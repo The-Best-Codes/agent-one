@@ -3,7 +3,6 @@
 import { Browse } from "@/components/tools/browse";
 import { Search } from "@/components/tools/search";
 import { useChat } from "@ai-sdk/react";
-import { useEffect, useState } from "react";
 
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
@@ -11,31 +10,23 @@ export default function Chat() {
       maxSteps: 5,
     });
 
-  const [toolLoading, setToolLoading] = useState(false);
-
-  useEffect(() => {
-    if (
-      messages.length > 0 &&
-      messages.at(-1)?.role === "assistant" &&
-      messages.at(-1)?.toolInvocations?.length
-    ) {
-      setToolLoading(true);
-    }
-  }, [messages]);
+  const isToolLoading = (part: any) => {
+    return isLoading && part.type === "tool-invocation";
+  };
 
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
       {messages.map((m) => (
         <div key={m.id} className="whitespace-pre-wrap">
           {m.role === "user" ? "User: " : "AI: "}
-          {m.parts.map((part, index) => {
+          {m.parts?.map((part, index) => {
             if (part.type === "tool-invocation") {
               if (part.toolInvocation.toolName === "searchTool") {
                 return (
                   <Search
                     key={`${m.id}-search-${index}`}
                     query={part.toolInvocation.args.query}
-                    isLoading={toolLoading}
+                    isLoading={isToolLoading(part)}
                   />
                 );
               } else if (part.toolInvocation.toolName === "browseTool") {
@@ -43,7 +34,7 @@ export default function Chat() {
                   <Browse
                     key={`${m.id}-browse-${index}`}
                     url={part.toolInvocation.args.url}
-                    isLoading={toolLoading}
+                    isLoading={isToolLoading(part)}
                   />
                 );
               }

@@ -12,9 +12,7 @@ export const Search: React.FC<SearchProps> = ({ query, isLoading }) => {
     <div className="border rounded p-2 my-2">
       <div className="flex items-center space-x-2">
         {isLoading ? (
-          <div className="flex justify-center items-center py-4">
-            <Loader2 className="animate-spin w-6 h-6 text-blue-500" />
-          </div>
+          <Loader2 className="animate-spin w-6 h-6 text-blue-500" />
         ) : (
           <SearchIcon className="w-4 h-4 text-gray-500" />
         )}
