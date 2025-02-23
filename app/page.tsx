@@ -7,7 +7,7 @@ import { useChat } from "@ai-sdk/react";
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
     useChat({
-      maxSteps: 5,
+      maxSteps: 25,
     });
 
   const isToolLoading = (messageIndex: number, partIndex: number) => {

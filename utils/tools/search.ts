@@ -1,18 +1,39 @@
 import { tool } from "ai";
 import { z } from "zod";
 
+const MAX_SEARCH_RESULTS = 5;
+
 export const search = tool({
   description: "Search the web for information.",
   parameters: z.object({
     query: z.string().describe("The search query."),
   }),
   execute: async ({ query }: { query: string }) => {
-    // Placeholder implementation - replace with actual search logic
-    console.log(`Searching for: ${query}`);
-    const results = `Search results for ${query}: This is placeholder search results. Implement the actual search logic to fetch the results.`;
+    try {
+      const response = await fetch(
+        `https://search-engines-api.vercel.app/api/scrape/bing/search?query=${encodeURIComponent(query)}`,
+      );
 
-    return {
-      results,
-    };
+      if (!response.ok) {
+        console.error(
+          `Failed to search for ${query}: ${response.status} ${response.statusText}`,
+        );
+        return {
+          results: `Failed to search for ${query}. Status: ${response.status} ${response.statusText}`,
+        };
+      }
+
+      const data = (await response.json()) as any[];
+      const results = data; // May implement processing logic here later
+
+      return {
+        results: results,
+      };
+    } catch (error: any) {
+      console.error(`Error searching for ${query}: ${error.message}`);
+      return {
+        results: `Error searching for ${query}: ${error.message}`,
+      };
+    }
   },
 });
