@@ -2,7 +2,14 @@
 
 import { Browse } from "@/components/tools/browse";
 import { Search } from "@/components/tools/search";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@ai-sdk/react";
+import { Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
@@ -32,47 +39,78 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {messages.map((m, messageIndex) => (
-        <div key={m.id} className="whitespace-pre-wrap">
-          {m.role === "user" ? "User: " : "AI: "}
-          {m.parts?.map((part, partIndex) => {
-            if (part.type === "tool-invocation") {
-              if (part.toolInvocation.toolName === "searchTool") {
-                return (
-                  <Search
-                    key={`${m.id}-search-${partIndex}`}
-                    query={part.toolInvocation.args.query}
-                    isLoading={isToolLoading(messageIndex, partIndex)}
-                  />
-                );
-              } else if (part.toolInvocation.toolName === "browseTool") {
-                return (
-                  <Browse
-                    key={`${m.id}-browse-${partIndex}`}
-                    url={part.toolInvocation.args.url}
-                    isLoading={isToolLoading(messageIndex, partIndex)}
-                  />
-                );
+    <div className="flex flex-col w-full max-w-2xl py-12 mx-auto h-screen">
+      <ScrollArea className="flex-1 mb-4">
+        <div className="flex flex-col gap-4">
+          {messages.map((m, messageIndex) => (
+            <Card
+              key={m.id}
+              className={
+                m.role === "user" ? "bg-zinc-100 dark:bg-zinc-800" : ""
               }
-            } else if (part.type === "text") {
-              return <p key={`${m.id}-text-${partIndex}`}>{part.text}</p>;
-            }
-            return null;
-          })}
+            >
+              <CardHeader>
+                <CardTitle>{m.role === "user" ? "User" : "AI"}</CardTitle>
+              </CardHeader>
+              <CardContent className="whitespace-pre-wrap">
+                {m.parts?.map((part, partIndex) => {
+                  if (part.type === "tool-invocation") {
+                    if (part.toolInvocation.toolName === "searchTool") {
+                      return (
+                        <Search
+                          key={`${m.id}-search-${partIndex}`}
+                          query={part.toolInvocation.args.query}
+                          isLoading={isToolLoading(messageIndex, partIndex)}
+                        />
+                      );
+                    } else if (part.toolInvocation.toolName === "browseTool") {
+                      return (
+                        <Browse
+                          key={`${m.id}-browse-${partIndex}`}
+                          url={part.toolInvocation.args.url}
+                          isLoading={isToolLoading(messageIndex, partIndex)}
+                        />
+                      );
+                    }
+                  } else if (part.type === "text") {
+                    return (
+                      <div className="prose">
+                        <ReactMarkdown
+                          key={`${m.id}-text-${partIndex}`}
+                          remarkPlugins={[remarkGfm]}
+                        >
+                          {part.text}
+                        </ReactMarkdown>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      ))}
+      </ScrollArea>
 
       {error && <p className="text-red-500">{error.message}</p>}
-      {/* {JSON.stringify(messages)} */}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <Input
+          className="dark:bg-zinc-900 dark:border-zinc-800"
           value={input}
           placeholder="Say something..."
           onChange={handleInputChange}
         />
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Researching...
+            </>
+          ) : (
+            "Send"
+          )}
+        </Button>
       </form>
     </div>
   );
