@@ -2,15 +2,18 @@ import { tool } from "ai";
 import { z } from "zod";
 
 export const browse = tool({
-  description: "Get the weather in a location (fahrenheit)",
+  description: "Browse the content of a webpage.",
   parameters: z.object({
-    location: z.string().describe("The location to get the weather for"),
+    // WARNING: ADDING .url() CAUSES AN ERROR WITH NO LOGS
+    url: z.string().describe("The URL of the webpage to browse."),
   }),
-  execute: async ({ location }) => {
-    const temperature = Math.round(Math.random() * (90 - 32) + 32);
+  execute: async ({ url }: { url: string }) => {
+    // Placeholder implementation - replace with actual browsing logic
+    console.log(`Browsing URL: ${url}`);
+    const content = `Content of ${url}: This is placeholder content. Implement the actual browsing logic to fetch the content.`;
+
     return {
-      location,
-      temperature,
+      content,
     };
   },
 });
