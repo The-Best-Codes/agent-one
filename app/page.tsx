@@ -29,7 +29,7 @@ export default function Chat() {
                   isLoading={isLoading}
                 />
               )}
-              <pre>{JSON.stringify(m.parts[0].toolInvocation, null, 2)}</pre>
+              {/* <pre>{JSON.stringify(m.parts[0].toolInvocation, null, 2)}</pre> */}
             </>
           ) : (
             <p>{m.content}</p>
