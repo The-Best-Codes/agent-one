@@ -10,36 +10,53 @@ export default function Chat() {
       maxSteps: 5,
     });
 
-  const isToolLoading = (part: any) => {
-    return isLoading && part.type === "tool-invocation";
+  const isToolLoading = (messageIndex: number, partIndex: number) => {
+    if (!isLoading) {
+      return false;
+    }
+
+    if (messages.length === 0) {
+      return false;
+    }
+
+    const latestMessageIndex = messages.length - 1;
+    const latestMessage = messages[latestMessageIndex];
+
+    if (!latestMessage || !latestMessage.parts) {
+      return false;
+    }
+
+    const latestPartIndex = latestMessage.parts.length - 1;
+
+    return messageIndex === latestMessageIndex && partIndex === latestPartIndex;
   };
 
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {messages.map((m) => (
+      {messages.map((m, messageIndex) => (
         <div key={m.id} className="whitespace-pre-wrap">
           {m.role === "user" ? "User: " : "AI: "}
-          {m.parts?.map((part, index) => {
+          {m.parts?.map((part, partIndex) => {
             if (part.type === "tool-invocation") {
               if (part.toolInvocation.toolName === "searchTool") {
                 return (
                   <Search
-                    key={`${m.id}-search-${index}`}
+                    key={`${m.id}-search-${partIndex}`}
                     query={part.toolInvocation.args.query}
-                    isLoading={isToolLoading(part)}
+                    isLoading={isToolLoading(messageIndex, partIndex)}
                   />
                 );
               } else if (part.toolInvocation.toolName === "browseTool") {
                 return (
                   <Browse
-                    key={`${m.id}-browse-${index}`}
+                    key={`${m.id}-browse-${partIndex}`}
                     url={part.toolInvocation.args.url}
-                    isLoading={isToolLoading(part)}
+                    isLoading={isToolLoading(messageIndex, partIndex)}
                   />
                 );
               }
             } else if (part.type === "text") {
-              return <p key={`${m.id}-text-${index}`}>{part.text}</p>;
+              return <p key={`${m.id}-text-${partIndex}`}>{part.text}</p>;
             }
             return null;
           })}
