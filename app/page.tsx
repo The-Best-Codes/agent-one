@@ -88,11 +88,8 @@ export default function Chat() {
                     }
                   } else if (part.type === "text") {
                     return (
-                      <div className="prose">
-                        <ReactMarkdown
-                          key={`${m.id}-text-${partIndex}`}
-                          remarkPlugins={[remarkGfm]}
-                        >
+                      <div className="prose" key={`${m.id}-text-${partIndex}`}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {part.text}
                         </ReactMarkdown>
                       </div>

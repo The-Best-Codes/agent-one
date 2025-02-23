@@ -1,6 +1,7 @@
 "use client";
 
 import { Globe, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface BrowseProps {
   url: string;
@@ -17,7 +18,14 @@ export const Browse: React.FC<BrowseProps> = ({ url, isLoading }) => {
           <Globe className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
         )}
         <p className="text-base font-medium">
-          {isLoading ? "Browsing" : "Browsed"} {url}
+          {isLoading ? "Browsing" : "Browsed"}{" "}
+          <Link
+            href={url}
+            target="_blank"
+            className="text-blue-500 cursor-pointer"
+          >
+            {url}
+          </Link>
         </p>
       </div>
     </div>
