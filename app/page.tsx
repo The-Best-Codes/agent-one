@@ -5,9 +5,9 @@ import { Search } from "@/components/tools/search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@ai-sdk/react";
 import { Loader2 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -38,9 +38,20 @@ export default function Chat() {
     return messageIndex === latestMessageIndex && partIndex === latestPartIndex;
   };
 
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <div className="flex flex-col w-full max-w-2xl py-12 mx-auto h-screen">
-      <ScrollArea className="flex-1 mb-4">
+      <div
+        className="flex-1 mb-4 overflow-y-auto scroll-smooth"
+        ref={scrollAreaRef}
+      >
         <div className="flex flex-col gap-4">
           {messages.map((m, messageIndex) => (
             <Card
@@ -52,7 +63,10 @@ export default function Chat() {
               <CardHeader>
                 <CardTitle>{m.role === "user" ? "User" : "AI"}</CardTitle>
               </CardHeader>
-              <CardContent className="whitespace-pre-wrap">
+              <CardContent
+                key={`${m.id}-card-content`}
+                className="whitespace-pre-wrap"
+              >
                 {m.parts?.map((part, partIndex) => {
                   if (part.type === "tool-invocation") {
                     if (part.toolInvocation.toolName === "searchTool") {
@@ -90,7 +104,7 @@ export default function Chat() {
             </Card>
           ))}
         </div>
-      </ScrollArea>
+      </div>
 
       {error && <p className="text-red-500">{error.message}</p>}
 
