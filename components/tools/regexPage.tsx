@@ -3,15 +3,15 @@
 import { Code, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-interface QueryProps {
+interface RegexPageProps {
   url: string;
-  selector: string;
+  regex: string;
   isLoading?: boolean;
 }
 
-export const QueryPage: React.FC<QueryProps> = ({
+export const RegexPage: React.FC<RegexPageProps> = ({
   url,
-  selector,
+  regex,
   isLoading,
 }) => {
   return (
@@ -23,9 +23,8 @@ export const QueryPage: React.FC<QueryProps> = ({
           <Code className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
         )}
         <p className="text-base font-medium">
-          {isLoading ? "Finding" : "Searched for"} "
-          <span className="font-mono bg-gray-100 px-1">{selector}</span>"{" "}
-          elements on{" "}
+          {isLoading ? "Finding" : "Searched"} "
+          <span className="font-mono bg-gray-100 px-1">{regex}</span>" on{" "}
           <Link
             href={url}
             target="_blank"

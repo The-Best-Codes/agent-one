@@ -3,6 +3,7 @@
 import { Browse } from "@/components/tools/browse";
 import { ImageDesc } from "@/components/tools/imageDesc";
 import { QueryPage } from "@/components/tools/queryPage";
+import { RegexPage } from "@/components/tools/regexPage";
 import { Search } from "@/components/tools/search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +17,7 @@ import remarkGfm from "remark-gfm";
 export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
     useChat({
-      maxSteps: 25,
+      maxSteps: 50,
     });
 
   const isToolLoading = (messageIndex: number, partIndex: number) => {
@@ -114,6 +115,17 @@ export default function Chat() {
                           <ImageDesc
                             key={`${m.id}-imageDesc-${partIndex}`}
                             url={part.toolInvocation.args.url}
+                            isLoading={isToolLoading(messageIndex, partIndex)}
+                          />
+                        );
+                      } else if (
+                        part.toolInvocation.toolName === "regexPageTool"
+                      ) {
+                        return (
+                          <RegexPage
+                            key={`${m.id}-regexPage-${partIndex}`}
+                            url={part.toolInvocation.args.url}
+                            regex={part.toolInvocation.args.regex}
                             isLoading={isToolLoading(messageIndex, partIndex)}
                           />
                         );
