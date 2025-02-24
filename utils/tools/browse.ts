@@ -3,7 +3,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 export const browse = tool({
-  description: "Browse the content of a webpage.",
+  description: "Browse a URL and return its content as Markdown.",
   parameters: z.object({
     url: z
       .string()

@@ -4,7 +4,8 @@ import { z } from "zod";
 const MAX_SEARCH_RESULTS = 5;
 
 export const search = tool({
-  description: "Search the web for information using Google.",
+  description:
+    "Search using search terms. Returns a list of page titles, links, descriptions, icons, and domains.",
   parameters: z.object({
     query: z.string().describe("The search query."),
   }),

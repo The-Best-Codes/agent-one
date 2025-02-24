@@ -1,4 +1,5 @@
 import { browse } from "@/utils/tools/browse";
+import { queryPage } from "@/utils/tools/queryPage";
 import { search } from "@/utils/tools/search";
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
@@ -17,13 +18,13 @@ You must be diligent and tenacious in your search, relentlessly pursuing every l
 After you have exhausted your research efforts, synthesize your findings into a comprehensive report, summarizing key information and providing citations for all sources. Your responses will be evaluated based on the depth and breadth of your research. Insufficient or shallow research will be considered a failure.
 
 You should search multiple times with different keywords, keeping in mind how a search engine works. You can't just ask it a question, you have to provide keywords or even just one word.
-You can also use advanced search techniques, for example 'site:(url)', for more complex queries.
 You should also browse multiple websites, even if they seem irrelevant, and when you find links or topics related to the research topic on a site, you should research those as well.
 `,
       messages,
       tools: {
         searchTool: search,
         browseTool: browse,
+        queryPageTool: queryPage,
       },
     });
 
