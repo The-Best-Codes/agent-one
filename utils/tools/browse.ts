@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { scrapePageToMarkdown } from "./browse/index";
 
 export const browse = tool({
   description: "Browse the content of a webpage.",
@@ -12,18 +13,8 @@ export const browse = tool({
   }),
   execute: async ({ url }: { url: string }) => {
     try {
-      const response = await fetch(
-        `https://search-engines-api.vercel.app/api/scrape/page-to-markdown?url=${encodeURIComponent(url)}`,
-      );
-      if (!response.ok) {
-        console.error(
-          `Failed to fetch ${url}: ${response.status} ${response.statusText}`,
-        );
-        return {
-          content: `Failed to browse ${url}. Status: ${response.status} ${response.statusText}`,
-        };
-      }
-      const content = await response.text();
+      const content = await scrapePageToMarkdown(url);
+
       return {
         content,
       };
