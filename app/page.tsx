@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -52,55 +52,68 @@ export default function Chat() {
         className="flex-1 mb-4 overflow-y-auto scroll-smooth"
         ref={scrollAreaRef}
       >
-        <div className="flex flex-col gap-4">
-          {messages.map((m, messageIndex) => (
-            <Card
-              key={m.id}
-              className={
-                m.role === "user" ? "bg-zinc-100 dark:bg-zinc-800" : ""
-              }
-            >
-              <CardHeader>
-                <CardTitle>{m.role === "user" ? "User" : "AI"}</CardTitle>
-              </CardHeader>
-              <CardContent
-                key={`${m.id}-card-content`}
-                className="whitespace-pre-wrap"
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <MessageSquare className="w-16 h-16 text-zinc-400 mb-4" />
+            <h2 className="text-4xl font-bold text-zinc-700">AgentOne</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-2">
+              Send a message to get started.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {messages.map((m, messageIndex) => (
+              <Card
+                key={m.id}
+                className={m.role === "user" ? "bg-zinc-50" : ""}
               >
-                {m.parts?.map((part, partIndex) => {
-                  if (part.type === "tool-invocation") {
-                    if (part.toolInvocation.toolName === "searchTool") {
+                <CardHeader>
+                  <CardTitle>{m.role === "user" ? "User" : "AI"}</CardTitle>
+                </CardHeader>
+                <CardContent
+                  key={`${m.id}-card-content`}
+                  className="whitespace-pre-wrap"
+                >
+                  {m.parts?.map((part, partIndex) => {
+                    if (part.type === "tool-invocation") {
+                      if (part.toolInvocation.toolName === "searchTool") {
+                        return (
+                          <Search
+                            key={`${m.id}-search-${partIndex}`}
+                            query={part.toolInvocation.args.query}
+                            isLoading={isToolLoading(messageIndex, partIndex)}
+                          />
+                        );
+                      } else if (
+                        part.toolInvocation.toolName === "browseTool"
+                      ) {
+                        return (
+                          <Browse
+                            key={`${m.id}-browse-${partIndex}`}
+                            url={part.toolInvocation.args.url}
+                            isLoading={isToolLoading(messageIndex, partIndex)}
+                          />
+                        );
+                      }
+                    } else if (part.type === "text") {
                       return (
-                        <Search
-                          key={`${m.id}-search-${partIndex}`}
-                          query={part.toolInvocation.args.query}
-                          isLoading={isToolLoading(messageIndex, partIndex)}
-                        />
-                      );
-                    } else if (part.toolInvocation.toolName === "browseTool") {
-                      return (
-                        <Browse
-                          key={`${m.id}-browse-${partIndex}`}
-                          url={part.toolInvocation.args.url}
-                          isLoading={isToolLoading(messageIndex, partIndex)}
-                        />
+                        <div
+                          className="prose"
+                          key={`${m.id}-text-${partIndex}`}
+                        >
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {part.text}
+                          </ReactMarkdown>
+                        </div>
                       );
                     }
-                  } else if (part.type === "text") {
-                    return (
-                      <div className="prose" key={`${m.id}-text-${partIndex}`}>
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {part.text}
-                        </ReactMarkdown>
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    return null;
+                  })}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {error && <p className="text-red-500">{error.message}</p>}
