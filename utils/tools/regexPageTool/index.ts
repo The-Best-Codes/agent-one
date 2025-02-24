@@ -22,8 +22,12 @@ export async function regexSearchPageContent(
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
     const pageContent = await page.evaluate(() => {
-      return document.body.innerText;
+      return document.body.textContent;
     });
+
+    if (!pageContent) {
+      throw new Error(`Failed to retrieve page content from ${url}`);
+    }
 
     const matches = [];
     const re = new RegExp(regex, "g");
