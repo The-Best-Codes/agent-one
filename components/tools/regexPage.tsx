@@ -1,6 +1,6 @@
 "use client";
 
-import { Code, Loader2 } from "lucide-react";
+import { Loader2, Regex } from "lucide-react";
 import Link from "next/link";
 
 interface RegexPageProps {
@@ -20,7 +20,7 @@ export const RegexPage: React.FC<RegexPageProps> = ({
         {isLoading ? (
           <Loader2 className="animate-spin w-6 h-6 min-w-6 min-h-6 text-blue-500" />
         ) : (
-          <Code className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
+          <Regex className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
         )}
         <p className="text-base font-medium">
           {isLoading ? "Finding" : "Searched"} "
