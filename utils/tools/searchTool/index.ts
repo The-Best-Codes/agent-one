@@ -5,11 +5,10 @@ interface SearchResult {
   title: string | null;
   link: string | null;
   description: string | null;
-  icon: string | null;
   domain: string | null;
 }
 
-export async function scrapeBingSearchResults(
+export async function scrapeMojeekSearchResults(
   url: string,
 ): Promise<SearchResult[]> {
   let browser = null;
@@ -30,53 +29,35 @@ export async function scrapeBingSearchResults(
     // Extract search results
     const searchResults: SearchResult[] = await page.evaluate(() => {
       let results: SearchResult[] = [];
-      const resultList = document.querySelector("#b_results"); // Select the parent <ol>
+      const resultList = document.querySelector(".results-standard"); // Select the parent <ul>
 
       if (!resultList) {
         console.warn("Could not find the result list element.");
         return results; // Return an empty array if the list isn't found
       }
 
-      const resultElements = resultList.querySelectorAll("li.b_algo"); // Select <li> elements with class "b_algo"
+      const resultElements = resultList.querySelectorAll("li"); // Select <li> elements
 
       resultElements.forEach((resultElement) => {
         try {
-          const titleElement = resultElement.querySelector("h2 a"); // Get the title from the h2 > a
+          const titleElement = resultElement.querySelector("h2 a.title"); // Get the title from the h2 > a
           const title = titleElement ? titleElement.textContent : null;
 
-          const linkElement = resultElement.querySelector("h2 a"); // Link also from h2 > a
+          const linkElement = resultElement.querySelector("h2 a.title"); // Link also from h2 > a
           const link = linkElement ? linkElement.getAttribute("href") : null;
 
-          const descriptionElement =
-            resultElement.querySelector(".b_caption p"); // Find description in .b_caption p
+          const descriptionElement = resultElement.querySelector("p.s"); // Find description in p.s
           const description = descriptionElement
             ? descriptionElement.textContent
             : null;
 
-          // Improved icon extraction logic
-          let icon: string | null = null;
-          const rms_iacElement = resultElement.querySelector(".rms_iac");
-          if (rms_iacElement) {
-            icon =
-              rms_iacElement.getAttribute("data-src") ||
-              rms_iacElement.getAttribute("src"); // Prioritize data-src
-          } else {
-            const iconElement = resultElement.querySelector(".cico img"); // Find icon in .cico img
-            if (iconElement) {
-              icon = iconElement.getAttribute("src");
-            }
-          }
-
-          const domainElement = resultElement.querySelector(
-            ".b_attribution cite",
-          );
+          const domainElement = resultElement.querySelector("p.i span.url");
           const domain = domainElement ? domainElement.textContent : null;
 
           results.push({
             title,
             link,
             description,
-            icon,
             domain,
           });
         } catch (error) {
@@ -89,8 +70,8 @@ export async function scrapeBingSearchResults(
 
     return searchResults;
   } catch (error: any) {
-    console.error("Error scraping Bing search results:", error);
-    throw new Error("Failed to scrape Bing search results.");
+    console.error("Error scraping Mojeek search results:", error);
+    throw new Error("Failed to scrape Mojeek search results.");
   } finally {
     if (browser) {
       try {

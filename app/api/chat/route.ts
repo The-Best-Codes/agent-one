@@ -19,6 +19,7 @@ After you have exhausted your research efforts, synthesize your findings into a 
 
 You should search multiple times with different keywords, keeping in mind how a search engine works. You can't just ask it a question, you have to provide keywords or even just one word.
 You should also browse multiple websites, even if they seem irrelevant, and when you find links or topics related to the research topic on a site, you should research those as well.
+When you need to search the content of a page in a more advanced manner, you can run query selectors on the page's HTML.
 `,
       messages,
       tools: {
