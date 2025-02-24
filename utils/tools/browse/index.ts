@@ -13,13 +13,26 @@ export async function scrapePageToMarkdown(url: string): Promise<string> {
     const page = await browser.newPage();
 
     await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
     );
 
     // Block unnecessary resources
     await page.setRequestInterception(true);
     page.on("request", (req) => {
-      if (["stylesheet", "font"].includes(req.resourceType())) {
+      const resourceType = req.resourceType();
+      const url = req.url();
+
+      if (["stylesheet", "font"].includes(resourceType)) {
+        req.abort();
+        return;
+      }
+
+      if (
+        url.includes("google-analytics.com") ||
+        url.includes("googletagmanager.com") ||
+        url.includes("doubleclick.net") ||
+        url.includes("adservice.google.com")
+      ) {
         req.abort();
       } else {
         req.continue();

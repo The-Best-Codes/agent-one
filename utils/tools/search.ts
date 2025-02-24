@@ -1,33 +1,25 @@
+import { scrapeGoogleSearchResults } from "@/utils/tools/search/index";
 import { tool } from "ai";
 import { z } from "zod";
-
 const MAX_SEARCH_RESULTS = 5;
 
 export const search = tool({
-  description: "Search the web for information.",
+  description: "Search the web for information using Google.",
   parameters: z.object({
     query: z.string().describe("The search query."),
   }),
   execute: async ({ query }: { query: string }) => {
     try {
-      const response = await fetch(
-        `https://search-engines-api.vercel.app/api/scrape/bing/search?query=${encodeURIComponent(query)}`,
-      );
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+      const searchResults = await scrapeGoogleSearchResults(searchUrl);
 
-      if (!response.ok) {
-        console.error(
-          `Failed to search for ${query}: ${response.status} ${response.statusText}`,
-        );
-        return {
-          results: `Failed to search for ${query}. Status: ${response.status} ${response.statusText}`,
-        };
-      }
+      // Limit the number of results (optional)
+      const limitedResults = searchResults.slice(0, MAX_SEARCH_RESULTS);
 
-      const data = (await response.json()) as any[];
-      const results = data; // May implement processing logic here later
+      console.log(limitedResults);
 
       return {
-        results: results,
+        results: limitedResults,
       };
     } catch (error: any) {
       console.error(`Error searching for ${query}: ${error.message}`);

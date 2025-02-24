@@ -1,6 +1,6 @@
+import { scrapePageToMarkdown } from "@/utils/tools/browse/index";
 import { tool } from "ai";
 import { z } from "zod";
-import { scrapePageToMarkdown } from "./browse/index";
 
 export const browse = tool({
   description: "Browse the content of a webpage.",
