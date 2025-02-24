@@ -1,6 +1,7 @@
 "use client";
 
 import { Browse } from "@/components/tools/browse";
+import { ImageDesc } from "@/components/tools/imageDesc";
 import { QueryPage } from "@/components/tools/queryPage";
 import { Search } from "@/components/tools/search";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,16 @@ export default function Chat() {
                             key={`${m.id}-queryPage-${partIndex}`}
                             url={part.toolInvocation.args.url}
                             selector={part.toolInvocation.args.selector}
+                            isLoading={isToolLoading(messageIndex, partIndex)}
+                          />
+                        );
+                      } else if (
+                        part.toolInvocation.toolName === "imageDescTool"
+                      ) {
+                        return (
+                          <ImageDesc
+                            key={`${m.id}-imageDesc-${partIndex}`}
+                            url={part.toolInvocation.args.url}
                             isLoading={isToolLoading(messageIndex, partIndex)}
                           />
                         );

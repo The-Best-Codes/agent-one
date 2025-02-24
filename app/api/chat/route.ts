@@ -1,4 +1,5 @@
 import { browse } from "@/utils/tools/browse";
+import { imageDesc } from "@/utils/tools/imageDesc";
 import { queryPage } from "@/utils/tools/queryPage";
 import { search } from "@/utils/tools/search";
 import { google } from "@ai-sdk/google";
@@ -26,6 +27,10 @@ When you need to search the content of a page in a more advanced manner, you can
         searchTool: search,
         browseTool: browse,
         queryPageTool: queryPage,
+        imageDescTool: imageDesc,
+      },
+      onError: async (error) => {
+        console.error(error);
       },
     });
 
