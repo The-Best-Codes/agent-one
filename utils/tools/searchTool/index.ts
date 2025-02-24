@@ -53,8 +53,19 @@ export async function scrapeBingSearchResults(
             ? descriptionElement.textContent
             : null;
 
-          const iconElement = resultElement.querySelector(".cico img"); // Find icon in .cico img
-          const icon = iconElement ? iconElement.getAttribute("src") : null;
+          // Improved icon extraction logic
+          let icon: string | null = null;
+          const rms_iacElement = resultElement.querySelector(".rms_iac");
+          if (rms_iacElement) {
+            icon =
+              rms_iacElement.getAttribute("data-src") ||
+              rms_iacElement.getAttribute("src"); // Prioritize data-src
+          } else {
+            const iconElement = resultElement.querySelector(".cico img"); // Find icon in .cico img
+            if (iconElement) {
+              icon = iconElement.getAttribute("src");
+            }
+          }
 
           const domainElement = resultElement.querySelector(
             ".b_attribution cite",
