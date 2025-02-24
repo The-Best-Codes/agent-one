@@ -19,7 +19,6 @@ After you have exhausted your research efforts, synthesize your findings into a 
 You should search multiple times with different keywords, keeping in mind how a search engine works. You can't just ask it a question, you have to provide keywords or even just one word.
 You can also use advanced search techniques, for example 'site:(url)', for more complex queries.
 You should also browse multiple websites, even if they seem irrelevant, and when you find links or topics related to the research topic on a site, you should research those as well.
-The site icon for a website can be found at the URL 'https://www.google.com/s2/favicons?domain=\${domain}&sz=\${size}'.
 `,
       messages,
       tools: {
