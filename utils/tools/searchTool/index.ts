@@ -31,6 +31,7 @@ export async function scrapeBingSearchResults(
     const searchResults: SearchResult[] = await page.evaluate(() => {
       let results: SearchResult[] = [];
       const resultList = document.querySelector("#b_results"); // Select the parent <ol>
+
       if (!resultList) {
         console.warn("Could not find the result list element.");
         return results; // Return an empty array if the list isn't found
@@ -52,7 +53,7 @@ export async function scrapeBingSearchResults(
             ? descriptionElement.textContent
             : null;
 
-          const iconElement = resultElement.querySelector(".rms_img img"); // Find icon in .rms_img img
+          const iconElement = resultElement.querySelector(".cico img"); // Find icon in .cico img
           const icon = iconElement ? iconElement.getAttribute("src") : null;
 
           const domainElement = resultElement.querySelector(

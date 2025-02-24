@@ -1,4 +1,4 @@
-import { scrapePageToMarkdown } from "@/utils/tools/browse/index";
+import { scrapePageToMarkdown } from "@/utils/tools/browseTool/index";
 import { tool } from "ai";
 import { z } from "zod";
 

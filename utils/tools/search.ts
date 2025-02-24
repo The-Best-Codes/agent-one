@@ -1,4 +1,4 @@
-import { scrapeBingSearchResults } from "@/utils/tools/search/index";
+import { scrapeBingSearchResults } from "@/utils/tools/searchTool/index";
 import { tool } from "ai";
 import { z } from "zod";
 const MAX_SEARCH_RESULTS = 5;
