@@ -1,4 +1,4 @@
-import { scrapeGoogleSearchResults } from "@/utils/tools/search/index";
+import { scrapeBingSearchResults } from "@/utils/tools/search/index";
 import { tool } from "ai";
 import { z } from "zod";
 const MAX_SEARCH_RESULTS = 5;
@@ -10,13 +10,11 @@ export const search = tool({
   }),
   execute: async ({ query }: { query: string }) => {
     try {
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-      const searchResults = await scrapeGoogleSearchResults(searchUrl);
+      const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+      const searchResults = await scrapeBingSearchResults(searchUrl);
 
-      // Limit the number of results (optional)
+      // Limit the number of results
       const limitedResults = searchResults.slice(0, MAX_SEARCH_RESULTS);
-
-      console.log(limitedResults);
 
       return {
         results: limitedResults,

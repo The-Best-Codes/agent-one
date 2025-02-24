@@ -9,7 +9,7 @@ interface SearchResult {
   domain: string | null;
 }
 
-export async function scrapeGoogleSearchResults(
+export async function scrapeBingSearchResults(
   url: string,
 ): Promise<SearchResult[]> {
   let browser = null;
@@ -25,43 +25,39 @@ export async function scrapeGoogleSearchResults(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
     );
 
-    // Block unnecessary resources
-    await page.setRequestInterception(true);
-    page.on("request", (req) => {
-      const resourceType = req.resourceType();
-      const url = req.url();
-
-      if (["stylesheet", "font"].includes(resourceType)) {
-        req.abort();
-        return;
-      }
-    });
-
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
     // Extract search results
     const searchResults: SearchResult[] = await page.evaluate(() => {
       let results: SearchResult[] = [];
-      console.log("Document: ", document);
-      const resultElements = document.querySelectorAll(".MjjYud"); // This targets the main container for each result
+      const resultList = document.querySelector("#b_results"); // Select the parent <ol>
+      if (!resultList) {
+        console.warn("Could not find the result list element.");
+        return results; // Return an empty array if the list isn't found
+      }
+
+      const resultElements = resultList.querySelectorAll("li.b_algo"); // Select <li> elements with class "b_algo"
 
       resultElements.forEach((resultElement) => {
         try {
-          const titleElement = resultElement.querySelector("h3");
+          const titleElement = resultElement.querySelector("h2 a"); // Get the title from the h2 > a
           const title = titleElement ? titleElement.textContent : null;
 
-          const linkElement = resultElement.querySelector("a[href]");
+          const linkElement = resultElement.querySelector("h2 a"); // Link also from h2 > a
           const link = linkElement ? linkElement.getAttribute("href") : null;
 
-          const iconElement = resultElement.querySelector("img.XNo5Ab");
-          const icon = iconElement ? iconElement.getAttribute("src") : null;
-
-          const descriptionElement = resultElement.querySelector(".VwiC3b"); // Description classname
+          const descriptionElement =
+            resultElement.querySelector(".b_caption p"); // Find description in .b_caption p
           const description = descriptionElement
             ? descriptionElement.textContent
             : null;
 
-          const domainElement = resultElement.querySelector(".VuuXrf");
+          const iconElement = resultElement.querySelector(".rms_img img"); // Find icon in .rms_img img
+          const icon = iconElement ? iconElement.getAttribute("src") : null;
+
+          const domainElement = resultElement.querySelector(
+            ".b_attribution cite",
+          );
           const domain = domainElement ? domainElement.textContent : null;
 
           results.push({
@@ -81,8 +77,8 @@ export async function scrapeGoogleSearchResults(
 
     return searchResults;
   } catch (error: any) {
-    console.error("Error scraping Google search results:", error);
-    throw new Error("Failed to scrape Google search results.");
+    console.error("Error scraping Bing search results:", error);
+    throw new Error("Failed to scrape Bing search results.");
   } finally {
     if (browser) {
       try {
