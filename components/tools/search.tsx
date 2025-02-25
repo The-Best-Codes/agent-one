@@ -56,7 +56,7 @@ export const Search: React.FC<SearchProps> = ({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="rounded-xl border p-2">
+                <div className="rounded-xl mt-2 p-0 px-2">
                   <h3 className="text-lg font-semibold">
                     {results.results.length ?? 0} Results
                   </h3>
