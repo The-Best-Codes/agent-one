@@ -238,10 +238,10 @@ export default function Chat() {
                             key={`${m.id}-text-${partIndex}`}
                           >
                             <AccordionItem
-                              className="border rounded-md px-2"
+                              className="border rounded-xl px-2"
                               value={m.id}
                             >
-                              <AccordionTrigger>
+                              <AccordionTrigger className="text-base py-2">
                                 {isTextLoading(messageIndex, partIndex)
                                   ? "Thinking..."
                                   : getThinkingText(

@@ -10,14 +10,14 @@ interface BrowseProps {
 
 export const Browse: React.FC<BrowseProps> = ({ url, isLoading }) => {
   return (
-    <div className="border rounded p-2 my-4">
+    <div className="border rounded-xl p-2 my-4">
       <div className="flex items-center space-x-2">
         {isLoading ? (
           <Loader2 className="animate-spin w-6 h-6 min-w-6 min-h-6 text-blue-500" />
         ) : (
           <Globe className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
         )}
-        <p className="text-base font-medium">
+        <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
           {isLoading ? "Browsing" : "Browsed"}{" "}
           <Link
             href={url}
