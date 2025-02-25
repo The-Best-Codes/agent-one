@@ -178,9 +178,9 @@ export default function Chat() {
         >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
-              <MessageSquare className="w-16 h-16 text-zinc-700 mb-4" />
-              <h2 className="text-4xl font-bold text-zinc-700">AgentOne</h2>
-              <p className="text-zinc-500 dark:text-zinc-400 mt-2">
+              <MessageSquare className="w-16 h-16 text-muted-foreground mb-4" />
+              <h2 className="text-4xl font-bold text-foreground">AgentOne</h2>
+              <p className="text-muted-foreground mt-2">
                 Enter research instructions below to begin!
               </p>
             </div>
@@ -189,7 +189,7 @@ export default function Chat() {
               {messages.map((m, messageIndex) => (
                 <Card
                   key={m.id}
-                  className={`${m.role === "user" ? "bg-zinc-50" : ""} shadow-none motion-preset-blur-up`}
+                  className={`${m.role === "user" ? "bg-secondary" : ""} shadow-none motion-preset-blur-up`}
                 >
                   <CardHeader>
                     <CardTitle>
@@ -317,13 +317,12 @@ export default function Chat() {
               ))}
             </div>
           )}
+          {error && <p className="text-red-500">{error.message}</p>}
         </div>
-
-        {error && <p className="text-red-500">{error.message}</p>}
 
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <Input
-            className="dark:bg-zinc-900 dark:border-zinc-800"
+            className="bg-secondary dark:bg-secondary"
             value={input}
             placeholder="Enter research instructions..."
             onChange={handleInputChange}
@@ -356,8 +355,8 @@ export default function Chat() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
-                <FileText className="w-16 h-16 text-zinc-700 mb-4" />
-                <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-center">
+                <FileText className="w-16 h-16 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mt-2 text-center">
                   AgentOne will generate a summary here when it is done
                   researching.
                 </p>
