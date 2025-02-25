@@ -68,10 +68,12 @@ export default function Chat() {
             {messages.map((m, messageIndex) => (
               <Card
                 key={m.id}
-                className={m.role === "user" ? "bg-zinc-50" : ""}
+                className={`${m.role === "user" ? "bg-zinc-50" : ""} shadow-none`}
               >
                 <CardHeader>
-                  <CardTitle>{m.role === "user" ? "User" : "AI"}</CardTitle>
+                  <CardTitle>
+                    {m.role === "user" ? "User" : "AgentOne"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent
                   key={`${m.id}-card-content`}

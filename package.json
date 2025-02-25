@@ -65,6 +65,7 @@
     "tailwindcss-animate": "^1.0.7",
     "turndown": "^7.2.0",
     "vaul": "^1.1.2",
+    "vm2": "^3.9.19",
     "zod": "^3.24.2"
   },
   "devDependencies": {
