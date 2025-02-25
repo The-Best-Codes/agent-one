@@ -1,3 +1,4 @@
+import { withTimeout } from "@/utils/timeoutWrapper";
 import { scrapePageToMarkdown } from "@/utils/tools/browseTool/index";
 import { tool } from "ai";
 import { z } from "zod";
@@ -13,7 +14,10 @@ export const browse = tool({
   }),
   execute: async ({ url }: { url: string }) => {
     try {
-      const content = await scrapePageToMarkdown(url);
+      const content = await withTimeout(
+        async () => await scrapePageToMarkdown(url),
+        45000,
+      );
 
       return {
         content,

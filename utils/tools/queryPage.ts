@@ -1,3 +1,4 @@
+import { withTimeout } from "@/utils/timeoutWrapper";
 import { scrapePageContent } from "@/utils/tools/queryPageTool/index";
 import { tool } from "ai";
 import { z } from "zod";
@@ -17,7 +18,10 @@ export const queryPage = tool({
   }),
   execute: async ({ url, selector }: { url: string; selector: string }) => {
     try {
-      const pageContent = await scrapePageContent(url, selector);
+      const pageContent = await withTimeout(
+        async () => await scrapePageContent(url, selector),
+        45000,
+      );
 
       return {
         result: pageContent,

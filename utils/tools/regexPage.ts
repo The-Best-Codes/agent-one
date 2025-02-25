@@ -1,3 +1,4 @@
+import { withTimeout } from "@/utils/timeoutWrapper";
 import { regexSearchPageContent } from "@/utils/tools/regexPageTool";
 import { tool } from "ai";
 import { z } from "zod";
@@ -17,7 +18,10 @@ export const regexPage = tool({
   }),
   execute: async ({ url, regex }: { url: string; regex: string }) => {
     try {
-      const matches = await regexSearchPageContent(url, regex);
+      const matches = await withTimeout(
+        async () => await regexSearchPageContent(url, regex),
+        45000,
+      );
 
       return {
         result: matches,

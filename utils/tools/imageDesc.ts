@@ -1,3 +1,4 @@
+import { withTimeout } from "@/utils/timeoutWrapper";
 import { describeImage } from "@/utils/tools/imageDescTool/index";
 import { tool } from "ai";
 import { z } from "zod";
@@ -13,7 +14,10 @@ export const imageDesc = tool({
   }),
   execute: async ({ url }: { url: string }) => {
     try {
-      const description = await describeImage(url);
+      const description = await withTimeout(
+        async () => await describeImage(url),
+        45000,
+      );
 
       return {
         description,
