@@ -165,7 +165,7 @@ export default function Chat() {
               {messages.map((m, messageIndex) => (
                 <Card
                   key={m.id}
-                  className={`${m.role === "user" ? "bg-zinc-50" : ""} shadow-none`}
+                  className={`${m.role === "user" ? "bg-zinc-50" : ""} shadow-none motion-preset-blur-up`}
                 >
                   <CardHeader>
                     <CardTitle>
@@ -246,7 +246,7 @@ export default function Chat() {
                             <Accordion
                               type="single"
                               collapsible
-                              className="my-4"
+                              className="my-4 motion-preset-blur-right"
                               key={`${m.id}-text-${partIndex}`}
                             >
                               <AccordionItem
@@ -313,7 +313,7 @@ export default function Chat() {
           </CardHeader>
           <CardContent className="h-full pt-4">
             {outputSummary ? (
-              <div className="prose">
+              <div className="prose motion-preset-blur-up">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {outputSummary}
                 </ReactMarkdown>
