@@ -31,7 +31,7 @@ export default function Chat() {
   const [thinkDurations, setThinkDurations] = useState<Record<string, number>>(
     {},
   );
-  const [outputMarkdown, setOutputMarkdown] = useState<string | null>(null);
+  const [outputSummary, setOutputSummary] = useState<string | null>(null);
 
   const getPartId = (messageId: string, partIndex: number) =>
     `${messageId}-${partIndex}`;
@@ -114,12 +114,12 @@ export default function Chat() {
           }));
         }
 
-        // Special handling for outputMarkdown tool
+        // Special handling for outputSummary tool
         if (
           part.type === "tool-invocation" &&
-          part.toolInvocation.toolName === "outputMarkdown"
+          part.toolInvocation.toolName === "outputSummary"
         ) {
-          setOutputMarkdown(part.toolInvocation.args.markdown);
+          setOutputSummary(part.toolInvocation.args.summary);
         }
       });
     });
@@ -312,10 +312,10 @@ export default function Chat() {
             <CardTitle className="sr-only">Summary</CardTitle>
           </CardHeader>
           <CardContent className="h-full pt-4">
-            {outputMarkdown ? (
+            {outputSummary ? (
               <div className="prose">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {outputMarkdown}
+                  {outputSummary}
                 </ReactMarkdown>
               </div>
             ) : (
