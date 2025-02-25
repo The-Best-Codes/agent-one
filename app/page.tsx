@@ -178,10 +178,10 @@ export default function Chat() {
         >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
-              <MessageSquare className="w-16 h-16 text-zinc-400 mb-4" />
+              <MessageSquare className="w-16 h-16 text-zinc-700 mb-4" />
               <h2 className="text-4xl font-bold text-zinc-700">AgentOne</h2>
               <p className="text-zinc-500 dark:text-zinc-400 mt-2">
-                Send a message to get started.
+                Enter research instructions below to begin!
               </p>
             </div>
           ) : (
@@ -325,7 +325,7 @@ export default function Chat() {
           <Input
             className="dark:bg-zinc-900 dark:border-zinc-800"
             value={input}
-            placeholder="Say something..."
+            placeholder="Enter research instructions..."
             onChange={handleInputChange}
           />
           <Button type="submit" disabled={isLoading}>
@@ -356,10 +356,10 @@ export default function Chat() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
-                <FileText className="w-16 h-16 text-zinc-400 mb-4" />
+                <FileText className="w-16 h-16 text-zinc-700 mb-4" />
                 <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-center">
-                  No summary yet. Send a message and AgentOne will research and
-                  generate a summary here.
+                  AgentOne will generate a summary here when it is done
+                  researching.
                 </p>
               </div>
             )}
