@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { Loader2, MessageSquare } from "lucide-react";
+import { FileText, Loader2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -31,6 +31,7 @@ export default function Chat() {
   const [thinkDurations, setThinkDurations] = useState<Record<string, number>>(
     {},
   );
+  const [outputMarkdown, setOutputMarkdown] = useState<string | null>(null);
 
   const getPartId = (messageId: string, partIndex: number) =>
     `${messageId}-${partIndex}`;
@@ -112,6 +113,14 @@ export default function Chat() {
             [partId]: duration,
           }));
         }
+
+        // Special handling for outputMarkdown tool
+        if (
+          part.type === "tool-invocation" &&
+          part.toolInvocation.toolName === "outputMarkdown"
+        ) {
+          setOutputMarkdown(part.toolInvocation.args.markdown);
+        }
       });
     });
   }, [messages, isLoading]);
@@ -136,161 +145,191 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-2xl py-12 mx-auto h-screen">
-      <div
-        className="flex-1 mb-4 overflow-y-auto scroll-smooth"
-        ref={scrollAreaRef}
-      >
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <MessageSquare className="w-16 h-16 text-zinc-400 mb-4" />
-            <h2 className="text-4xl font-bold text-zinc-700">AgentOne</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 mt-2">
-              Send a message to get started.
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {messages.map((m, messageIndex) => (
-              <Card
-                key={m.id}
-                className={`${m.role === "user" ? "bg-zinc-50" : ""} shadow-none`}
-              >
-                <CardHeader>
-                  <CardTitle>
-                    {m.role === "user" ? "User" : "AgentOne"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent
-                  key={`${m.id}-card-content`}
-                  className="whitespace-pre-wrap"
+    <div className="flex w-full max-w-6xl py-12 mx-auto h-screen">
+      {/* Left Section - Chat Messages */}
+      <div className="flex flex-col pr-4 border-r w-1/2">
+        <div
+          className="flex-1 mb-4 overflow-y-auto scroll-smooth"
+          ref={scrollAreaRef}
+        >
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <MessageSquare className="w-16 h-16 text-zinc-400 mb-4" />
+              <h2 className="text-4xl font-bold text-zinc-700">AgentOne</h2>
+              <p className="text-zinc-500 dark:text-zinc-400 mt-2">
+                Send a message to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {messages.map((m, messageIndex) => (
+                <Card
+                  key={m.id}
+                  className={`${m.role === "user" ? "bg-zinc-50" : ""} shadow-none`}
                 >
-                  {m.parts?.map((part, partIndex) => {
-                    if (part.type === "tool-invocation") {
-                      if (part.toolInvocation.toolName === "searchTool") {
-                        return (
-                          <Search
-                            key={`${m.id}-search-${partIndex}`}
-                            query={part.toolInvocation.args.query}
-                            isLoading={isToolLoading(messageIndex, partIndex)}
-                          />
-                        );
-                      } else if (
-                        part.toolInvocation.toolName === "browseTool"
-                      ) {
-                        return (
-                          <Browse
-                            key={`${m.id}-browse-${partIndex}`}
-                            url={part.toolInvocation.args.url}
-                            isLoading={isToolLoading(messageIndex, partIndex)}
-                          />
-                        );
-                      } else if (
-                        part.toolInvocation.toolName === "queryPageTool"
-                      ) {
-                        return (
-                          <QueryPage
-                            key={`${m.id}-queryPage-${partIndex}`}
-                            url={part.toolInvocation.args.url}
-                            selector={part.toolInvocation.args.selector}
-                            isLoading={isToolLoading(messageIndex, partIndex)}
-                          />
-                        );
-                      } else if (
-                        part.toolInvocation.toolName === "imageDescTool"
-                      ) {
-                        return (
-                          <ImageDesc
-                            key={`${m.id}-imageDesc-${partIndex}`}
-                            url={part.toolInvocation.args.url}
-                            isLoading={isToolLoading(messageIndex, partIndex)}
-                          />
-                        );
-                      } else if (
-                        part.toolInvocation.toolName === "regexPageTool"
-                      ) {
-                        return (
-                          <RegexPage
-                            key={`${m.id}-regexPage-${partIndex}`}
-                            url={part.toolInvocation.args.url}
-                            regex={part.toolInvocation.args.regex}
-                            isLoading={isToolLoading(messageIndex, partIndex)}
-                          />
-                        );
-                      }
-                    } else if (part.type === "text") {
-                      if (m.role === "user") {
-                        return (
-                          <div
-                            className="prose"
-                            key={`${m.id}-text-${partIndex}`}
-                          >
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {part.text}
-                            </ReactMarkdown>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <Accordion
-                            type="single"
-                            collapsible
-                            key={`${m.id}-text-${partIndex}`}
-                          >
-                            <AccordionItem
-                              className="border rounded-xl px-2"
-                              value={m.id}
+                  <CardHeader>
+                    <CardTitle>
+                      {m.role === "user" ? "User" : "AgentOne"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent
+                    key={`${m.id}-card-content`}
+                    className="whitespace-pre-wrap"
+                  >
+                    {m.parts?.map((part, partIndex) => {
+                      if (part.type === "tool-invocation") {
+                        if (part.toolInvocation.toolName === "searchTool") {
+                          return (
+                            <Search
+                              key={`${m.id}-search-${partIndex}`}
+                              query={part.toolInvocation.args.query}
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                            />
+                          );
+                        } else if (
+                          part.toolInvocation.toolName === "browseTool"
+                        ) {
+                          return (
+                            <Browse
+                              key={`${m.id}-browse-${partIndex}`}
+                              url={part.toolInvocation.args.url}
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                            />
+                          );
+                        } else if (
+                          part.toolInvocation.toolName === "queryPageTool"
+                        ) {
+                          return (
+                            <QueryPage
+                              key={`${m.id}-queryPage-${partIndex}`}
+                              url={part.toolInvocation.args.url}
+                              selector={part.toolInvocation.args.selector}
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                            />
+                          );
+                        } else if (
+                          part.toolInvocation.toolName === "imageDescTool"
+                        ) {
+                          return (
+                            <ImageDesc
+                              key={`${m.id}-imageDesc-${partIndex}`}
+                              url={part.toolInvocation.args.url}
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                            />
+                          );
+                        } else if (
+                          part.toolInvocation.toolName === "regexPageTool"
+                        ) {
+                          return (
+                            <RegexPage
+                              key={`${m.id}-regexPage-${partIndex}`}
+                              url={part.toolInvocation.args.url}
+                              regex={part.toolInvocation.args.regex}
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                            />
+                          );
+                        }
+                      } else if (part.type === "text") {
+                        if (m.role === "user") {
+                          return (
+                            <div
+                              className="prose"
+                              key={`${m.id}-text-${partIndex}`}
                             >
-                              <AccordionTrigger className="text-base py-2">
-                                {isTextLoading(messageIndex, partIndex)
-                                  ? "Thinking..."
-                                  : getThinkingText(
-                                      m.id,
-                                      partIndex,
-                                      messageIndex,
-                                    )}
-                              </AccordionTrigger>
-                              <AccordionContent>
-                                <div className="prose">
-                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {part.text}
-                                  </ReactMarkdown>
-                                </div>
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        );
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {part.text}
+                              </ReactMarkdown>
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <Accordion
+                              type="single"
+                              collapsible
+                              className="my-4"
+                              key={`${m.id}-text-${partIndex}`}
+                            >
+                              <AccordionItem
+                                className="border rounded-xl px-2"
+                                value={m.id}
+                              >
+                                <AccordionTrigger className="text-base py-2">
+                                  {isTextLoading(messageIndex, partIndex)
+                                    ? "Thinking..."
+                                    : getThinkingText(
+                                        m.id,
+                                        partIndex,
+                                        messageIndex,
+                                      )}
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <div className="prose">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                      {part.text}
+                                    </ReactMarkdown>
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            </Accordion>
+                          );
+                        }
                       }
-                    }
-                    return null;
-                  })}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                      return null;
+                    })}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {error && <p className="text-red-500">{error.message}</p>}
+
+        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+          <Input
+            className="dark:bg-zinc-900 dark:border-zinc-800"
+            value={input}
+            placeholder="Say something..."
+            onChange={handleInputChange}
+          />
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Researching...
+              </>
+            ) : (
+              "Send"
+            )}
+          </Button>
+        </form>
       </div>
 
-      {error && <p className="text-red-500">{error.message}</p>}
-
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
-        <Input
-          className="dark:bg-zinc-900 dark:border-zinc-800"
-          value={input}
-          placeholder="Say something..."
-          onChange={handleInputChange}
-        />
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Researching...
-            </>
-          ) : (
-            "Send"
-          )}
-        </Button>
-      </form>
+      {/* Right Section - Output Markdown Summary */}
+      <div className="w-1/2">
+        <Card className="h-full shadow-none border-0 max-h-full overflow-auto">
+          <CardHeader className="p-0">
+            <CardTitle className="sr-only">Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="h-full pt-4">
+            {outputMarkdown ? (
+              <div className="prose">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {outputMarkdown}
+                </ReactMarkdown>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full">
+                <FileText className="w-16 h-16 text-zinc-400 mb-4" />
+                <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-center">
+                  No summary yet. Send a message and AgentOne will research and
+                  generate a summary here.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
