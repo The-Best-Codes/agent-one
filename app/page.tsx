@@ -5,6 +5,12 @@ import { ImageDesc } from "@/components/tools/imageDesc";
 import { QueryPage } from "@/components/tools/queryPage";
 import { RegexPage } from "@/components/tools/regexPage";
 import { Search } from "@/components/tools/search";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,6 +45,31 @@ export default function Chat() {
     const latestPartIndex = latestMessage.parts.length - 1;
 
     return messageIndex === latestMessageIndex && partIndex === latestPartIndex;
+  };
+
+  const isTextLoading = (messageIndex: number, partIndex: number) => {
+    if (!isLoading) {
+      return false;
+    }
+
+    if (messages.length === 0) {
+      return false;
+    }
+
+    const latestMessageIndex = messages.length - 1;
+    const latestMessage = messages[latestMessageIndex];
+
+    if (!latestMessage || !latestMessage.parts) {
+      return false;
+    }
+
+    const latestPartIndex = latestMessage.parts.length - 1;
+
+    return (
+      messageIndex === latestMessageIndex &&
+      partIndex === latestPartIndex &&
+      latestMessage.parts[latestPartIndex].type === "text"
+    );
   };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -133,16 +164,41 @@ export default function Chat() {
                         );
                       }
                     } else if (part.type === "text") {
-                      return (
-                        <div
-                          className="prose"
-                          key={`${m.id}-text-${partIndex}`}
-                        >
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {part.text}
-                          </ReactMarkdown>
-                        </div>
-                      );
+                      if (m.role === "user") {
+                        return (
+                          <div
+                            className="prose"
+                            key={`${m.id}-text-${partIndex}`}
+                          >
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {part.text}
+                            </ReactMarkdown>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <Accordion
+                            type="single"
+                            collapsible
+                            key={`${m.id}-text-${partIndex}`}
+                          >
+                            <AccordionItem value={m.id}>
+                              <AccordionTrigger>
+                                {isTextLoading(messageIndex, partIndex)
+                                  ? "Thinking..."
+                                  : "Thought about the research"}
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="prose">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {part.text}
+                                  </ReactMarkdown>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        );
+                      }
                     }
                     return null;
                   })}
