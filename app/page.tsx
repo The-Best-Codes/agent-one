@@ -144,6 +144,29 @@ export default function Chat() {
     return `Thought for ${Math.round(duration)} seconds`;
   };
 
+  const isLastTextPart = (message: any, partIndex: number): boolean => {
+    if (!message || !message.parts) {
+      return false; // Or handle this case as needed
+    }
+
+    const textParts = message.parts.filter((part: any) => part.type === "text");
+
+    if (textParts.length === 0) {
+      return false; // No text parts in the message
+    }
+
+    // Find the index of the current part in the filtered text parts array
+    const textPartIndex = textParts.findIndex((part: any, index: number) => {
+      return message.parts.indexOf(part) === partIndex;
+    });
+
+    if (textPartIndex === -1) {
+      return false; // Current part is not a text part
+    }
+
+    return textPartIndex === textParts.length - 1;
+  };
+
   return (
     <div className="flex w-full max-w-6xl py-12 mx-auto h-screen">
       {/* Left Section - Chat Messages */}
@@ -248,6 +271,9 @@ export default function Chat() {
                               collapsible
                               className="my-4 motion-preset-blur-right"
                               key={`${m.id}-text-${partIndex}`}
+                              value={
+                                isLastTextPart(m, partIndex) ? m.id : undefined
+                              }
                             >
                               <AccordionItem
                                 className="border rounded-xl px-2"
