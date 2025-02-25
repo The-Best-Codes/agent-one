@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
 import { Loader2, MessageSquare } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -25,6 +25,15 @@ export default function Chat() {
     useChat({
       maxSteps: 50,
     });
+  const [thinkStartTime, setThinkStartTime] = useState<Record<string, number>>(
+    {},
+  );
+  const [thinkDurations, setThinkDurations] = useState<Record<string, number>>(
+    {},
+  );
+
+  const getPartId = (messageId: string, partIndex: number) =>
+    `${messageId}-${partIndex}`;
 
   const isToolLoading = (messageIndex: number, partIndex: number) => {
     if (!isLoading) {
@@ -79,6 +88,52 @@ export default function Chat() {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    messages.forEach((message, messageIndex) => {
+      message.parts?.forEach((part, partIndex) => {
+        const partId = getPartId(message.id, partIndex);
+
+        // Start timing if this is the current part being processed
+        if (isTextLoading(messageIndex, partIndex)) {
+          if (!thinkStartTime[partId]) {
+            setThinkStartTime((prev) => ({
+              ...prev,
+              [partId]: Date.now(),
+            }));
+          }
+        }
+
+        // Complete timing when the next part starts or message completes
+        else if (thinkStartTime[partId] && !thinkDurations[partId]) {
+          const duration = (Date.now() - thinkStartTime[partId]) / 1000;
+          setThinkDurations((prev) => ({
+            ...prev,
+            [partId]: duration,
+          }));
+        }
+      });
+    });
+  }, [messages, isLoading]);
+
+  const getThinkingText = (
+    messageId: string,
+    partIndex: number,
+    messageIndex: number,
+  ) => {
+    const partId = getPartId(messageId, partIndex);
+
+    if (isTextLoading(messageIndex, partIndex)) {
+      return "Thinking...";
+    }
+
+    const duration = thinkDurations[partId];
+    if (!duration) return "Thinking...";
+
+    if (duration < 1) return "Thought briefly";
+    if (duration < 2) return "Thought for a second";
+    return `Thought for ${Math.round(duration)} seconds`;
+  };
 
   return (
     <div className="flex flex-col w-full max-w-2xl py-12 mx-auto h-screen">
@@ -182,11 +237,18 @@ export default function Chat() {
                             collapsible
                             key={`${m.id}-text-${partIndex}`}
                           >
-                            <AccordionItem value={m.id}>
+                            <AccordionItem
+                              className="border rounded-md px-2"
+                              value={m.id}
+                            >
                               <AccordionTrigger>
                                 {isTextLoading(messageIndex, partIndex)
                                   ? "Thinking..."
-                                  : "Thought about the research"}
+                                  : getThinkingText(
+                                      m.id,
+                                      partIndex,
+                                      messageIndex,
+                                    )}
                               </AccordionTrigger>
                               <AccordionContent>
                                 <div className="prose">
