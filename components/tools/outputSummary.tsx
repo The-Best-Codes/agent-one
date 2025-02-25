@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, TextIcon } from "lucide-react";
+import { Loader } from "@/components/a1/smooth-loader";
+import { TextIcon } from "lucide-react";
 
 interface OutputSummaryProps {
   isLoading?: boolean;
@@ -19,7 +20,7 @@ export const OutputSummary: React.FC<OutputSummaryProps> = ({
     >
       <div className="flex items-center space-x-2">
         {isLoading ? (
-          <Loader2 className="animate-spin w-6 h-6 min-w-6 min-h-6 text-blue-500" />
+          <Loader className="w-6 h-6 min-w-6 min-h-6" />
         ) : (
           <TextIcon className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
         )}

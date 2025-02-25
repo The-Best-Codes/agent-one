@@ -1,6 +1,7 @@
 "use client";
 
-import { Code, Loader2 } from "lucide-react";
+import { Loader } from "@/components/a1/smooth-loader";
+import { Code } from "lucide-react";
 import Link from "next/link";
 
 interface QueryProps {
@@ -18,7 +19,7 @@ export const QueryPage: React.FC<QueryProps> = ({
     <div className="border rounded-xl p-2 my-4 motion-preset-blur-right">
       <div className="flex items-center space-x-2">
         {isLoading ? (
-          <Loader2 className="animate-spin w-6 h-6 min-w-6 min-h-6 text-blue-500" />
+          <Loader className="w-6 h-6 min-w-6 min-h-6" />
         ) : (
           <Code className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
         )}

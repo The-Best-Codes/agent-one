@@ -1,6 +1,7 @@
 "use client";
 
-import { Loader2, Search as SearchIcon } from "lucide-react";
+import { Loader } from "@/components/a1/smooth-loader";
+import { Search as SearchIcon } from "lucide-react";
 
 interface SearchProps {
   query: string;
@@ -12,7 +13,7 @@ export const Search: React.FC<SearchProps> = ({ query, isLoading }) => {
     <div className="border rounded-xl p-2 my-4 motion-preset-blur-right">
       <div className="flex items-center space-x-2">
         {isLoading ? (
-          <Loader2 className="animate-spin w-6 h-6 min-w-6 min-h-6 text-blue-500" />
+          <Loader className="w-6 h-6 min-w-6 min-h-6" />
         ) : (
           <SearchIcon className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
         )}
