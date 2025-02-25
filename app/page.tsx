@@ -84,6 +84,8 @@ export default function Chat() {
   };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const outputSummaryRef = useRef<HTMLDivElement>(null);
+  const [isOutputSummaryFocused, setIsOutputSummaryFocused] = useState(false);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -166,6 +168,21 @@ export default function Chat() {
     }
 
     return textPartIndex === textParts.length - 1;
+  };
+
+  const handleOutputSummaryClick = () => {
+    if (outputSummaryRef.current) {
+      outputSummaryRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      outputSummaryRef.current.focus();
+
+      setIsOutputSummaryFocused(true);
+      setTimeout(() => {
+        setIsOutputSummaryFocused(false);
+      }, 300);
+    }
   };
 
   return (
@@ -259,6 +276,7 @@ export default function Chat() {
                             <OutputSummary
                               key={`${m.id}-outputSummary-${partIndex}`}
                               isLoading={isToolLoading(messageIndex, partIndex)}
+                              onClick={handleOutputSummaryClick}
                             />
                           );
                         }
@@ -326,6 +344,7 @@ export default function Chat() {
             value={input}
             placeholder="Enter research instructions..."
             onChange={handleInputChange}
+            autoFocus
           />
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (
@@ -341,7 +360,10 @@ export default function Chat() {
       </div>
 
       {/* Right Section - Output Markdown Summary */}
-      <div className="w-1/2">
+      <div
+        ref={outputSummaryRef}
+        className={`w-1/2 ${isOutputSummaryFocused ? "motion-preset-focus motion-duration-300" : ""}`}
+      >
         <Card className="h-full shadow-none border-0 max-h-full overflow-auto">
           <CardHeader className="p-0">
             <CardTitle className="sr-only">Summary</CardTitle>
