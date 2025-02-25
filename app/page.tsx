@@ -2,6 +2,7 @@
 
 import { Browse } from "@/components/tools/browse";
 import { ImageDesc } from "@/components/tools/imageDesc";
+import { OutputSummary } from "@/components/tools/outputSummary";
 import { QueryPage } from "@/components/tools/queryPage";
 import { RegexPage } from "@/components/tools/regexPage";
 import { Search } from "@/components/tools/search";
@@ -248,6 +249,15 @@ export default function Chat() {
                               key={`${m.id}-regexPage-${partIndex}`}
                               url={part.toolInvocation.args.url}
                               regex={part.toolInvocation.args.regex}
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                            />
+                          );
+                        } else if (
+                          part.toolInvocation.toolName === "outputSummary"
+                        ) {
+                          return (
+                            <OutputSummary
+                              key={`${m.id}-outputSummary-${partIndex}`}
                               isLoading={isToolLoading(messageIndex, partIndex)}
                             />
                           );
