@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { FileText, Loader2, MessageSquare } from "lucide-react";
+import { CircleHelp, FileText, Loader2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -279,6 +279,17 @@ export default function Chat() {
                               onClick={handleOutputSummaryClick}
                             />
                           );
+                        } else {
+                          return (
+                            <div className="border rounded-xl p-2 my-4 motion-preset-blur-right">
+                              <div className="flex items-center space-x-2">
+                                <CircleHelp className="w-6 h-6 min-w-6 min-h-6" />
+                                <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
+                                  Oops! AI tried to use an unsupported tool.
+                                </p>
+                              </div>
+                            </div>
+                          );
                         }
                       } else if (part.type === "text") {
                         if (m.role === "user") {
@@ -358,7 +369,6 @@ export default function Chat() {
           </Button>
         </form>
       </div>
-
       {/* Right Section - Output Markdown Summary */}
       <div
         ref={outputSummaryRef}
