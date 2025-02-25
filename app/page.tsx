@@ -225,6 +225,11 @@ export default function Chat() {
                               key={`${m.id}-search-${partIndex}`}
                               query={part.toolInvocation.args.query}
                               isLoading={isToolLoading(messageIndex, partIndex)}
+                              results={
+                                part.toolInvocation.state === "result"
+                                  ? part.toolInvocation.result
+                                  : []
+                              }
                             />
                           );
                         } else if (
