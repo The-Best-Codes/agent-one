@@ -119,7 +119,7 @@ export default function Chat() {
           part.type === "tool-invocation" &&
           part.toolInvocation.toolName === "outputSummary"
         ) {
-          setOutputSummary(part.toolInvocation.args.summary);
+          setOutputSummary(part.toolInvocation.args.markdown);
         }
       });
     });

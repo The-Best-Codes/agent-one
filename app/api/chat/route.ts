@@ -47,7 +47,7 @@ You should also feel free to display images from external sites in your Markdown
           }),
           execute: async ({ markdown }: { markdown: string }) => {
             return {
-              content: markdown,
+              markdown: markdown,
             };
           },
         }),
