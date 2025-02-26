@@ -1,4 +1,5 @@
 import { browse } from "@/utils/tools/browse";
+import { deployAgent } from "@/utils/tools/deployAgent";
 import { imageDesc } from "@/utils/tools/imageDesc";
 import { queryPage } from "@/utils/tools/queryPage";
 import { regexPage } from "@/utils/tools/regexPage";
@@ -29,6 +30,12 @@ You should also browse multiple websites, even if they seem irrelevant, and when
 You should also view relevant images on sites that are relevant to the research topic.
 When you need to search the content of a page in a more advanced manner, you can run query selectors on the page's HTML or use Regex patterns on the page's content.
 
+## Agent Deployment
+You have the ability to deploy specialized agents for specific subtasks using the 'deployAgentTool'.
+This is useful when you need to investigate a separate but related area of research in parallel or handle complex research tasks that benefit from different perspectives.
+
+When deploying an agent, give it a user-friendly name (for the UI) and specific task instructions. You can optionally provide a custom system prompt or let it use the default.
+
 ## Security Notes
 You should not try to browse internal URLs such as localhost or it's equivalents, but you may view IP addresses.
 You should also feel free to display images from external sites in your Markdown.
@@ -51,6 +58,7 @@ You should also feel free to display images from external sites in your Markdown
             };
           },
         }),
+        deployAgentTool: deployAgent,
         searchTool: search,
         browseTool: browse,
         queryPageTool: queryPage,

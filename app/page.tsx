@@ -1,6 +1,7 @@
 "use client";
 
 import { Browse } from "@/components/tools/browse";
+import { DeployAgent } from "@/components/tools/deployAgent";
 import { ImageDesc } from "@/components/tools/imageDesc";
 import { OutputSummary } from "@/components/tools/outputSummary";
 import { QueryPage } from "@/components/tools/queryPage";
@@ -287,6 +288,22 @@ export default function Chat() {
                               url={part.toolInvocation.args.url}
                               regex={part.toolInvocation.args.regex}
                               isLoading={isToolLoading(messageIndex, partIndex)}
+                            />
+                          );
+                        } else if (
+                          part.toolInvocation.toolName === "deployAgentTool"
+                        ) {
+                          return (
+                            <DeployAgent
+                              key={`${m.id}-deployAgent-${partIndex}`}
+                              agentName={part.toolInvocation.args.agentName}
+                              task={part.toolInvocation.args.task}
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                              results={
+                                part.toolInvocation.state === "result"
+                                  ? part.toolInvocation.result
+                                  : undefined
+                              }
                             />
                           );
                         } else if (
