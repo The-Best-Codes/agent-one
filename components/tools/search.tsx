@@ -51,7 +51,7 @@ export const Search: React.FC<SearchProps> = ({
             >
               <AccordionTrigger className="text-base w-full py-2 font-medium">
                 <div className="flex flex-row w-full">
-                  <p className="text-base font-medium max-w-96 truncate overflow-auto whitespace-nowrap">
+                  <p className="text-base font-medium max-w-96 truncate">
                     <SearchIcon className="w-6 h-6 min-w-6 min-h-6 mr-2" />
                     Searched "{query}"
                   </p>

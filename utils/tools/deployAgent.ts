@@ -1,6 +1,6 @@
 import { withTimeout } from "@/utils/timeoutWrapper";
 import { google } from "@ai-sdk/google";
-import { generateText, tool } from "ai";
+import { streamText, tool } from "ai";
 import { z } from "zod";
 import { browse } from "./browse";
 import { imageDesc } from "./imageDesc";
@@ -41,7 +41,7 @@ export const deployAgent = tool({
       const finalSystemPrompt = systemPrompt || defaultSystemPrompt;
 
       const { res } = await withTimeout(async () => {
-        const result = await generateText({
+        const result = streamText({
           model: google("gemini-2.0-flash-001"),
           system: finalSystemPrompt,
           prompt: `Your task: ${task}\n\nBegin your research immediately. Be thorough and provide detailed information.`,
@@ -53,9 +53,15 @@ export const deployAgent = tool({
             regexPageTool: regexPage,
           },
           maxTokens: 4000,
+          maxSteps: 25,
         });
 
-        return { res: result };
+        let lastText = "";
+        for await (const chunk of result.textStream) {
+          lastText = chunk;
+        }
+
+        return { res: { text: lastText } };
       }, 300000);
 
       return {

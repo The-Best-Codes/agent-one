@@ -53,7 +53,7 @@ export const QueryPage: React.FC<QueryProps> = ({
               <AccordionTrigger className="text-base w-full py-2 font-medium">
                 <div className="flex flex-row max-w-full">
                   <Code className="w-6 h-6 min-w-6 min-h-6 mr-2" />
-                  <p className="text-base font-medium max-w-96 truncate overflow-auto whitespace-nowrap">
+                  <p className="text-base font-medium max-w-96 truncate">
                     Searched for "
                     <span className="font-mono bg-gray-100 px-1">
                       {selector}

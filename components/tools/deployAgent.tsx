@@ -32,7 +32,7 @@ export function DeployAgent({
     <div className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
-          <div className="py-2 flex flex-row space-x-2">
+          <div className="py-2 flex flex-row w-full space-x-2">
             <Loader className="w-6 h-6 min-w-6 min-h-6" />
             <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
               Agent "{agentName}" is working. This may take a few minutes.
@@ -47,9 +47,11 @@ export function DeployAgent({
           >
             <AccordionItem className="border-none w-full" value="agent-results">
               <AccordionTrigger className="text-base w-full py-2 font-medium">
-                <div className="flex flex-row w-fit">
+                <div className="flex flex-row w-full">
                   <Robot className="w-6 h-6 min-w-6 min-h-6 mr-2" />
-                  Agent "{results.agentName || agentName}" is finished
+                  <p className="text-base font-medium max-w-96 truncate">
+                    Agent "{results.agentName || agentName}" finished
+                  </p>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
@@ -57,7 +59,7 @@ export function DeployAgent({
                   <div className="text-sm text-muted-foreground mb-2">
                     Task: {results.task || task}
                   </div>
-                  <div className="border-t pt-2 mt-2 overflow-auto max-h-[400px] prose-sm prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1">
+                  <div className="border-t pt-2 mt-2 overflow-auto max-h-96 prose-sm prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {results.result || "Agent didn't respond"}
                     </ReactMarkdown>
