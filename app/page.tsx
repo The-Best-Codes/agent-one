@@ -240,6 +240,11 @@ export default function Chat() {
                               key={`${m.id}-browse-${partIndex}`}
                               url={part.toolInvocation.args.url}
                               isLoading={isToolLoading(messageIndex, partIndex)}
+                              content={
+                                part.toolInvocation.state === "result"
+                                  ? part.toolInvocation.result?.content || []
+                                  : []
+                              }
                             />
                           );
                         } else if (
@@ -251,6 +256,11 @@ export default function Chat() {
                               url={part.toolInvocation.args.url}
                               selector={part.toolInvocation.args.selector}
                               isLoading={isToolLoading(messageIndex, partIndex)}
+                              results={
+                                part.toolInvocation.state === "result"
+                                  ? part.toolInvocation.result?.result || []
+                                  : []
+                              }
                             />
                           );
                         } else if (
@@ -261,6 +271,12 @@ export default function Chat() {
                               key={`${m.id}-imageDesc-${partIndex}`}
                               url={part.toolInvocation.args.url}
                               isLoading={isToolLoading(messageIndex, partIndex)}
+                              description={
+                                part.toolInvocation.state === "result"
+                                  ? part.toolInvocation.result?.description ||
+                                    []
+                                  : []
+                              }
                             />
                           );
                         } else if (
