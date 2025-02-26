@@ -41,7 +41,9 @@ export const deployAgent = tool({
       const finalSystemPrompt = systemPrompt || defaultSystemPrompt;
 
       const { res } = await withTimeout(async () => {
-        const result = streamText({
+        let finalResult: any = "";
+
+        const resStream = streamText({
           model: google("gemini-2.0-flash-001"),
           system: finalSystemPrompt,
           prompt: `Your task: ${task}\n\nBegin your research immediately. Be thorough and provide detailed information.`,
@@ -52,22 +54,23 @@ export const deployAgent = tool({
             imageDescTool: imageDesc,
             regexPageTool: regexPage,
           },
-          maxTokens: 4000,
           maxSteps: 25,
+          onStepFinish: (completion) => {
+            finalResult = structuredClone(completion);
+          },
         });
 
-        let lastText = "";
-        for await (const chunk of result.textStream) {
-          lastText = chunk;
+        for await (const chunk of resStream.textStream) {
+          // No-op, we just have to do this so that the stream can be processed
         }
 
-        return { res: { text: lastText } };
+        return { res: { text: finalResult } };
       }, 300000);
 
       return {
         agentName,
         task,
-        result: res.text,
+        result: res.text.text,
       };
     } catch (error: any) {
       console.error(`Error deploying agent ${agentName}: ${error.message}`);

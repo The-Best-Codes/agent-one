@@ -61,7 +61,11 @@ export function DeployAgent({
                   </div>
                   <div className="border-t pt-2 mt-2 overflow-auto max-h-96 prose-sm prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {results.result || "Agent didn't respond"}
+                      {results.result
+                        ? typeof results.result === "string"
+                          ? results.result
+                          : JSON.stringify(results.result)
+                        : "Agent didn't respond"}
                     </ReactMarkdown>
                   </div>
                 </div>
