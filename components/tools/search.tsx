@@ -32,7 +32,7 @@ export const Search: React.FC<SearchProps> = ({
     <div className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
-          <div className="py-2 flex flex-row space-x-2">
+          <div className="py-2 flex flex-row w-full space-x-2">
             <Loader className="w-6 h-6 min-w-6 min-h-6" />
             <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
               Searching "{query}"
@@ -50,9 +50,11 @@ export const Search: React.FC<SearchProps> = ({
               value="search-results"
             >
               <AccordionTrigger className="text-base w-full py-2 font-medium">
-                <div className="flex flex-row w-fit">
-                  <SearchIcon className="w-6 h-6 min-w-6 min-h-6 mr-2" />
-                  Searched "{query}"
+                <div className="flex flex-row w-full">
+                  <p className="text-base font-medium max-w-96 truncate overflow-auto whitespace-nowrap">
+                    <SearchIcon className="w-6 h-6 min-w-6 min-h-6 mr-2" />
+                    Searched "{query}"
+                  </p>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
