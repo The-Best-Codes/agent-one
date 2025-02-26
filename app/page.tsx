@@ -240,9 +240,9 @@ export default function Chat() {
                               key={`${m.id}-browse-${partIndex}`}
                               url={part.toolInvocation.args.url}
                               isLoading={isToolLoading(messageIndex, partIndex)}
-                              content={
+                              results={
                                 part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result?.content || []
+                                  ? part.toolInvocation.result || []
                                   : []
                               }
                             />
@@ -258,7 +258,7 @@ export default function Chat() {
                               isLoading={isToolLoading(messageIndex, partIndex)}
                               results={
                                 part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result?.result || []
+                                  ? part.toolInvocation.result || []
                                   : []
                               }
                             />
@@ -271,10 +271,9 @@ export default function Chat() {
                               key={`${m.id}-imageDesc-${partIndex}`}
                               url={part.toolInvocation.args.url}
                               isLoading={isToolLoading(messageIndex, partIndex)}
-                              description={
+                              results={
                                 part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result?.description ||
-                                    []
+                                  ? part.toolInvocation.result || []
                                   : []
                               }
                             />

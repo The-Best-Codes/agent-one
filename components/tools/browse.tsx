@@ -13,10 +13,10 @@ import Link from "next/link";
 interface BrowseProps {
   url: string;
   isLoading?: boolean;
-  content?: string | null;
+  results?: { content: string };
 }
 
-export const Browse: React.FC<BrowseProps> = ({ url, isLoading, content }) => {
+export const Browse: React.FC<BrowseProps> = ({ url, isLoading, results }) => {
   return (
     <div className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right">
       <div className="flex w-full">
@@ -34,7 +34,7 @@ export const Browse: React.FC<BrowseProps> = ({ url, isLoading, content }) => {
               </Link>
             </p>
           </div>
-        ) : content ? (
+        ) : results ? (
           <Accordion
             className="w-full"
             type="single"
@@ -60,7 +60,7 @@ export const Browse: React.FC<BrowseProps> = ({ url, isLoading, content }) => {
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
                 <div className="rounded-xl mt-2 p-0 px-2">
-                  <p className="text-sm text-gray-600">{content}</p>
+                  <p className="text-sm text-gray-600">{results?.content}</p>
                 </div>
               </AccordionContent>
             </AccordionItem>

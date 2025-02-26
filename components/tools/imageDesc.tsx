@@ -14,13 +14,13 @@ import Link from "next/link";
 interface ImageDescProps {
   url: string;
   isLoading?: boolean;
-  description?: string | null;
+  results?: { description: string | null };
 }
 
 export const ImageDesc: React.FC<ImageDescProps> = ({
   url,
   isLoading,
-  description,
+  results,
 }) => {
   return (
     <div className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right">
@@ -39,7 +39,7 @@ export const ImageDesc: React.FC<ImageDescProps> = ({
               </Link>
             </p>
           </div>
-        ) : description ? (
+        ) : results?.description ? (
           <Accordion
             className="w-full"
             type="single"
@@ -67,12 +67,14 @@ export const ImageDesc: React.FC<ImageDescProps> = ({
                 <div className="rounded-xl mt-2 p-0 px-2">
                   <Image
                     src={url}
-                    alt={description}
+                    alt={results?.description || ""}
                     className="mt-2 w-fit max-w-full rounded-xl"
                     width={1024}
                     height={1024}
                   />
-                  <p className="mt-2 text-sm text-gray-600">{description}</p>
+                  <p className="mt-2 text-sm text-gray-600">
+                    {results?.description || "No description available"}
+                  </p>
                 </div>
               </AccordionContent>
             </AccordionItem>

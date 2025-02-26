@@ -14,7 +14,7 @@ interface QueryProps {
   url: string;
   selector: string;
   isLoading?: boolean;
-  results?: string | null;
+  results?: { result: string };
 }
 
 export const QueryPage: React.FC<QueryProps> = ({
@@ -68,7 +68,9 @@ export const QueryPage: React.FC<QueryProps> = ({
               <AccordionContent className="overflow-auto max-h-64">
                 <div className="rounded-xl mt-2 p-0 px-2">
                   <pre>
-                    <p className="text-sm text-gray-600 font-mono">{results}</p>
+                    <p className="text-sm text-gray-600 font-mono">
+                      {results.result}
+                    </p>
                   </pre>
                 </div>
               </AccordionContent>
