@@ -60,6 +60,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        scrollbar: {
+          track: "hsl(var(--scrollbar-track))",
+          thumb: "hsl(var(--scrollbar-thumb))",
+          "thumb-hover": "hsl(var(--scrollbar-thumb-hover))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

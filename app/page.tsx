@@ -191,7 +191,7 @@ export default function Chat() {
       {/* Left Section - Chat Messages */}
       <div className="flex flex-col pr-4 border-r w-1/2">
         <div
-          className="flex-1 mb-4 overflow-y-auto scroll-smooth"
+          className="flex-1 mb-4 pr-2 overflow-auto scroll-smooth"
           ref={scrollAreaRef}
         >
           {messages.length === 0 ? (

@@ -37,6 +37,9 @@
         --sidebar-accent-foreground: 240 5.9% 10%;
         --sidebar-border: 220 13% 91%;
         --sidebar-ring: 217.2 91.2% 59.8%;
+        --scrollbar-track: 0 0% 92%;
+        --scrollbar-thumb: 0 0% 80%;
+        --scrollbar-thumb-hover: 0 0% 70%;
     }
     .dark {
         --background: 0 0% 3.9%;
@@ -71,6 +74,9 @@
         --sidebar-accent-foreground: 240 4.8% 95.9%;
         --sidebar-border: 240 3.7% 15.9%;
         --sidebar-ring: 217.2 91.2% 59.8%;
+        --scrollbar-track: 0 0% 18%;
+        --scrollbar-thumb: 0 0% 30%;
+        --scrollbar-thumb-hover: 0 0% 40%;
     }
 }
 
@@ -86,12 +92,12 @@
         @apply w-2 h-2 rounded-full;
     }
     ::-webkit-scrollbar-track {
-        @apply bg-accent rounded-full;
+        @apply bg-scrollbar-track rounded-full;
     }
     ::-webkit-scrollbar-thumb {
-        @apply bg-secondary rounded-full;
+        @apply bg-scrollbar-thumb rounded-full;
     }
     ::-webkit-scrollbar-thumb:hover {
-        @apply bg-secondary-foreground;
+        @apply bg-scrollbar-thumb-hover;
     }
 }
