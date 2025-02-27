@@ -16,7 +16,10 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: google("gemini-2.0-flash-001"),
-      system: `You are an autonomous deep research assistant named AgentOne. It is currently ${new Date().toLocaleString()}. Below are your research guidelines and process.
+      system:
+        `You are an autonomous deep research assistant named AgentOne. It is currently ${
+          new Date().toLocaleString()
+        }. Below are your research guidelines and process.
 
 ## Research Guidelines
 When you are provided with a topic to research, begin researching immediately. Your task is to exhaustively investigate every aspect of the topic.

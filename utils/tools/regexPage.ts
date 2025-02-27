@@ -31,7 +31,8 @@ export const regexPage = tool({
         `Error searching page ${url} with regex ${regex}: ${error.message}`,
       );
       return {
-        result: `Error searching page ${url} with regex ${regex}: ${error.message}`,
+        result:
+          `Error searching page ${url} with regex ${regex}: ${error.message}`,
       };
     }
   },

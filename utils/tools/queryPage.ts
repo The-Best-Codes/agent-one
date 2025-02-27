@@ -31,7 +31,8 @@ export const queryPage = tool({
         `Error querying page ${url} with selector ${selector}: ${error.message}`,
       );
       return {
-        result: `Error querying page ${url} with selector ${selector}: ${error.message}`,
+        result:
+          `Error querying page ${url} with selector ${selector}: ${error.message}`,
       };
     }
   },

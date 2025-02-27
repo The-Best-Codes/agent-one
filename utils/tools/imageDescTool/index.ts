@@ -11,7 +11,8 @@ async function describeImage(imageUrlOrData: string): Promise<string> {
           content: [
             {
               type: "text",
-              text: "Describe the image in detail. Don't leave any details out.",
+              text:
+                "Describe the image in detail. Don't leave any details out.",
             },
             {
               type: "image",

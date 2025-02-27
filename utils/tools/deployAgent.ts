@@ -30,7 +30,8 @@ export const deployAgent = tool({
   }) => {
     try {
       // Default system prompt if none provided
-      const defaultSystemPrompt = `You are ${agentName}, a specialized research agent deployed to perform a specific task. Your goal: ${task}
+      const defaultSystemPrompt =
+        `You are ${agentName}, a specialized research agent deployed to perform a specific task. Your goal: ${task}
 
       You have access to search, browse, and other research tools. Use them to gather comprehensive information about your task.
 
@@ -46,7 +47,8 @@ export const deployAgent = tool({
         const resStream = streamText({
           model: google("gemini-2.0-flash-001"),
           system: finalSystemPrompt,
-          prompt: `Your task: ${task}\n\nBegin your research immediately. Be thorough and provide detailed information.`,
+          prompt:
+            `Your task: ${task}\n\nBegin your research immediately. Be thorough and provide detailed information.`,
           tools: {
             searchTool: search,
             browseTool: browse,

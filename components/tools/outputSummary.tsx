@@ -19,11 +19,9 @@ export const OutputSummary: React.FC<OutputSummaryProps> = ({
       disabled={isLoading}
     >
       <div className="flex items-center space-x-2">
-        {isLoading ? (
-          <Loader className="w-6 h-6 min-w-6 min-h-6" />
-        ) : (
-          <TextIcon className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
-        )}
+        {isLoading
+          ? <Loader className="w-6 h-6 min-w-6 min-h-6" />
+          : <TextIcon className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />}
         <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
           {isLoading ? "Generating" : "Generated"} research summary
         </p>
