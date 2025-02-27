@@ -59,7 +59,7 @@ export function DeployAgent({
                   <div className="text-sm text-muted-foreground mb-2">
                     Task: {results.task || task}
                   </div>
-                  <div className="border-t pt-2 mt-2 overflow-auto max-h-96 prose-sm prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1">
+                  <div className="border-t pt-2 mt-2 overflow-auto max-h-96 prose-sm dark:prose-invert prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {results.result
                         ? typeof results.result === "string"

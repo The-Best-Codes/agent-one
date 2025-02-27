@@ -332,7 +332,7 @@ export default function Chat() {
                         if (m.role === "user") {
                           return (
                             <div
-                              className="prose"
+                              className="prose dark:prose-invert"
                               key={`${m.id}-text-${partIndex}`}
                             >
                               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -365,7 +365,7 @@ export default function Chat() {
                                       )}
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  <div className="prose">
+                                  <div className="prose dark:prose-invert">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                       {part.text}
                                     </ReactMarkdown>
@@ -406,6 +406,7 @@ export default function Chat() {
           </Button>
         </form>
       </div>
+
       {/* Right Section - Output Markdown Summary */}
       <div
         ref={outputSummaryRef}
@@ -417,7 +418,7 @@ export default function Chat() {
           </CardHeader>
           <CardContent className="h-full pt-4">
             {outputSummary ? (
-              <div className="prose motion-preset-blur-up">
+              <div className="prose dark:prose-invert motion-preset-blur-up">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {outputSummary}
                 </ReactMarkdown>
