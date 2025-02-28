@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/accordion";
 import { Search as SearchIcon } from "lucide-react";
 import Link from "next/link";
+import ShinyText from "../a1/shiny-text";
 
 interface SearchResult {
   title: string | null;
@@ -34,9 +35,9 @@ export const Search: React.FC<SearchProps> = ({
         {isLoading ? (
           <div className="py-2 flex flex-row w-full space-x-2">
             <Loader className="w-6 h-6 min-w-6 min-h-6" />
-            <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-              Searching "{query}"
-            </p>
+            <div className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
+              <ShinyText speed={3} text={`Searching "${query}"`} />
+            </div>
           </div>
         ) : (
           <Accordion
