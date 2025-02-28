@@ -16,7 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { CircleHelp, FileText, Loader2, MessageSquare } from "lucide-react";
+import {
+  CircleHelp,
+  FileText,
+  Loader2,
+  MessageSquare,
+  Text,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -234,7 +240,7 @@ export default function Chat() {
                 >
                   <CardHeader>
                     <CardTitle>
-                      {m.role === "user" ? "User" : "AgentOne"}
+                      {m.role === "user" ? "You" : "AgentOne"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent
@@ -328,6 +334,22 @@ export default function Chat() {
                                   : undefined
                               }
                             />
+                          );
+                        } else if (
+                          part.toolInvocation.toolName === "finishResearchTool"
+                        ) {
+                          return (
+                            <div
+                              key={`$${m.id}-finishResearchTool-${partIndex}`}
+                              className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right"
+                            >
+                              <div className="py-2 flex flex-row space-x-2 w-full">
+                                <Text className="w-6 h-6 min-w-6 min-h-6" />
+                                <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
+                                  AgentOne finished researching the topic.
+                                </p>
+                              </div>
+                            </div>
                           );
                         } else {
                           return (
