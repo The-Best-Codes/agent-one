@@ -72,7 +72,7 @@ export const QueryPage: React.FC<QueryProps> = ({
                 </div>
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
-                <div className="rounded-xl mt-2 p-0 px-2">
+                <div className="rounded-xl mt-2 p-0 px-2 max-w-full overflow-auto pb-2">
                   {results && results?.result ? (
                     <pre>
                       <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
