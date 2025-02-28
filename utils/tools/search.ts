@@ -13,9 +13,10 @@ export const search = tool({
   }),
   execute: async ({ query }: { query: string }) => {
     try {
-      const searchUrl = `https://www.mojeek.com/search?q=${
-        encodeURIComponent(query)
-      }`;
+      const searchUrl = `https://www.mojeek.com/search?q=${encodeURIComponent(
+        query,
+      )}&cdate=1&si=0&tlen=127&dlen=511&safe=1`;
+
       const searchResults = await withTimeout(
         async () => await scrapeMojeekSearchResults(searchUrl),
         45000,
