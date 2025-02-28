@@ -42,7 +42,7 @@ export const QueryPage: React.FC<QueryProps> = ({
               </Link>
             </p>
           </div>
-        ) : results ? (
+        ) : (
           <Accordion
             className="w-full"
             type="single"
@@ -71,32 +71,19 @@ export const QueryPage: React.FC<QueryProps> = ({
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
                 <div className="rounded-xl mt-2 p-0 px-2">
-                  <pre>
-                    <p className="text-sm text-gray-600 font-mono">
-                      {results.result}
-                    </p>
-                  </pre>
+                  {results ? (
+                    <pre>
+                      <p className="text-sm text-gray-600 font-mono">
+                        {results.result}
+                      </p>
+                    </pre>
+                  ) : (
+                    <p className="text-sm text-gray-500">No results found.</p>
+                  )}
                 </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-        ) : (
-          <>
-            <Code className="w-6 h-6 min-w-6 min-h-6 text-gray-500" />
-            <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-              Searched for "
-              <span className="font-mono bg-gray-100 px-1">{selector}</span>"
-              elements on{" "}
-              <Link
-                href={url}
-                target="_blank"
-                className="text-blue-500 cursor-pointer"
-              >
-                {url}
-              </Link>
-            </p>
-            <p className="text-sm text-gray-500 mt-2">No results found.</p>
-          </>
         )}
       </div>
     </div>
