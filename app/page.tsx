@@ -3,7 +3,6 @@
 import { Browse } from "@/components/tools/browse";
 import { DeployAgent } from "@/components/tools/deployAgent";
 import { ImageDesc } from "@/components/tools/imageDesc";
-import { OutputSummary } from "@/components/tools/outputSummary";
 import { QueryPage } from "@/components/tools/queryPage";
 import { RegexPage } from "@/components/tools/regexPage";
 import { Search } from "@/components/tools/search";
@@ -120,17 +119,36 @@ export default function Chat() {
             [partId]: duration,
           }));
         }
-
-        // Special handling for outputSummary tool
-        if (
-          part.type === "tool-invocation" &&
-          part.toolInvocation.toolName === "outputSummary"
-        ) {
-          setOutputSummary(part.toolInvocation.args.markdown);
-        }
       });
     });
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      // Find the latest assistant message
+      const latestAssistantMessage = messages
+        .slice()
+        .reverse()
+        .find((message) => message.role === "assistant");
+
+      if (latestAssistantMessage && latestAssistantMessage.parts) {
+        // Find the latest text part in the latest assistant message
+        const latestTextPart = latestAssistantMessage.parts
+          .slice()
+          .reverse()
+          .find((part) => part.type === "text");
+
+        if (latestTextPart) {
+          setOutputSummary(latestTextPart.text);
+          focusOutputSummary();
+        } else {
+          setOutputSummary(null);
+        }
+      } else {
+        setOutputSummary(null);
+      }
+    }
+  }, [isLoading, messages]);
 
   const getThinkingText = (
     messageId: string,
@@ -174,7 +192,7 @@ export default function Chat() {
     return textPartIndex === textParts.length - 1;
   };
 
-  const handleOutputSummaryClick = () => {
+  const focusOutputSummary = () => {
     if (outputSummaryRef.current) {
       outputSummaryRef.current.scrollIntoView({
         behavior: "smooth",
@@ -311,16 +329,6 @@ export default function Chat() {
                               }
                             />
                           );
-                        } else if (
-                          part.toolInvocation.toolName === "outputSummary"
-                        ) {
-                          return (
-                            <OutputSummary
-                              key={`${m.id}-outputSummary-${partIndex}`}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              onClick={handleOutputSummaryClick}
-                            />
-                          );
                         } else {
                           return (
                             <div className="border rounded-xl p-2 my-4 motion-preset-blur-right">
@@ -413,21 +421,16 @@ export default function Chat() {
       </div>
 
       {/* Right Section - Output Markdown Summary */}
-      <div
-        ref={outputSummaryRef}
-        className={`w-1/2 ${
-          isOutputSummaryFocused
-            ? "motion-preset-focus motion-duration-300"
-            : ""
-        }`}
-      >
+      <div ref={outputSummaryRef} className="w-1/2">
         <Card className="h-full shadow-none border-0 max-h-full overflow-auto">
           <CardHeader className="p-0">
             <CardTitle className="sr-only">Summary</CardTitle>
           </CardHeader>
           <CardContent className="h-full pt-4">
             {outputSummary ? (
-              <div className="prose dark:prose-invert motion-preset-blur-up">
+              <div
+                className={`prose dark:prose-invert motion-duration-300 ${isOutputSummaryFocused ? "motion-preset-blur-up" : ""}`}
+              >
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {outputSummary}
                 </ReactMarkdown>
@@ -436,8 +439,7 @@ export default function Chat() {
               <div className="flex flex-col items-center justify-center h-full">
                 <FileText className="w-16 h-16 text-muted-foreground mb-4" />
                 <p className="text-muted-foreground mt-2 text-center">
-                  AgentOne will generate a summary here when it is done
-                  researching.
+                  AgentOne's final responses will appear here.
                 </p>
               </div>
             )}
