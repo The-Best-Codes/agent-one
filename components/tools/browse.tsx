@@ -63,7 +63,9 @@ export const Browse: React.FC<BrowseProps> = ({ url, isLoading, results }) => {
               <AccordionContent className="overflow-auto max-h-64">
                 {results ? (
                   <div className="rounded-xl mt-2 p-0 px-2">
-                    <p className="text-sm text-gray-600">{results?.content}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {results?.content}
+                    </p>
                   </div>
                 ) : (
                   <div className="rounded-xl mt-2 p-0 px-2">

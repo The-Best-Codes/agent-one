@@ -31,8 +31,10 @@ export const QueryPage: React.FC<QueryProps> = ({
             <Loader className="w-6 h-6 min-w-6 min-h-6" />
             <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
               Finding "
-              <span className="font-mono bg-gray-100 px-1">{selector}</span>"
-              elements on{" "}
+              <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1">
+                {selector}
+              </span>
+              " elements on{" "}
               <Link
                 href={url}
                 target="_blank"
@@ -71,10 +73,12 @@ export const QueryPage: React.FC<QueryProps> = ({
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
                 <div className="rounded-xl mt-2 p-0 px-2">
-                  {results ? (
+                  {results && results?.result ? (
                     <pre>
-                      <p className="text-sm text-gray-600 font-mono">
-                        {results.result}
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                        {results?.result?.length > 0
+                          ? results?.result
+                          : "No results found."}
                       </p>
                     </pre>
                   ) : (
