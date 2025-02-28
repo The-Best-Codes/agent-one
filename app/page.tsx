@@ -331,11 +331,15 @@ export default function Chat() {
                           );
                         } else {
                           return (
-                            <div className="border rounded-xl p-2 my-4 motion-preset-blur-right">
+                            <div
+                              key={`${m.id}-unknown-tool-${partIndex}`}
+                              className="border rounded-xl p-2 my-4 motion-preset-blur-right"
+                            >
                               <div className="flex items-center space-x-2">
                                 <CircleHelp className="w-6 h-6 min-w-6 min-h-6" />
                                 <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-                                  Oops! AI tried to use an unsupported tool.
+                                  Oops! AgentOne tried to use an unsupported
+                                  tool.
                                 </p>
                               </div>
                             </div>

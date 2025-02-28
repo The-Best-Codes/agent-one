@@ -5,7 +5,8 @@ import { queryPage } from "@/utils/tools/queryPage";
 import { regexPage } from "@/utils/tools/regexPage";
 import { search } from "@/utils/tools/search";
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { streamText, tool } from "ai";
+import { z } from "zod";
 
 export const maxDuration = 60;
 
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
 ## Research Guidelines
 When you are provided with a topic to research, begin researching immediately. Your task is to exhaustively investigate everything about the topic.
 You should NOT stop after a few searches and website visits. Avoid light overviews and be in-depth, thorough, and high-detail.
-After you have exhausted your research efforts, compile your findings into a comprehensive report, and respond with this report as your last message.
+After you have exhausted your research efforts, you should call the 'finishResearchTool' and generate your report. Your report should be comprehensive, detailed, and well-structured.
 
 ## Research Process
 You should search multiple times with different keywords throughout the course of your research. Keep in mind how a search engine works. You can't just ask it a question, you have to provide keywords, even just one word.
@@ -40,6 +41,22 @@ You can also display images from external sites in your Markdown.
 `,
       messages,
       tools: {
+        finishResearchTool: tool({
+          description:
+            "Finish your research and summarize the information you have gathered",
+          parameters: z.object({
+            message: z
+              .string()
+              .describe(
+                "This parameter is here for legacy purposes. Recommended value: 'Hello World'",
+              ),
+          }),
+          execute: async ({ message }: { message: string }) => {
+            return {
+              content: `You should now output a professional, formatted, comprehensive summary of your research findings to the user.`,
+            };
+          },
+        }),
         deployAgentTool: deployAgent,
         searchTool: search,
         browseTool: browse,
