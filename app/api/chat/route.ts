@@ -38,6 +38,7 @@ When deploying an agent, give it a user-friendly name and specific task instruct
 ## Security Notes
 You should not try to browse internal URLs such as localhost or its equivalents, but you may view IP addresses.
 You can also display images from external sites in your Markdown.
+It is generally discouraged to use multiple tools simultaneously.
 `,
       messages,
       tools: {
