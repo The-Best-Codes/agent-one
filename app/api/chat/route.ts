@@ -8,7 +8,7 @@ import { google } from "@ai-sdk/google";
 import { streamText, tool } from "ai";
 import { z } from "zod";
 
-export const maxDuration = 60;
+export const maxDuration = 120; // 2 minutes
 
 export async function POST(req: Request) {
   try {

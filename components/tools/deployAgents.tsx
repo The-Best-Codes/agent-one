@@ -14,6 +14,7 @@ import remarkGfm from "remark-gfm";
 interface AgentResult {
   agentName: string;
   task: string;
+  systemPrompt?: string;
   result: string;
 }
 
@@ -25,6 +26,7 @@ interface DeployAgentsProps {
   agents?: {
     agentName: string;
     task: string;
+    systemPrompt?: string;
   }[];
 }
 
@@ -59,6 +61,10 @@ export function DeployAgent({ isLoading, results, agents }: DeployAgentsProps) {
                   <div className="rounded-xl mt-2 p-0">
                     <div className="text-sm text-muted-foreground mb-2">
                       Task: {agentResult.task}
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      System Prompt:{" "}
+                      {agentResult?.systemPrompt || "(Default System Prompt)"}
                     </div>
                     <div className="border-t pt-2 mt-2 overflow-auto max-h-96 prose-sm dark:prose-invert prose-headings:mt-2 prose-headings:mb-1 prose-p:my-1">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>

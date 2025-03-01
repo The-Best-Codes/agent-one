@@ -4,8 +4,6 @@ import { streamText, tool } from "ai";
 import { z } from "zod";
 import { browse } from "./browse";
 import { imageDesc } from "./imageDesc";
-import { queryPage } from "./queryPage";
-import { regexPage } from "./regexPage";
 import { search } from "./search";
 
 const agentSchema = z.object({
@@ -37,13 +35,13 @@ export const deployAgents = tool({
         const { agentName, task, systemPrompt } = agent;
         try {
           // Default system prompt if none provided
-          const defaultSystemPrompt = `You are ${agentName}, a specialized research agent deployed to perform a specific task. Your goal: ${task}
+          const defaultSystemPrompt = `You are ${agentName}, a specialized research agent deployed to perform a specific task.
+This is your goal: ${task}
 
-          You have access to search, browse, and other research tools. Use them to gather comprehensive information about your task.
-
-          Organize your findings in a clear, structured manner with headers, bullet points, and other formatting as needed.
-
-          When you're done, provide a complete summary of your findings.`;
+You should never decline to perform your task. You can always find a way to complete it using the tools at your disposal.
+You have access to search, browse, and image description tools. Use them to gather comprehensive information about your task.
+Organize your findings in a clear, structured manner with headers, bullet points, and other formatting as needed. Be verbose and detailed.
+When you're done, provide a complete summary of your findings.`;
 
           const finalSystemPrompt = systemPrompt || defaultSystemPrompt;
 
@@ -57,11 +55,9 @@ export const deployAgents = tool({
               tools: {
                 searchTool: search,
                 browseTool: browse,
-                queryPageTool: queryPage,
                 imageDescTool: imageDesc,
-                regexPageTool: regexPage,
               },
-              maxSteps: 25,
+              maxSteps: 20,
               onStepFinish: (completion) => {
                 finalResult = structuredClone(completion);
               },
