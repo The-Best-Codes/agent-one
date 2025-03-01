@@ -13,15 +13,6 @@ const nextConfig: NextConfig = {
     return config;
     },
   */
-  experimental: {
-    turbo: {
-      resolveAlias: {
-        sharp$: "./turbo-patches/empty.js",
-        "onnxruntime-node$": "./turbo-patches/empty.js",
-      },
-    },
-    serverComponentsExternalPackages: ["sharp", "onnxruntime-node"],
-  },
   serverExternalPackages: ["sharp", "onnxruntime-node"], // When using turbopack, this is required to avoid errors with onnxruntime-node
   eslint: {
     ignoreDuringBuilds: true,
