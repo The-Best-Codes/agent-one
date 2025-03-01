@@ -1,5 +1,5 @@
 import { browse } from "@/utils/tools/browse";
-import { deployAgent } from "@/utils/tools/deployAgent";
+import { deployAgents } from "@/utils/tools/deployAgents";
 import { imageDesc } from "@/utils/tools/imageDesc";
 import { queryPage } from "@/utils/tools/queryPage";
 import { regexPage } from "@/utils/tools/regexPage";
@@ -31,7 +31,8 @@ When you need to search the content of a page in a more advanced manner, you can
 
 ## Agent Deployment
 You have the ability to deploy specialized agents for specific subtasks.
-This is useful when you need to investigate separate but related areas of research in parallel or handle complex research tasks that benefit from different perspectives.
+You should use agents when researching, as they can be VERY useful.
+You should deploy many agents in parallel to speed up your research.
 
 When deploying an agent, give it a user-friendly name and specific task instructions. You can optionally provide a custom system prompt or let it use the default.
 
@@ -58,7 +59,7 @@ It is generally discouraged to use multiple tools simultaneously.
             };
           },
         }),
-        deployAgentTool: deployAgent,
+        deployAgentsTool: deployAgents,
         searchTool: search,
         browseTool: browse,
         queryPageTool: queryPage,

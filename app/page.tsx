@@ -1,7 +1,7 @@
 "use client";
 
 import { Browse } from "@/components/tools/browse";
-import { DeployAgent } from "@/components/tools/deployAgent";
+import { DeployAgent } from "@/components/tools/deployAgents";
 import { ImageDesc } from "@/components/tools/imageDesc";
 import { QueryPage } from "@/components/tools/queryPage";
 import { RegexPage } from "@/components/tools/regexPage";
@@ -320,13 +320,12 @@ export default function Chat() {
                             />
                           );
                         } else if (
-                          part.toolInvocation.toolName === "deployAgentTool"
+                          part.toolInvocation.toolName === "deployAgentsTool"
                         ) {
                           return (
                             <DeployAgent
-                              key={`${m.id}-deployAgent-${partIndex}`}
-                              agentName={part.toolInvocation.args.agentName}
-                              task={part.toolInvocation.args.task}
+                              key={`${m.id}-deployAgents-${partIndex}`}
+                              agents={part.toolInvocation.args.agents}
                               isLoading={isToolLoading(messageIndex, partIndex)}
                               results={
                                 part.toolInvocation.state === "result"
