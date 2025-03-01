@@ -1,5 +1,7 @@
 import { initializeDB, loadDB, searchDB } from "@/utils/memory";
+import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
+import path from "path";
 import { z } from "zod";
 
 const QuerySchema = z.object({
@@ -8,12 +10,49 @@ const QuerySchema = z.object({
   returnEmbeddings: z.boolean().optional().default(false),
 });
 
-const HARDCODED_FILENAME = "agentone_memory_db";
+const HARDCODED_FILENAME = "db/agent_one_memory_db.json";
 
-export async function POST(req: NextRequest) {
+async function ensureDirectoryExistence(filePath: string) {
+  const dirname = path.dirname(filePath);
   try {
+    await fs.access(dirname);
+  } catch (error: any) {
+    try {
+      await fs.mkdir(dirname, { recursive: true });
+    } catch (error: any) {
+      throw error; // Something else went wrong
+    }
+  }
+}
+
+async function handleQuery(req: NextRequest, method: string) {
+  try {
+    await ensureDirectoryExistence(HARDCODED_FILENAME); // Ensure directory exists
     await initializeDB(); // Ensure DB is initialized
-    const body = await req.json();
+
+    let body;
+    if (method === "POST") {
+      body = await req.json();
+    } else {
+      const url = new URL(req.url);
+      const query = url.searchParams.get("query");
+      const topK = url.searchParams.get("topK");
+      const returnEmbeddings = url.searchParams.get("returnEmbeddings");
+
+      if (!query) {
+        return NextResponse.json(
+          { message: "Missing 'query' parameter in GET request" },
+          { status: 400 },
+        );
+      }
+
+      body = {
+        query: query,
+        topK: topK ? parseInt(topK) : undefined,
+        returnEmbeddings: returnEmbeddings === "true", // convert to boolean
+      };
+    }
+
     const validatedBody = QuerySchema.parse(body);
 
     await loadDB(HARDCODED_FILENAME); // Load from hardcoded filename
@@ -45,9 +84,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function POST(req: NextRequest) {
+  return handleQuery(req, "POST");
+}
+
 export async function GET(req: NextRequest) {
-  return NextResponse.json(
-    { message: "Use POST method to query." },
-    { status: 405 },
-  );
+  return handleQuery(req, "GET");
 }
