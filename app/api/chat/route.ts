@@ -2,7 +2,6 @@ import { browse } from "@/utils/tools/browse";
 import { deployAgents } from "@/utils/tools/deployAgents";
 import { imageDesc } from "@/utils/tools/imageDesc";
 import { queryPage } from "@/utils/tools/queryPage";
-import { regexPage } from "@/utils/tools/regexPage";
 import { search } from "@/utils/tools/search";
 import { google } from "@ai-sdk/google";
 import { streamText, tool } from "ai";
@@ -27,7 +26,7 @@ After you have exhausted your research efforts, you should call the 'finishResea
 You should search multiple times with different keywords throughout the course of your research. Keep in mind how a search engine works. You can't just ask it a question, you have to provide keywords, even just one word.
 You should browse multiple websites. When you find links or topics related to the research topic on a site, you should research those as well to collect more information.
 You should also view images on sites when relevant and applicable to the research topic.
-When you need to search the content of a page in a more advanced manner, you can run query selectors on the page's HTML or use Regex patterns on the page's content.
+When you need to search the content of a page in a more advanced manner, you can run query selectors on the page's HTML.
 
 ## Agent Deployment
 You have the ability to deploy specialized agents for specific subtasks.
@@ -62,9 +61,8 @@ It is generally discouraged to use multiple tools simultaneously.
         deployAgentsTool: deployAgents,
         searchTool: search,
         browseTool: browse,
-        queryPageTool: queryPage,
         imageDescTool: imageDesc,
-        regexPageTool: regexPage,
+        queryPageTool: queryPage,
       },
       onError: async (error) => {
         console.error(error);

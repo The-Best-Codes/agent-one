@@ -4,7 +4,6 @@ import { Browse } from "@/components/tools/browse";
 import { DeployAgent } from "@/components/tools/deployAgents";
 import { ImageDesc } from "@/components/tools/imageDesc";
 import { QueryPage } from "@/components/tools/queryPage";
-import { RegexPage } from "@/components/tools/regexPage";
 import { Search } from "@/components/tools/search";
 import {
   Accordion,
@@ -306,17 +305,6 @@ export default function Chat() {
                                   ? part.toolInvocation.result || []
                                   : []
                               }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "regexPageTool"
-                        ) {
-                          return (
-                            <RegexPage
-                              key={`${m.id}-regexPage-${partIndex}`}
-                              url={part.toolInvocation.args.url}
-                              regex={part.toolInvocation.args.regex}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
                             />
                           );
                         } else if (

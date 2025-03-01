@@ -36,9 +36,10 @@ export const deployAgents = tool({
         try {
           // Default system prompt if none provided
           const defaultSystemPrompt = `You are ${agentName}, a specialized research agent deployed to perform a specific task.
-This is your goal: ${task}
 
-You should never decline to perform your task. You can always find a way to complete it using the tools at your disposal.
+You should NEVER decline to perform your task. You can always find a way to complete it using the tools at your disposal.
+You are ALWAYS able to complete your task, even if it seems unrelated or impossible based on the tools you have. Be creative and resourceful.
+
 You have access to search, browse, and image description tools. Use them to gather comprehensive information about your task.
 Organize your findings in a clear, structured manner with headers, bullet points, and other formatting as needed. Be verbose and detailed.
 When you're done, provide a complete summary of your findings.`;
@@ -50,6 +51,7 @@ When you're done, provide a complete summary of your findings.`;
 
             const resStream = streamText({
               model: google("gemini-2.0-flash-lite"),
+              temperature: 0.7,
               system: finalSystemPrompt,
               prompt: `Your task: ${task}\n\nBegin your research immediately. Be thorough and provide detailed information.`,
               tools: {
