@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
     return config;
     },
   */
+  experimental: {
+    turbo: {
+      treeShaking: true,
+    },
+  },
   serverExternalPackages: ["sharp", "onnxruntime-node"], // When using turbopack, this is required to avoid errors with onnxruntime-node
   eslint: {
     ignoreDuringBuilds: true,
