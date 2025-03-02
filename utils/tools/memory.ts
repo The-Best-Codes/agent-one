@@ -1,12 +1,13 @@
+import {
+  addTextToDB,
+  initializeDB,
+  removeTextFromDB,
+  searchDB,
+} from "@/utils/memory";
 import { tool } from "ai";
+import fs from "fs/promises";
+import path from "path";
 import { z } from "zod";
-
-// TODO: Use the memory util directly
-const SERVER_URL =
-  process.env.NODE_ENV === "production"
-    ? process.env.PROD_DEPLOYMENT_URL
-    : process.env.LOCAL_DEPLOYMENT_URL;
-const BASE_URL = `${SERVER_URL}/api/memory`;
 
 const MemoryOperationSchema = z.enum(["add", "remove", "query"]);
 
@@ -21,6 +22,22 @@ const MemoryToolSchema = z.object({
   text: MemoryTextSchema,
 });
 
+const HARDCODED_FILENAME = "db/agent_one_memory_db.json";
+const HARDCODED_LOCK_FILENAME = "db/agent_one_memory_db.lock.json";
+
+async function ensureDirectoryExistence(filePath: string) {
+  const dirname = path.dirname(filePath);
+  try {
+    await fs.access(dirname);
+  } catch (error: any) {
+    try {
+      await fs.mkdir(dirname, { recursive: true });
+    } catch (error: any) {
+      throw error; // Something else went wrong
+    }
+  }
+}
+
 export const memory = tool({
   description:
     "Use this tool to interact with your memory. You can add, remove, or query information.",
@@ -32,58 +49,37 @@ export const memory = tool({
     operation: "add" | "remove" | "query";
     text: { add: string | null; remove: string | null; query: string | null };
   }) => {
-    let endpoint = "";
-    let requestBody = {};
-
-    switch (operation) {
-      case "add":
-        endpoint = `${BASE_URL}/save`;
-        if (!text.add) {
-          return { content: "Error: Text to add is required." };
-        }
-        requestBody = { text: text.add };
-        break;
-      case "remove":
-        endpoint = `${BASE_URL}/remove`;
-        if (!text.remove) {
-          return { content: "Error: Text to remove is required." };
-        }
-        requestBody = { text: text.remove };
-        break;
-      case "query":
-        endpoint = `${BASE_URL}/query`;
-        if (!text.query) {
-          return { content: "Error: Query text is required." };
-        }
-        requestBody = { query: text.query };
-        break;
-    }
-
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      await ensureDirectoryExistence(HARDCODED_FILENAME);
+      await ensureDirectoryExistence(HARDCODED_LOCK_FILENAME);
+      await initializeDB(HARDCODED_FILENAME, HARDCODED_LOCK_FILENAME);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error(`Memory ${operation} failed:`, errorData);
-        return {
-          content: `Error: Memory ${operation} failed: ${
-            errorData.message || "Unknown error"
-          }`,
-        };
+      switch (operation) {
+        case "add":
+          if (!text.add) {
+            return { content: "Error: Text to add is required." };
+          }
+          await addTextToDB(text.add);
+          return { content: "Text added to memory." };
+        case "remove":
+          if (!text.remove) {
+            return { content: "Error: Text to remove is required." };
+          }
+          await removeTextFromDB(text.remove);
+          return { content: "Text removed from memory." };
+        case "query":
+          if (!text.query) {
+            return { content: "Error: Query text is required." };
+          }
+          const results = await searchDB(text.query);
+          return { content: JSON.stringify(results) };
+        default:
+          return { content: "Error: Invalid operation." };
       }
-
-      const data = await response.json();
-      return { content: JSON.stringify(data) };
     } catch (error: any) {
-      console.error(`Error during memory ${operation}:`, error);
+      console.error(`Memory operation failed:`, error);
       return {
-        content: `Error: Memory ${operation} request failed: ${error.message}`,
+        content: `Error: Memory operation failed: ${error.message}`,
       };
     }
   },
