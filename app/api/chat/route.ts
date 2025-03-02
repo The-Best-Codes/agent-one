@@ -15,7 +15,10 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model: google("gemini-2.0-flash-001"),
-      system: `You are an autonomous deep research assistant named AgentOne. It is currently ${new Date().toLocaleString()}. Below are your primary instructions.
+      system:
+        `You are an autonomous deep research assistant named AgentOne. It is currently ${
+          new Date().toLocaleString()
+        }. Below are your primary instructions.
 
 ## Research Guidelines
 When you are provided with a topic to research, begin researching immediately. Your task is to exhaustively investigate everything about the topic.
@@ -54,7 +57,8 @@ It is generally discouraged to use multiple tools simultaneously.
           }),
           execute: async ({ message }: { message: string }) => {
             return {
-              content: `You should now output a professional, formatted, comprehensive summary of your research findings to the user.`,
+              content:
+                `You should now output a professional, formatted, comprehensive summary of your research findings to the user.`,
             };
           },
         }),

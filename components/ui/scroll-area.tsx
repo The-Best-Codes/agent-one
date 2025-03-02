@@ -32,13 +32,15 @@ const ScrollBar = ({
   className,
   orientation = "vertical",
   ...props
-}: React.ComponentPropsWithoutRef<
-  typeof ScrollAreaPrimitive.ScrollAreaScrollbar
-> & {
-  ref?: React.RefObject<
-    React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
-  >;
-}) => (
+}:
+  & React.ComponentPropsWithoutRef<
+    typeof ScrollAreaPrimitive.ScrollAreaScrollbar
+  >
+  & {
+    ref?: React.RefObject<
+      React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
+    >;
+  }) => (
   <ScrollAreaPrimitive.ScrollAreaScrollbar
     ref={ref}
     orientation={orientation}

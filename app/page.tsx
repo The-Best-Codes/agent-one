@@ -220,195 +220,205 @@ export default function Chat() {
           className="flex-1 mb-4 pr-2 overflow-auto scroll-smooth"
           ref={scrollAreaRef}
         >
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <MessageSquare className="w-16 h-16 text-muted-foreground mb-4" />
-              <h2 className="text-4xl font-bold text-foreground">AgentOne</h2>
-              <p className="text-muted-foreground mt-2">
-                Enter research instructions below to begin!
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {messages.map((m, messageIndex) => (
-                <Card
-                  key={m.id}
-                  className={`${
-                    m.role === "user" ? "bg-secondary" : ""
-                  } shadow-none motion-preset-blur-up`}
-                >
-                  <CardHeader>
-                    <CardTitle>
-                      {m.role === "user" ? "You" : "AgentOne"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent
-                    key={`${m.id}-card-content`}
-                    className="whitespace-pre-wrap"
+          {messages.length === 0
+            ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <MessageSquare className="w-16 h-16 text-muted-foreground mb-4" />
+                <h2 className="text-4xl font-bold text-foreground">AgentOne</h2>
+                <p className="text-muted-foreground mt-2">
+                  Enter research instructions below to begin!
+                </p>
+              </div>
+            )
+            : (
+              <div className="flex flex-col gap-4">
+                {messages.map((m, messageIndex) => (
+                  <Card
+                    key={m.id}
+                    className={`${
+                      m.role === "user" ? "bg-secondary" : ""
+                    } shadow-none motion-preset-blur-up`}
                   >
-                    {m.parts?.map((part, partIndex) => {
-                      if (part.type === "tool-invocation") {
-                        if (part.toolInvocation.toolName === "searchTool") {
-                          return (
-                            <Search
-                              key={`${m.id}-search-${partIndex}`}
-                              query={part.toolInvocation.args.query}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
+                    <CardHeader>
+                      <CardTitle>
+                        {m.role === "user" ? "You" : "AgentOne"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent
+                      key={`${m.id}-card-content`}
+                      className="whitespace-pre-wrap"
+                    >
+                      {m.parts?.map((part, partIndex) => {
+                        if (part.type === "tool-invocation") {
+                          if (part.toolInvocation.toolName === "searchTool") {
+                            return (
+                              <Search
+                                key={`${m.id}-search-${partIndex}`}
+                                query={part.toolInvocation.args.query}
+                                isLoading={isToolLoading(
+                                  messageIndex,
+                                  partIndex,
+                                )}
+                                results={part.toolInvocation.state === "result"
                                   ? part.toolInvocation.result
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "browseTool"
-                        ) {
-                          return (
-                            <Browse
-                              key={`${m.id}-browse-${partIndex}`}
-                              url={part.toolInvocation.args.url}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
+                                  : []}
+                              />
+                            );
+                          } else if (
+                            part.toolInvocation.toolName === "browseTool"
+                          ) {
+                            return (
+                              <Browse
+                                key={`${m.id}-browse-${partIndex}`}
+                                url={part.toolInvocation.args.url}
+                                isLoading={isToolLoading(
+                                  messageIndex,
+                                  partIndex,
+                                )}
+                                results={part.toolInvocation.state === "result"
                                   ? part.toolInvocation.result || []
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "queryPageTool"
-                        ) {
-                          return (
-                            <QueryPage
-                              key={`${m.id}-queryPage-${partIndex}`}
-                              url={part.toolInvocation.args.url}
-                              selector={part.toolInvocation.args.selector}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
+                                  : []}
+                              />
+                            );
+                          } else if (
+                            part.toolInvocation.toolName === "queryPageTool"
+                          ) {
+                            return (
+                              <QueryPage
+                                key={`${m.id}-queryPage-${partIndex}`}
+                                url={part.toolInvocation.args.url}
+                                selector={part.toolInvocation.args.selector}
+                                isLoading={isToolLoading(
+                                  messageIndex,
+                                  partIndex,
+                                )}
+                                results={part.toolInvocation.state === "result"
                                   ? part.toolInvocation.result || []
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "imageDescTool"
-                        ) {
-                          return (
-                            <ImageDesc
-                              key={`${m.id}-imageDesc-${partIndex}`}
-                              url={part.toolInvocation.args.url}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
+                                  : []}
+                              />
+                            );
+                          } else if (
+                            part.toolInvocation.toolName === "imageDescTool"
+                          ) {
+                            return (
+                              <ImageDesc
+                                key={`${m.id}-imageDesc-${partIndex}`}
+                                url={part.toolInvocation.args.url}
+                                isLoading={isToolLoading(
+                                  messageIndex,
+                                  partIndex,
+                                )}
+                                results={part.toolInvocation.state === "result"
                                   ? part.toolInvocation.result || []
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "deployAgentsTool"
-                        ) {
-                          return (
-                            <DeployAgent
-                              key={`${m.id}-deployAgents-${partIndex}`}
-                              agents={part.toolInvocation.args.agents}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
+                                  : []}
+                              />
+                            );
+                          } else if (
+                            part.toolInvocation.toolName === "deployAgentsTool"
+                          ) {
+                            return (
+                              <DeployAgent
+                                key={`${m.id}-deployAgents-${partIndex}`}
+                                agents={part.toolInvocation.args.agents}
+                                isLoading={isToolLoading(
+                                  messageIndex,
+                                  partIndex,
+                                )}
+                                results={part.toolInvocation.state === "result"
                                   ? part.toolInvocation.result
-                                  : undefined
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "finishResearchTool"
-                        ) {
-                          return (
-                            <div
-                              key={`$${m.id}-finishResearchTool-${partIndex}`}
-                              className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right"
-                            >
-                              <div className="py-2 flex flex-row space-x-2 w-full">
-                                <Text className="w-6 h-6 min-w-6 min-h-6" />
-                                <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-                                  AgentOne finished researching the topic.
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <div
-                              key={`${m.id}-unknown-tool-${partIndex}`}
-                              className="border rounded-xl p-2 my-4 motion-preset-blur-right"
-                            >
-                              <div className="flex items-center space-x-2">
-                                <CircleHelp className="w-6 h-6 min-w-6 min-h-6" />
-                                <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-                                  Oops! AgentOne tried to use an unsupported
-                                  tool.
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        }
-                      } else if (part.type === "text") {
-                        if (m.role === "user") {
-                          return (
-                            <div
-                              className="prose dark:prose-invert"
-                              key={`${m.id}-text-${partIndex}`}
-                            >
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {part.text}
-                              </ReactMarkdown>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <Accordion
-                              type="single"
-                              collapsible
-                              className="my-4 motion-preset-blur-right"
-                              key={`${m.id}-text-${partIndex}`}
-                              value={
-                                isLastTextPart(m, partIndex) ? m.id : undefined
-                              }
-                            >
-                              <AccordionItem
-                                className="border rounded-xl px-2"
-                                value={m.id}
+                                  : undefined}
+                              />
+                            );
+                          } else if (
+                            part.toolInvocation.toolName ===
+                              "finishResearchTool"
+                          ) {
+                            return (
+                              <div
+                                key={`$${m.id}-finishResearchTool-${partIndex}`}
+                                className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right"
                               >
-                                <AccordionTrigger className="text-base py-2">
-                                  {isTextLoading(messageIndex, partIndex)
-                                    ? "Thinking..."
-                                    : getThinkingText(
+                                <div className="py-2 flex flex-row space-x-2 w-full">
+                                  <Text className="w-6 h-6 min-w-6 min-h-6" />
+                                  <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
+                                    AgentOne finished researching the topic.
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div
+                                key={`${m.id}-unknown-tool-${partIndex}`}
+                                className="border rounded-xl p-2 my-4 motion-preset-blur-right"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <CircleHelp className="w-6 h-6 min-w-6 min-h-6" />
+                                  <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
+                                    Oops! AgentOne tried to use an unsupported
+                                    tool.
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          }
+                        } else if (part.type === "text") {
+                          if (m.role === "user") {
+                            return (
+                              <div
+                                className="prose dark:prose-invert"
+                                key={`${m.id}-text-${partIndex}`}
+                              >
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {part.text}
+                                </ReactMarkdown>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <Accordion
+                                type="single"
+                                collapsible
+                                className="my-4 motion-preset-blur-right"
+                                key={`${m.id}-text-${partIndex}`}
+                                value={isLastTextPart(m, partIndex)
+                                  ? m.id
+                                  : undefined}
+                              >
+                                <AccordionItem
+                                  className="border rounded-xl px-2"
+                                  value={m.id}
+                                >
+                                  <AccordionTrigger className="text-base py-2">
+                                    {isTextLoading(messageIndex, partIndex)
+                                      ? "Thinking..."
+                                      : getThinkingText(
                                         m.id,
                                         partIndex,
                                         messageIndex,
                                       )}
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                  <div className="prose dark:prose-invert">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                      {part.text}
-                                    </ReactMarkdown>
-                                  </div>
-                                </AccordionContent>
-                              </AccordionItem>
-                            </Accordion>
-                          );
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="prose dark:prose-invert">
+                                      <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                      >
+                                        {part.text}
+                                      </ReactMarkdown>
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              </Accordion>
+                            );
+                          }
                         }
-                      }
-                      return null;
-                    })}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                        return null;
+                      })}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           {error && <p className="text-red-500">{error.message}</p>}
         </div>
 
@@ -421,14 +431,16 @@ export default function Chat() {
             autoFocus
           />
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Researching...
-              </>
-            ) : (
-              "Send"
-            )}
+            {isLoading
+              ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Researching...
+                </>
+              )
+              : (
+                "Send"
+              )}
           </Button>
         </form>
       </div>
@@ -440,22 +452,26 @@ export default function Chat() {
             <CardTitle className="sr-only">Summary</CardTitle>
           </CardHeader>
           <CardContent className="h-full pt-4">
-            {outputSummary ? (
-              <div
-                className={`prose dark:prose-invert motion-duration-300 ${isOutputSummaryFocused ? "motion-preset-blur-up" : ""}`}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {outputSummary}
-                </ReactMarkdown>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full">
-                <FileText className="w-16 h-16 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mt-2 text-center">
-                  AgentOne's final responses will appear here.
-                </p>
-              </div>
-            )}
+            {outputSummary
+              ? (
+                <div
+                  className={`prose dark:prose-invert motion-duration-300 ${
+                    isOutputSummaryFocused ? "motion-preset-blur-up" : ""
+                  }`}
+                >
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {outputSummary}
+                  </ReactMarkdown>
+                </div>
+              )
+              : (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <FileText className="w-16 h-16 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground mt-2 text-center">
+                    AgentOne's final responses will appear here.
+                  </p>
+                </div>
+              )}
           </CardContent>
         </Card>
       </div>

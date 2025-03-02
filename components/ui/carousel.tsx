@@ -116,19 +116,17 @@ const Carousel = ({
 
   return (
     <CarouselContext.Provider
-      value={
-        {
-          carouselRef,
-          api: api,
-          opts,
-          orientation:
-            orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
-          scrollPrev,
-          scrollNext,
-          canScrollPrev,
-          canScrollNext,
-        } as any
-      }
+      value={{
+        carouselRef,
+        api: api,
+        opts,
+        orientation: orientation ||
+          (opts?.axis === "y" ? "vertical" : "horizontal"),
+        scrollPrev,
+        scrollNext,
+        canScrollPrev,
+        canScrollNext,
+      } as any}
     >
       <div
         ref={ref}
@@ -265,9 +263,9 @@ CarouselNext.displayName = "CarouselNext";
 
 export {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 };
