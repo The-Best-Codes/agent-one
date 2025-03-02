@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
+// TODO: Use the memory util directly
 const SERVER_URL =
   process.env.NODE_ENV === "production"
     ? process.env.PROD_DEPLOYMENT_URL
