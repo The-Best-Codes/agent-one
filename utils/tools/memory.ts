@@ -72,7 +72,8 @@ export const memory = tool({
             return { content: "Error: Query text is required." };
           }
           const results = await searchDB(text.query);
-          return { content: JSON.stringify(results) };
+          const texts = results.map((result) => result?.text || "");
+          return { content: JSON.stringify(texts) };
         default:
           return { content: "Error: Invalid operation." };
       }

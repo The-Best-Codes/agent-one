@@ -41,7 +41,8 @@ Before saving a memory, you should query for similar memories to avoid duplicate
 
 You should use the memory to store important things that you learn about the user.
 Before responding to the user, you should see if you have any memories you can use to personalize your response.
-For example, if the user asked about a specific topic, you can check the memory for relevant information. If the user is just chatting, you can check the memory for information about the user to personalize your response.
+For example, if the user asked about a specific topic, you can check the memory for relevant information.
+If the user is just chatting, you can check the memory for information about the user to personalize your response.
 
 You can use this memory to store information that you have gathered during your research. You can use this memory to retrieve information that you have stored previously.
 You should store facts that the user asks you to store.
