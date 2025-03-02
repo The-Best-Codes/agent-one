@@ -8,11 +8,22 @@ interface Document {
   embedding: number[];
 }
 
+interface DBLockEntry {
+  text: string;
+  timestamp: number;
+}
+
 class VectorDB {
   private documents: Document[] = [];
   private extractor: any;
+  public dbLockFilename: string;
+  private dbLock: { [key: string]: DBLockEntry } = {}; // Keyed by text
+  public dbFilename: string;
 
-  constructor() {}
+  constructor(dbFilename: string, dbLockFilename: string) {
+    this.dbFilename = dbFilename;
+    this.dbLockFilename = dbLockFilename;
+  }
 
   async init() {
     // Initialize the feature-extraction pipeline
@@ -20,15 +31,60 @@ class VectorDB {
       "feature-extraction",
       "Xenova/all-MiniLM-L6-v2",
     );
+    await this.loadDBLock();
+  }
+
+  private async loadDBLock(): Promise<void> {
+    try {
+      const data = await fs.readFile(this.dbLockFilename, "utf-8");
+      this.dbLock = JSON.parse(data);
+    } catch (error: any) {
+      if (error.code === "ENOENT") {
+        // File doesn't exist, create an empty one
+        this.dbLock = {};
+        await this.saveDBLock(); // Create the file
+      } else {
+        console.warn(
+          `Error loading db lock from ${this.dbLockFilename}: ${error}`,
+        );
+        this.dbLock = {};
+      }
+    }
+  }
+
+  private async saveDBLock(): Promise<void> {
+    const data = JSON.stringify(this.dbLock, null, 2); // Pretty print JSON
+    await fs.writeFile(this.dbLockFilename, data, "utf-8");
   }
 
   async addDocument(text: string): Promise<void> {
+    if (this.dbLock[text]) {
+      console.warn(`Text already exists in DB Lock, skipping: ${text}`);
+      return; // Skip if text already exists, it might be better to throw an error later
+    }
+
     const output = await this.extractor(text, {
       pooling: "mean",
       normalize: true,
     });
     const embedding = output.tolist()[0] as number[];
     this.documents.push({ text, embedding });
+
+    // Update DB Lock
+    this.dbLock[text] = {
+      text: text,
+      timestamp: Date.now(),
+    };
+    await this.saveDBLock();
+  }
+
+  async removeDocument(text: string): Promise<void> {
+    // Remove from documents array
+    this.documents = this.documents.filter((doc) => doc.text !== text);
+
+    // Remove from dbLock
+    delete this.dbLock[text];
+    await this.saveDBLock();
   }
 
   async search(query: string, topK: number = 3): Promise<Document[]> {
@@ -78,9 +134,14 @@ class VectorDB {
     try {
       const data = await fs.readFile(filename, "utf-8");
       this.documents = JSON.parse(data);
-    } catch (error) {
-      console.warn(`Error loading database from ${filename}: ${error}`);
-      this.documents = []; // Start with an empty database
+    } catch (error: any) {
+      if (error.code === "ENOENT") {
+        console.log(`Database file not found: ${filename}. Starting empty.`);
+        this.documents = [];
+      } else {
+        console.warn(`Error loading database from ${filename}: ${error}`);
+        this.documents = []; // Start with an empty database
+      }
     }
   }
 }
@@ -89,10 +150,14 @@ class VectorDB {
 let vectorDBInstance: VectorDB | null = null;
 
 // Initialize the database (must be called before using other functions)
-export async function initializeDB(): Promise<void> {
+export async function initializeDB(
+  dbFilename: string,
+  dbLockFilename: string,
+): Promise<void> {
   if (!vectorDBInstance) {
-    vectorDBInstance = new VectorDB();
+    vectorDBInstance = new VectorDB(dbFilename, dbLockFilename);
     await vectorDBInstance.init();
+    await vectorDBInstance.load(dbFilename); // Load the database after initialization
   }
 }
 
@@ -102,6 +167,16 @@ export async function addTextToDB(text: string): Promise<void> {
     throw new Error("VectorDB not initialized. Call initializeDB() first.");
   }
   await vectorDBInstance.addDocument(text);
+  await vectorDBInstance.save(vectorDBInstance.dbFilename); // Persist after adding
+}
+
+// Function to remove text from the database
+export async function removeTextFromDB(text: string): Promise<void> {
+  if (!vectorDBInstance) {
+    throw new Error("VectorDB not initialized. Call initializeDB() first.");
+  }
+  await vectorDBInstance.removeDocument(text);
+  await vectorDBInstance.save(vectorDBInstance.dbFilename); // Persist after removal
 }
 
 // Function to search the database
@@ -116,18 +191,25 @@ export async function searchDB(
 }
 
 // Function to save the database to a file
-export async function saveDB(filename: string): Promise<void> {
+export async function saveDB(): Promise<void> {
   if (!vectorDBInstance) {
     throw new Error("VectorDB not initialized. Call initializeDB() first.");
   }
-  await vectorDBInstance.save(filename);
+  if (vectorDBInstance.dbFilename) {
+    await vectorDBInstance.save(vectorDBInstance.dbFilename);
+  } else {
+    throw new Error("DB Filename is undefined");
+  }
 }
 
 // Function to load the database from a file
-export async function loadDB(filename: string): Promise<void> {
+export async function loadDB(): Promise<void> {
   if (!vectorDBInstance) {
-    vectorDBInstance = new VectorDB(); // Create instance if it doesn't exist
-    await vectorDBInstance.init(); // and initialize it.
+    throw new Error("VectorDB not initialized. Call initializeDB() first.");
   }
-  await vectorDBInstance.load(filename);
+  if (vectorDBInstance.dbFilename) {
+    await vectorDBInstance.load(vectorDBInstance.dbFilename);
+  } else {
+    throw new Error("DB Filename is undefined");
+  }
 }

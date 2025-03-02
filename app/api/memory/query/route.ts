@@ -1,4 +1,4 @@
-import { initializeDB, loadDB, searchDB } from "@/utils/memory";
+import { initializeDB, searchDB } from "@/utils/memory";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
@@ -11,6 +11,7 @@ const QuerySchema = z.object({
 });
 
 const HARDCODED_FILENAME = "db/agent_one_memory_db.json";
+const HARDCODED_LOCK_FILENAME = "db/agent_one_memory_db.lock.json";
 
 async function ensureDirectoryExistence(filePath: string) {
   const dirname = path.dirname(filePath);
@@ -28,7 +29,8 @@ async function ensureDirectoryExistence(filePath: string) {
 async function handleQuery(req: NextRequest, method: string) {
   try {
     await ensureDirectoryExistence(HARDCODED_FILENAME); // Ensure directory exists
-    await initializeDB(); // Ensure DB is initialized
+    await ensureDirectoryExistence(HARDCODED_LOCK_FILENAME); // Ensure directory exists
+    await initializeDB(HARDCODED_FILENAME, HARDCODED_LOCK_FILENAME); // Ensure DB is initialized
 
     let body;
     if (method === "POST") {
@@ -55,7 +57,8 @@ async function handleQuery(req: NextRequest, method: string) {
 
     const validatedBody = QuerySchema.parse(body);
 
-    await loadDB(HARDCODED_FILENAME); // Load from hardcoded filename
+    // Load from hardcoded filename - no longer needed as initialized once
+    //await loadDB();
 
     const results = await searchDB(validatedBody.query, validatedBody.topK);
 

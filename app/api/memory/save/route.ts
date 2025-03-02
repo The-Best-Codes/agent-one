@@ -1,4 +1,4 @@
-import { addTextToDB, initializeDB, saveDB } from "@/utils/memory";
+import { addTextToDB, initializeDB } from "@/utils/memory";
 import fs from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
@@ -9,6 +9,7 @@ const SaveSchema = z.object({
 });
 
 const HARDCODED_FILENAME = "db/agent_one_memory_db.json";
+const HARDCODED_LOCK_FILENAME = "db/agent_one_memory_db.lock.json";
 
 async function ensureDirectoryExistence(filePath: string) {
   const dirname = path.dirname(filePath);
@@ -26,7 +27,8 @@ async function ensureDirectoryExistence(filePath: string) {
 async function handleSave(req: NextRequest, method: string) {
   try {
     await ensureDirectoryExistence(HARDCODED_FILENAME); // Ensure directory exists
-    await initializeDB(); // Ensure DB is initialized
+    await ensureDirectoryExistence(HARDCODED_LOCK_FILENAME); // Ensure directory exists
+    await initializeDB(HARDCODED_FILENAME, HARDCODED_LOCK_FILENAME); // Ensure DB is initialized
 
     let body;
     if (method === "POST") {
@@ -47,7 +49,8 @@ async function handleSave(req: NextRequest, method: string) {
 
     await addTextToDB(validatedBody.text);
 
-    await saveDB(HARDCODED_FILENAME); // Use the hardcoded filename
+    // Save is handled inside addTextToDB, so is no longer needed here.
+    //await saveDB();
 
     return NextResponse.json(
       { message: "Text saved successfully" },
