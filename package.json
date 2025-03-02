@@ -43,6 +43,7 @@
     "@sparticuz/chromium": "^132.0.0",
     "@tailwindcss/typography": "^0.5.16",
     "ai": "^4.1.46",
+    "babel-plugin-react-compiler": "^19.0.0-beta-e1e972c-20250221",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
