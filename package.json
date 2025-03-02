@@ -11,7 +11,7 @@
   "dependencies": {
     "@ai-sdk/google": "^1.1.17",
     "@ai-sdk/groq": "^1.1.11",
-    "@ai-sdk/react": "^1.1.18",
+    "@ai-sdk/react": "^1.1.19",
     "@hookform/resolvers": "^4.1.2",
     "@huggingface/transformers": "^3.3.3",
     "@radix-ui/react-accordion": "^1.2.3",
@@ -42,7 +42,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@sparticuz/chromium": "^132.0.0",
     "@tailwindcss/typography": "^0.5.16",
-    "ai": "^4.1.46",
+    "ai": "^4.1.47",
     "babel-plugin-react-compiler": "^19.0.0-beta-e1e972c-20250221",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.9",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.8",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/turndown": "^5.0.5",
