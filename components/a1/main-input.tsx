@@ -37,11 +37,11 @@ export const MainInput: React.FC<MainInputProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col rounded-md focus-within:ring-1 focus-within:ring-ring motion-preset-blur-up"
+      className="flex flex-col bg-secondary dark:bg-secondary rounded-md focus-within:ring-1 focus-within:ring-ring pt-2 pr-2"
     >
       <Textarea
         ref={textareaRef as any}
-        className="bg-secondary dark:bg-secondary resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 transition-all duration-300 ease overflow-auto focus-visible:ring-0"
+        className="bg-secondary dark:bg-secondary pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto focus-visible:ring-0"
         value={input}
         placeholder="Enter research instructions..."
         onChange={handleInputChange}
@@ -49,7 +49,7 @@ export const MainInput: React.FC<MainInputProps> = ({
         disabled={isLoading}
       />
       <div
-        className={`bg-secondary dark:bg-secondary p-2 rounded-b-md rounded-t-none ${isLoading ? "opacity-50" : ""}`}
+        className={`bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none ${isLoading ? "opacity-50" : ""}`}
       >
         <div className="flex justify-between items-center">
           <div>
