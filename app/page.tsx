@@ -1,5 +1,6 @@
 "use client";
 
+import { MainInput } from "@/components/a1/main-input";
 import { ToolRenderer } from "@/components/a1/tool-renderer";
 import {
   Accordion,
@@ -7,11 +8,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { FileText, Loader2, MessageSquare } from "lucide-react";
+import { FileText, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -305,25 +304,12 @@ export default function Chat() {
           {error && <p className="text-red-500">{error.message}</p>}
         </div>
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
-          <Input
-            className="bg-secondary dark:bg-secondary"
-            value={input}
-            placeholder="Enter research instructions..."
-            onChange={handleInputChange}
-            autoFocus
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Researching...
-              </>
-            ) : (
-              "Send"
-            )}
-          </Button>
-        </form>
+        <MainInput
+          input={input}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Right Section - Output Markdown Summary */}
