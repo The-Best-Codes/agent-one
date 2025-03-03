@@ -2,6 +2,7 @@
 
 import { Browse } from "@/components/tools/browse";
 import { DeployAgent } from "@/components/tools/deployAgents";
+import { FinishResearch } from "@/components/tools/finishResearch";
 import { ImageDesc } from "@/components/tools/imageDesc";
 import { Memory } from "@/components/tools/memory";
 import { QueryPage } from "@/components/tools/queryPage";
@@ -16,13 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import {
-  CircleHelp,
-  FileText,
-  Loader2,
-  MessageSquare,
-  Text,
-} from "lucide-react";
+import { CircleHelp, FileText, Loader2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -252,8 +247,8 @@ export default function Chat() {
                         if (part.toolInvocation.toolName === "searchTool") {
                           return (
                             <Search
-                              key={`${m.id}-search-${partIndex}`}
-                              query={part.toolInvocation.args.query}
+                              key={`${m.id}-searchTool-${partIndex}`}
+                              args={part.toolInvocation.args}
                               isLoading={isToolLoading(messageIndex, partIndex)}
                               results={
                                 part.toolInvocation.state === "result"
@@ -267,8 +262,8 @@ export default function Chat() {
                         ) {
                           return (
                             <Browse
-                              key={`${m.id}-browse-${partIndex}`}
-                              url={part.toolInvocation.args.url}
+                              key={`${m.id}-browseTool-${partIndex}`}
+                              args={part.toolInvocation.args}
                               isLoading={isToolLoading(messageIndex, partIndex)}
                               results={
                                 part.toolInvocation.state === "result"
@@ -282,9 +277,8 @@ export default function Chat() {
                         ) {
                           return (
                             <QueryPage
-                              key={`${m.id}-queryPage-${partIndex}`}
-                              url={part.toolInvocation.args.url}
-                              selector={part.toolInvocation.args.selector}
+                              key={`${m.id}-queryPageTool-${partIndex}`}
+                              args={part.toolInvocation.args}
                               isLoading={isToolLoading(messageIndex, partIndex)}
                               results={
                                 part.toolInvocation.state === "result"
@@ -298,8 +292,8 @@ export default function Chat() {
                         ) {
                           return (
                             <ImageDesc
-                              key={`${m.id}-imageDesc-${partIndex}`}
-                              url={part.toolInvocation.args.url}
+                              key={`${m.id}-imageDescTool-${partIndex}`}
+                              args={part.toolInvocation.args}
                               isLoading={isToolLoading(messageIndex, partIndex)}
                               results={
                                 part.toolInvocation.state === "result"
@@ -313,8 +307,8 @@ export default function Chat() {
                         ) {
                           return (
                             <DeployAgent
-                              key={`${m.id}-deployAgents-${partIndex}`}
-                              agents={part.toolInvocation.args.agents}
+                              key={`${m.id}-deployAgentsTool-${partIndex}`}
+                              args={part.toolInvocation.args}
                               isLoading={isToolLoading(messageIndex, partIndex)}
                               results={
                                 part.toolInvocation.state === "result"
@@ -330,12 +324,7 @@ export default function Chat() {
                             <Memory
                               key={`${m.id}-memoryTool-${partIndex}`}
                               isLoading={isToolLoading(messageIndex, partIndex)}
-                              operation={part.toolInvocation.args.operation}
-                              text={
-                                part.toolInvocation.args.text[
-                                  part.toolInvocation.args.operation
-                                ]
-                              }
+                              args={part.toolInvocation.args}
                               results={
                                 part.toolInvocation.state === "result"
                                   ? part.toolInvocation.result
@@ -347,17 +336,16 @@ export default function Chat() {
                           part.toolInvocation.toolName === "finishResearchTool"
                         ) {
                           return (
-                            <div
+                            <FinishResearch
                               key={`$${m.id}-finishResearchTool-${partIndex}`}
-                              className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right"
-                            >
-                              <div className="py-2 flex flex-row space-x-2 w-full">
-                                <Text className="w-6 h-6 min-w-6 min-h-6" />
-                                <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-                                  AgentOne finished researching the topic.
-                                </p>
-                              </div>
-                            </div>
+                              isLoading={isToolLoading(messageIndex, partIndex)}
+                              args={part.toolInvocation.args}
+                              results={
+                                part.toolInvocation.state === "result"
+                                  ? part.toolInvocation.result
+                                  : undefined
+                              }
+                            />
                           );
                         } else {
                           return (
