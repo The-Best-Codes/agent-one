@@ -89,7 +89,10 @@ export default function Chat() {
 
   useEffect(() => {
     if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [messages]);
 
@@ -206,10 +209,7 @@ export default function Chat() {
     <div className="flex w-full max-w-6xl py-12 mx-auto h-screen">
       {/* Left Section - Chat Messages */}
       <div className="flex flex-col pr-4 border-r w-1/2">
-        <div
-          className="flex-1 mb-4 pr-2 overflow-auto scroll-smooth"
-          ref={scrollAreaRef}
-        >
+        <div className="flex-1 mb-4 pr-2 overflow-auto" ref={scrollAreaRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
               <MessageSquare className="w-16 h-16 text-muted-foreground mb-4" />
