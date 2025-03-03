@@ -16,10 +16,18 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
-    useChat({
-      maxSteps: 50,
-    });
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    stop,
+  } = useChat({
+    maxSteps: 50,
+  });
+
   const [thinkStartTime, setThinkStartTime] = useState<Record<string, number>>(
     {},
   );
@@ -309,6 +317,7 @@ export default function Chat() {
           handleInputChange={handleInputChange}
           handleSubmit={handleSubmit}
           isLoading={isLoading}
+          stop={stop}
         />
       </div>
 

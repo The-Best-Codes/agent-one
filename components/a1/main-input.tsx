@@ -2,7 +2,6 @@ import { Loader } from "@/components/a1/smooth-loader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Send } from "lucide-react";
-import { useEffect, useRef } from "react";
 
 interface MainInputProps {
   input: string;
@@ -17,14 +16,6 @@ export const MainInput: React.FC<MainInputProps> = ({
   handleSubmit,
   isLoading,
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, []);
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // Prevent newline
@@ -40,13 +31,12 @@ export const MainInput: React.FC<MainInputProps> = ({
       className="flex flex-col bg-secondary dark:bg-secondary rounded-md focus-within:ring-1 focus-within:ring-ring pt-2 pr-2"
     >
       <Textarea
-        ref={textareaRef as any}
+        autoFocus
         className="bg-secondary dark:bg-secondary pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto focus-visible:ring-0"
         value={input}
         placeholder="Enter research instructions..."
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        disabled={isLoading}
       />
       <div
         className={`bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none ${isLoading ? "opacity-50" : ""}`}
