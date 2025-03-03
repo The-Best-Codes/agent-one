@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChat } from "@ai-sdk/react";
-import { FileText, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -36,7 +36,6 @@ export default function Chat() {
   const [thinkDurations, setThinkDurations] = useState<Record<string, number>>(
     {},
   );
-  const [outputSummary, setOutputSummary] = useState<string | null>(null);
 
   const getPartId = (messageId: string, partIndex: number) =>
     `${messageId}-${partIndex}`;
@@ -93,8 +92,6 @@ export default function Chat() {
   };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const outputSummaryRef = useRef<HTMLDivElement>(null);
-  const [isOutputSummaryFocused, setIsOutputSummaryFocused] = useState(false);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -130,33 +127,6 @@ export default function Chat() {
     });
   }, [messages, isLoading]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      // Find the latest assistant message
-      const latestAssistantMessage = messages
-        .slice()
-        .reverse()
-        .find((message) => message.role === "assistant");
-
-      if (latestAssistantMessage && latestAssistantMessage.parts) {
-        // Find the latest text part in the latest assistant message
-        const latestTextPart = latestAssistantMessage.parts
-          .slice()
-          .reverse()
-          .find((part) => part.type === "text");
-
-        if (latestTextPart) {
-          setOutputSummary(latestTextPart.text);
-          focusOutputSummary();
-        } else {
-          setOutputSummary(null);
-        }
-      } else {
-        setOutputSummary(null);
-      }
-    }
-  }, [isLoading, messages]);
-
   const getThinkingText = (
     messageId: string,
     partIndex: number,
@@ -178,7 +148,7 @@ export default function Chat() {
 
   const isLastTextPart = (message: any, partIndex: number): boolean => {
     if (!message || !message.parts) {
-      return false; // Or handle this case as needed
+      return false;
     }
 
     const textParts = message.parts.filter((part: any) => part.type === "text");
@@ -199,32 +169,18 @@ export default function Chat() {
     return textPartIndex === textParts.length - 1;
   };
 
-  const focusOutputSummary = () => {
-    if (outputSummaryRef.current) {
-      outputSummaryRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-      outputSummaryRef.current.focus();
-
-      setIsOutputSummaryFocused(true);
-      setTimeout(() => {
-        setIsOutputSummaryFocused(false);
-      }, 300);
-    }
-  };
-
   return (
-    <div className="flex w-full max-w-6xl py-12 mx-auto h-screen">
-      {/* Left Section - Chat Messages */}
-      <div className="flex flex-col pr-4 border-r w-1/2">
+    <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
+      <div className="flex flex-col w-full">
         <div className="flex-1 mb-4 pr-2 overflow-auto" ref={scrollAreaRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full">
               <MessageSquare className="w-16 h-16 text-muted-foreground mb-4" />
-              <h2 className="text-4xl font-bold text-foreground">AgentOne</h2>
+              <h2 className="text-4xl font-bold text-foreground">
+                How can I help you?
+              </h2>
               <p className="text-muted-foreground mt-2">
-                Enter research instructions below to begin!
+                Send a message to AgentOne to get started
               </p>
             </div>
           ) : (
@@ -269,39 +225,51 @@ export default function Chat() {
                             </div>
                           );
                         } else {
-                          return (
-                            <Accordion
-                              type="single"
-                              collapsible
-                              className="my-4 motion-preset-blur-right"
-                              key={`${m.id}-text-${partIndex}`}
-                              value={
-                                isLastTextPart(m, partIndex) ? m.id : undefined
-                              }
-                            >
-                              <AccordionItem
-                                className="border rounded-xl px-2"
-                                value={m.id}
+                          if (isLastTextPart(m, partIndex)) {
+                            return (
+                              <div
+                                className="prose max-w-none dark:prose-invert mt-4"
+                                key={`${m.id}-text-${partIndex}`}
                               >
-                                <AccordionTrigger className="text-base py-2">
-                                  {isTextLoading(messageIndex, partIndex)
-                                    ? "Thinking..."
-                                    : getThinkingText(
-                                        m.id,
-                                        partIndex,
-                                        messageIndex,
-                                      )}
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                  <div className="prose dark:prose-invert">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                      {part.text}
-                                    </ReactMarkdown>
-                                  </div>
-                                </AccordionContent>
-                              </AccordionItem>
-                            </Accordion>
-                          );
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {part.text}
+                                </ReactMarkdown>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <Accordion
+                                type="single"
+                                collapsible
+                                className="my-4 motion-preset-blur-right"
+                                key={`${m.id}-text-${partIndex}`}
+                              >
+                                <AccordionItem
+                                  className="border rounded-xl px-2"
+                                  value={m.id}
+                                >
+                                  <AccordionTrigger className="text-base py-2">
+                                    {isTextLoading(messageIndex, partIndex)
+                                      ? "Thinking..."
+                                      : getThinkingText(
+                                          m.id,
+                                          partIndex,
+                                          messageIndex,
+                                        )}
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="prose max-w-none dark:prose-invert">
+                                      <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                      >
+                                        {part.text}
+                                      </ReactMarkdown>
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              </Accordion>
+                            );
+                          }
                         }
                       }
                       return null;
@@ -323,35 +291,6 @@ export default function Chat() {
           isLoading={isLoading}
           stop={stop}
         />
-      </div>
-
-      {/* Right Section - Output Markdown Summary */}
-      <div ref={outputSummaryRef} className="w-1/2">
-        <Card className="h-full shadow-none border-0 max-h-full overflow-auto">
-          <CardHeader className="p-0">
-            <CardTitle className="sr-only">Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="h-full pt-4">
-            {outputSummary ? (
-              <div
-                className={`prose dark:prose-invert motion-duration-300 ${
-                  isOutputSummaryFocused ? "motion-preset-blur-up" : ""
-                }`}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {outputSummary}
-                </ReactMarkdown>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full">
-                <FileText className="w-16 h-16 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mt-2 text-center">
-                  AgentOne's final responses will appear here.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
