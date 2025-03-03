@@ -1,13 +1,13 @@
-import { Loader } from "@/components/a1/smooth-loader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send } from "lucide-react";
+import { Plus, Send, Square as Stop } from "lucide-react";
 
 interface MainInputProps {
   input: string;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
+  stop: () => void;
 }
 
 export const MainInput: React.FC<MainInputProps> = ({
@@ -15,6 +15,7 @@ export const MainInput: React.FC<MainInputProps> = ({
   handleInputChange,
   handleSubmit,
   isLoading,
+  stop,
 }) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -39,7 +40,7 @@ export const MainInput: React.FC<MainInputProps> = ({
         onKeyDown={handleKeyDown}
       />
       <div
-        className={`bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none ${isLoading ? "opacity-50" : ""}`}
+        className={`bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none ${isLoading ? "bg-opacity-50" : ""}`}
       >
         <div className="flex justify-between items-center">
           <div>
@@ -48,9 +49,19 @@ export const MainInput: React.FC<MainInputProps> = ({
             </Button>
           </div>
           <div>
-            <Button type="submit" disabled={isLoading} size="icon">
-              {isLoading ? <Loader /> : <Send />}
-            </Button>
+            {isLoading ? (
+              <Button type="button" size="icon" onClick={stop}>
+                <Stop />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                size="icon"
+                disabled={isLoading || input.trim().length === 0}
+              >
+                <Send />
+              </Button>
+            )}
           </div>
         </div>
       </div>
