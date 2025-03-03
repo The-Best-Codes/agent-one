@@ -1,12 +1,6 @@
 "use client";
 
-import { Browse } from "@/components/tools/browse";
-import { DeployAgent } from "@/components/tools/deployAgents";
-import { FinishResearch } from "@/components/tools/finishResearch";
-import { ImageDesc } from "@/components/tools/imageDesc";
-import { Memory } from "@/components/tools/memory";
-import { QueryPage } from "@/components/tools/queryPage";
-import { Search } from "@/components/tools/search";
+import { ToolRenderer } from "@/components/a1/tool-renderer";
 import {
   Accordion,
   AccordionContent,
@@ -17,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { CircleHelp, FileText, Loader2, MessageSquare } from "lucide-react";
+import { FileText, Loader2, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -244,125 +238,15 @@ export default function Chat() {
                   >
                     {m.parts?.map((part, partIndex) => {
                       if (part.type === "tool-invocation") {
-                        if (part.toolInvocation.toolName === "searchTool") {
-                          return (
-                            <Search
-                              key={`${m.id}-searchTool-${partIndex}`}
-                              args={part.toolInvocation.args}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "browseTool"
-                        ) {
-                          return (
-                            <Browse
-                              key={`${m.id}-browseTool-${partIndex}`}
-                              args={part.toolInvocation.args}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result || []
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "queryPageTool"
-                        ) {
-                          return (
-                            <QueryPage
-                              key={`${m.id}-queryPageTool-${partIndex}`}
-                              args={part.toolInvocation.args}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result || []
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "imageDescTool"
-                        ) {
-                          return (
-                            <ImageDesc
-                              key={`${m.id}-imageDescTool-${partIndex}`}
-                              args={part.toolInvocation.args}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result || []
-                                  : []
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "deployAgentsTool"
-                        ) {
-                          return (
-                            <DeployAgent
-                              key={`${m.id}-deployAgentsTool-${partIndex}`}
-                              args={part.toolInvocation.args}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              results={
-                                part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result
-                                  : undefined
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "memoryTool"
-                        ) {
-                          return (
-                            <Memory
-                              key={`${m.id}-memoryTool-${partIndex}`}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              args={part.toolInvocation.args}
-                              results={
-                                part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result
-                                  : undefined
-                              }
-                            />
-                          );
-                        } else if (
-                          part.toolInvocation.toolName === "finishResearchTool"
-                        ) {
-                          return (
-                            <FinishResearch
-                              key={`$${m.id}-finishResearchTool-${partIndex}`}
-                              isLoading={isToolLoading(messageIndex, partIndex)}
-                              args={part.toolInvocation.args}
-                              results={
-                                part.toolInvocation.state === "result"
-                                  ? part.toolInvocation.result
-                                  : undefined
-                              }
-                            />
-                          );
-                        } else {
-                          return (
-                            <div
-                              key={`${m.id}-unknown-tool-${partIndex}`}
-                              className="border rounded-xl p-2 my-4 motion-preset-blur-right"
-                            >
-                              <div className="flex items-center space-x-2">
-                                <CircleHelp className="w-6 h-6 min-w-6 min-h-6" />
-                                <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-                                  Oops! AgentOne tried to use an unsupported
-                                  tool.
-                                </p>
-                              </div>
-                            </div>
-                          );
-                        }
+                        return (
+                          <ToolRenderer
+                            key={`${m.id}-tool-${partIndex}`}
+                            toolInvocation={part.toolInvocation}
+                            messageId={m.id}
+                            partIndex={partIndex}
+                            isLoading={isToolLoading(messageIndex, partIndex)}
+                          />
+                        );
                       } else if (part.type === "text") {
                         if (m.role === "user") {
                           return (
