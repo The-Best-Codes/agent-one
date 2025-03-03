@@ -2,6 +2,7 @@ import { Loader } from "@/components/a1/smooth-loader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Send } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface MainInputProps {
   input: string;
@@ -16,29 +17,48 @@ export const MainInput: React.FC<MainInputProps> = ({
   handleSubmit,
   isLoading,
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent newline
+      handleSubmit(e as any);
+    }
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative flex items-center motion-preset-blur-up"
+      className="flex flex-col motion-preset-blur-up"
     >
       <Textarea
-        className="bg-secondary dark:bg-secondary resize-none focus-visible:ring-0 focus-visible:ring-transparent py-2 px-3 max-h-40 overflow-y-auto"
+        ref={textareaRef as any}
+        className="bg-secondary dark:bg-secondary resize-none rounded-b-none h-10 min-h-10 max-h-40 transition-all duration-300 ease overflow-auto"
         value={input}
         placeholder="Enter research instructions..."
         onChange={handleInputChange}
-        autoFocus
-        rows={3}
+        onKeyDown={handleKeyDown}
         disabled={isLoading}
       />
-      <div className="absolute bottom-2 right-2 flex items-center gap-2">
-        <Button type="submit" disabled={isLoading} size="icon">
-          {isLoading ? <Loader /> : <Send />}
-        </Button>
-      </div>
-      <div className="absolute bottom-2 left-2 flex items-center gap-2">
-        <Button type="button" disabled={isLoading} size="icon">
-          <Plus />
-        </Button>
+      <div className="bg-secondary dark:bg-secondary p-2 rounded-b-md rounded-t-none">
+        <div className="flex justify-between items-center">
+          <div>
+            <Button type="button" disabled={isLoading} size="icon">
+              <Plus />
+            </Button>
+          </div>
+          <div>
+            <Button type="submit" disabled={isLoading} size="icon">
+              {isLoading ? <Loader /> : <Send />}
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   );
