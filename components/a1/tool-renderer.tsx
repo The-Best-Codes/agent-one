@@ -7,9 +7,16 @@ import { QueryPage } from "@/components/tools/queryPage";
 import { Search } from "@/components/tools/search";
 import type { ToolInvocation } from "ai";
 import { CircleHelp } from "lucide-react";
+import { FunctionComponent } from "react";
+
+interface BaseToolProps {
+  args: any;
+  isLoading: boolean;
+  results: any;
+}
 
 // Define a mapping of tool names to components
-const TOOL_COMPONENTS = {
+const TOOL_COMPONENTS: { [key: string]: FunctionComponent<BaseToolProps> } = {
   searchTool: Search,
   browseTool: Browse,
   queryPageTool: QueryPage,
