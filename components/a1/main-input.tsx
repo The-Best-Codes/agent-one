@@ -28,7 +28,9 @@ export const MainInput: React.FC<MainInputProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // Prevent newline
-      handleSubmit(e as any);
+      if (input.trim().length > 0) {
+        handleSubmit(e as any);
+      }
     }
   };
 
@@ -39,7 +41,7 @@ export const MainInput: React.FC<MainInputProps> = ({
     >
       <Textarea
         ref={textareaRef as any}
-        className="bg-secondary dark:bg-secondary resize-none rounded-b-none h-10 min-h-10 max-h-40 transition-all duration-300 ease overflow-auto focus-visible:ring-0"
+        className="bg-secondary dark:bg-secondary resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 transition-all duration-300 ease overflow-auto focus-visible:ring-0"
         value={input}
         placeholder="Enter research instructions..."
         onChange={handleInputChange}
