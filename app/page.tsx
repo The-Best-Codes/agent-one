@@ -21,12 +21,14 @@ export default function Chat() {
     input,
     handleInputChange,
     handleSubmit,
-    isLoading,
+    status,
     error,
     stop,
   } = useChat({
     maxSteps: 50,
   });
+
+  const isLoading = status !== "ready";
 
   const [thinkStartTime, setThinkStartTime] = useState<Record<string, number>>(
     {},
@@ -309,7 +311,9 @@ export default function Chat() {
               ))}
             </div>
           )}
-          {error && <p className="text-red-500">{error.message}</p>}
+          {status === "error" && (
+            <p className="text-red-500">{error?.message}</p>
+          )}
         </div>
 
         <MainInput
