@@ -1,10 +1,10 @@
-import { Browse } from "@/components/tools/browse";
 import { DeployAgent } from "@/components/tools/deployAgents";
 import { FinishResearch } from "@/components/tools/finishResearch";
 import { ImageDesc } from "@/components/tools/imageDesc";
 import { Memory } from "@/components/tools/memory";
 import { QueryPage } from "@/components/tools/queryPage";
-import { Search } from "@/components/tools/search";
+import { ReadSite } from "@/components/tools/readSite";
+import { WebSearch } from "@/components/tools/webSearch";
 import type { ToolInvocation } from "ai";
 import { CircleHelp } from "lucide-react";
 import { FunctionComponent } from "react";
@@ -17,8 +17,8 @@ interface BaseToolProps {
 
 // Define a mapping of tool names to components
 const TOOL_COMPONENTS: { [key: string]: FunctionComponent<BaseToolProps> } = {
-  searchTool: Search,
-  browseTool: Browse,
+  webSearchTool: WebSearch,
+  readSiteTool: ReadSite,
   queryPageTool: QueryPage,
   imageDescTool: ImageDesc,
   deployAgentsTool: DeployAgent,

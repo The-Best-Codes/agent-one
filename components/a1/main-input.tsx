@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Send, Square as Stop } from "lucide-react";
+import { ArrowUp, Plus, Square as Stop } from "lucide-react";
 
 interface MainInputProps {
   input: string;
@@ -59,7 +59,7 @@ export const MainInput: React.FC<MainInputProps> = ({
                 size="icon"
                 disabled={isLoading || input.trim().length === 0}
               >
-                <Send />
+                <ArrowUp />
               </Button>
             )}
           </div>

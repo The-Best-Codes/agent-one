@@ -1,9 +1,9 @@
-import { browse } from "@/utils/tools/browse";
 import { deployAgents } from "@/utils/tools/deployAgents";
 import { imageDesc } from "@/utils/tools/imageDesc";
 import { memory } from "@/utils/tools/memory";
 import { queryPage } from "@/utils/tools/queryPage";
-import { search } from "@/utils/tools/search";
+import { readSite } from "@/utils/tools/readSite";
+import { webSearch } from "@/utils/tools/webSearch";
 import { google } from "@ai-sdk/google";
 import { streamText, tool } from "ai";
 import { z } from "zod";
@@ -71,8 +71,8 @@ It is generally discouraged to use multiple tools simultaneously.
           },
         }),
         deployAgentsTool: deployAgents,
-        searchTool: search,
-        browseTool: browse,
+        webSearchTool: webSearch,
+        readSiteTool: readSite,
         memoryTool: memory,
         imageDescTool: imageDesc,
         queryPageTool: queryPage,

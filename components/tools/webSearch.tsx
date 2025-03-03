@@ -17,13 +17,17 @@ interface SearchResult {
   domain: string | null;
 }
 
-interface SearchProps {
+interface WebSearchProps {
   args: { query: string };
   isLoading?: boolean;
   results?: { results: SearchResult[] };
 }
 
-export const Search: React.FC<SearchProps> = ({ args, isLoading, results }) => {
+export const WebSearch: React.FC<WebSearchProps> = ({
+  args,
+  isLoading,
+  results,
+}) => {
   return (
     <div className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right">
       <div className="flex w-full">

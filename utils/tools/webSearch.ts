@@ -1,23 +1,21 @@
 import { withTimeout } from "@/utils/timeoutWrapper";
-import { scrapeMojeekSearchResults } from "@/utils/tools/searchTool/index";
+import { scrapeMojeekSearchResults } from "@/utils/tools/webSearchTool/index";
 import { tool } from "ai";
 import { z } from "zod";
 
 const MAX_SEARCH_RESULTS = 5;
 
-export const search = tool({
+export const webSearch = tool({
   description:
-    "Search using search terms (not natural language). Returns a list of page titles, links, descriptions, and domains.",
+    "Search using search terms (not natural language). Returns a JSONt of page titles, links, descriptions, and domains.",
   parameters: z.object({
     query: z.string().describe("The search query."),
   }),
   execute: async ({ query }: { query: string }) => {
     try {
-      const searchUrl = `https://www.mojeek.com/search?q=${
-        encodeURIComponent(
-          query,
-        )
-      }&cdate=1&si=0&tlen=127&dlen=511&safe=1`;
+      const searchUrl = `https://www.mojeek.com/search?q=${encodeURIComponent(
+        query,
+      )}&cdate=1&si=0&tlen=127&dlen=511&safe=1`;
 
       const searchResults = await withTimeout(
         async () => await scrapeMojeekSearchResults(searchUrl),

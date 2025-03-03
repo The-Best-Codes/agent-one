@@ -2,9 +2,9 @@ import { withTimeout } from "@/utils/timeoutWrapper";
 import { google } from "@ai-sdk/google";
 import { streamText, tool } from "ai";
 import { z } from "zod";
-import { browse } from "./browse";
 import { imageDesc } from "./imageDesc";
-import { search } from "./search";
+import { readSite } from "./readSite";
+import { webSearch } from "./webSearch";
 
 const agentSchema = z.object({
   agentName: z
@@ -35,8 +35,7 @@ export const deployAgents = tool({
         const { agentName, task, systemPrompt } = agent;
         try {
           // Default system prompt if none provided
-          const defaultSystemPrompt =
-            `You are ${agentName}, a specialized research agent deployed to perform a specific task.
+          const defaultSystemPrompt = `You are ${agentName}, a specialized research agent deployed to perform a specific task.
 
 You should NEVER decline to perform your task or say you are unable to. You can ALWAYS find a way to complete it with or without using the tools you have.
 You are ALWAYS able to complete your task, even if it seems impossible. Be creative and resourceful!
@@ -54,11 +53,10 @@ When you're done, provide a complete summary of your findings.`;
               model: google("gemini-2.0-flash-lite"),
               temperature: 0.7,
               system: finalSystemPrompt,
-              prompt:
-                `Your task: ${task}\n\nBegin your research immediately. Be thorough and provide detailed information.`,
+              prompt: `Your task: ${task}\n\nBegin your research immediately. Be thorough and provide detailed information.`,
               tools: {
-                searchTool: search,
-                browseTool: browse,
+                webSearchTool: webSearch,
+                readSiteTool: readSite,
                 imageDescTool: imageDesc,
               },
               maxSteps: 20,

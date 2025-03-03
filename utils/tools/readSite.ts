@@ -1,9 +1,9 @@
 import { withTimeout } from "@/utils/timeoutWrapper";
-import { scrapePageToMarkdown } from "@/utils/tools/browseTool/index";
+import { scrapePageToMarkdown } from "@/utils/tools/readSiteTool/index";
 import { tool } from "ai";
 import { z } from "zod";
 
-export const browse = tool({
+export const readSite = tool({
   description: "Browse a URL and return its content as Markdown.",
   parameters: z.object({
     url: z
