@@ -82,7 +82,7 @@ export const MainInput: React.FC<MainInputProps> = ({
 
       <Textarea
         autoFocus
-        className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto focus-visible:ring-0"
+        className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0"
         value={input}
         placeholder="Enter research instructions..."
         onChange={handleInputChange}
