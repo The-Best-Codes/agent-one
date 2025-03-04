@@ -1,19 +1,10 @@
 "use client";
 
+import { ChatMessage } from "@/components/a1/chat/chat-message";
 import { MainInput } from "@/components/a1/main-input";
-import { ToolRenderer } from "@/components/a1/tool-renderer";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useChat } from "@ai-sdk/react";
 import { MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 export default function Chat() {
   const {
@@ -186,96 +177,15 @@ export default function Chat() {
           ) : (
             <div className="flex flex-col gap-4">
               {messages.map((m, messageIndex) => (
-                <Card
+                <ChatMessage
                   key={m.id}
-                  className={`${
-                    m.role === "user" ? "bg-secondary" : ""
-                  } shadow-none motion-preset-blur-up`}
-                >
-                  <CardHeader>
-                    <CardTitle>
-                      {m.role === "user" ? "You" : "AgentOne"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent
-                    key={`${m.id}-card-content`}
-                    className="whitespace-pre-wrap"
-                  >
-                    {m.parts?.map((part, partIndex) => {
-                      if (part.type === "tool-invocation") {
-                        return (
-                          <ToolRenderer
-                            key={`${m.id}-tool-${partIndex}`}
-                            toolInvocation={part.toolInvocation}
-                            messageId={m.id}
-                            partIndex={partIndex}
-                            isLoading={isToolLoading(messageIndex, partIndex)}
-                          />
-                        );
-                      } else if (part.type === "text") {
-                        if (m.role === "user") {
-                          return (
-                            <div
-                              className="prose dark:prose-invert"
-                              key={`${m.id}-text-${partIndex}`}
-                            >
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {part.text}
-                              </ReactMarkdown>
-                            </div>
-                          );
-                        } else {
-                          if (isLastTextPart(m, partIndex)) {
-                            return (
-                              <div
-                                className="prose max-w-none dark:prose-invert mt-4"
-                                key={`${m.id}-text-${partIndex}`}
-                              >
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                  {part.text}
-                                </ReactMarkdown>
-                              </div>
-                            );
-                          } else {
-                            return (
-                              <Accordion
-                                type="single"
-                                collapsible
-                                className="my-4 motion-preset-blur-right"
-                                key={`${m.id}-text-${partIndex}`}
-                              >
-                                <AccordionItem
-                                  className="border rounded-xl px-2"
-                                  value={m.id}
-                                >
-                                  <AccordionTrigger className="text-base py-2">
-                                    {isTextLoading(messageIndex, partIndex)
-                                      ? "Thinking..."
-                                      : getThinkingText(
-                                          m.id,
-                                          partIndex,
-                                          messageIndex,
-                                        )}
-                                  </AccordionTrigger>
-                                  <AccordionContent>
-                                    <div className="prose max-w-none dark:prose-invert">
-                                      <ReactMarkdown
-                                        remarkPlugins={[remarkGfm]}
-                                      >
-                                        {part.text}
-                                      </ReactMarkdown>
-                                    </div>
-                                  </AccordionContent>
-                                </AccordionItem>
-                              </Accordion>
-                            );
-                          }
-                        }
-                      }
-                      return null;
-                    })}
-                  </CardContent>
-                </Card>
+                  message={m}
+                  messageIndex={messageIndex}
+                  isToolLoading={isToolLoading}
+                  isTextLoading={isTextLoading}
+                  getThinkingText={getThinkingText}
+                  isLastTextPart={isLastTextPart}
+                />
               ))}
             </div>
           )}

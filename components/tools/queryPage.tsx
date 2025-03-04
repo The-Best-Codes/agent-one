@@ -22,7 +22,7 @@ export const QueryPage: React.FC<QueryProps> = ({
   results,
 }) => {
   return (
-    <div className="border rounded-xl p-0 px-2 my-4 motion-preset-blur-right">
+    <div className="border rounded-xl p-0 px-2 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
           <div className="py-2 flex flex-row space-x-2 w-full">
