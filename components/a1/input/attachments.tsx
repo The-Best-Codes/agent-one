@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 interface AttachmentsProps {
-  files: FileList | undefined;
+  files: FileList;
   onRemove: (index: number) => void;
 }
 
@@ -15,13 +15,6 @@ export const Attachments: React.FC<AttachmentsProps> = ({
   const [previews, setPreviews] = useState<{ url: string; type: string }[]>([]);
 
   useEffect(() => {
-    if (!files || files.length === 0) {
-      // Clean up any existing previews when files are removed
-      previews.forEach((preview) => URL.revokeObjectURL(preview.url));
-      setPreviews([]);
-      return;
-    }
-
     // Generate previews for new files
     const newPreviews = Array.from(files).map((file) => {
       const fileType = file.type.split("/")[0]; // 'image', 'text', etc.
@@ -38,10 +31,6 @@ export const Attachments: React.FC<AttachmentsProps> = ({
       newPreviews.forEach((preview) => URL.revokeObjectURL(preview.url));
     };
   }, [files]);
-
-  if (!files || files.length === 0) {
-    return null;
-  }
 
   return (
     <div className="flex flex-wrap gap-2 p-2 max-h-[200px] overflow-y-auto">

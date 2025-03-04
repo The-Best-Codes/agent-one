@@ -28,15 +28,8 @@ export const MainInput: React.FC<MainInputProps> = ({
   isLoading,
   stop,
 }) => {
-  // Use DataTransfer to maintain the FileList state
-  const [attachmentList, setAttachmentList] = useState<DataTransfer>(
-    new DataTransfer(),
-  );
+  const [files, setFiles] = useState<FileList | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Extract FileList from DataTransfer object for rendering
-  const files =
-    attachmentList.files.length > 0 ? attachmentList.files : undefined;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -48,20 +41,8 @@ export const MainInput: React.FC<MainInputProps> = ({
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      const newDataTransfer = new DataTransfer();
-
-      // Add existing files
-      Array.from(attachmentList.files).forEach((file) => {
-        newDataTransfer.items.add(file);
-      });
-
-      // Add new files
-      Array.from(event.target.files).forEach((file) => {
-        newDataTransfer.items.add(file);
-      });
-
-      setAttachmentList(newDataTransfer);
+    if (event.target.files) {
+      setFiles(event.target.files);
     }
   };
 
@@ -72,23 +53,19 @@ export const MainInput: React.FC<MainInputProps> = ({
   const handleRemoveFile = (index: number) => {
     if (!files) return;
 
+    const newFiles = Array.from(files).filter((_, i) => i !== index);
     const newDataTransfer = new DataTransfer();
-    Array.from(files).forEach((file, i) => {
-      if (i !== index) {
-        newDataTransfer.items.add(file);
-      }
-    });
+    newFiles.forEach((file) => newDataTransfer.items.add(file));
 
-    setAttachmentList(newDataTransfer);
+    setFiles(newDataTransfer.files);
   };
 
   const handleSubmitWithFiles = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleSubmit(e, { experimental_attachments: files });
+    handleSubmit(e, { experimental_attachments: files || undefined }); // Pass files or undefined
 
     // Clear attachments after submitting
-    setAttachmentList(new DataTransfer());
-
+    setFiles(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -97,7 +74,7 @@ export const MainInput: React.FC<MainInputProps> = ({
   return (
     <form
       onSubmit={handleSubmitWithFiles}
-      className="flex flex-col bg-secondary dark:bg-secondary rounded-md focus-within:ring-1 focus-within:ring-ring"
+      className="flex flex-col bg-secondary dark:bg-secondary pr-2 pt-2 rounded-md focus-within:ring-1 focus-within:ring-ring"
     >
       {files && files.length > 0 && (
         <Attachments files={files} onRemove={handleRemoveFile} />
@@ -105,7 +82,7 @@ export const MainInput: React.FC<MainInputProps> = ({
 
       <Textarea
         autoFocus
-        className="bg-secondary dark:bg-secondary resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto focus-visible:ring-0"
+        className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto focus-visible:ring-0"
         value={input}
         placeholder="Enter research instructions..."
         onChange={handleInputChange}
