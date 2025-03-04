@@ -33,14 +33,14 @@ export const Attachments: React.FC<AttachmentsProps> = ({
   }, [files]);
 
   return (
-    <div className="flex flex-wrap gap-2 p-2 max-h-[200px] overflow-y-auto">
+    <div className="flex flex-wrap gap-2 p-2 pt-0 max-h-48 max-w-full overflow-auto">
       {Array.from(files).map((file, index) => (
         <div
           key={index}
           className="group flex items-center gap-2 border rounded-md p-2 bg-background/50 hover:bg-background/80 transition-colors relative"
         >
           {previews[index]?.type === "image" ? (
-            <div className="relative h-10 w-10 rounded overflow-hidden">
+            <div className="relative h-10 w-10 rounded-md overflow-hidden">
               <Image
                 src={previews[index].url}
                 alt={file.name}
@@ -56,7 +56,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
             </div>
           )}
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-medium truncate max-w-[120px]">
+            <span className="text-sm font-medium truncate max-w-32">
               {file.name}
             </span>
             <span className="text-xs text-muted-foreground">
