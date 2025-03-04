@@ -99,7 +99,10 @@ export const MainInput: React.FC<MainInputProps> = ({
             <Plus />
           </Button>
           {files && files.length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-4 w-4 flex items-center justify-center">
+            <span
+              title={`${files.length.toString()} attached`}
+              className="absolute -top-1 -right-1 shadow-sm shadow-muted select-none bg-primary text-primary-foreground text-xs rounded-full h-4 min-w-4 flex items-center justify-center"
+            >
               {files.length}
             </span>
           )}
@@ -109,7 +112,7 @@ export const MainInput: React.FC<MainInputProps> = ({
             multiple
             ref={fileInputRef}
             style={{ display: "none" }}
-            accept="image/*, text/*" // Only allow image and text files as before
+            accept="image/*, text/*"
           />
         </div>
         <div>
