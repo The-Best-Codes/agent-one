@@ -67,7 +67,7 @@ export const ToolRenderer = ({
       <div className="flex items-center space-x-2">
         <CircleHelp className="w-6 h-6 min-w-6 min-h-6" />
         <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-          Oops! AgentOne tried to use an unsupported tool: {toolName}
+          AgentOne tried to use a "{toolName}" tool, but it's not supported.
         </p>
       </div>
     </div>
