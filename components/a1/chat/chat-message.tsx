@@ -1,3 +1,4 @@
+import { AttachmentsDisplay } from "@/components/a1/chat/attachments-display";
 import { ToolRenderer } from "@/components/a1/tool-renderer";
 import {
   Accordion,
@@ -112,6 +113,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           }
           return null;
         })}
+
+        {message.experimental_attachments &&
+          message.experimental_attachments.length > 0 && (
+            <AttachmentsDisplay
+              attachments={message.experimental_attachments}
+            />
+          )}
       </div>
     </div>
   );

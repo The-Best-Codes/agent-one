@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import formatBytes from "@/utils/formatBytes";
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -72,7 +73,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
                 {file.name}
               </span>
               <span className="text-xs text-muted-foreground">
-                {(file.size / 1024).toFixed(1)} KB
+                {formatBytes(file.size)}
               </span>
             </div>
             <Button
