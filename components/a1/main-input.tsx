@@ -117,7 +117,12 @@ export const MainInput: React.FC<MainInputProps> = ({
         </div>
         <div>
           {isLoading ? (
-            <Button type="button" size="icon" onClick={stop}>
+            <Button
+              variant="destructive"
+              type="button"
+              size="icon"
+              onClick={stop}
+            >
               <Stop />
             </Button>
           ) : (
