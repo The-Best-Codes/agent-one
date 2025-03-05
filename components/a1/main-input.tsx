@@ -1,6 +1,12 @@
 import { Attachments } from "@/components/a1/input/attachments";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ArrowUp, Plus, Square as Stop } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -90,14 +96,21 @@ export const MainInput: React.FC<MainInputProps> = ({
       />
       <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
         <div className="relative">
-          <Button
-            type="button"
-            disabled={isLoading}
-            size="icon"
-            onClick={handlePlusClick}
-          >
-            <Plus />
-          </Button>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  disabled={isLoading}
+                  size="icon"
+                  onClick={handlePlusClick}
+                >
+                  <Plus />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Attach files</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {files && files.length > 0 && (
             <span
               title={`${files.length.toString()} attached`}
