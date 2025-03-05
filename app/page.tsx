@@ -21,9 +21,6 @@ export default function Chat() {
 
   const isLoading = status !== "ready";
 
-  const getPartId = (messageId: string, partIndex: number) =>
-    `${messageId}-${partIndex}`;
-
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,11 +39,7 @@ export default function Chat() {
           {messages.length === 0 ? (
             <EmptyChatState />
           ) : (
-            <ChatMessagesList
-              messages={messages}
-              isLoading={isLoading}
-              getPartId={getPartId}
-            />
+            <ChatMessagesList messages={messages} isLoading={isLoading} />
           )}
           {status === "error" && (
             <p className="text-red-500">{error?.message}</p>
