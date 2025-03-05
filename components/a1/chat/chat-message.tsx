@@ -2,6 +2,7 @@ import { AttachmentsDisplay } from "@/components/a1/chat/attachments-display";
 import { ToolRenderer } from "@/components/a1/tool-renderer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -93,11 +94,9 @@ const TextPart: React.FC<TextPartProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const text = part.text;
-  const shouldExpand = text.length > 255;
-  const truncatedText =
-    shouldExpand && !expanded ? text.substring(0, 255) : text;
+  const shouldExpand = text.length > 500;
 
-  if (isLastTextPart) {
+  if (isLastTextPart || !shouldExpand) {
     return (
       <div className="prose max-w-none dark:prose-invert">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
@@ -109,23 +108,40 @@ const TextPart: React.FC<TextPartProps> = ({
     <div className="space-y-2">
       <div
         className={cn(
-          "prose max-w-none dark:prose-invert overflow-hidden transition-all duration-300",
-          shouldExpand && !expanded ? "line-clamp-[12]" : "",
+          "prose max-w-none dark:prose-invert relative",
+          expanded
+            ? "max-h-fit h-48 overflow-auto"
+            : "max-h-24 overflow-hidden",
           isLoading ? "opacity-50" : "opacity-100",
         )}
       >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {truncatedText}
-        </ReactMarkdown>
-        {shouldExpand && !expanded && (
-          <span className="text-gray-500 dark:text-gray-400">...</span>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+
+        {!expanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
         )}
       </div>
-      {shouldExpand && (
-        <Button variant="link" size="sm" onClick={() => setExpanded(!expanded)}>
-          {expanded ? "Collapse" : "Expand"}
+
+      <div className="flex justify-center">
+        <Button
+          onClick={() => setExpanded(!expanded)}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+        >
+          {expanded ? (
+            <>
+              <ChevronUp />
+              <span>Show less</span>
+            </>
+          ) : (
+            <>
+              <ChevronDown />
+              <span>Show more</span>
+            </>
+          )}
         </Button>
-      )}
+      </div>
     </div>
   );
 };
