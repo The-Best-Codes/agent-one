@@ -1,12 +1,8 @@
 import { AttachmentsDisplay } from "@/components/a1/chat/attachments-display";
 import { ToolRenderer } from "@/components/a1/tool-renderer";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import React from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -15,11 +11,6 @@ interface ChatMessageProps {
   messageIndex: number;
   isToolLoading: (messageIndex: number, partIndex: number) => boolean;
   isTextLoading: (messageIndex: number, partIndex: number) => boolean;
-  getThinkingText: (
-    messageId: string,
-    partIndex: number,
-    messageIndex: number,
-  ) => string;
   isLastTextPart: (message: any, partIndex: number) => boolean;
 }
 
@@ -28,7 +19,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   messageIndex,
   isToolLoading,
   isTextLoading,
-  getThinkingText,
   isLastTextPart,
 }) => {
   return (
@@ -66,49 +56,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 </div>
               );
             } else {
-              if (isLastTextPart(message, partIndex)) {
-                return (
-                  <div
-                    className="prose max-w-none dark:prose-invert"
-                    key={`${message.id}-text-${partIndex}`}
-                  >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {part.text}
-                    </ReactMarkdown>
-                  </div>
-                );
-              } else {
-                return (
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="motion-preset-blur-right"
-                    key={`${message.id}-text-${partIndex}`}
-                  >
-                    <AccordionItem
-                      className="border rounded-xl px-2"
-                      value={message.id}
-                    >
-                      <AccordionTrigger className="text-base py-2">
-                        {isTextLoading(messageIndex, partIndex)
-                          ? "Thinking..."
-                          : getThinkingText(
-                              message.id,
-                              partIndex,
-                              messageIndex,
-                            )}
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <div className="prose max-w-none dark:prose-invert">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {part.text}
-                          </ReactMarkdown>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                );
-              }
+              return (
+                <TextPart
+                  key={`${message.id}-text-${partIndex}`}
+                  part={part}
+                  isLastTextPart={isLastTextPart(message, partIndex)}
+                  isLoading={isTextLoading(messageIndex, partIndex)}
+                />
+              );
             }
           }
           return null;
@@ -121,6 +76,56 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             />
           )}
       </div>
+    </div>
+  );
+};
+
+interface TextPartProps {
+  part: any;
+  isLastTextPart: boolean;
+  isLoading: boolean;
+}
+
+const TextPart: React.FC<TextPartProps> = ({
+  part,
+  isLastTextPart,
+  isLoading,
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const text = part.text;
+  const shouldExpand = text.length > 255;
+  const truncatedText =
+    shouldExpand && !expanded ? text.substring(0, 255) : text;
+
+  if (isLastTextPart) {
+    return (
+      <div className="prose max-w-none dark:prose-invert">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <div
+        className={cn(
+          "prose max-w-none dark:prose-invert overflow-hidden transition-all duration-300",
+          shouldExpand && !expanded ? "line-clamp-[12]" : "",
+          isLoading ? "opacity-50" : "opacity-100",
+        )}
+      >
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {truncatedText}
+        </ReactMarkdown>
+        {shouldExpand && !expanded && (
+          <span className="text-gray-500 dark:text-gray-400">...</span>
+        )}
+      </div>
+      {shouldExpand && (
+        <Button variant="link" size="sm" onClick={() => setExpanded(!expanded)}>
+          {expanded ? "Collapse" : "Expand"}
+        </Button>
+      )}
     </div>
   );
 };

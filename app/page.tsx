@@ -1,10 +1,10 @@
 "use client";
 
-import { ChatMessage } from "@/components/a1/chat/chat-message";
+import { EmptyChatState } from "@/components/a1/chat/empty-state";
+import { ChatMessagesList } from "@/components/a1/chat/message-list";
 import { MainInput } from "@/components/a1/main-input";
 import { useChat } from "@ai-sdk/react";
-import { MessageSquare } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export default function Chat() {
   const {
@@ -21,66 +21,8 @@ export default function Chat() {
 
   const isLoading = status !== "ready";
 
-  const [thinkStartTime, setThinkStartTime] = useState<Record<string, number>>(
-    {},
-  );
-  const [thinkDurations, setThinkDurations] = useState<Record<string, number>>(
-    {},
-  );
-
   const getPartId = (messageId: string, partIndex: number) =>
     `${messageId}-${partIndex}`;
-
-  const isToolLoading = (messageIndex: number, partIndex: number) => {
-    if (messages.length === 0 || !isLoading) {
-      return false;
-    }
-
-    const message = messages[messageIndex];
-
-    if (!message || !message.parts) {
-      return false;
-    }
-
-    const part = message.parts[partIndex];
-
-    if (part?.type !== "tool-invocation") {
-      return false; // Not a tool invocation part
-    }
-
-    // Check if the tool has a result
-    if (part.toolInvocation.state === "result") {
-      return false; // Tool has a result, so it's not loading
-    }
-
-    // Fallback to the global isLoading state
-    return isLoading;
-  };
-
-  const isTextLoading = (messageIndex: number, partIndex: number) => {
-    if (!isLoading) {
-      return false;
-    }
-
-    if (messages.length === 0) {
-      return false;
-    }
-
-    const latestMessageIndex = messages.length - 1;
-    const latestMessage = messages[latestMessageIndex];
-
-    if (!latestMessage || !latestMessage.parts) {
-      return false;
-    }
-
-    const latestPartIndex = latestMessage.parts.length - 1;
-
-    return (
-      messageIndex === latestMessageIndex &&
-      partIndex === latestPartIndex &&
-      latestMessage.parts[latestPartIndex].type === "text"
-    );
-  };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -93,101 +35,18 @@ export default function Chat() {
     }
   }, [messages]);
 
-  useEffect(() => {
-    messages.forEach((message, messageIndex) => {
-      message.parts?.forEach((part, partIndex) => {
-        const partId = getPartId(message.id, partIndex);
-
-        // Start timing if this is the current part being processed
-        if (isTextLoading(messageIndex, partIndex)) {
-          if (!thinkStartTime[partId]) {
-            setThinkStartTime((prev) => ({
-              ...prev,
-              [partId]: Date.now(),
-            }));
-          }
-        } // Complete timing when the next part starts or message completes
-        else if (thinkStartTime[partId] && !thinkDurations[partId]) {
-          const duration = (Date.now() - thinkStartTime[partId]) / 1000;
-          setThinkDurations((prev) => ({
-            ...prev,
-            [partId]: duration,
-          }));
-        }
-      });
-    });
-  }, [messages, isLoading]);
-
-  const getThinkingText = (
-    messageId: string,
-    partIndex: number,
-    messageIndex: number,
-  ) => {
-    const partId = getPartId(messageId, partIndex);
-
-    if (isTextLoading(messageIndex, partIndex)) {
-      return "Thinking...";
-    }
-
-    const duration = thinkDurations[partId];
-    if (!duration) return "Thinking...";
-
-    if (duration < 1) return "Thought briefly";
-    if (duration < 2) return "Thought for a second";
-    return `Thought for ${Math.round(duration)} seconds`;
-  };
-
-  const isLastTextPart = (message: any, partIndex: number): boolean => {
-    if (!message || !message.parts) {
-      return false;
-    }
-
-    const textParts = message.parts.filter((part: any) => part.type === "text");
-
-    if (textParts.length === 0) {
-      return false; // No text parts in the message
-    }
-
-    // Find the index of the current part in the filtered text parts array
-    const textPartIndex = textParts.findIndex((part: any, index: number) => {
-      return message.parts.indexOf(part) === partIndex;
-    });
-
-    if (textPartIndex === -1) {
-      return false; // Current part is not a text part
-    }
-
-    return textPartIndex === textParts.length - 1;
-  };
-
   return (
     <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
       <div className="flex flex-col w-full">
         <div className="flex-1 mb-4 pr-2 overflow-auto" ref={scrollAreaRef}>
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <MessageSquare className="w-16 h-16 text-muted-foreground mb-4" />
-              <h2 className="text-4xl font-bold text-foreground">
-                How can I help you?
-              </h2>
-              <p className="text-muted-foreground mt-2">
-                Send a message to AgentOne to get started
-              </p>
-            </div>
+            <EmptyChatState />
           ) : (
-            <div className="flex flex-col gap-4">
-              {messages.map((m, messageIndex) => (
-                <ChatMessage
-                  key={m.id}
-                  message={m}
-                  messageIndex={messageIndex}
-                  isToolLoading={isToolLoading}
-                  isTextLoading={isTextLoading}
-                  getThinkingText={getThinkingText}
-                  isLastTextPart={isLastTextPart}
-                />
-              ))}
-            </div>
+            <ChatMessagesList
+              messages={messages}
+              isLoading={isLoading}
+              getPartId={getPartId}
+            />
           )}
           {status === "error" && (
             <p className="text-red-500">{error?.message}</p>
