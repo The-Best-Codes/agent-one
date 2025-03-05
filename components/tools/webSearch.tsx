@@ -63,7 +63,7 @@ export const WebSearch: React.FC<WebSearchProps> = ({
                     <h3 className="text-lg font-semibold">
                       {results.results.length ?? 0} Results
                     </h3>
-                    <ul>
+                    <ul className="max-h-96 overflow-auto">
                       {results.results.map((result, index) => (
                         <li key={index} className="py-2">
                           <Link

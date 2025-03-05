@@ -65,6 +65,13 @@ export const ReadSite: React.FC<ReadSiteProps> = ({
                 </div>
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
+                <Link
+                  href={args.url}
+                  target="_blank"
+                  className="text-blue-500 cursor-pointer"
+                >
+                  {args.url}
+                </Link>
                 {results ? (
                   <div className="rounded-xl mt-2 p-0 px-2">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
