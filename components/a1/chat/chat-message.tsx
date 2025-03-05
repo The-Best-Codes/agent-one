@@ -30,7 +30,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     >
       <div
         className={`rounded-xl p-3 max-w-3/4 ${
-          message.role === "user" ? "bg-secondary text-right" : "bg-card border"
+          message.role === "user" ? "bg-secondary" : "bg-card border"
         } shadow-md motion-preset-blur-up space-y-4`}
       >
         {message.parts?.map((part: any, partIndex: number) => {
@@ -98,14 +98,16 @@ const TextPart: React.FC<TextPartProps> = ({
 
   if (isLastTextPart || !shouldExpand) {
     return (
-      <div className="prose max-w-none dark:prose-invert">
+      <div
+        className={`prose max-w-none dark:prose-invert ${!isLastTextPart ? "border rounded-md p-2" : ""}`}
+      >
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 border rounded-md p-2">
       <div
         className={cn(
           "prose max-w-none dark:prose-invert relative",

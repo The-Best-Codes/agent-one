@@ -28,11 +28,11 @@ const operationToString = (
 ) => {
   switch (operation) {
     case "add":
-      return isLoading ? "Adding" : "Added";
+      return isLoading ? "Saving" : "Saved";
     case "remove":
-      return isLoading ? "Removing" : "Removed";
+      return isLoading ? "Forgetting" : "Forgot";
     case "query":
-      return isLoading ? "Querying" : "Queried";
+      return isLoading ? "Trying to remember" : "Remembered";
     default:
       return "Memory Operation";
   }
@@ -84,9 +84,9 @@ export const Memory: React.FC<MemoryProps> = ({ args, isLoading, results }) => {
           <div className="py-2 flex flex-row space-x-2 w-full">
             <Loader className="w-6 h-6 min-w-6 min-h-6" />
             <p className="text-base font-medium max-w-full overflow-auto whitespace-nowrap">
-              {operationString} memory "
+              {operationString} "
               {(args.text && args.operation && args.text[args.operation]) ||
-                "No data"}
+                "(nothing)"}
               "
             </p>
           </div>
@@ -105,11 +105,11 @@ export const Memory: React.FC<MemoryProps> = ({ args, isLoading, results }) => {
                 <div className="flex flex-row w-full">
                   <Brain className="w-6 h-6 min-w-6 min-h-6 mr-2" />
                   <p className="text-base font-medium max-w-96 truncate">
-                    {operationString} memory "
+                    {operationString} "
                     {(args.text &&
                       args.operation &&
                       args.text[args.operation]) ||
-                      "No data"}
+                      "(nothing)"}
                     "
                   </p>
                 </div>
