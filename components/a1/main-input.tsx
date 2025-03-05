@@ -101,7 +101,7 @@ export const MainInput: React.FC<MainInputProps> = ({
           {files && files.length > 0 && (
             <span
               title={`${files.length.toString()} attached`}
-              className="absolute -top-1 -right-1 shadow-sm shadow-muted select-none bg-primary text-primary-foreground text-xs rounded-full h-4 min-w-4 flex items-center justify-center"
+              className="absolute -top-1 -right-1 dark:shadow-sm dark:shadow-muted select-none bg-primary text-primary-foreground text-xs rounded-full h-4 min-w-4 flex items-center justify-center"
             >
               {files.length}
             </span>

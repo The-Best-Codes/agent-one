@@ -31,7 +31,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       <div
         className={`rounded-xl p-3 max-w-3/4 ${
           message.role === "user" ? "bg-secondary" : "bg-card border"
-        } shadow-md motion-preset-blur-up space-y-4`}
+        } shadow-none motion-preset-blur-up space-y-4`}
       >
         {message.parts?.map((part: any, partIndex: number) => {
           if (part.type === "tool-invocation") {
