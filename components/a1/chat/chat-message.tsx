@@ -108,7 +108,7 @@ const TextPart: React.FC<TextPartProps> = ({
     <div className="space-y-2">
       <div
         className={cn(
-          "prose max-w-none dark:prose-invert relative transition-all duration-300",
+          "prose max-w-none dark:prose-invert relative",
           expanded
             ? "max-h-fit h-48 overflow-auto"
             : "max-h-24 overflow-hidden",
@@ -117,26 +117,30 @@ const TextPart: React.FC<TextPartProps> = ({
       >
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
 
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background to-transparent flex justify-center">
-          <Button
-            onClick={() => setExpanded(!expanded)}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1"
-          >
-            {expanded ? (
-              <>
-                <ChevronUp />
-                <span>Show less</span>
-              </>
-            ) : (
-              <>
-                <ChevronDown />
-                <span>Show more</span>
-              </>
-            )}
-          </Button>
-        </div>
+        {!expanded && (
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
+        )}
+      </div>
+
+      <div className="flex justify-center">
+        <Button
+          onClick={() => setExpanded(!expanded)}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+        >
+          {expanded ? (
+            <>
+              <ChevronUp />
+              <span>Show less</span>
+            </>
+          ) : (
+            <>
+              <ChevronDown />
+              <span>Show more</span>
+            </>
+          )}
+        </Button>
       </div>
     </div>
   );
