@@ -1,4 +1,3 @@
-import { deployAgents } from "@/utils/tools/deployAgents";
 import { imageDesc } from "@/utils/tools/imageDesc";
 import { memory } from "@/utils/tools/memory";
 import { queryPage } from "@/utils/tools/queryPage";
@@ -28,12 +27,6 @@ You should search multiple times with different keywords throughout the course o
 You should browse multiple websites. When you find links or topics related to the research topic on a site, you should research those as well to collect more information.
 You should view images on sites when relevant and applicable to the research topic.
 When you need to search the content of a page in a more advanced manner, you can run query selectors on the page's HTML.
-
-## Agent Deployment
-You have the ability to deploy specialized agents for specific sub-tasks.
-You should use agents when researching, as they can be VERY useful.
-You should deploy many agents in parallel to speed up your research.
-When deploying an agent, give it a user-friendly name and specific task instructions. You can optionally provide a custom system prompt or let it use the default.
 
 ## Memory Management
 You have access to a memory system that allows you to store and retrieve information.
@@ -70,7 +63,6 @@ It is generally discouraged to use multiple tools simultaneously.
             };
           },
         }),
-        deployAgentsTool: deployAgents,
         webSearchTool: webSearch,
         readSiteTool: readSite,
         memoryTool: memory,

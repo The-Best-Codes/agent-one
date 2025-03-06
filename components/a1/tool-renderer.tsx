@@ -1,4 +1,3 @@
-import { DeployAgent } from "@/components/tools/deployAgents";
 import { FinishResearch } from "@/components/tools/finishResearch";
 import { ImageDesc } from "@/components/tools/imageDesc";
 import { Memory } from "@/components/tools/memory";
@@ -21,7 +20,6 @@ const TOOL_COMPONENTS: { [key: string]: FunctionComponent<BaseToolProps> } = {
   readSiteTool: ReadSite,
   queryPageTool: QueryPage,
   imageDescTool: ImageDesc,
-  deployAgentsTool: DeployAgent,
   memoryTool: Memory,
   finishResearchTool: FinishResearch,
 };
