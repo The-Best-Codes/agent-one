@@ -31,7 +31,7 @@ const ThemeToggle = () => {
       onValueChange={handleThemeChange}
       defaultValue={resolvedTheme || "system"}
     >
-      <SelectTrigger className="w-36">
+      <SelectTrigger className="w-full">
         <SelectValue placeholder="Theme" />
       </SelectTrigger>
       <SelectContent>
