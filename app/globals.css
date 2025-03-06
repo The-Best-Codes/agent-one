@@ -4,7 +4,8 @@
 @plugin "@tailwindcss/typography";
 @plugin "tailwindcss-motion";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, .slate-dark *, .dim *)); /* Target all dark themes */
+@custom-variant black (&:is(.dark *)); /* Dark is basically the black theme */
 @custom-variant dim (&:is(.dim *));
 @custom-variant slate-light (&:is(.slate-light *));
 @custom-variant slate-dark (&:is(.slate-dark *));

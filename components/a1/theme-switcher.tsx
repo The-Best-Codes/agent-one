@@ -31,16 +31,16 @@ const ThemeToggle = () => {
       onValueChange={handleThemeChange}
       defaultValue={resolvedTheme || "system"}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-36">
         <SelectValue placeholder="Theme" />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="system">System</SelectItem>
         <SelectItem value="light">Light</SelectItem>
         <SelectItem value="dark">Dark</SelectItem>
-        <SelectItem value="system">System</SelectItem>
         <SelectItem value="dim">Dim</SelectItem>
-        <SelectItem value="slate-light">Slate Light</SelectItem>
-        <SelectItem value="slate-dark">Slate Dark</SelectItem>
+        <SelectItem value="slate-light">Slate (Light)</SelectItem>
+        <SelectItem value="slate-dark">Slate (Dark)</SelectItem>
       </SelectContent>
     </Select>
   );
