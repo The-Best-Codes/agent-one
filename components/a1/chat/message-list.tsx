@@ -1,14 +1,17 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Message } from "ai";
 import { ChatMessage } from "./chat-message";
 
 interface ChatMessagesListProps {
   messages: Message[];
   isLoading: boolean;
+  isSubmitted: boolean;
 }
 
 export const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
   messages,
   isLoading,
+  isSubmitted,
 }) => {
   const isToolInvocationLoading = (messageIndex: number, partIndex: number) => {
     if (messages.length === 0 || !isLoading) {
@@ -84,6 +87,10 @@ export const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
     return textPartIndex === textParts.length - 1;
   };
 
+  const shouldShowLoadingSkeleton = isSubmitted && messages.length > 0;
+  const shouldShowSkeletonInsideLastMessage =
+    shouldShowLoadingSkeleton && messages[messages.length - 1].role !== "user";
+
   return (
     <div className="flex flex-col gap-4">
       {messages.map((m, messageIndex) => (
@@ -94,8 +101,15 @@ export const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
           isToolLoading={isToolInvocationLoading}
           isTextLoading={isLatestTextPartLoading}
           isLastTextPart={isLastTextPart}
+          shouldShowSkeletonInsideLastMessage={
+            shouldShowSkeletonInsideLastMessage &&
+            messageIndex === messages.length - 1
+          }
         />
       ))}
+      {shouldShowLoadingSkeleton && !shouldShowSkeletonInsideLastMessage && (
+        <Skeleton className="h-10 w-3/4 rounded-md"></Skeleton>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { AttachmentsDisplay } from "@/components/a1/chat/attachments-display";
 import { ToolRenderer } from "@/components/a1/tool-renderer";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
@@ -13,6 +14,7 @@ interface ChatMessageProps {
   isToolLoading: (messageIndex: number, partIndex: number) => boolean;
   isTextLoading: (messageIndex: number, partIndex: number) => boolean;
   isLastTextPart: (message: any, partIndex: number) => boolean;
+  shouldShowSkeletonInsideLastMessage: boolean;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -21,6 +23,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   isToolLoading,
   isTextLoading,
   isLastTextPart,
+  shouldShowSkeletonInsideLastMessage,
 }) => {
   return (
     <div
@@ -76,6 +79,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               attachments={message.experimental_attachments}
             />
           )}
+        {shouldShowSkeletonInsideLastMessage && (
+          <Skeleton className="h-10 w-full rounded-md"></Skeleton>
+        )}
       </div>
     </div>
   );

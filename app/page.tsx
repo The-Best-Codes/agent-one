@@ -3,6 +3,7 @@
 import { EmptyChatState } from "@/components/a1/chat/empty-state";
 import { ChatMessagesList } from "@/components/a1/chat/message-list";
 import { MainInput } from "@/components/a1/main-input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useChat } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
 
@@ -20,6 +21,7 @@ export default function Chat() {
   });
 
   const isLoading = status !== "ready";
+  const isSubmitted = status === "submitted";
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -39,10 +41,17 @@ export default function Chat() {
           {messages.length === 0 ? (
             <EmptyChatState />
           ) : (
-            <ChatMessagesList messages={messages} isLoading={isLoading} />
+            <ChatMessagesList
+              messages={messages}
+              isLoading={isLoading}
+              isSubmitted={isSubmitted}
+            />
           )}
           {status === "error" && (
             <p className="text-red-500">{error?.message}</p>
+          )}
+          {isSubmitted && messages.length === 0 && (
+            <Skeleton className="h-10 w-3/4 rounded-md"></Skeleton>
           )}
         </div>
 
