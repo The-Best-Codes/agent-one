@@ -36,6 +36,7 @@ export default function RootLayout({
             dim: "dim",
             "retro-light": "retro-light",
             "retro-dark": "retro-dark",
+            "retro-yellow": "retro-yellow",
           }}
         >
           {children}
