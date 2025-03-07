@@ -78,7 +78,7 @@ export const Memory: React.FC<MemoryProps> = ({ args, isLoading, results }) => {
   const operationString = operationToString(args.operation, isLoading);
 
   return (
-    <div className="border rounded-xl p-0 px-2 motion-preset-blur-right">
+    <div className="border rounded-md p-0 px-2 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
           <div className="py-2 flex flex-row space-x-2 w-full">
@@ -116,11 +116,11 @@ export const Memory: React.FC<MemoryProps> = ({ args, isLoading, results }) => {
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
                 {results ? (
-                  <div className="rounded-xl mt-2 p-0 px-2">
+                  <div className="rounded-md mt-2 p-0 px-2">
                     {formatMemoryContent(results?.content)}
                   </div>
                 ) : (
-                  <div className="rounded-xl mt-2 p-0 px-2">
+                  <div className="rounded-md mt-2 p-0 px-2">
                     <p className="text-sm text-gray-500">No content found.</p>
                   </div>
                 )}

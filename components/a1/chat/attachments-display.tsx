@@ -31,7 +31,7 @@ export const AttachmentsDisplay: React.FC<AttachmentsDisplayProps> = ({
                 />
               </div>
             ) : (
-              <div className="h-10 w-10 flex items-center justify-center bg-muted rounded">
+              <div className="h-10 w-10 flex items-center justify-center bg-muted rounded-md">
                 <span className="text-xs text-muted-foreground uppercase">
                   {attachment.contentType.split("/")[1]?.substring(0, 3) ||
                     "file"}

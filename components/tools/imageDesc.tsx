@@ -23,7 +23,7 @@ export const ImageDesc: React.FC<ImageDescProps> = ({
   results,
 }) => {
   return (
-    <div className="border rounded-xl p-0 px-2 motion-preset-blur-right">
+    <div className="border rounded-md p-0 px-2 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
           <div className="py-2 flex flex-row space-x-2 w-full">
@@ -64,13 +64,13 @@ export const ImageDesc: React.FC<ImageDescProps> = ({
                 </div>
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
-                <div className="rounded-xl mt-2 p-0 px-2">
+                <div className="rounded-md mt-2 p-0 px-2">
                   {results?.description ? (
                     <>
                       <Image
                         src={args.url}
                         alt={results?.description || ""}
-                        className="mt-2 w-fit max-w-full rounded-xl"
+                        className="mt-2 w-fit max-w-full rounded-md"
                         width={1024}
                         height={1024}
                       />

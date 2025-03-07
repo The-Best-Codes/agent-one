@@ -60,7 +60,7 @@ export const ToolRenderer = ({
   return (
     <div
       key={`${messageId}-unknown-tool-${partIndex}`}
-      className="border rounded-xl p-2 my-4 motion-preset-blur-right"
+      className="border rounded-md p-2 my-4 motion-preset-blur-right"
     >
       <div className="flex items-center space-x-2">
         <CircleHelp className="w-6 h-6 min-w-6 min-h-6" />

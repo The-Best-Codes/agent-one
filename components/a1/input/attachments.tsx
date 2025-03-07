@@ -62,7 +62,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
                 />
               </div>
             ) : (
-              <div className="h-10 w-10 flex items-center justify-center bg-muted rounded">
+              <div className="h-10 w-10 flex items-center justify-center bg-muted rounded-md">
                 <span className="text-xs text-muted-foreground uppercase">
                   {file.type.split("/")[1]?.substring(0, 3) || "file"}
                 </span>

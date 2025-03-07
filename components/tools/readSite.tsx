@@ -22,7 +22,7 @@ export const ReadSite: React.FC<ReadSiteProps> = ({
   results,
 }) => {
   return (
-    <div className="border rounded-xl p-0 px-2 motion-preset-blur-right">
+    <div className="border rounded-md p-0 px-2 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
           <div className="py-2 flex flex-row space-x-2 w-full">
@@ -73,13 +73,13 @@ export const ReadSite: React.FC<ReadSiteProps> = ({
                   {args.url}
                 </Link>
                 {results ? (
-                  <div className="rounded-xl mt-2 p-0 px-2">
+                  <div className="rounded-md mt-2 p-0 px-2">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {results?.content}
                     </p>
                   </div>
                 ) : (
-                  <div className="rounded-xl mt-2 p-0 px-2">
+                  <div className="rounded-md mt-2 p-0 px-2">
                     <p className="text-sm text-gray-500">No content found.</p>
                   </div>
                 )}

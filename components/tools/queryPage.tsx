@@ -22,7 +22,7 @@ export const QueryPage: React.FC<QueryProps> = ({
   results,
 }) => {
   return (
-    <div className="border rounded-xl p-0 px-2 motion-preset-blur-right">
+    <div className="border rounded-md p-0 px-2 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
           <div className="py-2 flex flex-row space-x-2 w-full">
@@ -70,7 +70,7 @@ export const QueryPage: React.FC<QueryProps> = ({
                 </div>
               </AccordionTrigger>
               <AccordionContent className="overflow-auto max-h-64">
-                <div className="rounded-xl mt-2 p-0 px-2 max-w-full overflow-auto pb-2">
+                <div className="rounded-md mt-2 p-0 px-2 max-w-full overflow-auto pb-2">
                   {results && results?.result ? (
                     <pre>
                       <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">

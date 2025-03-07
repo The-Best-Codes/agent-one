@@ -29,7 +29,7 @@ export const WebSearch: React.FC<WebSearchProps> = ({
   results,
 }) => {
   return (
-    <div className="border rounded-xl p-0 px-2 motion-preset-blur-right">
+    <div className="border rounded-md p-0 px-2 motion-preset-blur-right">
       <div className="flex w-full">
         {isLoading ? (
           <div className="py-2 flex flex-row w-full space-x-2">
@@ -59,7 +59,7 @@ export const WebSearch: React.FC<WebSearchProps> = ({
               </AccordionTrigger>
               <AccordionContent>
                 {results && results.results && results.results.length > 0 ? (
-                  <div className="rounded-xl mt-2 p-0 px-2">
+                  <div className="rounded-md mt-2 p-0 px-2">
                     <h3 className="text-lg font-semibold">
                       {results.results.length ?? 0} Results
                     </h3>
@@ -89,7 +89,7 @@ export const WebSearch: React.FC<WebSearchProps> = ({
                     </ul>
                   </div>
                 ) : (
-                  <div className="rounded-xl mt-2 p-0 px-2">
+                  <div className="rounded-md mt-2 p-0 px-2">
                     <p className="text-sm text-gray-500">
                       No search results found.
                     </p>

@@ -4,11 +4,11 @@
 @plugin "@tailwindcss/typography";
 @plugin "tailwindcss-motion";
 
-@custom-variant dark (&:is(.dark *, .slate-dark *, .dim *)); /* Target all dark themes */
+@custom-variant dark (&:is(.dark *, .retro-dark *, .dim *)); /* Target all dark themes */
 @custom-variant black (&:is(.dark *)); /* Dark is basically the black theme */
 @custom-variant dim (&:is(.dim *));
-@custom-variant slate-light (&:is(.slate-light *));
-@custom-variant slate-dark (&:is(.slate-dark *));
+@custom-variant retro-light (&:is(.retro-light *));
+@custom-variant retro-dark (&:is(.retro-dark *));
 
 @theme {
     --color-background: hsl(var(--background));
@@ -227,80 +227,82 @@
         --scrollbar-thumb-hover: 230 10% 50%;
     }
 
-    .slate-light {
-        --background: 220 14% 96%;
-        --foreground: 220 10% 39%;
-        --card: 220 14% 96%;
-        --card-foreground: 220 10% 39%;
-        --popover: 220 14% 96%;
-        --popover-foreground: 220 10% 39%;
-        --primary: 220 10% 20%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 220 14% 88%;
-        --secondary-foreground: 220 10% 20%;
-        --muted: 220 14% 88%;
-        --muted-foreground: 220 10% 55%;
-        --accent: 220 14% 88%;
-        --accent-foreground: 220 10% 20%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 220 14% 80%;
-        --input: 220 14% 80%;
-        --ring: 220 10% 20%;
-        --chart-1: 12 76% 61%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 197 37% 24%;
-        --chart-4: 43 74% 66%;
-        --chart-5: 27 87% 67%;
-        --sidebar-background: 220 14% 92%;
-        --sidebar-foreground: 220 10% 39%;
-        --sidebar-primary: 220 10% 20%;
-        --sidebar-primary-foreground: 0 0% 98%;
-        --sidebar-accent: 220 14% 84%;
-        --sidebar-accent-foreground: 220 10% 20%;
-        --sidebar-border: 220 14% 76%;
-        --sidebar-ring: 217.2 91.2% 59.8%;
-        --scrollbar-track: 220 14% 84%;
-        --scrollbar-thumb: 220 14% 70%;
-        --scrollbar-thumb-hover: 220 14% 60%;
+    .retro-light {
+        --background: 240 20% 98%;
+        --foreground: 240 10% 20%;
+        --card: 240 20% 98%;
+        --card-foreground: 240 10% 20%;
+        --popover: 240 20% 98%;
+        --popover-foreground: 240 10% 20%;
+        --primary: 240 10% 10%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 240 20% 90%;
+        --secondary-foreground: 240 10% 10%;
+        --muted: 240 20% 90%;
+        --muted-foreground: 240 10% 40%;
+        --accent: 240 20% 90%;
+        --accent-foreground: 240 10% 10%;
+        --destructive: 0 80% 50%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 240 20% 70%;
+        --input: 240 20% 70%;
+        --ring: 240 10% 10%;
+        --chart-1: 30 80% 50%;
+        --chart-2: 120 60% 40%;
+        --chart-3: 210 50% 30%;
+        --chart-4: 300 70% 45%;
+        --chart-5: 30 90% 55%;
+        --radius: 0rem;
+        --sidebar-background: 240 20% 94%;
+        --sidebar-foreground: 240 10% 20%;
+        --sidebar-primary: 240 10% 10%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 240 20% 86%;
+        --sidebar-accent-foreground: 240 10% 10%;
+        --sidebar-border: 240 20% 66%;
+        --sidebar-ring: 240 50% 50%;
+        --scrollbar-track: 240 20% 86%;
+        --scrollbar-thumb: 240 20% 60%;
+        --scrollbar-thumb-hover: 240 20% 50%;
     }
 
-    .slate-dark {
-        --background: 220 13% 18%;
-        --foreground: 220 14% 78%;
-        --card: 220 13% 18%;
-        --card-foreground: 220 14% 78%;
-        --popover: 220 13% 18%;
-        --popover-foreground: 220 14% 78%;
-        --primary: 220 14% 88%;
-        --primary-foreground: 220 13% 18%;
-        --secondary: 220 13% 28%;
-        --secondary-foreground: 220 14% 78%;
-        --muted: 220 13% 28%;
-        --muted-foreground: 220 14% 58%;
-        --accent: 220 13% 28%;
-        --accent-foreground: 220 14% 78%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 220 13% 30%;
-        --input: 220 13% 30%;
-        --ring: 220 14% 88%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-        --sidebar-background: 220 13% 24%;
-        --sidebar-foreground: 220 14% 78%;
-        --sidebar-primary: 220 14% 88%;
-        --sidebar-primary-foreground: 220 13% 18%;
-        --sidebar-accent: 220 13% 34%;
-        --sidebar-accent-foreground: 220 14% 78%;
-        --sidebar-border: 220 13% 36%;
-        --sidebar-ring: 217.2 91.2% 59.8%;
-        --scrollbar-track: 220 13% 34%;
-        --scrollbar-thumb: 220 13% 44%;
-        --scrollbar-thumb-hover: 220 13% 54%;
+    .retro-dark {
+        --background: 240 10% 10%;
+        --foreground: 240 20% 80%;
+        --card: 240 10% 10%;
+        --card-foreground: 240 20% 80%;
+        --popover: 240 10% 10%;
+        --popover-foreground: 240 20% 80%;
+        --primary: 240 20% 90%;
+        --primary-foreground: 240 10% 10%;
+        --secondary: 240 10% 20%;
+        --secondary-foreground: 240 20% 80%;
+        --muted: 240 10% 20%;
+        --muted-foreground: 240 20% 60%;
+        --accent: 240 10% 20%;
+        --accent-foreground: 240 20% 80%;
+        --destructive: 0 60% 40%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 240 10% 30%;
+        --input: 240 10% 30%;
+        --ring: 240 20% 90%;
+        --chart-1: 30 70% 40%;
+        --chart-2: 120 50% 30%;
+        --chart-3: 210 40% 20%;
+        --chart-4: 300 60% 35%;
+        --chart-5: 30 80% 45%;
+        --radius: 0rem;
+        --sidebar-background: 240 10% 16%;
+        --sidebar-foreground: 240 20% 80%;
+        --sidebar-primary: 240 20% 90%;
+        --sidebar-primary-foreground: 240 10% 10%;
+        --sidebar-accent: 240 10% 26%;
+        --sidebar-accent-foreground: 240 20% 80%;
+        --sidebar-border: 240 10% 36%;
+        --sidebar-ring: 240 50% 50%;
+        --scrollbar-track: 240 10% 26%;
+        --scrollbar-thumb: 240 10% 40%;
+        --scrollbar-thumb-hover: 240 10% 50%;
     }
 }
 
@@ -318,13 +320,13 @@
     }
 
     ::-webkit-scrollbar {
-        @apply w-2 h-2 rounded-full;
+        @apply w-2 h-2 rounded-md;
     }
     ::-webkit-scrollbar-track {
-        @apply bg-scrollbar-track rounded-full;
+        @apply bg-scrollbar-track rounded-md;
     }
     ::-webkit-scrollbar-thumb {
-        @apply bg-scrollbar-thumb rounded-full;
+        @apply bg-scrollbar-thumb rounded-md;
     }
     ::-webkit-scrollbar-thumb:hover {
         @apply bg-scrollbar-thumb-hover;

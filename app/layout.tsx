@@ -34,8 +34,8 @@ export default function RootLayout({
             light: "light",
             dark: "dark",
             dim: "dim",
-            "slate-light": "slate-light",
-            "slate-dark": "slate-dark",
+            "retro-light": "retro-light",
+            "retro-dark": "retro-dark",
           }}
         >
           {children}
