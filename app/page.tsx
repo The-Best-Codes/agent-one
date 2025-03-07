@@ -47,19 +47,24 @@ export default function Chat() {
               isSubmitted={isSubmitted}
             />
           )}
-          {status === "error" && (
-            <p className="text-red-500">{error?.message}</p>
-          )}
           {isSubmitted && messages.length === 0 && (
             <Skeleton className="h-10 w-3/4 rounded-md"></Skeleton>
           )}
         </div>
+
+        {status === "error" && (
+          <div className="p-4 bg-destructive border border-destructive text-destructive-foreground rounded-md mb-4">
+            <p className="font-bold">Error:</p>
+            <p>{error?.message || "An unknown error occurred."}</p>
+          </div>
+        )}
 
         <MainInput
           input={input}
           handleInputChange={handleInputChange}
           handleSubmit={handleSubmit}
           isLoading={isLoading}
+          status={status}
           stop={stop}
         />
       </div>

@@ -18,6 +18,7 @@ interface MainInputProps {
     options?: { experimental_attachments?: FileList | Attachment[] },
   ) => void;
   isLoading: boolean;
+  status: string;
   stop: () => void;
 }
 
@@ -32,10 +33,13 @@ export const MainInput: React.FC<MainInputProps> = ({
   handleInputChange,
   handleSubmit,
   isLoading,
+  status,
   stop,
 }) => {
   const [files, setFiles] = useState<FileList | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const isStreaming = status === "streaming" || status === "submitted";
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -129,7 +133,7 @@ export const MainInput: React.FC<MainInputProps> = ({
           />
         </div>
         <div>
-          {isLoading ? (
+          {isStreaming ? (
             <Button
               variant="destructive"
               type="button"
@@ -142,7 +146,7 @@ export const MainInput: React.FC<MainInputProps> = ({
             <Button
               type="submit"
               size="icon"
-              disabled={isLoading || input.trim().length === 0}
+              disabled={isStreaming || input.trim().length === 0}
             >
               <ArrowUp />
             </Button>
