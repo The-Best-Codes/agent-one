@@ -1,3 +1,4 @@
+import { CopyButton } from "@/components/a1/copy-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -23,9 +24,14 @@ export const TextPart: React.FC<TextPartProps> = ({
   if (isLastTextPart || !shouldExpand) {
     return (
       <div
-        className={`prose max-w-none dark:prose-invert ${!isLastTextPart ? "border rounded-md p-2" : ""}`}
+        className={`relative ${!isLastTextPart ? "border rounded-md p-2" : ""}`}
       >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+        {isLastTextPart && (
+          <CopyButton text={text} className="absolute top-0 right-0" />
+        )}
+        <div className="prose max-w-none dark:prose-invert">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+        </div>
       </div>
     );
   }
