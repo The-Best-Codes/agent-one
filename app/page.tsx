@@ -4,6 +4,7 @@ import { EmptyChatState } from "@/components/a1/chat/empty-state";
 import { ChatMessagesList } from "@/components/a1/chat/message-list";
 import { MainInput } from "@/components/a1/main-input";
 import ThemeToggle from "@/components/a1/theme-switcher";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createChat, loadChat } from "@/lib/chat-store";
 import { useChat } from "@ai-sdk/react";
@@ -43,6 +44,7 @@ export default function Chat() {
     status,
     error,
     stop,
+    reload,
   } = useChat({
     id: chatId || undefined, // Pass chatId to useChat
     initialMessages: initialMessages,
@@ -88,9 +90,16 @@ export default function Chat() {
         </div>
 
         {status === "error" && (
-          <div className="p-4 bg-destructive border border-destructive text-destructive-foreground rounded-md mb-4">
-            <p className="font-bold">Error:</p>
-            <p>{error?.message || "An unknown error occurred."}</p>
+          <div className="p-4 flex flex-row justify-between items-center w-full bg-destructive border border-destructive text-destructive-foreground rounded-md mb-4">
+            <div className="w-full">
+              <p className="font-bold">Error:</p>
+              <p>{error?.message || "An unknown error occurred."}</p>
+            </div>
+            <div className="flex-1">
+              <Button variant="default" onClick={() => reload()}>
+                Retry
+              </Button>
+            </div>
           </div>
         )}
 
