@@ -22,8 +22,8 @@ const MemoryToolSchema = z.object({
   text: MemoryTextSchema,
 });
 
-const HARDCODED_FILENAME = "db/agent_one_memory_db.json";
-const HARDCODED_LOCK_FILENAME = "db/agent_one_memory_db.lock.json";
+const HARDCODED_FILENAME = "db/agent_one_memory_db.json"; // TODO: Check Windows and macOS compatibility
+const HARDCODED_LOCK_FILENAME = "db/agent_one_memory_db.lock.json"; // TODO: Check Windows and macOS compatibility
 
 async function ensureDirectoryExistence(filePath: string) {
   const dirname = path.dirname(filePath);
