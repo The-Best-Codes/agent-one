@@ -3,7 +3,6 @@
 import { EmptyChatState } from "@/components/a1/chat/empty-state";
 import { ChatMessagesList } from "@/components/a1/chat/message-list";
 import { MainInput } from "@/components/a1/main-input";
-import ThemeToggle from "@/components/a1/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createChat, loadChat } from "@/lib/chat-store";
@@ -21,15 +20,13 @@ export default function Chat() {
   useEffect(() => {
     const initializeChat = async () => {
       if (chatIdFromUrl) {
-        // Load existing chat
         const loadedMessages = await loadChat(chatIdFromUrl);
         setInitialMessages(loadedMessages);
         setChatId(chatIdFromUrl);
       } else {
-        // Create new chat
         const newChatId = await createChat();
         setChatId(newChatId);
-        router.push(`/?chatId=${newChatId}`); // Update URL
+        router.push(`/?chatId=${newChatId}`);
       }
     };
 
@@ -46,7 +43,7 @@ export default function Chat() {
     stop,
     reload,
   } = useChat({
-    id: chatId || undefined, // Pass chatId to useChat
+    id: chatId || undefined,
     initialMessages: initialMessages,
     maxSteps: 50,
     sendExtraMessageFields: true,
@@ -73,7 +70,6 @@ export default function Chat() {
   return (
     <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
       <div className="flex flex-col w-full">
-        <ThemeToggle className="w-fit" />
         <div className="flex-1 mb-4 pr-2 overflow-auto" ref={scrollAreaRef}>
           {messages.length === 0 ? (
             <EmptyChatState />
