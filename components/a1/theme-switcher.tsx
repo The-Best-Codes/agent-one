@@ -7,10 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-const ThemeToggle = () => {
+interface ThemeToggleProps {
+  className?: string;
+}
+
+const ThemeToggle = ({ className }: ThemeToggleProps) => {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -31,7 +36,7 @@ const ThemeToggle = () => {
       onValueChange={handleThemeChange}
       defaultValue={resolvedTheme || "system"}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger className={cn("w-full", className)}>
         <SelectValue placeholder="Theme" />
       </SelectTrigger>
       <SelectContent>

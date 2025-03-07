@@ -3,6 +3,7 @@
 import { EmptyChatState } from "@/components/a1/chat/empty-state";
 import { ChatMessagesList } from "@/components/a1/chat/message-list";
 import { MainInput } from "@/components/a1/main-input";
+import ThemeToggle from "@/components/a1/theme-switcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createChat, loadChat } from "@/lib/chat-store";
 import { useChat } from "@ai-sdk/react";
@@ -70,6 +71,7 @@ export default function Chat() {
   return (
     <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
       <div className="flex flex-col w-full">
+        <ThemeToggle className="w-fit" />
         <div className="flex-1 mb-4 pr-2 overflow-auto" ref={scrollAreaRef}>
           {messages.length === 0 ? (
             <EmptyChatState />
