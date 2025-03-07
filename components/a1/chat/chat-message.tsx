@@ -1,5 +1,6 @@
 import { AttachmentsDisplay } from "@/components/a1/chat/attachments-display";
 import { TextPart } from "@/components/a1/chat/cm-text-part";
+import { ChatMessageToolbar } from "@/components/a1/chat/cm-toolbar";
 import { ToolRenderer } from "@/components/a1/tool-renderer";
 import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
@@ -23,6 +24,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   isLastTextPart,
   shouldShowSkeletonInsideLastMessage,
 }) => {
+  let fullText = "";
+
   return (
     <div
       className={`flex flex-col w-full ${
@@ -46,6 +49,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               />
             );
           } else if (part.type === "text") {
+            fullText += part.text;
             if (message.role === "user") {
               return (
                 <div
@@ -81,6 +85,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           <Skeleton className="h-10 w-full rounded-md"></Skeleton>
         )}
       </div>
+      <ChatMessageToolbar text={fullText} />
     </div>
   );
 };
