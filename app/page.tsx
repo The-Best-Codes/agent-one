@@ -4,10 +4,36 @@ import { EmptyChatState } from "@/components/a1/chat/empty-state";
 import { ChatMessagesList } from "@/components/a1/chat/message-list";
 import { MainInput } from "@/components/a1/main-input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createChat, loadChat } from "@/lib/chat-store";
 import { useChat } from "@ai-sdk/react";
-import { useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 export default function Chat() {
+  const searchParams = useSearchParams();
+  const chatIdFromUrl = searchParams.get("chatId");
+  const [chatId, setChatId] = useState<string | null>(chatIdFromUrl);
+  const [initialMessages, setInitialMessages] = useState<any[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const initializeChat = async () => {
+      if (chatIdFromUrl) {
+        // Load existing chat
+        const loadedMessages = await loadChat(chatIdFromUrl);
+        setInitialMessages(loadedMessages);
+        setChatId(chatIdFromUrl);
+      } else {
+        // Create new chat
+        const newChatId = await createChat();
+        setChatId(newChatId);
+        router.push(`/?chatId=${newChatId}`); // Update URL
+      }
+    };
+
+    initializeChat();
+  }, [chatIdFromUrl, router]);
+
   const {
     messages,
     input,
@@ -17,7 +43,10 @@ export default function Chat() {
     error,
     stop,
   } = useChat({
+    id: chatId || undefined, // Pass chatId to useChat
+    initialMessages: initialMessages,
     maxSteps: 50,
+    sendExtraMessageFields: true,
   });
 
   const isLoading = status !== "ready";
@@ -33,6 +62,10 @@ export default function Chat() {
       });
     }
   }, [messages]);
+
+  if (!chatId) {
+    return <div>Loading...</div>; // TODO: Improve loader and handle errors
+  }
 
   return (
     <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
