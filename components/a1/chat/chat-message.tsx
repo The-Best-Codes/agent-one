@@ -1,10 +1,8 @@
 import { AttachmentsDisplay } from "@/components/a1/chat/attachments-display";
+import { TextPart } from "@/components/a1/chat/cm-text-part";
 import { ToolRenderer } from "@/components/a1/tool-renderer";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -82,73 +80,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {shouldShowSkeletonInsideLastMessage && (
           <Skeleton className="h-10 w-full rounded-md"></Skeleton>
         )}
-      </div>
-    </div>
-  );
-};
-
-interface TextPartProps {
-  part: any;
-  isLastTextPart: boolean;
-  isLoading: boolean;
-}
-
-const TextPart: React.FC<TextPartProps> = ({
-  part,
-  isLastTextPart,
-  isLoading,
-}) => {
-  const [expanded, setExpanded] = useState(false);
-  const text = part.text;
-  const shouldExpand = text.length > 300;
-
-  if (isLastTextPart || !shouldExpand) {
-    return (
-      <div
-        className={`prose max-w-none dark:prose-invert ${!isLastTextPart ? "border rounded-md p-2" : ""}`}
-      >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-2 border rounded-md p-2">
-      <div
-        className={cn(
-          "prose max-w-none dark:prose-invert relative",
-          expanded
-            ? "max-h-fit h-48 overflow-auto"
-            : "max-h-24 overflow-hidden",
-          isLoading ? "opacity-50" : "opacity-100",
-        )}
-      >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
-
-        {!expanded && (
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
-        )}
-      </div>
-
-      <div className="flex justify-center">
-        <Button
-          onClick={() => setExpanded(!expanded)}
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-1"
-        >
-          {expanded ? (
-            <>
-              <ChevronUp />
-              <span>Show less</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown />
-              <span>Show more</span>
-            </>
-          )}
-        </Button>
       </div>
     </div>
   );
