@@ -56,9 +56,9 @@ export default function Chat() {
   const isSubmitted = status === "submitted";
 
   return (
-    <main className="flex flex-row w-full h-full">
+    <main className="flex flex-row w-full h-screen">
       <Sidebar currentChatId={chatId} />
-      <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
+      <div className="flex w-full max-w-3xl mx-auto py-12 h-full">
         <ChatInterface
           messages={messages}
           input={input}
