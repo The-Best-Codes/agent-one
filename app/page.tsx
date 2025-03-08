@@ -69,7 +69,7 @@ function Chat() {
   return (
     <>
       <Sidebar currentChatId={chatId} handleChatIdChange={initializeChat} />
-      <div className="flex w-full max-w-3xl mx-auto py-12 h-full">
+      <div className="flex w-full max-w-4xl mx-auto p-4 h-full">
         <ChatInterface
           messages={messages}
           input={input}
