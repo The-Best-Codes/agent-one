@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +10,12 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const retroFont = Press_Start_2P({
+  weight: "400",
+  variable: "--font-retro",
   subsets: ["latin"],
 });
 
@@ -25,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${retroFont.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
@@ -36,7 +42,6 @@ export default function RootLayout({
             dim: "dim",
             "retro-light": "retro-light",
             "retro-dark": "retro-dark",
-            "retro-yellow": "retro-yellow",
           }}
         >
           {children}

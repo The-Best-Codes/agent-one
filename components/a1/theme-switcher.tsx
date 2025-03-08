@@ -43,7 +43,6 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
         <SelectItem value="dim">Dim</SelectItem>
         <SelectItem value="retro-light">Retro (Light)</SelectItem>
         <SelectItem value="retro-dark">Retro (Dark)</SelectItem>
-        <SelectItem value="retro-yellow">Retro (Yellow)</SelectItem>
       </SelectContent>
     </Select>
   );

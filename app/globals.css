@@ -9,7 +9,6 @@
 @custom-variant dim (&:is(.dim *));
 @custom-variant retro-light (&:is(.retro-light *));
 @custom-variant retro-dark (&:is(.retro-dark *));
-@custom-variant retro-yellow (&:is(.retro-yellow *));
 
 @theme {
     --color-background: hsl(var(--background));
@@ -305,53 +304,21 @@
         --scrollbar-thumb: 240 10% 40%;
         --scrollbar-thumb-hover: 240 10% 50%;
     }
-
-    .retro-yellow {
-        --background: 48 80% 98%;
-        --foreground: 0 0% 20%;
-        --card: 48 80% 95%;
-        --card-foreground: 0 0% 20%;
-        --popover: 48 80% 95%;
-        --popover-foreground: 0 0% 20%;
-        --primary: 48 100% 40%;
-        --primary-foreground: 0 0% 95%;
-        --secondary: 48 60% 85%;
-        --secondary-foreground: 0 0% 20%;
-        --muted: 48 50% 90%;
-        --muted-foreground: 0 0% 40%;
-        --accent: 48 50% 85%;
-        --accent-foreground: 0 0% 20%;
-        --destructive: 0 60% 50%;
-        --destructive-foreground: 0 0% 95%;
-        --border: 48 30% 70%;
-        --input: 48 30% 70%;
-        --ring: 48 100% 40%;
-        --radius: 0.25rem;
-        --chart-1: 120 80% 40%;
-        --chart-2: 210 60% 40%;
-        --chart-3: 300 70% 45%;
-        --chart-4: 30 90% 55%;
-        --chart-5: 180 50% 50%;
-        --sidebar-background: 48 70% 92%;
-        --sidebar-foreground: 0 0% 20%;
-        --sidebar-primary: 48 100% 40%;
-        --sidebar-primary-foreground: 0 0% 95%;
-        --sidebar-accent: 48 40% 82%;
-        --sidebar-accent-foreground: 0 0% 20%;
-        --sidebar-border: 48 20% 62%;
-        --sidebar-ring: 48 50% 50%;
-        --scrollbar-track: 48 20% 82%;
-        --scrollbar-thumb: 48 20% 56%;
-        --scrollbar-thumb-hover: 48 20% 46%;
-    }
 }
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
     }
+
     body {
         @apply bg-background text-foreground;
+        font-family: var(--font-geist-sans), system-ui, sans-serif;
+    }
+
+    .retro-light *,
+    .retro-dark * {
+        font-family: var(--font-retro), monospace;
     }
 
     button:not(:disabled),
