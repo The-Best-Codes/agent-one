@@ -16,7 +16,7 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle = ({ className }: ThemeToggleProps) => {
-  const { setTheme, resolvedTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -32,10 +32,7 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
   };
 
   return (
-    <Select
-      onValueChange={handleThemeChange}
-      defaultValue={resolvedTheme || "system"}
-    >
+    <Select onValueChange={handleThemeChange} defaultValue={theme || "system"}>
       <SelectTrigger className={cn("w-full", className)}>
         <SelectValue placeholder="Theme" />
       </SelectTrigger>
