@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { Geist, Geist_Mono, Press_Start_2P } from "next/font/google";
+import { Fira_Code, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const retroFont = Press_Start_2P({
+const retroFont = Fira_Code({
   weight: "400",
   variable: "--font-retro",
   subsets: ["latin"],
