@@ -1,13 +1,14 @@
 "use client";
 
+import { Loader } from "@/components/a1/smooth-loader";
 import { ChatInterface } from "@/components/pages/index";
 import { Sidebar } from "@/components/pages/sidebar";
 import { createChat, loadChat } from "@/lib/chat-store";
 import { useChat } from "@ai-sdk/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function Chat() {
+function Chat() {
   const searchParams = useSearchParams();
   const chatIdFromUrl = searchParams.get("chatId");
   const [chatId, setChatId] = useState<string | null>(chatIdFromUrl);
@@ -56,7 +57,7 @@ export default function Chat() {
   const isSubmitted = status === "submitted";
 
   return (
-    <main className="flex flex-row w-full h-screen">
+    <>
       <Sidebar currentChatId={chatId} />
       <div className="flex w-full max-w-3xl mx-auto py-12 h-full">
         <ChatInterface
@@ -73,6 +74,23 @@ export default function Chat() {
           isLoadingInitial={isLoadingInitial}
         />
       </div>
+    </>
+  );
+}
+
+export default function Page() {
+  return (
+    <main className="flex flex-row w-full h-screen">
+      <Suspense
+        fallback={
+          <div className="flex flex-row w-full h-full items-center justify-center text-lg">
+            <Loader />
+            <span>Loading AgentOne...</span>
+          </div>
+        }
+      >
+        <Chat />
+      </Suspense>
     </main>
   );
 }
