@@ -78,7 +78,7 @@ export const Memory: React.FC<MemoryProps> = ({ args, isLoading, results }) => {
   const operationString = operationToString(args.operation, isLoading);
 
   return (
-    <div className="border rounded-md p-0 px-2 motion-preset-blur-right">
+    <div className="border rounded-md p-0 px-2">
       <div className="flex w-full">
         {isLoading ? (
           <div className="py-2 flex flex-row space-x-2 w-full">

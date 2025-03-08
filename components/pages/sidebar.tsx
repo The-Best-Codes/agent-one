@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 
 interface SidebarProps {
   currentChatId?: string | null;
-  handleChatIdChange: (chatId?: string | null, type?: string) => void;
+  handleChatIdChange: (chatId?: string | null, type?: string) => Promise<void>;
 }
 
 export const Sidebar = ({
@@ -39,11 +39,21 @@ export const Sidebar = ({
 
   const handleCreateNewChat = async () => {
     try {
-      handleChatIdChange(undefined, "new");
+      await handleChatIdChange(undefined, "new");
     } catch (error) {
       console.error("Failed to create new chat:", error);
     } finally {
       loadChatIds();
+    }
+  };
+
+  const handleChatButtonClick = async (id: string) => {
+    try {
+      if (currentChatId !== id) {
+        await handleChatIdChange?.(id);
+      }
+    } catch (error) {
+      console.error("Failed to load chat:", error);
     }
   };
 
@@ -87,7 +97,7 @@ export const Sidebar = ({
                       "block cursor-pointer max-w-full w-full truncate justify-start",
                       currentChatId === id ? "" : "hover:bg-secondary/50",
                     )}
-                    onClick={() => handleChatIdChange?.(id)}
+                    onClick={async () => await handleChatButtonClick(id)}
                   >
                     <span>{id}</span>
                   </Button>
