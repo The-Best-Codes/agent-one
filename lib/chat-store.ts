@@ -54,41 +54,25 @@ export async function getAllChatIds(): Promise<string[]> {
     const chatIdsWithDates = await Promise.all(
       chatFiles.map(async (file) => {
         const chatId = file.slice(0, -5);
+        const chatFilePath = path.join(CHAT_DIR, file);
         try {
-          const chatFilePath = path.join(CHAT_DIR, file);
-          const chatData = await readFile(chatFilePath, "utf8");
-          const messages: Message[] = JSON.parse(chatData);
-
-          // Check if the chat has at least one message and it has a createdAt property
-          if (messages?.length > 0 && messages[0]?.createdAt) {
-            return {
-              id: chatId,
-              createdAt: new Date(messages[0]?.createdAt as unknown as string),
-            };
-          } else {
-            // If createdAt doesn't exist or no messages, use file creation time as fallback
-            const stats = await require("fs").promises.stat(chatFilePath); // Importing fs.promises here as readdir is already async
-            return { id: chatId, createdAt: stats.birthtime };
-          }
+          const stats = await require("fs").promises.stat(chatFilePath);
+          return { id: chatId, lastModified: stats.mtime };
         } catch (error) {
           console.error(`Error reading chat file ${file}:`, error);
-          // Return null for files that can't be read, to be filtered later
           return null;
         }
       }),
     );
 
-    // Filter out null results (files that couldn't be read)
     const validChatIdsWithDates = chatIdsWithDates.filter(
       (chatIdWithDate) => chatIdWithDate !== null,
-    ) as { id: string; createdAt: Date }[];
+    ) as { id: string; lastModified: Date }[];
 
-    // Sort by createdAt in descending order (newest first)
     validChatIdsWithDates.sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      (a, b) => b.lastModified.getTime() - a.lastModified.getTime(),
     );
 
-    // Extract only the chat IDs
     return validChatIdsWithDates.map((chatIdWithDate) => chatIdWithDate.id);
   } catch (error) {
     console.error("Error getting all chat IDs:", error);
