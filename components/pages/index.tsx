@@ -51,9 +51,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     return (
       <div className="flex flex-row gap-2 w-full items-center justify-center">
         <Loader />
-        <p className="text-lg text-muted-foreground animate-pulse">
-          Loading chat...
-        </p>
+        <p className="text-lg text-muted-foreground">Loading chat...</p>
       </div>
     );
   }

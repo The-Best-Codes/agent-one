@@ -34,8 +34,11 @@ export const Sidebar = ({
   };
 
   useEffect(() => {
-    loadChatIds();
-  }, []);
+    const chatIdExists = chatIds.includes(currentChatId || "");
+    if (!chatIdExists) {
+      loadChatIds();
+    }
+  }, [currentChatId, chatIds]);
 
   const handleCreateNewChat = async () => {
     try {
