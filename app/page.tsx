@@ -16,26 +16,36 @@ function Chat() {
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    const initializeChat = async () => {
-      setIsLoadingInitial(true);
-      try {
-        if (chatIdFromUrl) {
-          const loadedMessages = await loadChat(chatIdFromUrl);
-          setInitialMessages(loadedMessages);
-          setChatId(chatIdFromUrl);
-        } else {
-          const newChatId = await createChat();
-          setChatId(newChatId);
-          router.push(`/?chatId=${newChatId}`);
-        }
-      } finally {
-        setIsLoadingInitial(false);
-      }
-    };
+  const initializeChat = async (chatIdProp?: string | null, type?: string) => {
+    setIsLoadingInitial(true);
+    try {
+      let chatIdToUse = chatIdProp || chatIdFromUrl;
 
+      if (type === "new") {
+        chatIdToUse = null;
+      }
+
+      if (!chatIdToUse) {
+        const newChatId = await createChat();
+        chatIdToUse = newChatId;
+        router.push(`/?chatId=${newChatId}`);
+      } else {
+        router.push(`/?chatId=${chatIdToUse}`);
+      }
+
+      const loadedMessages = await loadChat(chatIdToUse);
+      setInitialMessages(loadedMessages);
+      setChatId(chatIdToUse);
+    } catch (error) {
+      console.error("Error initializing chat:", error);
+    } finally {
+      setIsLoadingInitial(false);
+    }
+  };
+
+  useEffect(() => {
     initializeChat();
-  }, [chatIdFromUrl, router]);
+  }, []);
 
   const {
     messages,
@@ -58,7 +68,7 @@ function Chat() {
 
   return (
     <>
-      <Sidebar currentChatId={chatId} />
+      <Sidebar currentChatId={chatId} handleChatIdChange={initializeChat} />
       <div className="flex w-full max-w-3xl mx-auto py-12 h-full">
         <ChatInterface
           messages={messages}

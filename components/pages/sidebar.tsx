@@ -7,18 +7,19 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getAllChatIds } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
 import { Inbox, Plus } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface SidebarProps {
   currentChatId?: string | null;
+  handleChatIdChange: (chatId?: string | null, type?: string) => void;
 }
 
-export const Sidebar = ({ currentChatId }: SidebarProps) => {
+export const Sidebar = ({
+  currentChatId,
+  handleChatIdChange,
+}: SidebarProps) => {
   const [chatIds, setChatIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   const loadChatIds = async () => {
     setLoading(true);
@@ -38,7 +39,7 @@ export const Sidebar = ({ currentChatId }: SidebarProps) => {
 
   const handleCreateNewChat = async () => {
     try {
-      router.push("/");
+      handleChatIdChange(undefined, "new");
     } catch (error) {
       console.error("Failed to create new chat:", error);
     } finally {
@@ -83,11 +84,12 @@ export const Sidebar = ({ currentChatId }: SidebarProps) => {
                     asChild
                     variant={currentChatId === id ? "secondary" : "ghost"}
                     className={cn(
-                      "block max-w-full w-full truncate justify-start",
+                      "block cursor-pointer max-w-full w-full truncate justify-start",
                       currentChatId === id ? "" : "hover:bg-secondary/50",
                     )}
+                    onClick={() => handleChatIdChange?.(id)}
                   >
-                    <Link href={`/?chatId=${id}`}>{id}</Link>
+                    <span>{id}</span>
                   </Button>
                 </li>
               ))}
