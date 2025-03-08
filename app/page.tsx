@@ -1,6 +1,7 @@
 "use client";
 
 import { ChatInterface } from "@/components/pages/index";
+import { Sidebar } from "@/components/pages/sidebar";
 import { createChat, loadChat } from "@/lib/chat-store";
 import { useChat } from "@ai-sdk/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -55,20 +56,23 @@ export default function Chat() {
   const isSubmitted = status === "submitted";
 
   return (
-    <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
-      <ChatInterface
-        messages={messages}
-        input={input}
-        handleInputChange={handleInputChange}
-        handleSubmit={handleSubmit as any}
-        isLoading={isLoading}
-        isSubmitted={isSubmitted}
-        status={status}
-        error={error}
-        stop={stop}
-        reload={reload}
-        isLoadingInitial={isLoadingInitial}
-      />
-    </div>
+    <main className="flex flex-row w-full h-full">
+      <Sidebar currentChatId={chatId} />
+      <div className="flex w-full max-w-3xl mx-auto py-12 h-screen">
+        <ChatInterface
+          messages={messages}
+          input={input}
+          handleInputChange={handleInputChange}
+          handleSubmit={handleSubmit as any}
+          isLoading={isLoading}
+          isSubmitted={isSubmitted}
+          status={status}
+          error={error}
+          stop={stop}
+          reload={reload}
+          isLoadingInitial={isLoadingInitial}
+        />
+      </div>
+    </main>
   );
 }
