@@ -1,8 +1,8 @@
 "use client";
 
 import { EmptyChatState } from "@/components/a1/chat/empty-state";
-import { ChatMessagesList } from "@/components/a1/chat/message-list";
-import { MainInput } from "@/components/a1/main-input";
+import ChatMessagesList from "@/components/a1/chat/message-list";
+import MainInput from "@/components/a1/main-input";
 import { Loader } from "@/components/a1/smooth-loader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
