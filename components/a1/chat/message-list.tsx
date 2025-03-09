@@ -1,10 +1,18 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { useChatContext } from "@/contexts/ChatContext";
-import { ChatMessage } from "./chat-message";
 import type { Message } from "ai";
+import { ChatMessage } from "./chat-message";
 
-export const ChatMessagesList: React.FC = () => {
-  const { messages, isLoading, isSubmitted } = useChatContext();
+interface ChatMessagesListProps {
+  messages: Message[];
+  isLoading: boolean;
+  isSubmitted: boolean;
+}
+
+export const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
+  messages,
+  isLoading,
+  isSubmitted,
+}) => {
   const isToolInvocationLoading = (messageIndex: number, partIndex: number) => {
     if (messages.length === 0 || !isLoading) {
       return false;
