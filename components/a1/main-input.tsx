@@ -96,7 +96,7 @@ export const MainInput: React.FC<MainInputProps> = ({
         className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0"
         value={input}
         placeholder="Enter research instructions..."
-        onChange={handleInputChange}
+        onChange={useCallback(handleInputChange, [handleInputChange])}
         onKeyDown={handleKeyDown}
       />
       <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">

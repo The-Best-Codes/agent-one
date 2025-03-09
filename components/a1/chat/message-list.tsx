@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Message } from "ai";
-import ChatMessage from "./chat-message";
+import ChatMessage from "@/components/a1/chat/chat-message";
 import React from "react";
 
 interface ChatMessagesListProps {
