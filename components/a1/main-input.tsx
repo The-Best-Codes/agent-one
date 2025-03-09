@@ -1,6 +1,7 @@
 import { Attachments } from "@/components/a1/input/attachments";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useChatContext } from "@/contexts/ChatContext";
 import {
   Tooltip,
   TooltipContent,
@@ -10,32 +11,8 @@ import {
 import { ArrowUp, Plus, Square as Stop } from "lucide-react";
 import { useRef, useState } from "react";
 
-interface MainInputProps {
-  input: string;
-  handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleSubmit: (
-    e: React.FormEvent<HTMLFormElement>,
-    options?: { experimental_attachments?: FileList | Attachment[] },
-  ) => void;
-  isLoading: boolean;
-  status: string;
-  stop: () => void;
-}
-
-interface Attachment {
-  name: string;
-  contentType: string;
-  url: string;
-}
-
-export const MainInput: React.FC<MainInputProps> = ({
-  input,
-  handleInputChange,
-  handleSubmit,
-  isLoading,
-  status,
-  stop,
-}) => {
+export const MainInput: React.FC = () => {
+  const { input, handleInputChange, handleSubmit, isLoading, status, stop } = useChatContext();
   const [files, setFiles] = useState<FileList | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

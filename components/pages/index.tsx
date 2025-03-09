@@ -50,11 +50,7 @@ export const ChatInterface: React.FC = () => {
           {messages.length === 0 ? (
             <EmptyChatState />
           ) : (
-            <ChatMessagesList
-              messages={messages}
-              isLoading={isLoading}
-              isSubmitted={isSubmitted}
-            />
+            <ChatMessagesList />
           )}
           {isSubmitted && messages.length === 0 && (
             <Skeleton className="h-10 w-3/4 rounded-md"></Skeleton>
@@ -75,14 +71,7 @@ export const ChatInterface: React.FC = () => {
           </div>
         )}
 
-        <MainInput
-          input={input}
-          handleInputChange={handleInputChange}
-          handleSubmit={handleSubmit}
-          isLoading={isLoading}
-          status={status}
-          stop={stop}
-        />
+        <MainInput />
       </div>
     </div>
   );
