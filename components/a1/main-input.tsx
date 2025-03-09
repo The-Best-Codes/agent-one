@@ -51,15 +51,15 @@ export const MainInput: React.FC<MainInputProps> = ({
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       setFiles(event.target.files);
     }
-  };
+  }, []);
 
-  const handlePlusClick = () => {
+  const handlePlusClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
   const handleRemoveFile = useCallback((index: number) => {
     if (!files) return;
@@ -71,7 +71,7 @@ export const MainInput: React.FC<MainInputProps> = ({
     setFiles(newDataTransfer.files);
   }, [files]);
 
-  const handleSubmitWithFiles = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitWithFiles = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleSubmit(e, { experimental_attachments: files || undefined }); // Pass files or undefined
 
@@ -80,7 +80,7 @@ export const MainInput: React.FC<MainInputProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  };
+  }, [files, handleSubmit]);
 
   return (
     <form

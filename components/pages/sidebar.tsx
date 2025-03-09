@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Inbox, Plus } from "lucide-react";
 import { useChatContext } from "@/contexts/ChatContext";
+import React from "react";
 
-export const Sidebar = () => {
+const Sidebar = () => {
   const {
     chatIds,
     chatId,
@@ -88,3 +89,5 @@ export const Sidebar = () => {
     </div>
   );
 };
+
+export default React.memo(Sidebar);

@@ -16,6 +16,17 @@ interface ChatMessageProps {
   shouldShowSkeletonInsideLastMessage: boolean;
 }
 
+const areEqual = (prevProps: ChatMessageProps, nextProps: ChatMessageProps) => {
+  return (
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.messageIndex === nextProps.messageIndex &&
+    prevProps.isToolLoading === nextProps.isToolLoading &&
+    prevProps.isTextLoading === nextProps.isTextLoading &&
+    prevProps.isLastTextPart === nextProps.isLastTextPart &&
+    prevProps.shouldShowSkeletonInsideLastMessage === nextProps.shouldShowSkeletonInsideLastMessage
+  );
+};
+
 const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   messageIndex,
@@ -90,4 +101,4 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   );
 };
 
-export default React.memo(ChatMessage);
+export default React.memo(ChatMessage, areEqual);
