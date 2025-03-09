@@ -12,11 +12,13 @@ import { useEffect, useState } from "react";
 interface SidebarProps {
   currentChatId?: string | null;
   handleChatIdChange: (chatId?: string | null, type?: string) => Promise<void>;
+  refreshChatNames: boolean;
 }
 
 export const Sidebar = ({
   currentChatId,
   handleChatIdChange,
+  refreshChatNames,
 }: SidebarProps) => {
   const [chatIds, setChatIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,7 @@ export const Sidebar = ({
 
   useEffect(() => {
     loadChatIds();
-  }, []);
+  }, [refreshChatNames]);
 
   useEffect(() => {
     // Check if the current chat ID exists in the loaded chat IDs

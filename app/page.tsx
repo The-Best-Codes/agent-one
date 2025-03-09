@@ -18,6 +18,11 @@ function Chat() {
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const router = useRouter();
 
+  const [refreshChatNames, setRefreshChatNames] = useState(false);
+  const forceSidebarUpdate = () => {
+    setRefreshChatNames((prev) => !prev); // Toggle state to trigger useEffect in Sidebar
+  };
+
   const initializeChat = async (chatIdProp?: string | null, type?: string) => {
     setIsLoadingInitial(true);
     try {
@@ -42,6 +47,8 @@ function Chat() {
         if (loadedMessages.length > 0) {
           chatName = await generateTitle(loadedMessages[0].content);
           await setChatName(chatIdToUse, chatName);
+
+          forceSidebarUpdate();
         } else {
           chatName = "New Chat";
         }
@@ -81,7 +88,11 @@ function Chat() {
 
   return (
     <>
-      <Sidebar currentChatId={chatId} handleChatIdChange={initializeChat} />
+      <Sidebar
+        currentChatId={chatId}
+        handleChatIdChange={initializeChat}
+        refreshChatNames={refreshChatNames}
+      />
       <div className="flex w-full max-w-4xl mx-auto p-4 h-full">
         <ChatInterface
           messages={messages}
