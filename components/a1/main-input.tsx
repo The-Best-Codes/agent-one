@@ -8,7 +8,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ArrowUp, Plus, Square as Stop } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
+import React from "react";
 
 interface MainInputProps {
   input: string;
@@ -60,7 +61,7 @@ export const MainInput: React.FC<MainInputProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleRemoveFile = (index: number) => {
+  const handleRemoveFile = useCallback((index: number) => {
     if (!files) return;
 
     const newFiles = Array.from(files).filter((_, i) => i !== index);
@@ -68,7 +69,7 @@ export const MainInput: React.FC<MainInputProps> = ({
     newFiles.forEach((file) => newDataTransfer.items.add(file));
 
     setFiles(newDataTransfer.files);
-  };
+  }, [files]);
 
   const handleSubmitWithFiles = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -156,3 +157,5 @@ export const MainInput: React.FC<MainInputProps> = ({
     </form>
   );
 };
+
+export default React.memo(MainInput);

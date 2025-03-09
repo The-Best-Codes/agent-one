@@ -20,6 +20,7 @@ interface ChatContextType {
   reload: () => void;
   createNewChat: () => Promise<void>;
   switchChat: (id: string) => Promise<void>;
+  initializeChat: (chatIdProp?: string | null, type?: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -57,10 +58,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const initializeChat = async (chatIdProp?: string | null) => {
+  const initializeChat = async (chatIdProp?: string | null, type?: string) => {
     setIsLoadingInitial(true);
     try {
       let chatIdToUse = chatIdProp || searchParams.get("chatId");
+
+      if (type === "new") {
+        chatIdToUse = null;
+      }
 
       if (!chatIdToUse) {
         const newChatId = await createChat();
@@ -134,6 +139,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     reload,
     createNewChat,
     switchChat,
+    initializeChat,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

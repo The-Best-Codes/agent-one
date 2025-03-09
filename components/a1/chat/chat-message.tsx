@@ -16,7 +16,7 @@ interface ChatMessageProps {
   shouldShowSkeletonInsideLastMessage: boolean;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({
+const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   messageIndex,
   isToolLoading,
@@ -89,3 +89,5 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     </div>
   );
 };
+
+export default React.memo(ChatMessage);

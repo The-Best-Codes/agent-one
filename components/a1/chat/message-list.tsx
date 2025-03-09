@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Message } from "ai";
 import { ChatMessage } from "./chat-message";
+import React from "react";
 
 interface ChatMessagesListProps {
   messages: Message[];
@@ -8,7 +9,7 @@ interface ChatMessagesListProps {
   isSubmitted: boolean;
 }
 
-export const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
+const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
   messages,
   isLoading,
   isSubmitted,
@@ -113,3 +114,5 @@ export const ChatMessagesList: React.FC<ChatMessagesListProps> = ({
     </div>
   );
 };
+
+export default React.memo(ChatMessagesList);

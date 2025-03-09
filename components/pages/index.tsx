@@ -6,36 +6,24 @@ import { MainInput } from "@/components/a1/main-input";
 import { Loader } from "@/components/a1/smooth-loader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Message } from "ai";
 import { useEffect, useRef } from "react";
+import { useChatContext } from "@/contexts/ChatContext";
 
-interface ChatInterfaceProps {
-  messages: Message[];
-  input: string;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  isLoading: boolean;
-  isSubmitted: boolean;
-  status: string;
-  error: Error | undefined;
-  stop: () => void;
-  reload: () => void;
-  isLoadingInitial: boolean;
-}
+export const ChatInterface: React.FC = () => {
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    isSubmitted,
+    status,
+    error,
+    stop,
+    reload,
+    isLoadingInitial,
+  } = useChatContext();
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({
-  messages,
-  input,
-  handleInputChange,
-  handleSubmit,
-  isLoading,
-  isSubmitted,
-  status,
-  error,
-  stop,
-  reload,
-  isLoadingInitial,
-}) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
