@@ -2,7 +2,7 @@
 
 import { Loader } from "@/components/a1/smooth-loader";
 import { ChatInterface } from "@/components/pages/index";
-import { Sidebar } from "@/components/pages/sidebar";
+import Sidebar from "@/components/pages/sidebar";
 import { ChatProvider } from "@/contexts/ChatContext";
 import { Suspense } from "react";
 
