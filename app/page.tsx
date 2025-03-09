@@ -3,15 +3,10 @@
 import { Loader } from "@/components/a1/smooth-loader";
 import { ChatInterface } from "@/components/pages/index";
 import { Sidebar } from "@/components/pages/sidebar";
-import { useChatContext } from "@/contexts/ChatContext";
+import { ChatProvider } from "@/contexts/ChatContext";
 import { Suspense } from "react";
 
 function Chat() {
-  const {
-    chatId,
-    initializeChat,
-  } = useChatContext();
-
   return (
     <>
       <Sidebar />
@@ -33,7 +28,9 @@ export default function Page() {
           </div>
         }
       >
-        <Chat />
+        <ChatProvider>
+          <Chat />
+        </ChatProvider>
       </Suspense>
     </main>
   );
