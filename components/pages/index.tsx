@@ -6,37 +6,24 @@ import { MainInput } from "@/components/a1/main-input";
 import { Loader } from "@/components/a1/smooth-loader";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Message } from "ai";
+import { useChatContext } from "@/contexts/ChatContext";
 import { useEffect, useRef } from "react";
 
-interface ChatInterfaceProps {
-  messages: Message[];
-  input: string;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-  isLoading: boolean;
-  isSubmitted: boolean;
-  status: string;
-  error: Error | undefined;
-  stop: () => void;
-  reload: () => void;
-  isLoadingInitial: boolean;
-}
-
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({
-  messages,
-  input,
-  handleInputChange,
-  handleSubmit,
-  isLoading,
-  isSubmitted,
-  status,
-  error,
-  stop,
-  reload,
-  isLoadingInitial,
-}) => {
+export const ChatInterface: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    isSubmitted,
+    status,
+    error,
+    stop,
+    reload,
+    isLoadingInitial,
+  } = useChatContext();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -90,7 +77,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
         <MainInput
           input={input}
-          handleInputChange={handleInputChange as any}
+          handleInputChange={handleInputChange}
           handleSubmit={handleSubmit}
           isLoading={isLoading}
           status={status}

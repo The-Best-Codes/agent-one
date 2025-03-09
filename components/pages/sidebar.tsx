@@ -4,56 +4,23 @@ import { Loader } from "@/components/a1/smooth-loader";
 import ThemeToggle from "@/components/a1/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getAllChatIds } from "@/lib/chat-store";
+import { useChatContext } from "@/contexts/ChatContext";
 import { cn } from "@/lib/utils";
 import { Inbox, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-interface SidebarProps {
-  currentChatId?: string | null;
-  handleChatIdChange: (chatId?: string | null, type?: string) => Promise<void>;
-}
-
-export const Sidebar = ({
-  currentChatId,
-  handleChatIdChange,
-}: SidebarProps) => {
-  const [chatIds, setChatIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const loadChatIds = async () => {
-    setLoading(true);
-    try {
-      const ids = await getAllChatIds();
-      setChatIds(ids);
-    } catch (error) {
-      console.error("Failed to load chat IDs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const chatIdExists = chatIds.includes(currentChatId || "");
-    if (!chatIdExists) {
-      loadChatIds();
-    }
-  }, [currentChatId, chatIds]);
-
-  const handleCreateNewChat = async () => {
-    try {
-      await handleChatIdChange(undefined, "new");
-    } catch (error) {
-      console.error("Failed to create new chat:", error);
-    } finally {
-      loadChatIds();
-    }
-  };
+export const Sidebar: React.FC = () => {
+  const {
+    chatId,
+    chatIds,
+    createNewChat,
+    switchChat,
+  } = useChatContext();
 
   const handleChatButtonClick = async (id: string) => {
     try {
-      if (currentChatId !== id) {
-        await handleChatIdChange?.(id);
+      if (chatId !== id) {
+        await switchChat(id);
       }
     } catch (error) {
       console.error("Failed to load chat:", error);
@@ -68,7 +35,7 @@ export const Sidebar = ({
         <Button
           variant="default"
           className="w-full"
-          onClick={handleCreateNewChat}
+          onClick={createNewChat}
         >
           <div className="flex flex-row justify-center items-center gap-2">
             <Plus />
@@ -79,12 +46,7 @@ export const Sidebar = ({
 
       <ScrollArea className="flex-1">
         <div className="p-4 pt-0">
-          {loading ? (
-            <div className="flex flex-row gap-2 justify-center items-center">
-              <Loader />
-              <span>Loading chats...</span>
-            </div>
-          ) : chatIds.length === 0 ? (
+          {chatIds.length === 0 ? (
             <div className="flex flex-col gap-2 mt-4 justify-center items-center">
               <Inbox className="w-16 h-16 text-muted" />
               <span>No chats yet</span>
@@ -95,10 +57,10 @@ export const Sidebar = ({
                 <li key={id} className="mb-2">
                   <Button
                     asChild
-                    variant={currentChatId === id ? "secondary" : "ghost"}
+                    variant={chatId === id ? "secondary" : "ghost"}
                     className={cn(
                       "block cursor-pointer max-w-full w-full truncate justify-start",
-                      currentChatId === id ? "" : "hover:bg-secondary/50",
+                      chatId === id ? "" : "hover:bg-secondary/50"
                     )}
                     onClick={async () => await handleChatButtonClick(id)}
                   >

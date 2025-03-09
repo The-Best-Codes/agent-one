@@ -72,8 +72,8 @@ export const MainInput: React.FC<MainInputProps> = ({
 
   const handleSubmitWithFiles = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleSubmit(e, { experimental_attachments: files || undefined }); // Pass files or undefined
-
+    handleSubmit(e, { experimental_attachments: files || undefined });
+    
     // Clear attachments after submitting
     setFiles(null);
     if (fileInputRef.current) {
