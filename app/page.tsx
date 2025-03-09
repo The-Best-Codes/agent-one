@@ -4,6 +4,8 @@ import { Loader } from "@/components/a1/smooth-loader";
 import { ChatInterface } from "@/components/pages/index";
 import { Sidebar } from "@/components/pages/sidebar";
 import { createChat, loadChat } from "@/lib/chat-store";
+import { getChatName, setChatName } from "@/lib/chat-name-store";
+import generateTitle from "@/utils/chat/titleGen";
 import { useChat } from "@ai-sdk/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -33,7 +35,18 @@ function Chat() {
         router.push(`/?chatId=${chatIdToUse}`);
       }
 
-      const loadedMessages = await loadChat(chatIdToUse);
+      let loadedMessages = await loadChat(chatIdToUse);
+      let chatName = await getChatName(chatIdToUse);
+
+      if (!chatName) {
+        if (loadedMessages.length > 0) {
+          chatName = await generateTitle(loadedMessages[0].content);
+          await setChatName(chatIdToUse, chatName);
+        } else {
+          chatName = "New Chat";
+        }
+      }
+
       setInitialMessages(loadedMessages);
       setChatId(chatIdToUse);
     } catch (error) {

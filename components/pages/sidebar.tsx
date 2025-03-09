@@ -4,6 +4,7 @@ import { Loader } from "@/components/a1/smooth-loader";
 import ThemeToggle from "@/components/a1/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getChatName } from "@/lib/chat-name-store";
 import { getAllChatIds } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
 import { Inbox, Plus } from "lucide-react";
@@ -20,12 +21,21 @@ export const Sidebar = ({
 }: SidebarProps) => {
   const [chatIds, setChatIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chatNames, setChatNames] = useState<{ [chatId: string]: string }>({});
 
   const loadChatIds = async () => {
     setLoading(true);
     try {
       const ids = await getAllChatIds();
       setChatIds(ids);
+      // Load chat names in parallel after fetching chat IDs
+      const names: { [chatId: string]: string } = {};
+      await Promise.all(
+        ids.map(async (id) => {
+          names[id] = (await getChatName(id)) || "New Chat";
+        }),
+      );
+      setChatNames(names);
     } catch (error) {
       console.error("Failed to load chat IDs:", error);
     } finally {
@@ -34,9 +44,17 @@ export const Sidebar = ({
   };
 
   useEffect(() => {
-    const chatIdExists = chatIds.includes(currentChatId || "");
-    if (!chatIdExists) {
-      loadChatIds();
+    loadChatIds();
+  }, []);
+
+  useEffect(() => {
+    // Check if the current chat ID exists in the loaded chat IDs
+    if (
+      currentChatId &&
+      chatIds.length > 0 &&
+      !chatIds.includes(currentChatId)
+    ) {
+      loadChatIds(); // Reload if current chat ID is not found after initial load
     }
   }, [currentChatId, chatIds]);
 
@@ -46,7 +64,7 @@ export const Sidebar = ({
     } catch (error) {
       console.error("Failed to create new chat:", error);
     } finally {
-      loadChatIds();
+      await loadChatIds(); // Load chat IDs after creating a new chat
     }
   };
 
@@ -91,21 +109,24 @@ export const Sidebar = ({
             </div>
           ) : (
             <ul>
-              {chatIds.map((id) => (
-                <li key={id} className="mb-2">
-                  <Button
-                    asChild
-                    variant={currentChatId === id ? "secondary" : "ghost"}
-                    className={cn(
-                      "block cursor-pointer max-w-full w-full truncate justify-start",
-                      currentChatId === id ? "" : "hover:bg-secondary/50",
-                    )}
-                    onClick={async () => await handleChatButtonClick(id)}
-                  >
-                    <span>{id}</span>
-                  </Button>
-                </li>
-              ))}
+              {chatIds.map((id) => {
+                const chatName = chatNames[id] || "New Chat";
+                return (
+                  <li key={id} className="mb-2">
+                    <Button
+                      asChild
+                      variant={currentChatId === id ? "secondary" : "ghost"}
+                      className={cn(
+                        "block cursor-pointer max-w-full w-full truncate justify-start",
+                        currentChatId === id ? "" : "hover:bg-secondary/50",
+                      )}
+                      onClick={async () => await handleChatButtonClick(id)}
+                    >
+                      <span>{chatName}</span>
+                    </Button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
