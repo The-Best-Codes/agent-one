@@ -13,14 +13,9 @@ export const ChatInterface: React.FC = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const {
     messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
     isSubmitted,
     status,
     error,
-    stop,
     reload,
     isLoadingInitial,
   } = useChatContext();
