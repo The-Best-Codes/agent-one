@@ -3,7 +3,6 @@
 import { Loader } from "@/components/a1/smooth-loader";
 import ThemeToggle from "@/components/a1/theme-switcher";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { getChatName } from "@/lib/chat-name-store";
 import { getAllChatIds } from "@/lib/chat-store";
 import { cn } from "@/lib/utils";
@@ -95,8 +94,8 @@ export const Sidebar = ({
         </Button>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="p-4 pt-0">
+      <div className="flex-1">
+        <div className="p-4 pt-0 w-full">
           {loading ? (
             <div className="flex flex-row gap-2 justify-center items-center">
               <Loader />
@@ -108,21 +107,20 @@ export const Sidebar = ({
               <span>No chats yet</span>
             </div>
           ) : (
-            <ul>
+            <ul className="w-full">
               {chatIds.map((id) => {
                 const chatName = chatNames[id] || "New Chat";
                 return (
-                  <li key={id} className="mb-2">
+                  <li key={id} className="mb-2 w-full">
                     <Button
-                      asChild
                       variant={currentChatId === id ? "secondary" : "ghost"}
                       className={cn(
-                        "block cursor-pointer max-w-full w-full truncate justify-start",
+                        "flex cursor-pointer w-full justify-start",
                         currentChatId === id ? "" : "hover:bg-secondary/50",
                       )}
                       onClick={async () => await handleChatButtonClick(id)}
                     >
-                      <span>{chatName}</span>
+                      <span className="max-w-full truncate">{chatName}</span>
                     </Button>
                   </li>
                 );
@@ -130,7 +128,7 @@ export const Sidebar = ({
             </ul>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="p-4 border-t border-border">
         <ThemeToggle />

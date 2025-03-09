@@ -3,8 +3,8 @@
 import { Loader } from "@/components/a1/smooth-loader";
 import { ChatInterface } from "@/components/pages/index";
 import { Sidebar } from "@/components/pages/sidebar";
-import { createChat, loadChat } from "@/lib/chat-store";
 import { getChatName, setChatName } from "@/lib/chat-name-store";
+import { createChat, loadChat } from "@/lib/chat-store";
 import generateTitle from "@/utils/chat/titleGen";
 import { useChat } from "@ai-sdk/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -106,7 +106,7 @@ export default function Page() {
     <main className="flex flex-row w-full h-screen">
       <Suspense
         fallback={
-          <div className="flex flex-row w-full h-full items-center justify-center text-lg">
+          <div className="flex flex-row gap-2 w-full h-full items-center justify-center text-lg">
             <Loader />
             <span>Loading AgentOne...</span>
           </div>
