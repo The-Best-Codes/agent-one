@@ -20,7 +20,7 @@ interface SearchResult {
 interface WebSearchProps {
   args: { query: string };
   isLoading?: boolean;
-  results?: { results: SearchResult[] };
+  results?: { results: SearchResult[] } | null;
 }
 
 export const WebSearch: React.FC<WebSearchProps> = ({
@@ -58,7 +58,9 @@ export const WebSearch: React.FC<WebSearchProps> = ({
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                {results && results.results && results.results.length > 0 ? (
+                {results &&
+                results.results &&
+                Array.isArray(results.results) ? (
                   <div className="rounded-md mt-2 p-0 px-2">
                     <h3 className="text-lg font-semibold">
                       {results.results.length ?? 0} Results
