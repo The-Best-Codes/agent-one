@@ -80,8 +80,16 @@
     "tailwindcss-motion": "^1.1.0",
     "typescript": "^5.8.2"
   },
+  "packageManager": "pnpm@10.6.2",
   "trustedDependencies": [
     "onnxruntime-node",
     "protobufjs"
-  ]
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "onnxruntime-node",
+      "protobufjs",
+      "sharp"
+    ]
+  }
 }
