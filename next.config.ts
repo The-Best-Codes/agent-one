@@ -14,9 +14,6 @@ const nextConfig: NextConfig = {
     },
   */
   experimental: {
-    turbo: {
-      treeShaking: process.env.BUILD_TREE_SHAKING === "true",
-    },
     reactCompiler: true,
   },
   serverExternalPackages: ["sharp", "onnxruntime-node"], // When using turbopack, this is required to avoid errors with onnxruntime-node
