@@ -82,8 +82,10 @@
   },
   "packageManager": "pnpm@10.6.2",
   "trustedDependencies": [
+    "@tailwindcss/oxide",
     "onnxruntime-node",
-    "protobufjs"
+    "protobufjs",
+    "sharp"
   ],
   "pnpm": {
     "onlyBuiltDependencies": [
