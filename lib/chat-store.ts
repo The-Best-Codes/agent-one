@@ -9,20 +9,47 @@ const CHAT_DIR = "db/chats"; // TODO: Check Windows and macOS compatibility
 
 function getChatFile(id: string): string {
   if (!existsSync(CHAT_DIR)) {
-    mkdirSync(CHAT_DIR, { recursive: true });
+    try {
+      mkdirSync(CHAT_DIR, { recursive: true });
+      console.log("Created chat directory:", CHAT_DIR);
+    } catch (error) {
+      console.error("Error creating chat directory:", error);
+      throw new Error(
+        `Failed to create chat directory: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
   return path.join(CHAT_DIR, `${id}.json`);
 }
 
 export async function createChat(): Promise<string> {
   const id = generateId();
-  await writeFile(getChatFile(id), "[]");
-  return id;
+  try {
+    const filePath = getChatFile(id);
+    await writeFile(filePath, "[]");
+    console.log("Created chat file:", filePath);
+    return id;
+  } catch (error) {
+    console.error("Error creating chat file:", error);
+    throw new Error(
+      `Failed to create chat: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 export async function loadChat(id: string): Promise<Message[]> {
   try {
-    const data = await readFile(getChatFile(id), "utf8");
+    const filePath = getChatFile(id);
+    console.log("Loading chat from:", filePath);
+
+    if (!existsSync(filePath)) {
+      console.log("Chat file does not exist, creating empty file");
+      await writeFile(filePath, "[]");
+      return [];
+    }
+
+    const data = await readFile(filePath, "utf8");
+    console.log("Chat file loaded successfully");
     return JSON.parse(data);
   } catch (error) {
     // Handle the case where the chat file doesn't exist (e.g., invalid ID)

@@ -26,6 +26,11 @@ function Chat() {
   const initializeChat = async (chatIdProp?: string | null, type?: string) => {
     setIsLoadingInitial(true);
     try {
+      console.log("Initializing chat with props:", {
+        chatIdProp,
+        type,
+        chatIdFromUrl,
+      });
       let chatIdToUse = chatIdProp || chatIdFromUrl;
 
       if (type === "new") {
@@ -33,29 +38,46 @@ function Chat() {
       }
 
       if (!chatIdToUse) {
+        console.log("Creating new chat...");
         const newChatId = await createChat();
+        console.log("New chat created with ID:", newChatId);
         chatIdToUse = newChatId;
         router.push(`/?chatId=${newChatId}`);
       } else {
+        console.log("Using existing chat ID:", chatIdToUse);
         router.push(`/?chatId=${chatIdToUse}`);
       }
 
+      console.log("Loading messages for chat:", chatIdToUse);
       let loadedMessages = await loadChat(chatIdToUse);
+      console.log("Loaded messages count:", loadedMessages.length);
+
+      console.log("Getting chat name for:", chatIdToUse);
       let chatName = await getChatName(chatIdToUse);
+      console.log("Retrieved chat name:", chatName);
 
       if (!chatName) {
         if (loadedMessages.length > 0) {
-          chatName = await generateTitle(loadedMessages[0].content);
-          await setChatName(chatIdToUse, chatName);
-
-          forceSidebarUpdate();
+          console.log("Generating title from first message");
+          try {
+            chatName = await generateTitle(loadedMessages[0].content);
+            console.log("Generated title:", chatName);
+            await setChatName(chatIdToUse, chatName);
+            forceSidebarUpdate();
+          } catch (titleError) {
+            console.error("Error generating title:", titleError);
+            chatName = "New Chat";
+            await setChatName(chatIdToUse, chatName);
+          }
         } else {
+          console.log("No messages, using default chat name");
           chatName = "New Chat";
         }
       }
 
       setInitialMessages(loadedMessages);
       setChatId(chatIdToUse);
+      console.log("Chat initialization complete");
     } catch (error) {
       console.error("Error initializing chat:", error);
     } finally {
