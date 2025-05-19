@@ -5,7 +5,7 @@ import { generateText } from "ai";
 
 export default async function generateTitle(message: string): Promise<string> {
   const { text } = await generateText({
-    model: google("gemini-2.0-flash-001"),
+    model: google("gemini-2.0-flash"),
     system: namePrompt,
     prompt: `\`\`\`user\n${message}\n\`\`\``,
     maxTokens: 100,
