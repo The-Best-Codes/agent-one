@@ -33,7 +33,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       }`}
     >
       <div
-        className={`rounded-md p-3 max-w-3/4 ${
+        className={`rounded-md p-3 max-w-3/4 overflow-auto ${
           message.role === "user" ? "bg-secondary" : "bg-card border"
         } shadow-none motion-safe:motion-preset-blur-up flex flex-col gap-4`}
       >
