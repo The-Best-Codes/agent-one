@@ -1,6 +1,6 @@
 import { tool } from "ai";
-import { ChartToolParametersSchema } from "./renderChartTool/index";
 import { z } from "zod";
+import { ChartToolParametersSchema } from "./renderChartTool/index";
 
 export const renderChart = tool({
   description:
