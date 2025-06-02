@@ -4,6 +4,7 @@ import { imageDesc } from "@/utils/tools/imageDesc";
 import { memory } from "@/utils/tools/memory";
 import { queryPage } from "@/utils/tools/queryPage";
 import { readSite } from "@/utils/tools/readSite";
+import { renderChart } from "@/utils/tools/renderChart";
 import { webSearch } from "@/utils/tools/webSearch";
 import { google } from "@ai-sdk/google";
 import { appendResponseMessages, streamText, tool } from "ai";
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     const { messages, id } = await req.json();
 
     const result = streamText({
-      model: google("gemini-2.0-flash"),
+      model: google("gemini-2.5-flash-preview-04-17"),
       system: defaultPrompt,
       messages,
       tools: {
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
                 "This parameter is here for legacy purposes. Recommended value: 'Hello World'",
               ),
           }),
-          execute: async ({ message }: { message: string }) => {
+          execute: async ({}: { message: string }) => {
             return {
               content: `You should now output a professional, formatted, comprehensive summary of your research findings to the user.`,
             };
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
         memoryTool: memory,
         imageDescTool: imageDesc,
         queryPageTool: queryPage,
+        renderChartTool: renderChart,
       },
       async onFinish({ response }) {
         if (id) {
