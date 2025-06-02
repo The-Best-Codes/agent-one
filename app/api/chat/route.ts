@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const { messages, id } = await req.json();
 
     const result = streamText({
-      model: google("gemini-2.0-flash"),
+      model: google("gemini-2.0-flash-exp"),
       system: defaultPrompt,
       messages,
       tools: {

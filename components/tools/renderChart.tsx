@@ -1,13 +1,37 @@
 "use client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Chart, ChartConfiguration, registerables } from "chart.js";
-import React, { useEffect, useRef, useState } from "react";
+import {
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import React, { useEffect, useState } from "react";
+import { Chart } from "react-chartjs-2";
 
-Chart.register(...registerables);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  LineElement,
+  PointElement,
+  RadialLinearScale,
+);
 
 interface ChartRendererProps {
   args: {
-    chartConfig: ChartConfiguration;
+    chartConfig: any;
   };
   isLoading?: boolean;
   results?: any;
@@ -17,42 +41,21 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
   args,
   isLoading,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartInstance = useRef<Chart | null>(null);
   const [renderError, setRenderError] = useState<string | null>(null);
 
+  const { type, data, options } = args?.chartConfig || {};
+
   useEffect(() => {
-    if (!canvasRef.current || !args?.chartConfig) {
-      return;
+    if (!args?.chartConfig) {
+      setRenderError("No chart configuration provided.");
+    } else if (!type || !data || !data.datasets) {
+      setRenderError(
+        "Invalid chart configuration: missing type, data, or datasets.",
+      );
+    } else {
+      setRenderError(null);
     }
-
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-      chartInstance.current = null;
-    }
-
-    setRenderError(null);
-
-    try {
-      const ctx = canvasRef.current.getContext("2d");
-      if (!ctx) {
-        setRenderError("Could not get canvas context.");
-        return;
-      }
-
-      chartInstance.current = new Chart(ctx, args.chartConfig);
-    } catch (error: any) {
-      console.error("Error rendering chart:", error);
-      setRenderError(`Error rendering chart: ${error.message}`);
-    }
-
-    return () => {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-        chartInstance.current = null;
-      }
-    };
-  }, [args?.chartConfig]);
+  }, [args?.chartConfig, type, data]);
 
   if (isLoading) {
     return (
@@ -67,15 +70,28 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
   if (renderError) {
     return (
       <div className="border rounded-md p-4 text-destructive">
-        <p className="font-medium">Chart Render Error:</p>
+        <p className="font-medium">Chart Configuration Error:</p>
         <p className="text-sm">{renderError}</p>
       </div>
     );
   }
 
+  if (!type || !data || !data.datasets) {
+    return null;
+  }
+
   return (
     <div className="border rounded-md p-0">
-      <canvas ref={canvasRef} className="w-full h-64"></canvas>
+      <Chart
+        type={type}
+        data={data}
+        options={{
+          ...options,
+          responsive: options.responsive || true,
+          maintainAspectRatio: options.maintainAspectRatio || false,
+        }}
+        className="w-full h-64"
+      />
     </div>
   );
 };
