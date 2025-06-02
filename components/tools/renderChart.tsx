@@ -90,7 +90,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
           responsive: options.responsive || true,
           maintainAspectRatio: options.maintainAspectRatio || false,
         }}
-        className="w-full h-64"
+        className="w-full h-64 bg-neutral-100 rounded-md"
       />
     </div>
   );
