@@ -1,21 +1,32 @@
 import { z } from "zod";
 
+const ChartDataPointSchema = z.union([
+  z.number(),
+  z.null(),
+  z
+    .object({ x: z.number(), y: z.number(), r: z.number().optional() })
+    .passthrough(),
+  z.record(z.string(), z.unknown()),
+]);
+
+const ChartDatasetSchema = z
+  .object({
+    data: z
+      .array(ChartDataPointSchema)
+      .describe(
+        "The primary data array for the dataset. Accepts numbers, nulls, or objects (e.g., {x, y}, {x, y, r}) for scatter/bubble charts.",
+      ),
+  })
+  .passthrough()
+  .describe(
+    "A Chart.js dataset object, allowing any standard Chart.js dataset properties like label, backgroundColor, borderColor, borderWidth, type, xAxisID, yAxisID, etc.",
+  );
+
 const ChartDataSchema = z
   .object({
     labels: z.array(z.string().nullable()).optional(),
     datasets: z
-      .array(
-        z
-          .object({
-            data: z
-              .array(z.number().nullable())
-              .describe("The primary data array for the dataset."),
-          })
-          .passthrough()
-          .describe(
-            "A Chart.js dataset object, allowing any standard Chart.js dataset properties like label, backgroundColor, borderColor, borderWidth, type, xAxisID, yAxisID, etc.",
-          ),
-      )
+      .array(ChartDatasetSchema)
       .describe("An array of dataset objects."),
   })
   .describe("The data configuration for the Chart.js chart.");
