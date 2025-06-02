@@ -13,7 +13,13 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import React, { useEffect, useState } from "react";
+import React, {
+  Component,
+  ErrorInfo,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { Chart } from "react-chartjs-2";
 
 ChartJS.register(
@@ -37,7 +43,61 @@ interface ChartRendererProps {
   results?: any;
 }
 
-export const ChartRenderer: React.FC<ChartRendererProps> = ({
+interface ChartErrorBoundaryProps {
+  children?: ReactNode;
+}
+
+interface ChartErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ChartErrorBoundary extends Component<
+  ChartErrorBoundaryProps,
+  ChartErrorBoundaryState
+> {
+  public state: ChartErrorBoundaryState = {
+    hasError: false,
+    error: null,
+  };
+
+  public static getDerivedStateFromError(
+    error: Error,
+  ): ChartErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error(
+      "Uncaught error caught by ChartErrorBoundary:",
+      error,
+      errorInfo,
+    );
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      return (
+        <div className="border rounded-md p-4 text-destructive">
+          <p className="font-medium">Error rendering chart:</p>
+          <p className="text-sm">
+            An unexpected error occurred while trying to render the chart.
+            Please check the chart configuration or component logic.
+          </p>
+          {process.env.NODE_ENV === "development" && this.state.error && (
+            <pre className="text-xs mt-2 overflow-auto max-h-32">
+              {this.state.error.message}
+            </pre>
+          )}
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const ChartRendererContent: React.FC<ChartRendererProps> = ({
   args,
   isLoading,
 }) => {
@@ -87,11 +147,19 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         data={data}
         options={{
           ...options,
-          responsive: options.responsive || true,
-          maintainAspectRatio: options.maintainAspectRatio || false,
+          responsive: options?.responsive ?? true,
+          maintainAspectRatio: options?.maintainAspectRatio ?? false,
         }}
         className="w-full h-64 bg-neutral-100 rounded-md"
       />
     </div>
+  );
+};
+
+export const ChartRenderer: React.FC<ChartRendererProps> = (props) => {
+  return (
+    <ChartErrorBoundary>
+      <ChartRendererContent {...props} />
+    </ChartErrorBoundary>
   );
 };
