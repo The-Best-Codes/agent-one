@@ -25,21 +25,17 @@ export const runJs = tool({
 
     try {
       isolate = new ivm.Isolate({
-        memoryLimit: 128,
+        memoryLimit: 256,
       });
 
       const context = await isolate.createContext();
-
-      const jail = context.global;
-
-      //jail.setSync("console", new ivm.Reference(console));
 
       const script = await isolate.compileScript(code, {
         filename: "sandbox.js",
       });
 
       result = await script.run(context, {
-        timeout: 1000,
+        timeout: 10000,
         copy: true,
       });
     } catch (e: any) {
