@@ -5,6 +5,7 @@ import { memory } from "@/utils/tools/memory";
 import { queryPage } from "@/utils/tools/queryPage";
 import { readSite } from "@/utils/tools/readSite";
 import { renderChart } from "@/utils/tools/renderChart";
+import { runJs } from "@/utils/tools/runJsTool";
 import { webSearch } from "@/utils/tools/webSearch";
 import { google } from "@ai-sdk/google";
 import { appendResponseMessages, streamText, tool } from "ai";
@@ -43,6 +44,7 @@ export async function POST(req: Request) {
         imageDescTool: imageDesc,
         queryPageTool: queryPage,
         renderChartTool: renderChart,
+        runJsTool: runJs,
       },
       async onFinish({ response }) {
         if (id) {

@@ -3,8 +3,9 @@ import { ImageDesc } from "@/components/tools/imageDesc";
 import { Memory } from "@/components/tools/memory";
 import { QueryPage } from "@/components/tools/queryPage";
 import { ReadSite } from "@/components/tools/readSite";
-import { WebSearch } from "@/components/tools/webSearch";
 import { ChartRenderer } from "@/components/tools/renderChart";
+import { RunJs } from "@/components/tools/runJs";
+import { WebSearch } from "@/components/tools/webSearch";
 import type { ToolInvocation } from "ai";
 import { CircleHelp } from "lucide-react";
 import { FunctionComponent } from "react";
@@ -24,6 +25,7 @@ const TOOL_COMPONENTS: { [key: string]: FunctionComponent<BaseToolProps> } = {
   memoryTool: Memory,
   finishResearchTool: FinishResearch,
   renderChartTool: ChartRenderer as FunctionComponent<BaseToolProps>,
+  runJsTool: RunJs as FunctionComponent<BaseToolProps>,
 };
 
 interface ToolRendererProps {
