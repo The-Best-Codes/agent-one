@@ -10,10 +10,14 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.0-beta.11",
+    "@ai-sdk/react": "^2.0.0-beta.20",
+    "@tauri-apps/api": "^2.6.0",
+    "@tauri-apps/plugin-opener": "^2.4.0",
+    "ai": "^5.0.0-beta.20",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "@tauri-apps/api": "^2.6.0",
-    "@tauri-apps/plugin-opener": "^2.4.0"
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.6.2",
