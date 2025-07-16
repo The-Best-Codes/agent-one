@@ -7,13 +7,12 @@ const google = createGoogleGenerativeAI({
   apiKey: import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY,
 });
 
-const customFetch = async (_input: RequestInfo | URL, options: any) => {
-  const m = JSON.parse(options.body) as any;
-  console.log(m);
+const customFetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
+  const m = JSON.parse(init?.body as string);
   const result = streamText({
     model: google("gemini-2.0-flash"),
     messages: convertToModelMessages(m.messages),
-    abortSignal: options.signal,
+    abortSignal: init?.signal as AbortSignal | undefined,
   });
   return result.toUIMessageStreamResponse();
 };
