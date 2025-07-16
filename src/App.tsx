@@ -1,30 +1,10 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { useChat } from "@ai-sdk/react";
-import { convertToModelMessages, DefaultChatTransport, streamText } from "ai";
+import { useChat } from "@/hooks/ai/useChat";
+import { google } from "@/lib/ai/providers/google";
 import { useState } from "react";
-
-const google = createGoogleGenerativeAI({
-  apiKey: import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY,
-});
-
-const customFetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
-  const m = JSON.parse(init?.body as string);
-  const result = streamText({
-    model: google("gemini-2.0-flash"),
-    messages: convertToModelMessages(m.messages),
-    abortSignal: init?.signal as AbortSignal | undefined,
-  });
-  return result.toUIMessageStreamResponse();
-};
 
 function App() {
   const [input, setInput] = useState("");
-
-  const { error, messages, sendMessage } = useChat({
-    transport: new DefaultChatTransport({
-      fetch: customFetch,
-    }),
-  });
+  const { error, messages, sendMessage } = useChat(google("gemini-2.0-flash"));
 
   return (
     <main>

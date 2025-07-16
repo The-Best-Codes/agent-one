@@ -1,0 +1,3 @@
+- Add tailwind (v4)
+- Add react compiler (to help reduce rerenders)
+- Add shadcn UI and decide on theming
