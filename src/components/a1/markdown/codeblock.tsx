@@ -81,6 +81,7 @@ export const CodeBlock = memo(
 
     return (
       <CodeMirror
+        className="rounded-md not-prose text-sm"
         value={content}
         theme={githubDark}
         extensions={extensions}
