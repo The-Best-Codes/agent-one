@@ -1,3 +1,4 @@
+import { CopyButton } from "@/components/a1/copy-button";
 import { cpp } from "@codemirror/lang-cpp";
 import { css } from "@codemirror/lang-css";
 import { go } from "@codemirror/lang-go";
@@ -80,38 +81,45 @@ export const CodeBlock = memo(
     }, [lang]);
 
     return (
-      <CodeMirror
-        className="rounded-md not-prose text-sm"
-        value={content}
-        theme={githubDark}
-        extensions={extensions}
-        editable={false}
-        readOnly={true}
-        basicSetup={{
-          lineNumbers: true,
-          highlightActiveLineGutter: false,
-          highlightSpecialChars: false,
-          history: false,
-          foldGutter: false,
-          drawSelection: false,
-          dropCursor: false,
-          allowMultipleSelections: false,
-          indentOnInput: false,
-          syntaxHighlighting: true,
-          bracketMatching: false,
-          closeBrackets: false,
-          autocompletion: false,
-          rectangularSelection: false,
-          crosshairCursor: false,
-          highlightActiveLine: false,
-          highlightSelectionMatches: false,
-          closeBracketsKeymap: false,
-          searchKeymap: false,
-          foldKeymap: false,
-          completionKeymap: false,
-          lintKeymap: false,
-        }}
-      />
+      <div className="relative rounded-md not-prose text-sm overflow-hidden">
+        <div className="flex items-center justify-between bg-primary text-xs p-0">
+          <span className="ml-2 font-mono text-primary-foreground">
+            {lang || "unknown"}
+          </span>
+          <CopyButton text={content} />
+        </div>
+        <CodeMirror
+          value={content}
+          theme={githubDark}
+          extensions={extensions}
+          editable={false}
+          readOnly={true}
+          basicSetup={{
+            lineNumbers: true,
+            highlightActiveLineGutter: false,
+            highlightSpecialChars: false,
+            history: false,
+            foldGutter: false,
+            drawSelection: false,
+            dropCursor: false,
+            allowMultipleSelections: false,
+            indentOnInput: false,
+            syntaxHighlighting: true,
+            bracketMatching: false,
+            closeBrackets: false,
+            autocompletion: false,
+            rectangularSelection: false,
+            crosshairCursor: false,
+            highlightActiveLine: false,
+            highlightSelectionMatches: false,
+            closeBracketsKeymap: false,
+            searchKeymap: false,
+            foldKeymap: false,
+            completionKeymap: false,
+            lintKeymap: false,
+          }}
+        />
+      </div>
     );
   },
   (prevProps, nextProps) => {
