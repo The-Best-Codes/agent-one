@@ -118,4 +118,20 @@
     body {
         @apply bg-background text-foreground antialiased;
     }
+
+    ::-webkit-scrollbar {
+        @apply w-2 h-2 rounded-md;
+    }
+    ::-webkit-scrollbar-track {
+        @apply bg-transparent rounded-md;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply bg-ring/75 rounded-md;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-ring;
+    }
+    ::-webkit-scrollbar-corner {
+        @apply bg-transparent;
+    }
 }
