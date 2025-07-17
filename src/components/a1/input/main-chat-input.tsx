@@ -14,14 +14,22 @@ export const MainChatInput = () => {
   const [input, setInput] = useState("");
   const { sendMessage, status } = useChatContext();
 
+  const handleSubmit = (
+    e:
+      | React.FormEvent<HTMLFormElement>
+      | React.KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    e.preventDefault();
+    if (input.trim()) {
+      sendMessage({ text: input });
+      setInput("");
+    }
+  };
+
   return (
     <form
       onSubmit={(e) => {
-        e.preventDefault();
-        if (input.trim()) {
-          sendMessage({ text: input });
-          setInput("");
-        }
+        handleSubmit(e);
       }}
       className="flex flex-col bg-secondary pr-2 pt-2 rounded-md border focus-within:border-ring"
     >
@@ -31,6 +39,11 @@ export const MainChatInput = () => {
         value={input}
         placeholder="Ask anything..."
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            handleSubmit(e);
+          }
+        }}
       />
       <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
         <div className="relative">
@@ -58,7 +71,9 @@ export const MainChatInput = () => {
               variant="destructive"
               type="button"
               size="icon"
-              onClick={stop}
+              onClick={() => {
+                console.log("Stop not implemented yet");
+              }}
             >
               <SquareIcon />
             </Button>
