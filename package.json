@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.0-beta.11",
     "@ai-sdk/react": "^2.0.0-beta.20",
+    "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.11",
     "@tauri-apps/api": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2.4.0",
