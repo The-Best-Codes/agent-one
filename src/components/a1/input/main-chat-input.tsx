@@ -31,7 +31,7 @@ export const MainChatInput = () => {
       onSubmit={(e) => {
         handleSubmit(e);
       }}
-      className="flex flex-col bg-secondary pr-2 pt-2 rounded-md border focus-within:border-ring"
+      className="flex flex-col bg-secondary pr-2 pt-2 rounded-md border border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
     >
       <Textarea
         autoFocus
