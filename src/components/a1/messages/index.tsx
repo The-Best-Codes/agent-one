@@ -1,13 +1,14 @@
 import type { UIMessage } from "ai";
+import { memo } from "react";
 import { MessagePartsGroup } from "./parts-group";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartStepStart } from "./parts/step-start";
 import { MessagePartText } from "./parts/text";
 
-export const MessageParts = ({ message }: { message: UIMessage }) => {
+export const MessageParts = memo(({ message }: { message: UIMessage }) => {
   return (
     <MessagePartsGroup>
-      {message.parts.map((part: (typeof message.parts)[number], i) => {
+      {message.parts.map((part, i) => {
         switch (part.type) {
           case "text":
             return (
@@ -28,4 +29,6 @@ export const MessageParts = ({ message }: { message: UIMessage }) => {
       })}
     </MessagePartsGroup>
   );
-};
+});
+
+MessageParts.displayName = "MessageParts";
