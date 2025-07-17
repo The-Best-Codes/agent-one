@@ -1,0 +1,48 @@
+import { type UIMessage } from "@ai-sdk/react";
+import {
+  convertToModelMessages,
+  streamText,
+  type ChatRequestOptions,
+  type ChatTransport,
+  type LanguageModel,
+  type UIMessageChunk,
+} from "ai";
+
+export class CustomChatTransport implements ChatTransport<UIMessage> {
+  private model: LanguageModel;
+
+  constructor(model: LanguageModel) {
+    this.model = model;
+  }
+
+  async sendMessages(
+    options: {
+      chatId: string;
+      messages: UIMessage[];
+      abortSignal: AbortSignal | undefined;
+    } & {
+      trigger:
+        | "submit-user-message"
+        | "submit-tool-result"
+        | "regenerate-assistant-message";
+      messageId: string | undefined;
+    } & ChatRequestOptions,
+  ): Promise<ReadableStream<UIMessageChunk>> {
+    const result = streamText({
+      model: this.model,
+      messages: convertToModelMessages(options.messages),
+      abortSignal: options.abortSignal,
+    });
+    return result.toUIMessageStream();
+  }
+
+  async reconnectToStream(
+    _options: {
+      chatId: string;
+    } & ChatRequestOptions,
+  ): Promise<ReadableStream<UIMessageChunk> | null> {
+    // Leaving this unimplemented for now,
+    // as our implementation is frontend-only.
+    return null;
+  }
+}
