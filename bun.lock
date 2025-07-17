@@ -15,6 +15,7 @@
         "@uiw/codemirror-theme-github": "^4.24.1",
         "@uiw/react-codemirror": "^4.24.1",
         "ai": "^5.0.0-beta.23",
+        "babel-plugin-react-compiler": "^19.1.0-rc.2",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "lucide-react": "^0.525.0",
@@ -451,6 +452,8 @@
     "@vitejs/plugin-react": ["@vitejs/plugin-react@4.6.0", "", { "dependencies": { "@babel/core": "^7.27.4", "@babel/plugin-transform-react-jsx-self": "^7.27.1", "@babel/plugin-transform-react-jsx-source": "^7.27.1", "@rolldown/pluginutils": "1.0.0-beta.19", "@types/babel__core": "^7.20.5", "react-refresh": "^0.17.0" }, "peerDependencies": { "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0-beta.0" } }, "sha512-5Kgff+m8e2PB+9j51eGHEpn5kUzRKH2Ry0qGoe8ItJg7pqnkPrYPkDQZGgGmTa0EGarHrkjLvOdU3b1fzI8otQ=="],
 
     "ai": ["ai@5.0.0-beta.23", "", { "dependencies": { "@ai-sdk/gateway": "1.0.0-beta.9", "@ai-sdk/provider": "2.0.0-beta.1", "@ai-sdk/provider-utils": "3.0.0-beta.4", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4" }, "bin": { "ai": "dist/bin/ai.min.js" } }, "sha512-cG+aeaqcYz/twJkjgQnctG+2jM16OyXGdgKYwCCVz00VzPmGj0vHRda+vTKhOIvqsO0+SttnTHQ+JyUO5I1jfg=="],
+
+    "babel-plugin-react-compiler": ["babel-plugin-react-compiler@19.1.0-rc.2", "", { "dependencies": { "@babel/types": "^7.26.0" } }, "sha512-kSNA//p5fMO6ypG8EkEVPIqAjwIXm5tMjfD1XRPL/sRjYSbJ6UsvORfaeolNWnZ9n310aM0xJP7peW26BuCVzA=="],
 
     "bail": ["bail@2.0.2", "", {}, "sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw=="],
 
