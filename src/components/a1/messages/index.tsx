@@ -12,7 +12,7 @@ export const MessageParts = ({ message }: { message: UIMessage }) => {
   return (
     <MessagePartsGroup>
       {message.parts.map((part: (typeof message.parts)[number], i) => {
-        const Part = partsMap[part.type];
+        const Part = (partsMap as any)[part.type];
         if (!Part) {
           console.error(`Unknown or unhandled message part type: ${part.type}`);
           return <MessagePartFallback key={`${message.id}-${i}`} {...part} />;
