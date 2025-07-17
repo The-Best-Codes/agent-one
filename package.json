@@ -12,11 +12,13 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.0-beta.11",
     "@ai-sdk/react": "^2.0.0-beta.20",
+    "@tailwindcss/vite": "^4.1.11",
     "@tauri-apps/api": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2.4.0",
     "ai": "^5.0.0-beta.20",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.11",
     "zod": "^4.0.5"
   },
   "devDependencies": {
@@ -27,5 +29,8 @@
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "~5.8.3",
     "vite": "^7.0.4"
-  }
+  },
+  "trustedDependencies": [
+    "@tailwindcss/oxide"
+  ]
 }
