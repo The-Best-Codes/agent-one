@@ -1,11 +1,13 @@
-import { MessagePartText } from "./parts/text";
-
 import type { UIMessage } from "ai";
 import { MessagePartsGroup } from "./parts-group";
+
 import { MessagePartFallback } from "./parts/fallback";
+import { MessagePartStepStart } from "./parts/step-start";
+import { MessagePartText } from "./parts/text";
 
 const partsMap = {
   text: MessagePartText,
+  "step-start": MessagePartStepStart,
 };
 
 export const MessageParts = ({ message }: { message: UIMessage }) => {
