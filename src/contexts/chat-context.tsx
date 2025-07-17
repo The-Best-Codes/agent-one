@@ -35,7 +35,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
   model = google("gemma-3-27b-it"),
 }) => {
-  const chatResult = useChat(model);
+  const chatResult = useChat(model, {
+    //experimental_throttle: 250, // TODO: Allow customizing this in settings
+  });
 
   const messagesValue = useMemo(
     () => ({
