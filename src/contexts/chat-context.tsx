@@ -1,6 +1,6 @@
 import { useChat } from "@/hooks/ai/useChat";
 import { google } from "@/lib/ai/providers/google";
-import type { UIMessage } from "@ai-sdk/react";
+import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import type { LanguageModel } from "ai";
 import React, {
   createContext,
@@ -9,12 +9,10 @@ import React, {
   type ReactNode,
 } from "react";
 
-interface ChatContextType {
-  messages: UIMessage[];
-  sendMessage: (message: { text: string }) => void;
-  error: Error | undefined;
-  status: string;
-}
+type ChatContextType = Pick<
+  UseChatHelpers<UIMessage>,
+  "messages" | "sendMessage" | "error" | "status"
+>;
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 

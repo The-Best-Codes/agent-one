@@ -1,11 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useChatContext } from "@/contexts/chat-context";
+import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
 import { useState } from "react";
 
 export const MainChatInput = () => {
   const [input, setInput] = useState("");
-  const { sendMessage, error } = useChatContext();
+  const { sendMessage, status } = useChatContext();
 
   return (
     <form
@@ -16,20 +23,56 @@ export const MainChatInput = () => {
           setInput("");
         }
       }}
-      className="flex gap-2 items-center pt-4"
+      className="flex flex-col bg-secondary pr-2 pt-2 rounded-md border focus-within:border-ring"
     >
-      <Input
+      <Textarea
+        autoFocus
+        className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0"
         value={input}
-        placeholder="Say something..."
-        onChange={(e) => setInput(e.currentTarget.value)}
-        className="flex-1"
+        placeholder="Ask anything..."
+        onChange={(e) => setInput(e.target.value)}
       />
-      <Button type="submit" disabled={!input.trim()}>
-        Send
-      </Button>
-      {error && (
-        <div className="text-destructive text-sm mt-2">{error.message}</div>
-      )}
+      <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
+        <div className="relative">
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  disabled={status !== "ready"}
+                  size="icon"
+                  onClick={() => {
+                    console.log("Attachments not implemented yet");
+                  }}
+                >
+                  <PaperclipIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">Attach files</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        <div>
+          {status === "streaming" ? (
+            <Button
+              variant="destructive"
+              type="button"
+              size="icon"
+              onClick={stop}
+            >
+              <SquareIcon />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              size="icon"
+              disabled={status !== "ready" || input.trim().length === 0}
+            >
+              <ArrowUpIcon />
+            </Button>
+          )}
+        </div>
+      </div>
     </form>
   );
 };
