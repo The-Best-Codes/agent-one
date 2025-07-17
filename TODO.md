@@ -1,3 +1,4 @@
+- Wrap codeblock to overflow (max height) and apply not-prose
 - Fix chat-context.tsx hmr invalidation
 - Add react compiler (to help reduce rerenders)
 - Add shadcn UI and decide on theming

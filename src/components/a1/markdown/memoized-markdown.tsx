@@ -1,19 +1,51 @@
 import { marked } from "marked";
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
+import { CodeBlock } from "./codeblock";
 
-function parseMarkdownIntoBlocks(markdown: string): string[] {
+type MarkdownBlock = {
+  type: string;
+  content: string;
+  lang?: string;
+};
+
+function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
   const tokens = marked.lexer(markdown);
-  return tokens.map((token) => token.raw);
+  const blocks: MarkdownBlock[] = [];
+
+  for (const token of tokens) {
+    if (token.type === "code") {
+      blocks.push({
+        type: "code",
+        content: token.text,
+        lang: token.lang,
+      });
+    } else {
+      blocks.push({
+        type: token.type,
+        content: token.raw,
+      });
+    }
+  }
+  return blocks;
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({ content }: { content: string }) => {
-    return <ReactMarkdown>{content}</ReactMarkdown>;
+  ({ block }: { block: MarkdownBlock }) => {
+    const { type, content, lang } = block;
+
+    if (type === "code") {
+      return <CodeBlock content={content} lang={lang} />;
+    } else {
+      return <ReactMarkdown>{content}</ReactMarkdown>;
+    }
   },
   (prevProps, nextProps) => {
-    if (prevProps.content !== nextProps.content) return false;
-    return true;
+    return (
+      prevProps.block.type === nextProps.block.type &&
+      prevProps.block.content === nextProps.block.content &&
+      prevProps.block.lang === nextProps.block.lang
+    );
   },
 );
 
@@ -24,7 +56,7 @@ export const MemoizedMarkdown = memo(
     const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
 
     return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock content={block} key={`${id}-block_${index}`} />
+      <MemoizedMarkdownBlock block={block} key={`${id}-block_${index}`} />
     ));
   },
 );

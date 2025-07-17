@@ -9,7 +9,7 @@ export const MessagePartText = ({
   text: TextUIPart["text"];
 }) => {
   return (
-    <div className="max-w-full overflow-auto rounded-md">
+    <div className="max-w-full overflow-auto rounded-md prose prose-sm">
       <MemoizedMarkdown id={id} content={text} />
     </div>
   );

@@ -12,10 +12,13 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.0-beta.11",
     "@ai-sdk/react": "^2.0.0-beta.20",
+    "@codemirror/language-data": "^6.5.1",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.11",
     "@tauri-apps/api": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2.4.0",
+    "@uiw/codemirror-theme-github": "^4.24.1",
+    "@uiw/react-codemirror": "^4.24.1",
     "ai": "^5.0.0-beta.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -29,6 +32,7 @@
     "zod": "^4.0.5"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
     "@tauri-apps/cli": "^2.6.2",
     "@types/node": "^24.0.14",
     "@types/react": "^19.1.8",
@@ -39,6 +43,7 @@
     "vite": "^7.0.4"
   },
   "trustedDependencies": [
-    "@tailwindcss/oxide"
+    "@tailwindcss/oxide",
+    "esbuild"
   ]
 }
