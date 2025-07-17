@@ -1,7 +1,4 @@
-import type { StepStartUIPart } from "ai";
-
-export const MessagePartStepStart = ({ ..._props }: StepStartUIPart) => {
+export const MessagePartStepStart = () => {
   // Unused for now
-  void _props;
   return null;
 };

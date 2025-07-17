@@ -14,13 +14,11 @@ export const MessageParts = ({ message }: { message: UIMessage }) => {
               <MessagePartText
                 key={`${message.id}-${i}`}
                 id={message.id}
-                {...part}
+                text={part.text}
               />
             );
           case "step-start":
-            return (
-              <MessagePartStepStart key={`${message.id}-${i}`} {...part} />
-            );
+            return <MessagePartStepStart key={`${message.id}-${i}`} />;
           default:
             console.error(
               `Unknown or unhandled message part type: ${part.type}`,
