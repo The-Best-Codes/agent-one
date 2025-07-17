@@ -1,9 +1,10 @@
+import { MessageParts } from "@/components/a1/messages";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useChat } from "@/hooks/ai/useChat";
 import { google } from "@/lib/ai/providers/google";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 function App() {
   const [input, setInput] = useState("");
@@ -21,22 +22,7 @@ function App() {
                 "justify-start": message.role !== "user",
               })}
             >
-              <div
-                className={cn("max-w-3/4 p-2 rounded-md", {
-                  "bg-secondary text-secondary-foreground":
-                    message.role === "user",
-                  "bg-primary text-primary-foreground": message.role !== "user",
-                })}
-              >
-                {message.parts.map((part, i) => {
-                  switch (part.type) {
-                    case "text":
-                      return <div key={`${message.id}-${i}`}>{part.text}</div>;
-                    default:
-                      return null;
-                  }
-                })}
-              </div>
+              <MessageParts message={message} />
             </div>
           ))}
         </div>
