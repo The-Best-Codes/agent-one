@@ -6,13 +6,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useChatContext } from "@/contexts/chat-context";
+import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
 import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
 import { useState } from "react";
 
 export const MainChatInput = () => {
   const [input, setInput] = useState("");
-  const { sendMessage, status } = useChatContext();
+  const { status } = useChatStatus();
+  const { sendMessage } = useChatFunctions();
 
   const handleSubmit = (
     e:

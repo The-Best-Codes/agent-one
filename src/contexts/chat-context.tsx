@@ -9,12 +9,22 @@ import React, {
   type ReactNode,
 } from "react";
 
-type ChatContextType = Pick<
+type ChatMessagesContextType = Pick<UseChatHelpers<UIMessage>, "messages">;
+type ChatStatusContextType = Pick<
   UseChatHelpers<UIMessage>,
-  "messages" | "sendMessage" | "error" | "status"
+  "status" | "error"
 >;
+type ChatFunctionsContextType = Pick<UseChatHelpers<UIMessage>, "sendMessage">;
 
-const ChatContext = createContext<ChatContextType | undefined>(undefined);
+const ChatMessagesContext = createContext<ChatMessagesContextType | undefined>(
+  undefined,
+);
+const ChatStatusContext = createContext<ChatStatusContextType | undefined>(
+  undefined,
+);
+const ChatFunctionsContext = createContext<
+  ChatFunctionsContextType | undefined
+>(undefined);
 
 interface ChatProviderProps {
   children: ReactNode;
@@ -23,34 +33,63 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = google("gemini-2.0-flash"),
+  model = google("gemma-3-27b-it"),
 }) => {
   const chatResult = useChat(model);
 
-  const contextValue = useMemo(
+  const messagesValue = useMemo(
     () => ({
       messages: chatResult.messages,
-      sendMessage: chatResult.sendMessage,
-      error: chatResult.error,
-      status: chatResult.status,
     }),
-    [
-      chatResult.messages,
-      chatResult.sendMessage,
-      chatResult.error,
-      chatResult.status,
-    ],
+    [chatResult.messages],
+  );
+
+  const statusValue = useMemo(
+    () => ({
+      status: chatResult.status,
+      error: chatResult.error,
+    }),
+    [chatResult.status, chatResult.error],
+  );
+
+  const functionsValue = useMemo(
+    () => ({
+      sendMessage: chatResult.sendMessage,
+    }),
+    [chatResult.sendMessage],
   );
 
   return (
-    <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>
+    <ChatMessagesContext.Provider value={messagesValue}>
+      <ChatStatusContext.Provider value={statusValue}>
+        <ChatFunctionsContext.Provider value={functionsValue}>
+          {children}
+        </ChatFunctionsContext.Provider>
+      </ChatStatusContext.Provider>
+    </ChatMessagesContext.Provider>
   );
 };
 
-export const useChatContext = (): ChatContextType => {
-  const context = useContext(ChatContext);
+export const useChatMessages = (): ChatMessagesContextType => {
+  const context = useContext(ChatMessagesContext);
   if (context === undefined) {
-    throw new Error("useChatContext must be used within a ChatProvider");
+    throw new Error("useChatMessages must be used within a ChatProvider");
+  }
+  return context;
+};
+
+export const useChatStatus = (): ChatStatusContextType => {
+  const context = useContext(ChatStatusContext);
+  if (context === undefined) {
+    throw new Error("useChatStatus must be used within a ChatProvider");
+  }
+  return context;
+};
+
+export const useChatFunctions = (): ChatFunctionsContextType => {
+  const context = useContext(ChatFunctionsContext);
+  if (context === undefined) {
+    throw new Error("useChatFunctions must be used within a ChatProvider");
   }
   return context;
 };

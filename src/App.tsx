@@ -1,10 +1,10 @@
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
-import { useChatContext } from "@/contexts/chat-context";
+import { useChatMessages } from "@/contexts/chat-context";
 import { cn } from "@/lib/utils";
 
 function App() {
-  const { messages } = useChatContext();
+  const { messages } = useChatMessages();
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center">
