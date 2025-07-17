@@ -1,14 +1,13 @@
 import { MessageParts } from "@/components/a1/messages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useChat } from "@/hooks/ai/useChat";
-import { google } from "@/lib/ai/providers/google";
+import { useChatContext } from "@/contexts/chat-context";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 function App() {
   const [input, setInput] = useState("");
-  const { error, messages, sendMessage } = useChat(google("gemini-2.0-flash"));
+  const { error, messages, sendMessage } = useChatContext();
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center">
