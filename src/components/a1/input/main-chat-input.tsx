@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
 import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
 
-export const MainChatInput = () => {
+export const MainChatInput = memo(() => {
   const [input, setInput] = useState("");
   const { status } = useChatStatus();
   const { sendMessage } = useChatFunctions();
@@ -91,4 +91,6 @@ export const MainChatInput = () => {
       </div>
     </form>
   );
-};
+});
+
+MainChatInput.displayName = "MainChatInput";
