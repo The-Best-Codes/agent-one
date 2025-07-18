@@ -7,9 +7,9 @@ function App() {
   const { messages } = useChatMessages();
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center">
+    <main className="h-screen flex flex-col items-center justify-center">
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
-        <div className="flex-1 max-h-full overflow-auto space-y-4 pr-2">
+        <div className="flex-1 max-h-full overflow-auto space-y-4 p-3">
           {messages.map((message) => (
             <div
               key={message.id}
