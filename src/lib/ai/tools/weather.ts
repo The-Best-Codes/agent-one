@@ -20,94 +20,25 @@ export const WeatherTool = tool({
       const data = await response.json();
 
       if (data.current_weather) {
-        const {
-          temperature,
-          weathercode,
-          windspeed,
-          winddirection,
-          is_day,
-          time,
-        } = data.current_weather;
-
-        // Open-Meteo weather codes mapping (simplified for example)
-        // For a full list, refer to Open-Meteo documentation: https://www.open-meteo.com/en/docs/current-weather-api
-        let weatherDescription = "Unknown";
-        switch (weathercode) {
-          case 0:
-            weatherDescription = "Clear sky";
-            break;
-          case 1:
-          case 2:
-          case 3:
-            weatherDescription = "Mainly clear, partly cloudy, and overcast";
-            break;
-          case 45:
-          case 48:
-            weatherDescription = "Fog and depositing rime fog";
-            break;
-          case 51:
-          case 53:
-          case 55:
-            weatherDescription = "Drizzle";
-            break;
-          case 56:
-          case 57:
-            weatherDescription = "Freezing Drizzle";
-            break;
-          case 61:
-          case 63:
-          case 65:
-            weatherDescription = "Rain";
-            break;
-          case 66:
-          case 67:
-            weatherDescription = "Freezing Rain";
-            break;
-          case 71:
-          case 73:
-          case 75:
-            weatherDescription = "Snow fall";
-            break;
-          case 77:
-            weatherDescription = "Snow grains";
-            break;
-          case 80:
-          case 81:
-          case 82:
-            weatherDescription = "Rain showers";
-            break;
-          case 85:
-          case 86:
-            weatherDescription = "Snow showers";
-            break;
-          case 95:
-            weatherDescription = "Thunderstorm";
-            break;
-          case 96:
-          case 99:
-            weatherDescription = "Thunderstorm with slight and heavy hail";
-            break;
-          default:
-            weatherDescription = "Unknown weather code";
-            break;
-        }
+        const { temperature, windspeed, winddirection, is_day, time } =
+          data.current_weather;
 
         const dayNight = is_day === 1 ? "Day" : "Night";
 
-        const getCardinalDirection = (deg: number) => {
-          if (deg > 337.5 || deg <= 22.5) return "N";
-          if (deg > 22.5 && deg <= 67.5) return "NE";
-          if (deg > 67.5 && deg <= 112.5) return "E";
-          if (deg > 112.5 && deg <= 157.5) return "SE";
-          if (deg > 157.5 && deg <= 202.5) return "S";
-          if (deg > 202.5 && deg <= 247.5) return "SW";
-          if (deg > 247.5 && deg <= 292.5) return "W";
-          if (deg > 292.5 && deg <= 337.5) return "NW";
-          return "";
+        return {
+          temperature,
+          windSpeed: windspeed,
+          windDirection: winddirection,
+          dayNight,
+          time,
+          schema: {
+            temperature: "The temperature in Celsius",
+            windSpeed: "The wind speed in km/h",
+            windDirection: "The wind direction in degrees",
+            dayNight: "Current day or night value",
+            time: "The time of the weather data",
+          },
         };
-        const windDirectionCardinal = getCardinalDirection(winddirection);
-
-        return `${weatherDescription} (${dayNight}) with a temperature of ${temperature}°C. Wind: ${windspeed} km/h ${windDirectionCardinal}. (As of ${time})`;
       } else {
         return "Could not retrieve current weather data for the given coordinates.";
       }

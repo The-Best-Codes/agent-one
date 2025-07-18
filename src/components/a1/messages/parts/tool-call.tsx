@@ -1,5 +1,10 @@
 import type { ToolUIPart } from "ai";
-import { AlertCircle, Loader2 } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  Loader2,
+  WrenchIcon,
+  XCircleIcon,
+} from "lucide-react";
 
 interface ToolCallPartProps {
   part: ToolUIPart;
@@ -15,7 +20,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         <div key={callId} className="flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin text-foreground" />
           <span className="text-sm font-bold text-foreground">
-            Preparing {toolName} request...
+            Preparing "{toolName}" request...
           </span>
         </div>
       );
@@ -24,9 +29,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 text-foreground" />
+            <Loader2 className="h-4 w-4 animate-spin text-foreground" />
             <span className="text-sm font-bold text-foreground">
-              Executing {toolName}
+              Executing "{toolName}"
             </span>
           </div>
           {part.input &&
@@ -46,9 +51,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 text-foreground" />
+            <WrenchIcon className="h-4 w-4 text-foreground" />
             <span className="text-sm font-bold text-foreground">
-              {toolName} completed
+              Tool "{toolName}" completed
             </span>
           </div>
           <div className="text-sm text-foreground/80">
@@ -66,7 +71,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-destructive" />
+          <XCircleIcon className="h-4 w-4 text-destructive" />
           <span className="text-sm font-bold text-destructive">
             Error executing {toolName}:{" "}
             <span className="text-destructive/80 font-normal">
@@ -79,7 +84,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 text-foreground" />
+          <AlertTriangleIcon className="h-4 w-4 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown tool call state for {toolName}
           </span>
