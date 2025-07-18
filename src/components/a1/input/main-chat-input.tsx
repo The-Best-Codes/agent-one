@@ -32,7 +32,7 @@ export const MainChatInput = memo(() => {
       onSubmit={(e) => {
         handleSubmit(e);
       }}
-      className="flex flex-col bg-secondary pr-2 pt-2 rounded-md border border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
+      className="w-full flex flex-col bg-secondary pr-2 pt-2 rounded-md rounded-b-none border border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
     >
       <Textarea
         autoFocus
