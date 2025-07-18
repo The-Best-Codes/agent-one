@@ -14,7 +14,10 @@ type ChatStatusContextType = Pick<
   UseChatHelpers<UIMessage>,
   "status" | "error"
 >;
-type ChatFunctionsContextType = Pick<UseChatHelpers<UIMessage>, "sendMessage">;
+type ChatFunctionsContextType = Pick<
+  UseChatHelpers<UIMessage>,
+  "sendMessage" | "addToolResult"
+>;
 
 const ChatMessagesContext = createContext<ChatMessagesContextType | undefined>(
   undefined,
@@ -37,6 +40,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 }) => {
   const chatResult = useChat(model, {
     //experimental_throttle: 250, // TODO: Allow customizing this in settings
+    async onToolCall({ toolCall: _toolCall }) {
+      return undefined;
+    },
   });
 
   const messagesValue = useMemo(
@@ -57,8 +63,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const functionsValue = useMemo(
     () => ({
       sendMessage: chatResult.sendMessage,
+      addToolResult: chatResult.addToolResult,
     }),
-    [chatResult.sendMessage],
+    [chatResult.sendMessage, chatResult.addToolResult],
   );
 
   return (

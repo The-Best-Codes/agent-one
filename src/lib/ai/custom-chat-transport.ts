@@ -7,6 +7,7 @@ import {
   type LanguageModel,
   type UIMessageChunk,
 } from "ai";
+import { toolsObject } from "./tools";
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel;
@@ -32,6 +33,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       model: this.model,
       messages: convertToModelMessages(options.messages),
       abortSignal: options.abortSignal,
+      tools: toolsObject,
     });
     return result.toUIMessageStream();
   }

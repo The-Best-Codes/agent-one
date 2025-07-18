@@ -1,9 +1,11 @@
-import type { UIMessage } from "ai";
+import type { ToolUIPart, UIMessage } from "ai";
 import { memo } from "react";
 import { MessageGroup } from "./group";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartStepStart } from "./parts/step-start";
 import { MessagePartText } from "./parts/text";
+import { MessagePartToolCall } from "./parts/tool-call";
+import { MessagePartToolWeather } from "./parts/tool-weather";
 
 export const MessageParts = memo(({ message }: { message: UIMessage }) => {
   return (
@@ -20,7 +22,20 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
             );
           case "step-start":
             return <MessagePartStepStart key={`${message.id}-${i}`} />;
+          case "tool-weather":
+            return (
+              <MessagePartToolWeather key={`${message.id}-${i}`} part={part} />
+            );
           default:
+            if (part.type.startsWith("tool-")) {
+              return (
+                <MessagePartToolCall
+                  key={`${message.id}-${i}`}
+                  part={part as ToolUIPart}
+                />
+              );
+            }
+
             console.error(
               `Unknown or unhandled message part type: ${part.type}`,
             );
