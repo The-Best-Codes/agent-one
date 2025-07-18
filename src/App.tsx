@@ -13,10 +13,10 @@ function App() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={cn("flex", {
-                "justify-end": message.role === "user",
-                "justify-start": message.role !== "user",
-              })}
+              className={cn(
+                "flex",
+                message.role === "user" ? "justify-end" : "justify-start",
+              )}
             >
               <MessageParts message={message} />
             </div>
