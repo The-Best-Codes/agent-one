@@ -1,3 +1,4 @@
+import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
 import { useChatMessages } from "@/contexts/chat-context";
@@ -10,6 +11,7 @@ function App() {
     <main className="h-screen flex flex-col items-center justify-center">
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
         <div className="flex-1 max-h-full overflow-auto space-y-4 p-0 pr-2 my-2">
+          {messages.length === 0 && <NoMessagesGreeting />}
           {messages.map((message) => (
             <div
               key={message.id}
