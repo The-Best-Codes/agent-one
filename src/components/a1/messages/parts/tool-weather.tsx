@@ -38,7 +38,7 @@ export const MessagePartToolWeather = ({ part }: WeatherToolPartProps) => {
         <Accordion
           type="single"
           collapsible
-          className="w-full rounded-md bg-secondary"
+          className="w-full rounded-md bg-secondary my-1"
         >
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
@@ -50,7 +50,7 @@ export const MessagePartToolWeather = ({ part }: WeatherToolPartProps) => {
                 </span>
               </p>
             </AccordionTrigger>
-            <AccordionContent className="pt-0 pb-2">
+            <AccordionContent className="pt-0 p-2">
               <div className="text-xs text-foreground/80">
                 <span className="font-medium">Parameters:</span>
                 <pre className="mt-1 bg-transparent p-2 rounded text-xs overflow-x-auto">
@@ -67,7 +67,7 @@ export const MessagePartToolWeather = ({ part }: WeatherToolPartProps) => {
         <Accordion
           type="single"
           collapsible
-          className="w-full rounded-md bg-secondary"
+          className="w-full rounded-md bg-secondary my-1"
         >
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
@@ -79,7 +79,7 @@ export const MessagePartToolWeather = ({ part }: WeatherToolPartProps) => {
                 </span>
               </p>
             </AccordionTrigger>
-            <AccordionContent className="pt-0 pb-2">
+            <AccordionContent className="pt-0 p-2">
               <div className="text-sm text-foreground/80">
                 <span className="font-medium">Result:</span>
                 <pre className="mt-1 bg-transparent p-2 rounded text-xs overflow-x-auto">

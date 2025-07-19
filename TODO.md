@@ -1,2 +1,3 @@
+- Use ref in textarea instead of rerender on each keypress
 - Fix chat-context.tsx hmr invalidation
 - Add shadcn UI and decide on theming

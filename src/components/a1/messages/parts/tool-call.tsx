@@ -1,3 +1,9 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import type { ToolUIPart } from "ai";
 import {
   AlertTriangleIcon,
@@ -5,12 +11,6 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"; // Import accordion components
 
 interface ToolCallPartProps {
   part: ToolUIPart;
@@ -33,22 +33,28 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
 
     case "input-available":
       return (
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full rounded-md bg-secondary my-1"
+        >
           <AccordionItem value={callId}>
-            <AccordionTrigger className="flex items-center gap-2 py-2">
-              <Loader2Icon className="h-4 w-4 shrink-0 animate-spin text-foreground" />
-              <span className="text-sm font-bold text-foreground">
-                Executing "{toolName}"
-              </span>
+            <AccordionTrigger className="p-2 hover:no-underline">
+              <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
+                <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+                <span className="max-w-2xl truncate">
+                  Executing "{toolName}"
+                </span>
+              </p>
             </AccordionTrigger>
-            <AccordionContent className="pt-0 pb-2">
+            <AccordionContent className="pt-0 p-2">
               {part.input &&
               typeof part.input === "object" &&
               Object.keys(part.input).length > 0 ? (
                 <div className="text-xs text-foreground/80">
                   <span className="font-medium">Parameters:</span>
                   <pre className="mt-1 bg-transparent p-2 rounded text-xs overflow-x-auto">
-                    {JSON.stringify(part.input as any, null, 2)}
+                    {JSON.stringify(part.input, null, 2)}
                   </pre>
                 </div>
               ) : null}
@@ -59,15 +65,21 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
 
     case "output-available":
       return (
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full rounded-md bg-secondary my-1"
+        >
           <AccordionItem value={callId}>
-            <AccordionTrigger className="flex items-center gap-2 py-2">
-              <WrenchIcon className="h-4 w-4 shrink-0 text-foreground" />
-              <span className="text-sm font-bold text-foreground">
-                Tool "{toolName}" completed
-              </span>
+            <AccordionTrigger className="p-2 hover:no-underline">
+              <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
+                <WrenchIcon className="h-4 w-4 shrink-0 text-foreground" />
+                <span className="max-w-2xl truncate">
+                  Tool "{toolName}" completed
+                </span>
+              </p>
             </AccordionTrigger>
-            <AccordionContent className="pt-0 pb-2">
+            <AccordionContent className="pt-0 p-2">
               <div className="text-sm text-foreground/80">
                 {typeof part.output === "string" ? (
                   <div className="whitespace-pre-wrap">
