@@ -8,13 +8,25 @@ import {
 } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
 import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
-import { memo, useRef } from "react";
+import { memo, useLayoutEffect, useRef } from "react";
 
 export const MainChatInput = memo(() => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const { status } = useChatStatus();
   const { sendMessage } = useChatFunctions();
+
+  const updateSubmitButtonState = () => {
+    if (textareaRef.current && submitButtonRef.current) {
+      const isTextareaEmpty = !textareaRef.current.value.trim();
+      submitButtonRef.current.disabled = status !== "ready" || isTextareaEmpty;
+    }
+  };
+
+  useLayoutEffect(() => {
+    updateSubmitButtonState();
+  }, []);
 
   const handleSubmit = (
     e:
@@ -29,6 +41,7 @@ export const MainChatInput = memo(() => {
       sendMessage({ text: inputValue });
       if (textareaRef.current) {
         textareaRef.current.value = "";
+        updateSubmitButtonState();
       }
     }
   };
@@ -51,6 +64,7 @@ export const MainChatInput = memo(() => {
             handleSubmit(e);
           }
         }}
+        onChange={updateSubmitButtonState}
       />
       <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
         <div className="relative">
@@ -85,7 +99,12 @@ export const MainChatInput = memo(() => {
               <SquareIcon />
             </Button>
           ) : (
-            <Button type="submit" size="icon" disabled={status !== "ready"}>
+            <Button
+              ref={submitButtonRef}
+              type="submit"
+              size="icon"
+              disabled={status !== "ready"}
+            >
               <ArrowUpIcon />
             </Button>
           )}
