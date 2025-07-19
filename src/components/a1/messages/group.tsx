@@ -14,7 +14,7 @@ export const MessageGroup = ({
   return (
     <div
       className={cn(
-        "flex flex-col group",
+        "flex flex-col group wrap-anywhere",
         messageRole === "user"
           ? "max-w-3/4 items-end"
           : "max-w-full items-start",
