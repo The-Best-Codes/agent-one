@@ -1,2 +1,3 @@
 - Fix chat-context.tsx hmr invalidation
 - Decide whether to use themes or more fine-grained theming (e.g., more padding, less padding, more rounded, less rounded, etc. instead of dark/light)
+- Fix codeblock not even appearing bug (only seen in prod build)
