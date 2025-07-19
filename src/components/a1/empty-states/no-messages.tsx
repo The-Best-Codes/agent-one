@@ -26,7 +26,7 @@ export const NoMessagesGreeting = () => {
 
   return (
     <div className="flex justify-center items-center h-full">
-      <h1 className="text-2xl text-foreground">{currentPhrase}</h1>
+      <h1 className="text-2xl text-center text-foreground">{currentPhrase}</h1>
     </div>
   );
 };
