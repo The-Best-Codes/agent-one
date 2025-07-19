@@ -12,7 +12,7 @@ type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
 export function useChat(model: LanguageModel, options?: CustomChatOptions) {
   const chatResult = useChatSDK({
     transport: new CustomChatTransport(model),
-    maxSteps: 5,
+    maxSteps: 5, // TODO: Use `stepCountIs` value here. Get from global config (user-set) when that's implemented.
     ...options,
   });
 

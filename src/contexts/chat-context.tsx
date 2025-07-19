@@ -40,9 +40,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 }) => {
   const chatResult = useChat(model, {
     //experimental_throttle: 250, // TODO: Allow customizing this in settings
-    async onToolCall({ toolCall: _toolCall }) {
-      return undefined;
-    },
   });
 
   const messagesValue = useMemo(

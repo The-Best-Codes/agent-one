@@ -1,6 +1,7 @@
 import { type UIMessage } from "@ai-sdk/react";
 import {
   convertToModelMessages,
+  stepCountIs,
   streamText,
   type ChatRequestOptions,
   type ChatTransport,
@@ -37,6 +38,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       tools: toolsObject,
       toolChoice: "auto",
       system: SYSTEM_PROMPT,
+      stopWhen: stepCountIs(5), // TODO: Move this to settings or some kind of config for the user
     });
     return result.toUIMessageStream();
   }
