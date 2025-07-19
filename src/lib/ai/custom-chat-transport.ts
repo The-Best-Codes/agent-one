@@ -7,6 +7,7 @@ import {
   type LanguageModel,
   type UIMessageChunk,
 } from "ai";
+import { SYSTEM_PROMPT } from "./system-prompt";
 import { toolsObject } from "./tools";
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
@@ -35,8 +36,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       abortSignal: options.abortSignal,
       tools: toolsObject,
       toolChoice: "auto",
-      system:
-        "You are a friendly and helpful general-purpose assistant named AgentOne. The tools available to you do NOT define or constrain your general-purpose capabilities.",
+      system: SYSTEM_PROMPT,
     });
     return result.toUIMessageStream();
   }
