@@ -7,8 +7,16 @@ import { MessagePartText } from "./parts/text";
 import { MessageToolHandler } from "./tool-handler";
 
 export const MessageParts = memo(({ message }: { message: UIMessage }) => {
+  const getCopyContent = () => {
+    return message.parts
+      .map((part) =>
+        typeof (part as any)?.text === "string" ? (part as any).text : "",
+      )
+      .join("\n");
+  };
+
   return (
-    <MessageGroup messageRole={message.role}>
+    <MessageGroup contentToCopy={getCopyContent()} messageRole={message.role}>
       {message.parts.map((part, i) => {
         const key = `${message.id}-${i}`;
 
