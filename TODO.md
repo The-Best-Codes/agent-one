@@ -1,4 +1,4 @@
-- Remove template weather tool
+- Remove template weather tool after fixing tool error continuation
 - Fix bundle size
 - Fix chat-context.tsx hmr invalidation
 - Decide whether to use themes or more fine-grained theming (e.g., more padding, less padding, more rounded, less rounded, etc. instead of dark/light)

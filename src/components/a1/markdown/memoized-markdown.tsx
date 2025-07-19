@@ -1,6 +1,7 @@
 import { marked } from "marked";
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import { CodeBlock } from "./codeblock";
 
 type MarkdownBlock = {
@@ -37,7 +38,9 @@ const MemoizedMarkdownBlock = memo(
     if (type === "code") {
       return <CodeBlock content={content} lang={lang} />;
     } else {
-      return <ReactMarkdown>{content}</ReactMarkdown>;
+      return (
+        <ReactMarkdown remarkPlugins={[remarkBreaks]}>{content}</ReactMarkdown>
+      );
     }
   },
   (prevProps, nextProps) => {
