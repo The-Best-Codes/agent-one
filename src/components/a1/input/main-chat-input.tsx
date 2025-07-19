@@ -47,12 +47,12 @@ export const MainChatInput = memo(() => {
       onSubmit={(e) => {
         handleSubmit(e);
       }}
-      className="w-full flex flex-col bg-secondary pr-2 pt-2 rounded-md rounded-b-none border border-b-0 border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
+      className="w-full flex flex-col bg-secondary pr-2 pt-2 rounded-none md:rounded-md rounded-b-none border border-b-0 border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
     >
       <Textarea
         autoFocus
         ref={textareaRef}
-        className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0"
+        className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-none md:rounded-md rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0"
         placeholder="Ask anything..."
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
