@@ -1,20 +1,8 @@
 import { CopyButton } from "@/components/a1/copy-button";
-import { cpp } from "@codemirror/lang-cpp";
-import { css } from "@codemirror/lang-css";
-import { go } from "@codemirror/lang-go";
-import { html } from "@codemirror/lang-html";
-import { java } from "@codemirror/lang-java";
-import { javascript } from "@codemirror/lang-javascript";
-import { json } from "@codemirror/lang-json";
-import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { php } from "@codemirror/lang-php";
-import { python } from "@codemirror/lang-python";
-import { rust } from "@codemirror/lang-rust";
-import { languages } from "@codemirror/language-data";
 import type { Extension } from "@codemirror/state";
 import { githubDark } from "@uiw/codemirror-theme-github";
 import CodeMirror from "@uiw/react-codemirror";
-import { memo, useMemo } from "react";
+import { memo, useEffect, useState } from "react";
 
 type CodeBlockProps = {
   content: string;
@@ -23,61 +11,104 @@ type CodeBlockProps = {
 
 export const CodeBlock = memo(
   ({ content, lang }: CodeBlockProps) => {
-    const extensions = useMemo(() => {
-      let langExtension: Extension | Extension[];
-      switch (lang) {
-        case "js":
-        case "javascript":
-          langExtension = javascript({ jsx: false, typescript: false });
-          break;
-        case "jsx":
-          langExtension = javascript({ jsx: true, typescript: false });
-          break;
-        case "ts":
-        case "typescript":
-          langExtension = javascript({ typescript: true, jsx: false });
-          break;
-        case "tsx":
-          langExtension = javascript({ typescript: true, jsx: true });
-          break;
-        case "html":
-          langExtension = html();
-          break;
-        case "css":
-          langExtension = css();
-          break;
-        case "json":
-          langExtension = json();
-          break;
-        case "python":
-          langExtension = python();
-          break;
-        case "java":
-          langExtension = java();
-          break;
-        case "cpp":
-        case "c++":
-          langExtension = cpp();
-          break;
-        case "go":
-          langExtension = go();
-          break;
-        case "rust":
-          langExtension = rust();
-          break;
-        case "php":
-          langExtension = php();
-          break;
-        case "markdown":
-          langExtension = markdown({
-            base: markdownLanguage,
-            codeLanguages: languages,
-          });
-          break;
-        default:
-          langExtension = [];
-      }
-      return Array.isArray(langExtension) ? langExtension : [langExtension];
+    const [dynamicLangExtension, setDynamicLangExtension] = useState<
+      Extension[]
+    >([]);
+
+    useEffect(() => {
+      const loadLanguage = async () => {
+        let extension: Extension | Extension[] = [];
+        try {
+          switch (lang) {
+            case "js":
+            case "javascript":
+              const { javascript } = await import(
+                "@codemirror/lang-javascript"
+              );
+              extension = javascript({ jsx: false, typescript: false });
+              break;
+            case "jsx":
+              const { javascript: jsxLang } = await import(
+                "@codemirror/lang-javascript"
+              );
+              extension = jsxLang({ jsx: true, typescript: false });
+              break;
+            case "ts":
+            case "typescript":
+              const { javascript: tsLang } = await import(
+                "@codemirror/lang-javascript"
+              );
+              extension = tsLang({ typescript: true, jsx: false });
+              break;
+            case "tsx":
+              const { javascript: tsxLang } = await import(
+                "@codemirror/lang-javascript"
+              );
+              extension = tsxLang({ typescript: true, jsx: true });
+              break;
+            case "html":
+              const { html } = await import("@codemirror/lang-html");
+              extension = html();
+              break;
+            case "css":
+              const { css } = await import("@codemirror/lang-css");
+              extension = css();
+              break;
+            case "json":
+              const { json } = await import("@codemirror/lang-json");
+              extension = json();
+              break;
+            case "python":
+              const { python } = await import("@codemirror/lang-python");
+              extension = python();
+              break;
+            case "java":
+              const { java } = await import("@codemirror/lang-java");
+              extension = java();
+              break;
+            case "cpp":
+            case "c++":
+              const { cpp } = await import("@codemirror/lang-cpp");
+              extension = cpp();
+              break;
+            case "go":
+              const { go } = await import("@codemirror/lang-go");
+              extension = go();
+              break;
+            case "rust":
+              const { rust } = await import("@codemirror/lang-rust");
+              extension = rust();
+              break;
+            case "php":
+              const { php } = await import("@codemirror/lang-php");
+              extension = php();
+              break;
+            case "markdown":
+              const { markdown, markdownLanguage } = await import(
+                "@codemirror/lang-markdown"
+              );
+              const { languages } = await import("@codemirror/language-data");
+              extension = markdown({
+                base: markdownLanguage,
+                codeLanguages: languages,
+              });
+              break;
+            default:
+              extension = [];
+          }
+        } catch (error) {
+          console.error(
+            `Failed to load CodeMirror language extension for "${lang}":`,
+            error,
+          );
+          extension = [];
+        }
+        setDynamicLangExtension(
+          Array.isArray(extension) ? extension : [extension],
+        );
+      };
+
+      loadLanguage();
     }, [lang]);
 
     return (
@@ -91,7 +122,7 @@ export const CodeBlock = memo(
         <CodeMirror
           value={content}
           theme={githubDark}
-          extensions={extensions}
+          extensions={dynamicLangExtension}
           editable={false}
           readOnly={true}
           basicSetup={{

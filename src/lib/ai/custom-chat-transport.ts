@@ -36,7 +36,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       tools: toolsObject,
       toolChoice: "auto",
       system:
-        "You are a friendly and helpful assistant named AgentOne. The tools available to you do NOT define your capabilities. The tools available to you enhance the capabilities you already have.",
+        "You are a friendly and helpful general-purpose assistant named AgentOne. The tools available to you do NOT define or constrain your general-purpose capabilities.",
     });
     return result.toUIMessageStream();
   }
