@@ -8,25 +8,21 @@ import {
 } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
 import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
-import { memo, useLayoutEffect, useRef } from "react";
+import { memo, useRef, useState } from "react";
 
 export const MainChatInput = memo(() => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const { status } = useChatStatus();
   const { sendMessage } = useChatFunctions();
 
-  const updateSubmitButtonState = () => {
-    if (textareaRef.current && submitButtonRef.current) {
-      const isTextareaEmpty = !textareaRef.current.value.trim();
-      submitButtonRef.current.disabled = status !== "ready" || isTextareaEmpty;
+  const [isEmpty, setIsEmpty] = useState(true);
+
+  const updateIsEmptyState = () => {
+    if (textareaRef.current) {
+      setIsEmpty(!textareaRef.current.value.trim());
     }
   };
-
-  useLayoutEffect(() => {
-    updateSubmitButtonState();
-  }, []);
 
   const handleSubmit = (
     e:
@@ -41,7 +37,7 @@ export const MainChatInput = memo(() => {
       sendMessage({ text: inputValue });
       if (textareaRef.current) {
         textareaRef.current.value = "";
-        updateSubmitButtonState();
+        setIsEmpty(true);
       }
     }
   };
@@ -64,7 +60,7 @@ export const MainChatInput = memo(() => {
             handleSubmit(e);
           }
         }}
-        onChange={updateSubmitButtonState}
+        onChange={updateIsEmptyState}
       />
       <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
         <div className="relative">
@@ -100,10 +96,9 @@ export const MainChatInput = memo(() => {
             </Button>
           ) : (
             <Button
-              ref={submitButtonRef}
               type="submit"
               size="icon"
-              disabled={status !== "ready"}
+              disabled={status !== "ready" || isEmpty}
             >
               <ArrowUpIcon />
             </Button>
