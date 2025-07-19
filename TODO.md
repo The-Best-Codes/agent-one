@@ -1,4 +1,3 @@
-- Make codeblock overflow properly (not a fixed overflow width, which won't work on smaller screens, but dynamic e.g. max-w-full)
 - Remove template weather tool after fixing tool error continuation
 - Fix chat-context.tsx hmr invalidation
 - Decide whether to use themes or more fine-grained theming (e.g., more padding, less padding, more rounded, less rounded, etc. instead of dark/light)
