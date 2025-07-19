@@ -22,6 +22,7 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
             );
           case "step-start":
             return <MessagePartStepStart key={`${message.id}-${i}`} />;
+          // TODO: Move tool case handling to a seperate file and import it here
           case "tool-weather":
             return (
               <MessagePartToolWeather key={`${message.id}-${i}`} part={part} />
