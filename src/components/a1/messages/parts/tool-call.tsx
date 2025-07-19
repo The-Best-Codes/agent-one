@@ -18,7 +18,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin text-foreground" />
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Preparing "{toolName}" request...
           </span>
@@ -29,7 +29,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin text-foreground" />
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-foreground" />
             <span className="text-sm font-bold text-foreground">
               Executing "{toolName}"
             </span>
@@ -51,7 +51,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <WrenchIcon className="h-4 w-4 text-foreground" />
+            <WrenchIcon className="h-4 w-4 shrink-0 text-foreground" />
             <span className="text-sm font-bold text-foreground">
               Tool "{toolName}" completed
             </span>
@@ -71,7 +71,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-2">
-          <XCircleIcon className="h-4 w-4 text-destructive" />
+          <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
           <span className="text-sm font-bold text-destructive">
             Error executing {toolName}:{" "}
             <span className="text-destructive/80 font-normal">
@@ -84,7 +84,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-2">
-          <AlertTriangleIcon className="h-4 w-4 text-foreground" />
+          <AlertTriangleIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown tool call state for {toolName}
           </span>

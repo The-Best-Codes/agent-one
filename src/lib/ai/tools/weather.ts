@@ -40,11 +40,15 @@ export const WeatherTool = tool({
           },
         };
       } else {
-        return "Could not retrieve current weather data for the given coordinates.";
+        throw new Error(
+          "Could not retrieve current weather data for the given coordinates.",
+        );
       }
     } catch (error) {
       console.error("Error fetching weather data:", error);
-      return `Failed to get weather data: ${error instanceof Error ? error.message : String(error)}`;
+      throw new Error(
+        `Failed to get weather data: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   },
 });
