@@ -33,7 +33,7 @@ export const MainChatInput = memo(() => {
 
     const inputValue = textareaRef.current?.value || "";
 
-    if (inputValue.trim()) {
+    if (inputValue.trim() && status === "ready") {
       sendMessage({ text: inputValue });
       if (textareaRef.current) {
         textareaRef.current.value = "";

@@ -34,6 +34,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messages: convertToModelMessages(options.messages),
       abortSignal: options.abortSignal,
       tools: toolsObject,
+      toolChoice: "auto",
+      system:
+        "You are a friendly and helpful assistant named AgentOne. The tools available to you do NOT define your capabilities. The tools available to you enhance the capabilities you already have.",
     });
     return result.toUIMessageStream();
   }
