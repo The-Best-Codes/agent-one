@@ -7,7 +7,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
-import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
+import {
+  ArrowUpIcon,
+  Loader2Icon,
+  PaperclipIcon,
+  SquareIcon,
+} from "lucide-react";
 import { memo, useRef, useState } from "react";
 
 export const MainChatInput = memo(() => {
@@ -100,7 +105,11 @@ export const MainChatInput = memo(() => {
               size="icon"
               disabled={status !== "ready" || isEmpty}
             >
-              <ArrowUpIcon />
+              {status === "submitted" ? (
+                <Loader2Icon className="animate-spin" />
+              ) : (
+                <ArrowUpIcon />
+              )}
             </Button>
           )}
         </div>
