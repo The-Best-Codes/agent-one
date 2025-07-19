@@ -10,7 +10,7 @@ function App() {
   return (
     <main className="h-screen flex flex-col items-center justify-center">
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
-        <div className="flex-1 max-h-full overflow-auto space-y-4 p-0 pr-2 my-2">
+        <div className="flex-1 max-h-full overflow-auto space-y-0 p-0 pr-2 my-2">
           {messages.length === 0 && <NoMessagesGreeting />}
           {messages.map((message) => (
             <div
