@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
 import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useRef } from "react";
 
 export const MainChatInput = memo(() => {
-  const [input, setInput] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const { status } = useChatStatus();
   const { sendMessage } = useChatFunctions();
 
@@ -21,9 +22,14 @@ export const MainChatInput = memo(() => {
       | React.KeyboardEvent<HTMLTextAreaElement>,
   ) => {
     e.preventDefault();
-    if (input.trim()) {
-      sendMessage({ text: input });
-      setInput("");
+
+    const inputValue = textareaRef.current?.value || "";
+
+    if (inputValue.trim()) {
+      sendMessage({ text: inputValue });
+      if (textareaRef.current) {
+        textareaRef.current.value = "";
+      }
     }
   };
 
@@ -36,12 +42,12 @@ export const MainChatInput = memo(() => {
     >
       <Textarea
         autoFocus
+        ref={textareaRef}
         className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0"
-        value={input}
         placeholder="Ask anything..."
-        onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
             handleSubmit(e);
           }
         }}
@@ -79,11 +85,7 @@ export const MainChatInput = memo(() => {
               <SquareIcon />
             </Button>
           ) : (
-            <Button
-              type="submit"
-              size="icon"
-              disabled={status !== "ready" || input.trim().length === 0}
-            >
+            <Button type="submit" size="icon" disabled={status !== "ready"}>
               <ArrowUpIcon />
             </Button>
           )}
