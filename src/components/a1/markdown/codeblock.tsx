@@ -81,7 +81,7 @@ export const CodeBlock = memo(
     }, [lang]);
 
     return (
-      <div className="relative rounded-md not-prose text-sm overflow-hidden">
+      <div className="relative rounded-md not-prose text-sm max-w-[calc(48rem-2rem)] overflow-auto">
         <div className="flex items-center justify-between bg-primary text-xs p-0">
           <span className="ml-2 font-mono text-primary-foreground">
             {lang || "unknown"}
