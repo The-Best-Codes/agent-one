@@ -25,7 +25,7 @@ export const MessagePartToolWeather = ({ part }: WeatherToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <div className="animate-spin">
-            <Loader2Icon className="h-4 w-4 shrink-0 text-foreground" />
+            <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
             Checking weather...
