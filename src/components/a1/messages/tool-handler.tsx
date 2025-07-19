@@ -2,7 +2,6 @@ import type { ToolUIPart, UIMessage } from "ai";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartToolCall } from "./parts/tool-call";
 import { MessagePartToolDateTime } from "./parts/tool-dateTime";
-import { MessagePartToolWeather } from "./parts/tool-weather";
 
 type MessageToolHandlerProps = {
   id: string;
@@ -18,8 +17,6 @@ export function MessageToolHandler({ id, part }: MessageToolHandlerProps) {
   }
 
   switch (part.type) {
-    case "tool-weather":
-      return <MessagePartToolWeather key={`${id}-${part.type}`} part={part} />;
     case "tool-dateTime":
       return <MessagePartToolDateTime key={`${id}-${part.type}`} part={part} />;
     default:
