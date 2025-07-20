@@ -40,7 +40,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
           <CalendarDaysIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
-            Current date and time: {output?.formatted}
+            Checked date and time ({output?.formatted})
           </span>
         </p>
       );

@@ -2,6 +2,7 @@ import type { UIMessage } from "ai";
 import { memo } from "react";
 import { MessageGroup } from "./group";
 import { MessagePartFallback } from "./parts/fallback";
+import { MessagePartReasoning } from "./parts/reasoning";
 import { MessagePartStepStart } from "./parts/step-start";
 import { MessagePartText } from "./parts/text";
 import { MessageToolHandler } from "./tool-handler";
@@ -30,6 +31,8 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
                 messageRole={message.role}
               />
             );
+          case "reasoning":
+            return <MessagePartReasoning key={key} text={part.text} />;
           case "step-start":
             return <MessagePartStepStart key={key} />;
           default:

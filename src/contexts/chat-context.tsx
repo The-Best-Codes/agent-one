@@ -36,7 +36,7 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = groq("moonshotai/kimi-k2-instruct"),
+  model = groq("qwen/qwen3-32b"),
 }) => {
   const chatResult = useChat(model, {
     //experimental_throttle: 250, // TODO: Allow customizing this in settings
