@@ -86,6 +86,7 @@ export const CodeBlock = memo(
               extension = php();
               break;
             case "md":
+            case "mdx":
             case "markdown":
               const { markdown, markdownLanguage } = await import(
                 "@codemirror/lang-markdown"
