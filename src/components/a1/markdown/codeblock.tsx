@@ -116,44 +116,51 @@ export const CodeBlock = memo(
     }, [lang]);
 
     return (
-      <div className="relative rounded-md not-prose text-sm overflow-auto min-w-0">
-        <div className="flex items-center justify-between bg-primary text-xs p-0">
-          <span className="ml-2 font-mono text-primary-foreground">
-            {lang || "unknown"}
-          </span>
-          <CopyButton text={content} />
+      <div className="not-prose text-sm min-w-0">
+        <div className="sticky bg-secondary top-0 z-10">
+          <div className="flex rounded-t-md items-center justify-between bg-[#0d1117] text-xs p-0">
+            <span className="ml-2 font-mono text-primary-foreground">
+              {lang || "unknown"}
+            </span>
+            <CopyButton
+              className="bg-[#0d1117] hover:bg-[#0d1117]"
+              text={content}
+            />
+          </div>
         </div>
-        <CodeMirror
-          value={content}
-          theme={githubDark}
-          extensions={dynamicLangExtension}
-          editable={false}
-          readOnly={true}
-          basicSetup={{
-            lineNumbers: false, // Allow changing in settings when settings are implemented?
-            highlightActiveLineGutter: false,
-            highlightSpecialChars: false,
-            history: false,
-            foldGutter: false,
-            drawSelection: false,
-            dropCursor: false,
-            allowMultipleSelections: false,
-            indentOnInput: false,
-            syntaxHighlighting: true,
-            bracketMatching: false,
-            closeBrackets: false,
-            autocompletion: false,
-            rectangularSelection: false,
-            crosshairCursor: false,
-            highlightActiveLine: false,
-            highlightSelectionMatches: false,
-            closeBracketsKeymap: false,
-            searchKeymap: false,
-            foldKeymap: false,
-            completionKeymap: false,
-            lintKeymap: false,
-          }}
-        />
+        <div className="overflow-auto rounded-b-md">
+          <CodeMirror
+            value={content}
+            theme={githubDark}
+            extensions={dynamicLangExtension}
+            editable={false}
+            readOnly={true}
+            basicSetup={{
+              lineNumbers: false, // Allow changing in settings when settings are implemented?
+              highlightActiveLineGutter: false,
+              highlightSpecialChars: false,
+              history: false,
+              foldGutter: false,
+              drawSelection: false,
+              dropCursor: false,
+              allowMultipleSelections: false,
+              indentOnInput: false,
+              syntaxHighlighting: true,
+              bracketMatching: false,
+              closeBrackets: false,
+              autocompletion: false,
+              rectangularSelection: false,
+              crosshairCursor: false,
+              highlightActiveLine: false,
+              highlightSelectionMatches: false,
+              closeBracketsKeymap: false,
+              searchKeymap: false,
+              foldKeymap: false,
+              completionKeymap: false,
+              lintKeymap: false,
+            }}
+          />
+        </div>
       </div>
     );
   },
