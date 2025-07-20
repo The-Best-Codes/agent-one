@@ -1,5 +1,5 @@
 import { useChat } from "@/hooks/ai/useChat";
-import { groq } from "@/lib/ai/providers/groq";
+import { google } from "@/lib/ai/providers/google";
 import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import type { LanguageModel } from "ai";
 import React, {
@@ -36,7 +36,7 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = groq("qwen/qwen3-32b"),
+  model = google("gemini-2.0-flash"),
 }) => {
   const chatResult = useChat(model, {
     //experimental_throttle: 250, // TODO: Allow customizing this in settings
