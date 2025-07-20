@@ -23,7 +23,12 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
         switch (part.type) {
           case "text":
             return (
-              <MessagePartText key={key} id={message.id} text={part.text} />
+              <MessagePartText
+                key={key}
+                id={message.id}
+                text={part.text}
+                messageRole={message.role}
+              />
             );
           case "step-start":
             return <MessagePartStepStart key={key} />;

@@ -1,16 +1,19 @@
 import { CopyButton } from "@/components/a1/copy-button";
+import { cn } from "@/lib/utils";
 import type { Extension } from "@codemirror/state";
 import { githubDark } from "@uiw/codemirror-theme-github";
 import CodeMirror from "@uiw/react-codemirror";
+import type { UIMessage } from "ai";
 import { memo, useEffect, useState } from "react";
 
 type CodeBlockProps = {
   content: string;
   lang?: string;
+  messageRole?: UIMessage["role"];
 };
 
 export const CodeBlock = memo(
-  ({ content, lang }: CodeBlockProps) => {
+  ({ content, lang, messageRole }: CodeBlockProps) => {
     const [dynamicLangExtension, setDynamicLangExtension] = useState<
       Extension[]
     >([]);
@@ -120,8 +123,12 @@ export const CodeBlock = memo(
         className="not-prose text-sm min-w-0 rounded-md"
         style={{ clipPath: "inset(0 round 0.375rem)" }}
       >
-        {/* TODO: Change the background color based on if this codeblock is in a user or assistant message (and provide a prop to remove the bg too) */}
-        <div className="sticky bg-secondary top-0 z-10">
+        <div
+          className={cn(
+            "sticky top-0 z-10",
+            messageRole === "user" ? "bg-secondary" : "bg-background",
+          )}
+        >
           <div className="flex rounded-t-md items-center justify-between bg-[#0d1117] text-xs p-0">
             <span className="ml-2 font-mono text-white">
               {lang || "unknown"}

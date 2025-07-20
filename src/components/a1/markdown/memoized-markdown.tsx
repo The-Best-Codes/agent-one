@@ -1,3 +1,4 @@
+import type { UIMessage } from "ai";
 import { marked } from "marked";
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
@@ -32,11 +33,19 @@ function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({ block }: { block: MarkdownBlock }) => {
+  ({
+    block,
+    messageRole,
+  }: {
+    block: MarkdownBlock;
+    messageRole: UIMessage["role"];
+  }) => {
     const { type, content, lang } = block;
 
     if (type === "code") {
-      return <CodeBlock content={content} lang={lang} />;
+      return (
+        <CodeBlock content={content} lang={lang} messageRole={messageRole} />
+      );
     } else {
       return (
         <ReactMarkdown remarkPlugins={[remarkBreaks]}>{content}</ReactMarkdown>
@@ -55,11 +64,23 @@ const MemoizedMarkdownBlock = memo(
 MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
 
 export const MemoizedMarkdown = memo(
-  ({ content, id }: { content: string; id: string }) => {
+  ({
+    content,
+    id,
+    messageRole,
+  }: {
+    content: string;
+    id: string;
+    messageRole: UIMessage["role"];
+  }) => {
     const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
 
     return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock block={block} key={`${id}-block_${index}`} />
+      <MemoizedMarkdownBlock
+        block={block}
+        messageRole={messageRole}
+        key={`${id}-block_${index}`}
+      />
     ));
   },
 );
