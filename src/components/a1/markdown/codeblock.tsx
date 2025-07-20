@@ -1,8 +1,8 @@
 import { CopyButton } from "@/components/a1/copy-button";
 import { cn } from "@/lib/utils";
-import { codeToHtml } from "shiki";
 import type { UIMessage } from "ai";
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
+import { SyntaxHighlighter } from "./shiki-highlighter";
 
 type CodeBlockProps = {
   content: string;
@@ -12,32 +12,6 @@ type CodeBlockProps = {
 
 export const CodeBlock = memo(
   ({ content, lang, messageRole }: CodeBlockProps) => {
-    const [highlightedHtml, setHighlightedHtml] = useState<string>("");
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
-    useEffect(() => {
-      const highlightCode = async () => {
-        setIsLoading(true);
-        try {
-          const html = await codeToHtml(content, {
-            lang: lang || "text",
-            theme: "github-dark",
-          });
-          setHighlightedHtml(html);
-        } catch (error) {
-          console.error(
-            `Failed to highlight code with Shiki for language "${lang}":`,
-            error,
-          );
-          setHighlightedHtml(`<pre><code>${content}</code></pre>`);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      highlightCode();
-    }, [content, lang]);
-
     return (
       <div
         className="not-prose text-sm min-w-0 rounded-md"
@@ -60,11 +34,7 @@ export const CodeBlock = memo(
           </div>
         </div>
         <div className="overflow-auto rounded-b-md shiki-container">
-          {isLoading ? (
-            <div className="bg-[#0d1117] text-white p-4">Loading code...</div>
-          ) : (
-            <div dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
-          )}
+          <SyntaxHighlighter language={lang || "text"} code={content} />
         </div>
       </div>
     );
