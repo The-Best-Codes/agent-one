@@ -1,3 +1,3 @@
-- Fix the issue where codeblock has no width if there is no other markdown besides the codeblock in a message
+- Fix syntax highlighting performance with fast or large updating streams
 - Fix chat-context.tsx hmr invalidation
 - Decide whether to use themes or more fine-grained theming (e.g., more padding, less padding, more rounded, less rounded, etc. instead of dark/light)
