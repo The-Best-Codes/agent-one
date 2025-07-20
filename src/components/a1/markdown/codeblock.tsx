@@ -130,7 +130,7 @@ export const CodeBlock = memo(
           editable={false}
           readOnly={true}
           basicSetup={{
-            lineNumbers: true,
+            lineNumbers: false, // Allow changing in settings when settings are implemented?
             highlightActiveLineGutter: false,
             highlightSpecialChars: false,
             history: false,
