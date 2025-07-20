@@ -1,4 +1,4 @@
 - Add HTML previews (hidden by default) to HTML codeblocks
-- Fix syntax highlighting performance with fast or large updating streams
+- Migrate to @monaco-editor/react instead of codemirror?
 - Fix chat-context.tsx hmr invalidation
 - Decide whether to use themes or more fine-grained theming (e.g., more padding, less padding, more rounded, less rounded, etc. instead of dark/light)
