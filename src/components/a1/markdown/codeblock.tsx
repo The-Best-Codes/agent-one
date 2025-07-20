@@ -23,12 +23,10 @@ export const CodeBlock = memo(
             messageRole === "user" ? "bg-secondary" : "bg-background",
           )}
         >
-          <div className="flex rounded-t-md items-center justify-between bg-[#0d1117] text-xs p-0">
-            <span className="ml-2 font-mono text-white">
-              {lang || "unknown"}
-            </span>
+          <div className="flex rounded-t-md items-center justify-between bg-[rgb(36,41,46)] text-xs p-0">
+            <span className="ml-2 font-mono text-white">{lang || "text"}</span>
             <CopyButton
-              className="bg-[#0d1117] hover:bg-[#0d1117] text-white"
+              className="bg-[rgb(36,41,46)] hover:bg-[rgb(36,41,46)] text-white"
               text={content}
             />
           </div>
