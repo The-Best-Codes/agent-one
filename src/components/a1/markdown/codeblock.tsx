@@ -116,14 +116,18 @@ export const CodeBlock = memo(
     }, [lang]);
 
     return (
-      <div className="not-prose text-sm min-w-0">
+      <div
+        className="not-prose text-sm min-w-0 rounded-md"
+        style={{ clipPath: "inset(0 round 0.375rem)" }}
+      >
+        {/* TODO: Change the background color based on if this codeblock is in a user or assistant message (and provide a prop to remove the bg too) */}
         <div className="sticky bg-secondary top-0 z-10">
           <div className="flex rounded-t-md items-center justify-between bg-[#0d1117] text-xs p-0">
-            <span className="ml-2 font-mono text-primary-foreground">
+            <span className="ml-2 font-mono text-white">
               {lang || "unknown"}
             </span>
             <CopyButton
-              className="bg-[#0d1117] hover:bg-[#0d1117]"
+              className="bg-[#0d1117] hover:bg-[#0d1117] text-white"
               text={content}
             />
           </div>
