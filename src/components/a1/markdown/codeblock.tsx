@@ -58,6 +58,7 @@ export const CodeBlock = memo(
               const { json } = await import("@codemirror/lang-json");
               extension = json();
               break;
+            case "py":
             case "python":
               const { python } = await import("@codemirror/lang-python");
               extension = python();
@@ -75,6 +76,7 @@ export const CodeBlock = memo(
               const { go } = await import("@codemirror/lang-go");
               extension = go();
               break;
+            case "rs":
             case "rust":
               const { rust } = await import("@codemirror/lang-rust");
               extension = rust();
@@ -83,6 +85,7 @@ export const CodeBlock = memo(
               const { php } = await import("@codemirror/lang-php");
               extension = php();
               break;
+            case "md":
             case "markdown":
               const { markdown, markdownLanguage } = await import(
                 "@codemirror/lang-markdown"
