@@ -37,7 +37,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       abortSignal: options.abortSignal,
       tools: toolsObject,
       toolChoice: "auto",
-      activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
+      //activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
       stopWhen: stepCountIs(50), // TODO: Move this to settings or some kind of config for the user
     });
@@ -70,6 +70,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   ): Promise<ReadableStream<UIMessageChunk> | null> {
     // Leaving this unimplemented for now,
     // as our implementation is frontend-only.
+    console.warn(
+      "resumeStream is not implemented in frontend-only applications. Please don't use it.",
+    );
     return null;
   }
 }

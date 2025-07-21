@@ -1,18 +1,44 @@
 import type { ToolUIPart } from "ai";
-import { CalendarDaysIcon, Loader2Icon, XCircleIcon } from "lucide-react";
+import { ClockIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 
-interface DateTimeOutput {
-  dateTime: string;
-  formatted: string;
+interface WaitNumberMillisecondsInput {
+  milliseconds: number;
 }
 
-interface DateTimeToolPartProps {
+interface WaitNumberMillisecondsToolPartProps {
   part: ToolUIPart;
 }
 
-export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
+export const MessagePartToolWaitNumberMilliseconds = ({
+  part,
+}: WaitNumberMillisecondsToolPartProps) => {
   const callId = part.toolCallId;
-  const output = part.output as DateTimeOutput;
+  const input = part.input as WaitNumberMillisecondsInput;
+
+  const safeFormatMilliseconds = (milliseconds: number) => {
+    try {
+      if (isNaN(milliseconds) || milliseconds < 0) {
+        return "unknown";
+      }
+
+      const totalSeconds = Math.floor(milliseconds / 1000);
+      const remainingMilliseconds = milliseconds % 1000;
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const remainingSeconds = totalSeconds % 60;
+
+      const formatted = [];
+
+      if (totalMinutes > 0) formatted.push(`${totalMinutes}m`);
+      if (remainingSeconds > 0) formatted.push(`${remainingSeconds}s`);
+      if (remainingMilliseconds > 0 || formatted.length === 0)
+        formatted.push(`${remainingMilliseconds}ms`);
+
+      return formatted.join(" ");
+    } catch (error) {
+      console.error(error);
+      return "unknown";
+    }
+  };
 
   switch (part.state) {
     case "input-streaming":
@@ -22,7 +48,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
             <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
-            Checking date and time...
+            Waiting a bit...
           </span>
         </div>
       );
@@ -31,16 +57,18 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
           <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
-          <span className="max-w-2xl truncate">Checking date and time...</span>
+          <span className="max-w-2xl truncate">
+            Waiting {safeFormatMilliseconds(input?.milliseconds)}...
+          </span>
         </p>
       );
 
     case "output-available":
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <CalendarDaysIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <ClockIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
-            Checked date and time ({output?.formatted})
+            Waited {safeFormatMilliseconds(input?.milliseconds)}
           </span>
         </p>
       );
@@ -61,7 +89,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <CalendarDaysIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <ClockIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown date-time tool state
           </span>

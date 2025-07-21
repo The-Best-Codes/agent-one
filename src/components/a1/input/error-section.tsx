@@ -6,7 +6,7 @@ import {
 
 export const MainInputErrorSection = () => {
   const { error } = useChatStatus();
-  const { regenerate, resumeStream } = useChatFunctions();
+  const { regenerate } = useChatFunctions();
 
   const errorText = error ? error.message : "";
 
@@ -21,10 +21,6 @@ export const MainInputErrorSection = () => {
         <Button onClick={() => regenerate()} variant="secondary">
           Retry
           {/* TODO: Add tooltip explaining that this regenerates the whole previous message (including tool calls etc), not just the last part */}
-        </Button>
-        <Button onClick={() => resumeStream()} variant="secondary">
-          Resume
-          {/* TODO: Does resume even work? Is it applicable here? May remove it. */}
         </Button>
       </div>
     </div>
