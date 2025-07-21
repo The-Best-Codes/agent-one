@@ -18,7 +18,7 @@ export const WaitNumberMillisecondsTool = tool({
             "abort",
             () => {
               clearTimeout(timeoutId);
-              reject(new Error("Wait aborted"));
+              reject(new Error("WAIT_ABORTED"));
             },
             { once: true },
           );
@@ -32,7 +32,7 @@ export const WaitNumberMillisecondsTool = tool({
         },
       };
     } catch (error) {
-      if (error instanceof Error && error.message === "Wait aborted") {
+      if (error instanceof Error && error.message === "WAIT_ABORTED") {
         return {
           status: "aborted",
           schema: {
