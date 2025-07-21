@@ -1,4 +1,4 @@
-- Fix stop button only aborting current tool if a tool call is in progress, not aborting whole chat stream (OR make it more obvious that it only stops the current step)
+- Fix stop button only aborting current tool if a tool call is in progress, not aborting whole chat stream (OR make it more obvious that it only stops the current step). Idea: Can we create a new hook+state+context (e.g., useThreadState) and use `stopWhen` with tool count AND a custom stop state to stop the thread at the next chance when the stop button is pressed?
 - Add proper error handling and retry logic (using AI SDK `error`)
 - Fix main chat input to auto-grow (using JS) for browsers that don't support field-sizing: content
 - Add HTML previews (hidden by default) to HTML codeblocks
