@@ -14,7 +14,7 @@ export type HighlighterProps = Omit<
 export const SyntaxHighlighter: FC<HighlighterProps> = ({
   code,
   language,
-  theme = "github-dark",
+  theme = "dark-plus",
   className,
   addDefaultStyles = false,
   showLanguage = false,
