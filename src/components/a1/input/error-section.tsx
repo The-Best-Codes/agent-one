@@ -7,6 +7,10 @@ export const MainInputErrorSection = () => {
 
   const errorText = error ? error.message : "";
 
+  if (!error) {
+    return null;
+  }
+
   return (
     <div className="w-full flex flex-row items-center justify-between bg-destructive text-primary-foreground rounded-md px-3 py-2 mb-2">
       <span className="max-w-full">{errorText}</span>
