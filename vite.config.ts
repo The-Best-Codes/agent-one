@@ -49,7 +49,6 @@ export default defineConfig(async () => ({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-dom/client"],
-          codemirror: ["codemirror", "@uiw/react-codemirror"],
           aiSdk: [
             "ai",
             "@ai-sdk/gateway",
