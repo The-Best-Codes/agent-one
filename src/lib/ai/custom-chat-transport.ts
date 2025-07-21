@@ -41,7 +41,25 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       system: SYSTEM_PROMPT,
       stopWhen: stepCountIs(5), // TODO: Move this to settings or some kind of config for the user
     });
-    return result.toUIMessageStream();
+    return result.toUIMessageStream({
+      onError: (error) => {
+        console.error("Error occurred in CustomChatTransport:", error);
+
+        if (error == null) {
+          return "Unknown error";
+        }
+
+        if (typeof error === "string") {
+          return error;
+        }
+
+        if (error instanceof Error) {
+          return error.message;
+        }
+
+        return JSON.stringify(error);
+      },
+    });
   }
 
   async reconnectToStream(
