@@ -5,7 +5,10 @@ export const DateTimeTool = tool({
   name: "dateTime",
   description: "Get the current date and time",
   inputSchema: z.object({}),
-  execute: async () => {
+  execute: async (input, { abortSignal }) => {
+    void input; // Ignore input parameter
+    void abortSignal; // Unused for now
+
     const now = new Date();
     return {
       dateTime: now.toISOString(),
