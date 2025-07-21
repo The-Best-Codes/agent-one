@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { ChatProvider } from "./contexts/chat-context";
+import { ChatProvider } from "./contexts/use-chat/chat-context";
 
 import "./index.css";
 
