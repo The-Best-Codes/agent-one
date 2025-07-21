@@ -6,7 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
+import { useChatFunctions, useChatStatus } from "@/contexts/chat-hooks";
 import {
   ArrowUpIcon,
   Loader2Icon,

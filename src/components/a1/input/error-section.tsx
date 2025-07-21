@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useChatFunctions, useChatStatus } from "@/contexts/chat-context";
+import { useChatFunctions, useChatStatus } from "@/contexts/chat-hooks";
 
 export const MainInputErrorSection = () => {
   const { error } = useChatStatus();
