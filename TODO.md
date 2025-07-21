@@ -1,3 +1,4 @@
+- Add proper error handling and retry logic (using AI SDK `error`)
 - Fix main chat input to auto-grow (using JS) for browsers that don't support field-sizing: content
 - Add HTML previews (hidden by default) to HTML codeblocks
 - Find what causes the codeblock header and the highlighter component to separate when scrolling at special velocities
