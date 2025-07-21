@@ -37,9 +37,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       abortSignal: options.abortSignal,
       tools: toolsObject,
       toolChoice: "auto",
-      activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
+      //activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
-      stopWhen: stepCountIs(5), // TODO: Move this to settings or some kind of config for the user
+      stopWhen: stepCountIs(50), // TODO: Move this to settings or some kind of config for the user
     });
     return result.toUIMessageStream({
       onError: (error) => {

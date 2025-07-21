@@ -6,7 +6,7 @@ import {
 
 export const MainInputErrorSection = () => {
   const { error } = useChatStatus();
-  const { regenerate } = useChatFunctions();
+  const { regenerate, resumeStream } = useChatFunctions();
 
   const errorText = error ? error.message : "";
 
@@ -15,11 +15,15 @@ export const MainInputErrorSection = () => {
   }
 
   return (
-    <div className="w-full flex flex-row items-center justify-between bg-destructive text-primary-foreground rounded-md px-3 py-2 mb-2">
-      <span className="max-w-full">{errorText}</span>
+    <div className="w-full flex flex-row items-center justify-between bg-destructive text-primary-foreground rounded-md p-2 mb-2 gap-2">
+      <span className="max-w-full max-h-10 overflow-auto">{errorText}</span>
       <Button onClick={() => regenerate()} variant="secondary">
         Retry
         {/* TODO: Add tooltip explaining that this regenerates the whole previous message (including tool calls etc), not just the last part */}
+      </Button>
+      <Button onClick={() => resumeStream()} variant="secondary">
+        Resume
+        {/* TODO: Does resume even work? Is it applicable here? May remove it. */}
       </Button>
     </div>
   );

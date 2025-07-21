@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
 import { memo, useState } from "react";
 import { SyntaxHighlighter } from "./shiki-highlighter";
-import { Play, Square } from "lucide-react";
+import { PlayIcon, SquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type CodeBlockProps = {
@@ -43,7 +43,11 @@ export const CodeBlock = memo(
                   className="w-8 h-8 bg-[rgb(36,41,46)] hover:bg-[rgb(36,41,46)] text-white"
                   title={isPreviewMode ? "Stop preview" : "Preview HTML"}
                 >
-                  {isPreviewMode ? <Square size={16} /> : <Play size={16} />}
+                  {isPreviewMode ? (
+                    <SquareIcon />
+                  ) : (
+                    <PlayIcon />
+                  )}
                 </Button>
               )}
               <CopyButton

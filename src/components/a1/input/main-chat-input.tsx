@@ -23,7 +23,7 @@ export const MainChatInput = memo(() => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { status } = useChatStatus();
-  const { sendMessage } = useChatFunctions();
+  const { sendMessage, stop } = useChatFunctions();
 
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -99,9 +99,7 @@ export const MainChatInput = memo(() => {
                 variant="destructive"
                 type="button"
                 size="icon"
-                onClick={() => {
-                  console.log("Stop not implemented yet");
-                }}
+                onClick={() => stop()}
               >
                 <SquareIcon />
               </Button>

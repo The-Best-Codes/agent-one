@@ -16,7 +16,7 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = google("gemini-2.0-flashe"), // Revert to `gemini-2.0-flash` after done testing error handling
+  model = google("gemini-2.0-flash"),
 }) => {
   const chatResult = useChat(model, {
     //experimental_throttle: 250, // TODO: Allow customizing this in settings
