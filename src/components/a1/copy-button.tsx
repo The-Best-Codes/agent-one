@@ -40,6 +40,7 @@ export const CopyButton = ({
       setCopyState("success");
       setTimeout(() => setCopyState("idle"), disabledDuration || 2000);
     } catch (error) {
+      console.error("Error copying content:", error);
       setCopyState("error");
       setTimeout(() => setCopyState("idle"), disabledDuration || 2000);
     }

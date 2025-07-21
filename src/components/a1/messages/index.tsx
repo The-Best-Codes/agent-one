@@ -1,4 +1,4 @@
-import type { UIMessage } from "ai";
+import type { TextUIPart, UIMessage } from "ai";
 import { memo } from "react";
 import { MessageGroup } from "./group";
 import { MessagePartFallback } from "./parts/fallback";
@@ -11,7 +11,9 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
   const getCopyContent = () => {
     return message.parts
       .map((part) =>
-        typeof (part as any)?.text === "string" ? (part as any).text : "",
+        typeof (part as TextUIPart)?.text === "string"
+          ? (part as TextUIPart).text
+          : "",
       )
       .join("\n");
   };

@@ -52,7 +52,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <span className="text-sm font-bold text-destructive">
             Error getting date and time:{" "}
             <span className="font-normal text-destructive/80">
-              {(part as any).errorText}
+              {part?.errorText || "Unknown error"}
             </span>
           </span>
         </div>

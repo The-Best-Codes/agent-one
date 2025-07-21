@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const MessagePartFallback = ({ ...props }: any) => {
   return (
     <div className="max-w-full rounded-md bg-destructive text-destructive-foreground flex flex-col">

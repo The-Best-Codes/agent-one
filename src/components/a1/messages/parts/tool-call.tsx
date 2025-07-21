@@ -103,7 +103,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <span className="text-sm font-bold text-destructive">
             Error executing {toolName}:{" "}
             <span className="text-destructive/80 font-normal">
-              {(part as any).errorText}
+              {part?.errorText || "Unknown error"}
             </span>
           </span>
         </div>

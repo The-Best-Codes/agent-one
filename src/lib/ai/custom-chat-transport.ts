@@ -63,6 +63,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   }
 
   async reconnectToStream(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options: {
       chatId: string;
     } & ChatRequestOptions,
