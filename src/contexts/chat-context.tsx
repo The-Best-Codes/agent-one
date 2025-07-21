@@ -9,6 +9,7 @@ import React, {
   type ReactNode,
 } from "react";
 
+// Hook types
 type ChatMessagesContextType = Pick<UseChatHelpers<UIMessage>, "messages">;
 type ChatStatusContextType = Pick<
   UseChatHelpers<UIMessage>,
@@ -16,9 +17,10 @@ type ChatStatusContextType = Pick<
 >;
 type ChatFunctionsContextType = Pick<
   UseChatHelpers<UIMessage>,
-  "sendMessage" | "addToolResult"
+  "sendMessage" | "addToolResult" | "regenerate" | "resumeStream" | "stop"
 >;
 
+// Contexts
 const ChatMessagesContext = createContext<ChatMessagesContextType | undefined>(
   undefined,
 );
@@ -29,6 +31,7 @@ const ChatFunctionsContext = createContext<
   ChatFunctionsContextType | undefined
 >(undefined);
 
+// Main provider type
 interface ChatProviderProps {
   children: ReactNode;
   model?: LanguageModel;
@@ -36,7 +39,7 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = google("gemini-2.0-flash"),
+  model = google("gemini-2.0-flashe"),
 }) => {
   const chatResult = useChat(model, {
     //experimental_throttle: 250, // TODO: Allow customizing this in settings
@@ -61,6 +64,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     () => ({
       sendMessage: chatResult.sendMessage,
       addToolResult: chatResult.addToolResult,
+      regenerate: chatResult.regenerate,
+      resumeStream: chatResult.resumeStream,
+      stop: chatResult.stop,
     }),
     [chatResult.sendMessage, chatResult.addToolResult],
   );
