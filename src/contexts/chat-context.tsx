@@ -39,7 +39,7 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = google("gemini-2.0-flashe"),
+  model = google("gemini-2.0-flashe"), // Revert to `gemini-2.0-flash` after done testing error handling
 }) => {
   const chatResult = useChat(model, {
     //experimental_throttle: 250, // TODO: Allow customizing this in settings
@@ -68,7 +68,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       resumeStream: chatResult.resumeStream,
       stop: chatResult.stop,
     }),
-    [chatResult.sendMessage, chatResult.addToolResult],
+    [
+      chatResult.sendMessage,
+      chatResult.addToolResult,
+      chatResult.regenerate,
+      chatResult.resumeStream,
+      chatResult.stop,
+    ],
   );
 
   return (
