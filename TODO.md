@@ -5,3 +5,4 @@
 - Find what causes the codeblock header and the highlighter component to separate when scrolling at special velocities
 - Fix chat-context.tsx hmr invalidation
 - Decide whether to use themes or more fine-grained theming (e.g., more padding, less padding, more rounded, less rounded, etc. instead of dark/light)
+- Add autoscrolling to bottom that the user can easily break out of
