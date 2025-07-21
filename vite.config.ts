@@ -51,12 +51,9 @@ export default defineConfig(async () => ({
           react: ["react", "react-dom", "react-dom/client"],
           aiSdk: [
             "ai",
-            "@ai-sdk/gateway",
             "@ai-sdk/react",
-            "@ai-sdk/provider",
-            "@ai-sdk/provider-utils",
-            "@ai-sdk/ui-utils",
             "@ai-sdk/google",
+            "@ai-sdk/groq",
           ],
         },
       },
