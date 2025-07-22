@@ -20,10 +20,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 }) => {
   const chatResult = useChat(model, {
     // experimental_throttle: 250, // TODO: Allow customizing this in settings
-    /* NOTE: If this is disabled, then calling `stop()` on a tool call with cause an abort error
-       However, if this is enabled, then `stopWhen` in `custom-chat-transport.ts` doesn't apply.
-       TODO: Find out why!
-    */
     // maxSteps: 50,
   });
 
