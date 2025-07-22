@@ -63,7 +63,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <CalendarDaysIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
-            Unknown date-time tool state
+            Unknown dateTime tool state
           </span>
         </div>
       );

@@ -78,7 +78,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         <div key={callId} className="flex items-center gap-1">
           <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
           <span className="text-sm font-bold text-destructive">
-            Error getting date and time:{" "}
+            An error occurred while waiting:{" "}
             <span className="font-normal text-destructive/80">
               {part?.errorText || "Unknown error"}
             </span>
@@ -91,7 +91,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         <div key={callId} className="flex items-center gap-1">
           <ClockIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
-            Unknown date-time tool state
+            Unknown waitNumberMilliseconds tool state
           </span>
         </div>
       );
