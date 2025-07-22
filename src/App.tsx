@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 function App() {
   const { messages } = useChatMessages();
 
+  console.log(messages);
+
   return (
     <main className="h-screen flex flex-col items-center justify-center">
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
