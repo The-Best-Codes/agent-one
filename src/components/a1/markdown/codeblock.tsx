@@ -43,11 +43,7 @@ export const CodeBlock = memo(
                   className="w-8 h-8 bg-[rgb(36,41,46)] hover:bg-[rgb(36,41,46)] text-white"
                   title={isPreviewMode ? "Stop preview" : "Preview HTML"}
                 >
-                  {isPreviewMode ? (
-                    <SquareIcon />
-                  ) : (
-                    <PlayIcon />
-                  )}
+                  {isPreviewMode ? <SquareIcon /> : <PlayIcon />}
                 </Button>
               )}
               <CopyButton
