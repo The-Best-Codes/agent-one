@@ -1,7 +1,6 @@
 import { type UIMessage } from "@ai-sdk/react";
 import {
   convertToModelMessages,
-  stepCountIs,
   streamText,
   type ChatRequestOptions,
   type ChatTransport,
@@ -39,8 +38,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: "auto",
       //activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
-      // TODO: Move max step count to settings or some kind of config for the user
-      stopWhen: stepCountIs(50),
     });
     return result.toUIMessageStream({
       onError: (error) => {

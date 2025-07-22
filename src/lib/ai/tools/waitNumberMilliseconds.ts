@@ -9,37 +9,26 @@ export const WaitNumberMillisecondsTool = tool({
     milliseconds: z.number().min(0).max(10000).default(1000),
   }),
   execute: async (input, { abortSignal }) => {
-    try {
-      await new Promise((resolve, reject) => {
-        const timeoutId = setTimeout(resolve, input.milliseconds);
+    await new Promise<void>((resolve, reject) => {
+      const timeoutId = setTimeout(resolve, input.milliseconds);
 
-        if (abortSignal) {
-          abortSignal.addEventListener(
-            "abort",
-            () => {
-              clearTimeout(timeoutId);
-              reject(new Error("WAIT_ABORTED"));
-            },
-            { once: true },
-          );
-        }
-      });
-
-      return {
-        status: "success",
-        schema: {
-          status: "The wait status (success, aborted)",
+      abortSignal?.addEventListener(
+        "abort",
+        () => {
+          clearTimeout(timeoutId);
+          const abortError = new Error("The operation was aborted.");
+          abortError.name = "AbortError";
+          reject(abortError);
         },
-      };
-    } catch (error) {
-      if (error instanceof Error && error.message === "WAIT_ABORTED") {
-        return {
-          status: "aborted",
-          schema: {
-            status: "The wait status (success, aborted)",
-          },
-        };
-      }
-    }
+        { once: true },
+      );
+    });
+
+    return {
+      status: "success",
+      schema: {
+        status: "The wait status (success, aborted)",
+      },
+    };
   },
 });
