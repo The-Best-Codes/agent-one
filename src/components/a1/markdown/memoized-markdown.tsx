@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 import { CodeBlock } from "./codeblock";
 
 type MarkdownBlock = {
@@ -48,7 +49,9 @@ const MemoizedMarkdownBlock = memo(
       );
     } else {
       return (
-        <ReactMarkdown remarkPlugins={[remarkBreaks]}>{content}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkBreaks, remarkGfm]}>
+          {content}
+        </ReactMarkdown>
       );
     }
   },
