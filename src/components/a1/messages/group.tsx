@@ -32,7 +32,7 @@ export const MessageGroup = ({
       </div>
       <div
         className={cn(
-          "mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease",
+          "mt-1 opacity-0 group-hover:opacity-100 max-md:opacity-100 transition-opacity duration-300 ease",
           messageRole !== "user" && "ml-2",
         )}
       >
