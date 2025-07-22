@@ -33,21 +33,21 @@ export const CodeBlock = memo(
             messageRole === "user" ? "bg-secondary" : "bg-background",
           )}
         >
-          <div className="flex rounded-t-md items-center justify-between bg-[rgb(36,41,46)] text-xs p-0">
+          <div className="flex rounded-t-md items-center justify-between bg-[rgb(30,30,30)] text-xs p-0">
             <span className="ml-2 font-mono text-white">{lang || "text"}</span>
             <div className="flex items-center">
               {isHtml && (
                 <Button
                   size="icon"
                   onClick={togglePreview}
-                  className="w-8 h-8 bg-[rgb(36,41,46)] hover:bg-[rgb(36,41,46)] text-white"
+                  className="w-8 h-8 bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
                   title={isPreviewMode ? "Stop preview" : "Preview HTML"}
                 >
                   {isPreviewMode ? <SquareIcon /> : <PlayIcon />}
                 </Button>
               )}
               <CopyButton
-                className="bg-[rgb(36,41,46)] hover:bg-[rgb(36,41,46)] text-white"
+                className="bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
                 text={content}
               />
             </div>
