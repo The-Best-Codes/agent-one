@@ -27,10 +27,12 @@ export const MainChatInput = memo(() => {
 
   const [isEmpty, setIsEmpty] = useState(true);
 
-  const updateIsEmptyState = () => {
-    if (textareaRef.current) {
-      setIsEmpty(!textareaRef.current.value.trim());
-    }
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = e.target;
+    setIsEmpty(!textarea.value.trim());
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   const handleSubmit = (
@@ -47,6 +49,7 @@ export const MainChatInput = memo(() => {
       if (textareaRef.current) {
         textareaRef.current.value = "";
         setIsEmpty(true);
+        textareaRef.current.style.height = "auto";
       }
     }
   };
@@ -63,7 +66,7 @@ export const MainChatInput = memo(() => {
         <Textarea
           autoFocus
           ref={textareaRef}
-          className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-none md:rounded-md rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0 shadow-none"
+          className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-none md:rounded-md rounded-b-none min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0 shadow-none"
           placeholder="Ask anything..."
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -71,7 +74,7 @@ export const MainChatInput = memo(() => {
               handleSubmit(e);
             }
           }}
-          onChange={updateIsEmptyState}
+          onChange={handleTextareaChange}
         />
         <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
           <div className="relative">

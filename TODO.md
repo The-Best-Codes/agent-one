@@ -1,4 +1,3 @@
-- Fix main chat input to auto-grow (using JS) for browsers that don't support field-sizing: content
 - Support multi-threading of chats?
 - Add autoscrolling to bottom that the user can easily break out of
 - React router
