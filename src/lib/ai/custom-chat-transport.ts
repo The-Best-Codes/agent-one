@@ -40,7 +40,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       //activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
       // TODO: Move max step count to settings or some kind of config for the user
-      stopWhen: stepCountIs(50),
+      stopWhen: stepCountIs(50), // TODO: Investigate why `maxSteps` in chat-context.tsx causes this to not apply
     });
     return result.toUIMessageStream({
       onError: (error) => {
