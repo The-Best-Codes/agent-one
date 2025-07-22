@@ -32,12 +32,12 @@ export const MessageGroup = ({
       </div>
       <div
         className={cn(
-          "mt-1 opacity-0 group-hover:opacity-100 max-md:opacity-100 transition-opacity duration-300 ease",
+          "mt-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100 transition-opacity duration-300 ease",
           messageRole !== "user" && "ml-2",
         )}
       >
         <CopyButton
-          className="w-4 h-4 bg-transparent hover:bg-transparent"
+          className="w-4 h-4 bg-transparent hover:bg-transparent focus-visible:ring-transparent"
           variants={{
             idle: "ghost",
             copying: "ghost",
