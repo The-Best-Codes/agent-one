@@ -1,3 +1,2 @@
 - Support multi-threading of chats?
 - Add autoscrolling to bottom that the user can easily break out of
-- React router
