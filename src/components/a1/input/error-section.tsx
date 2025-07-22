@@ -23,7 +23,9 @@ export const MainInputErrorSection = () => {
 
   return (
     <div className="w-full flex flex-row items-center justify-between bg-destructive text-primary-foreground rounded-none md:rounded-md p-2 mb-0 md:mb-2 gap-2">
-      <span className="max-w-full max-h-10 overflow-auto">{errorText}</span>
+      <span className="max-w-full max-h-10 overflow-auto">
+        {errorText || "An unknown error occurred"}
+      </span>
       <div className="flex flex-row items-center gap-2">
         <TooltipProvider>
           <Tooltip delayDuration={0}>
