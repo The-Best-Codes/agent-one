@@ -63,7 +63,7 @@ export const MainChatInput = memo(() => {
         <Textarea
           autoFocus
           ref={textareaRef}
-          className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-none md:rounded-md rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0"
+          className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-none md:rounded-md rounded-b-none field-sizing-content min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0 shadow-none"
           placeholder="Ask anything..."
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
