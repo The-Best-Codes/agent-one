@@ -29,10 +29,25 @@ export const MainChatInput = memo(() => {
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
-    setIsEmpty(!textarea.value.trim());
+    const newValue = textarea.value;
+    const newIsEmpty = !newValue.trim();
 
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    // Only update state if it actually changed
+    if (newIsEmpty !== isEmpty) {
+      setIsEmpty(newIsEmpty);
+    }
+
+    // Debounce the height adjustment to avoid layout thrashing
+    requestAnimationFrame(() => {
+      const previousHeight = textarea.style.height;
+      textarea.style.height = "auto";
+      const newHeight = `${textarea.scrollHeight}px`;
+
+      // Only update if height actually changed
+      if (previousHeight !== newHeight) {
+        textarea.style.height = newHeight;
+      }
+    });
   };
 
   const handleSubmit = (
