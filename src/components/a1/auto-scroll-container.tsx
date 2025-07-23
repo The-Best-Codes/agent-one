@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
+// TODO: Can we make this not rerender so much? Or does it already perform pretty well?
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -38,7 +39,6 @@ const AutoScrollContainerComponent = ({
   const [userHasScrolledUp, setUserHasScrolledUp] = useState(false);
 
   const contentRef = useRef<HTMLDivElement>(null);
-  // Used to mark programmatic (auto) scrolling
   const isAutoScrollingRef = useRef(false);
   const userHasScrolledUpRef = useRef(userHasScrolledUp);
   userHasScrolledUpRef.current = userHasScrolledUp;
