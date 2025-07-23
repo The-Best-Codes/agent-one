@@ -22,31 +22,31 @@ export const PerformantMarkdown = memo(({ content }: { content: string }) => {
   });
 
   return (
-    <CodeMirror
-      autoFocus
-      defaultValue={content || "No content detected to display"}
-      minHeight="16px"
-      maxHeight="384px"
-      minWidth="100%"
-      className="bg-transparent text-sm"
-      extensions={[
-        markdown({ base: markdownLanguage }),
-        editorTheme,
-        EditorView.lineWrapping,
-      ]}
-      readOnly={true}
-      basicSetup={{
-        lineNumbers: false,
-        foldGutter: false,
-        highlightActiveLine: false,
-        highlightActiveLineGutter: false,
-        highlightSelectionMatches: false,
-        autocompletion: false,
-        searchKeymap: false,
-        lintKeymap: false,
-        completionKeymap: false,
-      }}
-    />
+    <div className="overflow-hidden">
+      <CodeMirror
+        autoFocus
+        value={content || "No content detected to display"}
+        maxHeight="384px"
+        className="bg-transparent text-sm w-full"
+        extensions={[
+          markdown({ base: markdownLanguage }),
+          editorTheme,
+          EditorView.lineWrapping,
+        ]}
+        readOnly={true}
+        basicSetup={{
+          lineNumbers: false,
+          foldGutter: false,
+          highlightActiveLine: false,
+          highlightActiveLineGutter: false,
+          highlightSelectionMatches: false,
+          autocompletion: false,
+          searchKeymap: false,
+          lintKeymap: false,
+          completionKeymap: false,
+        }}
+      />
+    </div>
   );
 });
 
