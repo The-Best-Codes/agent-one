@@ -18,7 +18,7 @@ import {
   PaperclipIcon,
   SquareIcon,
 } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { MainInputErrorSection } from "./error-section";
 
 const editorTheme = EditorView.theme({
@@ -49,11 +49,11 @@ export const MainChatInput = memo(() => {
   const { status } = useChatStatus();
   const { sendMessage, stop } = useChatFunctions();
 
-  const [value, setValue] = useState("");
   const [isEmpty, setIsEmpty] = useState(true);
 
+  const editorViewRef = useRef<EditorView | null>(null);
+
   const handleEditorChange = (newValue: string) => {
-    setValue(newValue);
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
@@ -61,9 +61,19 @@ export const MainChatInput = memo(() => {
   };
 
   const submitMessage = () => {
-    if (value.trim() && status === "ready") {
-      sendMessage({ text: value });
-      setValue("");
+    const currentText = editorViewRef.current?.state.doc.toString() || "";
+
+    if (currentText.trim() && status === "ready") {
+      sendMessage({ text: currentText });
+      if (editorViewRef.current) {
+        editorViewRef.current.dispatch({
+          changes: {
+            from: 0,
+            to: editorViewRef.current.state.doc.length,
+            insert: "",
+          },
+        });
+      }
       setIsEmpty(true);
     }
   };
@@ -83,7 +93,7 @@ export const MainChatInput = memo(() => {
         <div className="flex-grow overflow-hidden">
           <CodeMirror
             autoFocus
-            value={value}
+            defaultValue=""
             minHeight="40px"
             maxHeight="160px"
             placeholder="Ask anything..."
@@ -94,6 +104,10 @@ export const MainChatInput = memo(() => {
               EditorView.lineWrapping,
             ]}
             onChange={handleEditorChange}
+            onCreateEditor={(view) => {
+              editorViewRef.current = view;
+              setIsEmpty(!view.state.doc.toString().trim());
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
