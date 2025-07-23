@@ -32,20 +32,17 @@ export const MainChatInput = memo(() => {
     const newValue = textarea.value;
     const newIsEmpty = !newValue.trim();
 
-    // Only update state if it actually changed
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
     }
 
-    // Debounce the height adjustment to avoid layout thrashing
     requestAnimationFrame(() => {
       const previousHeight = textarea.style.height;
       textarea.style.height = "auto";
       const newHeight = `${textarea.scrollHeight}px`;
 
-      // Only update if height actually changed
       if (previousHeight !== newHeight) {
-        textarea.style.height = newHeight;
+        textarea.style.height = newHeight; // Comment this out... do we need it? Don't forget to test in Firefox.
       }
     });
   };
