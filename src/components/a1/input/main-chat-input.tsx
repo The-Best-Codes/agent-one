@@ -102,6 +102,7 @@ export const MainChatInput = memo(() => {
               markdown({ base: markdownLanguage }),
               editorTheme,
               EditorView.lineWrapping,
+              EditorView.contentAttributes.of({ spellcheck: "true" }),
             ]}
             onChange={handleEditorChange}
             onCreateEditor={(view) => {
