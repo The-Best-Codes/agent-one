@@ -14,8 +14,6 @@ import {
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trackingValue: any;
   scrollableClassName?: string;
   scrollButtonClassName?: string;
   scrollButtonChildren?: ReactNode;
@@ -28,7 +26,6 @@ export interface AutoScrollContainerProps
 const AutoScrollContainerComponent = ({
   children,
   className,
-  trackingValue,
   scrollableClassName,
   scrollButtonClassName,
   scrollButtonChildren,
@@ -40,6 +37,8 @@ const AutoScrollContainerComponent = ({
 
   const contentRef = useRef<HTMLDivElement>(null);
   const isAutoScrollingRef = useRef(false);
+  const userHasScrolledUpRef = useRef(userHasScrolledUp);
+  userHasScrolledUpRef.current = userHasScrolledUp;
 
   const isScrolledToBottom = useCallback(() => {
     if (!contentRef.current) return true;
@@ -73,10 +72,27 @@ const AutoScrollContainerComponent = ({
   }, [isScrolledToBottom]);
 
   useEffect(() => {
-    if (!userHasScrolledUp) {
-      scrollToBottom();
-    }
-  }, [trackingValue, userHasScrolledUp, scrollToBottom]);
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
+
+    scrollToBottom();
+
+    const observer = new MutationObserver(() => {
+      if (!userHasScrolledUpRef.current) {
+        scrollToBottom();
+      }
+    });
+
+    observer.observe(contentEl, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [scrollToBottom]);
 
   return (
     <div className={cn("relative", className)} {...props}>
