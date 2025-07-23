@@ -41,7 +41,7 @@ const editorTheme = EditorView.theme({
     paddingBottom: "0px",
   },
   ".cm-line": {
-    padding: "0 0.125rem 0 0.5rem",
+    padding: "0 0.125rem 0 0.625rem",
   },
 });
 
