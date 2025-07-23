@@ -93,6 +93,7 @@ export const MainChatInput = memo(() => {
         <div className="flex-grow overflow-hidden">
           <CodeMirror
             autoFocus
+            theme="light" // TODO: Base this off of real theme, next-themes for example
             defaultValue=""
             minHeight="40px"
             maxHeight="160px"
