@@ -38,6 +38,7 @@ const AutoScrollContainerComponent = ({
   const [userHasScrolledUp, setUserHasScrolledUp] = useState(false);
 
   const contentRef = useRef<HTMLDivElement>(null);
+  // Used to mark programmatic (auto) scrolling
   const isAutoScrollingRef = useRef(false);
   const userHasScrolledUpRef = useRef(userHasScrolledUp);
   userHasScrolledUpRef.current = userHasScrolledUp;
@@ -55,15 +56,18 @@ const AutoScrollContainerComponent = ({
       top: contentRef.current.scrollHeight,
       behavior: smoothScroll ? "smooth" : "auto",
     });
-    setUserHasScrolledUp(false);
-    setShowScrollButton(false);
-    setTimeout(() => {
-      isAutoScrollingRef.current = false;
-    }, 100);
   }, [smoothScroll]);
 
   const handleScroll = useCallback(() => {
-    if (!contentRef.current || isAutoScrollingRef.current) return;
+    if (!contentRef.current) return;
+
+    if (isAutoScrollingRef.current) {
+      if (isScrolledToBottom()) {
+        isAutoScrollingRef.current = false;
+      } else {
+        return;
+      }
+    }
 
     const atBottom = isScrolledToBottom();
 
