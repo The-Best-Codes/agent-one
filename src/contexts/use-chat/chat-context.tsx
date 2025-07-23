@@ -19,7 +19,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   model = groq("moonshotai/kimi-k2-instruct"),
 }) => {
   const chatResult = useChat(model, {
-    // experimental_throttle: 250, // TODO: Allow customizing this in settings
+    experimental_throttle: 250, // TODO: Allow customizing this in settings
     maxSteps: 50,
   });
 
