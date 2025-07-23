@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
@@ -10,84 +9,106 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { EditorView } from "@codemirror/view";
+import CodeMirror from "@uiw/react-codemirror";
 import {
   ArrowUpIcon,
   Loader2Icon,
   PaperclipIcon,
   SquareIcon,
 } from "lucide-react";
-import { memo, useRef, useState } from "react";
+import { memo, useState } from "react";
 import { MainInputErrorSection } from "./error-section";
 
-export const MainChatInput = memo(() => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+const editorTheme = EditorView.theme({
+  "&": {
+    border: "none",
+    backgroundColor: "transparent !important",
+  },
+  "& .cm-placeholder": {
+    color: "#6b7280",
+  },
+  "&.cm-focused": {
+    outline: "none",
+  },
+  ".cm-scroller": {
+    overflow: "auto",
+    fontFamily: "inherit",
+  },
+  ".cm-content": {
+    paddingTop: "0px",
+    paddingBottom: "0px",
+  },
+});
 
+export const MainChatInput = memo(() => {
   const { status } = useChatStatus();
   const { sendMessage, stop } = useChatFunctions();
 
+  const [value, setValue] = useState("");
   const [isEmpty, setIsEmpty] = useState(true);
 
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const textarea = e.target;
-    const newValue = textarea.value;
+  const handleEditorChange = (newValue: string) => {
+    setValue(newValue);
     const newIsEmpty = !newValue.trim();
-
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
     }
-
-    requestAnimationFrame(() => {
-      const previousHeight = textarea.style.height;
-      textarea.style.height = "auto";
-      const newHeight = `${textarea.scrollHeight}px`;
-
-      if (previousHeight !== newHeight) {
-        textarea.style.height = newHeight;
-      }
-    });
   };
 
-  const handleSubmit = (
-    e:
-      | React.FormEvent<HTMLFormElement>
-      | React.KeyboardEvent<HTMLTextAreaElement>,
-  ) => {
-    e.preventDefault();
-
-    const inputValue = textareaRef.current?.value || "";
-
-    if (inputValue.trim() && status === "ready") {
-      sendMessage({ text: inputValue });
-      if (textareaRef.current) {
-        textareaRef.current.value = "";
-        setIsEmpty(true);
-        textareaRef.current.style.height = "auto";
-      }
+  const submitMessage = () => {
+    if (value.trim() && status === "ready") {
+      sendMessage({ text: value });
+      setValue("");
+      setIsEmpty(true);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    submitMessage();
   };
 
   return (
     <>
       <MainInputErrorSection />
       <form
-        onSubmit={(e) => {
-          handleSubmit(e);
-        }}
-        className="w-full flex flex-col bg-secondary pr-2 pt-2 rounded-none md:rounded-md rounded-b-none border border-b-0 border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
+        onSubmit={handleSubmit}
+        className="w-full flex flex-col bg-secondary pr-2 pl-1 pt-2 rounded-none md:rounded-md rounded-b-none border border-b-0 border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
       >
-        <Textarea
-          autoFocus
-          ref={textareaRef}
-          className="bg-secondary dark:bg-secondary pr-0 pt-0 resize-none rounded-none md:rounded-md rounded-b-none min-h-10 max-h-40 overflow-auto border-none focus-visible:ring-0 shadow-none"
-          placeholder="Ask anything..."
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit(e);
-            }
-          }}
-          onChange={handleTextareaChange}
-        />
+        <div className="flex-grow overflow-hidden">
+          <CodeMirror
+            autoFocus
+            value={value}
+            minHeight="40px"
+            maxHeight="160px"
+            placeholder="Ask anything..."
+            className="bg-transparent text-base"
+            extensions={[
+              markdown({ base: markdownLanguage }),
+              editorTheme,
+              EditorView.lineWrapping,
+            ]}
+            onChange={handleEditorChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submitMessage();
+              }
+            }}
+            basicSetup={{
+              lineNumbers: false,
+              foldGutter: false,
+              highlightActiveLine: false,
+              highlightActiveLineGutter: false,
+              autocompletion: false,
+              searchKeymap: false,
+              lintKeymap: false,
+              completionKeymap: false,
+            }}
+          />
+        </div>
         <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
           <div className="relative">
             <TooltipProvider>
