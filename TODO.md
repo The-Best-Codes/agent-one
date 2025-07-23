@@ -1,3 +1,4 @@
 - Support multi-threading of chats?
 - Fix tool call re-rendering issues (all tool calls rerender when just one updates)
 - Fully test codemirror main chat input and fix bugs about input clearing, sending, shift enter, send, etc.
+- Enable spell checking in codemirror?
