@@ -42,7 +42,7 @@ export const MainChatInput = memo(() => {
       const newHeight = `${textarea.scrollHeight}px`;
 
       if (previousHeight !== newHeight) {
-        textarea.style.height = newHeight; // Comment this out... do we need it? Don't forget to test in Firefox.
+        textarea.style.height = newHeight;
       }
     });
   };
