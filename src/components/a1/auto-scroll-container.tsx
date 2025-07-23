@@ -21,6 +21,7 @@ export interface AutoScrollContainerProps
     React.ComponentProps<"button">,
     "className" | "children" | "onClick"
   >;
+  smoothScroll?: boolean;
 }
 
 const AutoScrollContainerComponent = ({
@@ -30,6 +31,7 @@ const AutoScrollContainerComponent = ({
   scrollButtonClassName,
   scrollButtonChildren,
   scrollButtonProps,
+  smoothScroll,
   ...props
 }: AutoScrollContainerProps) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -49,13 +51,16 @@ const AutoScrollContainerComponent = ({
   const scrollToBottom = useCallback(() => {
     if (!contentRef.current) return;
     isAutoScrollingRef.current = true;
-    contentRef.current.scrollTop = contentRef.current.scrollHeight;
+    contentRef.current.scrollTo({
+      top: contentRef.current.scrollHeight,
+      behavior: smoothScroll ? "smooth" : "auto",
+    });
     setUserHasScrolledUp(false);
     setShowScrollButton(false);
     setTimeout(() => {
       isAutoScrollingRef.current = false;
     }, 100);
-  }, []);
+  }, [smoothScroll]);
 
   const handleScroll = useCallback(() => {
     if (!contentRef.current || isAutoScrollingRef.current) return;
