@@ -134,4 +134,8 @@
   ::-webkit-scrollbar-corner {
     @apply bg-transparent;
   }
+
+  ::selection {
+    @apply bg-accent text-accent-foreground;
+  }
 }
