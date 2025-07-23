@@ -1,3 +1,3 @@
 - Support multi-threading of chats?
 - Add autoscrolling to bottom that the user can easily break out of
-- Fix tool call rendering issues
+- Fix tool call re-rendering issues
