@@ -54,7 +54,7 @@ const AutoScrollContainerComponent = ({
     isAutoScrollingRef.current = true;
     contentRef.current.scrollTo({
       top: contentRef.current.scrollHeight,
-      behavior: smoothScroll ? "smooth" : "auto",
+      behavior: smoothScroll ? "smooth" : "auto", // TODO: Properly handle smooth scrolling when content is still streaming in
     });
   }, [smoothScroll]);
 

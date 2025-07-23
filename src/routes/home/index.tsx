@@ -14,7 +14,7 @@ function HomeRoute() {
         <AutoScrollContainer
           className="flex-1 max-h-full my-2 min-h-0"
           scrollableClassName="space-y-0 p-0 pr-2"
-          smoothScroll={true}
+          smoothScroll={false}
         >
           {messages.length === 0 && <NoMessagesGreeting />}
           {messages.map((message) => (
