@@ -1,3 +1,3 @@
 - Support multi-threading of chats?
 - Fix tool call re-rendering issues (all tool calls rerender when just one updates)
-- Experiment: does ref v.s. useState in main-chat-input actually help performance?
+- Fully test codemirror main chat input and fix bugs about input clearing, sending, shift enter, send, etc.
