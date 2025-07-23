@@ -1,4 +1,3 @@
 - Support multi-threading of chats?
-- Add autoscrolling to bottom that the user can easily break out of
-- Fix tool call re-rendering issues
+- Fix tool call re-rendering issues (all tool calls rerender when just one updates)
 - Experiment: does ref v.s. useState in main-chat-input actually help performance?
