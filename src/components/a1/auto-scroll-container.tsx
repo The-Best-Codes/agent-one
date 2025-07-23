@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import {
+  memo,
   useCallback,
   useEffect,
   useRef,
@@ -24,7 +25,7 @@ export interface AutoScrollContainerProps
   >;
 }
 
-export function AutoScrollContainer({
+const AutoScrollContainerComponent = ({
   children,
   className,
   trackingValue,
@@ -33,7 +34,7 @@ export function AutoScrollContainer({
   scrollButtonChildren,
   scrollButtonProps,
   ...props
-}: AutoScrollContainerProps) {
+}: AutoScrollContainerProps) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [userHasScrolledUp, setUserHasScrolledUp] = useState(false);
 
@@ -92,7 +93,7 @@ export function AutoScrollContainer({
           size="icon"
           onClick={scrollToBottom}
           className={cn(
-            "absolute bottom-4 right-4 z-10",
+            "absolute bottom-4 right-4 z-10 hover:opacity-75",
             scrollButtonClassName,
           )}
           variant="default"
@@ -103,4 +104,8 @@ export function AutoScrollContainer({
       )}
     </div>
   );
-}
+};
+
+AutoScrollContainerComponent.displayName = "AutoScrollContainer";
+
+export const AutoScrollContainer = memo(AutoScrollContainerComponent);
