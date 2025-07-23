@@ -83,7 +83,7 @@ export const MainChatInput = memo(() => {
             value={value}
             minHeight="40px"
             maxHeight="160px"
-            placeholder="Ask anything..."
+            placeholder="Ask anything..." // TODO: Fix the padding so the editor and especially the placeholder text are aligned properly with the buttons and rest of the input
             className="bg-transparent text-base"
             extensions={[
               markdown({ base: markdownLanguage }),
