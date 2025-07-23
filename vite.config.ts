@@ -49,12 +49,13 @@ export default defineConfig(async () => ({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-dom/client"],
-          aiSdk: [
-            "ai",
-            "@ai-sdk/react",
-            "@ai-sdk/google",
-            "@ai-sdk/groq",
+          aiSdk: ["ai", "@ai-sdk/react", "@ai-sdk/google", "@ai-sdk/groq"],
+          codemirror: [
+            "codemirror",
+            "@uiw/react-codemirror",
+            "@codemirror/view",
           ],
+          codemirrorLangs: ["@codemirror/lang-markdown"],
         },
       },
     },
