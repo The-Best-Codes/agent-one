@@ -12,6 +12,26 @@ type CodeBlockProps = {
   messageRole?: UIMessage["role"];
 };
 
+const MAX_CHARS = 10000; // TODO: Allow user to configure this (in settings?)
+
+const BestHighlighter = ({
+  content,
+  lang,
+}: {
+  content: string;
+  lang?: string;
+}) => {
+  if (content.length > MAX_CHARS) {
+    return (
+      <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
+        <code className="text-white">{content}</code>
+      </pre>
+    );
+  } else {
+    return <SyntaxHighlighter language={lang || "text"} code={content} />;
+  }
+};
+
 export const CodeBlock = memo(
   ({ content, lang, messageRole }: CodeBlockProps) => {
     const [isPreviewMode, setIsPreviewMode] = useState(false); // TODO: Extract preview logic to other files
@@ -62,7 +82,7 @@ export const CodeBlock = memo(
               sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
             />
           ) : (
-            <SyntaxHighlighter language={lang || "text"} code={content} />
+            <BestHighlighter lang={lang || "text"} content={content} />
           )}
         </div>
       </div>
