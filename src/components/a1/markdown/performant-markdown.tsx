@@ -25,6 +25,7 @@ export const PerformantMarkdown = memo(({ content }: { content: string }) => {
     <div className="overflow-hidden">
       <CodeMirror
         autoFocus
+        theme="light" // TODO: Base this off of real theme, next-themes for example
         value={content || "No content detected to display"}
         maxHeight="384px"
         className="bg-transparent text-sm w-full"
