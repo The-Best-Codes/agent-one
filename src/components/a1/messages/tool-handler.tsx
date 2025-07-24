@@ -2,6 +2,7 @@ import type { ToolUIPart, UIMessage } from "ai";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartToolCall } from "./parts/tool-call";
 import { MessagePartToolDateTime } from "./parts/tool-dateTime";
+import { MessagePartToolGetUrlContent } from "./parts/tool-getUrlContent";
 import { MessagePartToolWaitNumberMilliseconds } from "./parts/tool-waitNumberMilliseconds";
 
 type MessageToolHandlerProps = {
@@ -26,6 +27,10 @@ export function MessageToolHandler({ id, part }: MessageToolHandlerProps) {
           key={`${id}-${part.type}`}
           part={part}
         />
+      );
+    case "tool-getUrlContent":
+      return (
+        <MessagePartToolGetUrlContent key={`${id}-${part.type}`} part={part} />
       );
     default:
       return (
