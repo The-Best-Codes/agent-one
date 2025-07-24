@@ -21,6 +21,10 @@ export const ChatMessageLoading = ({
     if (messageRole !== "assistant") return null;
   }
 
+  if (mode === "inLayout") {
+    if (status === "streaming") return null;
+  }
+
   const shouldBeVisible = status === "streaming" || status === "submitted";
   if (!shouldBeVisible) return null;
 
