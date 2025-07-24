@@ -44,7 +44,7 @@ export const CodeBlock = memo(
 
     return (
       <div
-        className="not-prose text-sm min-w-0 rounded-md"
+        className="not-prose text-sm min-w-0 rounded-md mb-6"
         style={{ clipPath: "inset(0 round 0.375rem)" }}
       >
         <div
