@@ -1,3 +1,2 @@
 - Support multi-threading of chats?
 - Fix tool call re-rendering issues (all tool calls rerender when just one updates)
-- Hide cursor in performant markdown rendering codemirror
