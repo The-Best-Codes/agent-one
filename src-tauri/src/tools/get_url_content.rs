@@ -8,7 +8,6 @@ use reqwest::header::{
 use serde::{Deserialize, Serialize};
 use tokio::time::{timeout, Duration};
 
-// Constants for browser-like behavior
 const USER_AGENTS: &[&str] = &[
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -20,7 +19,6 @@ const USER_AGENTS: &[&str] = &[
     "Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
 ];
 
-// Lazy static regexes for HTML pre-processing and title extraction
 static STYLE_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?is)<style[^>]*>.*?</style>").unwrap());
 static SCRIPT_REGEX: Lazy<Regex> =
@@ -48,7 +46,6 @@ pub async fn get_url_content(
     max_length: usize,
     timeout_seconds: Option<u64>,
 ) -> Result<UrlContentResponse, String> {
-    // Validate inputs
     if max_length > MAX_CONTENT_LENGTH {
         return Err(format!("max_length cannot exceed {}", MAX_CONTENT_LENGTH));
     }
@@ -59,7 +56,6 @@ pub async fn get_url_content(
             .min(MAX_TIMEOUT_SECONDS),
     );
 
-    // Perform the actual fetch with timeout
     timeout(timeout_duration, fetch_url_content(url, format, max_length))
         .await
         .map_err(|_| "Request timed out".to_string())?
@@ -70,29 +66,20 @@ async fn fetch_url_content(
     format: String,
     max_length: usize,
 ) -> Result<UrlContentResponse, String> {
-    // Create HTTP client with browser-like configuration
     let client = reqwest::Client::builder()
-        // Client-level timeout, set to max to let the outer tokio::timeout handle the hard limit
         .timeout(Duration::from_secs(MAX_TIMEOUT_SECONDS))
-        // Enable automatic decompression for common formats
         .gzip(true)
         .brotli(true)
         .deflate(true)
-        // Follow up to 10 redirects
         .redirect(reqwest::redirect::Policy::limited(10))
-        // Keep TCP connections alive
         .tcp_keepalive(Duration::from_secs(60))
-        // Set idle timeout for connections in the pool
         .pool_idle_timeout(Duration::from_secs(90))
-        // Max idle connections per host in the pool
         .pool_max_idle_per_host(10)
         .build()
         .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
 
-    // Set up browser-like headers
     let mut headers = HeaderMap::new();
 
-    // Randomly select a User-Agent
     let user_agent = USER_AGENTS
         .choose(&mut rng())
         .expect("USER_AGENTS array should not be empty");
@@ -101,22 +88,18 @@ async fn fetch_url_content(
         HeaderValue::from_str(user_agent).map_err(|e| e.to_string())?,
     );
 
-    // Accept HTML and other common web formats
     headers.insert(
         ACCEPT,
         HeaderValue::from_static("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
     );
 
-    // Indicate acceptance of compressed content
     headers.insert(
         ACCEPT_ENCODING,
         HeaderValue::from_static("gzip, deflate, br"),
     );
 
-    // Indicate preferred languages
     headers.insert(ACCEPT_LANGUAGE, HeaderValue::from_static("en-US,en;q=0.9"));
 
-    // Fetch the URL with enhanced headers
     let response = client
         .get(&url)
         .headers(headers)
@@ -124,12 +107,10 @@ async fn fetch_url_content(
         .await
         .map_err(|e| format!("Failed to fetch URL: {}", e))?;
 
-    // Check if response is successful
     if !response.status().is_success() {
         return Err(format!("HTTP error: {}", response.status()));
     }
 
-    // Get content type from headers
     let content_type = response
         .headers()
         .get("content-type")
@@ -137,30 +118,25 @@ async fn fetch_url_content(
         .unwrap_or("")
         .to_lowercase();
 
-    // Get the response body as text
     let mut raw_content = response
         .text()
         .await
         .map_err(|e| format!("Failed to read response body: {}", e))?;
 
-    // Extract title if content is HTML
     let title = if content_type.contains("text/html") {
         extract_title(&raw_content)
     } else {
         None
     };
 
-    // Process content based on desired format
     let processed_content = match format.as_str() {
         "markdown" => {
             if content_type.contains("text/html") {
-                // Pre-process HTML to remove unused/noisy data before conversion
                 raw_content = STYLE_REGEX.replace_all(&raw_content, "").to_string();
                 raw_content = SCRIPT_REGEX.replace_all(&raw_content, "").to_string();
                 raw_content = COMMENT_REGEX.replace_all(&raw_content, "").to_string();
                 raw_content = LINK_REGEX.replace_all(&raw_content, "").to_string();
                 raw_content = META_REGEX.replace_all(&raw_content, "").to_string();
-                // Normalize multiple blank lines to just two newlines
                 raw_content = BLANK_LINE_REGEX
                     .replace_all(&raw_content, "\n\n")
                     .to_string();
@@ -172,7 +148,7 @@ async fn fetch_url_content(
                 raw_content
             }
         }
-        "raw" => raw_content, // Return content as is
+        "raw" => raw_content,
         _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
     };
 
@@ -200,7 +176,6 @@ async fn fetch_url_content(
         (processed_content, false)
     };
 
-    // Append truncation notice if content was truncated
     if truncated {
         final_content = format!(
             "{}...\n\n[Content truncated at {} bytes]",
