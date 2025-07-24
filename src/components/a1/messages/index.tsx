@@ -1,5 +1,6 @@
 import type { TextUIPart, UIMessage } from "ai";
 import { memo } from "react";
+import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartReasoning } from "./parts/reasoning";
@@ -50,6 +51,11 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
             return <MessagePartFallback key={key} {...part} />;
         }
       })}
+      <ChatMessageLoading
+        mode="inMessage"
+        messageId={message.id}
+        messageRole={message.role}
+      />
     </MessageGroup>
   );
 });

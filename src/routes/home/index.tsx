@@ -29,8 +29,8 @@ function HomeRoute() {
               <MessageParts message={message} />
             </div>
           ))}
-          {/* TODO: Put this above the message action row in group.tsx */}
-          {messages.length > 0 && <ChatMessageLoading />}
+          {/* TODO: Don't show this if it's already shown in a message. How? */}
+          {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
         </AutoScrollContainer>
         <MainChatInput />
       </div>
