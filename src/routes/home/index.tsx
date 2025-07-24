@@ -1,4 +1,5 @@
 import { AutoScrollContainer } from "@/components/a1/auto-scroll-container";
+import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
@@ -28,6 +29,7 @@ function HomeRoute() {
               <MessageParts message={message} />
             </div>
           ))}
+          {messages.length > 0 && <ChatMessageLoading />}
         </AutoScrollContainer>
         <MainChatInput />
       </div>
