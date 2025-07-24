@@ -56,6 +56,7 @@ export default defineConfig(async () => ({
             "@codemirror/view",
           ],
           codemirrorLangs: ["@codemirror/lang-markdown"],
+          markdown: ["react-markdown", "remark-breaks", "remark-gfm"],
         },
       },
     },
