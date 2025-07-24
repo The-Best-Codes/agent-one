@@ -29,7 +29,6 @@ function HomeRoute() {
               <MessageParts message={message} />
             </div>
           ))}
-          {/* TODO: Don't show this if it's already shown in a message. How? */}
           {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
         </AutoScrollContainer>
         <MainChatInput />

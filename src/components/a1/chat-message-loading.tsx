@@ -1,6 +1,7 @@
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
-import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
+
+// TODO: Reduce rerendering (mostly cause of useChatMessages)
 
 export const ChatMessageLoading = ({
   mode = "inLayout",
@@ -14,28 +15,54 @@ export const ChatMessageLoading = ({
   const { status } = useChatStatus();
   const { messages } = useChatMessages();
 
-  if (mode === "inMessage") {
-    const isLatestMessage = messages[messages.length - 1]?.id === messageId;
-    if (!isLatestMessage) return null;
+  const lastOverallMessage = messages[messages.length - 1];
+  const isLatestMessageOverall = lastOverallMessage?.id === messageId;
 
-    if (messageRole !== "assistant") return null;
+  if (mode === "inMessage") {
+    if (!isLatestMessageOverall || messageRole !== "assistant") {
+      return null;
+    }
+
+    if (status === "streaming") {
+      return (
+        <div className="justify-end">
+          <span className="animate-caret-blink text-muted-foreground">|</span>
+        </div>
+      );
+    }
+
+    if (status === "submitted" && lastOverallMessage.role === "assistant") {
+      return (
+        <div className="justify-end">
+          <span className="animate-pulse text-muted-foreground">
+            Thinking...
+          </span>
+        </div>
+      );
+    }
+
+    return null;
   }
 
   if (mode === "inLayout") {
-    if (status === "streaming") return null;
+    if (status === "streaming") {
+      return null;
+    }
+
+    if (status === "submitted") {
+      if (!lastOverallMessage || lastOverallMessage.role === "user") {
+        return (
+          <div className="justify-end p-2">
+            <span className="animate-pulse text-muted-foreground">
+              Thinking...
+            </span>
+          </div>
+        );
+      }
+
+      return null;
+    }
   }
 
-  const shouldBeVisible = status === "streaming" || status === "submitted";
-  if (!shouldBeVisible) return null;
-
-  return (
-    <div className={cn("justify-end", mode === "inLayout" ? "p-2" : "")}>
-      {status == "streaming" && (
-        <span className="animate-caret-blink text-muted-foreground">|</span>
-      )}
-      {status == "submitted" && (
-        <span className="animate-pulse text-muted-foreground">Thinking...</span>
-      )}
-    </div>
-  );
+  return null;
 };
