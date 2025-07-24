@@ -35,7 +35,17 @@ export const MessagePartToolGetUrlContent = ({
   const formatUrl = (url: string) => {
     try {
       const urlObj = new URL(url);
-      return urlObj.hostname + urlObj.pathname;
+      let formattedUrl = urlObj.hostname;
+      if (urlObj.pathname !== "/") {
+        formattedUrl += urlObj.pathname;
+      }
+      if (urlObj.search) {
+        formattedUrl += urlObj.search;
+      }
+      if (formattedUrl.length > 500) {
+        formattedUrl = formattedUrl.slice(0, 497) + "...";
+      }
+      return formattedUrl;
     } catch {
       return url;
     }
