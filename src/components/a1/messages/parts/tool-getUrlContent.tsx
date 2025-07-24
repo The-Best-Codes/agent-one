@@ -1,5 +1,5 @@
 import type { ToolUIPart } from "ai";
-import { ExternalLinkIcon, Loader2Icon, XCircleIcon } from "lucide-react";
+import { GlobeIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 
 // TODO: Use an accordion to allow expanding and viewing more tool info
 
@@ -97,7 +97,7 @@ export const MessagePartToolGetUrlContent = ({
 
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <ExternalLinkIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             Browsed {formatUrl(output.url)}
             {/* TODO: Move other info (raw or markdown, the stuff below) inside accordion */}
@@ -124,7 +124,7 @@ export const MessagePartToolGetUrlContent = ({
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <ExternalLinkIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown getUrlContent tool state
           </span>
