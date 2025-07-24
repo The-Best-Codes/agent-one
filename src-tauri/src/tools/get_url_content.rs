@@ -132,6 +132,7 @@ async fn fetch_url_content(
     let processed_content = match format.as_str() {
         "markdown" => {
             if content_type.contains("text/html") {
+                // TODO: Add option to tool to remove long data URLs
                 raw_content = STYLE_REGEX.replace_all(&raw_content, "").to_string();
                 raw_content = SCRIPT_REGEX.replace_all(&raw_content, "").to_string();
                 raw_content = COMMENT_REGEX.replace_all(&raw_content, "").to_string();
