@@ -85,8 +85,8 @@ export const MessagePartToolGetUrlContent = ({
         return (
           <div key={callId} className="flex items-center gap-1">
             <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
-            <span className="text-sm font-bold text-destructive">
-              Failed to browse URL:{" "}
+            <span className="text-sm font-bold text-destructive max-w-2xl truncate">
+              Failed to browse {formatUrl(input?.url || "")}:{" "}
               <span className="font-normal text-destructive/80">
                 {output?.error || "Unknown error"}
               </span>

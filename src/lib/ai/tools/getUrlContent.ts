@@ -25,7 +25,7 @@ export const GetUrlContentTool = tool({
       .number()
       .min(1)
       .max(50000)
-      .default(10000)
+      .default(1000)
       .describe("Maximum length of content to return"),
     timeoutSeconds: z
       .number()
