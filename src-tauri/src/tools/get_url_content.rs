@@ -47,7 +47,7 @@ pub async fn get_url_content(
     timeout_seconds: Option<u64>,
 ) -> Result<UrlContentResponse, String> {
     if max_length > MAX_CONTENT_LENGTH {
-        return Err(format!("max_length cannot exceed {}", MAX_CONTENT_LENGTH));
+        return Err(format!("max_length cannot exceed {MAX_CONTENT_LENGTH}"));
     }
 
     let timeout_duration = Duration::from_secs(
@@ -76,7 +76,7 @@ async fn fetch_url_content(
         .pool_idle_timeout(Duration::from_secs(90))
         .pool_max_idle_per_host(10)
         .build()
-        .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+        .map_err(|e| format!("Failed to create HTTP client: {e}"))?;
 
     let mut headers = HeaderMap::new();
 
@@ -105,7 +105,7 @@ async fn fetch_url_content(
         .headers(headers)
         .send()
         .await
-        .map_err(|e| format!("Failed to fetch URL: {}", e))?;
+        .map_err(|e| format!("Failed to fetch URL: {e}"))?;
 
     if !response.status().is_success() {
         return Err(format!("HTTP error: {}", response.status()));
@@ -121,7 +121,7 @@ async fn fetch_url_content(
     let mut raw_content = response
         .text()
         .await
-        .map_err(|e| format!("Failed to read response body: {}", e))?;
+        .map_err(|e| format!("Failed to read response body: {e}"))?;
 
     let title = if content_type.contains("text/html") {
         extract_title(&raw_content)
@@ -142,7 +142,7 @@ async fn fetch_url_content(
                     .to_string();
 
                 htmd::convert(&raw_content)
-                    .map_err(|e| format!("Failed to convert HTML to markdown: {}", e))?
+                    .map_err(|e| format!("Failed to convert HTML to markdown: {e}"))?
             } else {
                 // If not HTML, treat raw text as markdown (don't convert)
                 raw_content
@@ -177,10 +177,7 @@ async fn fetch_url_content(
     };
 
     if truncated {
-        final_content = format!(
-            "{}...\n\n[Content truncated at {} bytes]",
-            final_content, max_length
-        );
+        final_content = format!("{final_content}...\n\n[Content truncated at {max_length} bytes]");
     }
 
     Ok(UrlContentResponse {
