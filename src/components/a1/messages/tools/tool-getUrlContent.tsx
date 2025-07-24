@@ -2,7 +2,6 @@ import type { ToolUIPart } from "ai";
 import { GlobeIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 
 // TODO: Use an accordion to allow expanding and viewing more tool info
-// TODO: Ensure "browsing 0 URLs" can never happen (it happens right now due to the input still streaming)
 
 interface GetUrlContentInput {
   urls: string[];
@@ -66,7 +65,6 @@ export const MessagePartToolGetUrlContent = ({
   // };
 
   const urlCount = input?.urls?.length || 0;
-  const urlText = urlCount === 1 ? "URL" : `${urlCount} URLs`;
 
   switch (part.state) {
     case "input-streaming":
@@ -76,7 +74,7 @@ export const MessagePartToolGetUrlContent = ({
             <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
-            Browsing {urlText}...
+            Browsing URLs...
           </span>
         </div>
       );
@@ -99,7 +97,7 @@ export const MessagePartToolGetUrlContent = ({
           <div key={callId} className="flex items-center gap-1">
             <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
             <span className="text-sm font-bold text-destructive max-w-2xl truncate">
-              Failed to browse {urlText}:{" "}
+              Failed to browse URLs:{" "}
               <span className="font-normal text-destructive/80">
                 {output?.error || "Unknown error"}
               </span>
