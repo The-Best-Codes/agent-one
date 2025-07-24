@@ -65,7 +65,7 @@ export const MessagePartToolGetUrlContent = ({
             <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
-            Fetching URL content...
+            Browsing URL...
           </span>
         </div>
       );
@@ -75,8 +75,7 @@ export const MessagePartToolGetUrlContent = ({
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
           <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
-            Fetching {input.format === "raw" ? "raw content" : "content"} from{" "}
-            {formatUrl(input?.url || "")}...
+            Browsing {formatUrl(input?.url || "")}...
           </span>
         </p>
       );
@@ -87,7 +86,7 @@ export const MessagePartToolGetUrlContent = ({
           <div key={callId} className="flex items-center gap-1">
             <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
             <span className="text-sm font-bold text-destructive">
-              Failed to fetch URL content:{" "}
+              Failed to browse URL:{" "}
               <span className="font-normal text-destructive/80">
                 {output?.error || "Unknown error"}
               </span>
@@ -100,8 +99,8 @@ export const MessagePartToolGetUrlContent = ({
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
           <ExternalLinkIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
-            Fetched {input.format === "raw" ? "raw content" : "content"} from{" "}
-            {formatUrl(output.url)}
+            Browsed {formatUrl(output.url)}
+            {/* TODO: Move other info (raw or markdown, the stuff below) inside accordion */}
             {/* {output.title && ` - "${output.title}"`}
             {output.length && ` (${formatLength(output.length)})`}
             {output.truncated && " - truncated"} */}
