@@ -1,9 +1,9 @@
 import type { ToolUIPart, UIMessage } from "ai";
 import { MessagePartFallback } from "./parts/fallback";
-import { MessagePartToolCall } from "./parts/tool-call";
-import { MessagePartToolDateTime } from "./parts/tool-dateTime";
-import { MessagePartToolGetUrlContent } from "./parts/tool-getUrlContent";
-import { MessagePartToolWaitNumberMilliseconds } from "./parts/tool-waitNumberMilliseconds";
+import { MessagePartToolCall } from "./tools/tool-call";
+import { MessagePartToolDateTime } from "./tools/tool-dateTime";
+import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
+import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
 
 type MessageToolHandlerProps = {
   id: string;
