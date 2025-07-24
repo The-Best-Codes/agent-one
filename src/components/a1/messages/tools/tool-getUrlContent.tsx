@@ -86,8 +86,8 @@ export const MessagePartToolGetUrlContent = ({
           <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             {urlCount === 1
-              ? `Browsing ${formatUrl(input?.urls?.[0] || "")}...`
-              : `Browsing ${urlCount} URLs...`}
+              ? `Browsing ${formatUrl(input?.urls?.[0] || "a website")}...`
+              : `Browsing ${urlCount === 0 ? " " : `${urlCount} `}URLs...`}
           </span>
         </p>
       );
@@ -128,7 +128,7 @@ export const MessagePartToolGetUrlContent = ({
           <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
             <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
             <span>
-              Browsed {results.length} URLs
+              Browsed {results.length === 0 ? " " : `${results.length} `}URLs
               {failCount > 0 && ` (${failCount} failed)`}
             </span>
           </p>
