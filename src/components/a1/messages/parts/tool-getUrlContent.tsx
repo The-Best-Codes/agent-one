@@ -4,13 +4,13 @@ import { GlobeIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 // TODO: Use an accordion to allow expanding and viewing more tool info
 
 interface GetUrlContentInput {
-  url: string;
+  urls: string[];
   format: string;
   maxLength: number;
   timeoutSeconds?: number;
 }
 
-interface GetUrlContentOutput {
+interface UrlResult {
   success: boolean;
   url: string;
   title?: string;
@@ -19,6 +19,13 @@ interface GetUrlContentOutput {
   length?: number;
   truncated?: boolean;
   error?: string;
+}
+
+interface GetUrlContentOutput {
+  success: boolean;
+  results?: UrlResult[];
+  error?: string;
+  urls?: string[];
 }
 
 interface GetUrlContentToolPartProps {
@@ -57,6 +64,9 @@ export const MessagePartToolGetUrlContent = ({
   //   return `${(length / 1000000).toFixed(1)}M chars`;
   // };
 
+  const urlCount = input?.urls?.length || 0;
+  const urlText = urlCount === 1 ? "URL" : `${urlCount} URLs`;
+
   switch (part.state) {
     case "input-streaming":
       return (
@@ -65,7 +75,7 @@ export const MessagePartToolGetUrlContent = ({
             <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
-            Browsing URL...
+            Browsing {urlText}...
           </span>
         </div>
       );
@@ -75,18 +85,20 @@ export const MessagePartToolGetUrlContent = ({
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
           <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
-            Browsing {formatUrl(input?.url || "")}...
+            {urlCount === 1
+              ? `Browsing ${formatUrl(input?.urls?.[0] || "")}...`
+              : `Browsing ${urlCount} URLs...`}
           </span>
         </p>
       );
 
-    case "output-available":
+    case "output-available": {
       if (!output?.success) {
         return (
           <div key={callId} className="flex items-center gap-1">
             <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
             <span className="text-sm font-bold text-destructive max-w-2xl truncate">
-              Failed to browse {formatUrl(input?.url || "")}:{" "}
+              Failed to browse {urlText}:{" "}
               <span className="font-normal text-destructive/80">
                 {output?.error || "Unknown error"}
               </span>
@@ -95,18 +107,51 @@ export const MessagePartToolGetUrlContent = ({
         );
       }
 
+      const results = output?.results || [];
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.length - successCount;
+
+      if (results.length === 1) {
+        const result = results[0];
+        return (
+          <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
+            <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
+            <span className="max-w-2xl truncate">
+              Browsed {formatUrl(result.url)}
+            </span>
+          </p>
+        );
+      }
+
       return (
-        <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
-          <span className="max-w-2xl truncate">
-            Browsed {formatUrl(output.url)}
-            {/* TODO: Move other info (raw or markdown, the stuff below) inside accordion */}
-            {/* {output.title && ` - "${output.title}"`}
-            {output.length && ` (${formatLength(output.length)})`}
-            {output.truncated && " - truncated"} */}
-          </span>
-        </p>
+        <div key={callId} className="flex flex-col gap-1">
+          <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
+            <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
+            <span>
+              Browsed {results.length} URLs
+              {failCount > 0 && ` (${failCount} failed)`}
+            </span>
+          </p>
+          {results.map((result, index) => (
+            <div key={index} className="flex items-center gap-1 ml-4">
+              {result.success ? (
+                <GlobeIcon className="h-3 w-3 shrink-0 text-foreground/60" />
+              ) : (
+                <XCircleIcon className="h-3 w-3 shrink-0 text-destructive" />
+              )}
+              <span
+                className={`text-xs max-w-2xl truncate ${
+                  result.success ? "text-foreground/80" : "text-destructive"
+                }`}
+              >
+                {formatUrl(result.url)}
+                {!result.success && result.error && `: ${result.error}`}
+              </span>
+            </div>
+          ))}
+        </div>
       );
+    }
 
     case "output-error":
       return (
