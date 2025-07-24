@@ -1,2 +1,3 @@
 - Support multi-threading of chats?
 - Fix tool call re-rendering issues (all tool calls rerender when just one updates)
+- Allow resuming after error without discarding previous message parts
