@@ -63,7 +63,8 @@ export const MessagePartToolGetUrlContent = ({
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
           <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
-            Fetching content from {formatUrl(input?.url || "")}...
+            Fetching {input.format === "raw" ? "raw content" : "content"} from{" "}
+            {formatUrl(input?.url || "")}...
           </span>
         </p>
       );
@@ -87,7 +88,8 @@ export const MessagePartToolGetUrlContent = ({
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
           <ExternalLinkIcon className="h-4 w-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
-            Fetched content from {formatUrl(output.url)}
+            Fetched {input.format === "raw" ? "raw content" : "content"} from{" "}
+            {formatUrl(output.url)}
             {/* {output.title && ` - "${output.title}"`}
             {output.length && ` (${formatLength(output.length)})`}
             {output.truncated && " - truncated"} */}
