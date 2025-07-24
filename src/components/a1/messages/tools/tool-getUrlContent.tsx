@@ -2,6 +2,7 @@ import type { ToolUIPart } from "ai";
 import { GlobeIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 
 // TODO: Use an accordion to allow expanding and viewing more tool info
+// TODO: Ensure "browsing 0 URLs" can never happen (it happens right now due to the input still streaming)
 
 interface GetUrlContentInput {
   urls: string[];
