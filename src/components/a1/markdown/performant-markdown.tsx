@@ -33,6 +33,7 @@ export const PerformantMarkdown = memo(({ content }: { content: string }) => {
           markdown({ base: markdownLanguage }),
           editorTheme,
           EditorView.lineWrapping,
+          EditorView.editable.of(false),
         ]}
         readOnly={true}
         basicSetup={{
