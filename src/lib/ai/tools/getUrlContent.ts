@@ -20,7 +20,7 @@ export const GetUrlContentTool = tool({
     format: z
       .enum(["markdown", "raw"])
       .default("markdown")
-      .describe("Format to return content in (default: markdown)"),
+      .describe("Format to return content in (markdown recommended)"),
     maxLength: z
       .number()
       .min(1)
@@ -38,10 +38,9 @@ export const GetUrlContentTool = tool({
   execute: async (input, { abortSignal }) => {
     const timeoutMs = (input.timeoutSeconds || 30) * 1000 + 5000; // Add 5s buffer
 
-    // Create timeout promise
     const timeoutPromise = new Promise<never>((_, reject) => {
       const timeoutId = setTimeout(() => {
-        reject(new Error("Frontend timeout"));
+        reject(new Error("Frontend timeout")); // TODO: Make sure this actually cancels the fetch on the Rust backend too
       }, timeoutMs);
 
       abortSignal?.addEventListener(
@@ -54,7 +53,6 @@ export const GetUrlContentTool = tool({
       );
     });
 
-    // Create invoke promise
     const invokePromise = invoke<UrlContentResponse>("get_url_content", {
       url: input.url,
       format: input.format,

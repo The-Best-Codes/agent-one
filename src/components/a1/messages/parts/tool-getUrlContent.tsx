@@ -1,6 +1,8 @@
 import type { ToolUIPart } from "ai";
 import { ExternalLinkIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 
+// TODO: Use an accordion to allow expanding and viewing more tool info
+
 interface GetUrlContentInput {
   url: string;
   format: string;
