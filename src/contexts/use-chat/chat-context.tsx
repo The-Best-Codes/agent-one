@@ -1,5 +1,5 @@
 import { useChat } from "@/hooks/ai/useChat";
-import { groq } from "@/lib/ai/providers/groq";
+import { google } from "@/lib/ai/providers/google";
 import type { LanguageModel } from "ai";
 import React, { useMemo, type ReactNode } from "react";
 import {
@@ -16,7 +16,7 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = groq("moonshotai/kimi-k2-instruct"),
+  model = google("gemini-2.5-flash"),
 }) => {
   const chatResult = useChat(model, {
     experimental_throttle: 250, // TODO: Allow customizing this in settings

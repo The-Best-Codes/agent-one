@@ -16,7 +16,9 @@ export const GetUrlContentTool = tool({
   description:
     "Fetch and extract content from a URL. Can return content as markdown or raw text.",
   inputSchema: z.object({
-    url: z.string().url().describe("The URL to fetch content from"),
+    url: z
+      .string()
+      .describe("The URL to fetch content from (must be a valid URL)"),
     format: z
       .enum(["markdown", "raw"])
       .default("markdown")
