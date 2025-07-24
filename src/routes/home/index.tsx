@@ -29,6 +29,7 @@ function HomeRoute() {
               <MessageParts message={message} />
             </div>
           ))}
+          {/* TODO: Put this above the message action row in group.tsx */}
           {messages.length > 0 && <ChatMessageLoading />}
         </AutoScrollContainer>
         <MainChatInput />
