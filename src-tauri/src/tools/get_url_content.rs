@@ -1,6 +1,35 @@
 use super::utils::{DEFAULT_TIMEOUT_SECONDS, MAX_CONTENT_LENGTH, MAX_TIMEOUT_SECONDS};
+use once_cell::sync::Lazy;
+use rand::{rng, seq::IndexedRandom};
+use regex::Regex;
+use reqwest::header::{
+    HeaderMap, HeaderValue, ACCEPT, ACCEPT_ENCODING, ACCEPT_LANGUAGE, USER_AGENT,
+};
 use serde::{Deserialize, Serialize};
 use tokio::time::{timeout, Duration};
+
+// Constants for browser-like behavior
+const USER_AGENTS: &[&str] = &[
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/121.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/121.0",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (iPad; CPU OS 17_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1.2 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+];
+
+// Lazy static regexes for HTML pre-processing and title extraction
+static STYLE_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?is)<style[^>]*>.*?</style>").unwrap());
+static SCRIPT_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?is)<script[^>]*>.*?</script>").unwrap());
+static COMMENT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<!--.*?-->").unwrap());
+static LINK_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<link[^>]*>").unwrap());
+static META_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<meta[^>]*>").unwrap());
+static BLANK_LINE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
+static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
 
 #[derive(Serialize, Deserialize)]
 pub struct UrlContentResponse {
@@ -41,15 +70,56 @@ async fn fetch_url_content(
     format: String,
     max_length: usize,
 ) -> Result<UrlContentResponse, String> {
-    // Create HTTP client
+    // Create HTTP client with browser-like configuration
     let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (compatible; AgentOne/1.0)")
+        // Client-level timeout, set to max to let the outer tokio::timeout handle the hard limit
+        .timeout(Duration::from_secs(MAX_TIMEOUT_SECONDS))
+        // Enable automatic decompression for common formats
+        .gzip(true)
+        .brotli(true)
+        .deflate(true)
+        // Follow up to 10 redirects
+        .redirect(reqwest::redirect::Policy::limited(10))
+        // Keep TCP connections alive
+        .tcp_keepalive(Duration::from_secs(60))
+        // Set idle timeout for connections in the pool
+        .pool_idle_timeout(Duration::from_secs(90))
+        // Max idle connections per host in the pool
+        .pool_max_idle_per_host(10)
         .build()
         .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
 
-    // Fetch the URL
+    // Set up browser-like headers
+    let mut headers = HeaderMap::new();
+
+    // Randomly select a User-Agent
+    let user_agent = USER_AGENTS
+        .choose(&mut rng())
+        .expect("USER_AGENTS array should not be empty");
+    headers.insert(
+        USER_AGENT,
+        HeaderValue::from_str(user_agent).map_err(|e| e.to_string())?,
+    );
+
+    // Accept HTML and other common web formats
+    headers.insert(
+        ACCEPT,
+        HeaderValue::from_static("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+    );
+
+    // Indicate acceptance of compressed content
+    headers.insert(
+        ACCEPT_ENCODING,
+        HeaderValue::from_static("gzip, deflate, br"),
+    );
+
+    // Indicate preferred languages
+    headers.insert(ACCEPT_LANGUAGE, HeaderValue::from_static("en-US,en;q=0.9"));
+
+    // Fetch the URL with enhanced headers
     let response = client
         .get(&url)
+        .headers(headers)
         .send()
         .await
         .map_err(|e| format!("Failed to fetch URL: {}", e))?;
@@ -59,7 +129,7 @@ async fn fetch_url_content(
         return Err(format!("HTTP error: {}", response.status()));
     }
 
-    // Get content type
+    // Get content type from headers
     let content_type = response
         .headers()
         .get("content-type")
@@ -67,45 +137,76 @@ async fn fetch_url_content(
         .unwrap_or("")
         .to_lowercase();
 
-    // Get the response text
-    let html_content = response
+    // Get the response body as text
+    let mut raw_content = response
         .text()
         .await
         .map_err(|e| format!("Failed to read response body: {}", e))?;
 
-    // Extract title if it's HTML
+    // Extract title if content is HTML
     let title = if content_type.contains("text/html") {
-        extract_title(&html_content)
+        extract_title(&raw_content)
     } else {
         None
     };
 
-    // Convert content based on format
+    // Process content based on desired format
     let processed_content = match format.as_str() {
         "markdown" => {
             if content_type.contains("text/html") {
-                html2md::parse_html(&html_content)
+                // Pre-process HTML to remove unused/noisy data before conversion
+                raw_content = STYLE_REGEX.replace_all(&raw_content, "").to_string();
+                raw_content = SCRIPT_REGEX.replace_all(&raw_content, "").to_string();
+                raw_content = COMMENT_REGEX.replace_all(&raw_content, "").to_string();
+                raw_content = LINK_REGEX.replace_all(&raw_content, "").to_string();
+                raw_content = META_REGEX.replace_all(&raw_content, "").to_string();
+                // Normalize multiple blank lines to just two newlines
+                raw_content = BLANK_LINE_REGEX
+                    .replace_all(&raw_content, "\n\n")
+                    .to_string();
+
+                htmd::convert(&raw_content)
+                    .map_err(|e| format!("Failed to convert HTML to markdown: {}", e))?
             } else {
-                html_content
+                // If not HTML, treat raw text as markdown (don't convert)
+                raw_content
             }
         }
-        "raw" => html_content,
+        "raw" => raw_content, // Return content as is
         _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
     };
 
-    // Truncate if necessary
-    let (final_content, truncated) = if processed_content.len() > max_length {
-        (
-            format!(
-                "{}...\n\n[Content truncated at {} characters]",
-                &processed_content[..max_length],
-                max_length
-            ),
-            true,
-        )
+    // Truncate content if its byte length exceeds max_length, safely handling UTF-8
+    let (mut final_content, truncated) = if processed_content.len() > max_length {
+        // Find the byte index up to which characters can be safely included
+        let mut byte_idx = 0;
+        for (idx, _) in processed_content.char_indices() {
+            if idx >= max_length {
+                break;
+            }
+            byte_idx = idx;
+        }
+        // If the first character alone exceeds max_length, ensure at least that much is taken if max_length > 0
+        if byte_idx == 0 && max_length > 0 && !processed_content.is_empty() {
+            byte_idx = processed_content.chars().next().unwrap().len_utf8();
+            if byte_idx > max_length {
+                // If even the first char is too long, truncate it
+                byte_idx = max_length;
+            }
+        }
+
+        (processed_content[..byte_idx].to_string(), true)
     } else {
         (processed_content, false)
     };
+
+    // Append truncation notice if content was truncated
+    if truncated {
+        final_content = format!(
+            "{}...\n\n[Content truncated at {} bytes]",
+            final_content, max_length
+        );
+    }
 
     Ok(UrlContentResponse {
         content: final_content.clone(),
@@ -118,9 +219,7 @@ async fn fetch_url_content(
 }
 
 fn extract_title(html: &str) -> Option<String> {
-    // Simple regex-based title extraction
-    let title_regex = regex::Regex::new(r"<title[^>]*>([^<]*)</title>").ok()?;
-    title_regex
+    TITLE_REGEX
         .captures(html)
         .and_then(|caps| caps.get(1))
         .map(|m| m.as_str().trim().to_string())
