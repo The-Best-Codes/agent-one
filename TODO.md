@@ -1,6 +1,6 @@
 - Support multi-threading of chats?
 - Fix tool call re-rendering issues (all tool calls rerender when just one updates)
-- Allow editing AI and user messages
+- Allow editing AI and user messages (using codemirror like in the textarea or performant renderer, perhaps?)
 - Allow resuming after error without discarding previous message parts. One method, a bit clumsy:
 
 ```
