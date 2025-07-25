@@ -111,6 +111,22 @@ export const GetUrlContentTool = tool({
 
       logger.verbose("Fetched URLs:", results);
 
+      const allUrlsFailed =
+        results.length > 0 && results.every((r) => !r.success);
+
+      if (allUrlsFailed) {
+        const errorDetails = results
+          .filter((r) => r.error)
+          .map((r) => `${r.url}: ${r.error}`)
+          .join(", ");
+
+        return {
+          success: false,
+          error: `All ${results.length} URLs failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
+          urls: input.urls,
+        };
+      }
+
       return {
         success: true,
         results,

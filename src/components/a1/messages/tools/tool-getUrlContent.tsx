@@ -112,6 +112,20 @@ export const MessagePartToolGetUrlContent = ({
 
       if (results.length === 1) {
         const result = results[0];
+        if (!result.success) {
+          return (
+            <div key={callId} className="flex items-center gap-1">
+              <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
+              <span className="text-sm font-bold text-destructive max-w-2xl truncate">
+                Failed to browse {formatUrl(result.url)}:{" "}
+                <span className="font-normal text-destructive/80">
+                  {result.error || "Unknown error"}
+                </span>
+              </span>
+            </div>
+          );
+        }
+
         return (
           <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
             <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
