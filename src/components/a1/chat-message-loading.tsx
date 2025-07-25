@@ -1,7 +1,7 @@
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import type { UIMessage } from "ai";
 
-// TODO: Reduce rerendering (mostly cause of useChatMessages)
+// TODO: Reduce rerendering (mostly because of useChatMessages)
 
 export const ChatMessageLoading = ({
   mode = "inLayout",
