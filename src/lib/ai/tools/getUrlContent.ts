@@ -1,6 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 interface UrlContentResponse {
   content: string;
@@ -44,6 +47,8 @@ export const GetUrlContentTool = tool({
   execute: async (input, { abortSignal }) => {
     const timeoutMs = (input.timeoutSeconds || 30) * 1000 + 5000;
 
+    logger.verbose("Executing getUrlContent tool with input:", input);
+
     const timeoutPromise = new Promise<never>((_, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error("Frontend timeout"));
@@ -67,6 +72,9 @@ export const GetUrlContentTool = tool({
           maxLength: input.maxLength,
           timeoutSeconds: input.timeoutSeconds,
         });
+
+        logger.verbose("Fetched URL:", result);
+
         return {
           success: true,
           url: result.url,
@@ -77,6 +85,7 @@ export const GetUrlContentTool = tool({
           truncated: result.truncated,
         };
       } catch (error) {
+        logger.error("Error fetching URL:", error);
         return {
           success: false,
           error:
@@ -92,6 +101,8 @@ export const GetUrlContentTool = tool({
         timeoutPromise,
       ]);
 
+      logger.verbose("Fetched URLs:", results);
+
       return {
         success: true,
         results,
@@ -101,6 +112,7 @@ export const GetUrlContentTool = tool({
         },
       };
     } catch (error) {
+      logger.error("Error fetching URLs:", error);
       return {
         success: false,
         error:
