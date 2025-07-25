@@ -1,5 +1,6 @@
 - Support multi-threading of chats?
 - Fix tool call re-rendering issues (all tool calls rerender when just one updates)
+- Add retry (`regenerate()`) button to each assistant message. Disable it if the chat state is streaming or submitted.
 - Allow resuming after error without discarding previous message parts. One method, a bit clumsy:
 
 ```
