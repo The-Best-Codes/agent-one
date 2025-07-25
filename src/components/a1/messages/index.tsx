@@ -20,7 +20,11 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
   };
 
   return (
-    <MessageGroup contentToCopy={getCopyContent()} messageRole={message.role}>
+    <MessageGroup
+      contentToCopy={getCopyContent()}
+      messageRole={message.role}
+      messageId={message.id}
+    >
       {message.parts.map((part, i) => {
         const key = `${message.id}-${i}`;
 
