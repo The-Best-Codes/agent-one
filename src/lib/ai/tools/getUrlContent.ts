@@ -122,7 +122,7 @@ export const GetUrlContentTool = tool({
 
         return {
           success: false,
-          error: `All ${results.length} URLs failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
+          error: `${results.length > 1 ? `All ${results.length} URLs` : `URL`} failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
           urls: input.urls,
         };
       }
