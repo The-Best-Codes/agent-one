@@ -1,7 +1,7 @@
+import { getLogger } from "@/lib/logger";
 import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
-import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
@@ -51,14 +51,18 @@ export const GetUrlContentTool = tool({
 
     const timeoutPromise = new Promise<never>((_, reject) => {
       const timeoutId = setTimeout(() => {
-        reject(new Error("Frontend timeout"));
+        logger.error("Timeout reached:", timeoutMs);
+        reject(new Error("Frontend timeout: Operation exceeded allowed time."));
       }, timeoutMs);
 
       abortSignal?.addEventListener(
         "abort",
         () => {
           clearTimeout(timeoutId);
-          reject(new Error("Operation aborted"));
+          logger.error("Operation aborted.");
+          const abortError = new Error("Operation aborted.");
+          abortError.name = "AbortError";
+          reject(abortError);
         },
         { once: true },
       );
