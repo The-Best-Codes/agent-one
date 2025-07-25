@@ -1,3 +1,4 @@
+import { fixUrl } from "@/lib/fix-url";
 import { getLogger } from "@/lib/logger";
 import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
@@ -24,7 +25,7 @@ export const GetUrlContentTool = tool({
       .min(1)
       .max(5)
       .describe(
-        "Array of URLs to fetch content from (1-5 URLs, must be valid URLs beginning with http:// or https://)",
+        "Array of URLs to fetch content from (1-5 URLs, must be valid URLs)",
       ),
     format: z
       .enum(["markdown", "raw"])
@@ -70,8 +71,9 @@ export const GetUrlContentTool = tool({
 
     const fetchPromises = input.urls.map(async (url) => {
       try {
+        const fixedUrl = fixUrl(url);
         const result = await invoke<UrlContentResponse>("get_url_content", {
-          url,
+          url: fixedUrl,
           format: input.format,
           maxLength: input.maxLength,
           timeoutSeconds: input.timeoutSeconds,
