@@ -1,8 +1,11 @@
 import { fixUrl } from "@/lib/fix-url";
+import { getError } from "@/lib/get-error";
 import { getLogger } from "@/lib/logger";
 import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
+
+// TODO: Reject errors properly so that the tool error will be recognized in the UI
 
 const logger = getLogger(import.meta.url);
 
@@ -94,8 +97,7 @@ export const GetUrlContentTool = tool({
         logger.error("Error fetching URL:", error);
         return {
           success: false,
-          error:
-            error instanceof Error ? error.message : "Unknown error occurred",
+          error: getError(error as Error),
           url,
         };
       }
@@ -121,8 +123,7 @@ export const GetUrlContentTool = tool({
       logger.error("Error fetching URLs:", error);
       return {
         success: false,
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        error: getError(error as Error),
         urls: input.urls,
         schema: {
           success: "Whether all URL fetches completed",
