@@ -2,7 +2,7 @@ import { getLogger } from "./logger";
 
 const logger = getLogger(import.meta.url);
 
-export const fixUrl = async (url: string): Promise<string> => {
+export const fixUrl = (url: string): string => {
   try {
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       url = url.trim();
@@ -11,10 +11,7 @@ export const fixUrl = async (url: string): Promise<string> => {
     }
     return url;
   } catch (error) {
-    // Log any errors that occur during the URL fixing process.
     logger.error(`Failed to fix URL: ${url}`, error);
-    // In case of an error, return the original URL to prevent further issues,
-    // as per the existing error handling logic.
     return url;
   }
 };

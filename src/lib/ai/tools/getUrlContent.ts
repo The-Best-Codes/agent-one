@@ -72,6 +72,7 @@ export const GetUrlContentTool = tool({
     const fetchPromises = input.urls.map(async (url) => {
       try {
         const fixedUrl = fixUrl(url);
+        console.log(`Fetching URL: ${fixedUrl}`);
         const result = await invoke<UrlContentResponse>("get_url_content", {
           url: fixedUrl,
           format: input.format,
