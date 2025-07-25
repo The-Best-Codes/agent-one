@@ -5,8 +5,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
 
-// TODO: Cancel timeout (and its errors) after the tool has run and succeeded
-
 const logger = getLogger(import.meta.url);
 
 interface UrlContentResponse {
@@ -53,8 +51,10 @@ export const GetUrlContentTool = tool({
 
     logger.verbose("Executing getUrlContent tool with input:", input);
 
+    let timeoutId: NodeJS.Timeout | undefined = undefined;
+
     const timeoutPromise = new Promise<never>((_, reject) => {
-      const timeoutId = setTimeout(() => {
+      timeoutId = setTimeout(() => {
         logger.error("Timeout reached:", timeoutMs);
         reject(new Error("Frontend timeout: Operation exceeded allowed time."));
       }, timeoutMs);
@@ -62,7 +62,7 @@ export const GetUrlContentTool = tool({
       abortSignal?.addEventListener(
         "abort",
         () => {
-          clearTimeout(timeoutId);
+          if (timeoutId) clearTimeout(timeoutId);
           logger.error("Operation aborted.");
           const abortError = new Error("Operation aborted.");
           abortError.name = "AbortError";
@@ -147,6 +147,8 @@ export const GetUrlContentTool = tool({
           urls: "The URLs that were attempted to be fetched",
         },
       };
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
     }
   },
 });
