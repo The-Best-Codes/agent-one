@@ -24,7 +24,7 @@ export const GetUrlContentTool = tool({
       .min(1)
       .max(5)
       .describe(
-        "Array of URLs to fetch content from (1-5 URLs, must be valid URLs)",
+        "Array of URLs to fetch content from (1-5 URLs, must be valid URLs beginning with http:// or https://)",
       ),
     format: z
       .enum(["markdown", "raw"])
