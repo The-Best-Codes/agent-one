@@ -6,6 +6,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 // TODO: Reject errors properly so that the tool error will be recognized in the UI
+// Also cancel timeout errors after the tool has run and succeeded
 
 const logger = getLogger(import.meta.url);
 
