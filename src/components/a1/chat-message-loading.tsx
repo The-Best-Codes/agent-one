@@ -11,7 +11,7 @@ export const ChatMessageLoading = ({
   messageRole?: UIMessage["role"];
 }) => {
   const { status } = useChatStatus();
-  const { messages } = useChatMessages();
+  const messages = useChatMessages();
 
   const lastOverallMessage = messages[messages.length - 1];
   const isLatestMessageOverall = lastOverallMessage?.id === messageId;

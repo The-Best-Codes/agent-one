@@ -21,7 +21,7 @@ import { RefreshCcwIcon, PlayIcon } from "lucide-react";
 export const MainInputErrorSection = () => {
   const { error } = useChatStatus();
   const { regenerate, sendMessage } = useChatFunctions();
-  const { messages } = useChatMessages();
+  const messages = useChatMessages();
 
   const errorText = error ? error.message : "";
 

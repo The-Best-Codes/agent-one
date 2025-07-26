@@ -7,10 +7,7 @@ import {
 } from "./chat-contexts";
 
 // Hook types
-export type ChatMessagesContextType = Pick<
-  UseChatHelpers<UIMessage>,
-  "messages"
->;
+export type ChatMessagesContextType = UIMessage[];
 export type ChatStatusContextType = Pick<
   UseChatHelpers<UIMessage>,
   "status" | "error"

@@ -22,13 +22,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     maxSteps: 50,
   });
 
-  const messagesValue = useMemo(
-    () => ({
-      messages: chatResult.messages,
-    }),
-    [chatResult.messages],
-  );
-
   const statusValue = useMemo(
     () => ({
       status: chatResult.status,
@@ -55,7 +48,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   );
 
   return (
-    <ChatMessagesContext.Provider value={messagesValue}>
+    <ChatMessagesContext.Provider value={chatResult.messages}>
       <ChatStatusContext.Provider value={statusValue}>
         <ChatFunctionsContext.Provider value={functionsValue}>
           {children}

@@ -7,7 +7,7 @@ import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
 function HomeRoute() {
-  const { messages } = useChatMessages();
+  const messages = useChatMessages();
 
   return (
     <main className="h-screen flex flex-col items-center justify-center">
