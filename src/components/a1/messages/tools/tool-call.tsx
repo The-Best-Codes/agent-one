@@ -11,13 +11,12 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from "lucide-react";
-import { memo } from "react";
 
 interface ToolCallPartProps {
   part: ToolUIPart;
 }
 
-export const MessagePartToolCall = memo(({ part }: ToolCallPartProps) => {
+export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
   const callId = part.toolCallId;
   const toolName = part.type.replace("tool-", "");
 
@@ -120,6 +119,6 @@ export const MessagePartToolCall = memo(({ part }: ToolCallPartProps) => {
         </div>
       );
   }
-});
+};
 
 MessagePartToolCall.displayName = "MessagePartToolCall";
