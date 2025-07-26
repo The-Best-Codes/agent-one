@@ -26,7 +26,10 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
       messageId={message.id}
     >
       {message.parts.map((part, i) => {
-        const key = `${message.id}-${i}`;
+        const key =
+          "toolCallId" in part && part.toolCallId
+            ? part.toolCallId
+            : `${message.id}-${i}`;
 
         switch (part.type) {
           case "text":
@@ -44,9 +47,7 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
             return <MessagePartStepStart key={key} />;
           default:
             if (part.type.startsWith("tool-")) {
-              return (
-                <MessageToolHandler key={key} id={message.id} part={part} />
-              );
+              return <MessageToolHandler key={key} part={part} />;
             }
 
             console.error(
