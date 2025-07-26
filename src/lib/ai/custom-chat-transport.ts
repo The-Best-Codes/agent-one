@@ -1,3 +1,4 @@
+import { getLogger } from "@/lib/logger";
 import { type UIMessage } from "@ai-sdk/react";
 import {
   convertToModelMessages,
@@ -9,6 +10,8 @@ import {
 } from "ai";
 import { SYSTEM_PROMPT } from "./system-prompt";
 import { toolsObject } from "./tools";
+
+const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel;
@@ -41,7 +44,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     });
     return result.toUIMessageStream({
       onError: (error) => {
-        console.error("Error occurred in CustomChatTransport:", error);
+        logger.error("Error occurred in CustomChatTransport:", error);
 
         if (error == null) {
           return "Unknown error";
@@ -68,7 +71,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   ): Promise<ReadableStream<UIMessageChunk> | null> {
     // Leaving this unimplemented for now,
     // as our implementation is frontend-only.
-    console.warn(
+    logger.warn(
       "resumeStream is not implemented in frontend-only applications. Please don't use it.",
     );
     return null;

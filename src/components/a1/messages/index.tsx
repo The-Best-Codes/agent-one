@@ -1,3 +1,4 @@
+import { getLogger } from "@/lib/logger";
 import type { TextUIPart, UIMessage } from "ai";
 import { memo, useCallback } from "react";
 import { ChatMessageLoading } from "../chat-message-loading";
@@ -7,6 +8,8 @@ import { MessagePartReasoning } from "./parts/reasoning";
 import { MessagePartStepStart } from "./parts/step-start";
 import { MessagePartText } from "./parts/text";
 import { MessageToolHandler } from "./tool-handler";
+
+const logger = getLogger(import.meta.url);
 
 export const MessageParts = memo(({ message }: { message: UIMessage }) => {
   const getCopyContent = useCallback(() => {
@@ -50,7 +53,7 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
               return <MessageToolHandler key={key} part={part} />;
             }
 
-            console.error(
+            logger.error(
               `Unknown or unhandled message part type: ${part.type}`,
             );
             return <MessagePartFallback key={key} {...part} />;

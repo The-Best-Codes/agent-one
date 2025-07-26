@@ -1,5 +1,8 @@
+import { getLogger } from "@/lib/logger";
 import type { ToolUIPart } from "ai";
 import { ClockIcon, Loader2Icon, XCircleIcon } from "lucide-react";
+
+const logger = getLogger(import.meta.url);
 
 interface WaitNumberMillisecondsInput {
   milliseconds: number;
@@ -35,7 +38,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
 
       return formatted.join(" ");
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       return "unknown";
     }
   };

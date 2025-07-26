@@ -9,6 +9,7 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { getLogger } from "@/lib/logger";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
@@ -20,6 +21,8 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { MainInputErrorSection } from "./error-section";
+
+const logger = getLogger(import.meta.url);
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -139,7 +142,7 @@ export const MainChatInput = () => {
                     disabled={status !== "ready"}
                     size="icon"
                     onClick={() => {
-                      console.log("Attachments not implemented yet");
+                      logger.log("Attachments not implemented yet");
                     }}
                   >
                     <PaperclipIcon />
