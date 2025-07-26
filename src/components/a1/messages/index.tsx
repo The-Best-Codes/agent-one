@@ -1,5 +1,5 @@
 import type { TextUIPart, UIMessage } from "ai";
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
 import { MessagePartFallback } from "./parts/fallback";
@@ -9,7 +9,7 @@ import { MessagePartText } from "./parts/text";
 import { MessageToolHandler } from "./tool-handler";
 
 export const MessageParts = memo(({ message }: { message: UIMessage }) => {
-  const getCopyContent = () => {
+  const getCopyContent = useCallback(() => {
     return message.parts
       .map((part) =>
         typeof (part as TextUIPart)?.text === "string"
@@ -17,7 +17,7 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
           : "",
       )
       .join("\n");
-  };
+  }, [message.parts]);
 
   return (
     <MessageGroup
