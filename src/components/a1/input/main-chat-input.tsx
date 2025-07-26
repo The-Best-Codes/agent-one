@@ -18,7 +18,7 @@ import {
   PaperclipIcon,
   SquareIcon,
 } from "lucide-react";
-import { memo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { MainInputErrorSection } from "./error-section";
 
 const editorTheme = EditorView.theme({
@@ -45,7 +45,7 @@ const editorTheme = EditorView.theme({
   },
 });
 
-export const MainChatInput = memo(() => {
+export const MainChatInput = () => {
   const { status } = useChatStatus();
   const { sendMessage, stop } = useChatFunctions();
 
@@ -177,6 +177,6 @@ export const MainChatInput = memo(() => {
       </form>
     </>
   );
-});
+};
 
 MainChatInput.displayName = "MainChatInput";
