@@ -1,3 +1,4 @@
+- Maybe later: Human-in-the-loop / tool confirmation
 - Support multi-threading of chats?
 - Fix tool call re-rendering issues (all tool calls rerender when just one updates)
 - Allow editing AI and user messages (using codemirror like in the textarea or performant renderer, perhaps?)
