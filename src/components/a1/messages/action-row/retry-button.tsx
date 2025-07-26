@@ -30,7 +30,7 @@ export const RetryButton = ({
       className={className}
       size="icon"
       variant="secondary"
-      title="Regenerate response"
+      aria-label="Regenerate response"
     >
       <RefreshCcwIcon />
     </Button>
