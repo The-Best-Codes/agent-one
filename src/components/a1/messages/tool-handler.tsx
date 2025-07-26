@@ -1,4 +1,5 @@
 import type { ToolUIPart, UIMessage } from "ai";
+import { memo } from "react";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartToolCall } from "./tools/tool-call";
 import { MessagePartToolDateTime } from "./tools/tool-dateTime";
@@ -9,7 +10,7 @@ type MessageToolHandlerProps = {
   part: UIMessage["parts"][number];
 };
 
-export const MessageToolHandler = ({ part }: MessageToolHandlerProps) => {
+export const MessageToolHandler = memo(({ part }: MessageToolHandlerProps) => {
   if (!part.type.startsWith("tool-")) {
     console.error(
       `MessagePartToolHandler received a non-tool part type: ${part.type}`,
@@ -27,6 +28,6 @@ export const MessageToolHandler = ({ part }: MessageToolHandlerProps) => {
     default:
       return <MessagePartToolCall part={part as ToolUIPart} />;
   }
-};
+});
 
 MessageToolHandler.displayName = "MessageToolHandler";
