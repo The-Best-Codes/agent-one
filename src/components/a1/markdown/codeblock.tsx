@@ -1,10 +1,10 @@
 import { CopyButton } from "@/components/a1/copy-button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
-import { memo, useState } from "react";
-import { SyntaxHighlighter } from "./shiki-highlighter";
 import { PlayIcon, SquareIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { SyntaxHighlighter } from "./shiki-highlighter";
 
 type CodeBlockProps = {
   content: string;
@@ -32,68 +32,60 @@ const BestHighlighter = ({
   }
 };
 
-export const CodeBlock = memo(
-  ({ content, lang, messageRole }: CodeBlockProps) => {
-    const [isPreviewMode, setIsPreviewMode] = useState(false); // TODO: Extract preview logic to other files
+export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
+  const [isPreviewMode, setIsPreviewMode] = useState(false); // TODO: Extract preview logic to other files
 
-    const isHtml = lang === "html"; // Preview will support other languages in the future, and maybe open in canvas if I add that?
+  const isHtml = lang === "html"; // Preview will support other languages in the future, and maybe open in canvas if I add that?
 
-    const togglePreview = () => {
-      setIsPreviewMode((prev) => !prev);
-    };
+  const togglePreview = () => {
+    setIsPreviewMode((prev) => !prev);
+  };
 
-    return (
+  return (
+    <div
+      className="not-prose text-sm min-w-0 rounded-md mb-6"
+      style={{ clipPath: "inset(0 round 0.375rem)" }}
+    >
       <div
-        className="not-prose text-sm min-w-0 rounded-md mb-6"
-        style={{ clipPath: "inset(0 round 0.375rem)" }}
+        className={cn(
+          "sticky top-0 z-10",
+          messageRole === "user" ? "bg-secondary" : "bg-background",
+        )}
       >
-        <div
-          className={cn(
-            "sticky top-0 z-10",
-            messageRole === "user" ? "bg-secondary" : "bg-background",
-          )}
-        >
-          <div className="flex rounded-t-md items-center justify-between bg-[rgb(30,30,30)] text-xs p-0">
-            <span className="ml-2 font-mono text-white">{lang || "text"}</span>
-            <div className="flex items-center">
-              {isHtml && (
-                <Button
-                  size="icon"
-                  onClick={togglePreview}
-                  className="w-8 h-8 bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
-                  title={isPreviewMode ? "Stop preview" : "Preview HTML"}
-                >
-                  {isPreviewMode ? <SquareIcon /> : <PlayIcon />}
-                </Button>
-              )}
-              <CopyButton
-                className="bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
-                text={content}
-              />
-            </div>
+        <div className="flex rounded-t-md items-center justify-between bg-[rgb(30,30,30)] text-xs p-0">
+          <span className="ml-2 font-mono text-white">{lang || "text"}</span>
+          <div className="flex items-center">
+            {isHtml && (
+              <Button
+                size="icon"
+                onClick={togglePreview}
+                className="w-8 h-8 bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
+                title={isPreviewMode ? "Stop preview" : "Preview HTML"}
+              >
+                {isPreviewMode ? <SquareIcon /> : <PlayIcon />}
+              </Button>
+            )}
+            <CopyButton
+              className="bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
+              text={content}
+            />
           </div>
         </div>
-        <div className="overflow-auto rounded-b-md shiki-container">
-          {isPreviewMode && isHtml ? (
-            <iframe
-              srcDoc={content}
-              title="HTML Preview"
-              className="w-full h-96 border-0 bg-white"
-              sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
-            />
-          ) : (
-            <BestHighlighter lang={lang || "text"} content={content} />
-          )}
-        </div>
       </div>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.content === nextProps.content &&
-      prevProps.lang === nextProps.lang
-    );
-  },
-);
+      <div className="overflow-auto rounded-b-md shiki-container">
+        {isPreviewMode && isHtml ? (
+          <iframe
+            srcDoc={content}
+            title="HTML Preview"
+            className="w-full h-96 border-0 bg-white"
+            sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
+          />
+        ) : (
+          <BestHighlighter lang={lang || "text"} content={content} />
+        )}
+      </div>
+    </div>
+  );
+};
 
 CodeBlock.displayName = "CodeBlock";
