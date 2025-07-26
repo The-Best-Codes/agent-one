@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
-import { CopyButton } from "../copy-button";
-import { RetryButton } from "../retry-button";
+import { MessageActionRow } from "./action-row";
 
 export const MessageGroup = ({
   children,
@@ -12,7 +11,7 @@ export const MessageGroup = ({
   children: React.ReactNode;
   messageRole: UIMessage["role"];
   contentToCopy: string;
-  messageId: string;
+  messageId: UIMessage["id"];
 }) => {
   return (
     <div
@@ -33,26 +32,11 @@ export const MessageGroup = ({
       >
         {children}
       </div>
-      <div
-        className={cn(
-          "mt-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 max-md:opacity-100 transition-opacity duration-300 ease flex gap-1",
-          messageRole !== "user" && "ml-2",
-        )}
-      >
-        <CopyButton
-          className="w-6 h-6"
-          variants={{
-            idle: "secondary",
-            copying: "secondary",
-            success: "secondary",
-            error: "secondary",
-          }}
-          text={contentToCopy}
-        />
-        {messageRole === "assistant" && (
-          <RetryButton messageId={messageId} className="w-6 h-6" />
-        )}
-      </div>
+      <MessageActionRow
+        contentToCopy={contentToCopy}
+        messageRole={messageRole}
+        messageId={messageId}
+      />
     </div>
   );
 };
