@@ -29,7 +29,7 @@ export const RetryButton = ({
       disabled={isDisabled}
       className={className}
       size="icon"
-      variant="ghost"
+      variant="secondary"
       title="Regenerate response"
     >
       <RefreshCcwIcon />

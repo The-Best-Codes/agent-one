@@ -42,10 +42,10 @@ export const MessageGroup = ({
         <CopyButton
           className="w-6 h-6"
           variants={{
-            idle: "ghost",
-            copying: "ghost",
-            success: "ghost",
-            error: "ghost",
+            idle: "secondary",
+            copying: "secondary",
+            success: "secondary",
+            error: "secondary",
           }}
           text={contentToCopy}
         />
