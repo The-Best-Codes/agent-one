@@ -1,14 +1,39 @@
 import { useChat } from "@/hooks/ai/useChat";
 import { google } from "@/lib/ai/providers/google";
 import type { LanguageModel } from "ai";
-import React, { useMemo, type ReactNode } from "react";
+import React, { useMemo, useRef, type ReactNode } from "react";
 import {
   ChatFunctionsContext,
   ChatMessagesContext,
   ChatStatusContext,
 } from "./chat-contexts";
 
-// Main provider type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function useStableObject<T extends Record<string, any>>(obj: T): T {
+  const ref = useRef<T>(obj);
+  const keysRef = useRef<string[]>(Object.keys(obj));
+
+  const hasChanged = useMemo(() => {
+    const currentKeys = Object.keys(obj);
+
+    if (
+      currentKeys.length !== keysRef.current.length ||
+      !currentKeys.every((key) => keysRef.current.includes(key))
+    ) {
+      keysRef.current = currentKeys;
+      return true;
+    }
+
+    return currentKeys.some((key) => ref.current[key] !== obj[key]);
+  }, [obj]);
+
+  if (hasChanged) {
+    ref.current = obj;
+  }
+
+  return ref.current;
+}
+
 interface ChatProviderProps {
   children: ReactNode;
   model?: LanguageModel;
@@ -23,37 +48,22 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     maxSteps: 50,
   });
 
-  const messagesValue = useMemo(
-    () => ({
-      messages: chatResult.messages,
-    }),
-    [chatResult.messages],
-  );
+  const messagesValue = useStableObject({
+    messages: chatResult.messages,
+  });
 
-  const statusValue = useMemo(
-    () => ({
-      status: chatResult.status,
-      error: chatResult.error,
-    }),
-    [chatResult.status, chatResult.error],
-  );
+  const statusValue = useStableObject({
+    status: chatResult.status,
+    error: chatResult.error,
+  });
 
-  const functionsValue = useMemo(
-    () => ({
-      sendMessage: chatResult.sendMessage,
-      addToolResult: chatResult.addToolResult,
-      regenerate: chatResult.regenerate,
-      resumeStream: chatResult.resumeStream,
-      stop: chatResult.stop,
-    }),
-    [
-      chatResult.sendMessage,
-      chatResult.addToolResult,
-      chatResult.regenerate,
-      chatResult.resumeStream,
-      chatResult.stop,
-    ],
-  );
+  const functionsValue = useStableObject({
+    sendMessage: chatResult.sendMessage,
+    addToolResult: chatResult.addToolResult,
+    regenerate: chatResult.regenerate,
+    resumeStream: chatResult.resumeStream,
+    stop: chatResult.stop,
+  });
 
   return (
     <ChatMessagesContext.Provider value={messagesValue}>
