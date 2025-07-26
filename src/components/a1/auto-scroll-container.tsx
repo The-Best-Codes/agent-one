@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import {
-  memo,
   useCallback,
   useEffect,
   useRef,
@@ -25,7 +24,7 @@ export interface AutoScrollContainerProps
   smoothScroll?: boolean;
 }
 
-const AutoScrollContainerComponent = ({
+export const AutoScrollContainer = ({
   children,
   className,
   scrollableClassName,
@@ -131,6 +130,4 @@ const AutoScrollContainerComponent = ({
   );
 };
 
-AutoScrollContainerComponent.displayName = "AutoScrollContainer";
-
-export const AutoScrollContainer = memo(AutoScrollContainerComponent);
+AutoScrollContainer.displayName = "AutoScrollContainer";
