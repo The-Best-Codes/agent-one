@@ -50,7 +50,7 @@ export const MessageParts = memo(({ message }: { message: UIMessage }) => {
             return <MessagePartStepStart key={key} />;
           default:
             if (part.type.startsWith("tool-")) {
-              return <MessageToolHandler key={key} part={part} />;
+              return <MessageToolHandler key={key} part={{ ...part }} />; // Using a spread operator to ensure React.memo will get a new instance of part
             }
 
             logger.error(
