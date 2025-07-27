@@ -14,7 +14,12 @@ export type ChatStatusContextType = Pick<
 >;
 export type ChatFunctionsContextType = Pick<
   UseChatHelpers<UIMessage>,
-  "sendMessage" | "addToolResult" | "regenerate" | "resumeStream" | "stop"
+  | "sendMessage"
+  | "addToolResult"
+  | "regenerate"
+  | "resumeStream"
+  | "stop"
+  | "setMessages"
 >;
 
 export const useChatMessages = (): ChatMessagesContextType => {

@@ -2,7 +2,7 @@ import { AutoScrollContainer } from "@/components/a1/auto-scroll-container";
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
-import { MessageParts } from "@/components/a1/messages";
+import { EditableMessage } from "@/components/a1/messages/editable-message";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ function HomeRoute() {
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
         <AutoScrollContainer
           className="flex-1 max-h-full my-2 min-h-0"
-          scrollableClassName="space-y-0 p-0 pr-2"
+          scrollableClassName="p-2"
           smoothScroll={false}
         >
           {messages.length === 0 && <NoMessagesGreeting />}
@@ -22,11 +22,11 @@ function HomeRoute() {
             <div
               key={message.id}
               className={cn(
-                "flex",
+                "flex mb-4 last:mb-0",
                 message.role === "user" ? "justify-end" : "justify-start",
               )}
             >
-              <MessageParts message={message} />
+              <EditableMessage message={message} />
             </div>
           ))}
           {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}

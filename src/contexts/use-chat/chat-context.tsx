@@ -37,6 +37,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       regenerate: chatResult.regenerate,
       resumeStream: chatResult.resumeStream,
       stop: chatResult.stop,
+      setMessages: chatResult.setMessages,
     }),
     [
       chatResult.sendMessage,
@@ -44,6 +45,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       chatResult.regenerate,
       chatResult.resumeStream,
       chatResult.stop,
+      chatResult.setMessages,
     ],
   );
 
