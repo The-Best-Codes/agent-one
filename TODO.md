@@ -2,3 +2,4 @@
 - Support multi-threading of chats?
 - Allow editing AI and user messages (using codemirror like in the textarea or performant renderer, perhaps?)
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
+- Fix rerenders of editable messages

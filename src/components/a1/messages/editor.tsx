@@ -6,7 +6,7 @@ import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import type { UIMessage } from "ai";
 import { CheckIcon, XIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -66,16 +66,6 @@ export const MessageEditor = ({
     }
   };
 
-  useEffect(() => {
-    const view = editorViewRef.current;
-    if (view) {
-      view.focus();
-      view.dispatch({
-        selection: { anchor: 0, head: view.state.doc.length },
-      });
-    }
-  }, []);
-
   return (
     <div
       className={cn(
@@ -86,10 +76,11 @@ export const MessageEditor = ({
       <CodeMirror
         value={content}
         autoFocus
-        theme="light"
+        theme="light" // TODO: Base this off of real theme, next-themes for example
         minHeight="40px"
         maxHeight="400px"
         className="bg-transparent text-sm"
+        selection={{ anchor: content.length, head: content.length }}
         extensions={[
           markdown({ base: markdownLanguage }),
           editorTheme,
