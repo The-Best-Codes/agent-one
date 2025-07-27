@@ -79,7 +79,7 @@ export const CopyButton = ({
     <Button
       onClick={handleCopy}
       disabled={copyState !== "idle"}
-      className={cn("w-8 h-8 cursor-copy", className)}
+      className={cn("size-8 cursor-copy", className)}
       size={size || "icon"}
       variant={getButtonVariant()}
     >

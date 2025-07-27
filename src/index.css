@@ -120,7 +120,7 @@
   }
 
   ::-webkit-scrollbar {
-    @apply w-2 h-2 rounded-md;
+    @apply size-2 rounded-md;
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent rounded-md;

@@ -19,7 +19,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+            <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
             Checking date and time...
@@ -30,7 +30,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     case "input-available":
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+          <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">Checking date and time...</span>
         </p>
       );
@@ -38,7 +38,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     case "output-available":
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <CalendarDaysIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <CalendarDaysIcon className="size-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             Checked date and time ({output?.formatted})
           </span>
@@ -48,7 +48,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
+          <XCircleIcon className="size-4 shrink-0 text-destructive" />
           <span className="text-sm font-bold text-destructive">
             Error getting date and time:{" "}
             <span className="font-normal text-destructive/80">
@@ -61,7 +61,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <CalendarDaysIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <CalendarDaysIcon className="size-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown dateTime tool state
           </span>

@@ -71,7 +71,7 @@ export const MessagePartToolGetUrlContent = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+            <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
             Browsing URLs...
@@ -82,7 +82,7 @@ export const MessagePartToolGetUrlContent = ({
     case "input-available":
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+          <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             {urlCount === 1
               ? `Browsing ${formatUrl(input?.urls?.[0] || "a website")}...`
@@ -95,7 +95,7 @@ export const MessagePartToolGetUrlContent = ({
       if (!output?.success) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
+            <XCircleIcon className="size-4 shrink-0 text-destructive" />
             <span className="text-sm font-bold text-destructive max-w-2xl truncate">
               Failed to browse URLs:{" "}
               <span className="font-normal text-destructive/80">
@@ -115,7 +115,7 @@ export const MessagePartToolGetUrlContent = ({
         if (!result.success) {
           return (
             <div key={callId} className="flex items-center gap-1">
-              <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
+              <XCircleIcon className="size-4 shrink-0 text-destructive" />
               <span className="text-sm font-bold text-destructive max-w-2xl truncate">
                 Failed to browse {formatUrl(result.url)}:{" "}
                 <span className="font-normal text-destructive/80">
@@ -128,7 +128,7 @@ export const MessagePartToolGetUrlContent = ({
 
         return (
           <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-            <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
+            <GlobeIcon className="size-4 shrink-0 text-foreground" />
             <span className="max-w-2xl truncate">
               Browsed {formatUrl(result.url)}
             </span>
@@ -139,7 +139,7 @@ export const MessagePartToolGetUrlContent = ({
       return (
         <div key={callId} className="flex flex-col gap-1">
           <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-            <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
+            <GlobeIcon className="size-4 shrink-0 text-foreground" />
             <span>
               Browsed {results.length === 0 ? " " : `${results.length} `}URLs
               {failCount > 0 && ` (${failCount} failed)`}
@@ -148,9 +148,9 @@ export const MessagePartToolGetUrlContent = ({
           {results.map((result, index) => (
             <div key={index} className="flex items-center gap-1 ml-4">
               {result.success ? (
-                <GlobeIcon className="h-3 w-3 shrink-0 text-foreground/60" />
+                <GlobeIcon className="size-3 shrink-0 text-foreground/60" />
               ) : (
-                <XCircleIcon className="h-3 w-3 shrink-0 text-destructive" />
+                <XCircleIcon className="size-3 shrink-0 text-destructive" />
               )}
               <span
                 className={`text-xs max-w-2xl truncate ${
@@ -169,7 +169,7 @@ export const MessagePartToolGetUrlContent = ({
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
+          <XCircleIcon className="size-4 shrink-0 text-destructive" />
           <span className="text-sm font-bold text-destructive">
             Error fetching URL content:{" "}
             <span className="font-normal text-destructive/80">
@@ -182,7 +182,7 @@ export const MessagePartToolGetUrlContent = ({
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <GlobeIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <GlobeIcon className="size-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown getUrlContent tool state
           </span>

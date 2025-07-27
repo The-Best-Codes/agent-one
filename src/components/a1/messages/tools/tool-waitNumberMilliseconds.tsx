@@ -48,7 +48,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+            <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">
             Waiting a bit...
@@ -59,7 +59,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     case "input-available":
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+          <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             Waiting {safeFormatMilliseconds(input?.milliseconds)}...
           </span>
@@ -69,7 +69,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     case "output-available":
       return (
         <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-          <ClockIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <ClockIcon className="size-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             Waited {safeFormatMilliseconds(input?.milliseconds)}
           </span>
@@ -79,7 +79,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
+          <XCircleIcon className="size-4 shrink-0 text-destructive" />
           <span className="text-sm font-bold text-destructive">
             An error occurred while waiting:{" "}
             <span className="font-normal text-destructive/80">
@@ -92,7 +92,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <ClockIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <ClockIcon className="size-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown waitNumberMilliseconds tool state
           </span>

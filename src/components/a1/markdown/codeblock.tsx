@@ -59,7 +59,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
               <Button
                 size="icon"
                 onClick={togglePreview}
-                className="w-8 h-8 bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
+                className="size-8 bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
                 title={isPreviewMode ? "Stop preview" : "Preview HTML"}
               >
                 {isPreviewMode ? <SquareIcon /> : <PlayIcon />}

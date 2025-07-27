@@ -24,7 +24,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-2">
-          <Loader2Icon className="h-4 w-4 shrink-0 animate-spin text-foreground" />
+          <Loader2Icon className="size-4 shrink-0 animate-spin text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Preparing "{toolName}" request...
           </span>
@@ -41,7 +41,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-                <Loader2Icon className="h-4 w-4 animate-spin shrink-0 text-foreground" />
+                <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
                 <span className="max-w-2xl truncate">
                   Executing "{toolName}"
                 </span>
@@ -73,7 +73,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-                <WrenchIcon className="h-4 w-4 shrink-0 text-foreground" />
+                <WrenchIcon className="size-4 shrink-0 text-foreground" />
                 <span className="max-w-2xl truncate">
                   Tool "{toolName}" completed
                 </span>
@@ -99,7 +99,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-2">
-          <XCircleIcon className="h-4 w-4 shrink-0 text-destructive" />
+          <XCircleIcon className="size-4 shrink-0 text-destructive" />
           <span className="text-sm font-bold text-destructive">
             Error executing {toolName}:{" "}
             <span className="text-destructive/80 font-normal">
@@ -112,7 +112,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-2">
-          <AlertTriangleIcon className="h-4 w-4 shrink-0 text-foreground" />
+          <AlertTriangleIcon className="size-4 shrink-0 text-foreground" />
           <span className="text-sm font-bold text-foreground">
             Unknown tool call state for {toolName}
           </span>

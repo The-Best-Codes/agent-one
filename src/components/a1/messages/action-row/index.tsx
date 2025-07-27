@@ -28,7 +28,7 @@ export const MessageActionRow = ({
       )}
     >
       <CopyButton
-        className="w-6 h-6"
+        className="size-6"
         variants={{
           idle: "secondary",
           copying: "secondary",
@@ -38,13 +38,13 @@ export const MessageActionRow = ({
         text={contentToCopy}
       />
       {messageRole === "assistant" && (
-        <RetryButton messageId={messageId} className="w-6 h-6" />
+        <RetryButton messageId={messageId} className="size-6" />
       )}
       {onEdit && (
         <Button
           onClick={onEdit}
           disabled={isStreaming}
-          className="w-6 h-6"
+          className="size-6"
           size="icon"
           variant="secondary"
           aria-label="Edit message"
