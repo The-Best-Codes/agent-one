@@ -114,11 +114,20 @@ export const MessageEditor = ({
         }}
       />
       <div className="flex justify-end items-center gap-2 mt-2">
-        <Button size="sm" variant="ghost" onClick={onCancel}>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
+          onClick={onCancel}
+        >
           <XIcon className="size-4" />
           Cancel
         </Button>
-        <Button size="sm" onClick={handleSave}>
+        <Button
+          size="sm"
+          className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
+          onClick={handleSave}
+        >
           <CheckIcon className="size-4" />
           {messageRole === "user" ? "Save & Regenerate" : "Save"}
         </Button>
