@@ -6,7 +6,7 @@ import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import type { UIMessage } from "ai";
 import { CheckIcon, XIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -45,7 +45,6 @@ export const MessageEditor = ({
   className,
 }: MessageEditorProps) => {
   const [content, setContent] = useState(initialContent);
-  const editorViewRef = useRef<EditorView | null>(null);
 
   const handleSave = () => {
     if (content.trim()) {
@@ -89,7 +88,9 @@ export const MessageEditor = ({
         ]}
         onChange={(value) => setContent(value)}
         onCreateEditor={(view) => {
-          editorViewRef.current = view;
+          view.dispatch({
+            scrollIntoView: true,
+          });
         }}
         onKeyDown={handleKeyDown}
         basicSetup={{
