@@ -1,8 +1,5 @@
 "use client";
-import {
-  useChatFunctions,
-  useChatMessages,
-} from "@/contexts/use-chat/chat-hooks";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { getLogger } from "@/lib/logger";
 import { type TextUIPart, type UIMessage } from "ai";
 import { memo, useCallback, useMemo, useState } from "react";
@@ -14,7 +11,6 @@ const logger = getLogger(import.meta.url);
 const EditableMessageInternal = ({ message }: { message: UIMessage }) => {
   const [isEditing, setIsEditing] = useState(false);
   const { setMessages, regenerate } = useChatFunctions();
-  const messages = useChatMessages();
 
   const textContent = useMemo(
     () =>
@@ -35,40 +31,43 @@ const EditableMessageInternal = ({ message }: { message: UIMessage }) => {
 
   const handleSave = useCallback(
     (newContent: string) => {
-      const messageIndex = messages.findIndex((m) => m.id === message.id);
-      if (messageIndex === -1) {
-        logger.error("Could not find message to edit.");
-        setIsEditing(false);
-        return;
-      }
-
-      const updatedMessages = [...messages];
-      const originalMessage = updatedMessages[messageIndex];
-
-      const newParts: UIMessage["parts"] = [];
-      let textPartUpdated = false;
-
-      for (const part of originalMessage.parts) {
-        if (part.type === "text") {
-          if (!textPartUpdated) {
-            newParts.push({ type: "text", text: newContent });
-            textPartUpdated = true;
-          }
-        } else {
-          newParts.push(part);
+      setMessages((currentMessages) => {
+        const messageIndex = currentMessages.findIndex(
+          (m) => m.id === message.id,
+        );
+        if (messageIndex === -1) {
+          logger.error("Could not find message to edit.");
+          return currentMessages;
         }
-      }
 
-      if (!textPartUpdated) {
-        newParts.push({ type: "text", text: newContent });
-      }
+        const updatedMessages = [...currentMessages];
+        const originalMessage = updatedMessages[messageIndex];
 
-      updatedMessages[messageIndex] = {
-        ...originalMessage,
-        parts: newParts,
-      };
+        const newParts: UIMessage["parts"] = [];
+        let textPartUpdated = false;
 
-      setMessages(updatedMessages);
+        for (const part of originalMessage.parts) {
+          if (part.type === "text") {
+            if (!textPartUpdated) {
+              newParts.push({ type: "text", text: newContent });
+              textPartUpdated = true;
+            }
+          } else {
+            newParts.push(part);
+          }
+        }
+
+        if (!textPartUpdated) {
+          newParts.push({ type: "text", text: newContent });
+        }
+
+        updatedMessages[messageIndex] = {
+          ...originalMessage,
+          parts: newParts,
+        };
+
+        return updatedMessages;
+      });
 
       if (message.role === "user") {
         regenerate({ messageId: message.id });
@@ -76,7 +75,7 @@ const EditableMessageInternal = ({ message }: { message: UIMessage }) => {
 
       setIsEditing(false);
     },
-    [messages, message.id, message.role, regenerate, setMessages],
+    [message.id, message.role, regenerate, setMessages],
   );
 
   const canEdit = useMemo(
