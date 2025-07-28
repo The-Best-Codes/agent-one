@@ -6,7 +6,7 @@ import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import type { UIMessage } from "ai";
 import { CheckIcon, XIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef } from "react";
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -44,11 +44,13 @@ export const MessageEditor = ({
   messageRole,
   className,
 }: MessageEditorProps) => {
-  const [content, setContent] = useState(initialContent);
+  const editorViewRef = useRef<EditorView | null>(null);
 
   const handleSave = () => {
-    if (content.trim()) {
-      onSave(content);
+    const currentContent = editorViewRef.current?.state.doc.toString() || "";
+
+    if (currentContent.trim()) {
+      onSave(currentContent);
     } else {
       onCancel();
     }
@@ -73,22 +75,25 @@ export const MessageEditor = ({
       )}
     >
       <CodeMirror
-        value={content}
+        value={initialContent}
         autoFocus
         theme="light" // TODO: Base this off of real theme, next-themes for example
         minHeight="40px"
         maxHeight="400px"
         className="bg-transparent text-sm"
-        selection={{ anchor: content.length, head: content.length }}
         extensions={[
           markdown({ base: markdownLanguage }),
           editorTheme,
           EditorView.lineWrapping,
           EditorView.contentAttributes.of({ spellcheck: "true" }),
         ]}
-        onChange={(value) => setContent(value)}
         onCreateEditor={(view) => {
+          editorViewRef.current = view;
           view.dispatch({
+            selection: {
+              anchor: view.state.doc.length,
+              head: view.state.doc.length,
+            },
             scrollIntoView: true,
           });
         }}
