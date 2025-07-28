@@ -1,9 +1,7 @@
 import { CopyButton } from "@/components/a1/copy-button";
-import { Button } from "@/components/ui/button";
-import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
-import { PencilIcon } from "lucide-react";
+import { EditButton } from "./edit-button";
 import { RetryButton } from "./retry-button";
 
 export const MessageActionRow = ({
@@ -17,9 +15,6 @@ export const MessageActionRow = ({
   messageId: UIMessage["id"];
   onEdit?: () => void;
 }) => {
-  const { status } = useChatStatus();
-  const isStreaming = status === "streaming" || status === "submitted";
-
   return (
     <div
       className={cn(
@@ -40,18 +35,7 @@ export const MessageActionRow = ({
       {messageRole === "assistant" && (
         <RetryButton messageId={messageId} className="size-6" />
       )}
-      {onEdit && (
-        <Button
-          onClick={onEdit}
-          disabled={isStreaming}
-          className="size-6"
-          size="icon"
-          variant="secondary"
-          aria-label="Edit message"
-        >
-          <PencilIcon />
-        </Button>
-      )}
+      {onEdit && <EditButton onEdit={onEdit} className="size-6" />}
     </div>
   );
 };
