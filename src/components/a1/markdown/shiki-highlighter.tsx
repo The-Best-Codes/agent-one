@@ -1,14 +1,37 @@
 import { cn } from "@/lib/utils";
 import type { FC } from "react";
-import ShikiHighlighter, { type ShikiHighlighterProps } from "react-shiki";
+import ShikiHighlighter, {
+  createHighlighterCore,
+  createJavaScriptRegexEngine,
+  type ShikiHighlighterProps,
+} from "react-shiki/core";
+
+// Languages
+import langBash from "@shikijs/langs/bash";
+import langCss from "@shikijs/langs/css";
+import langHtml from "@shikijs/langs/html";
+import langJs from "@shikijs/langs/javascript";
+import langJson from "@shikijs/langs/json";
+import langTsx from "@shikijs/langs/tsx";
+import langTs from "@shikijs/langs/typescript";
+
+// Themes
+import themeDarkPlus from "@shikijs/themes/dark-plus";
+import themeLightPlus from "@shikijs/themes/light-plus";
+
+const getHighlighterPromise = await createHighlighterCore({
+  langs: [langBash, langCss, langHtml, langJson, langJs, langTs, langTsx],
+  themes: [themeDarkPlus, themeLightPlus],
+  engine: createJavaScriptRegexEngine({ forgiving: true }),
+});
 
 export type HighlighterProps = Omit<
   ShikiHighlighterProps,
-  "children" | "theme"
+  "children" | "theme" | "highlighter"
 > & {
   code: string;
   language: string;
-  theme?: ShikiHighlighterProps["theme"];
+  theme?: "dark-plus" | "light-plus";
 };
 
 export const SyntaxHighlighter: FC<HighlighterProps> = ({
@@ -20,12 +43,12 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   showLanguage = false,
   ...props
 }) => {
-  const BASE_STYLES =
-    "[&_pre]:overflow-x-auto [&_pre]:rounded-b-lg [&_pre]:bg-black [&_pre]:p-4 [&_pre]:text-white";
+  const BASE_STYLES = "[&_pre]:p-2";
 
   return (
     <ShikiHighlighter
       {...props}
+      highlighter={getHighlighterPromise}
       language={language}
       theme={theme}
       addDefaultStyles={addDefaultStyles}

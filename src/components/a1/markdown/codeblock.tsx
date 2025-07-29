@@ -48,7 +48,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
     >
       <div
         className={cn(
-          "sticky top-0 z-10",
+          "sticky -top-2 z-10",
           messageRole === "user" ? "bg-secondary" : "bg-background",
         )}
       >
