@@ -4,3 +4,4 @@
 - Fix large bundle size of codeblock (wasm, cpp, and emacs lisp are the main problems)
 - Remove catch-all tool-call component and replace it with error for unknown tool
 - Tab should be for navigation in CodeMirror editors, not adding tabs/spaces
+- Investigate lag on page load now. Is it loading too many shiki langs at once? Should we use the WASM engine instead? etc.
