@@ -6,21 +6,20 @@ import ShikiHighlighter, {
   type ShikiHighlighterProps,
 } from "react-shiki/core";
 
-// Languages
-import langBash from "@shikijs/langs/bash";
-import langCss from "@shikijs/langs/css";
-import langHtml from "@shikijs/langs/html";
-import langJs from "@shikijs/langs/javascript";
-import langJson from "@shikijs/langs/json";
-import langTsx from "@shikijs/langs/tsx";
-import langTs from "@shikijs/langs/typescript";
-
 // Themes
 import themeDarkPlus from "@shikijs/themes/dark-plus";
 import themeLightPlus from "@shikijs/themes/light-plus";
 
 const getHighlighterPromise = await createHighlighterCore({
-  langs: [langBash, langCss, langHtml, langJson, langJs, langTs, langTsx],
+  langs: [
+    () => import("@shikijs/langs/bash"),
+    () => import("@shikijs/langs/css"),
+    () => import("@shikijs/langs/html"),
+    () => import("@shikijs/langs/json"),
+    () => import("@shikijs/langs/javascript"),
+    () => import("@shikijs/langs/typescript"),
+    () => import("@shikijs/langs/tsx"),
+  ],
   themes: [themeDarkPlus, themeLightPlus],
   engine: createJavaScriptRegexEngine({ forgiving: true }),
 });
