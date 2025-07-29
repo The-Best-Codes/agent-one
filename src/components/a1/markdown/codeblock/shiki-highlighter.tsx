@@ -5,21 +5,14 @@ import ShikiHighlighter, {
   createJavaScriptRegexEngine,
   type ShikiHighlighterProps,
 } from "react-shiki/core";
+import { shikiLangs } from "./shiki-langs";
 
 // Themes
 import themeDarkPlus from "@shikijs/themes/dark-plus";
 import themeLightPlus from "@shikijs/themes/light-plus";
 
 const getHighlighterPromise = await createHighlighterCore({
-  langs: [
-    () => import("@shikijs/langs/bash"),
-    () => import("@shikijs/langs/css"),
-    () => import("@shikijs/langs/html"),
-    () => import("@shikijs/langs/json"),
-    () => import("@shikijs/langs/javascript"),
-    () => import("@shikijs/langs/typescript"),
-    () => import("@shikijs/langs/tsx"),
-  ],
+  langs: shikiLangs,
   themes: [themeDarkPlus, themeLightPlus],
   engine: createJavaScriptRegexEngine({ forgiving: true }),
 });
