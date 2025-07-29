@@ -57,7 +57,7 @@ export default defineConfig(async () => ({
           ],
           codemirrorLangs: ["@codemirror/lang-markdown"],
           markdown: ["react-markdown", "remark-breaks", "remark-gfm"],
-          shikiCore: ["react-shiki"],
+          shikiCore: ["react-shiki", "shiki"],
           shikiThemes: [
             "@shikijs/themes/dark-plus",
             "@shikijs/themes/light-plus",
