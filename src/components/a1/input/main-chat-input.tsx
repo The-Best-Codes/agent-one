@@ -119,6 +119,7 @@ export const MainChatInput = () => {
                 submitMessage();
               }
             }}
+            indentWithTab={false}
             basicSetup={{
               lineNumbers: false,
               foldGutter: false,

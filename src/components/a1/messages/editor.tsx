@@ -98,6 +98,7 @@ export const MessageEditor = ({
           });
         }}
         onKeyDown={handleKeyDown}
+        indentWithTab={false}
         basicSetup={{
           lineNumbers: false,
           foldGutter: false,
