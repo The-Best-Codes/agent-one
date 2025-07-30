@@ -14,6 +14,7 @@ import themeLightPlus from "@shikijs/themes/light-plus";
 
 let highlighterPromise: Promise<HighlighterCore> | null = null;
 
+// TODO: Ensure there is only one instance of the highlighter (singleton instance)
 const getHighlighter = () => {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighterCore({

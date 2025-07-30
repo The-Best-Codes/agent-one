@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
 import { PlayIcon, SquareIcon } from "lucide-react";
-import { useState } from "react";
+import { usePreview } from "./preview";
 import { SyntaxHighlighter } from "./shiki-highlighter";
 
 type CodeBlockProps = {
@@ -33,13 +33,12 @@ const BestHighlighter = ({
 };
 
 export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
-  const [isPreviewMode, setIsPreviewMode] = useState(false); // TODO: Extract preview logic to other files
-
-  const isHtml = lang === "html"; // Preview will support other languages in the future, and maybe open in canvas if I add that?
-
-  const togglePreview = () => {
-    setIsPreviewMode((prev) => !prev);
-  };
+  const {
+    isPreviewMode,
+    togglePreview,
+    PreviewComponent,
+    isSupported: isPreviewSupported,
+  } = usePreview(lang);
 
   return (
     <div
@@ -55,7 +54,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
         <div className="flex rounded-t-md items-center justify-between bg-[rgb(30,30,30)] text-xs p-0">
           <span className="ml-2 font-mono text-white">{lang || "text"}</span>
           <div className="flex items-center">
-            {isHtml && (
+            {isPreviewSupported && (
               <Button
                 size="icon"
                 onClick={togglePreview}
@@ -73,13 +72,8 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
         </div>
       </div>
       <div className="overflow-auto rounded-b-md shiki-container">
-        {isPreviewMode && isHtml ? (
-          <iframe
-            srcDoc={content}
-            title="HTML Preview"
-            className="w-full h-96 border-0 bg-white"
-            sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
-          />
+        {isPreviewMode && PreviewComponent ? (
+          <PreviewComponent content={content} />
         ) : (
           <BestHighlighter lang={lang || "text"} content={content} />
         )}
