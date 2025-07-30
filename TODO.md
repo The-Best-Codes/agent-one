@@ -1,4 +1,3 @@
 - Maybe later: Human-in-the-loop / tool confirmation
 - Support multi-threading of chats?
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
-- Remove catch-all tool-call component and replace it with error for unknown tool

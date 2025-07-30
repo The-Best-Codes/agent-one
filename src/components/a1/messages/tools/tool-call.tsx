@@ -5,12 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import type { ToolUIPart } from "ai";
-import {
-  AlertTriangleIcon,
-  Loader2Icon,
-  WrenchIcon,
-  XCircleIcon,
-} from "lucide-react";
+import { XCircleIcon } from "lucide-react";
 
 interface ToolCallPartProps {
   part: ToolUIPart;
@@ -24,9 +19,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-2">
-          <Loader2Icon className="size-4 shrink-0 animate-spin text-foreground" />
-          <span className="text-sm font-bold text-foreground">
-            Preparing "{toolName}" request...
+          <XCircleIcon className="size-4 shrink-0 text-destructive" />
+          <span className="text-sm font-bold text-destructive">
+            Unknown tool "{toolName}"
           </span>
         </div>
       );
@@ -40,17 +35,15 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         >
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
-              <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-                <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
+              <p className="text-sm font-bold text-destructive flex flex-row items-center gap-1">
+                <XCircleIcon className="size-4 shrink-0 text-destructive" />
                 <span className="max-w-2xl truncate">
-                  Executing "{toolName}"
+                  Unknown tool executing "{toolName}"
                 </span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="pt-0 p-2">
-              {part.input &&
-              typeof part.input === "object" &&
-              Object.keys(part.input).length > 0 ? (
+              {part.input && typeof part.input === "object" ? (
                 <div className="text-xs text-foreground/80">
                   <span className="font-medium">Parameters:</span>
                   <pre className="mt-1 bg-transparent p-2 rounded text-xs overflow-x-auto">
@@ -72,24 +65,21 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         >
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
-              <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-                <WrenchIcon className="size-4 shrink-0 text-foreground" />
+              <p className="text-sm font-bold text-destructive flex flex-row items-center gap-1">
+                <XCircleIcon className="size-4 shrink-0 text-destructive" />
                 <span className="max-w-2xl truncate">
-                  Tool "{toolName}" completed
+                  Unknown tool "{toolName}" completed
                 </span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="pt-0 p-2">
               <div className="text-sm text-foreground/80">
-                {typeof part.output === "string" ? (
-                  <div className="whitespace-pre-wrap">
-                    {part.output as string}
-                  </div>
-                ) : (
-                  <pre className="bg-transparent p-2 rounded text-xs overflow-x-auto">
-                    {JSON.stringify(part.output, null, 2)}
-                  </pre>
-                )}
+                <div className="whitespace-pre-wrap">
+                  Unknown tool output:{" "}
+                  {typeof part.output === "string"
+                    ? part.output
+                    : JSON.stringify(part.output, null, 2)}
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -101,7 +91,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         <div key={callId} className="flex items-center gap-2">
           <XCircleIcon className="size-4 shrink-0 text-destructive" />
           <span className="text-sm font-bold text-destructive">
-            Error executing {toolName}:{" "}
+            Unknown tool "{toolName}" error:{" "}
             <span className="text-destructive/80 font-normal">
               {part?.errorText || "Unknown error"}
             </span>
@@ -112,9 +102,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-2">
-          <AlertTriangleIcon className="size-4 shrink-0 text-foreground" />
-          <span className="text-sm font-bold text-foreground">
-            Unknown tool call state for {toolName}
+          <XCircleIcon className="size-4 shrink-0 text-destructive" />
+          <span className="text-sm font-bold text-destructive">
+            Unknown tool "{toolName}"
           </span>
         </div>
       );
