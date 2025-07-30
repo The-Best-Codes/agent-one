@@ -49,7 +49,15 @@ const MemoizedMarkdownBlock = memo(
       );
     } else {
       return (
-        <ReactMarkdown remarkPlugins={[remarkBreaks, remarkGfm]}>
+        <ReactMarkdown
+          remarkPlugins={[remarkBreaks, remarkGfm]}
+          components={{
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            a({ node, ...props }) {
+              return <a {...props} target="_blank" rel="noopener noreferrer" />;
+            },
+          }}
+        >
           {content}
         </ReactMarkdown>
       );
