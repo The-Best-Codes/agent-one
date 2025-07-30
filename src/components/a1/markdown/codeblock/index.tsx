@@ -59,7 +59,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
                 size="icon"
                 onClick={togglePreview}
                 className="size-8 bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
-                title={isPreviewMode ? "Stop preview" : "Preview HTML"}
+                aria-label={isPreviewMode ? "Stop preview" : "Preview code"}
               >
                 {isPreviewMode ? <SquareIcon /> : <PlayIcon />}
               </Button>
