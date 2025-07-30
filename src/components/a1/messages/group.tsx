@@ -26,7 +26,7 @@ export const MessageGroup = ({
     >
       <div
         className={cn(
-          "rounded-md max-w-full",
+          "rounded-md max-w-full flex flex-col gap-2",
           messageRole === "user"
             ? "bg-secondary text-secondary-foreground p-2"
             : "p-2 pb-0",

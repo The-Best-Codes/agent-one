@@ -42,7 +42,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
 
   return (
     <div
-      className="not-prose text-sm min-w-0 rounded-md mb-6 last:mb-1"
+      className="not-prose text-sm min-w-0 rounded-md last:mb-1"
       style={{ clipPath: "inset(0 round 0.375rem)" }}
     >
       <div
