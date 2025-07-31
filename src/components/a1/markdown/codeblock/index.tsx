@@ -12,7 +12,7 @@ type CodeBlockProps = {
   messageRole?: UIMessage["role"];
 };
 
-const MAX_CHARS = 10000; // TODO: Allow user to configure this (in settings?)
+const MAX_CHARS = 100000; // TODO: Allow user to configure this (in settings?)
 
 const BestHighlighter = ({
   content,

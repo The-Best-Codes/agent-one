@@ -20,23 +20,27 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   ...props
 }) => {
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { highlight } = useSyntaxHighlighter();
 
   useEffect(() => {
     let cancelled = false;
-
-    setLoading(true);
     setError(null);
-    setHighlightedHtml(null);
 
     highlight(code, language, theme).then((result) => {
       if (cancelled) return;
 
-      setHighlightedHtml(result.html);
-      setLoading(result.loading);
-      setError(result.error);
+      if (result.html) {
+        setHighlightedHtml(result.html);
+      }
+
+      if (result.error) {
+        setError(result.error);
+        logger.error(
+          `Syntax highlighting failed for ${language}:`,
+          result.error,
+        );
+      }
     });
 
     return () => {
@@ -47,29 +51,20 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   const BASE_STYLES =
     "[&_pre]:p-2 [&_pre]:bg-[rgb(30,30,30)] [&_pre]:overflow-x-auto";
 
-  if (loading || !highlightedHtml) {
+  if (highlightedHtml && !error) {
     return (
-      <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
-        <code className="text-white">{code}</code>
-      </pre>
-    );
-  }
-
-  if (error) {
-    logger.error(`Syntax highlighting failed for ${language}:`, error);
-    return (
-      <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
-        <code className="text-white">{code}</code>
-      </pre>
+      <div
+        className={cn(BASE_STYLES, className)}
+        dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+        {...props}
+      />
     );
   }
 
   return (
-    <div
-      className={cn(BASE_STYLES, className)}
-      dangerouslySetInnerHTML={{ __html: highlightedHtml }} // TODO: Research how react-shiki doesn't use dangerouslySetInnerHTML and use their methods here
-      {...props}
-    />
+    <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
+      <code className="text-white">{code}</code>
+    </pre>
   );
 };
 
