@@ -49,7 +49,11 @@ const editorTheme = EditorView.theme({
   },
 });
 
-export const MainChatInput = () => {
+export const MainChatInput = ({
+  onAfterSend,
+}: {
+  onAfterSend?: () => void;
+}) => {
   const { status } = useChatStatus();
   const { sendMessage, stop } = useChatFunctions();
 
@@ -79,6 +83,7 @@ export const MainChatInput = () => {
         });
       }
       setIsEmpty(true);
+      onAfterSend?.();
     }
   };
 
