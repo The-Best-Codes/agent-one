@@ -49,6 +49,7 @@ const ScrollDownButton = ({
         scrollButtonClassName,
       )}
       variant="default"
+      aria-label="Scroll to bottom"
       {...scrollButtonProps}
     >
       {scrollButtonChildren || <ChevronDown />}
