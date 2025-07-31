@@ -1,3 +1,4 @@
 - Maybe later: Human-in-the-loop / tool confirmation
 - Support multi-threading of chats?
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
+- When editing or regenerating a message store the previous conversation history and allow navigating previous versions per message (like in ChatGPT, on each AI message that was changed)
