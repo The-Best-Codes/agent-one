@@ -61,19 +61,23 @@ export type AutoScrollHandle = {
   scrollToBottom: () => void;
 };
 
-function ContextBridge({
-  refSetter,
+function ImperativeHandle({
+  forwardedRef,
   behavior,
 }: {
-  refSetter: (api: AutoScrollHandle) => void;
+  forwardedRef: React.Ref<AutoScrollHandle> | undefined;
   behavior: AutoScrollContainerProps["behavior"];
 }) {
   const { scrollToBottom } = useStickToBottomContext();
+
   useImperativeHandle(
-    { current: null } as unknown as React.RefObject<AutoScrollHandle>,
-    () => ({ scrollToBottom: () => scrollToBottom({ animation: behavior }) }),
+    forwardedRef,
+    () => ({
+      scrollToBottom: () => scrollToBottom({ animation: behavior }),
+    }),
+    [scrollToBottom, behavior],
   );
-  refSetter({ scrollToBottom: () => scrollToBottom({ animation: behavior }) });
+
   return null;
 }
 
@@ -94,12 +98,6 @@ export const AutoScrollContainer = forwardRef<
     },
     ref,
   ) => {
-    let api: AutoScrollHandle | null = null;
-
-    useImperativeHandle(ref, () => ({
-      scrollToBottom: () => api?.scrollToBottom(),
-    }));
-
     return (
       <StickToBottom
         className={cn("relative h-full w-full overflow-y-auto", className)}
@@ -118,12 +116,7 @@ export const AutoScrollContainer = forwardRef<
           scrollButtonProps={scrollButtonProps}
         />
 
-        <ContextBridge
-          behavior={behavior}
-          refSetter={(built) => {
-            api = built;
-          }}
-        />
+        <ImperativeHandle forwardedRef={ref} behavior={behavior} />
       </StickToBottom>
     );
   },
