@@ -15,17 +15,17 @@ export interface AutoScrollContainerProps
     React.ComponentProps<"button">,
     "className" | "children" | "onClick"
   >;
-  smoothScroll?: boolean;
+  behavior?: "smooth" | "instant";
 }
 
 const ScrollDownButton = ({
-  smoothScroll,
+  behavior,
   scrollButtonClassName,
   scrollButtonChildren,
   scrollButtonProps,
 }: Pick<
   AutoScrollContainerProps,
-  | "smoothScroll"
+  | "behavior"
   | "scrollButtonClassName"
   | "scrollButtonChildren"
   | "scrollButtonProps"
@@ -37,7 +37,7 @@ const ScrollDownButton = ({
   }
 
   const handleClick = () => {
-    scrollToBottom({ animation: smoothScroll ? "smooth" : "instant" });
+    scrollToBottom({ animation: behavior });
   };
 
   return (
@@ -63,14 +63,14 @@ export const AutoScrollContainer = ({
   scrollButtonClassName,
   scrollButtonChildren,
   scrollButtonProps,
-  smoothScroll,
+  behavior,
   ...props
 }: AutoScrollContainerProps) => {
   return (
     <StickToBottom
       className={cn("relative h-full w-full overflow-y-auto", className)}
-      resize={smoothScroll ? "smooth" : "instant"}
-      initial={smoothScroll ? "smooth" : "instant"}
+      resize={behavior}
+      initial={behavior}
       {...props}
     >
       <StickToBottom.Content className={scrollableClassName}>
@@ -78,7 +78,7 @@ export const AutoScrollContainer = ({
       </StickToBottom.Content>
 
       <ScrollDownButton
-        smoothScroll={smoothScroll}
+        behavior={behavior}
         scrollButtonClassName={scrollButtonClassName}
         scrollButtonChildren={scrollButtonChildren}
         scrollButtonProps={scrollButtonProps}
