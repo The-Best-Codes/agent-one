@@ -1,38 +1,15 @@
+import useSyntaxHighlighter from "@/hooks/use-syntax-highlighter";
+import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-import { useEffect, useReducer, useState, type FC } from "react";
-import ShikiHighlighter, {
-  createHighlighterCore,
-  createJavaScriptRegexEngine,
-  type ShikiHighlighterProps,
-} from "react-shiki/core";
-import type { HighlighterCore } from "shiki";
-import { shikiLangsMap } from "./shiki-langs";
+import { useEffect, useState, type FC } from "react";
 
-// Themes
-import themeDarkPlus from "@shikijs/themes/dark-plus";
-import themeLightPlus from "@shikijs/themes/light-plus";
+const logger = getLogger(import.meta.url);
 
-let highlighterPromise: Promise<HighlighterCore> | null = null;
-
-// TODO: Ensure there is only one instance of the highlighter (singleton instance)
-const getHighlighter = () => {
-  if (!highlighterPromise) {
-    highlighterPromise = createHighlighterCore({
-      langs: [],
-      themes: [themeDarkPlus, themeLightPlus],
-      engine: createJavaScriptRegexEngine({ forgiving: true }),
-    });
-  }
-  return highlighterPromise;
-};
-
-export type HighlighterProps = Omit<
-  ShikiHighlighterProps,
-  "children" | "theme" | "highlighter"
-> & {
+export type HighlighterProps = {
   code: string;
   language: string;
   theme?: "dark-plus" | "light-plus";
+  className?: string;
 };
 
 export const SyntaxHighlighter: FC<HighlighterProps> = ({
@@ -40,46 +17,46 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   language,
   theme = "dark-plus",
   className,
-  addDefaultStyles = false,
-  showLanguage = false,
   ...props
 }) => {
-  const [highlighter, setHighlighter] = useState<HighlighterCore | null>(null);
-  const [updateKey, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { highlight } = useSyntaxHighlighter();
 
   useEffect(() => {
-    getHighlighter().then(setHighlighter);
-  }, []);
+    let cancelled = false;
 
-  const langAlias = language.toLowerCase();
+    setLoading(true);
+    setError(null);
+    setHighlightedHtml(null);
 
-  useEffect(() => {
-    if (!highlighter || !langAlias) {
-      return;
-    }
+    highlight(code, language, theme).then((result) => {
+      if (cancelled) return;
 
-    if (highlighter.getLoadedLanguages().includes(langAlias as never)) {
-      return;
-    }
+      setHighlightedHtml(result.html);
+      setLoading(result.loading);
+      setError(result.error);
+    });
 
-    const langLoader = shikiLangsMap[langAlias as keyof typeof shikiLangsMap];
-
-    if (langLoader) {
-      langLoader()
-        .then((langModule) => highlighter.loadLanguage(langModule.default))
-        .then(() => {
-          forceUpdate();
-        })
-        .catch((err) => {
-          console.error(`Failed to load Shiki language: ${langAlias}`, err);
-        });
-    }
-  }, [highlighter, langAlias]);
+    return () => {
+      cancelled = true;
+    };
+  }, [code, language, theme, highlight]);
 
   const BASE_STYLES =
     "[&_pre]:p-2 [&_pre]:bg-[rgb(30,30,30)] [&_pre]:overflow-x-auto";
 
-  if (!highlighter) {
+  if (loading || !highlightedHtml) {
+    return (
+      <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
+        <code className="text-white">{code}</code>
+      </pre>
+    );
+  }
+
+  if (error) {
+    logger.error(`Syntax highlighting failed for ${language}:`, error);
     return (
       <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
         <code className="text-white">{code}</code>
@@ -88,18 +65,11 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   }
 
   return (
-    <ShikiHighlighter
-      {...props}
-      highlighter={highlighter}
-      language={language}
-      theme={theme}
-      addDefaultStyles={addDefaultStyles}
-      showLanguage={showLanguage}
+    <div
       className={cn(BASE_STYLES, className)}
-      key={updateKey}
-    >
-      {code}
-    </ShikiHighlighter>
+      dangerouslySetInnerHTML={{ __html: highlightedHtml }} // TODO: Research how react-shiki doesn't use dangerouslySetInnerHTML and use their methods here
+      {...props}
+    />
   );
 };
 
