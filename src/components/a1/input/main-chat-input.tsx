@@ -11,7 +11,8 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { getLogger } from "@/lib/logger";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { EditorView } from "@codemirror/view";
+import { Prec } from "@codemirror/state"; // 1. Import Prec
+import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import {
   ArrowUpIcon,
@@ -107,17 +108,22 @@ export const MainChatInput = () => {
               editorTheme,
               EditorView.lineWrapping,
               EditorView.contentAttributes.of({ spellcheck: "true" }),
+              Prec.highest(
+                keymap.of([
+                  {
+                    key: "Enter",
+                    run: () => {
+                      submitMessage();
+                      return true;
+                    },
+                  },
+                ]),
+              ),
             ]}
             onChange={handleEditorChange}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
               setIsEmpty(!view.state.doc.toString().trim());
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                submitMessage();
-              }
             }}
             indentWithTab={false}
             basicSetup={{
