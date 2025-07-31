@@ -2,15 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { type ReactNode } from "react";
+import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
-// TODO: Can we make this not rerender so much? Or does it already perform pretty well?
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -24,6 +18,44 @@ export interface AutoScrollContainerProps
   smoothScroll?: boolean;
 }
 
+const ScrollDownButton = ({
+  smoothScroll,
+  scrollButtonClassName,
+  scrollButtonChildren,
+  scrollButtonProps,
+}: Pick<
+  AutoScrollContainerProps,
+  | "smoothScroll"
+  | "scrollButtonClassName"
+  | "scrollButtonChildren"
+  | "scrollButtonProps"
+>) => {
+  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
+
+  if (isAtBottom) {
+    return null;
+  }
+
+  const handleClick = () => {
+    scrollToBottom({ animation: smoothScroll ? "smooth" : "instant" });
+  };
+
+  return (
+    <Button
+      size="icon"
+      onClick={handleClick}
+      className={cn(
+        "absolute bottom-4 right-4 z-10 hover:opacity-75",
+        scrollButtonClassName,
+      )}
+      variant="default"
+      {...scrollButtonProps}
+    >
+      {scrollButtonChildren || <ChevronDown />}
+    </Button>
+  );
+};
+
 export const AutoScrollContainer = ({
   children,
   className,
@@ -34,99 +66,24 @@ export const AutoScrollContainer = ({
   smoothScroll,
   ...props
 }: AutoScrollContainerProps) => {
-  const [showScrollButton, setShowScrollButton] = useState(false);
-  const [userHasScrolledUp, setUserHasScrolledUp] = useState(false);
-
-  const contentRef = useRef<HTMLDivElement>(null);
-  const isAutoScrollingRef = useRef(false);
-  const userHasScrolledUpRef = useRef(userHasScrolledUp);
-  userHasScrolledUpRef.current = userHasScrolledUp;
-
-  const isScrolledToBottom = useCallback(() => {
-    if (!contentRef.current) return true;
-    const { scrollTop, scrollHeight, clientHeight } = contentRef.current;
-    return Math.abs(scrollHeight - clientHeight - scrollTop) < 5;
-  }, []);
-
-  const scrollToBottom = useCallback(() => {
-    if (!contentRef.current) return;
-    isAutoScrollingRef.current = true;
-    contentRef.current.scrollTo({
-      top: contentRef.current.scrollHeight,
-      behavior: smoothScroll ? "smooth" : "auto", // TODO: Properly handle smooth scrolling when content is still streaming in
-    });
-  }, [smoothScroll]);
-
-  const handleScroll = useCallback(() => {
-    if (!contentRef.current) return;
-
-    if (isAutoScrollingRef.current) {
-      if (isScrolledToBottom()) {
-        isAutoScrollingRef.current = false;
-      } else {
-        return;
-      }
-    }
-
-    const atBottom = isScrolledToBottom();
-
-    if (!atBottom) {
-      setUserHasScrolledUp(true);
-      setShowScrollButton(true);
-    } else {
-      setUserHasScrolledUp(false);
-      setShowScrollButton(false);
-    }
-  }, [isScrolledToBottom]);
-
-  useEffect(() => {
-    const contentEl = contentRef.current;
-    if (!contentEl) return;
-
-    scrollToBottom();
-
-    const observer = new MutationObserver(() => {
-      if (!userHasScrolledUpRef.current) {
-        scrollToBottom();
-      }
-    });
-
-    observer.observe(contentEl, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-    });
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [scrollToBottom]);
-
   return (
-    <div className={cn("relative", className)} {...props}>
-      <div
-        ref={contentRef}
-        onScroll={handleScroll}
-        className={cn("h-full w-full overflow-y-auto", scrollableClassName)}
-      >
+    <StickToBottom
+      className={cn("relative h-full w-full overflow-y-auto", className)}
+      resize={smoothScroll ? "smooth" : "instant"}
+      initial={smoothScroll ? "smooth" : "instant"}
+      {...props}
+    >
+      <StickToBottom.Content className={scrollableClassName}>
         {children}
-      </div>
+      </StickToBottom.Content>
 
-      {showScrollButton && (
-        <Button
-          size="icon"
-          onClick={scrollToBottom}
-          className={cn(
-            "absolute bottom-4 right-4 z-10 hover:opacity-75",
-            scrollButtonClassName,
-          )}
-          variant="default"
-          {...scrollButtonProps}
-        >
-          {scrollButtonChildren || <ChevronDown />}
-        </Button>
-      )}
-    </div>
+      <ScrollDownButton
+        smoothScroll={smoothScroll}
+        scrollButtonClassName={scrollButtonClassName}
+        scrollButtonChildren={scrollButtonChildren}
+        scrollButtonProps={scrollButtonProps}
+      />
+    </StickToBottom>
   );
 };
 
