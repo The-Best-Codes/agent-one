@@ -11,7 +11,7 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { getLogger } from "@/lib/logger";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { Prec } from "@codemirror/state"; // 1. Import Prec
+import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import {

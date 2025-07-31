@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { EditorView } from "@codemirror/view";
+import { Prec } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import type { UIMessage } from "ai";
 import { CheckIcon, XIcon } from "lucide-react";
@@ -56,17 +57,6 @@ export const MessageEditor = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSave();
-    }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      onCancel();
-    }
-  };
-
   return (
     <div
       className={cn(
@@ -86,6 +76,24 @@ export const MessageEditor = ({
           editorTheme,
           EditorView.lineWrapping,
           EditorView.contentAttributes.of({ spellcheck: "true" }),
+          Prec.highest(
+            keymap.of([
+              {
+                key: "Enter",
+                run: () => {
+                  handleSave();
+                  return true;
+                },
+              },
+              {
+                key: "Escape",
+                run: () => {
+                  onCancel();
+                  return true;
+                },
+              },
+            ]),
+          ),
         ]}
         onCreateEditor={(view) => {
           editorViewRef.current = view;
@@ -97,7 +105,6 @@ export const MessageEditor = ({
             scrollIntoView: true,
           });
         }}
-        onKeyDown={handleKeyDown}
         indentWithTab={false}
         basicSetup={{
           lineNumbers: false,
