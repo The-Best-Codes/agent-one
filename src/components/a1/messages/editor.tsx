@@ -7,6 +7,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import type { UIMessage } from "ai";
 import { CheckIcon, XIcon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRef } from "react";
 
 const editorTheme = EditorView.theme({
@@ -46,6 +47,7 @@ export const MessageEditor = ({
   className,
 }: MessageEditorProps) => {
   const editorViewRef = useRef<EditorView | null>(null);
+  const { resolvedTheme } = useTheme();
 
   const handleSave = () => {
     const currentContent = editorViewRef.current?.state.doc.toString() || "";
@@ -67,7 +69,7 @@ export const MessageEditor = ({
       <CodeMirror
         value={initialContent}
         autoFocus
-        theme="light" // TODO: Base this off of real theme, next-themes for example
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
         minHeight="40px"
         maxHeight="400px"
         className="bg-transparent text-sm"

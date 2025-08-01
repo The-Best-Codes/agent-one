@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -20,6 +21,7 @@ import {
   PaperclipIcon,
   SquareIcon,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useRef, useState } from "react";
 import { MainInputErrorSection } from "./error-section";
 
@@ -55,6 +57,7 @@ export const MainChatInput = ({
   onAfterSend?: () => void;
 }) => {
   const { status } = useChatStatus();
+  const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
 
   const [isEmpty, setIsEmpty] = useState(true);
@@ -102,7 +105,7 @@ export const MainChatInput = ({
         <div className="flex-grow overflow-hidden">
           <CodeMirror
             autoFocus
-            theme="light" // TODO: Base this off of real theme, next-themes for example
+            theme={resolvedTheme === "dark" ? "dark" : "light"}
             defaultValue=""
             minHeight="40px"
             maxHeight="160px"
