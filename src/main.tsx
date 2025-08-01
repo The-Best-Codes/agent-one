@@ -5,11 +5,14 @@ import App from "./App";
 import { ThemeProvider } from "next-themes";
 import { ChatProvider } from "./contexts/use-chat/chat-context";
 
-import "./index.css";
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ThemeProvider defaultTheme="system" attribute="class" enableSystem={true}>
+    <ThemeProvider
+      defaultTheme="system"
+      attribute="class"
+      enableSystem={true}
+      storageKey="theme"
+    >
       <ChatProvider>
         <App />
       </ChatProvider>
