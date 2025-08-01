@@ -24,6 +24,7 @@ import { useTheme } from "next-themes";
 import { useRef, useState } from "react";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
+import { Badge } from "@/components/ui/badge";
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -201,7 +202,16 @@ export const MainChatInput = ({
                     onClick={() => {
                       fileInputRef.current?.click();
                     }}
+                    className="relative"
                   >
+                    {files && files?.length > 0 && (
+                      <Badge
+                        variant="default"
+                        className="absolute -top-2 -right-2 z-10 shadow-md"
+                      >
+                        {files?.length}
+                      </Badge>
+                    )}
                     <PaperclipIcon />
                   </Button>
                 </TooltipTrigger>
