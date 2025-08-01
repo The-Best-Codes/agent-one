@@ -19,7 +19,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 }) => {
   const chatResult = useChat(model, {
     experimental_throttle: 250, // TODO: Allow customizing this in settings
-    maxSteps: 50,
   });
 
   const statusValue = useMemo(
