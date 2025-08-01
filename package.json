@@ -10,7 +10,10 @@
     "tauri": "tauri",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write src"
+    "format": "prettier --write src",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.0",
@@ -56,6 +59,7 @@
     "zod": "3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@tailwindcss/typography": "^0.5.16",
     "@tauri-apps/cli": "^2.6.2",
     "@types/node": "^24.1.0",
