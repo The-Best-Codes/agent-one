@@ -6,6 +6,7 @@ import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { EditableMessage } from "@/components/a1/messages/editable-message";
+import ThemeSelect from "@/components/theme/select-menu";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 import { useRef } from "react";
@@ -16,6 +17,7 @@ function HomeRoute() {
 
   return (
     <main className="h-screen flex flex-col items-center justify-center">
+      <ThemeSelect className="w-32" />
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
         <AutoScrollContainer
           ref={scrollRef}
