@@ -1,5 +1,5 @@
 import { useChat } from "@/hooks/ai/useChat";
-import { groq } from "@/lib/ai/providers/groq";
+import { google } from "@/lib/ai/providers/google";
 import {
   lastAssistantMessageIsCompleteWithToolCalls,
   type LanguageModel,
@@ -18,7 +18,7 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
-  model = groq("moonshotai/kimi-k2-instruct"),
+  model = google("gemini-2.5-flash"),
 }) => {
   // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
   const chatResult = useChat(model, {

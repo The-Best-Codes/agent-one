@@ -4,6 +4,7 @@ import { memo, useCallback } from "react";
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
 import { MessagePartFallback } from "./parts/fallback";
+import { MessagePartFile } from "./parts/file";
 import { MessagePartReasoning } from "./parts/reasoning";
 import { MessagePartStepStart } from "./parts/step-start";
 import { MessagePartText } from "./parts/text";
@@ -15,11 +16,15 @@ export const MessageParts = memo(
   ({ message, onEdit }: { message: UIMessage; onEdit?: () => void }) => {
     const getCopyContent = useCallback(() => {
       return message.parts
-        .map((part) =>
-          typeof (part as TextUIPart)?.text === "string"
-            ? (part as TextUIPart).text
-            : "",
-        )
+        .map((part) => {
+          if (part.type === "text") {
+            return (part as TextUIPart).text;
+          } else if (part.type === "file") {
+            return `[File: ${part.filename || "Unnamed file"}]`;
+          }
+          return "";
+        })
+        .filter(Boolean)
         .join("\n");
     }, [message.parts]);
 
@@ -50,6 +55,8 @@ export const MessageParts = memo(
               return <MessagePartReasoning key={key} text={part.text} />;
             case "step-start":
               return <MessagePartStepStart key={key} />;
+            case "file":
+              return <MessagePartFile key={key} file={part} />;
             default:
               if (part.type.startsWith("tool-")) {
                 return <MessageToolHandler key={key} part={{ ...part }} />; // Using a spread operator to ensure React.memo will get a new instance of part

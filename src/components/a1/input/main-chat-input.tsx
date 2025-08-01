@@ -10,7 +10,6 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
-import { getLogger } from "@/lib/logger";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -23,9 +22,8 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRef, useState } from "react";
+import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
-
-const logger = getLogger(import.meta.url);
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -61,8 +59,10 @@ export const MainChatInput = ({
   const { sendMessage, stop } = useChatFunctions();
 
   const [isEmpty, setIsEmpty] = useState(true);
+  const [files, setFiles] = useState<FileList | undefined>(undefined);
 
   const editorViewRef = useRef<EditorView | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleEditorChange = (newValue: string) => {
     const newIsEmpty = !newValue.trim();
@@ -74,8 +74,11 @@ export const MainChatInput = ({
   const submitMessage = () => {
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
-    if (currentText.trim() && status === "ready") {
-      sendMessage({ text: currentText });
+    if ((currentText.trim() || files) && status === "ready") {
+      sendMessage({
+        text: currentText || "",
+        files: files,
+      });
       if (editorViewRef.current) {
         editorViewRef.current.dispatch({
           changes: {
@@ -86,6 +89,10 @@ export const MainChatInput = ({
         });
       }
       setIsEmpty(true);
+      setFiles(undefined);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       onAfterSend?.();
     }
   };
@@ -95,6 +102,30 @@ export const MainChatInput = ({
     submitMessage();
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const fileList = e.target.files;
+      setFiles(fileList);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    if (!files) return;
+
+    const filesArray = Array.from(files);
+    filesArray.splice(index, 1);
+
+    const dt = new DataTransfer();
+    filesArray.forEach((file) => dt.items.add(file));
+
+    const newFileList = dt.files;
+    setFiles(newFileList.length > 0 ? newFileList : undefined);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.files = newFileList;
+    }
+  };
+
   return (
     <>
       <MainInputErrorSection />
@@ -102,6 +133,17 @@ export const MainChatInput = ({
         onSubmit={handleSubmit}
         className="w-full flex flex-col bg-secondary pr-2 pt-2 rounded-none md:rounded-md md:rounded-b-none border border-b-0 border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
       >
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleFileChange}
+          multiple
+          className="hidden"
+          accept="image/*,text/*,video/*,application/pdf,.pdf,.doc,.docx,.txt,.md,.csv,.json,.xml,.html,.css,.js,.ts,.tsx,.jsx,.py,.java,.cpp,.c,.h,.rs,.go,.rb,.php,.swift,.kt"
+        />
+        {files && files.length > 0 && (
+          <Attachments files={files} onRemove={handleRemoveFile} />
+        )}
         <div className="flex-grow overflow-hidden">
           <CodeMirror
             autoFocus
@@ -157,7 +199,7 @@ export const MainChatInput = ({
                     disabled={status !== "ready"}
                     size="icon"
                     onClick={() => {
-                      logger.log("Attachments not implemented yet");
+                      fileInputRef.current?.click();
                     }}
                   >
                     <PaperclipIcon />
@@ -181,7 +223,7 @@ export const MainChatInput = ({
               <Button
                 type="submit"
                 size="icon"
-                disabled={status !== "ready" || isEmpty}
+                disabled={status !== "ready" || (isEmpty && !files)}
               >
                 {status === "submitted" ? (
                   <Loader2Icon className="animate-spin" />
