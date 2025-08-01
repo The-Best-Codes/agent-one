@@ -2,7 +2,7 @@ import { getLogger } from "@/lib/logger";
 import { type UIMessage } from "@ai-sdk/react";
 import {
   convertToModelMessages,
-  stepCountIs,
+  // stepCountIs,
   streamText,
   type ChatRequestOptions,
   type ChatTransport,
@@ -39,7 +39,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: "auto",
       //activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
-      stopWhen: stepCountIs(50), // TODO: Allow the user to configure this in settings
+      // stopWhen: stepCountIs(50), // TODO: Allow the user to configure this in settings
     });
     return result.toUIMessageStream({
       onError: (error) => {

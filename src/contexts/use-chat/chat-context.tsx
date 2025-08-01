@@ -1,6 +1,9 @@
 import { useChat } from "@/hooks/ai/useChat";
 import { groq } from "@/lib/ai/providers/groq";
-import type { LanguageModel } from "ai";
+import {
+  lastAssistantMessageIsCompleteWithToolCalls,
+  type LanguageModel,
+} from "ai";
 import React, { useMemo, type ReactNode } from "react";
 import {
   ChatFunctionsContext,
@@ -19,6 +22,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 }) => {
   const chatResult = useChat(model, {
     experimental_throttle: 250, // TODO: Allow customizing this in settings
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
   });
 
   const statusValue = useMemo(
