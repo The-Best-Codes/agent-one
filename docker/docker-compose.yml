@@ -1,0 +1,9 @@
+services:
+  agent-one-playwright-test-runner:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    container_name: agent-one-playwright-test-runner
+    ipc: host
+    init: true
+    command: tail -f /dev/null

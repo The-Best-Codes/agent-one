@@ -11,9 +11,9 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write src",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test-internal:e2e": "playwright test",
+    "test-internal:e2e:headed": "playwright test --headed",
+    "test-internal:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.0",
