@@ -8,5 +8,17 @@ services:
     init: true
     command: tail -f /dev/null
     volumes:
+      # Essential Application Source & Configuration
+      - ../src:/app/src
+      - ../tests:/app/tests
+      - ../public:/app/public
+      - ../index.html:/app/index.html
+      - ../vite.config.ts:/app/vite.config.ts
+      - ../playwright.config.ts:/app/playwright.config.ts
+      - ../tsconfig.json:/app/tsconfig.json
+      - ../tsconfig.node.json:/app/tsconfig.node.json
+      - ../components.json:/app/components.json
+      - ../eslint.config.js:/app/eslint.config.js
+      # Mount these seperately
       - ../docker-report/playwright-report:/app/playwright-report
       - ../docker-report/test-results:/app/test-results
