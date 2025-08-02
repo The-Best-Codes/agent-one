@@ -25,6 +25,7 @@ const editorTheme = EditorView.theme({
   ".cm-content": {
     paddingTop: "0px",
     paddingBottom: "0px",
+    color: "var(--foreground);",
   },
   ".cm-line": {
     padding: "0 0.125rem 0 0.125rem",

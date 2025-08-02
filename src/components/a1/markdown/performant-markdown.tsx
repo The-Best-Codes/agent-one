@@ -20,6 +20,7 @@ export const PerformantMarkdown = memo(({ content }: { content: string }) => {
     },
     ".cm-content": {
       padding: "0px",
+      color: "var(--foreground);",
     },
   });
 

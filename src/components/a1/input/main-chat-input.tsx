@@ -1,11 +1,6 @@
 "use client";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   useChatFunctions,
   useChatStatus,
@@ -24,7 +19,6 @@ import { useTheme } from "next-themes";
 import { useRef, useState } from "react";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
-import { Badge } from "@/components/ui/badge";
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -44,6 +38,7 @@ const editorTheme = EditorView.theme({
   ".cm-content": {
     paddingTop: "0px",
     paddingBottom: "0px",
+    color: "var(--foreground);",
   },
   ".cm-line": {
     padding: "0 0.125rem 0 0.625rem",
@@ -160,7 +155,10 @@ export const MainChatInput = ({
               markdown({ base: markdownLanguage }),
               editorTheme,
               EditorView.lineWrapping,
-              EditorView.contentAttributes.of({ spellcheck: "true" }),
+              EditorView.contentAttributes.of({
+                spellcheck: "true",
+                "aria-label": "Chat message input",
+              }),
               Prec.highest(
                 keymap.of([
                   {
@@ -194,33 +192,27 @@ export const MainChatInput = ({
         </div>
         <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
           <div className="relative">
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button
-                    data-testid="attach-button"
-                    type="button"
-                    disabled={status !== "ready"}
-                    size="icon"
-                    onClick={() => {
-                      fileInputRef.current?.click();
-                    }}
-                    className="relative"
-                  >
-                    {files && files?.length > 0 && (
-                      <Badge
-                        variant="default"
-                        className="absolute -top-2 -right-2 z-10 shadow-md"
-                      >
-                        {files?.length}
-                      </Badge>
-                    )}
-                    <PaperclipIcon />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">Attach files</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button
+              data-testid="attach-button"
+              type="button"
+              disabled={status !== "ready"}
+              size="icon"
+              onClick={() => {
+                fileInputRef.current?.click();
+              }}
+              className="relative"
+              aria-label="Attach files"
+            >
+              {files && files?.length > 0 && (
+                <Badge
+                  variant="default"
+                  className="absolute -top-2 -right-2 z-10 shadow-md"
+                >
+                  {files?.length}
+                </Badge>
+              )}
+              <PaperclipIcon />
+            </Button>
           </div>
           <div>
             {status === "streaming" ? (
@@ -229,6 +221,7 @@ export const MainChatInput = ({
                 type="button"
                 size="icon"
                 onClick={() => stop()}
+                aria-label="Stop response"
               >
                 <SquareIcon />
               </Button>
@@ -238,6 +231,7 @@ export const MainChatInput = ({
                 type="submit"
                 size="icon"
                 disabled={status !== "ready" || (isEmpty && !files)}
+                aria-label="Send message"
               >
                 {status === "submitted" ? (
                   <Loader2Icon className="animate-spin" />
