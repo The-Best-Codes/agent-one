@@ -42,6 +42,7 @@ const ScrollDownButton = ({
 
   return (
     <Button
+      data-testid="scroll-to-bottom"
       size="icon"
       onClick={handleClick}
       className={cn(
@@ -52,7 +53,9 @@ const ScrollDownButton = ({
       aria-label="Scroll to bottom"
       {...scrollButtonProps}
     >
-      {scrollButtonChildren || <ChevronDown />}
+      {scrollButtonChildren || (
+        <ChevronDown data-testid="scroll-to-bottom-icon" />
+      )}
     </Button>
   );
 };

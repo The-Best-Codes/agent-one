@@ -22,6 +22,7 @@
     "@ai-sdk/google": "^2.0.0",
     "@ai-sdk/groq": "^2.0.0",
     "@ai-sdk/react": "^2.0.0",
+    "@axe-core/playwright": "^4.10.2",
     "@codemirror/lang-markdown": "^6.3.3",
     "@codemirror/view": "^6.38.1",
     "@eslint/js": "^9.31.0",

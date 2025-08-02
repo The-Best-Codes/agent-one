@@ -131,6 +131,7 @@ export const MainChatInput = ({
     <>
       <MainInputErrorSection />
       <form
+        data-testid="chat-form"
         onSubmit={handleSubmit}
         className="w-full flex flex-col bg-secondary pr-2 pt-2 rounded-none md:rounded-md md:rounded-b-none border border-b-0 border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50"
       >
@@ -147,6 +148,7 @@ export const MainChatInput = ({
         )}
         <div className="flex-grow overflow-hidden">
           <CodeMirror
+            data-testid="chat-editor"
             autoFocus
             theme={resolvedTheme === "dark" ? "dark" : "light"}
             defaultValue=""
@@ -196,6 +198,7 @@ export const MainChatInput = ({
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Button
+                    data-testid="attach-button"
                     type="button"
                     disabled={status !== "ready"}
                     size="icon"
@@ -231,6 +234,7 @@ export const MainChatInput = ({
               </Button>
             ) : (
               <Button
+                data-testid="send-button"
                 type="submit"
                 size="icon"
                 disabled={status !== "ready" || (isEmpty && !files)}

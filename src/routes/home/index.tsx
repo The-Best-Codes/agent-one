@@ -16,7 +16,11 @@ function HomeRoute() {
   const scrollRef = useRef<AutoScrollHandle | null>(null);
 
   return (
-    <main className="h-screen flex flex-col items-center justify-center">
+    <main
+      className="h-screen flex flex-col items-center justify-center"
+      data-testid="home-main"
+      role="main"
+    >
       {/* Theme selector will move into the sidebar / settings later */}
       {/*<ThemeSelect className="w-32" />*/}
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
