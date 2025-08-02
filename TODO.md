@@ -5,4 +5,3 @@
 - Properly abort getUrlContent tool like waitNumberMilliseconds (causes stream to end)
 - Handle attachments in message editor
 - Handle tool calls in message editor
-- Copy test stuff, don't mount it. Just reorder steps to leverage caching
