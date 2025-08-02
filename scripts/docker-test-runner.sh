@@ -23,9 +23,7 @@ else
     echo "Container for '${SERVICE_NAME}' is already running."
 fi
 
-# getting this error on the line below:
-# ./scripts/docker-test-runner.sh: line 28: [: too many arguments
-if [ -z "$@" ]; then
+if [ "$#" -eq 0 ]; then
     echo "No command provided to execute inside the container."
     echo "Usage: $0 <command_to_run_in_container>"
     echo "Example: $0 bash"
