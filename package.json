@@ -11,10 +11,12 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write src",
+    "test:docker-down": "docker-compose -f docker/docker-compose.yml down",
     "test-local:e2e": "playwright test",
     "test-local:e2e:headed": "playwright test --headed",
     "test-local:e2e:report": "playwright show-report",
-    "test:e2e": "./scripts/docker-test-runner.sh npm run test-local:e2e"
+    "test:e2e": "./scripts/docker-test-runner.sh npm run test-local:e2e",
+    "test:e2e:report": "playwright show-report ./docker-report/playwright-report"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.0",

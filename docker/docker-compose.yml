@@ -7,3 +7,6 @@ services:
     ipc: host
     init: true
     command: tail -f /dev/null
+    volumes:
+      - ../docker-report/playwright-report:/app/playwright-report
+      - ../docker-report/test-results:/app/test-results
