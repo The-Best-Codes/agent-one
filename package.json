@@ -11,9 +11,10 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write src",
-    "test-internal:e2e": "playwright test",
-    "test-internal:e2e:headed": "playwright test --headed",
-    "test-internal:e2e:report": "playwright show-report"
+    "test-local:e2e": "playwright test",
+    "test-local:e2e:headed": "playwright test --headed",
+    "test-local:e2e:report": "playwright show-report",
+    "test:e2e": "./scripts/docker-test-runner.sh npm run test-local:e2e"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.0",
