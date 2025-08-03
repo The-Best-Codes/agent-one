@@ -11,8 +11,6 @@ import {
   useState,
 } from "react";
 
-// TODO: Consider making it so that when the user scrolls to the bottom, auto-scroll is enabled
-
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -59,16 +57,9 @@ export const AutoScrollContainer = forwardRef<
       ref,
       () => ({
         scrollToBottom: () => {
-          const container = containerRef.current;
-          if (container) {
-            container.scrollTo({
-              top: container.scrollHeight,
-              behavior,
-            });
-          }
+          setIsAutoScrolling(true);
         },
       }),
-      [behavior],
     );
 
     useLayoutEffect(() => {
@@ -87,10 +78,18 @@ export const AutoScrollContainer = forwardRef<
       }
 
       const handleScroll = () => {
-        const currentScrollTop = container.scrollTop;
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const currentScrollTop = scrollTop;
+
         if (isAutoScrolling && currentScrollTop < lastScrollTopRef.current) {
           setIsAutoScrolling(false);
         }
+
+        const isAtBottom = scrollHeight - currentScrollTop <= clientHeight + 1;
+        if (!isAutoScrolling && isAtBottom) {
+          setIsAutoScrolling(true);
+        }
+
         lastScrollTopRef.current = currentScrollTop;
       };
 
@@ -104,7 +103,11 @@ export const AutoScrollContainer = forwardRef<
         childList: true,
         subtree: true,
       });
-      container.addEventListener("scroll", handleScroll);
+      container.addEventListener(
+        "scroll",
+        handleScroll,
+        { passive: true }
+      );
 
       lastScrollTopRef.current = container.scrollTop;
 
