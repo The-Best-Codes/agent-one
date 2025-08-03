@@ -16,7 +16,7 @@
     "test-local:e2e:headed": "playwright test --headed",
     "test-local:e2e:report": "playwright show-report",
     "test:e2e": "./scripts/docker-test-runner.sh npm run test-local:e2e",
-    "test:e2e:report": "playwright show-report ./docker-report/playwright-report"
+    "test:e2e:report": "playwright show-report ./docker/test-report/playwright-report"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.0",

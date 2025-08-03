@@ -9,5 +9,5 @@ services:
     command: tail -f /dev/null
     volumes:
       # Mount these seperately
-      - ../docker-report/playwright-report:/app/playwright-report
-      - ../docker-report/test-results:/app/test-results
+      - ./test-report/playwright-report:/app/playwright-report
+      - ./test-report/test-results:/app/test-results

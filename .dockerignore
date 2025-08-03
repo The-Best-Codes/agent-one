@@ -29,7 +29,7 @@ dist-ssr
 playwright/.auth/
 test-results/
 playwright-report/
-/docker-report
+./docker/test-report
 
 # Docker
 /.docker-cache
