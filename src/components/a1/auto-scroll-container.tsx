@@ -11,6 +11,8 @@ import {
   useState,
 } from "react";
 
+// TODO later: Allow user to change whether to watch resize events. Off for now for performance reasons.
+
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
