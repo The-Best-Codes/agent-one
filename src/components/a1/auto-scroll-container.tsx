@@ -53,14 +53,11 @@ export const AutoScrollContainer = forwardRef<
       setIsAutoScrolling(true);
     };
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        scrollToBottom: () => {
-          setIsAutoScrolling(true);
-        },
-      }),
-    );
+    useImperativeHandle(ref, () => ({
+      scrollToBottom: () => {
+        setIsAutoScrolling(true);
+      },
+    }));
 
     useLayoutEffect(() => {
       const container = containerRef.current;
@@ -103,11 +100,7 @@ export const AutoScrollContainer = forwardRef<
         childList: true,
         subtree: true,
       });
-      container.addEventListener(
-        "scroll",
-        handleScroll,
-        { passive: true }
-      );
+      container.addEventListener("scroll", handleScroll, { passive: true });
 
       lastScrollTopRef.current = container.scrollTop;
 
