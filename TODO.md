@@ -7,4 +7,3 @@
 - Handle tool calls in message editor
 - Prevent shiki highlighter from re-loading assets so much (test: write an html code, then watch the network tab as you toggle and untoggle the preview/highlighter)
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
-- Fix scroll to bottom not staying stuck at bottom. Check docs? https://github.com/stackblitz-labs/use-stick-to-bottom
