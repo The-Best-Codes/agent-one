@@ -29,10 +29,10 @@ dist-ssr
 playwright/.auth/
 test-results/
 playwright-report/
-./docker/test-report
 
 # Docker
 /.docker-cache
+/docker/test-report
 
 ###
 # Specific to docker ignore
