@@ -5,3 +5,4 @@
 - Properly abort getUrlContent tool like waitNumberMilliseconds (causes stream to end)
 - Handle attachments in message editor
 - Handle tool calls in message editor
+- Prevent shiki highlighter from re-loading assets so much (test: write an html code, then watch the network tab as you toggle and untoggle the preview/highlighter)
