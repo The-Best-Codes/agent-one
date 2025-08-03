@@ -1,8 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DOCKER_COMPOSE_FILE="${SCRIPT_DIR}/../docker/docker-compose.yml"
 SERVICE_NAME="agent-one-playwright-test-runner"
+
+echo "--- Syncing repo to docker cache ---"
+bash "${SCRIPT_DIR}/sync-to-cache.sh"
 
 echo "--- Checking if Playwright test runner image is built ---"
 if ! docker compose -f "${DOCKER_COMPOSE_FILE}" images -q "${SERVICE_NAME}" | grep -q .; then
@@ -30,6 +34,10 @@ if [ "$#" -eq 0 ]; then
     echo "Example: $0 npx playwright test"
     exit 1
 fi
+
+echo "---Setting up Node.js environment---"
+docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npm ci
+docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npx -y playwright@1.54.2 install --with-deps
 
 echo "--- Executing command in container: '$@' ---"
 docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" "$@"
