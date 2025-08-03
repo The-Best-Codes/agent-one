@@ -2,8 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
-import { forwardRef, type ReactNode, useImperativeHandle } from "react";
-import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
+import {
+  forwardRef,
+  type ReactNode,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -18,71 +24,9 @@ export interface AutoScrollContainerProps
   behavior?: "smooth" | "instant";
 }
 
-const ScrollDownButton = ({
-  behavior,
-  scrollButtonClassName,
-  scrollButtonChildren,
-  scrollButtonProps,
-}: Pick<
-  AutoScrollContainerProps,
-  | "behavior"
-  | "scrollButtonClassName"
-  | "scrollButtonChildren"
-  | "scrollButtonProps"
->) => {
-  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
-
-  if (isAtBottom) {
-    return null;
-  }
-
-  const handleClick = () => {
-    scrollToBottom({ animation: behavior });
-  };
-
-  return (
-    <Button
-      data-testid="scroll-to-bottom"
-      size="icon"
-      onClick={handleClick}
-      className={cn(
-        "absolute bottom-4 right-4 z-10 hover:opacity-75",
-        scrollButtonClassName,
-      )}
-      variant="default"
-      aria-label="Scroll to bottom"
-      {...scrollButtonProps}
-    >
-      {scrollButtonChildren || (
-        <ChevronDown data-testid="scroll-to-bottom-icon" />
-      )}
-    </Button>
-  );
-};
-
 export type AutoScrollHandle = {
   scrollToBottom: () => void;
 };
-
-function ImperativeHandle({
-  forwardedRef,
-  behavior,
-}: {
-  forwardedRef: React.Ref<AutoScrollHandle> | undefined;
-  behavior: AutoScrollContainerProps["behavior"];
-}) {
-  const { scrollToBottom } = useStickToBottomContext();
-
-  useImperativeHandle(
-    forwardedRef,
-    () => ({
-      scrollToBottom: () => scrollToBottom({ animation: behavior }),
-    }),
-    [scrollToBottom, behavior],
-  );
-
-  return null;
-}
 
 export const AutoScrollContainer = forwardRef<
   AutoScrollHandle,
@@ -96,31 +40,106 @@ export const AutoScrollContainer = forwardRef<
       scrollButtonClassName,
       scrollButtonChildren,
       scrollButtonProps,
-      behavior,
+      behavior = "instant",
       ...props
     },
     ref,
   ) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isAutoScrolling, setIsAutoScrolling] = useState(true);
+    const lastScrollTopRef = useRef(0);
+
+    const handleScrollButtonClick = () => {
+      setIsAutoScrolling(true);
+    };
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        scrollToBottom: () => {
+          const container = containerRef.current;
+          if (container) {
+            container.scrollTo({
+              top: container.scrollHeight,
+              behavior,
+            });
+          }
+        },
+      }),
+      [behavior],
+    );
+
+    useLayoutEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const scroll = () => {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior,
+        });
+      };
+
+      if (isAutoScrolling) {
+        scroll();
+      }
+
+      const handleScroll = () => {
+        const currentScrollTop = container.scrollTop;
+        if (isAutoScrolling && currentScrollTop < lastScrollTopRef.current) {
+          setIsAutoScrolling(false);
+        }
+        lastScrollTopRef.current = currentScrollTop;
+      };
+
+      const mutationObserver = new MutationObserver(() => {
+        if (isAutoScrolling) {
+          scroll();
+        }
+      });
+
+      mutationObserver.observe(container, {
+        childList: true,
+        subtree: true,
+      });
+      container.addEventListener("scroll", handleScroll);
+
+      lastScrollTopRef.current = container.scrollTop;
+
+      return () => {
+        mutationObserver.disconnect();
+        container.removeEventListener("scroll", handleScroll);
+      };
+    }, [isAutoScrolling, behavior]);
+
     return (
-      <StickToBottom
+      <div
+        ref={containerRef}
         className={cn("relative h-full w-full overflow-y-auto", className)}
-        resize={behavior}
-        initial={behavior}
         {...props}
       >
-        <StickToBottom.Content className={scrollableClassName}>
-          {children}
-        </StickToBottom.Content>
+        <div className={scrollableClassName}>{children}</div>
 
-        <ScrollDownButton
-          behavior={behavior}
-          scrollButtonClassName={scrollButtonClassName}
-          scrollButtonChildren={scrollButtonChildren}
-          scrollButtonProps={scrollButtonProps}
-        />
-
-        <ImperativeHandle forwardedRef={ref} behavior={behavior} />
-      </StickToBottom>
+        {!isAutoScrolling && (
+          <Button
+            data-testid="scroll-to-bottom"
+            size="icon"
+            onClick={handleScrollButtonClick}
+            // TODO: Fix button positioning so it won't just scroll out of the viewport along with the content
+            className={cn(
+              "absolute bottom-4 right-4 z-10 hover:opacity-75",
+              scrollButtonClassName,
+            )}
+            variant="default"
+            aria-label="Scroll to bottom"
+            {...scrollButtonProps}
+          >
+            {scrollButtonChildren || (
+              <ChevronDown data-testid="scroll-to-bottom-icon" />
+            )}
+          </Button>
+        )}
+      </div>
     );
   },
 );
