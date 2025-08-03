@@ -5,4 +5,3 @@
 - Properly abort getUrlContent tool like waitNumberMilliseconds (causes stream to end)
 - Handle attachments in message editor
 - Handle tool calls in message editor
-- Detect when docker filesystem and current codebase filesystem are out of sync (using a hash?) and rebuild the docker when testing
