@@ -1,0 +1,9 @@
+- Maybe later: Human-in-the-loop / tool confirmation
+- Support multi-threading of chats?
+- Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.) | NOTE: Specially handle fetch is aborted and tool aborted errors. Change them perhaps to custom error signals so that the error popup will not be shown in the UI and you can send a followup message.
+- When editing or regenerating a message store the previous conversation history and allow navigating previous versions per message (like in ChatGPT, on each AI message that was changed)
+- Properly abort getUrlContent tool like waitNumberMilliseconds (causes stream to end)
+- Handle attachments in message editor
+- Handle tool calls in message editor
+- Prevent shiki highlighter from re-loading assets so much (test: write an html code, then watch the network tab as you toggle and untoggle the preview/highlighter)
+- Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.

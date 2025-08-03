@@ -13,8 +13,7 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+.vscode
 .idea
 .DS_Store
 *.suo
@@ -22,10 +21,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Environment variables
-.env*
-!.env.example
 
 # ESLint cache
 .eslintcache
@@ -39,3 +34,12 @@ playwright-report/
 /.docker-cache
 /docker/test-report
 /docker/cached
+
+###
+# Specific to docker ignore
+###
+# Tauri
+src-tauri/
+
+# Version control
+.git/

@@ -1,14 +1,28 @@
 # AgentOne
 
-## Local Setup
+## Prerequisites
 
-- Create an API key at https://aistudio.google.com/apikey
-- Create a `.env` file in the root directory of the project and add the following line:
+- Node.js
+- npm
+- Rust & Tauri https://tauri.app/start/prerequisites/
 
-```toml
-GOOGLE_GENERATIVE_AI_API_KEY="YOUR_API_KEY_HERE" # Replace YOUR_API_KEY_HERE with your API key
+## Installation
+
+Clone the repository using the following command:
+
+```bash
+git clone https://github.com/The-Best-Codes/agent-one.git
 ```
 
-- Run `npm install` to install dependencies
-- Run `npm run build` to build the project
-- Run `npm run start` to start the server, then access the app at http://localhost:3000
+Install dependencies:
+
+```bash
+cd agent-one
+npm install
+```
+
+Run the application:
+
+```bash
+npm run tauri dev
+```
