@@ -6,10 +6,12 @@ import {
   forwardRef,
   type ReactNode,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
-  useLayoutEffect,
 } from "react";
+
+// TODO: Consider making it so that when the user scrolls to the bottom, auto-scroll is enabled
 
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
