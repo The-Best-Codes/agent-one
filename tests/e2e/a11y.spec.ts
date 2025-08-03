@@ -8,7 +8,15 @@ test.describe("Accessibility - Home page", () => {
     await expect(page.locator("main[role='main']")).toBeVisible();
 
     const accessibilityScanResults = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "best-practice"])
+      .withTags([
+        "wcag2a",
+        "wcag2aa",
+        "wcag21a",
+        "wcag21aa",
+        "wcag22a",
+        "wcag22aa",
+        "best-practice",
+      ])
       .disableRules([
         // "color-contrast"
       ])
