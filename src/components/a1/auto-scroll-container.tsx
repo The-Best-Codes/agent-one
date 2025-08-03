@@ -28,6 +28,8 @@ export type AutoScrollHandle = {
   scrollToBottom: () => void;
 };
 
+const SCROLL_UP_THRESHOLD = 10;
+
 export const AutoScrollContainer = forwardRef<
   AutoScrollHandle,
   AutoScrollContainerProps
@@ -53,11 +55,22 @@ export const AutoScrollContainer = forwardRef<
       setIsAutoScrolling(true);
     };
 
-    useImperativeHandle(ref, () => ({
-      scrollToBottom: () => {
-        setIsAutoScrolling(true);
-      },
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        scrollToBottom: () => {
+          const container = containerRef.current;
+          if (container) {
+            setIsAutoScrolling(true);
+            container.scrollTo({
+              top: container.scrollHeight,
+              behavior,
+            });
+          }
+        },
+      }),
+      [behavior],
+    );
 
     useLayoutEffect(() => {
       const container = containerRef.current;
@@ -78,7 +91,10 @@ export const AutoScrollContainer = forwardRef<
         const { scrollTop, scrollHeight, clientHeight } = container;
         const currentScrollTop = scrollTop;
 
-        if (isAutoScrolling && currentScrollTop < lastScrollTopRef.current) {
+        if (
+          isAutoScrolling &&
+          lastScrollTopRef.current - currentScrollTop > SCROLL_UP_THRESHOLD
+        ) {
           setIsAutoScrolling(false);
         }
 
