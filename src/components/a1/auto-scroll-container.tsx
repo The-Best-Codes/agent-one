@@ -6,9 +6,9 @@ import {
   forwardRef,
   type ReactNode,
   useImperativeHandle,
-  useLayoutEffect,
   useRef,
   useState,
+  useLayoutEffect,
 } from "react";
 
 export interface AutoScrollContainerProps
@@ -113,19 +113,15 @@ export const AutoScrollContainer = forwardRef<
     }, [isAutoScrolling, behavior]);
 
     return (
-      <div
-        ref={containerRef}
-        className={cn("relative h-full w-full overflow-y-auto", className)}
-        {...props}
-      >
-        <div className={scrollableClassName}>{children}</div>
-
+      <div className={cn("relative h-full w-full", className)} {...props}>
+        <div ref={containerRef} className="h-full w-full overflow-y-auto">
+          <div className={scrollableClassName}>{children}</div>
+        </div>
         {!isAutoScrolling && (
           <Button
             data-testid="scroll-to-bottom"
             size="icon"
             onClick={handleScrollButtonClick}
-            // TODO: Fix button positioning so it won't just scroll out of the viewport along with the content
             className={cn(
               "absolute bottom-4 right-4 z-10 hover:opacity-75",
               scrollButtonClassName,
