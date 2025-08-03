@@ -142,7 +142,7 @@ export const AutoScrollContainer = forwardRef<
               "absolute bottom-4 right-4 z-10 hover:opacity-75",
               scrollButtonClassName,
             )}
-            variant="default"
+            variant="secondary"
             aria-label="Scroll to bottom"
             {...scrollButtonProps}
           >
