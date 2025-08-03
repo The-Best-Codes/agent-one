@@ -7,3 +7,4 @@
 - Handle tool calls in message editor
 - Prevent shiki highlighter from re-loading assets so much (test: write an html code, then watch the network tab as you toggle and untoggle the preview/highlighter)
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
+- Add error boundary component with good non-dev and dev UX to the app. Wrap the whole app and chunks of the app in it.
