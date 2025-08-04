@@ -32,7 +32,6 @@ playwright-report/
 
 # Docker
 /.docker-cache
-/docker/test-report
 /docker/cached
 
 ###

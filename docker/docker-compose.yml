@@ -9,6 +9,3 @@ services:
     command: tail -f /dev/null
     volumes:
       - ./cached:/app:rw
-      # Mount these seperately
-      - ./test-report/playwright-report:/app/playwright-report
-      - ./test-report/test-results:/app/test-results
