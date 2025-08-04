@@ -17,7 +17,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "npm run dev",
+    command: `npm run preview -- --port ${PORT}`,
     url: BASE_URL,
     reuseExistingServer: true,
     timeout: 120000,

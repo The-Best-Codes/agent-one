@@ -37,6 +37,7 @@ fi
 
 echo "---Setting up Node.js environment---"
 docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npm ci
+docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npm run build
 docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npx -y playwright@1.54.2 install --with-deps
 
 echo "--- Executing command in container: '$@' ---"
