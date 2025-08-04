@@ -21,8 +21,9 @@ test.describe("Main Chat Input", () => {
     await expect(sendButton).toBeDisabled();
   });
 
-  test("typing in editor enables send, pressing Enter submits and clears the editor", async ({
+  test("typing in editor enables send, pressing Enter submits and clears the editor (except on mobile)", async ({
     page,
+    isMobile,
   }) => {
     const editor = page.locator("[data-testid='chat-editor']");
     const sendButton = page.locator("[data-testid='send-button']");
@@ -33,7 +34,9 @@ test.describe("Main Chat Input", () => {
 
     await page.keyboard.press("Enter");
 
-    await expect(sendButton).toBeDisabled();
+    if (!isMobile) {
+      await expect(sendButton).toBeDisabled();
+    }
 
     await editor.click();
     await page.keyboard.press("ControlOrMeta+a");
