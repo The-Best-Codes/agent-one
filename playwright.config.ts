@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 1420;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${PORT}`;
+const CI = process.env.CI === "true";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -12,9 +13,9 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: BASE_URL,
-    trace: "on-first-retry",
-    video: "retain-on-failure",
-    screenshot: "only-on-failure",
+    trace: CI ? "off" : "on-first-retry",
+    video: CI ? "off" : "retain-on-failure",
+    screenshot: CI ? "off" : "only-on-failure",
   },
   webServer: {
     command: `npm run preview -- --port ${PORT}`,
