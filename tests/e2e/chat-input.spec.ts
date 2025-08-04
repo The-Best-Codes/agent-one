@@ -27,8 +27,7 @@ test.describe("Main Chat Input", () => {
     const editor = page.locator("[data-testid='chat-editor']");
     const sendButton = page.locator("[data-testid='send-button']");
 
-    await editor.click();
-    await page.keyboard.type("Hello world!");
+    await editor.fill("Hello world!");
 
     await expect(sendButton).toBeEnabled();
 

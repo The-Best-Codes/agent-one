@@ -7,22 +7,20 @@ test.describe("Layout and autoscroll behaviors", () => {
     await page.goto("/");
 
     const scrollable = page.locator(
-      "main [data-testid='home-main'] .relative.h-full.w-full >> div.h-full.w-full.overflow-y-auto",
+      "[data-testid='auto-scroll-container-scrollable']",
     );
     await expect(scrollable).toBeVisible();
 
-    const contentWrapper = page.locator(
-      "main [data-testid='home-main'] .relative.h-full.w-full >> div.h-full.w-full.overflow-y-auto >> div",
-    );
+    const contentWrapper = scrollable.locator("div").first();
     await expect(contentWrapper).toBeVisible();
 
     const wrapperSelector =
-      "main [data-testid='home-main'] .relative.h-full.w-full >> div.h-full.w-full.overflow-y-auto >> div";
+      "[data-testid='auto-scroll-container-scrollable'] > div";
 
     await page.evaluate((selector) => {
       const wrapper = document.querySelector(selector);
       if (!wrapper) return;
-      (wrapper as HTMLElement).innerHTML = "";
+      wrapper.innerHTML = "";
       for (let i = 0; i < 60; i++) {
         const div = document.createElement("div");
         div.textContent = `Row ${i + 1}`;
@@ -34,6 +32,14 @@ test.describe("Layout and autoscroll behaviors", () => {
         (div.style as CSSStyleDeclaration).padding = "0 8px";
         wrapper.appendChild(div);
       }
+    }, wrapperSelector);
+
+    await page.waitForTimeout(100);
+    await page.evaluate((selector) => {
+      const wrapper = document.querySelector(selector);
+      if (!wrapper) return;
+      wrapper.scrollTop = wrapper.scrollHeight - wrapper.clientHeight;
+      wrapper.dispatchEvent(new Event("scroll"));
     }, wrapperSelector);
 
     const hasOverflow = await scrollable.evaluate((el) => {
@@ -48,6 +54,8 @@ test.describe("Layout and autoscroll behaviors", () => {
     await scrollable.evaluate((el) => {
       el.scrollTop = Math.max(0, el.scrollTop - 100);
     });
+
+    await page.waitForTimeout(100);
 
     const scrollToBottomButton = page.locator(
       "[data-testid='scroll-to-bottom']",

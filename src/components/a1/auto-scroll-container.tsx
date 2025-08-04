@@ -130,7 +130,11 @@ export const AutoScrollContainer = forwardRef<
 
     return (
       <div className={cn("relative h-full w-full", className)} {...props}>
-        <div ref={containerRef} className="h-full w-full overflow-y-auto">
+        <div
+          ref={containerRef}
+          className="h-full w-full overflow-y-auto"
+          data-testid="auto-scroll-container-scrollable"
+        >
           <div className={scrollableClassName}>{children}</div>
         </div>
         {!isAutoScrolling && (
