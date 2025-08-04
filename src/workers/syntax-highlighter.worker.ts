@@ -1,5 +1,9 @@
 import { createHighlighterCore, type HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
+import type {
+  HighlightRequest,
+  HighlightResponse,
+} from "../lib/syntax-highlighter/types";
 
 // Themes
 import themeDarkPlus from "@shikijs/themes/dark-plus";
@@ -51,19 +55,6 @@ const langAliases: Record<string, keyof typeof shikiLangsMap> = {
   yml: "yaml",
   rs: "rust",
 };
-
-interface HighlightRequest {
-  id: string;
-  code: string;
-  language: string;
-  theme: "dark-plus" | "light-plus";
-}
-
-interface HighlightResponse {
-  id: string;
-  html?: string;
-  error?: string;
-}
 
 async function initializeHighlighter() {
   if (highlighter) return highlighter;
