@@ -22,13 +22,11 @@ test.describe("Accessibility - Home page", () => {
       ])
       .analyze();
 
-    const violations = accessibilityScanResults.violations.filter(
-      (v) => v.impact === "serious" || v.impact === "critical",
-    );
+    const violations = accessibilityScanResults.violations;
 
     expect(
       violations,
-      `Expected no serious/critical a11y violations. Found:\n${violations
+      `Expected no a11y violations. Found:\n${violations
         .map((v) => `- ${v.id}: ${v.description}\n  Help: ${v.helpUrl}`)
         .join("\n")}`,
     ).toEqual([]);
