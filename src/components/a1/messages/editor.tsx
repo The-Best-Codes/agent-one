@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import useMobileDetection from "@/hooks/use-mobile-detection";
 import { cn } from "@/lib/utils";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
@@ -49,6 +50,11 @@ export const MessageEditor = ({
 }: MessageEditorProps) => {
   const editorViewRef = useRef<EditorView | null>(null);
   const { resolvedTheme } = useTheme();
+  const isMobile = useMobileDetection({
+    anyHover: true,
+    pointerCoarse: true,
+    match: "all",
+  });
 
   const handleSave = () => {
     const currentContent = editorViewRef.current?.state.doc.toString() || "";
@@ -84,6 +90,9 @@ export const MessageEditor = ({
               {
                 key: "Enter",
                 run: () => {
+                  if (isMobile) {
+                    return false;
+                  }
                   handleSave();
                   return true;
                 },
