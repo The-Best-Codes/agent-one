@@ -49,19 +49,19 @@ export default defineConfig({
     },
     {
       name: "iphone-14-light",
-      use: { ...devices["iPhone 14"], colorScheme: "light" },
+      use: { ...devices["iPhone 14"], colorScheme: "light", isMobile: true },
     },
     {
       name: "iphone-14-dark",
-      use: { ...devices["iPhone 14"], colorScheme: "dark" },
+      use: { ...devices["iPhone 14"], colorScheme: "dark", isMobile: true },
     },
     {
       name: "pixel-7-light",
-      use: { ...devices["Pixel 7"], colorScheme: "light" },
+      use: { ...devices["Pixel 7"], colorScheme: "light", isMobile: true },
     },
     {
       name: "pixel-7-dark",
-      use: { ...devices["Pixel 7"], colorScheme: "dark" },
+      use: { ...devices["Pixel 7"], colorScheme: "dark", isMobile: true },
     },
   ],
 });
