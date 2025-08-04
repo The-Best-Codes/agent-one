@@ -6,5 +6,4 @@
 - Handle attachments in message editor
 - Handle tool calls in message editor
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
-- Add error boundary component with good non-dev and dev UX to the app. Wrap the whole app and chunks of the app in it.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
