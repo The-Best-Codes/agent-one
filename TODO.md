@@ -7,3 +7,4 @@
 - Handle tool calls in message editor
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
+- Create a test PR
