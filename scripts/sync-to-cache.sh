@@ -8,22 +8,19 @@ DEST="${ROOT_DIR}/docker/cached"
 mkdir -p "${DEST}"
 
 if command -v git >/dev/null 2>&1 && [ -d "${ROOT_DIR}/.git" ]; then
-  echo "--- Using git ls-files to compute sync set (respects .gitignore) ---"
-  # Compose list of files to sync:
-  # 1) Tracked files
-  # 2) Untracked but not ignored files
-  FILES=$(cd "${SRC}" && git ls-files && git ls-files --others --exclude-standard)
-
-  rsync -a --delete --files-from=<(printf "%s\n" "${FILES}") "${SRC}/" "${DEST}/"
+  echo "--- Using rsync with .gitignore filters to sync ---"
+  rsync -a --delete --delete-excluded \
+    --filter=':- .gitignore' \
+    "${SRC}/" "${DEST}/"
 else
   echo "--- git not available; falling back to rsync with .dockerignore excludes ---"
   EXCLUDE_FILE="${ROOT_DIR}/.dockerignore"
   if [ -f "${EXCLUDE_FILE}" ]; then
-    rsync -a --delete \
+    rsync -a --delete --delete-excluded \
       --exclude-from="${EXCLUDE_FILE}" \
       "${SRC}/" "${DEST}/"
   else
-    rsync -a --delete "${SRC}/" "${DEST}/"
+    rsync -a --delete --delete-excluded "${SRC}/" "${DEST}/"
   fi
 fi
 
