@@ -5,6 +5,7 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import useMobileDetection from "@/hooks/use-mobile-detection";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -54,6 +55,11 @@ export const MainChatInput = ({
   const { status } = useChatStatus();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
+  const isMobile = useMobileDetection({
+    anyHover: true,
+    pointerCoarse: true,
+    match: "all",
+  });
 
   const [isEmpty, setIsEmpty] = useState(true);
   const [files, setFiles] = useState<FileList | undefined>(undefined);
@@ -166,6 +172,9 @@ export const MainChatInput = ({
                     // TODO: Later, allow changing the send key to CTRL/CMD + Enter
                     key: "Enter",
                     run: () => {
+                      if (isMobile) {
+                        return false;
+                      }
                       submitMessage();
                       return true;
                     },
