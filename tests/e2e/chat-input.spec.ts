@@ -110,8 +110,9 @@ test.describe("Main Chat Input", () => {
     await expect(sendButton).toBeDisabled();
   });
 
-  test("Shift+Enter should not send (stay in editor), Enter should send", async ({
+  test("Shift+Enter should not send (stay in editor), Enter should send (except on mobile)", async ({
     page,
+    isMobile,
   }) => {
     const editor = page.locator("[data-testid='chat-editor']");
     const sendButton = page.locator("[data-testid='send-button']");
@@ -125,6 +126,10 @@ test.describe("Main Chat Input", () => {
 
     await page.keyboard.press("Enter");
 
-    await expect(sendButton).toBeDisabled();
+    if (isMobile) {
+      await expect(sendButton).toBeEnabled();
+    } else {
+      await expect(sendButton).toBeDisabled();
+    }
   });
 });
