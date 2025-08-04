@@ -145,7 +145,6 @@ export const MainChatInput = ({
         )}
         <div className="flex-grow overflow-hidden">
           <CodeMirror
-            data-testid="chat-editor"
             autoFocus
             theme={resolvedTheme === "dark" ? "dark" : "light"}
             defaultValue=""
@@ -160,10 +159,12 @@ export const MainChatInput = ({
               EditorView.contentAttributes.of({
                 spellcheck: "true",
                 "aria-label": "Chat message input",
+                "data-testid": "chat-editor",
               }),
               Prec.highest(
                 keymap.of([
                   {
+                    // TODO: Later, allow changing the send key to CTRL/CMD + Enter
                     key: "Enter",
                     run: () => {
                       submitMessage();
