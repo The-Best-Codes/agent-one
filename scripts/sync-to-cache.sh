@@ -8,7 +8,7 @@ DEST="${ROOT_DIR}/docker/cached"
 mkdir -p "${DEST}"
 
 echo "--- Using rsync with .dockerignore filters to sync ---"
-rsync -a --delete --delete-excluded \
+rsync -a --delete \
   --filter=':- .dockerignore' \
   "${SRC}/" "${DEST}/"
 
