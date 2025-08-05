@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { getLogger } from "@/lib/logger";
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useCallback, useRef, useEffect } from "react";
 import { InlineTextEditor } from "./inline-text-editor";
 import { MessagePartReasoning } from "./parts/reasoning";
 import { MessagePartStepStart } from "./parts/step-start";
@@ -34,17 +34,22 @@ export const EditableMessageParts = ({
   onSave,
   className,
 }: EditableMessagePartsProps) => {
-  // Capture initial text part values in-order
-  const textValues = useMemo(() => {
+  // Build stable ordered values for text parts
+  const initialValues = useMemo(() => {
     return message.parts
       .filter((p): p is TextUIPart => p.type === "text")
       .map((p) => p.text);
   }, [message.parts]);
 
-  // Maintain edited values mapped by text-part order
-  const [editedTextValues, setEditedTextValues] = useState<string[]>(
-    () => [...textValues],
-  );
+  // Store text values in a ref to avoid parent rerenders on each keystroke
+  const textValuesRef = useRef<string[]>(initialValues);
+
+  // Refs to editor containers to control focus and scroll
+  const editorRefs = useRef<(HTMLDivElement | null)[]>([]);
+  editorRefs.current.length = initialValues.length;
+
+  // Used to handle Escape at the container level
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const isMobile = useMobileDetection({
     anyHover: true,
@@ -53,11 +58,8 @@ export const EditableMessageParts = ({
   });
 
   const handleTextChange = useCallback((textIndex: number, next: string) => {
-    setEditedTextValues((prev) => {
-      const copy = [...prev];
-      copy[textIndex] = next;
-      return copy;
-    });
+    textValuesRef.current[textIndex] = next;
+    // No state updates here to prevent rerendering the whole message
   }, []);
 
   const handleSave = useCallback(() => {
@@ -66,7 +68,7 @@ export const EditableMessageParts = ({
       let idx = 0;
       const nextParts: UIMessage["parts"] = message.parts.map((part) => {
         if (part.type === "text") {
-          const nextText = editedTextValues[idx] ?? "";
+          const nextText = textValuesRef.current[idx] ?? "";
           idx += 1;
           return { ...part, text: nextText };
         }
@@ -75,7 +77,7 @@ export const EditableMessageParts = ({
 
       // If message is only text parts and all edits are empty/whitespace, behave like cancel
       const hasOnlyTextParts = message.parts.every((p) => p.type === "text");
-      const hasAnyNonEmptyText = editedTextValues.some(
+      const hasAnyNonEmptyText = textValuesRef.current.some(
         (t) => t.trim().length > 0,
       );
       if (hasOnlyTextParts && !hasAnyNonEmptyText) {
@@ -88,12 +90,43 @@ export const EditableMessageParts = ({
       logger.error(e);
       onCancel();
     }
-  }, [editedTextValues, message.parts, onCancel, onSave]);
+  }, [message.parts, onCancel, onSave]);
+
+  // Escape-to-cancel on container
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onCancel();
+      }
+    };
+    el.addEventListener("keydown", onKeyDown);
+    return () => {
+      el.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onCancel]);
+
+  // Focus last text editor and scroll into view when editing starts
+  useEffect(() => {
+    if (initialValues.length === 0) return;
+    const lastIdx = initialValues.length - 1;
+    const id = window.setTimeout(() => {
+      const el = editorRefs.current[lastIdx];
+      if (el) {
+        el.focus();
+        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [initialValues.length]);
 
   // Render message parts with inline editors for text
   let textIndex = 0;
   return (
     <div
+      ref={containerRef}
       className={cn(
         "w-full flex flex-col p-2 border border-input rounded-md focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 bg-background",
         className,
@@ -110,15 +143,21 @@ export const EditableMessageParts = ({
             case "text": {
               const thisIndex = textIndex++;
               return (
-                <InlineTextEditor
+                <div
                   key={key}
-                  value={editedTextValues[thisIndex] ?? ""}
-                  onChange={(v) => handleTextChange(thisIndex, v)}
-                  autoFocus={thisIndex === 0}
-                  disableEnter={isMobile}
-                  onEnter={!isMobile ? handleSave : undefined}
-                  className={cn(thisIndex > 0 ? "mt-1" : "")}
-                />
+                  ref={(el) => {
+                    editorRefs.current[thisIndex] = el;
+                  }}
+                >
+                  <InlineTextEditor
+                    value={textValuesRef.current[thisIndex] ?? ""}
+                    onChange={(v) => handleTextChange(thisIndex, v)}
+                    autoFocus={false}
+                    disableEnter={isMobile}
+                    onEnter={!isMobile ? handleSave : undefined}
+                    className={cn(thisIndex > 0 ? "mt-1" : "")}
+                  />
+                </div>
               );
             }
             case "reasoning":

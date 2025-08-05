@@ -5,7 +5,7 @@ import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useTheme } from "next-themes";
-import { useRef } from "react";
+import { memo, useRef } from "react";
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -38,7 +38,7 @@ interface InlineTextEditorProps {
   disableEnter?: boolean;
 }
 
-export const InlineTextEditor = ({
+const InlineTextEditorImpl = ({
   value,
   onChange,
   autoFocus,
@@ -95,5 +95,16 @@ export const InlineTextEditor = ({
     />
   );
 };
+
+export const InlineTextEditor = memo(
+  InlineTextEditorImpl,
+  (prev, next) =>
+    prev.value === next.value &&
+    prev.autoFocus === next.autoFocus &&
+    prev.className === next.className &&
+    prev.disableEnter === next.disableEnter &&
+    prev.onEnter === next.onEnter &&
+    prev.onChange === next.onChange,
+);
 
 InlineTextEditor.displayName = "InlineTextEditor";
