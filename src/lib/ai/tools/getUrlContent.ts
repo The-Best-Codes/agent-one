@@ -63,8 +63,8 @@ export const GetUrlContentTool = tool({
         "abort",
         () => {
           if (timeoutId) clearTimeout(timeoutId);
-          logger.error("Operation aborted.");
-          const abortError = new Error("Operation aborted.");
+          logger.error("The operation was aborted.");
+          const abortError = new Error("The operation was aborted.");
           abortError.name = "AbortError";
           reject(abortError);
         },
@@ -80,6 +80,7 @@ export const GetUrlContentTool = tool({
           format: input.format,
           maxLength: input.maxLength,
           timeoutSeconds: input.timeoutSeconds,
+          signal: abortSignal,
         });
 
         logger.verbose("Fetched URL:", result);
@@ -95,6 +96,9 @@ export const GetUrlContentTool = tool({
         };
       } catch (error) {
         logger.error("Error fetching URL:", error);
+        if ((error as Error).name === "AbortError") {
+          throw error;
+        }
         return {
           success: false,
           error: getError(error as Error),
@@ -136,6 +140,9 @@ export const GetUrlContentTool = tool({
         },
       };
     } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        throw error;
+      }
       logger.error("Error fetching URLs:", error);
       return {
         success: false,
