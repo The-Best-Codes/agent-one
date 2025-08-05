@@ -108,14 +108,13 @@ export const EditableMessageParts = ({
     };
   }, [onCancel]);
 
-  // Focus last text editor and scroll into view when editing starts
+  // Ensure last text editor is scrolled into view when editing starts
   useEffect(() => {
     if (initialValues.length === 0) return;
     const lastIdx = initialValues.length - 1;
     const id = window.setTimeout(() => {
       const el = editorRefs.current[lastIdx];
       if (el) {
-        el.focus();
         el.scrollIntoView({ block: "nearest", behavior: "smooth" });
       }
     }, 0);
@@ -142,6 +141,8 @@ export const EditableMessageParts = ({
           switch (part.type) {
             case "text": {
               const thisIndex = textIndex++;
+              const lastTextIndex =
+                initialValues.length > 0 ? initialValues.length - 1 : -1;
               return (
                 <div
                   key={key}
@@ -152,7 +153,7 @@ export const EditableMessageParts = ({
                   <InlineTextEditor
                     value={textValuesRef.current[thisIndex] ?? ""}
                     onChange={(v) => handleTextChange(thisIndex, v)}
-                    autoFocus={false}
+                    autoFocus={thisIndex === lastTextIndex}
                     disableEnter={isMobile}
                     onEnter={!isMobile ? handleSave : undefined}
                     className={cn(thisIndex > 0 ? "mt-1" : "")}

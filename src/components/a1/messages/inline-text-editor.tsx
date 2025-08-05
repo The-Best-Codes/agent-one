@@ -79,6 +79,14 @@ const InlineTextEditorImpl = ({
       onChange={(v) => onChange(v)}
       onCreateEditor={(view) => {
         editorViewRef.current = view;
+        if (autoFocus) {
+          const len = view.state.doc.length;
+          view.dispatch({
+            selection: { anchor: len, head: len },
+            scrollIntoView: true,
+          });
+          view.focus();
+        }
       }}
       indentWithTab={false}
       basicSetup={{
