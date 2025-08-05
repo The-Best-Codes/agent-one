@@ -3,8 +3,8 @@ import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { getLogger } from "@/lib/logger";
 import { type UIMessage } from "ai";
 import { memo, useCallback, useMemo, useState } from "react";
-import { MessageParts } from "./index";
 import { EditableMessageParts } from "./editable-message-parts";
+import { MessageParts } from "./index";
 
 const logger = getLogger(import.meta.url);
 
