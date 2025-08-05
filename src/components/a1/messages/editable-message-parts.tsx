@@ -80,21 +80,6 @@ export const EditableMessageParts = ({
   }, [message.parts, onCancel, onSave]);
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onCancel();
-      }
-    };
-    el.addEventListener("keydown", onKeyDown);
-    return () => {
-      el.removeEventListener("keydown", onKeyDown);
-    };
-  }, [onCancel]);
-
-  useEffect(() => {
     if (initialValues.length === 0) return;
     const lastIdx = initialValues.length - 1;
     const id = window.setTimeout(() => {
@@ -140,6 +125,7 @@ export const EditableMessageParts = ({
                     autoFocus={thisIndex === lastTextIndex}
                     disableEnter={isMobile}
                     onEnter={!isMobile ? handleSave : undefined}
+                    onCancel={onCancel}
                     className={cn(thisIndex > 0 ? "mt-1" : "")}
                   />
                 </div>

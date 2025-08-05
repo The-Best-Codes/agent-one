@@ -36,6 +36,7 @@ interface InlineTextEditorProps {
   className?: string;
   onEnter?: () => void;
   disableEnter?: boolean;
+  onCancel?: () => void;
 }
 
 const InlineTextEditorImpl = ({
@@ -45,6 +46,7 @@ const InlineTextEditorImpl = ({
   className,
   onEnter,
   disableEnter = false,
+  onCancel,
 }: InlineTextEditorProps) => {
   const { resolvedTheme } = useTheme();
   const editorViewRef = useRef<EditorView | null>(null);
@@ -71,6 +73,13 @@ const InlineTextEditorImpl = ({
                   return true;
                 }
                 return false;
+              },
+            },
+            {
+              key: "Escape",
+              run: () => {
+                onCancel?.();
+                return true;
               },
             },
           ]),
