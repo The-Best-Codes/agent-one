@@ -1,25 +1,16 @@
 "use client";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { getLogger } from "@/lib/logger";
-import { type TextUIPart, type UIMessage } from "ai";
+import { type UIMessage } from "ai";
 import { memo, useCallback, useMemo, useState } from "react";
-import { MessageEditor } from "./editor";
 import { MessageParts } from "./index";
+import { EditableMessageParts } from "./editable-message-parts";
 
 const logger = getLogger(import.meta.url);
 
 const EditableMessageInternal = ({ message }: { message: UIMessage }) => {
   const [isEditing, setIsEditing] = useState(false);
   const { setMessages, regenerate } = useChatFunctions();
-
-  const textContent = useMemo(
-    () =>
-      message.parts
-        .filter((part): part is TextUIPart => part.type === "text")
-        .map((part) => part.text)
-        .join("\n"),
-    [message.parts],
-  );
 
   const handleEdit = useCallback(() => {
     setIsEditing(true);
@@ -29,8 +20,8 @@ const EditableMessageInternal = ({ message }: { message: UIMessage }) => {
     setIsEditing(false);
   }, []);
 
-  const handleSave = useCallback(
-    (newContent: string) => {
+  const handleSaveParts = useCallback(
+    (updatedParts: UIMessage["parts"]) => {
       setMessages((currentMessages) => {
         const messageIndex = currentMessages.findIndex(
           (m) => m.id === message.id,
@@ -43,27 +34,9 @@ const EditableMessageInternal = ({ message }: { message: UIMessage }) => {
         const updatedMessages = [...currentMessages];
         const originalMessage = updatedMessages[messageIndex];
 
-        const newParts: UIMessage["parts"] = [];
-        let textPartUpdated = false;
-
-        for (const part of originalMessage.parts) {
-          if (part.type === "text") {
-            if (!textPartUpdated) {
-              newParts.push({ type: "text", text: newContent });
-              textPartUpdated = true;
-            }
-          } else {
-            newParts.push(part);
-          }
-        }
-
-        if (!textPartUpdated) {
-          newParts.push({ type: "text", text: newContent });
-        }
-
         updatedMessages[messageIndex] = {
           ...originalMessage,
-          parts: newParts,
+          parts: updatedParts,
         };
 
         return updatedMessages;
@@ -85,11 +58,10 @@ const EditableMessageInternal = ({ message }: { message: UIMessage }) => {
 
   if (isEditing) {
     return (
-      <MessageEditor
-        initialContent={textContent}
-        onSave={handleSave}
+      <EditableMessageParts
+        message={message}
         onCancel={handleCancel}
-        messageRole={message.role}
+        onSave={handleSaveParts}
         className="w-full"
       />
     );

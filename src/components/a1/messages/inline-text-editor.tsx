@@ -1,0 +1,99 @@
+"use client";
+import { cn } from "@/lib/utils";
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { Prec } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
+import CodeMirror from "@uiw/react-codemirror";
+import { useTheme } from "next-themes";
+import { useRef } from "react";
+
+const editorTheme = EditorView.theme({
+  "&": {
+    border: "none",
+    backgroundColor: "transparent !important",
+  },
+  "&.cm-focused": {
+    outline: "none",
+  },
+  ".cm-scroller": {
+    overflow: "auto",
+    fontFamily: "inherit",
+  },
+  ".cm-content": {
+    paddingTop: "0px",
+    paddingBottom: "0px",
+    color: "var(--foreground);",
+  },
+  ".cm-line": {
+    padding: "0 0.125rem 0 0.125rem",
+  },
+});
+
+interface InlineTextEditorProps {
+  value: string;
+  onChange: (next: string) => void;
+  autoFocus?: boolean;
+  className?: string;
+  onEnter?: () => void;
+  disableEnter?: boolean;
+}
+
+export const InlineTextEditor = ({
+  value,
+  onChange,
+  autoFocus,
+  className,
+  onEnter,
+  disableEnter = false,
+}: InlineTextEditorProps) => {
+  const { resolvedTheme } = useTheme();
+  const editorViewRef = useRef<EditorView | null>(null);
+
+  return (
+    <CodeMirror
+      value={value}
+      autoFocus={autoFocus}
+      theme={resolvedTheme === "dark" ? "dark" : "light"}
+      minHeight="24px"
+      className={cn("bg-transparent text-sm", className)}
+      extensions={[
+        markdown({ base: markdownLanguage }),
+        editorTheme,
+        EditorView.lineWrapping,
+        EditorView.contentAttributes.of({ spellcheck: "true" }),
+        Prec.highest(
+          keymap.of([
+            {
+              key: "Enter",
+              run: () => {
+                if (!disableEnter && onEnter) {
+                  onEnter();
+                  return true;
+                }
+                return false;
+              },
+            },
+          ]),
+        ),
+      ]}
+      onChange={(v) => onChange(v)}
+      onCreateEditor={(view) => {
+        editorViewRef.current = view;
+      }}
+      indentWithTab={false}
+      basicSetup={{
+        lineNumbers: false,
+        foldGutter: false,
+        highlightActiveLine: false,
+        highlightActiveLineGutter: false,
+        highlightSelectionMatches: false,
+        autocompletion: false,
+        searchKeymap: false,
+        lintKeymap: false,
+        completionKeymap: false,
+      }}
+    />
+  );
+};
+
+InlineTextEditor.displayName = "InlineTextEditor";
