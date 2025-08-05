@@ -85,7 +85,7 @@ export const EditableMessageParts = ({
     const id = window.setTimeout(() => {
       const el = editorRefs.current[lastIdx];
       if (el) {
-        el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        el.scrollIntoView({ block: "nearest", behavior: "instant" });
       }
     }, 0);
     return () => window.clearTimeout(id);
