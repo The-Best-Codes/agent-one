@@ -5,7 +5,7 @@ import {
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
-import { EditableMessage } from "@/components/a1/messages/editable-message";
+import { MessageParts } from "@/components/a1/messages";
 // import ThemeSelect from "@/components/theme/select-menu";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ function HomeRoute() {
                 message.role === "user" ? "justify-end" : "justify-start",
               )}
             >
-              <EditableMessage message={message} />
+              <MessageParts message={message} />
             </div>
           ))}
           {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
