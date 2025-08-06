@@ -87,8 +87,7 @@ class ErrorBoundary extends React.Component<
                     Something went wrong
                   </CardTitle>
                   <CardDescription>
-                    We've encountered an issue while trying to display this
-                    content
+                    An error occurred within the main application.
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
