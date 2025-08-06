@@ -72,25 +72,6 @@ export const useMessageEditing = ({
 
   const handleSave = useCallback(() => {
     try {
-      let idx = 0;
-      const nextParts: UIMessage["parts"] = message.parts.map((part) => {
-        if (part.type === "text") {
-          const nextText = textValuesRef.current[idx] ?? "";
-          idx += 1;
-          return { ...part, text: nextText };
-        }
-        return part;
-      });
-
-      const hasOnlyTextParts = message.parts.every((p) => p.type === "text");
-      const hasAnyNonEmptyText = textValuesRef.current.some(
-        (t) => t.trim().length > 0,
-      );
-      if (hasOnlyTextParts && !hasAnyNonEmptyText) {
-        handleCancel();
-        return;
-      }
-
       setMessages((currentMessages) => {
         const messageIndex = currentMessages.findIndex(
           (m) => m.id === message.id,
@@ -102,6 +83,29 @@ export const useMessageEditing = ({
 
         const updatedMessages = [...currentMessages];
         const originalMessage = updatedMessages[messageIndex];
+
+        const hasOnlyTextParts = originalMessage.parts.every(
+          (p) => p.type === "text",
+        );
+        const hasAnyNonEmptyText = textValuesRef.current.some(
+          (t) => t.trim().length > 0,
+        );
+
+        if (hasOnlyTextParts && !hasAnyNonEmptyText) {
+          return currentMessages;
+        }
+
+        let idx = 0;
+        const nextParts: UIMessage["parts"] = originalMessage.parts.map(
+          (part) => {
+            if (part.type === "text") {
+              const nextText = textValuesRef.current[idx] ?? "";
+              idx += 1;
+              return { ...part, text: nextText };
+            }
+            return part;
+          },
+        );
 
         updatedMessages[messageIndex] = {
           ...originalMessage,
@@ -116,7 +120,7 @@ export const useMessageEditing = ({
       logger.error(e);
       handleCancel();
     }
-  }, [message.id, message.parts, setMessages, handleCancel]);
+  }, [message.id, setMessages, handleCancel]);
 
   useEffect(() => {
     if (isEditing && initialValues.length > 0) {
