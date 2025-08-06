@@ -122,7 +122,8 @@ export const InlineTextEditor = memo(
     prev.className === next.className &&
     prev.disableEnter === next.disableEnter &&
     prev.onEnter === next.onEnter &&
-    prev.onChange === next.onChange,
+    prev.onChange === next.onChange &&
+    prev.onCancel === next.onCancel,
 );
 
 InlineTextEditor.displayName = "InlineTextEditor";
