@@ -30,7 +30,7 @@ export const useMessageEditing = ({
   message,
 }: UseMessageEditingOptions): UseMessageEditingReturn => {
   const [isEditing, setIsEditing] = useState(false);
-  const { setMessages, regenerate } = useChatFunctions();
+  const { setMessages } = useChatFunctions();
 
   const initialValues = useMemo(() => {
     return message.parts
@@ -111,23 +111,12 @@ export const useMessageEditing = ({
         return updatedMessages;
       });
 
-      if (message.role === "user") {
-        regenerate({ messageId: message.id });
-      }
-
       setIsEditing(false);
     } catch (e) {
       logger.error(e);
       handleCancel();
     }
-  }, [
-    message.id,
-    message.parts,
-    message.role,
-    regenerate,
-    setMessages,
-    handleCancel,
-  ]);
+  }, [message.id, message.parts, setMessages, handleCancel]);
 
   useEffect(() => {
     if (isEditing && initialValues.length > 0) {

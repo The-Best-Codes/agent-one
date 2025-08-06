@@ -115,7 +115,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
             onClick={handleSave}
           >
             <CheckIcon className="size-4" />
-            {message.role === "user" ? "Save & Regenerate" : "Save"}
+            Save
           </Button>
         </div>
       </div>
