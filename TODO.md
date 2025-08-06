@@ -7,4 +7,4 @@
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
 - Cache PR test GH action steps (like the install playwright deps step could be cached maybe and it takes a long time)
-- Later: Allow regenerating next AI messages after saving user message
+- Later: Add "Save & Regenerate" option when editing user message
