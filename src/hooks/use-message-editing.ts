@@ -15,22 +15,24 @@ export interface UseMessageEditingReturn {
   isEditing: boolean;
   canEdit: boolean;
   isMobile: boolean;
-  
+
   // Refs for editors
-  textValuesRef: React.MutableRefObject<string[]>;
-  editorRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
-  
+  textValuesRef: React.RefObject<string[]>;
+  editorRefs: React.RefObject<(HTMLDivElement | null)[]>;
+
   // Handlers
   handleEdit: () => void;
   handleCancel: () => void;
   handleSave: () => void;
   handleTextChange: (textIndex: number, next: string) => void;
-  
+
   // Computed values
   initialValues: string[];
 }
 
-export const useMessageEditing = ({ message }: UseMessageEditingOptions): UseMessageEditingReturn => {
+export const useMessageEditing = ({
+  message,
+}: UseMessageEditingOptions): UseMessageEditingReturn => {
   const [isEditing, setIsEditing] = useState(false);
   const { setMessages, regenerate } = useChatFunctions();
 
@@ -132,7 +134,14 @@ export const useMessageEditing = ({ message }: UseMessageEditingOptions): UseMes
       logger.error(e);
       handleCancel();
     }
-  }, [message.id, message.parts, message.role, regenerate, setMessages, handleCancel]);
+  }, [
+    message.id,
+    message.parts,
+    message.role,
+    regenerate,
+    setMessages,
+    handleCancel,
+  ]);
 
   // Auto-scroll to last editor when editing starts
   useEffect(() => {
@@ -153,17 +162,17 @@ export const useMessageEditing = ({ message }: UseMessageEditingOptions): UseMes
     isEditing,
     canEdit,
     isMobile,
-    
+
     // Refs
     textValuesRef,
     editorRefs,
-    
+
     // Handlers
     handleEdit,
     handleCancel,
     handleSave,
     handleTextChange,
-    
+
     // Computed values
     initialValues,
   };
