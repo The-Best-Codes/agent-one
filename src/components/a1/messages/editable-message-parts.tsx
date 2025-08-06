@@ -82,13 +82,13 @@ export const EditableMessageParts = ({
   useEffect(() => {
     if (initialValues.length === 0) return;
     const lastIdx = initialValues.length - 1;
-    const id = window.setTimeout(() => {
+    const id = requestAnimationFrame(() => {
       const el = editorRefs.current[lastIdx];
       if (el) {
         el.scrollIntoView({ block: "nearest", behavior: "instant" });
       }
-    }, 0);
-    return () => window.clearTimeout(id);
+    });
+    return () => window.cancelAnimationFrame(id);
   }, [initialValues.length]);
 
   let textIndex = 0;
