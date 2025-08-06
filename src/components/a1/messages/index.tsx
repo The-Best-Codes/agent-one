@@ -103,8 +103,8 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
           return <MessagePartFallback key={key} {...part} />;
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    editorRefs,
     handleCancel,
     handleSave,
     handleTextChange,
@@ -114,7 +114,6 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     message.id,
     message.parts,
     message.role,
-    textValuesRef,
   ]);
 
   const content = (
