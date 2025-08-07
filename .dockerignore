@@ -34,11 +34,13 @@ playwright-report/
 /.docker-cache
 /docker/cached
 
+# Local Uncommitable
+.local-uncommitable
+
 ###
 # Specific to docker ignore
 ###
 # Tauri
 src-tauri/
-
 # Version control
 .git/

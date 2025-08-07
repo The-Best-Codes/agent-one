@@ -38,3 +38,6 @@ playwright-report/
 # Docker
 /.docker-cache
 /docker/cached
+
+# Local Uncommitable
+.local-uncommitable
