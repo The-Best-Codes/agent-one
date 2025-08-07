@@ -132,7 +132,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     return (
       <div
         className={cn(
-          "w-full flex flex-col p-2 border border-input rounded-md focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 bg-background",
+          "w-full ml-2 flex flex-col p-2 border border-input rounded-md focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 bg-background",
         )}
       >
         <div className="flex flex-col">{renderedParts}</div>
