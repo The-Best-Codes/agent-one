@@ -20,7 +20,7 @@ export interface UseMessageEditingReturn {
 
   handleEdit: () => void;
   handleCancel: () => void;
-  handleSave: () => void;
+  handleSave: (shouldRegenerate?: boolean) => void;
   handleTextChange: (textIndex: number, next: string) => void;
 
   initialValues: string[];
@@ -30,7 +30,7 @@ export const useMessageEditing = ({
   message,
 }: UseMessageEditingOptions): UseMessageEditingReturn => {
   const [isEditing, setIsEditing] = useState(false);
-  const { setMessages } = useChatFunctions();
+  const { setMessages, regenerate } = useChatFunctions();
 
   const initialValues = useMemo(() => {
     return message.parts
@@ -70,57 +70,64 @@ export const useMessageEditing = ({
     textValuesRef.current[textIndex] = next;
   }, []);
 
-  const handleSave = useCallback(() => {
-    try {
-      setMessages((currentMessages) => {
-        const messageIndex = currentMessages.findIndex(
-          (m) => m.id === message.id,
-        );
-        if (messageIndex === -1) {
-          logger.error("Could not find message to edit.");
-          return currentMessages;
+  const handleSave = useCallback(
+    (shouldRegenerate?: boolean) => {
+      try {
+        setMessages((currentMessages) => {
+          const messageIndex = currentMessages.findIndex(
+            (m) => m.id === message.id,
+          );
+          if (messageIndex === -1) {
+            logger.error("Could not find message to edit.");
+            return currentMessages;
+          }
+
+          const updatedMessages = [...currentMessages];
+          const originalMessage = updatedMessages[messageIndex];
+
+          const hasOnlyTextParts = originalMessage.parts.every(
+            (p) => p.type === "text",
+          );
+          const hasAnyNonEmptyText = textValuesRef.current.some(
+            (t) => t.trim().length > 0,
+          );
+
+          if (hasOnlyTextParts && !hasAnyNonEmptyText) {
+            return currentMessages;
+          }
+
+          let idx = 0;
+          const nextParts: UIMessage["parts"] = originalMessage.parts.map(
+            (part) => {
+              if (part.type === "text") {
+                const nextText = textValuesRef.current[idx] ?? "";
+                idx += 1;
+                return { ...part, text: nextText };
+              }
+              return part;
+            },
+          );
+
+          updatedMessages[messageIndex] = {
+            ...originalMessage,
+            parts: nextParts,
+          };
+
+          return updatedMessages;
+        });
+
+        setIsEditing(false);
+
+        if (shouldRegenerate) {
+          regenerate({ messageId: message.id });
         }
-
-        const updatedMessages = [...currentMessages];
-        const originalMessage = updatedMessages[messageIndex];
-
-        const hasOnlyTextParts = originalMessage.parts.every(
-          (p) => p.type === "text",
-        );
-        const hasAnyNonEmptyText = textValuesRef.current.some(
-          (t) => t.trim().length > 0,
-        );
-
-        if (hasOnlyTextParts && !hasAnyNonEmptyText) {
-          return currentMessages;
-        }
-
-        let idx = 0;
-        const nextParts: UIMessage["parts"] = originalMessage.parts.map(
-          (part) => {
-            if (part.type === "text") {
-              const nextText = textValuesRef.current[idx] ?? "";
-              idx += 1;
-              return { ...part, text: nextText };
-            }
-            return part;
-          },
-        );
-
-        updatedMessages[messageIndex] = {
-          ...originalMessage,
-          parts: nextParts,
-        };
-
-        return updatedMessages;
-      });
-
-      setIsEditing(false);
-    } catch (e) {
-      logger.error(e);
-      handleCancel();
-    }
-  }, [message.id, setMessages, handleCancel]);
+      } catch (e) {
+        logger.error(e);
+        handleCancel();
+      }
+    },
+    [setMessages, message.id, regenerate, handleCancel],
+  );
 
   useEffect(() => {
     if (isEditing && initialValues.length > 0) {

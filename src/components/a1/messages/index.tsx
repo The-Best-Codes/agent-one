@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { SplitButton } from "@/components/ui/split-button";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
-import { CheckIcon, XIcon } from "lucide-react";
+import { CheckIcon, RotateCwIcon, XIcon } from "lucide-react";
 import { memo, useCallback, useMemo } from "react";
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
@@ -146,14 +147,47 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
             <XIcon className="size-4" />
             Cancel
           </Button>
-          <Button
-            size="sm"
-            className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
-            onClick={handleSave}
-          >
-            <CheckIcon className="size-4" />
-            Save
-          </Button>
+          {message.role === "user" ? (
+            <SplitButton
+              size="sm"
+              className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
+              storageKey="message-edit-action"
+              options={[
+                {
+                  id: "save",
+                  label: (
+                    <>
+                      <CheckIcon className="size-4" />
+                      Save
+                    </>
+                  ),
+                  onClick: () => handleSave(false),
+                },
+                {
+                  id: "save-regenerate",
+                  label: (
+                    <>
+                      <RotateCwIcon className="size-4" />
+                      Save & Regenerate
+                    </>
+                  ),
+                  onClick: () => {
+                    handleSave(true);
+                  },
+                },
+              ]}
+            />
+          ) : (
+            <Button
+              size="sm"
+              variant="default"
+              className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
+              onClick={() => handleSave(false)}
+            >
+              <CheckIcon className="size-4" />
+              Save
+            </Button>
+          )}
         </div>
       </div>
     );
