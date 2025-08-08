@@ -37,6 +37,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "@tauri-apps/api": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2.4.0",
+    "@tauri-apps/plugin-sql": "^2.3.0",
     "@uiw/react-codemirror": "^4.24.1",
     "ai": "^5.0.0",
     "babel-plugin-react-compiler": "^19.1.0-rc.2",
