@@ -42,7 +42,7 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
   },
 ];
 
-export const DEFAULT_MODEL_ID = "groq-kimi-k2";
+export const DEFAULT_MODEL_ID = "groq-kimi-k2-instruct";
 
 export function getModelById(id: string): ModelConfig | undefined {
   return AVAILABLE_MODELS.find((model) => model.id === id);
