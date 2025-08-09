@@ -11,7 +11,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
 
   if (isImage) {
     return (
-      <div className="max-w-md rounded-md overflow-hidden border">
+      <div className="max-w-48 rounded-md overflow-hidden border">
         <img
           src={file.url}
           alt={file.filename || "Attached image"}
@@ -22,7 +22,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
           <div className="p-2 bg-background border-t">
             <div className="text-xs text-muted-foreground flex items-center gap-1">
               <FileImageIcon className="h-3 w-3" />
-              {file.filename}
+              <span className="truncate">{file.filename}</span>
             </div>
           </div>
         )}
@@ -32,7 +32,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
 
   if (isPdf) {
     return (
-      <div className="max-w-lg border rounded-md overflow-hidden">
+      <div className="max-w-48 border rounded-md overflow-hidden">
         <iframe
           src={file.url}
           title={file.filename || "PDF Document"}
@@ -43,7 +43,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
           <div className="p-2 bg-background border-t">
             <div className="text-xs text-muted-foreground flex items-center gap-1">
               <FileIcon className="h-3 w-3" />
-              {file.filename} &middot; PDF
+              <span className="truncate">{file.filename} &middot; PDF</span>
             </div>
           </div>
         )}
@@ -63,7 +63,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 border rounded-md bg-background max-w-sm">
+    <div className="flex items-center gap-2 p-2 border rounded-md bg-background max-w-48">
       <div className="h-12 w-12 flex items-center justify-center bg-background rounded-md border">
         {getFileIcon()}
       </div>
