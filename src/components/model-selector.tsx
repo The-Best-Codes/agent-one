@@ -30,22 +30,22 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ className }) => {
         aria-label={`Model: ${currentModel.name}`}
       >
         <SelectValue>
-          <div className="flex flex-col items-start">
-            <span className="text-sm font-medium">{currentModel.name}</span>
+          <div className="flex flex-row items-center">
             <span className="text-xs text-muted-foreground">
-              {currentModel.provider}
+              {currentModel.provider}/
             </span>
+            <span className="font-medium">{currentModel.name}</span>
           </div>
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {AVAILABLE_MODELS.map((model) => (
           <SelectItem key={model.id} value={model.id}>
-            <div className="flex flex-col items-start">
-              <span className="font-medium">{model.name}</span>
+            <div className="flex flex-row items-center">
               <span className="text-xs text-muted-foreground">
-                {model.provider} • {model.description}
+                {model.provider}/
               </span>
+              <span className="font-medium">{model.name}</span>
             </div>
           </SelectItem>
         ))}

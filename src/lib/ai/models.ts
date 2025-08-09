@@ -7,7 +7,7 @@ export interface ModelConfig {
   name: string;
   provider: string;
   model: LanguageModel;
-  description?: string;
+  supportsToolUse: boolean;
 }
 
 // TODO: Add tool calls supported, etc.
@@ -17,28 +17,28 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
     name: "Kimi K2 Instruct",
     provider: "Groq",
     model: groq("moonshotai/kimi-k2-instruct"),
-    description: "Fast and efficient model for general conversations",
+    supportsToolUse: true,
   },
   {
     id: "groq-llama-3.3-70b-versatile",
     name: "Llama 3.3 70B",
     provider: "Groq",
     model: groq("llama-3.3-70b-versatile"),
-    description: "Open-source model from Meta AI",
+    supportsToolUse: true,
   },
   {
     id: "google-gemini-2.0-flash",
     name: "Gemini 2.0 Flash",
     provider: "Google",
     model: google("gemini-2.0-flash"),
-    description: "Google's fast multimodal model",
+    supportsToolUse: true,
   },
   {
     id: "google-gemini-2.5-flash",
     name: "Gemini 2.5 Flash",
     provider: "Google",
     model: google("gemini-2.5-flash"),
-    description: "Google's most capable model",
+    supportsToolUse: true,
   },
 ];
 
