@@ -16,6 +16,8 @@ export const MessagePartText = ({
 }) => {
   const shouldUsePerformantRenderer = text.length > MAX_CHARS;
 
+  if (!text) return null;
+
   return (
     <div className="max-w-full rounded-md prose dark:prose-invert prose-sm text-base prose-neutral prose-code:select-all">
       {shouldUsePerformantRenderer ? (
