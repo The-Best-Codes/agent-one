@@ -6,6 +6,7 @@ import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
+import { ModelSelector } from "@/components/model-selector";
 // import ThemeSelect from "@/components/theme/select-menu";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
@@ -21,8 +22,11 @@ function HomeRoute() {
       data-testid="home-main"
       role="main"
     >
-      {/* Theme selector will move into the sidebar / settings later */}
-      {/*<ThemeSelect className="w-32" />*/}
+      {/* Model and theme selectors - will move into the sidebar / settings later */}
+      <div className="w-full max-w-3xl flex justify-between items-center p-4 gap-4">
+        <ModelSelector className="w-64" />
+        {/*<ThemeSelect className="w-32" />*/}
+      </div>
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
         <AutoScrollContainer
           ref={scrollRef}
