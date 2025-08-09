@@ -30,19 +30,9 @@ jobs:
         run: npm ci
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-        if: matrix.test == 'e2e'
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
-        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
+        if: matrix.test == 'e2e'
 
       - name: Install Tauri Linux System Dependencies
         run: |
