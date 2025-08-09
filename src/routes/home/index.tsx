@@ -24,7 +24,7 @@ function HomeRoute() {
     >
       {/* Model and theme selectors - will move into the sidebar / settings later */}
       <div className="w-full max-w-3xl flex justify-between items-center p-4 gap-4">
-        <ModelSelector className="w-64" />
+        <ModelSelector className="w-64" popoverClassName="w-64" />
         {/*<ThemeSelect className="w-32" />*/}
       </div>
       <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
