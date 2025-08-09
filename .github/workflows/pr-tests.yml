@@ -3,11 +3,17 @@ name: PR Tests
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: true
+      matrix:
+        test: [typecheck, lint, e2e, rust-check]
 
     steps:
       - name: Checkout code
@@ -16,41 +22,70 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "23"
           cache: "npm"
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
-      - name: Install dependencies
+      - name: Install JS dependencies
         run: npm ci
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
-      - name: Run type checking
-        run: npm run typecheck
-
-      - name: Run linting
-        run: npm run lint
-
-      - name: Build project
-        run: npm run build
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+        if: matrix.test == 'e2e'
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
 
-      - name: Run Playwright tests
+      - name: Setup Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+        if: matrix.test == 'rust-check'
+
+      - name: Run Type Checking
+        run: npm run typecheck
+        if: matrix.test == 'typecheck'
+
+      - name: Run Linting
+        run: npm run lint
+        if: matrix.test == 'lint'
+
+      - name: Build Project for E2E
+        run: npm run build
+        if: matrix.test == 'e2e'
+
+      - name: Run E2E Playwright Tests
         run: npm run test-local:e2e
         env:
           CI: true
+        if: matrix.test == 'e2e'
+
+      - name: Run Rust Cargo Check
+        run: cd src-tauri && cargo check
+        if: matrix.test == 'rust-check'
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && matrix.test == 'e2e'
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.test }}
           path: playwright-report/
           retention-days: 30
 
-      - name: Upload test results
+      - name: Upload Test Results
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && matrix.test == 'e2e'
         with:
-          name: test-results
+          name: test-results-${{ matrix.test }}
           path: test-results/
           retention-days: 30
