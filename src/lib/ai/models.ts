@@ -10,7 +10,6 @@ export interface ModelConfig {
   supportsToolUse: boolean;
 }
 
-// TODO: Add tool calls supported, etc.
 export const AVAILABLE_MODELS: ModelConfig[] = [
   {
     id: "groq-kimi-k2-instruct",

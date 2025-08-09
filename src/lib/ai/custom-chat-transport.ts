@@ -44,7 +44,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: "auto",
       //activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
-      // stopWhen: stepCountIs(50), // TODO: Allow the user to configure this in settings
+      // stopWhen: stepCountIs(50), // TODO: [TODO: Investigate if this is relevant in AI SDK 5] Allow the user to configure this in settings
     });
     return result.toUIMessageStream({
       onError: (error) => {
