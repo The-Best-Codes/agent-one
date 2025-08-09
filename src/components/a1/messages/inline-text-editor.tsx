@@ -56,7 +56,7 @@ const InlineTextEditorImpl = ({
       value={value}
       autoFocus={autoFocus}
       theme={resolvedTheme === "dark" ? "dark" : "light"}
-      minHeight="24px"
+      minHeight="20px"
       maxHeight="384px"
       className={cn("bg-transparent text-sm", className)}
       extensions={[
