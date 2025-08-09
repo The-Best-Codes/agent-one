@@ -208,6 +208,7 @@ export const MainChatInput = ({
               type="button"
               disabled={status !== "ready"}
               size="icon"
+              variant="outline"
               onClick={() => {
                 fileInputRef.current?.click();
               }}
