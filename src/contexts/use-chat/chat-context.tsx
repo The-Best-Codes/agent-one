@@ -1,5 +1,5 @@
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { useDynamicChat } from "@/hooks/ai/useDynamicChat";
+import { useChat } from "@/hooks/ai/useChat";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import React, { useMemo, type ReactNode } from "react";
 import {
@@ -18,7 +18,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const model = useMemo(() => currentModel.model, [currentModel.model]);
 
   // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
-  const chatResult = useDynamicChat(model, {
+  const chatResult = useChat(model, {
     experimental_throttle: 250, // TODO: Allow customizing this in settings
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
   });
