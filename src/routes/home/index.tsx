@@ -6,7 +6,7 @@ import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
-import { ModelSelector } from "@/components/model-selector";
+import { ModelSelector } from "@/components/a1/model-selector";
 // import ThemeSelect from "@/components/theme/select-menu";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
