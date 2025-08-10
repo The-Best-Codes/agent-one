@@ -130,7 +130,7 @@ export const MainChatInput = ({
   };
 
   return (
-    <>
+    <div className="px-0 md:px-2">
       <MainInputErrorSection />
       <form
         data-testid="chat-form"
@@ -255,7 +255,7 @@ export const MainChatInput = ({
           </div>
         </div>
       </form>
-    </>
+    </div>
   );
 };
 
