@@ -1,0 +1,52 @@
+import type { LanguageModel } from "ai";
+import { google } from "./providers/google";
+import { groq } from "./providers/groq";
+
+export interface ModelConfig {
+  id: string;
+  name: string;
+  provider: string;
+  model: LanguageModel;
+  supportsToolUse: boolean;
+}
+
+export const AVAILABLE_MODELS: ModelConfig[] = [
+  {
+    id: "groq-kimi-k2-instruct",
+    name: "Kimi K2 Instruct",
+    provider: "Groq",
+    model: groq("moonshotai/kimi-k2-instruct"),
+    supportsToolUse: true,
+  },
+  {
+    id: "groq-llama-3.3-70b-versatile",
+    name: "Llama 3.3 70B",
+    provider: "Groq",
+    model: groq("llama-3.3-70b-versatile"),
+    supportsToolUse: true,
+  },
+  {
+    id: "google-gemini-2.0-flash",
+    name: "Gemini 2.0 Flash",
+    provider: "Google",
+    model: google("gemini-2.0-flash"),
+    supportsToolUse: true,
+  },
+  {
+    id: "google-gemini-2.5-flash",
+    name: "Gemini 2.5 Flash",
+    provider: "Google",
+    model: google("gemini-2.5-flash"),
+    supportsToolUse: true,
+  },
+];
+
+export const DEFAULT_MODEL_ID = "groq-kimi-k2-instruct";
+
+export function getModelById(id: string): ModelConfig | undefined {
+  return AVAILABLE_MODELS.find((model) => model.id === id);
+}
+
+export function getDefaultModel(): ModelConfig {
+  return getModelById(DEFAULT_MODEL_ID) || AVAILABLE_MODELS[0];
+}

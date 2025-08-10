@@ -1,9 +1,6 @@
+import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
-import { groq } from "@/lib/ai/providers/groq";
-import {
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type LanguageModel,
-} from "ai";
+import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import React, { useMemo, type ReactNode } from "react";
 import {
   ChatFunctionsContext,
@@ -13,13 +10,13 @@ import {
 
 interface ChatProviderProps {
   children: ReactNode;
-  model?: LanguageModel;
 }
 
-export const ChatProvider: React.FC<ChatProviderProps> = ({
-  children,
-  model = groq("moonshotai/kimi-k2-instruct"),
-}) => {
+export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+  const { currentModel } = useModel();
+
+  const model = useMemo(() => currentModel.model, [currentModel.model]);
+
   // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
   const chatResult = useChat(model, {
     experimental_throttle: 250, // TODO: Allow customizing this in settings
