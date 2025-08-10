@@ -17,14 +17,14 @@ const SidebarContent = () => (
       <label className="text-sm font-medium text-sidebar-foreground">
         Model
       </label>
-      <ModelSelector className="w-full" popoverClassName="w-56" />
+      <ModelSelector className="w-60" popoverClassName="w-60" />
     </div>
 
     <div className="space-y-2">
       <label className="text-sm font-medium text-sidebar-foreground">
         Theme
       </label>
-      <ThemeSelect className="w-full" />
+      <ThemeSelect className="w-60" />
     </div>
   </div>
 );
