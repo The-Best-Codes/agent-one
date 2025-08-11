@@ -29,8 +29,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
   const chatResult = useChat(model, {
-    experimental_throttle: 250,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    experimental_throttle: 250, // TODO: Allow customizing this in settings
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
     id: chatId,
     messages: initialMessages,
   });
