@@ -17,7 +17,7 @@ import {
   SquareIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 
@@ -63,9 +63,11 @@ export const MainChatInput = ({
 
   const [isEmpty, setIsEmpty] = useState(true);
   const [files, setFiles] = useState<FileList | undefined>(undefined);
+  const [isDragging, setIsDragging] = useState(false);
 
   const editorViewRef = useRef<EditorView | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dragCounter = useRef(0);
 
   const handleEditorChange = (newValue: string) => {
     const newIsEmpty = !newValue.trim();
@@ -105,10 +107,31 @@ export const MainChatInput = ({
     submitMessage();
   };
 
+  const addFiles = useCallback(
+    (newFiles: FileList) => {
+      if (!newFiles || newFiles.length === 0) return;
+
+      const currentFiles = files ? Array.from(files) : [];
+      const newFilesArray = Array.from(newFiles);
+
+      const combined = [...currentFiles, ...newFilesArray];
+
+      const dt = new DataTransfer();
+      combined.forEach((file) => dt.items.add(file));
+      const updatedFileList = dt.files;
+
+      setFiles(updatedFileList.length > 0 ? updatedFileList : undefined);
+      if (fileInputRef.current) {
+        fileInputRef.current.files = updatedFileList;
+      }
+    },
+    [files],
+  );
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const fileList = e.target.files;
-      setFiles(fileList);
+    if (e.target.files) {
+      const newFiles = e.target.files;
+      setFiles(newFiles.length > 0 ? newFiles : undefined);
     }
   };
 
@@ -129,14 +152,62 @@ export const MainChatInput = ({
     }
   };
 
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+      dragCounter.current = 0;
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        addFiles(e.dataTransfer.files);
+        e.dataTransfer.clearData();
+      }
+    },
+    [addFiles],
+  );
+
   return (
     <div className="px-0 md:px-2">
       <MainInputErrorSection />
       <form
         data-testid="chat-form"
         onSubmit={handleSubmit}
-        className="w-full flex flex-col bg-secondary pr-2 pt-2 rounded-none md:rounded-md md:rounded-b-none border-0 border-t-1 md:border md:border-b-0 border-input focus-within:border-ring md:focus-within:ring-[3px] focus-within:ring-ring/50"
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        className="relative w-full flex flex-col bg-secondary pr-2 pt-2 rounded-none md:rounded-md md:rounded-b-none border-0 border-t-1 md:border md:border-b-0 border-input focus-within:border-ring md:focus-within:ring-[3px] focus-within:ring-ring/50"
       >
+        {isDragging && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md rounded-b-none border-2 border-dashed border-primary bg-background/80 backdrop-blur-sm">
+            <p className="text-lg font-semibold text-primary">
+              Drop files to attach
+            </p>
+          </div>
+        )}
         <input
           ref={fileInputRef}
           type="file"
@@ -165,6 +236,17 @@ export const MainChatInput = ({
                 spellcheck: "true",
                 "aria-label": "Chat message input",
                 "data-testid": "chat-editor",
+              }),
+              EditorView.domEventHandlers({
+                paste: (event) => {
+                  const pastedFiles = event.clipboardData?.files;
+                  if (pastedFiles && pastedFiles.length > 0) {
+                    addFiles(pastedFiles);
+                    event.preventDefault();
+                    return true;
+                  }
+                  return false;
+                },
               }),
               Prec.highest(
                 keymap.of([
