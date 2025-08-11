@@ -1,6 +1,6 @@
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
-import { saveChat } from "@/lib/utils";
+import { saveChat } from "@/lib/ai/persistence";
 import {
   lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
