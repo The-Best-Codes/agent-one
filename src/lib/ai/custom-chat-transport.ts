@@ -23,7 +23,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
   updateModel(model: LanguageModel) {
     this.model = model;
-    logger.info("CustomChatTransport model updated to:", model);
+    logger.verbose("CustomChatTransport model updated to:", model);
   }
 
   async sendMessages(
