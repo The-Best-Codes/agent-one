@@ -43,7 +43,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         )}
       >
         {isCollapsed ? (
-          <div className="flex-1 flex flex-col items-center">
+          <div className="flex-1 flex flex-col items-center mt-1.5">
             <Button
               variant="outline"
               size="icon"
@@ -81,7 +81,12 @@ export const Sidebar = ({ className }: SidebarProps) => {
     >
       <Drawer direction="left">
         <DrawerTrigger asChild>
-          <Button variant="outline" size="icon" aria-label="Expand sidebar">
+          <Button
+            className="mt-1.5"
+            variant="outline"
+            size="icon"
+            aria-label="Expand sidebar"
+          >
             <ChevronRightIcon />
           </Button>
         </DrawerTrigger>
