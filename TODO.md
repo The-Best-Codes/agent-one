@@ -4,3 +4,4 @@
 - When editing or regenerating a message store the previous conversation history and allow navigating previous versions per message (like in ChatGPT, on each AI message that was changed)
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
+- Disable model selector when current response is streaming
