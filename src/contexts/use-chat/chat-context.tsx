@@ -27,11 +27,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   const model = useMemo(() => currentModel.model, [currentModel.model]);
 
+  // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
   const chatResult = useChat(model, {
-    id: chatId,
-    messages: initialMessages,
     experimental_throttle: 250,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    id: chatId,
+    messages: initialMessages,
   });
 
   const hasMountedRef = useRef(false);
