@@ -156,7 +156,7 @@ export const MainChatInput = ({
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current++;
-    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+    if (e.dataTransfer.types.includes("Files")) {
       setIsDragging(true);
     }
   }, []);
