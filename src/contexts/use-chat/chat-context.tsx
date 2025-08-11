@@ -1,7 +1,13 @@
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
-import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
-import React, { useMemo, type ReactNode } from "react";
+import { saveChat } from "@/lib/utils";
+import { lastAssistantMessageIsCompleteWithToolCalls, type UIMessage } from "ai";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from "react";
 import {
   ChatFunctionsContext,
   ChatMessagesContext,
@@ -10,18 +16,41 @@ import {
 
 interface ChatProviderProps {
   children: ReactNode;
+  chatId: string;
+  initialMessages: UIMessage[];
 }
 
-export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+export const ChatProvider: React.FC<ChatProviderProps> = ({
+  children,
+  chatId,
+  initialMessages,
+}) => {
   const { currentModel } = useModel();
 
   const model = useMemo(() => currentModel.model, [currentModel.model]);
 
-  // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
   const chatResult = useChat(model, {
-    experimental_throttle: 250, // TODO: Allow customizing this in settings
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
+    id: chatId,
+    messages: initialMessages,
+    experimental_throttle: 250,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
+
+  const hasMountedRef = useRef(false);
+
+  // This effect handles persisting the chat messages to localStorage.
+  useEffect(() => {
+    // We prevent saving on the very first render, as useChat might still be initializing.
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    // We only save when the chat is 'ready' (i.e., not streaming a response).
+    // This condition is met after a stream finishes or after a message is edited.
+    if (chatResult.status === "ready" && chatResult.messages.length > 0) {
+      saveChat({ chatId, messages: chatResult.messages });
+    }
+  }, [chatResult.messages, chatResult.status, chatId]);
 
   const statusValue = useMemo(
     () => ({

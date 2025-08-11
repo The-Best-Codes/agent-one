@@ -7,6 +7,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomeRoute />} />
+        <Route path="/chat/:id" element={<HomeRoute />} />
       </Routes>
     </BrowserRouter>
   );
