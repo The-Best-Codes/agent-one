@@ -6,7 +6,7 @@ import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar } from "@/components/a1/sidebar";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 import { useRef } from "react";
