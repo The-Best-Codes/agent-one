@@ -1,13 +1,11 @@
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
 import { saveChat } from "@/lib/utils";
-import { lastAssistantMessageIsCompleteWithToolCalls, type UIMessage } from "ai";
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  type ReactNode,
-} from "react";
+import {
+  lastAssistantMessageIsCompleteWithToolCalls,
+  type UIMessage,
+} from "ai";
+import React, { useEffect, useMemo, useRef, type ReactNode } from "react";
 import {
   ChatFunctionsContext,
   ChatMessagesContext,
@@ -38,16 +36,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   const hasMountedRef = useRef(false);
 
-  // This effect handles persisting the chat messages to localStorage.
   useEffect(() => {
-    // We prevent saving on the very first render, as useChat might still be initializing.
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
       return;
     }
-    // We only save when the chat is 'ready' (i.e., not streaming a response).
-    // This condition is met after a stream finishes or after a message is edited.
-    if (chatResult.status === "ready" && chatResult.messages.length > 0) {
+
+    if (chatResult.status !== "streaming" && chatResult.messages.length > 0) {
       saveChat({ chatId, messages: chatResult.messages });
     }
   }, [chatResult.messages, chatResult.status, chatId]);

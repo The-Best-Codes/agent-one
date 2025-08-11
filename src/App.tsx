@@ -1,13 +1,14 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 
-import HomeRoute from "@/routes/home";
+import ChatRoute from "@/routes/chat";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomeRoute />} />
-        <Route path="/chat/:id" element={<HomeRoute />} />
+        <Route path="/" element={<ChatRoute />} />
+        <Route path="/chat" element={<ChatRoute />} />
+        <Route path="/chat/:id" element={<ChatRoute />} />
       </Routes>
     </BrowserRouter>
   );

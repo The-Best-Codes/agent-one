@@ -9,11 +9,11 @@ import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
 import { ChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
-import { createChat, loadChat, cn } from "@/lib/utils";
+import { createChat, loadChat } from "@/lib/ai/persistence";
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 
-// The UI part of the chat, which consumes the ChatContext
 const ChatInterface = () => {
   const messages = useChatMessages();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
@@ -58,12 +58,10 @@ const ChatInterface = () => {
   );
 };
 
-// The route component that handles logic for loading/creating chats
-function HomeRoute() {
+function ChatRoute() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Handle redirection for new chats
   useEffect(() => {
     if (!id) {
       const newChatId = createChat();
@@ -71,7 +69,6 @@ function HomeRoute() {
     }
   }, [id, navigate]);
 
-  // Load initial messages for the current chat
   const initialMessages = useMemo(() => {
     if (id) {
       return loadChat(id);
@@ -79,9 +76,8 @@ function HomeRoute() {
     return [];
   }, [id]);
 
-  // Render nothing until we have an ID and have redirected
   if (!id) {
-    return null; // Or a loading spinner
+    return null;
   }
 
   return (
@@ -91,4 +87,4 @@ function HomeRoute() {
   );
 }
 
-export default HomeRoute;
+export default ChatRoute;

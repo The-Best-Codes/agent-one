@@ -44,7 +44,6 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       system: SYSTEM_PROMPT,
     });
 
-    // The transport should not handle persistence. We simply return the stream.
     return result.toUIMessageStream({
       onError: (error) => {
         logger.error("Error occurred in CustomChatTransport:", error);
