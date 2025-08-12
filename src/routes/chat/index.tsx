@@ -9,10 +9,10 @@ import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
 import { ChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
-import { createChat, loadChat } from "@/lib/ai/persistence";
+import { loadChat } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useRef } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useMemo, useRef } from "react";
+import { useParams } from "react-router";
 
 const ChatInterface = () => {
   const messages = useChatMessages();
@@ -60,14 +60,6 @@ const ChatInterface = () => {
 
 function ChatRoute() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!id) {
-      const newChatId = createChat();
-      navigate(`/chat/${newChatId}`, { replace: true });
-    }
-  }, [id, navigate]);
 
   const initialMessages = useMemo(() => {
     if (id) {
@@ -75,10 +67,6 @@ function ChatRoute() {
     }
     return [];
   }, [id]);
-
-  if (!id) {
-    return null;
-  }
 
   return (
     <ChatProvider chatId={id} initialMessages={initialMessages}>
