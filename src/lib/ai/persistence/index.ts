@@ -29,9 +29,12 @@ export function createChat(): string {
   const id = generateId();
   try {
     const chatKey = getChatKey(id);
-    localStorage.setItem(chatKey, "[]");
+    localStorage.setItem(chatKey, JSON.stringify([]));
     const currentIds = listChatIds();
     saveChatIds([id, ...currentIds]);
+    window.dispatchEvent(
+      new CustomEvent("persistence:chat-created", { detail: { chatId: id } }),
+    );
     return id;
   } catch (error) {
     console.error("Failed to create chat in localStorage", error);
@@ -65,7 +68,29 @@ export function saveChat({
     const chatKey = getChatKey(chatId);
     const content = JSON.stringify(messages);
     localStorage.setItem(chatKey, content);
+    window.dispatchEvent(
+      new CustomEvent("persistence:chat-updated", {
+        detail: { chatId, messages },
+      }),
+    );
   } catch (error) {
     console.error(`Failed to save chat ${chatId} to localStorage`, error);
+  }
+}
+
+export function deleteChat(chatId: string): void {
+  try {
+    const chatKey = getChatKey(chatId);
+    localStorage.removeItem(chatKey);
+
+    const ids = listChatIds();
+    const newIds = ids.filter((id) => id !== chatId);
+    saveChatIds(newIds);
+
+    window.dispatchEvent(
+      new CustomEvent("persistence:chat-deleted", { detail: { chatId } }),
+    );
+  } catch (error) {
+    console.error(`Failed to delete chat ${chatId} from localStorage`, error);
   }
 }

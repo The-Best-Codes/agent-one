@@ -6,28 +6,40 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
+import { ChatList } from "./chat-list";
 
 interface SidebarProps {
   className?: string;
 }
 
-const SidebarContent = () => (
-  <div className="flex-1 p-2 space-y-2">
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-sidebar-foreground">
-        Model
-      </label>
-      <ModelSelector className="w-60" popoverClassName="w-60" />
-    </div>
+const SidebarContent = ({
+  setIsCollapsed,
+}: {
+  setIsCollapsed: (value: boolean) => void;
+}) => {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 flex flex-col min-h-0">
+        <ChatList />
+      </div>
 
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-sidebar-foreground">
-        Theme
-      </label>
-      <ThemeSelect className="w-60" />
+      <div className="p-2 border-t border-sidebar-border flex flex-col justify-center gap-2">
+        <ModelSelector
+          className="w-full"
+          popoverClassName="w-[calc(var(--radix-popover-trigger-width)-1rem)]"
+        />
+        <ThemeSelect className="w-full" />
+        <Button
+          variant="outline"
+          onClick={() => setIsCollapsed(true)}
+          className="w-full"
+        >
+          <ChevronLeftIcon />
+        </Button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -55,16 +67,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
           </div>
         ) : (
           <>
-            <SidebarContent />
-            <div className="p-2 border-t border-sidebar-border mt-auto">
-              <Button
-                variant="outline"
-                onClick={() => setIsCollapsed(true)}
-                className="w-full"
-              >
-                <ChevronLeftIcon />
-                Collapse
-              </Button>
+            <div className="flex-1 flex flex-col min-h-0">
+              <SidebarContent setIsCollapsed={setIsCollapsed} />
             </div>
           </>
         )}
@@ -91,9 +95,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           </Button>
         </DrawerTrigger>
         <DrawerContent className="w-64 h-full p-0 bg-sidebar border-r border-sidebar-border">
-          <div className="flex flex-col h-full">
-            <SidebarContent />
-          </div>
+          <SidebarContent setIsCollapsed={setIsCollapsed} />
         </DrawerContent>
       </Drawer>
     </aside>
