@@ -8,6 +8,8 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 import { ChatList } from "./chat-list";
 
+// TODO: Give sidebar even padding in all parts and on all states (collapsed, mobile expanded, desktop expanded)
+
 interface SidebarProps {
   className?: string;
 }
@@ -29,6 +31,8 @@ const SidebarContent = ({
           popoverClassName="w-[calc(var(--radix-popover-trigger-width)-1rem)]"
         />
         <ThemeSelect className="w-full" />
+
+        {/* TODO: Hide this on mobile (in the sheet) */}
         <Button
           variant="outline"
           onClick={() => setIsCollapsed(true)}
