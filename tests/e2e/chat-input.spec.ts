@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Main Chat Input", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("[data-testid='home-main']")).toBeVisible();
+    await page.goto("/chat");
+    await expect(page.locator("[data-testid='chat-main']")).toBeVisible();
     await expect(page.locator("[data-testid='chat-form']")).toBeVisible();
   });
 

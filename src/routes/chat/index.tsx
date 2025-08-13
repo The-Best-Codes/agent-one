@@ -7,21 +7,24 @@ import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
+import { ChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
+import { loadChat } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import { useParams } from "react-router";
 
-function HomeRoute() {
+const ChatInterface = () => {
   const messages = useChatMessages();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
 
   return (
-    <div className="h-screen flex" data-testid="home-main">
+    <main className="h-screen flex" role="main" data-testid="main">
       <Sidebar />
 
-      <main
+      <div
         className="flex-1 flex flex-col items-center justify-center"
-        role="main"
+        data-testid="chat-main"
       >
         <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
           <AutoScrollContainer
@@ -50,9 +53,26 @@ function HomeRoute() {
             }}
           />
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
+  );
+};
+
+function ChatRoute() {
+  const { id } = useParams<{ id: string }>();
+
+  const initialMessages = useMemo(() => {
+    if (id) {
+      return loadChat(id);
+    }
+    return [];
+  }, [id]);
+
+  return (
+    <ChatProvider chatId={id} initialMessages={initialMessages}>
+      <ChatInterface />
+    </ChatProvider>
   );
 }
 
-export default HomeRoute;
+export default ChatRoute;

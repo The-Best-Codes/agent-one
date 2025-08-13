@@ -134,4 +134,24 @@
   ::-webkit-scrollbar-corner {
     @apply bg-transparent;
   }
+
+  .text-shimmer {
+    font-optical-sizing: auto;
+    /* background: linear-gradient(135deg, #ffffff, #5e5e5e, #ffffff); */
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: transparent;
+    color: transparent;
+    background-size: 200% 100%;
+    animation: text-shimmer 5s linear infinite;
+  }
+  @keyframes text-shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
 }

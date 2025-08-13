@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Accessibility - Home page", () => {
   test("has no critical accessibility violations on load", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/chat");
 
     await expect(page.locator("main[role='main']")).toBeVisible();
 

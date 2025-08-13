@@ -46,6 +46,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       system: SYSTEM_PROMPT,
       // stopWhen: stepCountIs(50), // TODO: [TODO: Investigate if this is relevant in AI SDK 5] Allow the user to configure this in settings
     });
+
     return result.toUIMessageStream({
       onError: (error) => {
         logger.error("Error occurred in CustomChatTransport:", error);

@@ -1,12 +1,15 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 
-import HomeRoute from "@/routes/home";
+import ChatRoute from "@/routes/chat";
+import IndexRoute from "@/routes/index";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomeRoute />} />
+        <Route path="/" element={<IndexRoute />} />
+        <Route path="/chat" element={<ChatRoute />} />
+        <Route path="/chat/:id" element={<ChatRoute />} />
       </Routes>
     </BrowserRouter>
   );

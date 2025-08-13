@@ -4,3 +4,7 @@
 - When editing or regenerating a message store the previous conversation history and allow navigating previous versions per message (like in ChatGPT, on each AI message that was changed)
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
+- Disable model selector when current response is streaming
+- Tweak the padding, colors, etc. of the sidebar. Also: Virtualize chat list in sidebar later?
+- Fix the sidebar rerendering each time persisted chat state updates. We only need to rerender when the chat title changes or is initially created (or deleted, name edited, etc.)
+- Allow editing the chat title

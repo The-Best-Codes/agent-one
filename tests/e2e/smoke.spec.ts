@@ -4,7 +4,7 @@ test.describe("App smoke test", () => {
   test("loads home page, has correct title, and renders app root", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/chat");
 
     await expect(page).toHaveTitle(/AgentOne/);
 
@@ -29,7 +29,7 @@ test.describe("App smoke test", () => {
       }
     });
 
-    await page.goto("/");
+    await page.goto("/chat");
 
     await page.waitForTimeout(500);
 
