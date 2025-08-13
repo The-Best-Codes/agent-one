@@ -19,12 +19,12 @@ const ChatInterface = () => {
   const scrollRef = useRef<AutoScrollHandle | null>(null);
 
   return (
-    <div className="h-screen flex" data-testid="home-main">
+    <main className="h-screen flex" role="main" data-testid="main">
       <Sidebar />
 
-      <main
+      <div
         className="flex-1 flex flex-col items-center justify-center"
-        role="main"
+        data-testid="chat-main"
       >
         <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
           <AutoScrollContainer
@@ -53,8 +53,8 @@ const ChatInterface = () => {
             }}
           />
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 };
 
