@@ -5,3 +5,4 @@
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
 - Disable model selector when current response is streaming
+- Tweak the padding, colors, etc. of the sidebar. Also: Virtualize chat list in sidebar later?
