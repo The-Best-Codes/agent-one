@@ -38,6 +38,7 @@ const SidebarContent = ({
           onClick={() => setIsCollapsed(true)}
           className="w-full"
         >
+          <span className="sr-only">Collapse Sidebar</span>
           <ChevronLeftIcon />
         </Button>
       </div>

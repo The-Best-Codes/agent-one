@@ -114,10 +114,10 @@ export const ChatList = () => {
       <div className="p-2">
         <Button
           onClick={handleNewChat}
-          className="w-full justify-start h-9"
+          className="w-full justify-start"
           variant="outline"
         >
-          <PlusIcon className="mr-2 h-4 w-4" />
+          <PlusIcon className="h-4 w-4" />
           New Chat
         </Button>
       </div>
