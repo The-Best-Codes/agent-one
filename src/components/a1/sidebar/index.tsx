@@ -94,7 +94,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <ChevronRightIcon />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="w-64 h-full p-2 bg-sidebar border-r border-sidebar-border">
+        <DrawerContent className="!max-w-64 h-full p-2 bg-sidebar border-r border-sidebar-border">
           <SidebarContent setIsCollapsed={setIsCollapsed} hideCollapseButton />
         </DrawerContent>
       </Drawer>
