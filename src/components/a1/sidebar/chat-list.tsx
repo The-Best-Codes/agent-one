@@ -111,7 +111,7 @@ export const ChatList = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-2">
+      <div className="pb-2">
         <Button
           onClick={handleNewChat}
           className="w-full justify-start"
@@ -121,7 +121,7 @@ export const ChatList = () => {
           New Chat
         </Button>
       </div>
-      <nav className="flex-1 overflow-y-auto px-2 space-y-1">
+      <nav className="flex-1 overflow-y-auto space-y-1">
         {chats.map((chat) => (
           <Link to={`/chat/${chat.id}`} key={chat.id} className="block">
             <Button
@@ -129,14 +129,16 @@ export const ChatList = () => {
               className="w-full justify-between group pr-2"
             >
               <span className="truncate text-sm font-normal">{chat.title}</span>
-              <Button
-                size="icon"
-                variant="secondary"
-                className="text-destructive hover:text-white hover:bg-destructive size-0 group-hover:size-6 shrink-0 overflow-hidden"
-                onClick={(e) => handleDeleteChat(e, chat.id)}
-              >
-                <TrashIcon />
-              </Button>
+              <div className="size-0 group-hover:size-6 focus-within:size-6 shrink-0 overflow-hidden focus-within:overflow-visible">
+                <Button
+                  size="icon"
+                  variant="default"
+                  className="text-destructive bg-transparent hover:text-white hover:bg-destructive size-6"
+                  onClick={(e) => handleDeleteChat(e, chat.id)}
+                >
+                  <TrashIcon />
+                </Button>
+              </div>
             </Button>
           </Link>
         ))}

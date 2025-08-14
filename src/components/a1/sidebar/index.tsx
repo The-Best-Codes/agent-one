@@ -16,8 +16,10 @@ interface SidebarProps {
 
 const SidebarContent = ({
   setIsCollapsed,
+  hideCollapseButton,
 }: {
   setIsCollapsed: (value: boolean) => void;
+  hideCollapseButton?: boolean;
 }) => {
   return (
     <div className="flex flex-col h-full">
@@ -25,22 +27,20 @@ const SidebarContent = ({
         <ChatList />
       </div>
 
-      <div className="p-2 border-t border-sidebar-border flex flex-col justify-center gap-2">
-        <ModelSelector
-          className="w-full"
-          popoverClassName="w-[calc(var(--radix-popover-trigger-width)-1rem)]"
-        />
+      <div className="pt-2 border-t border-sidebar-border flex flex-col items-center justify-center gap-2">
+        <ModelSelector className="w-full" popoverClassName="w-full" />
         <ThemeSelect className="w-full" />
 
-        {/* TODO: Hide this on mobile (in the sheet) */}
-        <Button
-          variant="outline"
-          onClick={() => setIsCollapsed(true)}
-          className="w-full"
-        >
-          <span className="sr-only">Collapse Sidebar</span>
-          <ChevronLeftIcon />
-        </Button>
+        {!hideCollapseButton && (
+          <Button
+            variant="outline"
+            onClick={() => setIsCollapsed(true)}
+            className="w-full"
+          >
+            <span className="sr-only">Collapse Sidebar</span>
+            <ChevronLeftIcon />
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -54,13 +54,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
     return (
       <aside
         className={cn(
-          "h-full bg-sidebar border-r border-sidebar-border flex flex-col",
-          isCollapsed ? "w-12 items-center" : "w-64",
+          "h-full bg-sidebar border-r border-sidebar-border flex flex-col p-2",
+          isCollapsed ? "w-13 items-center" : "w-64",
           className,
         )}
       >
         {isCollapsed ? (
-          <div className="flex-1 flex flex-col items-center mt-1.5">
+          <div className="flex-1 flex flex-col items-center justify-end">
             <Button
               variant="outline"
               size="icon"
@@ -84,23 +84,18 @@ export const Sidebar = ({ className }: SidebarProps) => {
   return (
     <aside
       className={cn(
-        "w-12 h-full bg-sidebar border-r border-sidebar-border flex flex-col items-center",
+        "w-13 p-2 h-full bg-sidebar border-r border-sidebar-border flex flex-col items-center justify-end",
         className,
       )}
     >
       <Drawer direction="left">
         <DrawerTrigger asChild>
-          <Button
-            className="mt-1.5"
-            variant="outline"
-            size="icon"
-            aria-label="Expand sidebar"
-          >
+          <Button variant="outline" size="icon" aria-label="Expand sidebar">
             <ChevronRightIcon />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="w-64 h-full p-0 bg-sidebar border-r border-sidebar-border">
-          <SidebarContent setIsCollapsed={setIsCollapsed} />
+        <DrawerContent className="w-64 h-full p-2 bg-sidebar border-r border-sidebar-border">
+          <SidebarContent setIsCollapsed={setIsCollapsed} hideCollapseButton />
         </DrawerContent>
       </Drawer>
     </aside>
