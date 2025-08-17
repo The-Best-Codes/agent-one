@@ -31,6 +31,7 @@ const ChatInterface = () => {
             ref={scrollRef}
             className="flex-1 max-h-full mb-2 min-h-0 p-2 pl-0"
             scrollableClassName="pr-2 h-full"
+            scrollButtonClassName="mr-2"
             behavior="smooth"
           >
             {messages.length === 0 && <NoMessagesGreeting />}
