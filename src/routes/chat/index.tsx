@@ -26,7 +26,7 @@ const ChatInterface = () => {
         className="flex-1 flex flex-col items-center justify-center"
         data-testid="chat-main"
       >
-        <div className="w-full max-w-3xl h-full flex-1 flex flex-col">
+        <div className="max-w-3xl w-full h-full flex-1 flex flex-col">
           <AutoScrollContainer
             ref={scrollRef}
             className="flex-1 max-h-full mb-2 min-h-0 p-2 pl-0"
