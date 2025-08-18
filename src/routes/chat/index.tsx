@@ -23,7 +23,7 @@ const ChatInterface = () => {
       <Sidebar />
 
       <div
-        className="flex-1 flex flex-col items-center justify-center"
+        className="flex-1 flex flex-col items-center justify-center min-w-0"
         data-testid="chat-main"
       >
         <div className="max-w-3xl w-full h-full flex-1 flex flex-col">
