@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { deleteChat, listChatIds, loadChat } from "@/lib/ai/persistence";
-import type { TextUIPart, UIMessage } from "ai";
+import { useModel } from "@/contexts/use-model/model-hooks";
+import {
+  deleteChat,
+  listChatIds,
+  loadChatData,
+  saveChatTitle,
+} from "@/lib/ai/persistence";
+import { generateChatTitle } from "@/lib/ai/title-generator";
 import { PlusIcon, TrashIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -10,45 +16,52 @@ interface ChatListItem {
   title: string;
 }
 
-const getChatTitle = (messages: UIMessage[]): string => {
-  if (!messages || messages.length === 0) {
-    return "New Chat";
-  }
-
-  const firstUserMessageWithText = messages.find(
-    (m) =>
-      m.role === "user" &&
-      m.parts.some(
-        (p) =>
-          p.type === "text" &&
-          (p as TextUIPart).text &&
-          (p as TextUIPart).text.trim() !== "",
-      ),
-  );
-
-  if (firstUserMessageWithText) {
-    const textPart = firstUserMessageWithText.parts.find(
-      (p) => p.type === "text",
-    ) as TextUIPart | undefined;
-    if (textPart?.text) {
-      const title = textPart.text.trim();
-      return title.length > 28 ? `${title.substring(0, 28)}...` : title;
-    }
-  }
-
-  return "Untitled Chat";
+const getChatTitle = (title: string): string => {
+  return title;
 };
 
 export const ChatList = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const { id: activeChatId } = useParams<{ id: string }>();
+  const { currentModel } = useModel();
   const navigate = useNavigate();
+
+  const generateTitleForChat = useCallback(
+    async (chatId: string) => {
+      try {
+        const chatData = loadChatData(chatId);
+
+        if (chatData.title !== "New chat" || chatData.messages.length === 0) {
+          return;
+        }
+
+        const hasUserMessage = chatData.messages.some((m) => m.role === "user");
+
+        if (!hasUserMessage) {
+          return;
+        }
+
+        const generatedTitle = await generateChatTitle(
+          currentModel.model,
+          chatData.messages,
+        );
+
+        saveChatTitle({ chatId, title: generatedTitle });
+      } catch (error) {
+        console.error("Failed to generate title for chat:", chatId, error);
+      }
+    },
+    [currentModel.model],
+  );
 
   const refreshChats = useCallback(() => {
     const ids = listChatIds();
     const chatListItems = ids.map((id) => {
-      const messages = loadChat(id);
-      return { id, title: getChatTitle(messages) };
+      const chatData = loadChatData(id);
+      return {
+        id,
+        title: getChatTitle(chatData.title),
+      };
     });
     setChats(chatListItems);
   }, []);
@@ -58,21 +71,36 @@ export const ChatList = () => {
 
     const handleChatCreated = (event: Event) => {
       const { chatId } = (event as CustomEvent).detail;
-      const messages = loadChat(chatId);
+      const chatData = loadChatData(chatId);
       setChats((prev) => [
-        { id: chatId, title: getChatTitle(messages) },
+        {
+          id: chatId,
+          title: getChatTitle(chatData.title),
+        },
         ...prev,
       ]);
     };
 
     const handleChatUpdated = (event: Event) => {
-      const { chatId, messages } = (event as CustomEvent).detail;
+      const { chatId, chatData } = (event as CustomEvent).detail;
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === chatId
-            ? { ...chat, title: getChatTitle(messages) }
+            ? {
+                ...chat,
+                title: getChatTitle(chatData?.title || "New chat"),
+              }
             : chat,
         ),
+      );
+
+      generateTitleForChat(chatId);
+    };
+
+    const handleChatTitleUpdated = (event: Event) => {
+      const { chatId, title } = (event as CustomEvent).detail;
+      setChats((prev) =>
+        prev.map((chat) => (chat.id === chatId ? { ...chat, title } : chat)),
       );
     };
 
@@ -84,13 +112,21 @@ export const ChatList = () => {
     window.addEventListener("persistence:chat-created", handleChatCreated);
     window.addEventListener("persistence:chat-updated", handleChatUpdated);
     window.addEventListener("persistence:chat-deleted", handleChatDeleted);
+    window.addEventListener(
+      "persistence:chat-title-updated",
+      handleChatTitleUpdated,
+    );
 
     return () => {
       window.removeEventListener("persistence:chat-created", handleChatCreated);
       window.removeEventListener("persistence:chat-updated", handleChatUpdated);
       window.removeEventListener("persistence:chat-deleted", handleChatDeleted);
+      window.removeEventListener(
+        "persistence:chat-title-updated",
+        handleChatTitleUpdated,
+      );
     };
-  }, [refreshChats]);
+  }, [refreshChats, generateTitleForChat]);
 
   const handleNewChat = () => {
     navigate("/chat");

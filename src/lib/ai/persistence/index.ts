@@ -3,6 +3,11 @@ import { generateId } from "ai";
 
 const CHAT_IDS_KEY = "chat-ids";
 
+export interface ChatData {
+  messages: UIMessage[];
+  title: string;
+}
+
 function getChatKey(id: string): string {
   return `chat-${id}`;
 }
@@ -29,7 +34,8 @@ export function createChat(): string {
   const id = generateId();
   try {
     const chatKey = getChatKey(id);
-    localStorage.setItem(chatKey, JSON.stringify([]));
+    const chatData: ChatData = { messages: [], title: "New chat" };
+    localStorage.setItem(chatKey, JSON.stringify(chatData));
     const currentIds = listChatIds();
     saveChatIds([id, ...currentIds]);
     window.dispatchEvent(
@@ -43,17 +49,23 @@ export function createChat(): string {
 }
 
 export function loadChat(id: string): UIMessage[] {
+  const chatData = loadChatData(id);
+  return chatData.messages;
+}
+
+export function loadChatData(id: string): ChatData {
   try {
     const chatKey = getChatKey(id);
     const chatJson = localStorage.getItem(chatKey);
     if (chatJson) {
-      return JSON.parse(chatJson);
+      const parsed = JSON.parse(chatJson);
+      return parsed;
     }
     console.warn(`No chat found for id: ${id}`);
-    return [];
+    return { messages: [], title: "New chat" };
   } catch (error) {
     console.error(`Failed to load chat ${id} from localStorage`, error);
-    return [];
+    return { messages: [], title: "New chat" };
   }
 }
 
@@ -66,15 +78,46 @@ export function saveChat({
 }): void {
   try {
     const chatKey = getChatKey(chatId);
-    const content = JSON.stringify(messages);
+    const existingData = loadChatData(chatId);
+    const chatData: ChatData = {
+      ...existingData,
+      messages,
+    };
+    const content = JSON.stringify(chatData);
     localStorage.setItem(chatKey, content);
     window.dispatchEvent(
       new CustomEvent("persistence:chat-updated", {
-        detail: { chatId, messages },
+        detail: { chatId, messages, chatData },
       }),
     );
   } catch (error) {
     console.error(`Failed to save chat ${chatId} to localStorage`, error);
+  }
+}
+
+export function saveChatTitle({
+  chatId,
+  title,
+}: {
+  chatId: string;
+  title: string;
+}): void {
+  try {
+    const chatKey = getChatKey(chatId);
+    const existingData = loadChatData(chatId);
+    const chatData: ChatData = {
+      ...existingData,
+      title,
+    };
+    const content = JSON.stringify(chatData);
+    localStorage.setItem(chatKey, content);
+    window.dispatchEvent(
+      new CustomEvent("persistence:chat-title-updated", {
+        detail: { chatId, title },
+      }),
+    );
+  } catch (error) {
+    console.error(`Failed to save chat title ${chatId} to localStorage`, error);
   }
 }
 
