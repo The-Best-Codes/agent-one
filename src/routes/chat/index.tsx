@@ -11,12 +11,18 @@ import { ChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { loadChat } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollToBottom();
+    }
+  }, [chatId]);
 
   return (
     <main className="h-screen flex" role="main" data-testid="main">
