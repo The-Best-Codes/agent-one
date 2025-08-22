@@ -85,11 +85,15 @@ export function saveChat({
     };
     const content = JSON.stringify(chatData);
     localStorage.setItem(chatKey, content);
-    window.dispatchEvent(
-      new CustomEvent("persistence:chat-updated", {
-        detail: { chatId, messages, chatData },
-      }),
-    );
+
+    const hasUserMessage = messages.some((m) => m.role === "user");
+    if (chatData.title === "New chat" && hasUserMessage) {
+      window.dispatchEvent(
+        new CustomEvent("persistence:chat-updated", {
+          detail: { chatId, messages, chatData },
+        }),
+      );
+    }
   } catch (error) {
     console.error(`Failed to save chat ${chatId} to localStorage`, error);
   }

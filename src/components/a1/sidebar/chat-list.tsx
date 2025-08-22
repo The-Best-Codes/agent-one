@@ -1,15 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import {
-  deleteChat,
-  listChatIds,
-  loadChatData,
-  saveChatTitle,
-} from "@/lib/ai/persistence";
+import { listChatIds, loadChatData, saveChatTitle } from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
-import { PlusIcon, TrashIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { PlusIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import { ChatItem } from "./chat-item";
 
 interface ChatListItem {
   id: string;
@@ -22,37 +18,36 @@ const getChatTitle = (title: string): string => {
 
 export const ChatList = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
-  const { id: activeChatId } = useParams<{ id: string }>();
   const { currentModel } = useModel();
   const navigate = useNavigate();
 
-  const generateTitleForChat = useCallback(
-    async (chatId: string) => {
-      try {
-        const chatData = loadChatData(chatId);
+  const currentModelRef = useRef(currentModel.model);
+  currentModelRef.current = currentModel.model;
 
-        if (chatData.title !== "New chat" || chatData.messages.length === 0) {
-          return;
-        }
+  const generateTitleForChat = useCallback(async (chatId: string) => {
+    try {
+      const chatData = loadChatData(chatId);
 
-        const hasUserMessage = chatData.messages.some((m) => m.role === "user");
-
-        if (!hasUserMessage) {
-          return;
-        }
-
-        const generatedTitle = await generateChatTitle(
-          currentModel.model,
-          chatData.messages,
-        );
-
-        saveChatTitle({ chatId, title: generatedTitle });
-      } catch (error) {
-        console.error("Failed to generate title for chat:", chatId, error);
+      if (chatData.title !== "New chat" || chatData.messages.length === 0) {
+        return;
       }
-    },
-    [currentModel.model],
-  );
+
+      const hasUserMessage = chatData.messages.some((m) => m.role === "user");
+
+      if (!hasUserMessage) {
+        return;
+      }
+
+      const generatedTitle = await generateChatTitle(
+        currentModelRef.current,
+        chatData.messages,
+      );
+
+      saveChatTitle({ chatId, title: generatedTitle });
+    } catch (error) {
+      console.error("Failed to generate title for chat:", chatId, error);
+    }
+  }, []);
 
   const refreshChats = useCallback(() => {
     const ids = listChatIds();
@@ -66,9 +61,7 @@ export const ChatList = () => {
     setChats(chatListItems);
   }, []);
 
-  useEffect(() => {
-    refreshChats();
-
+  const eventHandlers = useMemo(() => {
     const handleChatCreated = (event: Event) => {
       const { chatId } = (event as CustomEvent).detail;
       const chatData = loadChatData(chatId);
@@ -94,7 +87,9 @@ export const ChatList = () => {
         ),
       );
 
-      generateTitleForChat(chatId);
+      if (chatData?.messages && chatData.title === "New chat") {
+        generateTitleForChat(chatId);
+      }
     };
 
     const handleChatTitleUpdated = (event: Event) => {
@@ -108,6 +103,24 @@ export const ChatList = () => {
       const { chatId } = (event as CustomEvent).detail;
       setChats((prev) => prev.filter((chat) => chat.id !== chatId));
     };
+
+    return {
+      handleChatCreated,
+      handleChatUpdated,
+      handleChatTitleUpdated,
+      handleChatDeleted,
+    };
+  }, [generateTitleForChat]);
+
+  useEffect(() => {
+    refreshChats();
+
+    const {
+      handleChatCreated,
+      handleChatUpdated,
+      handleChatTitleUpdated,
+      handleChatDeleted,
+    } = eventHandlers;
 
     window.addEventListener("persistence:chat-created", handleChatCreated);
     window.addEventListener("persistence:chat-updated", handleChatUpdated);
@@ -126,23 +139,10 @@ export const ChatList = () => {
         handleChatTitleUpdated,
       );
     };
-  }, [refreshChats, generateTitleForChat]);
+  }, [refreshChats, eventHandlers]);
 
   const handleNewChat = () => {
     navigate("/chat");
-  };
-
-  const handleDeleteChat = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    chatId: string,
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // TODO: A confirmation dialog would be a good addition here in the future
-    deleteChat(chatId);
-    if (activeChatId === chatId) {
-      navigate("/chat");
-    }
   };
 
   return (
@@ -159,24 +159,7 @@ export const ChatList = () => {
       </div>
       <nav className="flex-1 overflow-y-auto space-y-1">
         {chats.map((chat) => (
-          <Link to={`/chat/${chat.id}`} key={chat.id} className="block">
-            <Button
-              variant={activeChatId === chat.id ? "secondary" : "ghost"}
-              className="w-full justify-between group pr-2"
-            >
-              <span className="truncate text-sm font-normal">{chat.title}</span>
-              <div className="size-0 group-hover:size-6 focus-within:size-6 shrink-0 overflow-hidden focus-within:overflow-visible">
-                <Button
-                  size="icon"
-                  variant="default"
-                  className="text-destructive bg-transparent hover:text-white hover:bg-destructive size-6"
-                  onClick={(e) => handleDeleteChat(e, chat.id)}
-                >
-                  <TrashIcon />
-                </Button>
-              </div>
-            </Button>
-          </Link>
+          <ChatItem key={chat.id} id={chat.id} title={chat.title} />
         ))}
       </nav>
     </div>
