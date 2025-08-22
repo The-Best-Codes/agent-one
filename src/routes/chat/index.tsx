@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useMemo, useRef } from "react";
 import { useParams } from "react-router";
 
-const ChatInterface = () => {
+const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
 
@@ -49,6 +49,7 @@ const ChatInterface = () => {
             {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
           </AutoScrollContainer>
           <MainChatInput
+            key={chatId || "new-chat"}
             onAfterSend={() => {
               scrollRef.current?.scrollToBottom();
             }}
@@ -71,7 +72,7 @@ function ChatRoute() {
 
   return (
     <ChatProvider chatId={id} initialMessages={initialMessages}>
-      <ChatInterface />
+      <ChatInterface chatId={id} />
     </ChatProvider>
   );
 }
