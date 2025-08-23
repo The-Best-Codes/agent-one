@@ -8,3 +8,4 @@
 - Tweak the padding, colors, etc. of the sidebar. Also: Virtualize chat list in sidebar later?
 - Fix the sidebar rerendering each time persisted chat state updates. We only need to rerender when the chat title changes or is initially created (or deleted, name edited, etc.)
 - Allow editing the chat title
+- Fix chat performance when starting a new chat (small period when nothing is shown) and some bugs when going from chat to new and back to chat. Be sure to test in a slow, low performance environment.
