@@ -1,5 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { deleteChat, saveChatTitle } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
 import { CheckIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
@@ -16,8 +21,9 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const handleDeleteChat = (
+  const handleConfirmDeleteChat = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     chatId: string,
   ) => {
@@ -27,6 +33,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
     if (activeChatId === chatId) {
       navigate("/chat");
     }
+    setIsDeleteDialogOpen(false);
   };
 
   const handleEditChat = (
@@ -87,7 +94,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
 
         <div
           className={`shrink-0 overflow-hidden flex items-center gap-1 ${
-            isEditing
+            isEditing || isDeleteDialogOpen
               ? "w-13 h-12"
               : "size-0 group-hover:w-13 group-hover:h-12 focus-within:w-13 focus-within:h-12 focus-within:overflow-visible"
           }`}
@@ -129,14 +136,47 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
               >
                 <PencilIcon />
               </Button>
-              <Button
-                size="icon"
-                variant="default"
-                className="text-destructive bg-transparent hover:text-white hover:bg-destructive border-none shadow-none size-6"
-                onClick={(e) => handleDeleteChat(e, id)}
+
+              <Popover
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
               >
-                <TrashIcon />
-              </Button>
+                <PopoverTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="default"
+                    className="text-destructive bg-transparent hover:text-white hover:bg-destructive border-none shadow-none size-6"
+                  >
+                    <TrashIcon />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto flex gap-1 p-1"
+                  side="bottom"
+                  align="center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="size-6"
+                    onClick={(e) => handleConfirmDeleteChat(e, id)}
+                  >
+                    <CheckIcon />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="default"
+                    className="size-6"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsDeleteDialogOpen(false);
+                    }}
+                  >
+                    <XIcon />
+                  </Button>
+                </PopoverContent>
+              </Popover>
             </>
           )}
         </div>
