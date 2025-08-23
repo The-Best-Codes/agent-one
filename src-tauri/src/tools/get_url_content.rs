@@ -1,4 +1,5 @@
 use super::utils::{DEFAULT_TIMEOUT_SECONDS, MAX_CONTENT_LENGTH, MAX_TIMEOUT_SECONDS};
+use htmd::HtmlToMarkdown;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -6,13 +7,8 @@ use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
 
-static STYLE_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?is)<style[^>]*>.*?</style>").unwrap());
-static SCRIPT_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?is)<script[^>]*>.*?</script>").unwrap());
-static COMMENT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<!--.*?-->").unwrap());
-static LINK_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<link[^>]*>").unwrap());
-static META_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<meta[^>]*>").unwrap());
+// TODO: Truncate long image data URLs
+
 static BLANK_LINE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
 static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
 
@@ -85,18 +81,20 @@ pub async fn get_url_content(
     let processed_content = match format.as_str() {
         "markdown" => {
             if content_type.contains("text/html") {
-                let mut cleaned_html = text;
-                cleaned_html = STYLE_REGEX.replace_all(&cleaned_html, "").to_string();
-                cleaned_html = SCRIPT_REGEX.replace_all(&cleaned_html, "").to_string();
-                cleaned_html = COMMENT_REGEX.replace_all(&cleaned_html, "").to_string();
-                cleaned_html = LINK_REGEX.replace_all(&cleaned_html, "").to_string();
-                cleaned_html = META_REGEX.replace_all(&cleaned_html, "").to_string();
-                cleaned_html = BLANK_LINE_REGEX
-                    .replace_all(&cleaned_html, "\n\n")
+                let mut converter_builder = HtmlToMarkdown::builder();
+                converter_builder =
+                    converter_builder.skip_tags(vec!["script", "style", "link", "meta"]);
+                let converter = converter_builder.build();
+
+                let mut markdown_output = converter
+                    .convert(&text)
+                    .map_err(|e| format!("Failed to convert HTML to markdown: {e}"))?;
+
+                markdown_output = BLANK_LINE_REGEX
+                    .replace_all(&markdown_output, "\n\n")
                     .to_string();
 
-                htmd::convert(&cleaned_html)
-                    .map_err(|e| format!("Failed to convert HTML to markdown: {e}"))?
+                markdown_output
             } else {
                 text
             }
