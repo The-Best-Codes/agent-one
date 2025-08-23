@@ -6,10 +6,15 @@ use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
 
-static HTML_TITLE_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
-
-static HTML_TAG_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<[^>]*>").unwrap());
+static STYLE_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?is)<style[^>]*>.*?</style>").unwrap());
+static SCRIPT_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?is)<script[^>]*>.*?</script>").unwrap());
+static COMMENT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<!--.*?-->").unwrap());
+static LINK_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<link[^>]*>").unwrap());
+static META_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(?is)<meta[^>]*>").unwrap());
+static BLANK_LINE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
+static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UrlContentResponse {
@@ -59,78 +64,86 @@ pub async fn get_url_content(
 
     let final_url = response.url().to_string();
 
+    let content_type = response
+        .headers()
+        .get("content-type")
+        .and_then(|ct| ct.to_str().ok())
+        .unwrap_or("")
+        .to_lowercase();
+
     let text = response
         .text()
         .await
         .map_err(|e| format!("Failed to read response body: {}", e))?;
 
-    let title = extract_title(&text);
+    let title = if content_type.contains("text/html") {
+        extract_title(&text)
+    } else {
+        None
+    };
 
-    let (processed_content, truncated) = match format.as_str() {
+    let processed_content = match format.as_str() {
         "markdown" => {
-            let markdown = html_to_markdown(&text);
-            truncate_content(&markdown, max_length)
+            if content_type.contains("text/html") {
+                let mut cleaned_html = text;
+                cleaned_html = STYLE_REGEX.replace_all(&cleaned_html, "").to_string();
+                cleaned_html = SCRIPT_REGEX.replace_all(&cleaned_html, "").to_string();
+                cleaned_html = COMMENT_REGEX.replace_all(&cleaned_html, "").to_string();
+                cleaned_html = LINK_REGEX.replace_all(&cleaned_html, "").to_string();
+                cleaned_html = META_REGEX.replace_all(&cleaned_html, "").to_string();
+                cleaned_html = BLANK_LINE_REGEX
+                    .replace_all(&cleaned_html, "\n\n")
+                    .to_string();
+
+                htmd::convert(&cleaned_html)
+                    .map_err(|e| format!("Failed to convert HTML to markdown: {e}"))?
+            } else {
+                text
+            }
         }
-        "raw" => truncate_content(&text, max_length),
+        "raw" => text,
         _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
     };
 
+    let (mut final_content, truncated) = if processed_content.len() > max_length {
+        let mut byte_idx = 0;
+        for (idx, _) in processed_content.char_indices() {
+            if idx >= max_length {
+                break;
+            }
+            byte_idx = idx;
+        }
+
+        if byte_idx == 0 && max_length > 0 && !processed_content.is_empty() {
+            byte_idx = processed_content.chars().next().unwrap().len_utf8();
+            if byte_idx > max_length {
+                byte_idx = max_length;
+            }
+        }
+
+        (processed_content[..byte_idx].to_string(), true)
+    } else {
+        (processed_content, false)
+    };
+
+    if truncated {
+        final_content = format!("{final_content}...\n\n[Content truncated at {max_length} bytes]");
+    }
+
     Ok(UrlContentResponse {
-        content: processed_content.clone(),
+        content: final_content.clone(),
         title,
         url: final_url,
         format,
-        length: processed_content.len(),
+        length: final_content.len(),
         truncated,
     })
 }
 
 fn extract_title(html: &str) -> Option<String> {
-    HTML_TITLE_REGEX
+    TITLE_REGEX
         .captures(html)
         .and_then(|caps| caps.get(1))
-        .map(|m| html_escape::decode_html_entities(m.as_str().trim()).to_string())
-        .filter(|title| !title.is_empty())
-}
-
-fn html_to_markdown(html: &str) -> String {
-    match htmd::convert(html) {
-        Ok(markdown) => markdown,
-        Err(_) => {
-            let text = HTML_TAG_REGEX.replace_all(html, " ");
-            let text = text.replace('\n', " ");
-            let text = text.replace('\t', " ");
-
-            let mut result = String::new();
-            let mut prev_space = false;
-
-            for ch in text.chars() {
-                if ch.is_whitespace() {
-                    if !prev_space {
-                        result.push(' ');
-                        prev_space = true;
-                    }
-                } else {
-                    result.push(ch);
-                    prev_space = false;
-                }
-            }
-
-            result.trim().to_string()
-        }
-    }
-}
-
-fn truncate_content(content: &str, max_length: usize) -> (String, bool) {
-    if content.len() <= max_length {
-        (content.to_string(), false)
-    } else {
-        let truncated = if let Some(pos) = content[..max_length].rfind(' ') {
-            &content[..pos]
-        } else {
-            &content[..max_length]
-        };
-
-        (format!("{}...", truncated), true)
-    }
+        .map(|m| m.as_str().trim().to_string())
+        .filter(|s| !s.is_empty())
 }
