@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { deleteChat } from "@/lib/ai/persistence";
-import { TrashIcon } from "lucide-react";
-import { memo } from "react";
+import { Input } from "@/components/ui/input";
+import { deleteChat, saveChatTitle } from "@/lib/ai/persistence";
+import { cn } from "@/lib/utils";
+import { CheckIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
+import { memo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 interface ChatItemProps {
@@ -12,6 +14,8 @@ interface ChatItemProps {
 export const ChatItem = memo(({ id, title }: ChatItemProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(title);
 
   const handleDeleteChat = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -25,22 +29,116 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
     }
   };
 
+  const handleEditChat = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditTitle(title);
+    setIsEditing(true);
+  };
+
+  const handleSaveTitle = () => {
+    if (editTitle.trim() && editTitle.trim() !== title) {
+      saveChatTitle({ chatId: id, title: editTitle.trim() });
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditTitle(title);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSaveTitle();
+    } else if (e.key === "Escape") {
+      handleCancelEdit();
+    }
+  };
+
+  const handleInputClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
     <Link to={`/chat/${id}`} className="block">
       <Button
         variant={activeChatId === id ? "secondary" : "ghost"}
-        className="w-full justify-between group pr-2"
+        className={cn(
+          "w-full justify-between group pr-2 transition-none",
+          isEditing && "pl-2",
+        )}
       >
-        <span className="truncate text-sm font-normal">{title}</span>
-        <div className="size-0 group-hover:size-6 focus-within:size-6 shrink-0 overflow-hidden focus-within:overflow-visible">
-          <Button
-            size="icon"
-            variant="default"
-            className="text-destructive bg-transparent hover:text-white hover:bg-destructive size-6"
-            onClick={(e) => handleDeleteChat(e, id)}
-          >
-            <TrashIcon />
-          </Button>
+        {isEditing ? (
+          <Input
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onClick={handleInputClick}
+            className="h-6 text-sm leading-none font-normal bg-background border-none shadow-none p-0 px-2 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-md"
+            autoFocus
+          />
+        ) : (
+          <span className="truncate text-sm font-normal">{title}</span>
+        )}
+
+        <div
+          className={`shrink-0 overflow-hidden flex items-center gap-1 ${
+            isEditing
+              ? "w-13 h-12"
+              : "size-0 group-hover:w-13 group-hover:h-12 focus-within:w-13 focus-within:h-12 focus-within:overflow-visible"
+          }`}
+        >
+          {isEditing ? (
+            <>
+              <Button
+                size="icon"
+                variant="default"
+                className="size-6"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSaveTitle();
+                }}
+              >
+                <CheckIcon />
+              </Button>
+              <Button
+                size="icon"
+                variant="default"
+                className="size-6"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancelEdit();
+                }}
+              >
+                <XIcon />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="icon"
+                variant="default"
+                className="bg-transparent text-foreground hover:bg-primary hover:text-primary-foreground border-none shadow-none size-6"
+                onClick={handleEditChat}
+              >
+                <PencilIcon />
+              </Button>
+              <Button
+                size="icon"
+                variant="default"
+                className="text-destructive bg-transparent hover:text-white hover:bg-destructive border-none shadow-none size-6"
+                onClick={(e) => handleDeleteChat(e, id)}
+              >
+                <TrashIcon />
+              </Button>
+            </>
+          )}
         </div>
       </Button>
     </Link>
