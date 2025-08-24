@@ -7,6 +7,7 @@ import { MessagePartToolCall } from "./tools/tool-call";
 import { MessagePartToolDateTime } from "./tools/tool-dateTime";
 import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
+import { MessagePartToolWebSearch } from "./tools/tool-webSearch";
 
 const logger = getLogger(import.meta.url);
 
@@ -30,6 +31,8 @@ export const MessageToolHandler = memo(
         return <MessagePartToolWaitNumberMilliseconds part={part} />;
       case "tool-getUrlContent":
         return <MessagePartToolGetUrlContent part={part} />;
+      case "tool-webSearch":
+        return <MessagePartToolWebSearch part={part} />;
       default:
         return <MessagePartToolCall part={part as ToolUIPart} />;
     }
