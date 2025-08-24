@@ -93,7 +93,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           <AccordionItem
             value={callId}
             className={cn(
-              "rounded-md w-fit",
+              "rounded-md w-fit transition-all duration-300",
               accordionValue === callId ? "bg-muted p-2" : "",
             )}
           >
