@@ -105,13 +105,13 @@ pub async fn fetch_html_from_webview(
                 // Wait a bit more for dynamic content to load
                 setTimeout(function() {{
                     const html = document.documentElement.outerHTML;
-                    window.__TAURI__.core.invoke('webview_html_callback', {{
+                    window.__TAURI_INTERNALS__.invoke('webview_html_callback', {{
                         webviewId: '{}',
                         html: html
                     }}).catch(console.error);
                 }}, 1000);
             }} catch (error) {{
-                window.__TAURI__.core.invoke('webview_html_callback', {{
+                window.__TAURI_INTERNALS__.invoke('webview_html_callback', {{
                     webviewId: '{}',
                     html: 'Error: ' + error.message
                 }}).catch(console.error);
