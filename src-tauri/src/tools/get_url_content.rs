@@ -10,6 +10,7 @@ use wreq::Client;
 use wreq_util::Emulation;
 
 // TODO: Truncate long image data URLs
+// TODO: If webview fails, fail the whole thing, don't fallback on wreq
 
 static BLANK_LINE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
 static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
