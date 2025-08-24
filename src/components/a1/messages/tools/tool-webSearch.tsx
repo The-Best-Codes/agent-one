@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import {
   ExternalLinkIcon,
@@ -11,6 +12,7 @@ import {
   SearchIcon,
   XCircleIcon,
 } from "lucide-react";
+import { useState } from "react";
 
 interface WebSearchInput {
   query: string;
@@ -39,6 +41,7 @@ interface WebSearchResult {
 
 export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
   const callId = part.toolCallId;
+  const [accordionValue, setAccordionValue] = useState<string | undefined>();
 
   switch (part.state) {
     case "input-streaming":
@@ -83,10 +86,17 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <Accordion
           type="single"
           collapsible
+          onValueChange={(value) => setAccordionValue(value)}
           className="bg-transparent text-foreground text-sm p-0"
         >
           {/* TODO: Put chevron icon in accordion on the left? */}
-          <AccordionItem value={callId} className="border-b w-fit">
+          <AccordionItem
+            value={callId}
+            className={cn(
+              "rounded-md w-fit",
+              accordionValue === callId ? "bg-muted p-2" : "",
+            )}
+          >
             <AccordionTrigger className="p-0 gap-2 hover:no-underline font-bold">
               <p className="flex flex-row items-center gap-1">
                 <SearchIcon className="size-4 shrink-0 text-foreground" />
@@ -96,7 +106,8 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               </p>
             </AccordionTrigger>
             <AccordionContent className="pt-2 p-0 text-xs text-muted-foreground">
-              <div className="space-y-2 pr-2 mt-1 max-h-96 overflow-y-auto">
+              {/* Removed pr-2 from the element below for now until I find a way to only show pr when it is overflowing */}
+              <div className="space-y-2 mt-1 max-h-96 overflow-y-auto">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {result.search_url && (
                     <a
@@ -111,10 +122,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                   )}
                 </div>
                 {result.results?.map((searchResult, index) => (
-                  <div
-                    key={index}
-                    className="border rounded-md p-2 bg-background hover:bg-muted transition-colors"
-                  >
+                  <div key={index} className="border rounded-md p-2">
                     <div className="space-y-1">
                       <a
                         href={searchResult.url}
@@ -128,7 +136,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                         {searchResult.display_url}
                       </div>
                       {searchResult.snippet && (
-                        <p className="text-xs text-muted-foreground/80 line-clamp-3">
+                        <p className="text-xs text-muted-foreground">
                           {searchResult.snippet}
                         </p>
                       )}
