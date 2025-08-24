@@ -2,6 +2,7 @@ import type { ToolUIPart } from "ai";
 import { GlobeIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 
 // TODO: Use an accordion to allow expanding and viewing more tool info
+// See tool-webSearch.tsx for reference
 
 interface GetUrlContentInput {
   urls: string[];
