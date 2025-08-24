@@ -50,12 +50,10 @@ pub async fn create_fetch_webview(
     let _webview_window = WebviewWindowBuilder::new(&app, &webview_id, parsed_url)
         .title("URL Fetch Webview")
         .inner_size(1200.0, 800.0)
-        .position(0.0, 0.0)
+        .position(-9999.0, -9999.0)
         .resizable(false)
-        .visible(true)
+        .visible(false)
         .closable(false)
-        // .skip_taskbar(true)
-        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         .build()
         .map_err(|e| format!("Failed to create webview: {}", e))?;
 
@@ -98,18 +96,24 @@ pub async fn fetch_html_from_webview(
         channels.insert(webview_id.clone(), sender);
     }
 
+    // TODO: Allow waiting a custom delay before executing JavaScript (to allow dynamic content to load)
     let js_code = format!(
         r#"
         (function() {{
             try {{
-                // Wait a bit more for dynamic content to load
-                setTimeout(function() {{
+                const handleDOMLoaded = () => {{
                     const html = document.documentElement.outerHTML;
                     window.__TAURI_INTERNALS__.invoke('webview_html_callback', {{
                         webviewId: '{}',
                         html: html
                     }}).catch(console.error);
-                }}, 1000);
+                }};
+
+                if (document.readyState === 'loading') {{
+                    document.addEventListener('DOMContentLoaded', handleDOMLoaded);
+                }} else {{
+                    handleDOMLoaded();
+                }}
             }} catch (error) {{
                 window.__TAURI_INTERNALS__.invoke('webview_html_callback', {{
                     webviewId: '{}',
