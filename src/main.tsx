@@ -1,10 +1,9 @@
 import ErrorBoundary from "@/components/error-boundary";
+import { ModelProvider } from "@/contexts/use-model/model-context";
+import { ThemeProvider } from "next-themes";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-
-import { ModelProvider } from "@/contexts/use-model/model-context";
-import { ThemeProvider } from "next-themes";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
