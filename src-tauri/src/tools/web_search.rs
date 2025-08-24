@@ -35,8 +35,8 @@ pub async fn web_search(
         .unwrap_or(DEFAULT_TIMEOUT_SECONDS)
         .min(MAX_TIMEOUT_SECONDS);
 
-    let max_results = max_results.unwrap_or(10).min(20); // Limit to 20 results max
-    let use_webview = use_webview.unwrap_or(true); // Default to webview
+    let max_results = max_results.unwrap_or(10).min(20);
+    let use_webview = use_webview.unwrap_or(true);
 
     let search_url = format!(
         "https://html.duckduckgo.com/html/?q={}",
@@ -44,7 +44,6 @@ pub async fn web_search(
     );
 
     let html = if use_webview {
-        // Use webview to avoid bot detection
         let webview_result = fetch_url_with_webview(app, search_url.clone(), timeout_seconds)
             .await
             .map_err(|e| format!("Failed to fetch search results with webview: {}", e))?;
@@ -63,7 +62,6 @@ pub async fn web_search(
             )
         })?
     } else {
-        // Fallback to HTTP client (may be detected as bot)
         let emulation = Emulation::Chrome137;
 
         let client = Client::builder()
@@ -104,59 +102,52 @@ pub async fn web_search(
 }
 
 fn parse_search_results(html: &str, max_results: usize) -> Result<Vec<SearchResult>, String> {
-    println!("HTML: {}", html);
     let mut results = Vec::new();
 
-    // Compile all regexes outside the loop
-    let result_regex = Regex::new(r#"<div[^>]*class="[^"]*result[^"]*results_links[^"]*web-result[^"]*"[^>]*>(.*?)</div>\s*</div>\s*(?:</div>)?"#)
+    let result_regex = Regex::new(r#"(?s)<div[^>]*class="[^"]*result[^"]*results_links[^"]*web-result[^"]*"[^>]*>(.*?)</div>\s*</div>"#)
         .map_err(|e| format!("Failed to compile result regex: {}", e))?;
 
-    let title_regex = Regex::new(r#"<h2[^>]*class="[^"]*result__title[^"]*"[^>]*>.*?<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>"#)
+    let title_regex = Regex::new(r#"(?s)<h2[^>]*class="[^"]*result__title[^"]*"[^>]*>.*?<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>"#)
         .map_err(|e| format!("Failed to compile title regex: {}", e))?;
 
     let display_url_regex = Regex::new(r#"<a[^>]*class="[^"]*result__url[^"]*"[^>]*>([^<]*)</a>"#)
         .map_err(|e| format!("Failed to compile display URL regex: {}", e))?;
 
-    let snippet_regex = Regex::new(r#"<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>"#)
-        .map_err(|e| format!("Failed to compile snippet regex: {}", e))?;
+    let snippet_regex =
+        Regex::new(r#"(?s)<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>"#)
+            .map_err(|e| format!("Failed to compile snippet regex: {}", e))?;
 
-    for result_match in result_regex.find_iter(html) {
+    for result_match in result_regex.captures_iter(html) {
         if results.len() >= max_results {
             break;
         }
 
-        let result_html = result_match.as_str();
-
-        // Extract title and main URL
+        let result_html = result_match.get(1).unwrap().as_str();
 
         let (title, url) = if let Some(title_match) = title_regex.captures(result_html) {
             let raw_url = title_match.get(1).unwrap().as_str();
             let raw_title = title_match.get(2).unwrap().as_str();
 
-            // Clean up the URL (DuckDuckGo wraps URLs)
             let clean_url = extract_actual_url(raw_url);
             let clean_title = clean_html_text(raw_title);
 
             (clean_title, clean_url)
         } else {
-            continue; // Skip if we can't find title/URL
+            continue;
         };
 
-        // Extract display URL
         let display_url = if let Some(display_match) = display_url_regex.captures(result_html) {
             clean_html_text(display_match.get(1).unwrap().as_str())
         } else {
-            url.clone() // Fallback to main URL
+            url.clone()
         };
 
-        // Extract snippet
         let snippet = if let Some(snippet_match) = snippet_regex.captures(result_html) {
             clean_html_text(snippet_match.get(1).unwrap().as_str())
         } else {
-            String::new() // Empty snippet if not found
+            String::new()
         };
 
-        // Skip ads and invalid results
         if url.contains("duckduckgo.com/y.js") || url.contains("ad_domain") || title.is_empty() {
             continue;
         }
@@ -169,11 +160,14 @@ fn parse_search_results(html: &str, max_results: usize) -> Result<Vec<SearchResu
         });
     }
 
+    if results.is_empty() {
+        return Err("Could not parse any search results from the HTML. The page structure may have changed.".to_string());
+    }
+
     Ok(results)
 }
 
 fn extract_actual_url(ddg_url: &str) -> String {
-    // DuckDuckGo wraps URLs like: //duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.example.com
     if let Some(uddg_start) = ddg_url.find("uddg=") {
         let encoded_url = &ddg_url[uddg_start + 5..];
         if let Some(end) = encoded_url.find('&') {
@@ -186,16 +180,13 @@ fn extract_actual_url(ddg_url: &str) -> String {
         }
     }
 
-    // If extraction fails, return the original URL
     ddg_url.to_string()
 }
 
 fn clean_html_text(text: &str) -> String {
-    // Remove HTML tags and decode entities
     let tag_regex = Regex::new(r"<[^>]*>").unwrap();
     let no_tags = tag_regex.replace_all(text, "");
 
-    // Decode common HTML entities
     let mut result = no_tags.to_string();
     result = result.replace("&amp;", "&");
     result = result.replace("&lt;", "<");
@@ -205,7 +196,6 @@ fn clean_html_text(text: &str) -> String {
     result = result.replace("&nbsp;", " ");
     result = result.replace("&#92;", "\\");
 
-    // Clean up whitespace
     let whitespace_regex = Regex::new(r"\s+").unwrap();
     whitespace_regex
         .replace_all(&result, " ")

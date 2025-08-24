@@ -59,7 +59,11 @@ export const WebSearchTool = tool({
     const timeoutPromise = new Promise<never>((_, reject) => {
       timeoutId = setTimeout(() => {
         logger.error("Timeout reached:", timeoutMs);
-        reject(new Error("Frontend timeout: Search operation exceeded allowed time."));
+        reject(
+          new Error(
+            "Frontend timeout: Search operation exceeded allowed time.",
+          ),
+        );
       }, timeoutMs);
 
       abortSignal?.addEventListener(
@@ -115,7 +119,8 @@ export const WebSearchTool = tool({
           success: "Whether the search completed successfully",
           query: "The search query that was executed",
           total_results: "Total number of results found",
-          results: "Array of search results with title, url, snippet, and display_url",
+          results:
+            "Array of search results with title, url, snippet, and display_url",
           search_url: "The DuckDuckGo search URL that was used",
         },
       };

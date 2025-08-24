@@ -5,8 +5,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLinkIcon, SearchIcon } from "lucide-react";
 import type { ToolUIPart } from "ai";
+import { ExternalLinkIcon, SearchIcon } from "lucide-react";
 
 interface WebSearchInput {
   query: string;
