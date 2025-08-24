@@ -58,22 +58,28 @@ export const MessagePartToolWaitNumberMilliseconds = ({
 
     case "input-available":
       return (
-        <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
+        <div
+          key={callId}
+          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+        >
           <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             Waiting {safeFormatMilliseconds(input?.milliseconds)}...
           </span>
-        </p>
+        </div>
       );
 
     case "output-available":
       return (
-        <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
+        <div
+          key={callId}
+          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+        >
           <ClockIcon className="size-4 shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             Waited {safeFormatMilliseconds(input?.milliseconds)}
           </span>
-        </p>
+        </div>
       );
 
     case "output-error":

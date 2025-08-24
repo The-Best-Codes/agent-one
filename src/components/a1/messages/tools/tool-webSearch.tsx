@@ -4,9 +4,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import type { ToolUIPart } from "ai";
-import { ExternalLinkIcon, SearchIcon } from "lucide-react";
+import {
+  ExternalLinkIcon,
+  Loader2Icon,
+  SearchIcon,
+  XCircleIcon,
+} from "lucide-react";
 
 interface WebSearchInput {
   query: string;
@@ -39,9 +43,9 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
   switch (part.state) {
     case "input-streaming":
       return (
-        <div key={callId} className="flex items-center gap-2">
-          <SearchIcon className="size-4 shrink-0 text-blue-500 animate-pulse" />
-          <span className="text-sm font-bold text-blue-600">
+        <div key={callId} className="flex items-center gap-1">
+          <Loader2Icon className="size-4 shrink-0 text-foreground animate-spin" />{" "}
+          <span className="text-sm font-bold text-foreground">
             Preparing web search...
           </span>
         </div>
@@ -50,38 +54,14 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     case "input-available": {
       const input = part.input as WebSearchInput;
       const query = input?.query || "Unknown query";
-      const maxResults = input?.maxResults || 10;
 
       return (
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full rounded-md bg-blue-50 dark:bg-blue-950/20 my-1"
-        >
-          <AccordionItem value={callId}>
-            <AccordionTrigger className="p-2 hover:no-underline">
-              <p className="text-sm font-bold text-blue-600 flex flex-row items-center gap-1">
-                <SearchIcon className="size-4 shrink-0 animate-pulse" />
-                <span className="max-w-2xl truncate">
-                  Searching web for "{query}"...
-                </span>
-              </p>
-            </AccordionTrigger>
-            <AccordionContent className="pt-0 p-2">
-              <div className="text-xs text-foreground/80">
-                <span className="font-medium">Search parameters:</span>
-                <div className="mt-1 space-y-1">
-                  <div>
-                    Query: <span className="font-mono">{query}</span>
-                  </div>
-                  <div>
-                    Max results: <span className="font-mono">{maxResults}</span>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <div key={callId} className="flex flex-row items-center gap-1">
+          <Loader2Icon className="size-4 shrink-0 animate-spin text-foreground" />
+          <span className="max-w-2xl truncate">
+            Searching online for "{query}"...
+          </span>
+        </div>
       );
     }
 
@@ -90,30 +70,12 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
 
       if (!result.success) {
         return (
-          <Accordion
-            type="single"
-            collapsible
-            className="w-full rounded-md bg-red-50 dark:bg-red-950/20 my-1"
-          >
-            <AccordionItem value={callId}>
-              <AccordionTrigger className="p-2 hover:no-underline">
-                <p className="text-sm font-bold text-red-600 flex flex-row items-center gap-1">
-                  <SearchIcon className="size-4 shrink-0" />
-                  <span className="max-w-2xl truncate">
-                    Web search failed for "{result.query || "unknown query"}"
-                  </span>
-                </p>
-              </AccordionTrigger>
-              <AccordionContent className="pt-0 p-2">
-                <div className="text-sm text-red-600">
-                  <div className="font-medium">Error:</div>
-                  <div className="mt-1">
-                    {result.error || "Unknown error occurred"}
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <div key={callId} className="flex flex-row items-center gap-1">
+            <XCircleIcon className="size-4 shrink-0 text-destructive" />{" "}
+            <span className="max-w-2xl truncate">
+              Web search failed for "{result.query || "unknown query"}"
+            </span>
+          </div>
         );
       }
 
@@ -121,63 +83,58 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <Accordion
           type="single"
           collapsible
-          className="w-full rounded-md bg-green-50 dark:bg-green-950/20 my-1"
+          className="bg-transparent text-foreground text-sm p-0"
         >
-          <AccordionItem value={callId}>
-            <AccordionTrigger className="p-2 hover:no-underline">
-              <p className="text-sm font-bold text-green-600 flex flex-row items-center gap-1">
-                <SearchIcon className="size-4 shrink-0" />
+          {/* TODO: Put chevron icon in accordion on the left? */}
+          <AccordionItem value={callId} className="border-b w-fit">
+            <AccordionTrigger className="p-0 gap-2 hover:no-underline font-bold">
+              <p className="flex flex-row items-center gap-1">
+                <SearchIcon className="size-4 shrink-0 text-foreground" />
                 <span className="max-w-2xl truncate">
                   Found {result.total_results} results for "{result.query}"
                 </span>
               </p>
             </AccordionTrigger>
-            <AccordionContent className="pt-0 p-2">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-xs text-foreground/70">
-                  <Badge variant="secondary" className="text-xs">
-                    {result.total_results} results
-                  </Badge>
+            <AccordionContent className="pt-2 p-0 text-xs text-muted-foreground">
+              <div className="space-y-2 pr-2 mt-1 max-h-96 overflow-y-auto">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {result.search_url && (
                     <a
                       href={result.search_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                      className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
                     >
                       View on DuckDuckGo
                       <ExternalLinkIcon className="size-3" />
                     </a>
                   )}
                 </div>
-
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {result.results?.map((searchResult, index) => (
-                    <div
-                      key={index}
-                      className="border rounded-md p-3 bg-background/50 hover:bg-background/80 transition-colors"
-                    >
-                      <div className="space-y-1">
-                        <a
-                          href={searchResult.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline line-clamp-2"
-                        >
-                          {searchResult.title}
-                        </a>
-                        <div className="text-xs text-green-600 font-mono">
-                          {searchResult.display_url}
-                        </div>
-                        {searchResult.snippet && (
-                          <p className="text-xs text-foreground/80 line-clamp-3">
-                            {searchResult.snippet}
-                          </p>
-                        )}
+                {result.results?.map((searchResult, index) => (
+                  <div
+                    key={index}
+                    className="border rounded-md p-2 bg-background hover:bg-muted transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <a
+                        href={searchResult.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-foreground hover:underline inline-block"
+                      >
+                        {searchResult.title}
+                      </a>
+                      <div className="text-xs text-muted-foreground font-mono">
+                        {searchResult.display_url}
                       </div>
+                      {searchResult.snippet && (
+                        <p className="text-xs text-muted-foreground/80 line-clamp-3">
+                          {searchResult.snippet}
+                        </p>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -187,11 +144,11 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
 
     case "output-error":
       return (
-        <div key={callId} className="flex items-center gap-2">
-          <SearchIcon className="size-4 shrink-0 text-red-500" />
-          <span className="text-sm font-bold text-red-600">
+        <div key={callId} className="flex items-center gap-1">
+          <XCircleIcon className="size-4 shrink-0 text-destructive" />{" "}
+          <span className="text-sm font-bold text-destructive">
             Web search error:{" "}
-            <span className="text-red-500/80 font-normal">
+            <span className="text-destructive/80 font-normal">
               {part?.errorText || "Unknown error"}
             </span>
           </span>
@@ -200,8 +157,8 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
 
     default:
       return (
-        <div key={callId} className="flex items-center gap-2">
-          <SearchIcon className="size-4 shrink-0 text-muted-foreground" />
+        <div key={callId} className="flex items-center gap-1">
+          <SearchIcon className="size-4 shrink-0 text-muted-foreground" />{" "}
           <span className="text-sm font-bold text-muted-foreground">
             Web search
           </span>

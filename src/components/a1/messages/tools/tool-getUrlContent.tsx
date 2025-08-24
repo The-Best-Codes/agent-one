@@ -81,14 +81,17 @@ export const MessagePartToolGetUrlContent = ({
 
     case "input-available":
       return (
-        <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
+        <div
+          key={callId}
+          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+        >
           <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
           <span className="max-w-2xl truncate">
             {urlCount === 1
               ? `Browsing ${formatUrl(input?.urls?.[0] || "a website")}...`
               : `Browsing ${urlCount === 0 ? " " : `${urlCount} `}URLs...`}
           </span>
-        </p>
+        </div>
       );
 
     case "output-available": {
