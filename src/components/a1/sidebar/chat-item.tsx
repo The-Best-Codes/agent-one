@@ -94,7 +94,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
         )}
 
         <div
-          className={`shrink-0 overflow-hidden flex items-center gap-1 transition-all duration-200 ${
+          className={`shrink-0 overflow-hidden flex items-center gap-1 transition-[width,height] duration-200 ${
             isEditing || isDeleteDialogOpen
               ? "w-13 h-12"
               : "size-0 group-hover/chat-item:w-13 group-hover/chat-item:h-12 focus-within:w-13 focus-within:h-12 focus-within:overflow-visible"
