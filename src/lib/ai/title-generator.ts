@@ -37,6 +37,9 @@ Title:`,
     });
 
     const title = result.text.trim().replace(/^["']|["']$/g, "");
+    if (!title) {
+      return "New chat";
+    }
     return title.length > 50 ? title.substring(0, 47) + "..." : title;
   } catch (error) {
     logger.error("Failed to generate chat title:", error);
