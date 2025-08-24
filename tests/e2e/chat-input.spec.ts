@@ -79,7 +79,7 @@ test.describe("Main Chat Input", () => {
     const previewsContainer = page.locator("div:has(> div.flex.flex-nowrap)");
 
     const attachmentChips = previewsContainer.locator(
-      "div.group.flex.items-center.gap-2.border.rounded-md.p-2.bg-background.relative.shrink-0",
+      "div.flex.items-center.gap-2.border.rounded-md.p-2.bg-background.relative.shrink-0",
     );
     await expect(attachmentChips).toHaveCount(2);
 

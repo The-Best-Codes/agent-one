@@ -75,7 +75,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
       <Button
         variant={activeChatId === id ? "secondary" : "ghost"}
         className={cn(
-          "w-full justify-between group py-2 pr-2 transition-none",
+          "w-full justify-between group/chat-item py-2 pr-2 transition-none",
           isEditing && "pl-2",
         )}
       >
@@ -96,7 +96,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
           className={`shrink-0 overflow-hidden flex items-center gap-1 ${
             isEditing || isDeleteDialogOpen
               ? "w-13 h-12"
-              : "size-0 group-hover:w-13 group-hover:h-12 focus-within:w-13 focus-within:h-12 focus-within:overflow-visible"
+              : "size-0 group-hover/chat-item:w-13 group-hover/chat-item:h-12 focus-within:w-13 focus-within:h-12 focus-within:overflow-visible"
           }`}
         >
           {isEditing ? (

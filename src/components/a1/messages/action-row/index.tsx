@@ -18,7 +18,7 @@ export const MessageActionRow = ({
   return (
     <div
       className={cn(
-        "mt-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100 transition-opacity duration-300 ease flex gap-1",
+        "mt-1 opacity-0 group-hover/message:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100 transition-opacity duration-300 ease flex gap-1",
         messageRole !== "user" && "ml-2",
       )}
     >

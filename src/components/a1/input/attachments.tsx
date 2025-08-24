@@ -50,7 +50,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
         {Array.from(files).map((file, index) => (
           <div
             key={index}
-            className="group flex items-center gap-2 border rounded-md p-2 bg-background relative shrink-0 min-w-0"
+            className="flex items-center gap-2 border rounded-md p-2 bg-background relative shrink-0 min-w-0"
           >
             {previews[index]?.type === "image" ? (
               <div className="relative h-12 w-12 rounded-md overflow-hidden border">

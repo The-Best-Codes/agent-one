@@ -7,6 +7,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import {
+  ChevronDownIcon,
   ExternalLinkIcon,
   Loader2Icon,
   SearchIcon,
@@ -41,7 +42,9 @@ interface WebSearchResult {
 
 export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
   const callId = part.toolCallId;
-  const [accordionValue, setAccordionValue] = useState<string | undefined>();
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
+    boolean | undefined
+  >();
 
   switch (part.state) {
     case "input-streaming":
@@ -86,20 +89,38 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <Accordion
           type="single"
           collapsible
-          onValueChange={(value) => setAccordionValue(value)}
+          onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
           className="bg-transparent text-foreground text-sm p-0"
         >
-          {/* TODO: Put chevron icon in accordion on the left? */}
           <AccordionItem
             value={callId}
             className={cn(
-              "rounded-md w-fit transition-all duration-300",
-              accordionValue === callId ? "bg-muted p-2" : "",
+              "rounded-md w-fit transition-all duration-300 group/web-search-accordion",
+              isMainAccordionOpen ? "bg-muted p-2" : "",
             )}
           >
-            <AccordionTrigger className="p-0 gap-2 hover:no-underline font-bold">
+            <AccordionTrigger
+              icon={
+                <div className="relative">
+                  <SearchIcon
+                    className={cn(
+                      "group-hover/web-search-accordion:hidden inline absolute inset-0 size-4 shrink-0 text-foreground",
+                      isMainAccordionOpen && "hidden",
+                    )}
+                  />
+                  <ChevronDownIcon
+                    className={cn(
+                      "hidden group-hover/web-search-accordion:inline absolute inset-0 size-4 shrink-0 text-foreground",
+                      isMainAccordionOpen && "inline",
+                    )}
+                  />
+                </div>
+              }
+              iconPosition="left"
+              shouldRotateIcon={true}
+              className="p-0 gap-1 justify-start hover:no-underline font-bold"
+            >
               <p className="flex flex-row items-center gap-1">
-                <SearchIcon className="size-4 shrink-0 text-foreground" />
                 <span className="max-w-2xl truncate">
                   Found {result.total_results} results for "{result.query}"
                 </span>

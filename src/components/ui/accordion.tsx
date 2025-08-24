@@ -1,5 +1,4 @@
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDownIcon } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -23,23 +22,70 @@ function AccordionItem({
   );
 }
 
+const AccordionTriggerIconWrapper = React.forwardRef<
+  HTMLSpanElement,
+  React.ComponentPropsWithoutRef<"span">
+>(({ className, ...props }, ref) => (
+  <span
+    ref={ref}
+    data-slot="accordion-icon"
+    className={cn(
+      "text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200",
+      className,
+    )}
+    {...props}
+  />
+));
+AccordionTriggerIconWrapper.displayName = "AccordionTriggerIconWrapper";
+
+interface AccordionTriggerProps
+  extends React.ComponentProps<typeof AccordionPrimitive.Trigger> {
+  /**
+   * Optional custom icon to display. If not provided (undefined or null), no icon will be rendered.
+   * You can pass any ReactNode here (e.g., `<ChevronDownIcon />`, `<YourCustomIcon />`, or a string).
+   */
+  icon?: React.ReactNode;
+  /**
+   * Position of the icon relative to the children content. Defaults to "right".
+   * This prop is only effective if the `icon` prop is provided.
+   */
+  iconPosition?: "left" | "right";
+  /**
+   * Whether the icon should rotate when the accordion is open. Defaults to false.
+   * This prop is only effective if the `icon` prop is provided.
+   */
+  shouldRotateIcon?: boolean;
+}
+
 function AccordionTrigger({
   className,
   children,
+  icon,
+  iconPosition = "right",
+  shouldRotateIcon = false,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Trigger>) {
+}: AccordionTriggerProps) {
+  const shouldRenderIcon = icon !== undefined && icon !== null;
+
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180",
+          "focus-visible:border-ring focus-visible:ring-ring/50 flex flex-1 items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50",
+          shouldRotateIcon &&
+            "[&[data-state=open]>[data-slot='accordion-icon']]:rotate-180",
           className,
         )}
         {...props}
       >
+        {iconPosition === "left" && shouldRenderIcon && (
+          <AccordionTriggerIconWrapper>{icon}</AccordionTriggerIconWrapper>
+        )}
         {children}
-        <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4 shrink-0 translate-y-0.5 transition-transform duration-200" />
+        {iconPosition === "right" && shouldRenderIcon && (
+          <AccordionTriggerIconWrapper>{icon}</AccordionTriggerIconWrapper>
+        )}
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   );
