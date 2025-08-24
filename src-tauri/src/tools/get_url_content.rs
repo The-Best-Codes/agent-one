@@ -1,8 +1,10 @@
-use super::utils::{DEFAULT_TIMEOUT_SECONDS, MAX_CONTENT_LENGTH, MAX_TIMEOUT_SECONDS};
+use super::constants::{DEFAULT_TIMEOUT_SECONDS, MAX_CONTENT_LENGTH, MAX_TIMEOUT_SECONDS};
+use crate::utils::headless_webview::fetch_url_with_webview;
 use htmd::HtmlToMarkdown;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use tauri::AppHandle;
 use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
@@ -24,16 +26,91 @@ pub struct UrlContentResponse {
 
 #[tauri::command]
 pub async fn get_url_content(
+    app: AppHandle,
     url: String,
     format: String,
     max_length: usize,
     timeout_seconds: Option<u64>,
+    use_webview: Option<bool>,
 ) -> Result<UrlContentResponse, String> {
     let timeout_seconds = timeout_seconds
         .unwrap_or(DEFAULT_TIMEOUT_SECONDS)
         .min(MAX_TIMEOUT_SECONDS);
 
     let max_length = max_length.min(MAX_CONTENT_LENGTH);
+    let use_webview = use_webview.unwrap_or(true);
+
+    if use_webview {
+        match fetch_url_with_webview(app, url.clone(), timeout_seconds).await {
+            Ok(webview_result) => {
+                if webview_result.success {
+                    if let Some(html_content) = webview_result.content {
+                        let processed_content = match format.as_str() {
+                            "markdown" => {
+                                let mut converter_builder = HtmlToMarkdown::builder();
+                                converter_builder = converter_builder
+                                    .skip_tags(vec!["script", "style", "link", "meta"]);
+                                let converter = converter_builder.build();
+
+                                let mut markdown_output =
+                                    converter.convert(&html_content).map_err(|e| {
+                                        format!("Failed to convert HTML to markdown: {e}")
+                                    })?;
+
+                                markdown_output = BLANK_LINE_REGEX
+                                    .replace_all(&markdown_output, "\n\n")
+                                    .to_string();
+
+                                markdown_output
+                            }
+                            "raw" => html_content,
+                            _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
+                        };
+
+                        let (mut final_content, truncated) = if processed_content.len() > max_length
+                        {
+                            let mut byte_idx = 0;
+                            for (idx, _) in processed_content.char_indices() {
+                                if idx >= max_length {
+                                    break;
+                                }
+                                byte_idx = idx;
+                            }
+
+                            if byte_idx == 0 && max_length > 0 && !processed_content.is_empty() {
+                                byte_idx = processed_content.chars().next().unwrap().len_utf8();
+                                if byte_idx > max_length {
+                                    byte_idx = max_length;
+                                }
+                            }
+
+                            (processed_content[..byte_idx].to_string(), true)
+                        } else {
+                            (processed_content, false)
+                        };
+
+                        if truncated {
+                            final_content = format!(
+                                "{final_content}...\n\n[Content truncated at {max_length} bytes]"
+                            );
+                        }
+
+                        return Ok(UrlContentResponse {
+                            content: final_content.clone(),
+                            title: webview_result.title,
+                            url: webview_result.url,
+                            format,
+                            length: final_content.len(),
+                            truncated,
+                        });
+                    }
+                }
+            }
+            Err(_) => {
+                // If webview failed, fall back to HTTP method
+            }
+        }
+    }
 
     let emulation = Emulation::Chrome137;
 

@@ -19,7 +19,7 @@ interface UrlContentResponse {
 export const GetUrlContentTool = tool({
   name: "getUrlContent",
   description:
-    "Fetch and extract content from URLs (up to 5 at once). Can return content as markdown or raw text.",
+    "Fetch and extract content from URLs (up to 5 at once). Can return content as markdown or raw text. Uses webview by default for better JavaScript support.",
   inputSchema: z.object({
     urls: z
       .array(z.string())
@@ -45,6 +45,11 @@ export const GetUrlContentTool = tool({
       .default(30)
       .optional()
       .describe("Timeout in seconds per URL"),
+    useWebview: z
+      .boolean()
+      .default(true)
+      .optional()
+      .describe("Use webview for fetching (better for JS-heavy sites, fallback to HTTP if fails)"),
   }),
   execute: async (input, { abortSignal }) => {
     const timeoutMs = (input.timeoutSeconds || 30) * 1000 + 5000;
@@ -80,6 +85,7 @@ export const GetUrlContentTool = tool({
           format: input.format,
           maxLength: input.maxLength,
           timeoutSeconds: input.timeoutSeconds,
+          useWebview: input.useWebview,
           signal: abortSignal,
         });
 
