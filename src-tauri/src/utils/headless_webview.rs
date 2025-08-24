@@ -5,13 +5,14 @@ use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tokio::sync::{oneshot, Mutex};
 use tokio::time::{sleep, timeout, Duration};
 
-static WEBVIEW_TIMEOUTS: once_cell::sync::Lazy<
-    Arc<Mutex<HashMap<String, tokio::task::JoinHandle<()>>>>,
-> = once_cell::sync::Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
+type WebviewTimeoutHandleMap = Arc<Mutex<HashMap<String, tokio::task::JoinHandle<()>>>>;
+type WebviewChannelMap = Arc<Mutex<HashMap<String, oneshot::Sender<String>>>>;
 
-static WEBVIEW_CHANNELS: once_cell::sync::Lazy<
-    Arc<Mutex<HashMap<String, oneshot::Sender<String>>>>,
-> = once_cell::sync::Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
+static WEBVIEW_TIMEOUTS: once_cell::sync::Lazy<WebviewTimeoutHandleMap> =
+    once_cell::sync::Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
+
+static WEBVIEW_CHANNELS: once_cell::sync::Lazy<WebviewChannelMap> =
+    once_cell::sync::Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WebviewFetchResult {
