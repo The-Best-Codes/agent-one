@@ -31,3 +31,4 @@ tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 wreq = { version = "5.3.0", features = ["json", "gzip", "brotli", "deflate", "cookies"] }
 wreq-util = "2.2.6"
 html-escape = "0.2.13"
+urlencoding = "2.1.3"

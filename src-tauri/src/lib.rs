@@ -8,6 +8,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             tools::get_url_content,
+            tools::web_search,
             utils::webview_html_callback,
             utils::list_webviews,
             utils::force_close_webview,
