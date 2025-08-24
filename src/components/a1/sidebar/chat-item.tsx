@@ -85,7 +85,8 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
             onChange={(e) => setEditTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             onClick={handleInputClick}
-            className="h-5 text-sm font-normal bg-background border-none shadow-none p-0 px-1 ml-1 rounded-md"
+            // TODO: h-5 solves text shifting issues, but h-6 is more consistent with other elements. Resolve this.
+            className="h-6 text-sm font-normal bg-background border-none shadow-none p-0 px-1 ml-1 rounded-md"
             autoFocus
           />
         ) : (
@@ -93,7 +94,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
         )}
 
         <div
-          className={`shrink-0 overflow-hidden flex items-center gap-1 ${
+          className={`shrink-0 overflow-hidden flex items-center gap-1 transition-all duration-200 ${
             isEditing || isDeleteDialogOpen
               ? "w-13 h-12"
               : "size-0 group-hover/chat-item:w-13 group-hover/chat-item:h-12 focus-within:w-13 focus-within:h-12 focus-within:overflow-visible"
