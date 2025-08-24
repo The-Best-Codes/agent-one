@@ -110,7 +110,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                   />
                   <ChevronDownIcon
                     className={cn(
-                      "hidden group-hover/web-search-accordion:inline absolute inset-0 size-4 shrink-0 text-foreground",
+                      "group-hover/web-search-accordion:inline hidden absolute inset-0 size-4 shrink-0 text-foreground",
                       isMainAccordionOpen && "inline",
                     )}
                   />
