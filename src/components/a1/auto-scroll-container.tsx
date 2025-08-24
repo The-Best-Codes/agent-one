@@ -143,7 +143,7 @@ export const AutoScrollContainer = forwardRef<
             size="icon"
             onClick={handleScrollButtonClick}
             className={cn(
-              "absolute bottom-4 right-4 z-10 hover:opacity-75",
+              "absolute right-4 bottom-4 z-10 hover:opacity-75",
               scrollButtonClassName,
             )}
             variant="secondary"

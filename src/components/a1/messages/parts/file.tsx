@@ -11,16 +11,16 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
 
   if (isImage) {
     return (
-      <div className="max-w-48 rounded-md overflow-hidden border">
+      <div className="max-w-48 overflow-hidden rounded-md border">
         <img
           src={file.url}
           alt={file.filename || "Attached image"}
-          className="w-full h-auto"
+          className="h-auto w-full"
           loading="lazy"
         />
         {file.filename && (
-          <div className="p-2 bg-background border-t">
-            <div className="text-xs text-muted-foreground flex items-center gap-1">
+          <div className="bg-background border-t p-2">
+            <div className="text-muted-foreground flex items-center gap-1 text-xs">
               <FileImageIcon className="h-3 w-3" />
               <span className="truncate">{file.filename}</span>
             </div>
@@ -32,16 +32,16 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
 
   if (isPdf) {
     return (
-      <div className="max-w-48 border rounded-md overflow-hidden">
+      <div className="max-w-48 overflow-hidden rounded-md border">
         <iframe
           src={file.url}
           title={file.filename || "PDF Document"}
-          className="w-full h-96 border-0"
+          className="h-96 w-full border-0"
           sandbox="allow-scripts allow-same-origin"
         />
         {file.filename && (
-          <div className="p-2 bg-background border-t">
-            <div className="text-xs text-muted-foreground flex items-center gap-1">
+          <div className="bg-background border-t p-2">
+            <div className="text-muted-foreground flex items-center gap-1 text-xs">
               <FileIcon className="h-3 w-3" />
               <span className="truncate">{file.filename} &middot; PDF</span>
             </div>
@@ -53,7 +53,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
 
   const getFileIcon = () => {
     if (isText) return <FileTextIcon className="h-5 w-5" />;
-    return <FileIcon className="h-5 w-5 text-muted-foreground" />;
+    return <FileIcon className="text-muted-foreground h-5 w-5" />;
   };
 
   const getFileTypeLabel = () => {
@@ -63,15 +63,15 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 border rounded-md bg-background max-w-48">
-      <div className="h-12 w-12 flex items-center justify-center bg-background rounded-md border">
+    <div className="bg-background flex max-w-48 items-center gap-2 rounded-md border p-2">
+      <div className="bg-background flex h-12 w-12 items-center justify-center rounded-md border">
         {getFileIcon()}
       </div>
-      <div className="flex flex-col overflow-hidden min-w-0 flex-1">
-        <span className="text-sm font-medium truncate" title={file.filename}>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <span className="truncate text-sm font-medium" title={file.filename}>
           {file.filename || "Attached file"}
         </span>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-1 text-xs">
           <span>{getFileTypeLabel()}</span>
           {file.mediaType && (
             <>

@@ -22,8 +22,8 @@ export const MainInputErrorSection = () => {
   }
 
   return (
-    <div className="w-full flex flex-row items-center justify-between bg-destructive text-primary-foreground rounded-none md:rounded-md p-2 mb-0 md:mb-2 gap-2">
-      <span className="max-w-full max-h-10 overflow-auto">
+    <div className="bg-destructive text-primary-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none p-2 md:mb-2 md:rounded-md">
+      <span className="max-h-10 max-w-full overflow-auto">
         {errorText || "An unknown error occurred"}
       </span>
       <div className="flex flex-row items-center gap-2">
@@ -37,7 +37,7 @@ export const MainInputErrorSection = () => {
             </TooltipTrigger>
             <TooltipContent
               side="right"
-              className="max-w-48 max-h-48 overflow-auto"
+              className="max-h-48 max-w-48 overflow-auto"
             >
               Discards the last AI message (if any) and retries
             </TooltipContent>

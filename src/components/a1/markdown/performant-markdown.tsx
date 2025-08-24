@@ -31,7 +31,7 @@ export const PerformantMarkdown = memo(({ content }: { content: string }) => {
         theme={resolvedTheme === "dark" ? "dark" : "light"}
         value={content || "No content detected to display"}
         maxHeight="384px"
-        className="bg-transparent text-sm w-full"
+        className="w-full bg-transparent text-sm"
         extensions={[
           markdown({ base: markdownLanguage }),
           editorTheme,

@@ -19,9 +19,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
+            <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
-          <span className="text-sm font-bold text-foreground">
+          <span className="text-foreground text-sm font-bold">
             Checking date and time...
           </span>
         </div>
@@ -31,9 +31,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div
           key={callId}
-          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+          className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
+          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">Checking date and time...</span>
         </div>
       );
@@ -42,9 +42,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div
           key={callId}
-          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+          className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <CalendarDaysIcon className="size-4 shrink-0 text-foreground" />
+          <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             Checked date and time ({output?.formatted})
           </span>
@@ -54,10 +54,10 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="size-4 shrink-0 text-destructive" />
-          <span className="text-sm font-bold text-destructive">
+          <XCircleIcon className="text-destructive size-4 shrink-0" />
+          <span className="text-destructive text-sm font-bold">
             Error getting date and time:{" "}
-            <span className="font-normal text-destructive/80">
+            <span className="text-destructive/80 font-normal">
               {part?.errorText || "Unknown error"}
             </span>
           </span>
@@ -67,8 +67,8 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <CalendarDaysIcon className="size-4 shrink-0 text-foreground" />
-          <span className="text-sm font-bold text-foreground">
+          <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">
             Unknown dateTime tool state
           </span>
         </div>

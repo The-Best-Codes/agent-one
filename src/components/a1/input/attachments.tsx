@@ -46,33 +46,33 @@ export const Attachments: React.FC<AttachmentsProps> = ({
 
   return (
     <div className="p-2 pt-0">
-      <div className="flex flex-nowrap gap-2 pb-2 max-h-28 max-w-full overflow-x-auto overflow-y-hidden">
+      <div className="flex max-h-28 max-w-full flex-nowrap gap-2 overflow-x-auto overflow-y-hidden pb-2">
         {Array.from(files).map((file, index) => (
           <div
             key={index}
-            className="flex items-center gap-2 border rounded-md p-2 bg-background relative shrink-0 min-w-0"
+            className="bg-background relative flex min-w-0 shrink-0 items-center gap-2 rounded-md border p-2"
           >
             {previews[index]?.type === "image" ? (
-              <div className="relative h-12 w-12 rounded-md overflow-hidden border">
+              <div className="relative h-12 w-12 overflow-hidden rounded-md border">
                 <img
                   src={previews[index].url}
                   alt={file.name}
-                  className="object-cover w-full h-full"
+                  className="h-full w-full object-cover"
                 />
               </div>
             ) : (
-              <div className="h-12 w-12 flex items-center justify-center bg-muted/70 rounded-md border relative">
-                <FileIcon className="h-6 w-6 text-muted-foreground" />
+              <div className="bg-muted/70 relative flex h-12 w-12 items-center justify-center rounded-md border">
+                <FileIcon className="text-muted-foreground h-6 w-6" />
               </div>
             )}
-            <div className="flex flex-col overflow-hidden min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
               <span
-                className="text-sm font-medium truncate max-w-36"
+                className="max-w-36 truncate text-sm font-medium"
                 title={file.name}
               >
                 {file.name}
               </span>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex items-center gap-2 text-xs">
                 <span>{formatBytes(file.size)}</span>
                 {file.type && (
                   <>
@@ -87,7 +87,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
               size="icon"
               variant="ghost"
               onClick={() => handleRemove(index)}
-              className="h-6 w-6 opacity-60 hover:opacity-100 transition-opacity shrink-0"
+              className="h-6 w-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
               title="Remove file"
             >
               <X className="h-3 w-3" />

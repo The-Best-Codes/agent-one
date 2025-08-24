@@ -199,11 +199,11 @@ export const MainChatInput = ({
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="relative w-full flex flex-col bg-secondary pr-2 pt-2 rounded-none md:rounded-md md:rounded-b-none border-0 border-t-1 md:border md:border-b-0 border-input focus-within:border-ring md:focus-within:ring-[3px] focus-within:ring-ring/50"
+        className="bg-secondary border-input focus-within:border-ring focus-within:ring-ring/50 relative flex w-full flex-col rounded-none border-0 border-t-1 pt-2 pr-2 md:rounded-md md:rounded-b-none md:border md:border-b-0 md:focus-within:ring-[3px]"
       >
         {isDragging && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-md rounded-b-none border-2 border-dashed border-primary bg-background/80 backdrop-blur-sm">
-            <p className="text-lg font-semibold text-primary">
+          <div className="border-primary bg-background/80 absolute inset-0 z-20 flex items-center justify-center rounded-md rounded-b-none border-2 border-dashed backdrop-blur-sm">
+            <p className="text-primary text-lg font-semibold">
               Drop files to attach
             </p>
           </div>
@@ -283,7 +283,7 @@ export const MainChatInput = ({
             }}
           />
         </div>
-        <div className="bg-secondary dark:bg-secondary p-2 pr-0 rounded-b-md rounded-t-none flex justify-between items-center">
+        <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
           <div className="relative">
             <Button
               data-testid="attach-button"

@@ -41,7 +41,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-label={`Model: ${currentModel.name}`}
         >
           <div className="flex flex-row items-center">
-            <span className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground text-xs">
               {currentModel.provider}/
             </span>
             <span className="font-medium">{currentModel.name}</span>
@@ -72,7 +72,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                   }}
                 >
                   <div className="flex flex-row items-center">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {model.provider}/
                     </span>
                     <span className="font-medium">{model.name}</span>

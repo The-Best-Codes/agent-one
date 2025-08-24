@@ -16,7 +16,7 @@ export const MessagePartReasoning = ({
       <Accordion type="single" collapsible>
         <AccordionItem value="reasoning">
           <AccordionTrigger className="w-fit py-2">Reasoning</AccordionTrigger>
-          <AccordionContent className="prose dark:prose-invert prose-sm text-base prose-neutral prose-code:select-all">
+          <AccordionContent className="prose dark:prose-invert prose-sm prose-neutral prose-code:select-all text-base">
             <pre>{text}</pre>
           </AccordionContent>
         </AccordionItem>

@@ -48,9 +48,9 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
+            <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
-          <span className="text-sm font-bold text-foreground">
+          <span className="text-foreground text-sm font-bold">
             Waiting a bit...
           </span>
         </div>
@@ -60,9 +60,9 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div
           key={callId}
-          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+          className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
+          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
             Waiting {safeFormatMilliseconds(input?.milliseconds)}...
           </span>
@@ -73,9 +73,9 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div
           key={callId}
-          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+          className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <ClockIcon className="size-4 shrink-0 text-foreground" />
+          <ClockIcon className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             Waited {safeFormatMilliseconds(input?.milliseconds)}
           </span>
@@ -85,10 +85,10 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="size-4 shrink-0 text-destructive" />
-          <span className="text-sm font-bold text-destructive">
+          <XCircleIcon className="text-destructive size-4 shrink-0" />
+          <span className="text-destructive text-sm font-bold">
             An error occurred while waiting:{" "}
-            <span className="font-normal text-destructive/80">
+            <span className="text-destructive/80 font-normal">
               {part?.errorText || "Unknown error"}
             </span>
           </span>
@@ -98,8 +98,8 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <ClockIcon className="size-4 shrink-0 text-foreground" />
-          <span className="text-sm font-bold text-foreground">
+          <ClockIcon className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">
             Unknown waitNumberMilliseconds tool state
           </span>
         </div>

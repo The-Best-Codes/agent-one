@@ -62,7 +62,7 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   }
 
   return (
-    <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
+    <pre className="max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-xs">
       <code className="text-white">{code}</code>
     </pre>
   );

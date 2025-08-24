@@ -22,12 +22,12 @@ const SidebarContent = ({
   hideCollapseButton?: boolean;
 }) => {
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex h-full flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         <ChatList />
       </div>
 
-      <div className="pt-2 border-t border-sidebar-border flex flex-col items-center justify-center gap-2">
+      <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 border-t pt-2">
         <ModelSelector className="w-full" popoverClassName="w-full" />
         <ThemeTabs className="w-full" />
 
@@ -54,13 +54,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
     return (
       <aside
         className={cn(
-          "h-full bg-sidebar border-r border-sidebar-border flex flex-col p-2",
+          "bg-sidebar border-sidebar-border flex h-full flex-col border-r p-2",
           isCollapsed ? "w-13 items-center" : "w-64",
           className,
         )}
       >
         {isCollapsed ? (
-          <div className="flex-1 flex flex-col items-center justify-end">
+          <div className="flex flex-1 flex-col items-center justify-end">
             <Button
               variant="outline"
               size="icon"
@@ -72,7 +72,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           </div>
         ) : (
           <>
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex min-h-0 flex-1 flex-col">
               <SidebarContent setIsCollapsed={setIsCollapsed} />
             </div>
           </>
@@ -84,7 +84,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   return (
     <aside
       className={cn(
-        "w-13 p-2 h-full bg-sidebar border-r border-sidebar-border flex flex-col items-center justify-end",
+        "bg-sidebar border-sidebar-border flex h-full w-13 flex-col items-center justify-end border-r p-2",
         className,
       )}
     >
@@ -94,7 +94,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <ChevronRightIcon />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="!max-w-64 h-full p-2 bg-sidebar border-r border-sidebar-border">
+        <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
           <SidebarContent setIsCollapsed={setIsCollapsed} hideCollapseButton />
         </DrawerContent>
       </Drawer>

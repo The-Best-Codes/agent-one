@@ -50,8 +50,8 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Loader2Icon className="size-4 shrink-0 text-foreground animate-spin" />{" "}
-          <span className="text-sm font-bold text-foreground">
+          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />{" "}
+          <span className="text-foreground text-sm font-bold">
             Preparing web search...
           </span>
         </div>
@@ -63,7 +63,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
 
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
-          <Loader2Icon className="size-4 shrink-0 animate-spin text-foreground" />
+          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
             Searching online for "{query}"...
           </span>
@@ -77,7 +77,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       if (!result.success) {
         return (
           <div key={callId} className="flex flex-row items-center gap-1">
-            <XCircleIcon className="size-4 shrink-0 text-destructive" />{" "}
+            <XCircleIcon className="text-destructive size-4 shrink-0" />{" "}
             <span className="max-w-2xl truncate">
               Web search failed for "{result.query || "unknown query"}"
             </span>
@@ -90,13 +90,13 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           type="single"
           collapsible
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-          className="bg-transparent text-foreground text-sm p-0"
+          className="text-foreground bg-transparent p-0 text-sm"
         >
           <AccordionItem
             value={callId}
             className={cn(
-              "rounded-md w-fit transition-[padding] duration-200 group/web-search-accordion border-0 border-border",
-              isMainAccordionOpen && "p-2 border-1 !border-b-1",
+              "group/web-search-accordion border-border w-fit rounded-md border-0 transition-[padding] duration-200",
+              isMainAccordionOpen && "border-1 !border-b-1 p-2",
             )}
           >
             <AccordionTrigger
@@ -104,13 +104,13 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 <div className="relative">
                   <SearchIcon
                     className={cn(
-                      "group-hover/web-search-accordion:hidden inline absolute inset-0 size-4 shrink-0 text-foreground",
+                      "text-foreground absolute inset-0 inline size-4 shrink-0 group-hover/web-search-accordion:hidden",
                       isMainAccordionOpen && "hidden",
                     )}
                   />
                   <ChevronDownIcon
                     className={cn(
-                      "group-hover/web-search-accordion:inline hidden absolute inset-0 size-4 shrink-0 text-foreground",
+                      "text-foreground absolute inset-0 hidden size-4 shrink-0 group-hover/web-search-accordion:inline",
                       isMainAccordionOpen && "inline",
                     )}
                   />
@@ -118,7 +118,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               }
               iconPosition="left"
               shouldRotateIcon={true}
-              className="p-0 gap-1 justify-start hover:no-underline font-bold"
+              className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <p className="flex flex-row items-center gap-1">
                 <span className="max-w-2xl truncate">
@@ -126,16 +126,16 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 </span>
               </p>
             </AccordionTrigger>
-            <AccordionContent className="pt-2 p-0 text-xs text-muted-foreground">
+            <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               {/* Removed pr-2 from the element below for now until I find a way to only show pr when it is overflowing */}
-              <div className="space-y-2 mt-1 max-h-96 overflow-y-auto">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="mt-1 max-h-96 space-y-2 overflow-y-auto">
+                <div className="text-muted-foreground flex items-center gap-2 text-xs">
                   {result.search_url && (
                     <a
                       href={result.search_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground flex items-center gap-1"
                     >
                       View on DuckDuckGo
                       <ExternalLinkIcon className="size-3" />
@@ -143,21 +143,21 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                   )}
                 </div>
                 {result.results?.map((searchResult, index) => (
-                  <div key={index} className="border rounded-md p-2">
+                  <div key={index} className="rounded-md border p-2">
                     <div className="space-y-1">
                       <a
                         href={searchResult.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-foreground hover:underline inline-block"
+                        className="text-foreground inline-block text-sm font-medium hover:underline"
                       >
                         {searchResult.title}
                       </a>
-                      <div className="text-xs text-muted-foreground font-mono">
+                      <div className="text-muted-foreground font-mono text-xs">
                         {searchResult.display_url}
                       </div>
                       {searchResult.snippet && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {searchResult.snippet}
                         </p>
                       )}
@@ -174,8 +174,8 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="size-4 shrink-0 text-destructive" />{" "}
-          <span className="text-sm font-bold text-destructive">
+          <XCircleIcon className="text-destructive size-4 shrink-0" />{" "}
+          <span className="text-destructive text-sm font-bold">
             Web search error:{" "}
             <span className="text-destructive/80 font-normal">
               {part?.errorText || "Unknown error"}
@@ -187,8 +187,8 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <SearchIcon className="size-4 shrink-0 text-muted-foreground" />{" "}
-          <span className="text-sm font-bold text-muted-foreground">
+          <SearchIcon className="text-muted-foreground size-4 shrink-0" />{" "}
+          <span className="text-muted-foreground text-sm font-bold">
             Web search
           </span>
         </div>

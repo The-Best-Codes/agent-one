@@ -25,17 +25,17 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   }, [chatId]);
 
   return (
-    <main className="h-screen flex" role="main" data-testid="main">
+    <main className="flex h-screen" role="main" data-testid="main">
       <Sidebar />
 
       <div
-        className="flex-1 flex flex-col items-center justify-center min-w-0"
+        className="flex min-w-0 flex-1 flex-col items-center justify-center"
         data-testid="chat-main"
       >
-        <div className="max-w-3xl w-full h-full flex-1 flex flex-col">
+        <div className="flex h-full w-full max-w-3xl flex-1 flex-col">
           <AutoScrollContainer
             ref={scrollRef}
-            className="flex-1 max-h-full mb-2 min-h-0 p-2 pl-0"
+            className="mb-2 max-h-full min-h-0 flex-1 p-2 pl-0"
             scrollableClassName="pr-2 h-full"
             scrollButtonClassName="mr-2"
             behavior="smooth"
@@ -45,7 +45,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               <div
                 key={message.id}
                 className={cn(
-                  "flex mb-4 last:mb-0",
+                  "mb-4 flex last:mb-0",
                   message.role === "user" ? "justify-end" : "justify-start",
                 )}
               >

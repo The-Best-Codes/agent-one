@@ -146,7 +146,7 @@ export const ChatList = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <div className="pb-2">
         <Button
           onClick={handleNewChat}
@@ -157,7 +157,7 @@ export const ChatList = () => {
           New Chat
         </Button>
       </div>
-      <nav className="flex-1 overflow-y-auto space-y-1">
+      <nav className="flex-1 space-y-1 overflow-y-auto">
         {chats.map((chat) => (
           <ChatItem key={chat.id} id={chat.id} title={chat.title} />
         ))}

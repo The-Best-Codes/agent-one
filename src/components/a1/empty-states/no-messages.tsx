@@ -25,8 +25,8 @@ export const NoMessagesGreeting = () => {
   }, []);
 
   return (
-    <div className="flex justify-center items-center h-full">
-      <h1 className="text-2xl text-center text-foreground select-none animate-in slide-in-from-bottom fade-in-0">
+    <div className="flex h-full items-center justify-center">
+      <h1 className="text-foreground animate-in slide-in-from-bottom fade-in-0 text-center text-2xl select-none">
         {currentPhrase}
       </h1>
     </div>

@@ -32,7 +32,7 @@ export const ChatMessageLoading = ({
     if (status === "submitted" && lastOverallMessage.role === "assistant") {
       return (
         <div className="justify-end">
-          <span className="animate-pulse text-muted-foreground">
+          <span className="text-muted-foreground animate-pulse">
             Thinking...
           </span>
         </div>
@@ -51,7 +51,7 @@ export const ChatMessageLoading = ({
       if (!lastOverallMessage || lastOverallMessage.role === "user") {
         return (
           <div className="justify-end p-2">
-            <span className="animate-pulse text-muted-foreground">
+            <span className="text-muted-foreground animate-pulse">
               Thinking...
             </span>
           </div>

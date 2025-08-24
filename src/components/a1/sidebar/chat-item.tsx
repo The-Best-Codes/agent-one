@@ -75,7 +75,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
       <Button
         variant={activeChatId === id ? "secondary" : "ghost"}
         className={cn(
-          "w-full justify-between group/chat-item py-2 pr-2 transition-none",
+          "group/chat-item w-full justify-between py-2 pr-2 transition-none",
           isEditing && "pl-2",
         )}
       >
@@ -86,7 +86,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
             onKeyDown={handleKeyDown}
             onClick={handleInputClick}
             // TODO: h-5 solves text shifting issues, but h-6 is more consistent with other elements. Resolve this.
-            className="h-6 text-sm font-normal bg-background border-none shadow-none p-0 px-1 ml-1 rounded-md"
+            className="bg-background ml-1 h-6 rounded-md border-none p-0 px-1 text-sm font-normal shadow-none"
             autoFocus
           />
         ) : (
@@ -94,10 +94,10 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
         )}
 
         <div
-          className={`shrink-0 overflow-hidden flex items-center gap-1 transition-[width,height] duration-200 ${
+          className={`flex shrink-0 items-center gap-1 overflow-hidden transition-[width,height] duration-200 ${
             isEditing || isDeleteDialogOpen
-              ? "w-13 h-12"
-              : "size-0 group-hover/chat-item:w-13 group-hover/chat-item:h-12 focus-within:w-13 focus-within:h-12 focus-within:overflow-visible"
+              ? "h-12 w-13"
+              : "size-0 group-hover/chat-item:h-12 group-hover/chat-item:w-13 focus-within:h-12 focus-within:w-13 focus-within:overflow-visible"
           }`}
         >
           {isEditing ? (
@@ -132,7 +132,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
               <Button
                 size="icon"
                 variant="default"
-                className="bg-transparent text-foreground hover:bg-primary hover:text-primary-foreground border-none shadow-none size-6"
+                className="text-foreground hover:bg-primary hover:text-primary-foreground size-6 border-none bg-transparent shadow-none"
                 onClick={handleEditChat}
               >
                 <PencilIcon />
@@ -146,13 +146,13 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
                   <Button
                     size="icon"
                     variant="default"
-                    className="text-destructive bg-transparent hover:text-white hover:bg-destructive border-none shadow-none size-6"
+                    className="text-destructive hover:bg-destructive size-6 border-none bg-transparent shadow-none hover:text-white"
                   >
                     <TrashIcon />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-auto flex gap-1 p-1"
+                  className="flex w-auto gap-1 p-1"
                   side="bottom"
                   align="center"
                   onClick={(e) => e.stopPropagation()}

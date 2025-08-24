@@ -132,12 +132,12 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     return (
       <div
         className={cn(
-          "w-full ml-2 flex flex-col p-2 border border-input rounded-md focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 bg-background",
+          "border-input focus-within:border-ring focus-within:ring-ring/50 bg-background ml-2 flex w-full flex-col rounded-md border p-2 focus-within:ring-[3px]",
         )}
       >
         <div className="flex flex-col">{renderedParts}</div>
 
-        <div className="flex justify-end items-center gap-2 mt-2">
+        <div className="mt-2 flex items-center justify-end gap-2">
           <Button
             size="sm"
             variant="outline"

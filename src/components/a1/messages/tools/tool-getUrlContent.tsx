@@ -72,9 +72,9 @@ export const MessagePartToolGetUrlContent = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
+            <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
-          <span className="text-sm font-bold text-foreground">
+          <span className="text-foreground text-sm font-bold">
             Browsing URLs...
           </span>
         </div>
@@ -84,9 +84,9 @@ export const MessagePartToolGetUrlContent = ({
       return (
         <div
           key={callId}
-          className="text-sm font-bold text-foreground flex flex-row items-center gap-1"
+          className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Loader2Icon className="size-4 animate-spin shrink-0 text-foreground" />
+          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
             {urlCount === 1
               ? `Browsing ${formatUrl(input?.urls?.[0] || "a website")}...`
@@ -99,10 +99,10 @@ export const MessagePartToolGetUrlContent = ({
       if (!output?.success) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="size-4 shrink-0 text-destructive" />
-            <span className="text-sm font-bold text-destructive max-w-2xl truncate">
+            <XCircleIcon className="text-destructive size-4 shrink-0" />
+            <span className="text-destructive max-w-2xl truncate text-sm font-bold">
               Failed to browse URLs:{" "}
-              <span className="font-normal text-destructive/80">
+              <span className="text-destructive/80 font-normal">
                 {output?.error || "Unknown error"}
               </span>
             </span>
@@ -119,10 +119,10 @@ export const MessagePartToolGetUrlContent = ({
         if (!result.success) {
           return (
             <div key={callId} className="flex items-center gap-1">
-              <XCircleIcon className="size-4 shrink-0 text-destructive" />
-              <span className="text-sm font-bold text-destructive max-w-2xl truncate">
+              <XCircleIcon className="text-destructive size-4 shrink-0" />
+              <span className="text-destructive max-w-2xl truncate text-sm font-bold">
                 Failed to browse {formatUrl(result.url)}:{" "}
-                <span className="font-normal text-destructive/80">
+                <span className="text-destructive/80 font-normal">
                   {result.error || "Unknown error"}
                 </span>
               </span>
@@ -131,8 +131,8 @@ export const MessagePartToolGetUrlContent = ({
         }
 
         return (
-          <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-            <GlobeIcon className="size-4 shrink-0 text-foreground" />
+          <p className="text-foreground flex flex-row items-center gap-1 text-sm font-bold">
+            <GlobeIcon className="text-foreground size-4 shrink-0" />
             <span className="max-w-2xl truncate">
               Browsed {formatUrl(result.url)}
             </span>
@@ -142,22 +142,22 @@ export const MessagePartToolGetUrlContent = ({
 
       return (
         <div key={callId} className="flex flex-col gap-1">
-          <p className="text-sm font-bold text-foreground flex flex-row items-center gap-1">
-            <GlobeIcon className="size-4 shrink-0 text-foreground" />
+          <p className="text-foreground flex flex-row items-center gap-1 text-sm font-bold">
+            <GlobeIcon className="text-foreground size-4 shrink-0" />
             <span>
               Browsed {results.length === 0 ? " " : `${results.length} `}URLs
               {failCount > 0 && ` (${failCount} failed)`}
             </span>
           </p>
           {results.map((result, index) => (
-            <div key={index} className="flex items-center gap-1 ml-4">
+            <div key={index} className="ml-4 flex items-center gap-1">
               {result.success ? (
-                <GlobeIcon className="size-3 shrink-0 text-foreground/60" />
+                <GlobeIcon className="text-foreground/60 size-3 shrink-0" />
               ) : (
-                <XCircleIcon className="size-3 shrink-0 text-destructive" />
+                <XCircleIcon className="text-destructive size-3 shrink-0" />
               )}
               <span
-                className={`text-xs max-w-2xl truncate ${
+                className={`max-w-2xl truncate text-xs ${
                   result.success ? "text-foreground/80" : "text-destructive"
                 }`}
               >
@@ -173,10 +173,10 @@ export const MessagePartToolGetUrlContent = ({
     case "output-error":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="size-4 shrink-0 text-destructive" />
-          <span className="text-sm font-bold text-destructive">
+          <XCircleIcon className="text-destructive size-4 shrink-0" />
+          <span className="text-destructive text-sm font-bold">
             Error fetching URL content:{" "}
-            <span className="font-normal text-destructive/80">
+            <span className="text-destructive/80 font-normal">
               {part?.errorText || "Unknown error"}
             </span>
           </span>
@@ -186,8 +186,8 @@ export const MessagePartToolGetUrlContent = ({
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <GlobeIcon className="size-4 shrink-0 text-foreground" />
-          <span className="text-sm font-bold text-foreground">
+          <GlobeIcon className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">
             Unknown getUrlContent tool state
           </span>
         </div>

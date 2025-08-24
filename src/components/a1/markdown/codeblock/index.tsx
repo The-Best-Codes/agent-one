@@ -23,7 +23,7 @@ const BestHighlighter = ({
 }) => {
   if (content.length > MAX_CHARS) {
     return (
-      <pre className="bg-[rgb(30,30,30)] text-xs p-2 max-w-full overflow-auto">
+      <pre className="max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-xs">
         <code className="text-white">{content}</code>
       </pre>
     );
@@ -42,7 +42,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
 
   return (
     <div
-      className="not-prose text-sm min-w-0 rounded-md last:mb-1"
+      className="not-prose min-w-0 rounded-md text-sm last:mb-1"
       style={{ clipPath: "inset(0 round 0.375rem)" }}
     >
       <div
@@ -51,27 +51,27 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
           messageRole === "user" ? "bg-secondary" : "bg-background",
         )}
       >
-        <div className="flex rounded-t-md items-center justify-between bg-[rgb(30,30,30)] text-xs p-0">
+        <div className="flex items-center justify-between rounded-t-md bg-[rgb(30,30,30)] p-0 text-xs">
           <span className="ml-2 font-mono text-white">{lang || "text"}</span>
           <div className="flex items-center">
             {isPreviewSupported && (
               <Button
                 size="icon"
                 onClick={togglePreview}
-                className="size-8 bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
+                className="size-8 bg-[rgb(30,30,30)] text-white hover:bg-[rgb(30,30,30)]"
                 aria-label={isPreviewMode ? "Stop preview" : "Preview code"}
               >
                 {isPreviewMode ? <SquareIcon /> : <PlayIcon />}
               </Button>
             )}
             <CopyButton
-              className="bg-[rgb(30,30,30)] hover:bg-[rgb(30,30,30)] text-white"
+              className="bg-[rgb(30,30,30)] text-white hover:bg-[rgb(30,30,30)]"
               text={content}
             />
           </div>
         </div>
       </div>
-      <div className="overflow-auto rounded-b-md shiki-container">
+      <div className="shiki-container overflow-auto rounded-b-md">
         {isPreviewMode && PreviewComponent ? (
           <PreviewComponent content={content} />
         ) : (

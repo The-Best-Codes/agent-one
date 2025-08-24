@@ -19,7 +19,7 @@ export const MessagePartText = ({
   if (!text) return null;
 
   return (
-    <div className="max-w-full rounded-md prose dark:prose-invert prose-sm text-base prose-neutral prose-code:select-all">
+    <div className="prose dark:prose-invert prose-sm prose-neutral prose-code:select-all max-w-full rounded-md text-base">
       {shouldUsePerformantRenderer ? (
         <>
           <Alert variant="destructive" className="mb-2">

@@ -18,7 +18,7 @@ export const MessageGroup = ({
   return (
     <div
       className={cn(
-        "flex flex-col group/message wrap-anywhere",
+        "group/message flex flex-col wrap-anywhere",
         messageRole === "user"
           ? "max-w-3/4 items-end"
           : "max-w-full items-start",
@@ -26,7 +26,7 @@ export const MessageGroup = ({
     >
       <div
         className={cn(
-          "rounded-md max-w-full flex flex-col gap-2",
+          "flex max-w-full flex-col gap-2 rounded-md",
           messageRole === "user"
             ? "bg-secondary text-secondary-foreground p-2"
             : "p-2 pb-0",

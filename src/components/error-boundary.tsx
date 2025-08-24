@@ -77,12 +77,12 @@ class ErrorBoundary extends React.Component<
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center p-4 w-screen min-h-screen overflow-auto">
+        <div className="flex min-h-screen w-screen items-center justify-center overflow-auto p-4">
           <Card className="w-full max-w-2xl">
             <CardHeader>
-              <div className="flex justify-between items-start">
+              <div className="flex items-start justify-between">
                 <div>
-                  <CardTitle className="text-xl text-destructive flex items-center gap-2">
+                  <CardTitle className="text-destructive flex items-center gap-2 text-xl">
                     <TriangleAlertIcon />
                     Something went wrong
                   </CardTitle>
@@ -117,14 +117,14 @@ class ErrorBoundary extends React.Component<
                     <span>Technical Details</span>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="rounded-md bg-muted p-3 font-mono text-sm overflow-auto max-h-96">
+                    <div className="bg-muted max-h-96 overflow-auto rounded-md p-3 font-mono text-sm">
                       {this.state.errorInfo?.componentStack}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
             </CardContent>
-            <CardFooter className="pt-4 flex justify-end gap-2 flex-wrap">
+            <CardFooter className="flex flex-wrap justify-end gap-2 pt-4">
               <div className="flex gap-2">
                 <Button variant="outline" onClick={this.handleReset}>
                   Try Again
