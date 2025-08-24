@@ -54,7 +54,7 @@ pub async fn create_fetch_webview(
         .resizable(false)
         .visible(true)
         .closable(false)
-        .skip_taskbar(true)
+        // .skip_taskbar(true)
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         .build()
         .map_err(|e| format!("Failed to create webview: {}", e))?;

@@ -10,7 +10,6 @@ use wreq::Client;
 use wreq_util::Emulation;
 
 // TODO: Truncate long image data URLs
-// TODO: If webview fails, fail the whole thing, don't fallback on wreq
 
 static BLANK_LINE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
 static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
@@ -42,75 +41,79 @@ pub async fn get_url_content(
     let use_webview = use_webview.unwrap_or(true);
 
     if use_webview {
-        match fetch_url_with_webview(app, url.clone(), timeout_seconds).await {
-            Ok(webview_result) => {
-                if webview_result.success {
-                    if let Some(html_content) = webview_result.content {
-                        let processed_content = match format.as_str() {
-                            "markdown" => {
-                                let mut converter_builder = HtmlToMarkdown::builder();
-                                converter_builder = converter_builder
-                                    .skip_tags(vec!["script", "style", "link", "meta"]);
-                                let converter = converter_builder.build();
+        let webview_result = fetch_url_with_webview(app, url.clone(), timeout_seconds)
+            .await
+            .map_err(|e| format!("Failed to fetch URL with webview: {e}"))?;
 
-                                let mut markdown_output =
-                                    converter.convert(&html_content).map_err(|e| {
-                                        format!("Failed to convert HTML to markdown: {e}")
-                                    })?;
+        if !webview_result.success {
+            return Err(format!(
+                "Webview reported failure for URL: {}",
+                webview_result.url
+            ));
+        }
 
-                                markdown_output = BLANK_LINE_REGEX
-                                    .replace_all(&markdown_output, "\n\n")
-                                    .to_string();
+        let html_content = webview_result.content.ok_or_else(|| {
+            format!(
+                "Webview reported success but returned no content for URL: {}",
+                webview_result.url
+            )
+        })?;
 
-                                markdown_output
-                            }
-                            "raw" => html_content,
-                            _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
-                        };
+        let processed_content = match format.as_str() {
+            "markdown" => {
+                let mut converter_builder = HtmlToMarkdown::builder();
+                converter_builder =
+                    converter_builder.skip_tags(vec!["script", "style", "link", "meta"]);
+                let converter = converter_builder.build();
 
-                        let (mut final_content, truncated) = if processed_content.len() > max_length
-                        {
-                            let mut byte_idx = 0;
-                            for (idx, _) in processed_content.char_indices() {
-                                if idx >= max_length {
-                                    break;
-                                }
-                                byte_idx = idx;
-                            }
+                let mut markdown_output = converter
+                    .convert(&html_content)
+                    .map_err(|e| format!("Failed to convert HTML to markdown: {e}"))?;
 
-                            if byte_idx == 0 && max_length > 0 && !processed_content.is_empty() {
-                                byte_idx = processed_content.chars().next().unwrap().len_utf8();
-                                if byte_idx > max_length {
-                                    byte_idx = max_length;
-                                }
-                            }
+                markdown_output = BLANK_LINE_REGEX
+                    .replace_all(&markdown_output, "\n\n")
+                    .to_string();
 
-                            (processed_content[..byte_idx].to_string(), true)
-                        } else {
-                            (processed_content, false)
-                        };
+                markdown_output
+            }
+            "raw" => html_content,
+            _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
+        };
 
-                        if truncated {
-                            final_content = format!(
-                                "{final_content}...\n\n[Content truncated at {max_length} bytes]"
-                            );
-                        }
+        let (mut final_content, truncated) = if processed_content.len() > max_length {
+            let mut byte_idx = 0;
+            for (idx, _) in processed_content.char_indices() {
+                if idx >= max_length {
+                    break;
+                }
+                byte_idx = idx;
+            }
 
-                        return Ok(UrlContentResponse {
-                            content: final_content.clone(),
-                            title: webview_result.title,
-                            url: webview_result.url,
-                            format,
-                            length: final_content.len(),
-                            truncated,
-                        });
-                    }
+            if byte_idx == 0 && max_length > 0 && !processed_content.is_empty() {
+                byte_idx = processed_content.chars().next().unwrap().len_utf8();
+                if byte_idx > max_length {
+                    byte_idx = max_length;
                 }
             }
-            Err(_) => {
-                // If webview failed, fall back to HTTP method
-            }
+
+            (processed_content[..byte_idx].to_string(), true)
+        } else {
+            (processed_content, false)
+        };
+
+        if truncated {
+            final_content =
+                format!("{final_content}...\n\n[Content truncated at {max_length} bytes]");
         }
+
+        return Ok(UrlContentResponse {
+            content: final_content.clone(),
+            title: webview_result.title,
+            url: webview_result.url,
+            format,
+            length: final_content.len(),
+            truncated,
+        });
     }
 
     let emulation = Emulation::Chrome137;
