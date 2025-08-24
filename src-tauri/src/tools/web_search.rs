@@ -1,6 +1,8 @@
 use super::constants::{DEFAULT_TIMEOUT_SECONDS, MAX_TIMEOUT_SECONDS};
+use crate::utils::headless_webview::fetch_url_with_webview;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use tauri::AppHandle;
 use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
@@ -23,48 +25,73 @@ pub struct WebSearchResponse {
 
 #[tauri::command]
 pub async fn web_search(
+    app: AppHandle,
     query: String,
     max_results: Option<usize>,
     timeout_seconds: Option<u64>,
+    use_webview: Option<bool>,
 ) -> Result<WebSearchResponse, String> {
     let timeout_seconds = timeout_seconds
         .unwrap_or(DEFAULT_TIMEOUT_SECONDS)
         .min(MAX_TIMEOUT_SECONDS);
 
     let max_results = max_results.unwrap_or(10).min(20); // Limit to 20 results max
+    let use_webview = use_webview.unwrap_or(true); // Default to webview
 
     let search_url = format!(
         "https://html.duckduckgo.com/html/?q={}",
         urlencoding::encode(&query)
     );
 
-    let emulation = Emulation::Chrome137;
+    let html = if use_webview {
+        // Use webview to avoid bot detection
+        let webview_result = fetch_url_with_webview(app, search_url.clone(), timeout_seconds)
+            .await
+            .map_err(|e| format!("Failed to fetch search results with webview: {}", e))?;
 
-    let client = Client::builder()
-        .emulation(emulation)
-        .cookie_store(true)
-        .redirect(wreq::redirect::Policy::limited(10))
-        .timeout(Duration::from_secs(timeout_seconds))
-        .connect_timeout(Duration::from_secs(10))
-        .build()
-        .map_err(|e| format!("Failed to build wreq client: {}", e))?;
+        if !webview_result.success {
+            return Err(format!(
+                "Webview reported failure for search URL: {}",
+                webview_result.url
+            ));
+        }
 
-    let response = timeout(
-        Duration::from_secs(timeout_seconds + 5),
-        client.get(&search_url).send(),
-    )
-    .await
-    .map_err(|_| "Request timed out".to_string())?
-    .map_err(|e| format!("Request failed: {}", e))?;
+        webview_result.content.ok_or_else(|| {
+            format!(
+                "Webview reported success but returned no content for search URL: {}",
+                webview_result.url
+            )
+        })?
+    } else {
+        // Fallback to HTTP client (may be detected as bot)
+        let emulation = Emulation::Chrome137;
 
-    if !response.status().is_success() {
-        return Err(format!("HTTP error: {}", response.status()));
-    }
+        let client = Client::builder()
+            .emulation(emulation)
+            .cookie_store(true)
+            .redirect(wreq::redirect::Policy::limited(10))
+            .timeout(Duration::from_secs(timeout_seconds))
+            .connect_timeout(Duration::from_secs(10))
+            .build()
+            .map_err(|e| format!("Failed to build wreq client: {}", e))?;
 
-    let html = response
-        .text()
+        let response = timeout(
+            Duration::from_secs(timeout_seconds + 5),
+            client.get(&search_url).send(),
+        )
         .await
-        .map_err(|e| format!("Failed to read response body: {}", e))?;
+        .map_err(|_| "Request timed out".to_string())?
+        .map_err(|e| format!("Request failed: {}", e))?;
+
+        if !response.status().is_success() {
+            return Err(format!("HTTP error: {}", response.status()));
+        }
+
+        response
+            .text()
+            .await
+            .map_err(|e| format!("Failed to read response body: {}", e))?
+    };
 
     let results = parse_search_results(&html, max_results)?;
 
@@ -77,6 +104,7 @@ pub async fn web_search(
 }
 
 fn parse_search_results(html: &str, max_results: usize) -> Result<Vec<SearchResult>, String> {
+    println!("HTML: {}", html);
     let mut results = Vec::new();
 
     // Compile all regexes outside the loop

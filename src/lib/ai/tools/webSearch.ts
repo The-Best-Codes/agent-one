@@ -43,6 +43,11 @@ export const WebSearchTool = tool({
       .default(30)
       .optional()
       .describe("Timeout in seconds for the search request"),
+    useWebview: z
+      .boolean()
+      .default(true)
+      .optional()
+      .describe("Use webview to avoid bot detection (recommended)"),
   }),
   execute: async (input, { abortSignal }) => {
     const timeoutMs = (input.timeoutSeconds || 30) * 1000 + 5000;
@@ -75,6 +80,7 @@ export const WebSearchTool = tool({
         query: input.query,
         maxResults: input.maxResults,
         timeoutSeconds: input.timeoutSeconds,
+        useWebview: input.useWebview,
       });
 
       const result = await Promise.race([searchPromise, timeoutPromise]);

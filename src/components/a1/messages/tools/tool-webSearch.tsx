@@ -8,6 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLinkIcon, SearchIcon } from "lucide-react";
 import type { ToolUIPart } from "ai";
 
+interface WebSearchInput {
+  query: string;
+  maxResults?: number;
+}
+
 interface WebSearchToolPartProps {
   part: ToolUIPart;
 }
@@ -42,9 +47,10 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         </div>
       );
 
-    case "input-available":
-      const query = part.input?.query || "Unknown query";
-      const maxResults = part.input?.maxResults || 10;
+    case "input-available": {
+      const input = part.input as WebSearchInput;
+      const query = input?.query || "Unknown query";
+      const maxResults = input?.maxResults || 10;
 
       return (
         <Accordion
@@ -65,16 +71,21 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               <div className="text-xs text-foreground/80">
                 <span className="font-medium">Search parameters:</span>
                 <div className="mt-1 space-y-1">
-                  <div>Query: <span className="font-mono">{query}</span></div>
-                  <div>Max results: <span className="font-mono">{maxResults}</span></div>
+                  <div>
+                    Query: <span className="font-mono">{query}</span>
+                  </div>
+                  <div>
+                    Max results: <span className="font-mono">{maxResults}</span>
+                  </div>
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
       );
+    }
 
-    case "output-available":
+    case "output-available": {
       const result = part.output as WebSearchResult;
 
       if (!result.success) {
@@ -89,14 +100,16 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 <p className="text-sm font-bold text-red-600 flex flex-row items-center gap-1">
                   <SearchIcon className="size-4 shrink-0" />
                   <span className="max-w-2xl truncate">
-                    Web search failed for "{result.query || 'unknown query'}"
+                    Web search failed for "{result.query || "unknown query"}"
                   </span>
                 </p>
               </AccordionTrigger>
               <AccordionContent className="pt-0 p-2">
                 <div className="text-sm text-red-600">
                   <div className="font-medium">Error:</div>
-                  <div className="mt-1">{result.error || "Unknown error occurred"}</div>
+                  <div className="mt-1">
+                    {result.error || "Unknown error occurred"}
+                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -137,7 +150,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                     </a>
                   )}
                 </div>
-                
+
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {result.results?.map((searchResult, index) => (
                     <div
@@ -170,6 +183,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           </AccordionItem>
         </Accordion>
       );
+    }
 
     case "output-error":
       return (
