@@ -27,7 +27,7 @@ const SidebarContent = ({
         <ChatList />
       </div>
 
-      <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 border-t pt-2">
+      <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
         <ModelSelector className="w-full" popoverClassName="w-full" />
         <ThemeTabs className="w-full" />
 

@@ -81,9 +81,10 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
   return (
     <Button
       variant={activeChatId === id ? "secondary" : "ghost"}
+      size="sm"
       className={cn(
-        "group/chat-item w-full justify-between py-2 pr-2 transition-none",
-        isEditing && "pl-2",
+        "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
+        isEditing && "pl-1",
       )}
       asChild
     >
@@ -94,7 +95,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
             onChange={(e) => setEditTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             onClick={handleInputClick}
-            className="bg-background ml-1 h-6 rounded-md border-none p-0 px-1 text-sm font-normal shadow-none"
+            className="bg-background m-0 h-6 rounded-md border-none p-0 px-1 text-sm font-normal shadow-none"
             autoFocus
           />
         ) : (
