@@ -1,8 +1,25 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/native/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
-import { GlobeIcon, Loader2Icon, XCircleIcon } from "lucide-react";
-
-// TODO: Use an accordion to allow expanding and viewing more tool info
-// See tool-webSearch.tsx for reference
+import {
+  ChevronDownIcon,
+  FileTextIcon,
+  GlobeIcon,
+  Loader2Icon,
+  XCircleIcon,
+} from "lucide-react";
+import { memo, useState } from "react";
 
 interface GetUrlContentInput {
   urls: string[];
@@ -33,37 +50,89 @@ interface GetUrlContentToolPartProps {
   part: ToolUIPart;
 }
 
+const formatUrl = (url: string) => {
+  try {
+    const urlObj = new URL(url);
+    let formattedUrl = urlObj.hostname;
+    if (urlObj.pathname !== "/") {
+      formattedUrl += urlObj.pathname;
+    }
+    if (urlObj.search) {
+      formattedUrl += urlObj.search;
+    }
+    if (formattedUrl.length > 50) {
+      formattedUrl = formattedUrl.slice(0, 47) + "...";
+    }
+    return formattedUrl;
+  } catch {
+    return url;
+  }
+};
+
+const UrlResultDisplay = memo(
+  ({ result, input }: { result: UrlResult; input: GetUrlContentInput }) => {
+    if (!result.success) {
+      return (
+        <div className="flex items-center gap-1">
+          <XCircleIcon className="text-destructive size-4 shrink-0" />
+          <span className="text-destructive max-w-2xl truncate text-sm font-bold">
+            Failed to browse {formatUrl(result.url)}
+          </span>
+        </div>
+      );
+    }
+
+    const isRawContent = result.format === "raw" || result.format === "text";
+
+    return (
+      <div className="flex items-center gap-1">
+        <GlobeIcon className="text-foreground size-4 shrink-0" />
+        <span className="text-foreground max-w-2xl truncate text-sm font-bold">
+          Browsed {formatUrl(result.url)}
+        </span>
+        <div className="flex items-center gap-1">
+          <TooltipProvider delayDuration={0}>
+            {isRawContent && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
+                </TooltipTrigger>
+                <TooltipContent>Fetched raw content</TooltipContent>
+              </Tooltip>
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className={cn(
+                    "size-2 shrink-0 rounded-full",
+                    result.truncated ? "bg-yellow-500" : "bg-green-500",
+                  )}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                {result.truncated
+                  ? `Truncated to ${input.maxLength || "unknown"} characters`
+                  : `${result.length || "All"} characters processed`}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+    );
+  },
+);
+
+UrlResultDisplay.displayName = "UrlResultDisplay";
+
 export const MessagePartToolGetUrlContent = ({
   part,
 }: GetUrlContentToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as GetUrlContentInput;
   const output = part.output as GetUrlContentOutput;
-
-  const formatUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url);
-      let formattedUrl = urlObj.hostname;
-      if (urlObj.pathname !== "/") {
-        formattedUrl += urlObj.pathname;
-      }
-      if (urlObj.search) {
-        formattedUrl += urlObj.search;
-      }
-      if (formattedUrl.length > 500) {
-        formattedUrl = formattedUrl.slice(0, 497) + "...";
-      }
-      return formattedUrl;
-    } catch {
-      return url;
-    }
-  };
-
-  // const formatLength = (length: number) => {
-  //   if (length < 1000) return `${length} chars`;
-  //   if (length < 1000000) return `${(length / 1000).toFixed(1)}K chars`;
-  //   return `${(length / 1000000).toFixed(1)}M chars`;
-  // };
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
+    boolean | undefined
+  >();
 
   const urlCount = input?.urls?.length || 0;
 
@@ -111,62 +180,65 @@ export const MessagePartToolGetUrlContent = ({
       }
 
       const results = output?.results || [];
-      const successCount = results.filter((r) => r.success).length;
-      const failCount = results.length - successCount;
 
       if (results.length === 1) {
-        const result = results[0];
-        if (!result.success) {
-          return (
-            <div key={callId} className="flex items-center gap-1">
-              <XCircleIcon className="text-destructive size-4 shrink-0" />
-              <span className="text-destructive max-w-2xl truncate text-sm font-bold">
-                Failed to browse {formatUrl(result.url)}:{" "}
-                <span className="text-destructive/80 font-normal">
-                  {result.error || "Unknown error"}
-                </span>
-              </span>
-            </div>
-          );
-        }
-
         return (
-          <p className="text-foreground flex flex-row items-center gap-1 text-sm font-bold">
-            <GlobeIcon className="text-foreground size-4 shrink-0" />
-            <span className="max-w-2xl truncate">
-              Browsed {formatUrl(result.url)}
-            </span>
-          </p>
+          <UrlResultDisplay key={callId} result={results[0]} input={input} />
         );
       }
 
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.length - successCount;
+
       return (
-        <div key={callId} className="flex flex-col gap-1">
-          <p className="text-foreground flex flex-row items-center gap-1 text-sm font-bold">
-            <GlobeIcon className="text-foreground size-4 shrink-0" />
-            <span>
-              Browsed {results.length === 0 ? " " : `${results.length} `}URLs
-              {failCount > 0 && ` (${failCount} failed)`}
-            </span>
-          </p>
-          {results.map((result, index) => (
-            <div key={index} className="ml-4 flex items-center gap-1">
-              {result.success ? (
-                <GlobeIcon className="text-foreground/60 size-3 shrink-0" />
-              ) : (
-                <XCircleIcon className="text-destructive size-3 shrink-0" />
-              )}
-              <span
-                className={`max-w-2xl truncate text-xs ${
-                  result.success ? "text-foreground/80" : "text-destructive"
-                }`}
-              >
-                {formatUrl(result.url)}
-                {!result.success && result.error && `: ${result.error}`}
+        <Accordion
+          type="single"
+          collapsible
+          onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
+          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
+        >
+          <AccordionItem
+            value={callId}
+            className={cn(
+              "group/url-content-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+              isMainAccordionOpen && "border-1 !border-b-1 p-2",
+            )}
+          >
+            <AccordionTrigger
+              icon={
+                <div className="relative">
+                  <GlobeIcon
+                    className={cn(
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                      isMainAccordionOpen && "scale-0 opacity-0",
+                    )}
+                  />
+                  <ChevronDownIcon
+                    className={cn(
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
+                      isMainAccordionOpen && "scale-100 opacity-100",
+                    )}
+                  />
+                </div>
+              }
+              iconPosition="left"
+              shouldRotateIcon={true}
+              className="justify-start gap-1 p-0 font-bold hover:no-underline"
+            >
+              <span className="max-w-2xl truncate">
+                Browsed {results.length} URL{results.length !== 1 ? "s" : ""}
+                {failCount > 0 && ` (${failCount} failed)`}
               </span>
-            </div>
-          ))}
-        </div>
+            </AccordionTrigger>
+            <AccordionContent className="p-0 pt-2">
+              <div className="space-y-1">
+                {results.map((result, index) => (
+                  <UrlResultDisplay key={index} result={result} input={input} />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       );
     }
 
