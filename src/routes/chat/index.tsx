@@ -45,7 +45,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               <div
                 key={message.id}
                 className={cn(
-                  "mb-4 flex last:mb-0",
+                  "flex",
                   message.role === "user" ? "justify-end" : "justify-start",
                 )}
               >
