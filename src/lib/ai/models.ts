@@ -26,6 +26,13 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
     supportsToolUse: true,
   },
   {
+    id: "groq-openai-gpt-oss-120b",
+    name: "GPT-OSS 120B",
+    provider: "Groq",
+    model: groq("openai/gpt-oss-120b"),
+    supportsToolUse: true,
+  },
+  {
     id: "google-gemini-2.0-flash",
     name: "Gemini 2.0 Flash",
     provider: "Google",

@@ -77,7 +77,10 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
 
       if (!result.success) {
         return (
-          <div key={callId} className="flex flex-row items-center gap-1">
+          <div
+            key={callId}
+            className="flex flex-row items-center gap-1 text-sm"
+          >
             <XCircleIcon className="text-destructive size-4 shrink-0" />{" "}
             <span className="max-w-2xl truncate">
               Web search failed for "{result.query || "unknown query"}"
@@ -190,7 +193,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <SearchIcon className="text-muted-foreground size-4 shrink-0" />{" "}
           <span className="text-muted-foreground text-sm font-bold">
-            Web search
+            Unknown web search tool state
           </span>
         </div>
       );
