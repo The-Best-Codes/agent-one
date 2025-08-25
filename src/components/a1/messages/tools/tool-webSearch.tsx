@@ -65,7 +65,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
-          <span className="max-w-2xl truncate">
+          <span className="max-w-2xl truncate text-sm">
             Searching online for "{query}"...
           </span>
         </div>
