@@ -5,13 +5,14 @@ import { ChevronDown } from "lucide-react";
 import {
   forwardRef,
   type ReactNode,
+  useCallback,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
 
-// TODO later: Allow user to change whether to watch resize events. Off for now for performance reasons.
+const AT_BOTTOM_THRESHOLD = 10;
 
 export interface AutoScrollContainerProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -24,13 +25,13 @@ export interface AutoScrollContainerProps
     "className" | "children" | "onClick"
   >;
   behavior?: "smooth" | "instant";
+  /** Whether to watch resize events on the container. Defaults to false for performance. */
+  watchResize?: boolean;
 }
 
 export type AutoScrollHandle = {
   scrollToBottom: () => void;
 };
-
-const SCROLL_UP_THRESHOLD = 10;
 
 export const AutoScrollContainer = forwardRef<
   AutoScrollHandle,
@@ -45,88 +46,90 @@ export const AutoScrollContainer = forwardRef<
       scrollButtonChildren,
       scrollButtonProps,
       behavior = "instant",
+      watchResize = false,
       ...props
     },
     ref,
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isAutoScrolling, setIsAutoScrolling] = useState(true);
-    const lastScrollTopRef = useRef(0);
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const isAtBottomRef = useRef(true);
+
+    const scrollToBottom = useCallback(
+      (scrollBehavior: "smooth" | "instant" = behavior) => {
+        const container = containerRef.current;
+        if (container) {
+          container.scrollTo({
+            top: container.scrollHeight,
+            behavior: scrollBehavior,
+          });
+        }
+      },
+      [behavior],
+    );
 
     const handleScrollButtonClick = () => {
-      setIsAutoScrolling(true);
+      isAtBottomRef.current = true;
+      setShowScrollButton(false);
+      scrollToBottom("smooth");
     };
 
     useImperativeHandle(
       ref,
       () => ({
         scrollToBottom: () => {
-          const container = containerRef.current;
-          if (container) {
-            setIsAutoScrolling(true);
-            container.scrollTo({
-              top: container.scrollHeight,
-              behavior,
-            });
-          }
+          isAtBottomRef.current = true;
+          setShowScrollButton(false);
+          scrollToBottom();
         },
       }),
-      [behavior],
+      [scrollToBottom],
     );
 
     useLayoutEffect(() => {
       const container = containerRef.current;
       if (!container) return;
 
-      const scroll = () => {
-        container.scrollTo({
-          top: container.scrollHeight,
-          behavior,
-        });
-      };
-
-      if (isAutoScrolling) {
-        scroll();
-      }
-
       const handleScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = container;
-        const currentScrollTop = scrollTop;
+        const atBottom =
+          scrollHeight - scrollTop <= clientHeight + AT_BOTTOM_THRESHOLD;
 
-        if (
-          isAutoScrolling &&
-          lastScrollTopRef.current - currentScrollTop > SCROLL_UP_THRESHOLD
-        ) {
-          setIsAutoScrolling(false);
-        }
+        isAtBottomRef.current = atBottom;
 
-        const isAtBottom = scrollHeight - currentScrollTop <= clientHeight + 1;
-        if (!isAutoScrolling && isAtBottom) {
-          setIsAutoScrolling(true);
-        }
-
-        lastScrollTopRef.current = currentScrollTop;
+        setShowScrollButton(!atBottom);
       };
 
-      const mutationObserver = new MutationObserver(() => {
-        if (isAutoScrolling) {
-          scroll();
+      const observerCallback = () => {
+        if (isAtBottomRef.current) {
+          scrollToBottom("instant");
         }
-      });
+      };
 
+      scrollToBottom("instant");
+
+      const mutationObserver = new MutationObserver(observerCallback);
       mutationObserver.observe(container, {
         childList: true,
         subtree: true,
       });
+
+      let resizeObserver: ResizeObserver | undefined;
+      if (watchResize) {
+        resizeObserver = new ResizeObserver(observerCallback);
+        resizeObserver.observe(container);
+      }
+
       container.addEventListener("scroll", handleScroll, { passive: true });
 
-      lastScrollTopRef.current = container.scrollTop;
+      handleScroll();
 
       return () => {
         mutationObserver.disconnect();
+        resizeObserver?.disconnect();
         container.removeEventListener("scroll", handleScroll);
       };
-    }, [isAutoScrolling, behavior]);
+    }, [scrollToBottom, watchResize]);
 
     return (
       <div className={cn("relative h-full w-full", className)} {...props}>
@@ -137,7 +140,7 @@ export const AutoScrollContainer = forwardRef<
         >
           <div className={scrollableClassName}>{children}</div>
         </div>
-        {!isAutoScrolling && (
+        {showScrollButton && (
           <Button
             data-testid="scroll-to-bottom"
             size="icon"
