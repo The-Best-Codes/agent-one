@@ -3,7 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/ui/native/accordion";
 import type { ReasoningUIPart } from "ai";
 
 export const MessagePartReasoning = ({

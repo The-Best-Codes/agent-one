@@ -3,7 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/ui/native/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
@@ -96,7 +96,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           <AccordionItem
             value={callId}
             className={cn(
-              "group/web-search-accordion border-border w-fit rounded-md border-0 transition-[padding] duration-200",
+              "group/web-search-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
               isMainAccordionOpen && "border-1 !border-b-1 p-2",
             )}
           >
