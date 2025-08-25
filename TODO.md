@@ -12,3 +12,4 @@
 - Fix tool calls showing the same thing when there are multiple of the same tool in a row (known issue with multiple consecutive get url content tools) | Edit: Make sure this is not an edge case!
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
+- Smoothly animate native accordion closing
