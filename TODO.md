@@ -1,15 +1,13 @@
 - Maybe later: Human-in-the-loop / tool confirmation
 - Support multi-threading of chats?
-- Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.) | NOTE: Specially handle fetch is aborted and tool aborted errors. Change them perhaps to custom error signals so that the error popup will not be shown in the UI and you can send a followup message.
-- When editing or regenerating a message store the previous conversation history and allow navigating previous versions per message (like in ChatGPT, on each AI message that was changed)
+- Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
+- Allow forking conversations
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
 - Disable model selector when current response is streaming
 - Tweak the padding, colors, etc. of the sidebar. Also: Virtualize chat list in sidebar later?
-- Fix the sidebar rerendering each time persisted chat state updates. We only need to rerender when the chat title changes or is initially created (or deleted, name edited, etc.)
-- Allow editing the chat title
 - Fix chat performance when starting a new chat (small period when nothing is shown) and some bugs when going from chat to new and back to chat. Be sure to test in a slow, low performance environment.
-- Fix tool calls showing the same thing when there are multiple of the same tool in a row (known issue with multiple consecutive get url content tools) | Edit: Make sure this is not an edge case!
+- When deleting a chat, cancel its stream (no matter the state)
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
-- Smoothly animate native accordion closing
+- Persist model per message
