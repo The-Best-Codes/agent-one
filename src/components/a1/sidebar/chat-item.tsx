@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { deleteChat, saveChatTitle } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
 import { CheckIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
@@ -21,7 +22,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(title);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const handleConfirmDeleteChat = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -33,7 +34,13 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
     if (activeChatId === chatId) {
       navigate("/chat");
     }
-    setIsDeleteDialogOpen(false);
+    setIsConfirmingDelete(false);
+  };
+
+  const handleCancelDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsConfirmingDelete(false);
   };
 
   const handleEditChat = (
@@ -41,6 +48,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
   ) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsConfirmingDelete(false);
     setEditTitle(title);
     setIsEditing(true);
   };
@@ -85,7 +93,6 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
             onChange={(e) => setEditTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             onClick={handleInputClick}
-            // TODO: h-5 solves text shifting issues, but h-6 is more consistent with other elements. Resolve this.
             className="bg-background ml-1 h-6 rounded-md border-none p-0 px-1 text-sm font-normal shadow-none"
             autoFocus
           />
@@ -94,11 +101,14 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
         )}
 
         <div
-          className={`flex shrink-0 items-center gap-1 overflow-hidden transition-[width,height] duration-200 ${
-            isEditing || isDeleteDialogOpen
-              ? "h-12 w-13"
-              : "size-0 group-hover/chat-item:h-12 group-hover/chat-item:w-13 focus-within:h-12 focus-within:w-13 focus-within:overflow-visible"
-          }`}
+          className={cn(
+            "flex shrink-0 items-center gap-1 overflow-hidden transition-[width,height] duration-200",
+            {
+              "h-12 w-13": isEditing || isConfirmingDelete,
+              "size-0 group-hover/chat-item:h-12 group-hover/chat-item:w-13 focus-within:h-12 focus-within:w-13 focus-within:overflow-visible":
+                !isEditing && !isConfirmingDelete,
+            },
+          )}
         >
           {isEditing ? (
             <>
@@ -112,7 +122,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
                   handleSaveTitle();
                 }}
               >
-                <CheckIcon />
+                <CheckIcon className="size-4" />
               </Button>
               <Button
                 size="icon"
@@ -124,9 +134,42 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
                   handleCancelEdit();
                 }}
               >
-                <XIcon />
+                <XIcon className="size-4" />
               </Button>
             </>
+          ) : isConfirmingDelete ? (
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="size-6"
+                    onClick={(e) => handleConfirmDeleteChat(e, id)}
+                  >
+                    <CheckIcon className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Delete Chat</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="default"
+                    className="size-6"
+                    onClick={handleCancelDelete}
+                  >
+                    <XIcon className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Cancel</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ) : (
             <>
               <Button
@@ -135,49 +178,22 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
                 className="text-foreground hover:bg-primary hover:text-primary-foreground size-6 border-none bg-transparent shadow-none"
                 onClick={handleEditChat}
               >
-                <PencilIcon />
+                <PencilIcon className="size-4" />
               </Button>
 
-              <Popover
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
+              <Button
+                size="icon"
+                variant="default"
+                className="text-destructive hover:bg-destructive size-6 border-none bg-transparent shadow-none hover:text-white"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsEditing(false);
+                  setIsConfirmingDelete(true);
+                }}
               >
-                <PopoverTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="default"
-                    className="text-destructive hover:bg-destructive size-6 border-none bg-transparent shadow-none hover:text-white"
-                  >
-                    <TrashIcon />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="flex w-auto gap-1 p-1"
-                  side="bottom"
-                  align="center"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="size-6"
-                    onClick={(e) => handleConfirmDeleteChat(e, id)}
-                  >
-                    <CheckIcon />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="default"
-                    className="size-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsDeleteDialogOpen(false);
-                    }}
-                  >
-                    <XIcon />
-                  </Button>
-                </PopoverContent>
-              </Popover>
+                <TrashIcon className="size-4" />
+              </Button>
             </>
           )}
         </div>
