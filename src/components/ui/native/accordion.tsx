@@ -143,7 +143,10 @@ function AccordionItem({ className, value, ...props }: AccordionItemProps) {
     <AccordionItemContext.Provider value={itemContextValue}>
       <details
         data-slot="accordion-item"
-        className={cn("border-b last:border-b-0", className)}
+        className={cn(
+          "accordion-details-animated border-b last:border-b-0",
+          className,
+        )}
         open={isOpen}
         {...props}
       />
@@ -211,21 +214,23 @@ function AccordionTrigger({
   );
 }
 
+interface AccordionContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  wrapperClassName?: string;
+}
+
 function AccordionContent({
+  wrapperClassName,
   className,
   children,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: AccordionContentProps) {
   const { isOpen } = useAccordionItemContext();
 
   return (
     <div
       data-slot="accordion-content"
       data-state={isOpen ? "open" : "closed"}
-      className={cn(
-        "grid text-sm transition-all duration-300 ease-in-out",
-        isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-      )}
+      className={cn("text-sm", wrapperClassName)}
       {...props}
     >
       <div className={cn("overflow-hidden pt-0 pb-4", className)}>

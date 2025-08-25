@@ -161,3 +161,19 @@
     display: none;
   }
 }
+
+@utility accordion-details-animated {
+  & {
+    interpolate-size: allow-keywords;
+  }
+  &::details-content {
+    height: 0;
+    overflow-y: clip;
+    transition:
+      content-visibility 200ms allow-discrete,
+      height 200ms;
+  }
+  &[open]::details-content {
+    height: auto;
+  }
+}
