@@ -79,14 +79,15 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
   };
 
   return (
-    <Link to={`/chat/${id}`} className="block">
-      <Button
-        variant={activeChatId === id ? "secondary" : "ghost"}
-        className={cn(
-          "group/chat-item w-full justify-between py-2 pr-2 transition-none",
-          isEditing && "pl-2",
-        )}
-      >
+    <Button
+      variant={activeChatId === id ? "secondary" : "ghost"}
+      className={cn(
+        "group/chat-item w-full justify-between py-2 pr-2 transition-none",
+        isEditing && "pl-2",
+      )}
+      asChild
+    >
+      <Link to={`/chat/${id}`} className="block">
         {isEditing ? (
           <Input
             value={editTitle}
@@ -197,8 +198,8 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
             </>
           )}
         </div>
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 });
 
