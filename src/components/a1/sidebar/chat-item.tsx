@@ -1,16 +1,20 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { deleteChat, saveChatTitle } from "@/lib/ai/persistence";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { CheckIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
+import {
+  DownloadIcon,
+  MoreHorizontalIcon,
+  PencilIcon,
+  TrashIcon,
+} from "lucide-react";
 import { memo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useParams } from "react-router";
+import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
 
 interface ChatItemProps {
   id: string;
@@ -19,188 +23,100 @@ interface ChatItemProps {
 
 export const ChatItem = memo(({ id, title }: ChatItemProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(title);
-  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-
-  const handleConfirmDeleteChat = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    chatId: string,
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    deleteChat(chatId);
-    if (activeChatId === chatId) {
-      navigate("/chat");
-    }
-    setIsConfirmingDelete(false);
-  };
-
-  const handleCancelDelete = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsConfirmingDelete(false);
-  };
-
-  const handleEditChat = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsConfirmingDelete(false);
-    setEditTitle(title);
-    setIsEditing(true);
-  };
-
-  const handleSaveTitle = () => {
-    if (editTitle.trim() && editTitle.trim() !== title) {
-      saveChatTitle({ chatId: id, title: editTitle.trim() });
-    }
-    setIsEditing(false);
-  };
-
-  const handleCancelEdit = () => {
-    setEditTitle(title);
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSaveTitle();
-    } else if (e.key === "Escape") {
-      handleCancelEdit();
-    }
-  };
-
-  const handleInputClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
+  const [showChangeTitleModal, setShowChangeTitleModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <Button
-      variant={activeChatId === id ? "secondary" : "ghost"}
-      size="sm"
-      className={cn(
-        "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
-        isEditing && "pl-1",
-      )}
-      asChild
-    >
-      <Link to={`/chat/${id}`} className="block">
-        {isEditing ? (
-          <Input
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onClick={handleInputClick}
-            className="bg-background m-0 h-6 rounded-md border-none p-0 px-1 text-sm font-normal shadow-none"
-            autoFocus
-          />
-        ) : (
+    <>
+      <Button
+        variant={activeChatId === id ? "secondary" : "ghost"}
+        size="sm"
+        className="group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none"
+        asChild
+      >
+        <Link to={`/chat/${id}`} className="relative block overflow-hidden">
           <span className="truncate text-sm font-normal">{title}</span>
-        )}
+          <div
+            className={cn(
+              "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100",
+              isDropdownOpen ? "opacity-100" : "",
+            )}
+          >
+            <DropdownMenu onOpenChange={setIsDropdownOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="size-6"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  <MoreHorizontalIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-fit">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowChangeTitleModal(true);
+                  }}
+                >
+                  <PencilIcon className="size-4" />
+                  Change Title
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowExportModal(true);
+                  }}
+                >
+                  <DownloadIcon className="size-4" />
+                  Export Chat
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowDeleteModal(true);
+                  }}
+                  variant="destructive"
+                >
+                  <TrashIcon className="size-4" />
+                  Delete Chat
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </Link>
+      </Button>
 
-        <div
-          className={cn(
-            "flex shrink-0 items-center gap-1 overflow-hidden transition-[width,height] duration-200",
-            {
-              "h-12 w-13": isEditing || isConfirmingDelete,
-              "size-0 group-hover/chat-item:h-12 group-hover/chat-item:w-13 focus-within:h-12 focus-within:w-13":
-                !isEditing && !isConfirmingDelete,
-            },
-          )}
-        >
-          {isEditing ? (
-            <>
-              <Button
-                size="icon"
-                variant="default"
-                className="size-6"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSaveTitle();
-                }}
-              >
-                <CheckIcon className="size-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="default"
-                className="size-6"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleCancelEdit();
-                }}
-              >
-                <XIcon className="size-4" />
-              </Button>
-            </>
-          ) : isConfirmingDelete ? (
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="size-6"
-                    onClick={(e) => handleConfirmDeleteChat(e, id)}
-                  >
-                    <CheckIcon className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>Delete Chat</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="default"
-                    className="size-6"
-                    onClick={handleCancelDelete}
-                  >
-                    <XIcon className="size-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>Cancel</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : (
-            <>
-              <Button
-                size="icon"
-                variant="default"
-                className="text-foreground hover:bg-primary hover:text-primary-foreground size-6 border-none bg-transparent shadow-none"
-                onClick={handleEditChat}
-              >
-                <PencilIcon className="size-4" />
-              </Button>
+      <ChangeTitleModal
+        isOpen={showChangeTitleModal}
+        onClose={() => setShowChangeTitleModal(false)}
+        chatId={id}
+        currentTitle={title}
+      />
 
-              <Button
-                size="icon"
-                variant="default"
-                className="text-destructive hover:bg-destructive size-6 border-none bg-transparent shadow-none hover:text-white"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsEditing(false);
-                  setIsConfirmingDelete(true);
-                }}
-              >
-                <TrashIcon className="size-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      </Link>
-    </Button>
+      <DeleteChatModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        chatId={id}
+        chatTitle={title}
+      />
+
+      <ExportChatModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        chatId={id}
+        chatTitle={title}
+      />
+    </>
   );
 });
 
