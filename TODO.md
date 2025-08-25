@@ -10,4 +10,4 @@
 - When deleting a chat, cancel its stream (no matter the state)
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
-- Persist model per message
+- Persist model used to generate message per message
