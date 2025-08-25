@@ -91,7 +91,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           type="single"
           collapsible
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-          className="text-foreground bg-transparent p-0 text-sm"
+          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
         >
           <AccordionItem
             value={callId}
@@ -130,16 +130,17 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               <ScrollArea type="always" viewportClassName="max-h-96">
                 <div className="space-y-2">
-                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                  <div>
                     {result.search_url && (
                       <a
                         href={result.search_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-foreground flex items-center gap-1"
+                        className="text-muted-foreground hover:text-foreground text-xs"
                       >
-                        View on DuckDuckGo
-                        <ExternalLinkIcon className="size-3" />
+                        View <span className="italic">"{result.query}"</span> on
+                        DuckDuckGo
+                        <ExternalLinkIcon className="ml-1 inline size-3" />
                       </a>
                     )}
                   </div>
