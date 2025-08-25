@@ -11,3 +11,4 @@
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
 - Persist model used to generate message per message
+- Sometimes, scroll to bottom button still appears when at bottom when switching to new chat or separate shorter chat
