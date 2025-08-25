@@ -106,7 +106,7 @@ export const ChatItem = memo(({ id, title }: ChatItemProps) => {
             "flex shrink-0 items-center gap-1 overflow-hidden transition-[width,height] duration-200",
             {
               "h-12 w-13": isEditing || isConfirmingDelete,
-              "size-0 group-hover/chat-item:h-12 group-hover/chat-item:w-13 focus-within:h-12 focus-within:w-13 focus-within:overflow-visible":
+              "size-0 group-hover/chat-item:h-12 group-hover/chat-item:w-13 focus-within:h-12 focus-within:w-13":
                 !isEditing && !isConfirmingDelete,
             },
           )}
