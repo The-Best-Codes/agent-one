@@ -18,7 +18,11 @@ import {
 } from "@/components/ui/card";
 import { getLogger } from "@/lib/logger";
 import dedent from "dedent";
-import { RefreshCwIcon, TriangleAlertIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  RefreshCwIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import React from "react";
 
 const logger = getLogger(import.meta.url);
@@ -113,7 +117,11 @@ class ErrorBoundary extends React.Component<
 
               <Accordion type="single" collapsible className="w-full space-y-2">
                 <AccordionItem value="details">
-                  <AccordionTrigger className="flex justify-between">
+                  <AccordionTrigger
+                    icon={<ChevronDownIcon className="size-4" />}
+                    shouldRotateIcon
+                    className="flex justify-between"
+                  >
                     <span>Technical Details</span>
                   </AccordionTrigger>
                   <AccordionContent>
