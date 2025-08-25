@@ -105,14 +105,14 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 <div className="relative">
                   <SearchIcon
                     className={cn(
-                      "text-foreground absolute inset-0 inline size-4 shrink-0 group-hover/web-search-accordion:hidden",
-                      isMainAccordionOpen && "hidden",
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/web-search-accordion:scale-0 group-hover/web-search-accordion:opacity-0",
+                      isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
                   <ChevronDownIcon
                     className={cn(
-                      "text-foreground absolute inset-0 hidden size-4 shrink-0 group-hover/web-search-accordion:inline",
-                      isMainAccordionOpen && "inline",
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/web-search-accordion:scale-100 group-hover/web-search-accordion:opacity-100",
+                      isMainAccordionOpen && "scale-100 opacity-100",
                     )}
                   />
                 </div>
@@ -128,7 +128,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               </p>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
-              <ScrollArea viewportClassName="max-h-96">
+              <ScrollArea type="always" viewportClassName="max-h-96">
                 <div className="space-y-2">
                   <div className="text-muted-foreground flex items-center gap-2 text-xs">
                     {result.search_url && (
