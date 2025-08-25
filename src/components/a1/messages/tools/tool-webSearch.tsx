@@ -83,7 +83,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           >
             <XCircleIcon className="text-destructive size-4 shrink-0" />{" "}
             <span className="max-w-2xl truncate">
-              Web search failed for "{result.query || "unknown query"}"
+              Web search for "{result.query || "unknown query"}" failed
             </span>
           </div>
         );
