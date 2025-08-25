@@ -121,11 +121,9 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <p className="flex flex-row items-center gap-1">
-                <span className="max-w-2xl truncate">
-                  Found {result.total_results} results for "{result.query}"
-                </span>
-              </p>
+              <span className="max-w-2xl truncate">
+                Found {result.total_results} results for "{result.query}"
+              </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               <ScrollArea type="always" viewportClassName="max-h-96">
