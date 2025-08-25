@@ -8,8 +8,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 import { ChatList } from "./chat-list";
 
-// TODO: Give sidebar even padding in all parts and on all states (collapsed, mobile expanded, desktop expanded)
-
 interface SidebarProps {
   className?: string;
 }
