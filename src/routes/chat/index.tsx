@@ -32,7 +32,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
             className="mb-2 max-h-full min-h-0 flex-1 p-2 pl-0"
             scrollableClassName="pr-2 h-full"
             scrollButtonClassName="mr-2"
-            behavior="smooth"
+            behavior="instant"
           >
             {messages.length === 0 && <NoMessagesGreeting />}
             {messages.map((message) => (
