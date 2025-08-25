@@ -115,16 +115,20 @@ class ErrorBoundary extends React.Component<
                 </AlertDescription>
               </Alert>
 
-              <Accordion type="single" collapsible className="w-full space-y-2">
-                <AccordionItem value="details">
+              <Accordion
+                type="single"
+                collapsible
+                className="border-border w-full space-y-2 rounded-md border px-3"
+              >
+                <AccordionItem className="p-0" value="details">
                   <AccordionTrigger
                     icon={<ChevronDownIcon className="size-4" />}
                     shouldRotateIcon
-                    className="flex justify-between"
+                    className="flex justify-between p-2 px-1"
                   >
                     <span>Technical Details</span>
                   </AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="pb-3">
                     <div className="bg-muted max-h-96 overflow-auto rounded-md p-3 font-mono text-sm">
                       {this.state.errorInfo?.componentStack}
                     </div>
