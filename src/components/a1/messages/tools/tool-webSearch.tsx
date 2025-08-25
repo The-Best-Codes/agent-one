@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import {
@@ -127,44 +128,45 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               </p>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
-              {/* Removed pr-2 from the element below for now until I find a way to only show pr when it is overflowing */}
-              <div className="mt-1 max-h-96 space-y-2 overflow-y-auto">
-                <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                  {result.search_url && (
-                    <a
-                      href={result.search_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground flex items-center gap-1"
-                    >
-                      View on DuckDuckGo
-                      <ExternalLinkIcon className="size-3" />
-                    </a>
-                  )}
-                </div>
-                {result.results?.map((searchResult, index) => (
-                  <div key={index} className="rounded-md border p-2">
-                    <div className="space-y-1">
+              <ScrollArea viewportClassName="max-h-96">
+                <div className="space-y-2">
+                  <div className="text-muted-foreground flex items-center gap-2 text-xs">
+                    {result.search_url && (
                       <a
-                        href={searchResult.url}
+                        href={result.search_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-foreground inline-block text-sm font-medium hover:underline"
+                        className="text-muted-foreground hover:text-foreground flex items-center gap-1"
                       >
-                        {searchResult.title}
+                        View on DuckDuckGo
+                        <ExternalLinkIcon className="size-3" />
                       </a>
-                      <div className="text-muted-foreground font-mono text-xs">
-                        {searchResult.display_url}
-                      </div>
-                      {searchResult.snippet && (
-                        <p className="text-muted-foreground text-xs">
-                          {searchResult.snippet}
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
+                  {result.results?.map((searchResult, index) => (
+                    <div key={index} className="rounded-md border p-2">
+                      <div className="space-y-1">
+                        <a
+                          href={searchResult.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-foreground inline-block text-sm font-medium hover:underline"
+                        >
+                          {searchResult.title}
+                        </a>
+                        <div className="text-muted-foreground font-mono text-xs">
+                          {searchResult.display_url}
+                        </div>
+                        {searchResult.snippet && (
+                          <p className="text-muted-foreground text-xs">
+                            {searchResult.snippet}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
