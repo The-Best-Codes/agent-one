@@ -160,10 +160,6 @@ fn parse_search_results(html: &str, max_results: usize) -> Result<Vec<SearchResu
         });
     }
 
-    if results.is_empty() {
-        return Err("Could not parse any search results from the HTML. The page structure may have changed.".to_string());
-    }
-
     Ok(results)
 }
 

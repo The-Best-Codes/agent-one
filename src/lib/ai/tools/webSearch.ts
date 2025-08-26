@@ -91,19 +91,6 @@ export const WebSearchTool = tool({
 
       logger.verbose("Search completed:", result);
 
-      if (result.results.length === 0) {
-        return {
-          success: false,
-          error: `No search results found for query: "${input.query}"`,
-          query: input.query,
-          schema: {
-            success: "Whether the search completed successfully",
-            error: "Error message if the search failed",
-            query: "The search query that was used",
-          },
-        };
-      }
-
       return {
         success: true,
         query: result.query,
