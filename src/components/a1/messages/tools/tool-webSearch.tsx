@@ -79,9 +79,9 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         return (
           <div
             key={callId}
-            className="flex flex-row items-center gap-1 text-sm font-bold"
+            className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
           >
-            <XCircleIcon className="text-destructive size-4 shrink-0" />{" "}
+            <XCircleIcon className="size-4 shrink-0" />{" "}
             <span className="max-w-2xl truncate">
               Web search for "{result.query || "unknown query"}" failed
             </span>
