@@ -13,3 +13,4 @@
 - Persist model used to generate message per message
 - Sometimes, scroll to bottom button still appears when at bottom when switching to new chat or separate shorter chat
 - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
+- Refactor all the `console.*` to `logger.*`

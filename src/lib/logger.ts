@@ -1,4 +1,4 @@
-import { type ConsolaInstance, createConsola } from "consola";
+import { type ConsolaInstance, createConsola, LogLevels } from "consola";
 
 const isNodeJs =
   typeof process !== "undefined" && process.versions && process.versions.node;
@@ -54,5 +54,7 @@ function getTagFromPathOrUrl(inputPath: string): string {
  */
 export function getLogger(filePath: string): ConsolaInstance {
   const filename = getTagFromPathOrUrl(filePath);
-  return createConsola().withTag(filename);
+  return createConsola({
+    level: LogLevels.verbose,
+  }).withTag(filename);
 }
