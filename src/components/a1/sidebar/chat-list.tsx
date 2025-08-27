@@ -7,7 +7,7 @@ import { getLogger } from "@/lib/logger";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { ChatItem } from "./chat-item";
 
 const logger = getLogger(import.meta.url);
@@ -26,6 +26,8 @@ export const ChatList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { currentModel } = useModel();
   const navigate = useNavigate();
+  const { id: activeChatId } = useParams<{ id: string }>();
+
   const parentRef = useRef<HTMLDivElement>(null);
 
   const currentModelRef = useRef(currentModel.model);
@@ -168,10 +170,32 @@ export const ChatList = () => {
   };
 
   useEffect(() => {
-    if (chats.length > 0 && parentRef.current) {
-      parentRef.current.scrollTop = 0;
+    try {
+      if (virtualizer && activeChatId) {
+        const activeChatIndex = chats.findIndex(
+          (chat) => chat.id === activeChatId,
+        );
+        if (activeChatIndex === -1) return;
+
+        const range = virtualizer.range;
+
+        if (range) {
+          const { startIndex, endIndex } = range;
+          const isAlreadyInViewport =
+            activeChatIndex >= startIndex && activeChatIndex <= endIndex;
+
+          if (!isAlreadyInViewport) {
+            virtualizer.scrollToIndex(activeChatIndex, {
+              align: "center",
+              behavior: "auto",
+            });
+          }
+        }
+      }
+    } catch (error) {
+      logger.error("Error scrolling to top:", error);
     }
-  }, [chats.length]);
+  }, [activeChatId, chats, virtualizer]);
 
   return (
     <div className="flex h-full flex-col">
