@@ -13,16 +13,16 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { memo, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link } from "react-router";
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
 
 interface ChatItemProps {
+  activeChatId?: string;
   id: string;
   title: string;
 }
 
-export const ChatItem = memo(({ id, title }: ChatItemProps) => {
-  const { id: activeChatId } = useParams<{ id: string }>();
+export const ChatItem = memo(({ activeChatId, id, title }: ChatItemProps) => {
   const [showChangeTitleModal, setShowChangeTitleModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);

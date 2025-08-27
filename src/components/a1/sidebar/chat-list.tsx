@@ -274,7 +274,12 @@ export const ChatList = () => {
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <ChatItem id={chat.id} title={chat.title} />
+                  <ChatItem
+                    key={chat.id}
+                    activeChatId={activeChatId}
+                    id={chat.id}
+                    title={chat.title}
+                  />
                 </div>
               );
             })
