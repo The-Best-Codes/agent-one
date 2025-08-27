@@ -3,6 +3,7 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { listChatIds, loadChatData, saveChatTitle } from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
@@ -23,9 +24,16 @@ export const ChatList = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const { currentModel } = useModel();
   const navigate = useNavigate();
+  const parentRef = useRef<HTMLDivElement>(null);
 
   const currentModelRef = useRef(currentModel.model);
   currentModelRef.current = currentModel.model;
+
+  const virtualizer = useVirtualizer({
+    count: chats.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 32 + 2, // 32px tall, 2px gap
+  });
 
   const generateTitleForChat = useCallback(async (chatId: string) => {
     try {
@@ -148,6 +156,12 @@ export const ChatList = () => {
     navigate("/chat");
   };
 
+  useEffect(() => {
+    if (chats.length > 0 && parentRef.current) {
+      parentRef.current.scrollTop = 0;
+    }
+  }, [chats.length]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="pb-2">
@@ -160,11 +174,34 @@ export const ChatList = () => {
           New Chat
         </Button>
       </div>
-      <nav className="flex-1 space-y-1 overflow-y-auto">
-        {chats.map((chat) => (
-          <ChatItem key={chat.id} id={chat.id} title={chat.title} />
-        ))}
-      </nav>
+      <div ref={parentRef} className="flex-1 overflow-y-auto">
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
+            position: "relative",
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualItem) => {
+            const chat = chats[virtualItem.index];
+            return (
+              <div
+                key={virtualItem.key}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: `${virtualItem.size}px`,
+                  transform: `translateY(${virtualItem.start}px)`,
+                }}
+              >
+                <ChatItem id={chat.id} title={chat.title} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };

@@ -42,6 +42,7 @@
     "@shikijs/langs": "^3.8.1",
     "@shikijs/themes": "^3.8.1",
     "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/react-virtual": "^3.13.12",
     "@tauri-apps/api": "^2.6.0",
     "@tauri-apps/plugin-opener": "^2.4.0",
     "@tauri-apps/plugin-sql": "^2.3.0",
