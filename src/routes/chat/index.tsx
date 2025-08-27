@@ -29,7 +29,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
         <div className="flex h-full w-full max-w-3xl flex-1 flex-col">
           <AutoScrollContainer
             ref={scrollRef}
-            className="mb-2 max-h-full min-h-0 flex-1 p-2 pl-0"
+            className="max-h-full min-h-0 flex-1 p-2 pr-0 pl-0 md:pr-2"
             scrollableClassName="pr-2 h-full"
             scrollButtonClassName="mr-2"
             behavior="instant"
