@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { listChatIds, loadChatData, saveChatTitle } from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { PlusIcon } from "lucide-react";
+import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { ChatItem } from "./chat-item";
@@ -22,6 +23,7 @@ const getChatTitle = (title: string): string => {
 
 export const ChatList = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const { currentModel } = useModel();
   const navigate = useNavigate();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -29,8 +31,17 @@ export const ChatList = () => {
   const currentModelRef = useRef(currentModel.model);
   currentModelRef.current = currentModel.model;
 
+  const filteredChats = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return chats;
+    }
+    return chats.filter((chat) =>
+      chat.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [chats, searchQuery]);
+
   const virtualizer = useVirtualizer({
-    count: chats.length,
+    count: filteredChats.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 32 + 2, // 32px tall, 2px gap
   });
@@ -164,7 +175,7 @@ export const ChatList = () => {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="pb-2">
+      <div className="space-y-2 pb-2">
         <Button
           onClick={handleNewChat}
           className="w-full justify-start"
@@ -173,6 +184,15 @@ export const ChatList = () => {
           <PlusIcon className="h-4 w-4" />
           New Chat
         </Button>
+        <div className="group/sidebar-search-input relative">
+          <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
+          <Input
+            placeholder="Search chats..."
+            className="pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
       <div ref={parentRef} className="flex-1 overflow-y-auto">
         <div
@@ -182,24 +202,33 @@ export const ChatList = () => {
             position: "relative",
           }}
         >
-          {virtualizer.getVirtualItems().map((virtualItem) => {
-            const chat = chats[virtualItem.index];
-            return (
-              <div
-                key={virtualItem.key}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: `${virtualItem.size}px`,
-                  transform: `translateY(${virtualItem.start}px)`,
-                }}
-              >
-                <ChatItem id={chat.id} title={chat.title} />
-              </div>
-            );
-          })}
+          {filteredChats.length === 0 && chats.length > 0 ? (
+            <div className="text-muted-foreground flex flex-col items-center justify-center text-center text-sm">
+              <InboxIcon className="text-muted-foreground size-16" />
+              <span className="max-w-full min-w-0 truncate">
+                No results for "{searchQuery}"
+              </span>
+            </div>
+          ) : (
+            virtualizer.getVirtualItems().map((virtualItem) => {
+              const chat = filteredChats[virtualItem.index];
+              return (
+                <div
+                  key={virtualItem.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <ChatItem id={chat.id} title={chat.title} />
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
