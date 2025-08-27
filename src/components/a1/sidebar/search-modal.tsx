@@ -4,44 +4,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { SearchIcon } from "lucide-react";
 import { VirtualizedChatList } from "./virtualized-chat-list";
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   activeChatId?: string;
-  handleNewChat: () => void;
 }
 
 export const SearchModal = ({
   isOpen,
   onClose,
   activeChatId,
-  handleNewChat,
 }: SearchModalProps) => {
-  const handleNewChatAndClose = () => {
-    handleNewChat();
-    onClose();
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="flex h-[80vh] max-w-2xl flex-col">
+      <DialogContent
+        showCloseButton={false}
+        className="flex h-[80vh] max-w-2xl flex-col p-2"
+      >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <SearchIcon className="h-5 w-5" />
-            Search Chats
+          <DialogTitle className="sr-only flex items-center gap-2">
+            Chat search dialog
           </DialogTitle>
+          <div className="min-h-0 flex-1">
+            <VirtualizedChatList
+              activeChatId={activeChatId}
+              showNewChatButton={false}
+              className="h-full"
+              additionalOnChatClickCallback={onClose}
+            />
+          </div>
         </DialogHeader>
-        <div className="min-h-0 flex-1">
-          <VirtualizedChatList
-            activeChatId={activeChatId}
-            handleNewChat={handleNewChatAndClose}
-            showNewChatButton={false}
-            className="h-full"
-          />
-        </div>
       </DialogContent>
     </Dialog>
   );

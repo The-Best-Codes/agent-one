@@ -21,9 +21,10 @@ const getChatTitle = (title: string): string => {
 
 interface VirtualizedChatListProps {
   activeChatId?: string;
-  handleNewChat: () => void;
+  handleNewChat?: () => void;
   showNewChatButton?: boolean;
   className?: string;
+  additionalOnChatClickCallback?: (id: string) => void;
 }
 
 export const VirtualizedChatList = ({
@@ -31,6 +32,7 @@ export const VirtualizedChatList = ({
   handleNewChat,
   showNewChatButton = true,
   className = "w-full",
+  additionalOnChatClickCallback,
 }: VirtualizedChatListProps) => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,7 +172,7 @@ export const VirtualizedChatList = ({
       {showNewChatButton && (
         <div className="space-y-2 pb-2">
           <Button
-            onClick={handleNewChat}
+            onClick={() => handleNewChat && handleNewChat()}
             className="w-full justify-start"
             variant="outline"
           >
@@ -241,6 +243,9 @@ export const VirtualizedChatList = ({
                     activeChatId={activeChatId}
                     id={chat.id}
                     title={chat.title}
+                    additionalOnChatClickCallback={
+                      additionalOnChatClickCallback
+                    }
                   />
                 </div>
               );

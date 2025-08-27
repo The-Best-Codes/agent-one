@@ -1,7 +1,12 @@
 import { ModelSelector } from "@/components/a1/model-selector";
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -149,6 +154,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           </Button>
         </DrawerTrigger>
         <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
+          <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
           <SidebarContent
             setIsCollapsed={setIsCollapsed}
             hideCollapseButton
@@ -170,7 +176,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
           isOpen={isSearchModalOpen}
           onClose={() => setIsSearchModalOpen(false)}
           activeChatId={activeChatId}
-          handleNewChat={handleNewChat}
         />
       </>
     );
