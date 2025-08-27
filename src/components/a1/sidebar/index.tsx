@@ -1,5 +1,5 @@
 import { ModelSelector } from "@/components/a1/model-selector";
-import ThemeTabs from "@/components/theme/tabs-menu";
+import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -27,7 +27,7 @@ const SidebarContent = ({
 
       <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
         <ModelSelector className="w-full" popoverClassName="w-full" />
-        <ThemeTabs className="w-full" />
+        <ThemeToggle className="w-full" />
 
         {!hideCollapseButton && (
           <Button
