@@ -12,8 +12,9 @@ import {
   SidebarIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { ChatList } from "./chat-list";
+import { SearchModal } from "./search-modal";
 
 const logger = getLogger(import.meta.url);
 
@@ -24,14 +25,18 @@ interface SidebarProps {
 const SidebarContent = ({
   setIsCollapsed,
   hideCollapseButton,
+  activeChatId,
+  handleNewChat,
 }: {
   setIsCollapsed: (value: boolean) => void;
   hideCollapseButton?: boolean;
+  activeChatId?: string;
+  handleNewChat: () => void;
 }) => {
   return (
     <div className="flex h-full flex-col">
       <div className="flex min-h-0 flex-1 flex-col">
-        <ChatList />
+        <ChatList activeChatId={activeChatId} handleNewChat={handleNewChat} />
       </div>
 
       <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
@@ -56,9 +61,11 @@ const SidebarContent = ({
 const CollapsedIconContainer = ({
   handleNewChat,
   expandButton,
+  onSearchClick,
 }: {
   handleNewChat: () => void;
   expandButton: React.ReactNode;
+  onSearchClick: () => void;
 }) => {
   return (
     <div className="fixed top-0 left-0 z-50 md:top-2 md:left-2">
@@ -67,9 +74,7 @@ const CollapsedIconContainer = ({
         <Button
           variant="outline"
           size="icon"
-          onClick={() => {
-            // TODO: Implement search from collapsed state
-          }}
+          onClick={onSearchClick}
           aria-label="Search chats"
           className="size-6 pointer-coarse:size-8"
         >
@@ -99,8 +104,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
       return false;
     }
   });
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
+  const { id: activeChatId } = useParams<{ id: string }>();
 
   useEffect(() => {
     try {
@@ -112,6 +119,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   const handleNewChat = () => {
     navigate("/chat");
+  };
+
+  const handleSearchClick = () => {
+    setIsSearchModalOpen(true);
   };
 
   if (!isDesktop || isCollapsed) {
@@ -138,16 +149,30 @@ export const Sidebar = ({ className }: SidebarProps) => {
           </Button>
         </DrawerTrigger>
         <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
-          <SidebarContent setIsCollapsed={setIsCollapsed} hideCollapseButton />
+          <SidebarContent
+            setIsCollapsed={setIsCollapsed}
+            hideCollapseButton
+            activeChatId={activeChatId}
+            handleNewChat={handleNewChat}
+          />
         </DrawerContent>
       </Drawer>
     );
 
     return (
-      <CollapsedIconContainer
-        handleNewChat={handleNewChat}
-        expandButton={expandButton}
-      />
+      <>
+        <CollapsedIconContainer
+          handleNewChat={handleNewChat}
+          expandButton={expandButton}
+          onSearchClick={handleSearchClick}
+        />
+        <SearchModal
+          isOpen={isSearchModalOpen}
+          onClose={() => setIsSearchModalOpen(false)}
+          activeChatId={activeChatId}
+          handleNewChat={handleNewChat}
+        />
+      </>
     );
   }
 
@@ -159,7 +184,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
       )}
     >
       <div className="flex min-h-0 flex-1 flex-col">
-        <SidebarContent setIsCollapsed={setIsCollapsed} />
+        <SidebarContent
+          setIsCollapsed={setIsCollapsed}
+          activeChatId={activeChatId}
+          handleNewChat={handleNewChat}
+        />
       </div>
     </aside>
   );
