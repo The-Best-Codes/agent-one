@@ -3,10 +3,19 @@ import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useState } from "react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlusIcon,
+  SearchIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { ChatList } from "./chat-list";
+
+const logger = getLogger(import.meta.url);
 
 interface SidebarProps {
   className?: string;
@@ -45,57 +54,124 @@ const SidebarContent = ({
 };
 
 export const Sidebar = ({ className }: SidebarProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem("sidebar-collapsed");
+      return saved ? JSON.parse(saved) : false;
+    } catch (error) {
+      logger.error("Error retrieving sidebar state from localStorage:", error);
+      return false;
+    }
+  });
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("sidebar-collapsed", JSON.stringify(isCollapsed));
+    } catch (error) {
+      logger.error("Error saving sidebar state to localStorage:", error);
+    }
+  }, [isCollapsed]);
+
+  const handleNewChat = () => {
+    navigate("/chat");
+  };
 
   if (isDesktop) {
-    return (
-      <aside
-        className={cn(
-          "bg-sidebar border-sidebar-border flex h-full flex-col border-r p-2",
-          isCollapsed ? "w-13 items-center" : "w-64",
-          className,
-        )}
-      >
-        {isCollapsed ? (
-          <div className="flex flex-1 flex-col items-center justify-end">
+    if (isCollapsed) {
+      return (
+        <div className="fixed top-2 left-2 z-50">
+          <div className="bg-sidebar-accent border-sidebar-border flex items-center gap-1 rounded-lg border p-1 shadow-lg">
             <Button
-              variant="outline"
+              variant="ghost"
+              size="icon"
+              onClick={handleNewChat}
+              aria-label="New chat"
+              className="h-8 w-8"
+            >
+              <PlusIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                // TODO: Implement search from collapsed state
+              }}
+              aria-label="Search chats"
+              className="h-8 w-8"
+            >
+              <SearchIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => setIsCollapsed(false)}
               aria-label="Expand sidebar"
+              className="h-8 w-8"
             >
-              <ChevronRightIcon />
+              <ChevronRightIcon className="h-4 w-4" />
             </Button>
           </div>
-        ) : (
-          <>
-            <div className="flex min-h-0 flex-1 flex-col">
-              <SidebarContent setIsCollapsed={setIsCollapsed} />
-            </div>
-          </>
+        </div>
+      );
+    }
+
+    return (
+      <aside
+        className={cn(
+          "bg-sidebar border-sidebar-border flex h-full w-64 flex-col border-r p-2",
+          className,
         )}
+      >
+        <div className="flex min-h-0 flex-1 flex-col">
+          <SidebarContent setIsCollapsed={setIsCollapsed} />
+        </div>
       </aside>
     );
   }
-
   return (
-    <aside
-      className={cn(
-        "bg-sidebar border-sidebar-border flex h-full w-13 flex-col items-center justify-end border-r p-2",
-        className,
-      )}
-    >
-      <Drawer direction="left">
-        <DrawerTrigger asChild>
-          <Button variant="outline" size="icon" aria-label="Expand sidebar">
-            <ChevronRightIcon />
-          </Button>
-        </DrawerTrigger>
-        <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
-          <SidebarContent setIsCollapsed={setIsCollapsed} hideCollapseButton />
-        </DrawerContent>
-      </Drawer>
-    </aside>
+    <div className="fixed top-2 left-2 z-50">
+      <div className="bg-sidebar-accent border-sidebar-border flex items-center gap-1 rounded-lg border p-1 shadow-lg">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleNewChat}
+          aria-label="New chat"
+          className="h-8 w-8"
+        >
+          <PlusIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            // TODO: Implement search from collapsed state
+          }}
+          aria-label="Search chats"
+          className="h-8 w-8"
+        >
+          <SearchIcon className="h-4 w-4" />
+        </Button>
+        <Drawer direction="left">
+          <DrawerTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Expand sidebar"
+              className="h-8 w-8"
+            >
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
+            <SidebarContent
+              setIsCollapsed={setIsCollapsed}
+              hideCollapseButton
+            />
+          </DrawerContent>
+        </Drawer>
+      </div>
+    </div>
   );
 };
