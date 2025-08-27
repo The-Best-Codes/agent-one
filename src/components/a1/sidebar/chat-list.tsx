@@ -4,6 +4,7 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { listChatIds, loadChatData, saveChatTitle } from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +25,7 @@ const getChatTitle = (title: string): string => {
 export const ChatList = () => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isOverflowing, setIsOverflowing] = useState(false);
   const { currentModel } = useModel();
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
@@ -47,6 +49,27 @@ export const ChatList = () => {
     getScrollElement: () => parentRef.current,
     estimateSize: () => 32 + 2, // 32px tall, 2px gap
   });
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (parentRef.current) {
+        const contentHeight = virtualizer.getTotalSize();
+        const containerHeight = parentRef.current.clientHeight;
+        setIsOverflowing(contentHeight > containerHeight);
+      }
+    };
+
+    checkOverflow();
+
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    if (parentRef.current) {
+      resizeObserver.observe(parentRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [virtualizer, filteredChats.length]);
 
   const generateTitleForChat = useCallback(async (chatId: string) => {
     try {
@@ -218,7 +241,10 @@ export const ChatList = () => {
           />
         </div>
       </div>
-      <div ref={parentRef} className="flex-1 overflow-y-auto">
+      <div
+        ref={parentRef}
+        className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}
+      >
         <div
           style={{
             height: `${virtualizer.getTotalSize()}px`,
