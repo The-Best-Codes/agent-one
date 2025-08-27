@@ -1,7 +1,10 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
+import { getLogger } from "../../logger";
 
 const CHAT_IDS_KEY = "chat-ids";
+
+const logger = getLogger(import.meta.url);
 
 export interface ChatData {
   messages: UIMessage[];
@@ -17,7 +20,7 @@ export function listChatIds(): string[] {
     const idsJson = localStorage.getItem(CHAT_IDS_KEY);
     return idsJson ? JSON.parse(idsJson) : [];
   } catch (error) {
-    console.error("Failed to list chat IDs from localStorage", error);
+    logger.error("Failed to list chat IDs from localStorage", error);
     return [];
   }
 }
@@ -26,7 +29,7 @@ function saveChatIds(ids: string[]): void {
   try {
     localStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
   } catch (error) {
-    console.error("Failed to save chat IDs to localStorage", error);
+    logger.error("Failed to save chat IDs to localStorage", error);
   }
 }
 
@@ -43,7 +46,7 @@ export function createChat(): string {
     );
     return id;
   } catch (error) {
-    console.error("Failed to create chat in localStorage", error);
+    logger.error("Failed to create chat in localStorage", error);
     throw new Error("Failed to create new chat in localStorage.");
   }
 }
@@ -61,10 +64,10 @@ export function loadChatData(id: string): ChatData {
       const parsed = JSON.parse(chatJson);
       return parsed;
     }
-    console.warn(`No chat found for id: ${id}`);
+    logger.warn(`No chat found for id: ${id}`);
     return { messages: [], title: "New chat" };
   } catch (error) {
-    console.error(`Failed to load chat ${id} from localStorage`, error);
+    logger.error(`Failed to load chat ${id} from localStorage`, error);
     return { messages: [], title: "New chat" };
   }
 }
@@ -95,7 +98,7 @@ export function saveChat({
       );
     }
   } catch (error) {
-    console.error(`Failed to save chat ${chatId} to localStorage`, error);
+    logger.error(`Failed to save chat ${chatId} to localStorage`, error);
   }
 }
 
@@ -121,7 +124,7 @@ export function saveChatTitle({
       }),
     );
   } catch (error) {
-    console.error(`Failed to save chat title ${chatId} to localStorage`, error);
+    logger.error(`Failed to save chat title ${chatId} to localStorage`, error);
   }
 }
 
@@ -138,6 +141,6 @@ export function deleteChat(chatId: string): void {
       new CustomEvent("persistence:chat-deleted", { detail: { chatId } }),
     );
   } catch (error) {
-    console.error(`Failed to delete chat ${chatId} from localStorage`, error);
+    logger.error(`Failed to delete chat ${chatId} from localStorage`, error);
   }
 }

@@ -2,10 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { listChatIds, loadChatData, saveChatTitle } from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
+import { getLogger } from "@/lib/logger";
 import { PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { ChatItem } from "./chat-item";
+
+const logger = getLogger(import.meta.url);
 
 interface ChatListItem {
   id: string;
@@ -45,7 +48,7 @@ export const ChatList = () => {
 
       saveChatTitle({ chatId, title: generatedTitle });
     } catch (error) {
-      console.error("Failed to generate title for chat:", chatId, error);
+      logger.error("Failed to generate title for chat:", chatId, error);
     }
   }, []);
 

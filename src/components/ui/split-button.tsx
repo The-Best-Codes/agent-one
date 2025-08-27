@@ -5,6 +5,9 @@ import * as React from "react";
 
 import { buttonVariants } from "@/components/ui/variants/button";
 import { cn } from "@/lib/utils";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 interface SplitButtonOption {
   id: string;
@@ -48,7 +51,7 @@ function SplitButton({
         return stored;
       }
     } catch (error) {
-      console.warn("Failed to read from localStorage:", error);
+      logger.warn("Failed to read from localStorage:", error);
     }
 
     return defaultOptionId || options[0]?.id || "";
@@ -67,7 +70,7 @@ function SplitButton({
         try {
           localStorage.setItem(storageKey, optionId);
         } catch (error) {
-          console.warn("Failed to write to localStorage:", error);
+          logger.warn("Failed to write to localStorage:", error);
         }
       }
 

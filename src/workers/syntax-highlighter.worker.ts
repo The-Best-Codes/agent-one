@@ -4,12 +4,15 @@ import type {
   HighlightRequest,
   HighlightResponse,
 } from "../lib/syntax-highlighter/types";
+import { getLogger } from "../lib/logger";
 
 // Themes
 import themeDarkPlus from "@shikijs/themes/dark-plus";
 import themeLightPlus from "@shikijs/themes/light-plus";
 
 let highlighter: HighlighterCore | null = null;
+
+const logger = getLogger(import.meta.url);
 
 const shikiLangsMap = {
   html: () => import("@shikijs/langs/html"),
@@ -67,7 +70,7 @@ async function initializeHighlighter() {
     });
     return highlighter;
   } catch (error) {
-    console.error("Failed to initialize highlighter:", error);
+    logger.error("Failed to initialize highlighter:", error);
     throw error;
   }
 }
@@ -144,6 +147,6 @@ self.onmessage = async (event: MessageEvent<HighlightRequest>) => {
 
 self.addEventListener("message", (event) => {
   if (event.data.type === "init") {
-    initializeHighlighter().catch(console.error);
+    initializeHighlighter().catch(logger.error);
   }
 });
