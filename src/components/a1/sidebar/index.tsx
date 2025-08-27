@@ -61,8 +61,8 @@ const CollapsedIconContainer = ({
   expandButton: React.ReactNode;
 }) => {
   return (
-    <div className="fixed top-2 left-2 z-50">
-      <div className="border-sidebar-border flex items-center gap-1 rounded-lg border p-1">
+    <div className="fixed top-0 left-0 z-50 md:top-2 md:left-2">
+      <div className="bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r-1 border-b-1 p-1 md:rounded-md md:border-1">
         {expandButton}
         <Button
           variant="outline"
