@@ -154,6 +154,10 @@ export const VirtualizedChatList = ({
   //   }
   // }, [activeChatId, chats, loadChats]);
 
+  const showNoChatsPlaceholder = chats.length === 0;
+  const showNoSearchResults =
+    chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
+
   return (
     <div className={cn("flex h-full flex-col", className)}>
       {showNewChatButton && (
@@ -196,22 +200,27 @@ export const VirtualizedChatList = ({
         ref={parentRef}
         className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}
       >
-        <div
-          style={{
-            height: `${virtualizer.getTotalSize()}px`,
-            width: "100%",
-            position: "relative",
-          }}
-        >
-          {filteredChats.length === 0 && chats.length > 0 ? (
-            <div className="text-muted-foreground flex flex-col items-center justify-center text-center text-sm">
-              <InboxIcon className="text-muted-foreground size-16" />
-              <span className="max-w-full min-w-0 truncate">
-                No results for "{searchQuery}"
-              </span>
-            </div>
-          ) : (
-            virtualizer.getVirtualItems().map((virtualItem) => {
+        {showNoChatsPlaceholder ? (
+          <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
+            <InboxIcon className="text-muted-foreground size-16" />
+            <p className="max-w-full min-w-0 truncate">No chats yet</p>
+          </div>
+        ) : showNoSearchResults ? (
+          <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
+            <InboxIcon className="text-muted-foreground size-16" />
+            <span className="max-w-full min-w-0 truncate">
+              No results for "{searchQuery}"
+            </span>
+          </div>
+        ) : (
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
               const chat = filteredChats[virtualItem.index];
               return (
                 <div
@@ -236,9 +245,9 @@ export const VirtualizedChatList = ({
                   />
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
