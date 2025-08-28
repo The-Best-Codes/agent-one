@@ -94,16 +94,12 @@ export const Sidebar = ({ className }: SidebarProps) => {
       size="icon"
       onClick={() => setIsCollapsed(!isCollapsed)}
       aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      className={cn("size-6", !isCollapsed && "!size-6")}
+      className="size-6"
     >
       <SidebarIcon />
     </Button>
   ) : (
-    <Drawer
-      defaultOpen={!isCollapsed}
-      onOpenChange={(open) => setIsCollapsed(!open)}
-      direction="left"
-    >
+    <Drawer direction="left">
       <DrawerTrigger asChild>
         <Button
           variant="outline"
