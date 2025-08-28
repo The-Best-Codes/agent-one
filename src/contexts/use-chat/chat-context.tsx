@@ -5,6 +5,7 @@ import {
   loadChatData,
   saveChat,
   saveChatTitle,
+  saveChatTitleState,
 } from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
@@ -76,13 +77,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       const chatData = loadChatData(chatId);
       const hasUserMessage = messages.some((m) => m.role === "user");
 
-      if (chatData.title === "New chat" && hasUserMessage) {
+      if (hasUserMessage && !chatData.titleState) {
+        saveChatTitleState({ chatId, titleState: "generating" });
         generateChatTitle(model, messages)
           .then((generatedTitle) => {
             saveChatTitle({ chatId, title: generatedTitle });
           })
           .catch((error) => {
             logger.error("Failed to generate title for chat:", chatId, error);
+            saveChatTitleState({ chatId, titleState: "error" });
           });
       }
     }

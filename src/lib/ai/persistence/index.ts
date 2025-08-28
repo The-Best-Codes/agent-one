@@ -9,6 +9,7 @@ const logger = getLogger(import.meta.url);
 export interface ChatData {
   messages: UIMessage[];
   title: string;
+  titleState?: "generating" | "generated" | "error";
 }
 
 function getChatKey(id: string): string {
@@ -37,7 +38,11 @@ export function createChat(): string {
   const id = generateId();
   try {
     const chatKey = getChatKey(id);
-    const chatData: ChatData = { messages: [], title: "New chat" };
+    const chatData: ChatData = {
+      messages: [],
+      title: "New chat",
+      titleState: undefined,
+    };
     localStorage.setItem(chatKey, JSON.stringify(chatData));
     const currentIds = listChatIds();
     saveChatIds([id, ...currentIds]);
@@ -93,6 +98,30 @@ export function saveChat({
   }
 }
 
+export function saveChatTitleState({
+  chatId,
+  titleState,
+}: {
+  chatId: string;
+  titleState: "generating" | "generated" | "error";
+}): void {
+  try {
+    const chatKey = getChatKey(chatId);
+    const existingData = loadChatData(chatId);
+    const chatData: ChatData = {
+      ...existingData,
+      titleState,
+    };
+    const content = JSON.stringify(chatData);
+    localStorage.setItem(chatKey, content);
+  } catch (error) {
+    logger.error(
+      `Failed to save chat title state ${chatId} to localStorage`,
+      error,
+    );
+  }
+}
+
 export function saveChatTitle({
   chatId,
   title,
@@ -106,6 +135,7 @@ export function saveChatTitle({
     const chatData: ChatData = {
       ...existingData,
       title,
+      titleState: "generated",
     };
     const content = JSON.stringify(chatData);
     localStorage.setItem(chatKey, content);
