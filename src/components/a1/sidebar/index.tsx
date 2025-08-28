@@ -88,7 +88,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <SidebarIcon />
     </Button>
   ) : (
-    <Drawer direction="left">
+    <Drawer onOpenChange={(open) => setIsCollapsed(!open)} direction="left">
       <DrawerTrigger asChild>
         <Button
           variant="outline"
