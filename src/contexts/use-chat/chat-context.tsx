@@ -72,21 +72,25 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       return;
     }
     if (chatId && status !== "streaming" && messages.length > 0) {
-      saveChat({ chatId, messages });
+      try {
+        saveChat({ chatId, messages });
 
-      const chatData = loadChatData(chatId);
-      const hasUserMessage = messages.some((m) => m.role === "user");
+        const chatData = loadChatData(chatId);
+        const hasUserMessage = messages.some((m) => m.role === "user");
 
-      if (hasUserMessage && !chatData.titleState) {
-        saveChatTitleState({ chatId, titleState: "generating" });
-        generateChatTitle(model, messages)
-          .then((generatedTitle) => {
-            saveChatTitle({ chatId, title: generatedTitle });
-          })
-          .catch((error) => {
-            logger.error("Failed to generate title for chat:", chatId, error);
-            saveChatTitleState({ chatId, titleState: "error" });
-          });
+        if (hasUserMessage && !chatData.titleState) {
+          saveChatTitleState({ chatId, titleState: "generating" });
+          generateChatTitle(model, messages)
+            .then((generatedTitle) => {
+              saveChatTitle({ chatId, title: generatedTitle });
+            })
+            .catch((error) => {
+              logger.error("Failed to generate title for chat:", chatId, error);
+              saveChatTitleState({ chatId, titleState: "error" });
+            });
+        }
+      } catch (error) {
+        logger.error("Failed to save chat or generate title:", chatId, error);
       }
     }
   }, [messages, status, chatId, model]);

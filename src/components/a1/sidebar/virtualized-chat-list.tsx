@@ -91,16 +91,18 @@ export const VirtualizedChatList = ({
       }
     };
 
-    checkOverflow();
+    const timeoutId = setTimeout(checkOverflow, 0);
+
     const resizeObserver = new ResizeObserver(checkOverflow);
     if (parentRef.current) {
       resizeObserver.observe(parentRef.current);
     }
 
     return () => {
+      clearTimeout(timeoutId);
       resizeObserver.disconnect();
     };
-  }, [filteredChats]);
+  }, [filteredChats.length]);
 
   // Event handlers for persistence events
   useEffect(() => {
@@ -145,11 +147,12 @@ export const VirtualizedChatList = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (activeChatId && !chats.find((chat) => chat.id === activeChatId)) {
-      loadChats();
-    }
-  }, [activeChatId, chats, loadChats]);
+  // This causes an infinite rerender bug
+  // useEffect(() => {
+  //   if (activeChatId && !chats.find((chat) => chat.id === activeChatId)) {
+  //     loadChats();
+  //   }
+  // }, [activeChatId, chats, loadChats]);
 
   return (
     <div className={cn("flex h-full flex-col", className)}>

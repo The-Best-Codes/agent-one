@@ -65,7 +65,12 @@ function ChatRoute() {
 
   const initialMessages = useMemo(() => {
     if (id) {
-      return loadChat(id);
+      try {
+        return loadChat(id);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_error) {
+        return [];
+      }
     }
     return [];
   }, [id]);
