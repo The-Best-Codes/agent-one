@@ -18,6 +18,7 @@ import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 
 const logger = getLogger(import.meta.url);
+const LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY = "agent-one-sidebar-collapsed";
 
 interface SidebarProps {
   className?: string;
@@ -50,7 +51,7 @@ const SidebarContent = ({
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
-      const saved = localStorage.getItem("sidebar-collapsed");
+      const saved = localStorage.getItem(LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY);
       return saved ? JSON.parse(saved) : false;
     } catch (error) {
       logger.error("Error retrieving sidebar state from localStorage:", error);
@@ -64,7 +65,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem("sidebar-collapsed", JSON.stringify(isCollapsed));
+      localStorage.setItem(
+        LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY,
+        JSON.stringify(isCollapsed),
+      );
     } catch (error) {
       logger.error("Error saving sidebar state to localStorage:", error);
     }
