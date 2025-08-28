@@ -83,7 +83,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       size="icon"
       onClick={() => setIsCollapsed(!isCollapsed)}
       aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      className="size-6 pointer-coarse:size-8"
+      className={cn("size-6 pointer-coarse:size-8", !isCollapsed && "!size-6")}
     >
       <SidebarIcon />
     </Button>
