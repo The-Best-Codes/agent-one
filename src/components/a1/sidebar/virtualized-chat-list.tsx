@@ -116,20 +116,6 @@ export const VirtualizedChatList = ({
       ]);
     };
 
-    const handleChatUpdated = (event: Event) => {
-      const { chatId, chatData } = (event as CustomEvent).detail;
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === chatId
-            ? {
-                ...chat,
-                title: getChatTitle(chatData?.title || "New chat"),
-              }
-            : chat,
-        ),
-      );
-    };
-
     const handleChatTitleUpdated = (event: Event) => {
       const { chatId, title } = (event as CustomEvent).detail;
       setChats((prev) =>
@@ -143,7 +129,6 @@ export const VirtualizedChatList = ({
     };
 
     window.addEventListener("persistence:chat-created", handleChatCreated);
-    window.addEventListener("persistence:chat-updated", handleChatUpdated);
     window.addEventListener("persistence:chat-deleted", handleChatDeleted);
     window.addEventListener(
       "persistence:chat-title-updated",
@@ -152,7 +137,6 @@ export const VirtualizedChatList = ({
 
     return () => {
       window.removeEventListener("persistence:chat-created", handleChatCreated);
-      window.removeEventListener("persistence:chat-updated", handleChatUpdated);
       window.removeEventListener("persistence:chat-deleted", handleChatDeleted);
       window.removeEventListener(
         "persistence:chat-title-updated",

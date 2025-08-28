@@ -9,7 +9,7 @@ export async function generateChatTitle(
   messages: UIMessage[],
 ): Promise<string> {
   try {
-    const relevantMessages = messages.slice(0, 4);
+    const relevantMessages = messages.slice(0, 2);
 
     if (relevantMessages.length === 0) {
       return "New chat";

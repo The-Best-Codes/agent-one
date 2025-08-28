@@ -1,6 +1,13 @@
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
-import { createChat, saveChat } from "@/lib/ai/persistence";
+import {
+  createChat,
+  loadChatData,
+  saveChat,
+  saveChatTitle,
+} from "@/lib/ai/persistence";
+import { generateChatTitle } from "@/lib/ai/title-generator";
+import { getLogger } from "@/lib/logger";
 import {
   lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
@@ -18,6 +25,8 @@ import {
   ChatMessagesContext,
   ChatStatusContext,
 } from "./chat-contexts";
+
+const logger = getLogger(import.meta.url);
 
 interface ChatProviderProps {
   children: ReactNode;
@@ -63,8 +72,21 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     }
     if (chatId && status !== "streaming" && messages.length > 0) {
       saveChat({ chatId, messages });
+
+      const chatData = loadChatData(chatId);
+      const hasUserMessage = messages.some((m) => m.role === "user");
+
+      if (chatData.title === "New chat" && hasUserMessage) {
+        generateChatTitle(model, messages)
+          .then((generatedTitle) => {
+            saveChatTitle({ chatId, title: generatedTitle });
+          })
+          .catch((error) => {
+            logger.error("Failed to generate title for chat:", chatId, error);
+          });
+      }
     }
-  }, [messages, status, chatId]);
+  }, [messages, status, chatId, model]);
 
   useEffect(() => {
     const pendingState = location.state?.pendingMessage;
