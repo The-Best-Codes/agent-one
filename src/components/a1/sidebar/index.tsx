@@ -51,6 +51,12 @@ const SidebarContent = ({
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
+      const collapsedIsDesktop =
+        window.matchMedia("(min-width: 768px)").matches;
+      if (!collapsedIsDesktop) {
+        return true;
+      }
+
       const saved = localStorage.getItem(LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY);
       return saved ? JSON.parse(saved) : false;
     } catch (error) {
@@ -93,7 +99,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <SidebarIcon />
     </Button>
   ) : (
-    <Drawer onOpenChange={(open) => setIsCollapsed(!open)} direction="left">
+    <Drawer
+      defaultOpen={!isCollapsed}
+      onOpenChange={(open) => setIsCollapsed(!open)}
+      direction="left"
+    >
       <DrawerTrigger asChild>
         <Button
           variant="outline"
