@@ -121,7 +121,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           {sidebarButton}
           <div
             className={cn(
-              "flex items-center gap-1 transition-[opacity,scale,translate] duration-200",
+              "flex items-center gap-1 transition-[opacity,scale,translate] duration-100",
               isCollapsed
                 ? "translate-x-0 scale-100 opacity-100"
                 : "pointer-events-none -translate-x-2 scale-95 opacity-0",
