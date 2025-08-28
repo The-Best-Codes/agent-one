@@ -21,7 +21,7 @@ export const SearchModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         showCloseButton={false}
-        className="flex h-[80vh] max-w-2xl flex-col p-2"
+        className="flex h-[80svh] max-w-2xl flex-col p-2"
       >
         <DialogHeader>
           <DialogTitle className="sr-only flex items-center gap-2">

@@ -83,7 +83,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       size="icon"
       onClick={() => setIsCollapsed(!isCollapsed)}
       aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      className={cn("size-6 pointer-coarse:size-8", !isCollapsed && "!size-6")}
+      className={cn("size-6", !isCollapsed && "!size-6")}
     >
       <SidebarIcon />
     </Button>
@@ -94,7 +94,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="outline"
           size="icon"
           aria-label="Expand sidebar"
-          className="size-6 pointer-coarse:size-8"
+          className="size-6"
         >
           <SidebarIcon />
         </Button>
@@ -132,7 +132,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               size="icon"
               onClick={handleSearchClick}
               aria-label="Search chats"
-              className="size-6 pointer-coarse:size-8"
+              className="size-6"
             >
               <SearchIcon />
             </Button>
@@ -141,7 +141,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               size="icon"
               onClick={handleNewChat}
               aria-label="New chat"
-              className="size-6 pointer-coarse:size-8"
+              className="size-6"
             >
               <PlusIcon />
             </Button>

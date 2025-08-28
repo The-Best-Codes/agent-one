@@ -1,7 +1,7 @@
 export default function SuspenseFallback() {
   return (
     <main
-      className="flex h-screen flex-col items-center justify-center"
+      className="flex h-svh flex-col items-center justify-center"
       role="main"
       data-testid="main"
     >

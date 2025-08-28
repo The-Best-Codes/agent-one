@@ -19,7 +19,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const scrollRef = useRef<AutoScrollHandle | null>(null);
 
   return (
-    <main className="flex h-screen" role="main" data-testid="main">
+    <main className="flex h-svh" role="main" data-testid="main">
       <Sidebar />
 
       <div
