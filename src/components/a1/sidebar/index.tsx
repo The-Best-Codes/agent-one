@@ -114,44 +114,57 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <div className="fixed top-0 left-0 z-50 md:top-2 md:left-2">
         <div
           className={cn(
-            "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r-1 border-b-1 p-1 md:rounded-md md:border-1",
+            "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r-1 border-b-1 p-1 transition-[border,padding,background-color] duration-200 md:rounded-md md:border-1",
             !isCollapsed && "border-transparent bg-transparent pt-0 pl-0",
           )}
         >
           {sidebarButton}
-          {isCollapsed && (
-            <>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleSearchClick}
-                aria-label="Search chats"
-                className="size-6 pointer-coarse:size-8"
-              >
-                <SearchIcon />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleNewChat}
-                aria-label="New chat"
-                className="size-6 pointer-coarse:size-8"
-              >
-                <PlusIcon />
-              </Button>
-            </>
-          )}
+          <div
+            className={cn(
+              "flex items-center gap-1 transition-[opacity,scale,translate] duration-200",
+              isCollapsed
+                ? "translate-x-0 scale-100 opacity-100"
+                : "pointer-events-none -translate-x-2 scale-95 opacity-0",
+            )}
+          >
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleSearchClick}
+              aria-label="Search chats"
+              className="size-6 pointer-coarse:size-8"
+            >
+              <SearchIcon />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleNewChat}
+              aria-label="New chat"
+              className="size-6 pointer-coarse:size-8"
+            >
+              <PlusIcon />
+            </Button>
+          </div>
         </div>
       </div>
 
-      {!isCollapsed && isDesktop && (
+      {isDesktop && (
         <aside
           className={cn(
-            "bg-sidebar border-sidebar-border flex h-full w-64 flex-col border-r p-2",
+            "bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width] duration-200",
+            isCollapsed
+              ? "pointer-events-none w-0 -translate-x-full opacity-0"
+              : "w-64 translate-x-0 opacity-100",
             className,
           )}
         >
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div
+            className={cn(
+              "flex min-h-0 flex-1 flex-col transition-[scale,opacity] duration-200",
+              isCollapsed ? "scale-95 opacity-0" : "scale-100 opacity-100",
+            )}
+          >
             <SidebarContent
               activeChatId={activeChatId}
               handleNewChat={handleNewChat}
