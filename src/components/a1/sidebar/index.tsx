@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
@@ -99,11 +100,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <SidebarIcon />
         </Button>
       </DrawerTrigger>
-      <DrawerContent
-        aria-describedby={undefined}
-        className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2"
-      >
+      <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
         <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
+        <DrawerDescription className="sr-only">
+          Mobile chat sidebar content
+        </DrawerDescription>
         <SidebarContent
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}

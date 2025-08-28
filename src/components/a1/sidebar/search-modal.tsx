@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -27,6 +28,9 @@ export const SearchModal = ({
           <DialogTitle className="sr-only flex items-center gap-2">
             Chat search dialog
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Select a conversation to continue
+          </DialogDescription>
           <div className="min-h-0 flex-1">
             <VirtualizedChatList
               activeChatId={activeChatId}
