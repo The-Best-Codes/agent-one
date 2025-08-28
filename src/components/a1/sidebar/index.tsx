@@ -51,12 +51,6 @@ const SidebarContent = ({
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
-      const collapsedIsDesktop =
-        window.matchMedia("(min-width: 768px)").matches;
-      if (!collapsedIsDesktop) {
-        return true;
-      }
-
       const saved = localStorage.getItem(LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY);
       return saved ? JSON.parse(saved) : false;
     } catch (error) {
@@ -68,6 +62,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
+
+  const isSidebarSmall = isCollapsed || !isDesktop;
 
   useEffect(() => {
     try {
@@ -129,14 +125,14 @@ export const Sidebar = ({ className }: SidebarProps) => {
         <div
           className={cn(
             "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r-1 border-b-1 p-1 transition-[border,padding,background-color] duration-200 md:rounded-md md:border-1",
-            !isCollapsed && "border-transparent bg-transparent pt-0 pl-0",
+            !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
           )}
         >
           {sidebarButton}
           <div
             className={cn(
               "flex items-center gap-1 transition-[opacity,scale,translate] duration-100",
-              isCollapsed
+              isSidebarSmall
                 ? "translate-x-0 scale-100 opacity-100"
                 : "pointer-events-none -translate-x-2 scale-95 opacity-0",
             )}
@@ -168,7 +164,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         <aside
           className={cn(
             "bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width] duration-200",
-            isCollapsed
+            isSidebarSmall
               ? "pointer-events-none w-0 -translate-x-full opacity-0"
               : "w-64 translate-x-0 opacity-100",
             className,
@@ -177,7 +173,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <div
             className={cn(
               "flex min-h-0 flex-1 flex-col transition-[scale,opacity] duration-200",
-              isCollapsed ? "scale-95 opacity-0" : "scale-100 opacity-100",
+              isSidebarSmall ? "scale-95 opacity-0" : "scale-100 opacity-100",
             )}
           >
             <SidebarContent
