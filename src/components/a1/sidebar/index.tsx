@@ -99,7 +99,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <SidebarIcon />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
+      <DrawerContent
+        aria-describedby={undefined}
+        className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2"
+      >
         <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
         <SidebarContent
           activeChatId={activeChatId}
@@ -126,6 +129,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 ? "translate-x-0 scale-100 opacity-100"
                 : "pointer-events-none -translate-x-2 scale-95 opacity-0",
             )}
+            aria-hidden={!isCollapsed}
           >
             <Button
               variant="outline"
