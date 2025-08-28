@@ -27,9 +27,11 @@ interface SidebarProps {
 const SidebarContent = ({
   activeChatId,
   handleNewChat,
+  onChatClick,
 }: {
   activeChatId?: string;
   handleNewChat: () => void;
+  onChatClick?: (id: string) => void;
 }) => {
   return (
     <div className="flex h-full flex-col">
@@ -37,7 +39,11 @@ const SidebarContent = ({
         <span className="text-xl">AgentOne</span>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
-        <ChatList activeChatId={activeChatId} handleNewChat={handleNewChat} />
+        <ChatList
+          activeChatId={activeChatId}
+          handleNewChat={handleNewChat}
+          onChatClick={onChatClick}
+        />
       </div>
 
       <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
@@ -59,6 +65,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
     }
   });
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
@@ -78,6 +85,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   const handleNewChat = () => {
     navigate("/chat");
+    if (!isDesktop) {
+      setIsDrawerOpen(false);
+    }
   };
 
   const handleSearchClick = () => {
@@ -95,7 +105,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <SidebarIcon />
     </Button>
   ) : (
-    <Drawer direction="left">
+    <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
         <Button
           variant="outline"
@@ -114,6 +124,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         <SidebarContent
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}
+          onChatClick={() => setIsDrawerOpen(false)}
         />
       </DrawerContent>
     </Drawer>
