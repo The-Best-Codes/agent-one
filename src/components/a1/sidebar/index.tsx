@@ -66,11 +66,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
   });
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
 
   const isSidebarSmall = isCollapsed || !isDesktop;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     try {
@@ -139,16 +144,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
         <div
           className={cn(
             "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r-1 border-b-1 p-1 transition-[border,padding,background-color] duration-200 md:rounded-md md:border-1",
-            !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
+            (!isSidebarSmall || !isMounted) &&
+              "border-transparent bg-transparent pt-0 pl-0",
           )}
         >
           {sidebarButton}
           <div
             className={cn(
-              "flex items-center gap-1 transition-[opacity,scale,translate] duration-100",
-              isSidebarSmall
-                ? "translate-x-0 scale-100 opacity-100"
-                : "pointer-events-none -translate-x-2 scale-95 opacity-0",
+              "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
+              (!isSidebarSmall || !isMounted) &&
+                "pointer-events-none -translate-x-2 scale-95 opacity-0",
             )}
             inert={!isCollapsed}
           >
