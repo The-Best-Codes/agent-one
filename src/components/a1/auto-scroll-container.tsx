@@ -164,7 +164,7 @@ export const AutoScrollContainer = forwardRef<
             size="icon"
             onClick={handleScrollButtonClick}
             className={cn(
-              "pointer-events-auto transition-transform duration-200 will-change-transform hover:opacity-75",
+              "pointer-events-auto transition-transform duration-200 hover:opacity-75",
               scrollButtonClassName,
             )}
             style={{
