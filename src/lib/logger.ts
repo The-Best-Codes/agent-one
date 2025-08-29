@@ -10,35 +10,14 @@ function getTagFromPathOrUrl(inputPath: string): string {
     try {
       const url = new URL(inputPath);
       const pathname = url.pathname;
-
-      const parts = pathname.split("/");
-      let filenameWithExt = parts[parts.length - 1];
-
-      if (filenameWithExt.includes("?")) {
-        filenameWithExt = filenameWithExt.split("?")[0];
-      }
-      if (filenameWithExt.includes("#")) {
-        filenameWithExt = filenameWithExt.split("#")[0];
-      }
-
-      if (filenameWithExt.includes(".")) {
-        return filenameWithExt.substring(0, filenameWithExt.lastIndexOf("."));
-      }
-
-      return filenameWithExt || "browser-module";
+      return pathname || "browser-module";
     } catch (e) {
       console.warn(
         "getLogger: Could not parse input as URL in browser, falling back.",
         inputPath,
         e,
       );
-
-      const parts = inputPath.split("/");
-      const filename = parts[parts.length - 1];
-      if (filename.includes(".")) {
-        return filename.substring(0, filename.lastIndexOf("."));
-      }
-      return filename || "unknown-module";
+      return inputPath || "unknown-module";
     }
   }
 }
