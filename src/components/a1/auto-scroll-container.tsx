@@ -96,23 +96,31 @@ export const AutoScrollContainer = forwardRef<
       const container = containerRef.current;
       if (!container) return;
 
+      setButtonOffset(0);
+      isAtBottomRef.current = true;
+
       const handleScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = container;
         const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
         const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
 
+        const hasOverflow = scrollHeight > clientHeight;
         isAtBottomRef.current = atBottom;
 
         let offset = 0;
-        if (distanceFromBottom <= slideStartDistance) {
-          if (distanceFromBottom <= slideEndDistance) {
-            offset = 60;
-          } else {
-            const slideRange = slideStartDistance - slideEndDistance;
-            const slideProgress =
-              (slideStartDistance - distanceFromBottom) / slideRange;
-            offset = slideProgress * 60;
+        if (hasOverflow) {
+          if (distanceFromBottom <= slideStartDistance) {
+            if (distanceFromBottom <= slideEndDistance) {
+              offset = 60;
+            } else {
+              const slideRange = slideStartDistance - slideEndDistance;
+              const slideProgress =
+                (slideStartDistance - distanceFromBottom) / slideRange;
+              offset = slideProgress * 60;
+            }
           }
+        } else {
+          offset = 60;
         }
 
         setButtonOffset(offset);
@@ -122,6 +130,7 @@ export const AutoScrollContainer = forwardRef<
         if (isAtBottomRef.current) {
           scrollToBottom("instant");
         }
+        handleScroll();
       };
 
       scrollToBottom("instant");
