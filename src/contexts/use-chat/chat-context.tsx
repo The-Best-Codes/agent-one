@@ -58,7 +58,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     stop,
     setMessages,
   } = useChat(model, {
-    experimental_throttle: 250, // TODO: Allow customizing this in settings
+    // experimental_throttle: 250, // TODO: Allow customizing this in settings
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
     id: chatId,
     messages: initialMessages,
