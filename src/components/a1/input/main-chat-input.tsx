@@ -28,7 +28,6 @@ const editorTheme = EditorView.theme({
   },
   "& .cm-placeholder": {
     color: "var(--muted-foreground);",
-    "aria-hidden": "true",
   },
   "&.cm-focused": {
     outline: "none",
