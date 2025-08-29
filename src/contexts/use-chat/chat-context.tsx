@@ -7,6 +7,7 @@ import {
   saveChatTitle,
   saveChatTitleState,
 } from "@/lib/ai/persistence";
+import { streamRegistry } from "@/lib/ai/stream-registry";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
 import {
@@ -103,6 +104,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       sendMessage(message, options);
     }
   }, [location.state, location.pathname, navigate, status, sendMessage]);
+
+  useEffect(() => {
+    if (chatId) {
+      streamRegistry.register(chatId, stop);
+      return () => {
+        streamRegistry.unregister(chatId);
+      };
+    }
+  }, [chatId, stop]);
 
   const sendMessageWrapper = useCallback(
     (
