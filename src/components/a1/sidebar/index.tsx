@@ -116,7 +116,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <SidebarIcon />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2">
+      <DrawerContent
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2"
+      >
         <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
         <DrawerDescription className="sr-only">
           Mobile chat sidebar content
@@ -147,7 +150,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 ? "translate-x-0 scale-100 opacity-100"
                 : "pointer-events-none -translate-x-2 scale-95 opacity-0",
             )}
-            aria-hidden={!isCollapsed}
+            inert={!isCollapsed}
           >
             <Button
               variant="outline"
