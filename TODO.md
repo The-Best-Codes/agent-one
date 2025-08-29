@@ -10,7 +10,6 @@
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
 - Persist model used to generate message per message
-- Sometimes, scroll to bottom button still appears when at bottom when switching to new chat or separate shorter chat
 - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
