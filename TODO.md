@@ -4,7 +4,6 @@
 - Allow forking conversations
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - In settings, allow turning Markdown highlighting in the main chat input and message editor on/off
-- Disable model selector when current response is streaming
 - Fix chat performance when starting a new chat (small period when nothing is shown) and some bugs when going from chat to new and back to chat. Be sure to test in a slow, low performance environment.
 - When deleting a chat, cancel its stream (no matter the state)
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
