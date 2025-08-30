@@ -11,7 +11,9 @@ concurrency:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    outputs:
+      deps-key: ${{ steps.hash.outputs.key }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,18 +24,46 @@ jobs:
           node-version: "23"
           cache: "npm"
 
+      - name: Generate dependency key
+        id: hash
+        run: echo "key=${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}" >> $GITHUB_OUTPUT
+
       - name: Cache npm dependencies
-        id: cache-npm
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+          key: ${{ steps.hash.outputs.key }}
 
-      - name: Install JS dependencies (if cache miss)
-        if: steps.cache-npm.outputs.cache-hit != 'true'
+      - name: Install JS dependencies
         run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Playwright browsers and dependencies
+        run: npx playwright install --with-deps
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Upload dependencies artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deps-${{ steps.hash.outputs.key }}
+          path: |
+            node_modules
+            ~/.cache/ms-playwright
+          retention-days: 1
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: dist/
+          retention-days: 1
 
   lint:
     runs-on: ubuntu-latest
@@ -42,19 +72,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download dependencies
+        uses: actions/download-artifact@v4
         with:
-          node-version: "23"
-
-      - name: Restore npm dependencies from cache
-        id: cache-npm
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+          name: deps-${{ needs.setup.outputs.deps-key }}
+          path: |
+            .
+            ~/.cache/
 
       - name: Run Linting
         run: npm run lint
@@ -66,19 +90,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download dependencies
+        uses: actions/download-artifact@v4
         with:
-          node-version: "23"
-
-      - name: Restore npm dependencies from cache
-        id: cache-npm
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+          name: deps-${{ needs.setup.outputs.deps-key }}
+          path: |
+            .
+            ~/.cache/
 
       - name: Run Type Checking
         run: npm run typecheck
@@ -105,87 +123,33 @@ jobs:
       - name: Run Rust Cargo Check
         run: cd src-tauri && cargo check
 
-  prepare-e2e:
-    runs-on: ubuntu-latest
-    needs: setup
-    timeout-minutes: 15
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "23"
-
-      - name: Restore npm dependencies from cache
-        id: cache-npm
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Build Project for E2E
-        run: npm run build
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-build
-          path: dist/
-
   e2e:
     runs-on: ubuntu-latest
-    needs: prepare-e2e
+    needs: setup
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         shard: [1, 2, 3]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "23"
+      - name: Install system dependencies for Playwright
+        run: npx playwright install --with-deps
 
-      - name: Restore npm dependencies from cache
-        id: cache-npm
-        uses: actions/cache@v4
+      - name: Download dependencies
+        uses: actions/download-artifact@v4
         with:
-          path: node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      - name: Restore Playwright browser cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
+          name: deps-${{ needs.setup.outputs.deps-key }}
+          path: |
+            .
+            ~/.cache/
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: playwright-build
+          name: build-artifact
           path: dist/
 
       - name: Run E2E Playwright Tests (Shard ${{ matrix.shard }}/${{ strategy.job-total }})
@@ -194,8 +158,8 @@ jobs:
           CI: true
 
       - name: Upload Playwright report for shard
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report-shard-${{ matrix.shard }}
           path: playwright-report/
@@ -209,7 +173,7 @@ jobs:
       - name: Download all shard reports
         uses: actions/download-artifact@v4
         with:
-          name: playwright-report-shard-*
+          pattern: playwright-report-shard-*
           path: playwright-reports/
           merge-multiple: true
 
