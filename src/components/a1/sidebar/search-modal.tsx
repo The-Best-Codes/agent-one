@@ -31,7 +31,7 @@ export const SearchModal = ({
           <DialogDescription className="sr-only">
             Select a conversation to continue
           </DialogDescription>
-          <div className="min-h-0 flex-1">
+          <div className="h-96 min-h-0 flex-1">
             <VirtualizedChatList
               activeChatId={activeChatId}
               showNewChatButton={false}
