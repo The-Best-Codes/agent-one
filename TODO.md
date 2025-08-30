@@ -11,3 +11,4 @@
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
 - Don't disable model selector when streaming (lol) but keep track of what model was used for a chat when switching between chats
+- Make persistence happen more often (like after tool calls etc too) to save progress better
