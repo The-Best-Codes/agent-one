@@ -22,14 +22,18 @@ jobs:
           node-version: "23"
           cache: "npm"
 
-      - name: Install JS dependencies
-        run: npm ci
-
-      - name: Upload node_modules artifact
-        uses: actions/upload-artifact@v4
+      - name: Cache npm dependencies
+        id: cache-npm
+        uses: actions/cache@v4
         with:
-          name: node-modules
-          path: node_modules/
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install JS dependencies (if cache miss)
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: npm ci
 
   lint:
     runs-on: ubuntu-latest
@@ -43,11 +47,14 @@ jobs:
         with:
           node-version: "23"
 
-      - name: Download node_modules artifact
-        uses: actions/download-artifact@v4
+      - name: Restore npm dependencies from cache
+        id: cache-npm
+        uses: actions/cache@v4
         with:
-          name: node-modules
-          path: node_modules/
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Run Linting
         run: npm run lint
@@ -64,11 +71,14 @@ jobs:
         with:
           node-version: "23"
 
-      - name: Download node_modules artifact
-        uses: actions/download-artifact@v4
+      - name: Restore npm dependencies from cache
+        id: cache-npm
+        uses: actions/cache@v4
         with:
-          name: node-modules
-          path: node_modules/
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Run Type Checking
         run: npm run typecheck
@@ -113,11 +123,14 @@ jobs:
         with:
           node-version: "23"
 
-      - name: Download node_modules artifact
-        uses: actions/download-artifact@v4
+      - name: Restore npm dependencies from cache
+        id: cache-npm
+        uses: actions/cache@v4
         with:
-          name: node-modules
-          path: node_modules/
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -146,7 +159,7 @@ jobs:
       - name: Download all shard reports
         uses: actions/download-artifact@v4
         with:
-          name: playwright-report-shard-*
+          name: playwright-report-shard-
           path: playwright-reports/
           merge-multiple: true
 
