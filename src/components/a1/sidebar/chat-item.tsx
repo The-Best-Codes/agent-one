@@ -1,4 +1,3 @@
-import { MouseDownLink } from "@/components/mouse-down-link";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,8 +13,8 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { memo, useState } from "react";
+import { Link } from "react-router";
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
-// import { Link } from "react-router"; // Will probably revert to this later
 
 interface ChatItemProps {
   activeChatId?: string;
@@ -47,10 +46,7 @@ export const ChatItem = memo(
             additionalOnChatClickCallback && additionalOnChatClickCallback(id)
           }
         >
-          <MouseDownLink
-            to={`/chat/${id}`}
-            className="relative block overflow-hidden"
-          >
+          <Link to={`/chat/${id}`} className="relative block overflow-hidden">
             <span className="truncate text-sm font-normal">{title}</span>
             <div
               className={cn(
@@ -107,7 +103,7 @@ export const ChatItem = memo(
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </MouseDownLink>
+          </Link>
         </Button>
 
         <ChangeTitleModal
