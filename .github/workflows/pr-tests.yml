@@ -159,7 +159,7 @@ jobs:
       - name: Download all shard reports
         uses: actions/download-artifact@v4
         with:
-          name: playwright-report-shard-
+          name: playwright-report-shard-*
           path: playwright-reports/
           merge-multiple: true
 
