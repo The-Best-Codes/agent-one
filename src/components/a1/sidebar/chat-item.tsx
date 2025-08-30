@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { memo, useState } from "react";
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
+// import { Link } from "react-router"; // Will probably revert to this later
 
 interface ChatItemProps {
   activeChatId?: string;
