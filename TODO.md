@@ -1,5 +1,4 @@
 - Maybe later: Human-in-the-loop / tool confirmation
-- Support multi-threading of chats?
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
 - Allow forking conversations
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
@@ -11,3 +10,4 @@
 - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
+- Don't disable model selector when streaming (lol) but keep track of what model was used for a chat when switching between chats
