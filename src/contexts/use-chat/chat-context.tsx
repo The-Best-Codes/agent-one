@@ -1,10 +1,16 @@
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
 import {
+  getDefaultModel,
+  getModelById,
+  type ModelConfig,
+} from "@/lib/ai/models";
+import {
   createChat,
   loadChat,
   loadChatData,
   saveChat,
+  saveChatModel,
   saveChatTitle,
   saveChatTitleState,
 } from "@/lib/ai/persistence";
@@ -29,6 +35,7 @@ import { useLocation, useNavigate } from "react-router";
 import {
   ChatFunctionsContext,
   ChatMessagesContext,
+  ChatModelContext,
   ChatStatusContext,
 } from "./chat-contexts";
 
@@ -113,24 +120,26 @@ const ChatController = memo(
     return null;
   },
 );
-
 ChatController.displayName = "ChatController";
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
   chatId,
 }) => {
-  const { currentModel } = useModel();
+  const { currentModel: globalDefaultModel, setModel: setGlobalDefaultModel } =
+    useModel();
   const navigate = useNavigate();
   const location = useLocation();
-  const model = useMemo(() => currentModel.model, [currentModel.model]);
 
   const [managedChatIds, setManagedChatIds] = useState<Set<string>>(
     chatId ? new Set([chatId]) : new Set(),
   );
-  const [chatData, setChatData] = useState<
+  const [chatHelpersMap, setChatHelpersMap] = useState<
     Map<string, UseChatHelpers<UIMessage>>
   >(new Map());
+  const [chatModelsMap, setChatModelsMap] = useState<Map<string, ModelConfig>>(
+    new Map(),
+  );
 
   useEffect(() => {
     if (chatId && !managedChatIds.has(chatId)) {
@@ -138,26 +147,41 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     }
   }, [chatId, managedChatIds]);
 
+  useEffect(() => {
+    managedChatIds.forEach((id) => {
+      if (!chatModelsMap.has(id)) {
+        const savedData = loadChatData(id);
+        const model = getModelById(savedData.modelId) || getDefaultModel();
+        setChatModelsMap((prev) => new Map(prev).set(id, model));
+      }
+    });
+  }, [managedChatIds, chatModelsMap]);
+
+  const activeChatHelpers = useMemo(() => {
+    if (!chatId) return null;
+    return chatHelpersMap.get(chatId);
+  }, [chatId, chatHelpersMap]);
+
+  const activeModel = useMemo(() => {
+    if (!chatId) return globalDefaultModel;
+    return chatModelsMap.get(chatId) || globalDefaultModel;
+  }, [chatId, chatModelsMap, globalDefaultModel]);
+
   const handleControllerUpdate = useCallback(
     (id: string, helpers: UseChatHelpers<UIMessage>) => {
-      setChatData((prev) => new Map(prev).set(id, helpers));
+      setChatHelpersMap((prev) => new Map(prev).set(id, helpers));
     },
     [],
   );
 
-  const activeChatData = useMemo(() => {
-    if (!chatId) return null;
-    return chatData.get(chatId);
-  }, [chatId, chatData]);
-
   useEffect(() => {
     const pendingState = location.state?.pendingMessage;
-    if (pendingState && activeChatData?.status === "ready") {
+    if (pendingState && activeChatHelpers?.status === "ready") {
       navigate(location.pathname, { replace: true, state: {} });
       const { message, options } = pendingState;
-      activeChatData.sendMessage(message, options);
+      activeChatHelpers.sendMessage(message, options);
     }
-  }, [location.state, location.pathname, navigate, activeChatData]);
+  }, [location.state, location.pathname, navigate, activeChatHelpers]);
 
   const sendMessageWrapper = useCallback(
     async (
@@ -165,7 +189,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       options?: Parameters<UseChatHelpers<UIMessage>["sendMessage"]>[1],
     ): Promise<void> => {
       if (chatId) {
-        const instance = chatData.get(chatId);
+        const instance = chatHelpersMap.get(chatId);
         if (instance) {
           instance.sendMessage(message, options);
           return;
@@ -176,55 +200,86 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         return;
       }
 
-      const newChatId = createChat();
+      const newChatId = createChat(globalDefaultModel.id);
       setManagedChatIds((prev) => new Set(prev).add(newChatId));
       navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
       });
     },
-    [chatId, chatData, navigate],
+    [chatId, chatHelpersMap, navigate, globalDefaultModel.id],
+  );
+
+  const setModelForActiveChat = useCallback(
+    (modelId: string) => {
+      const newModel = getModelById(modelId);
+      if (!newModel) return;
+
+      if (chatId) {
+        setChatModelsMap((prev) => new Map(prev).set(chatId, newModel));
+        saveChatModel({ chatId, modelId });
+      } else {
+        setGlobalDefaultModel(modelId);
+      }
+    },
+    [chatId, setGlobalDefaultModel],
   );
 
   const statusValue = useMemo(
     () => ({
-      status: activeChatData?.status || "ready",
-      error: activeChatData?.error,
+      status: activeChatHelpers?.status || "ready",
+      error: activeChatHelpers?.error,
     }),
-    [activeChatData?.status, activeChatData?.error],
+    [activeChatHelpers?.status, activeChatHelpers?.error],
   );
 
   const functionsValue = useMemo(
     () => ({
       sendMessage: sendMessageWrapper,
-      addToolResult: activeChatData?.addToolResult || (() => Promise.resolve()),
-      regenerate: activeChatData?.regenerate || (() => Promise.resolve()),
-      resumeStream: activeChatData?.resumeStream || (() => Promise.resolve()),
-      stop: activeChatData?.stop
-        ? () => Promise.resolve(activeChatData.stop())
+      addToolResult:
+        activeChatHelpers?.addToolResult || (() => Promise.resolve()),
+      regenerate: activeChatHelpers?.regenerate || (() => Promise.resolve()),
+      resumeStream:
+        activeChatHelpers?.resumeStream || (() => Promise.resolve()),
+      stop: activeChatHelpers?.stop
+        ? () => Promise.resolve(activeChatHelpers.stop())
         : () => Promise.resolve(),
-      setMessages: activeChatData?.setMessages || (() => {}),
+      setMessages: activeChatHelpers?.setMessages || (() => {}),
     }),
-    [sendMessageWrapper, activeChatData],
+    [sendMessageWrapper, activeChatHelpers],
+  );
+
+  const modelValue = useMemo(
+    () => ({
+      model: activeModel,
+      setModel: setModelForActiveChat,
+    }),
+    [activeModel, setModelForActiveChat],
   );
 
   return (
     <>
-      {Array.from(managedChatIds).map((id) => (
-        <ChatController
-          key={id}
-          chatId={id}
-          model={model}
-          onUpdate={handleControllerUpdate}
-        />
-      ))}
-      <ChatMessagesContext.Provider value={activeChatData?.messages || []}>
-        <ChatStatusContext.Provider value={statusValue}>
-          <ChatFunctionsContext.Provider value={functionsValue}>
-            {children}
-          </ChatFunctionsContext.Provider>
-        </ChatStatusContext.Provider>
-      </ChatMessagesContext.Provider>
+      {Array.from(managedChatIds).map((id) => {
+        const modelConfig = chatModelsMap.get(id);
+        if (!modelConfig) return null;
+        return (
+          <ChatController
+            key={id}
+            chatId={id}
+            model={modelConfig.model}
+            onUpdate={handleControllerUpdate}
+          />
+        );
+      })}
+      <ChatModelContext.Provider value={modelValue}>
+        <ChatMessagesContext.Provider value={activeChatHelpers?.messages || []}>
+          <ChatStatusContext.Provider value={statusValue}>
+            <ChatFunctionsContext.Provider value={functionsValue}>
+              {children}
+            </ChatFunctionsContext.Provider>
+          </ChatStatusContext.Provider>
+        </ChatMessagesContext.Provider>
+      </ChatModelContext.Provider>
     </>
   );
 };

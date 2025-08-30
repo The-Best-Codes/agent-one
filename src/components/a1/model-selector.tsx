@@ -12,8 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
-import { useModel } from "@/contexts/use-model/model-hooks";
+import { useChatModel, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -28,7 +27,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   className,
   popoverClassName,
 }) => {
-  const { currentModel, setModel } = useModel();
+  const { model: currentModel, setModel } = useChatModel();
   const { status } = useChatStatus();
   const [open, setOpen] = useState(false);
 
