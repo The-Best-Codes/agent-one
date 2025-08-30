@@ -105,9 +105,51 @@ jobs:
       - name: Run Rust Cargo Check
         run: cd src-tauri && cargo check
 
-  e2e:
+  prepare-e2e:
     runs-on: ubuntu-latest
     needs: setup
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23"
+
+      - name: Restore npm dependencies from cache
+        id: cache-npm
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Build Project for E2E
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-build
+          path: dist/
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: prepare-e2e
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -132,11 +174,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Restore Playwright browser cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
-      - name: Build Project for E2E
-        run: npm run build
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-build
+          path: dist/
 
       - name: Run E2E Playwright Tests (Shard ${{ matrix.shard }}/${{ strategy.job-total }})
         run: npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
