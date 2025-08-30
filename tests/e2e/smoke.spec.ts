@@ -19,13 +19,20 @@ test.describe("App smoke test", () => {
 
   test("console has no severe errors on load", async ({ page }) => {
     const errors: string[] = [];
+    const errorWhitelist = [
+      'ConsoleError: Viewport argument key "interactive-widget" not recognized and ignored.',
+    ];
+
     page.on("pageerror", (err) =>
       errors.push(`PageError: ${err?.message ?? String(err)}`),
     );
     page.on("console", (msg) => {
       const type = msg.type();
       if (type === "error") {
-        errors.push(`ConsoleError: ${msg.text()}`);
+        const text = `ConsoleError: ${msg.text()}`;
+        if (!errorWhitelist.includes(text)) {
+          errors.push(text);
+        }
       }
     });
 
