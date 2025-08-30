@@ -4,16 +4,15 @@ on:
   pull_request:
     branches: [main]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
 jobs:
-  setup:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    outputs:
-      deps-key: ${{ steps.hash.outputs.key }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: true
+      matrix:
+        test: [typecheck, lint, e2e, rust-check]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,95 +22,31 @@ jobs:
         with:
           node-version: "23"
           cache: "npm"
-
-      - name: Generate dependency key
-        id: hash
-        run: echo "key=${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}" >> $GITHUB_OUTPUT
-
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ steps.hash.outputs.key }}
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
       - name: Install JS dependencies
         run: npm ci
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Install Playwright browsers and dependencies
+      - name: Install Playwright browsers
         run: npx playwright install --with-deps
-
-      - name: Build Project
-        run: npm run build
-
-      - name: Upload dependencies artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: deps-${{ steps.hash.outputs.key }}
-          path: |
-            node_modules
-            ~/.cache/ms-playwright
-          retention-days: 1
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifact
-          path: dist/
-          retention-days: 1
-
-  lint:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download dependencies
-        uses: actions/download-artifact@v4
-        with:
-          name: deps-${{ needs.setup.outputs.deps-key }}
-          path: |
-            .
-            ~/.cache/
-
-      - name: Run Linting
-        run: npm run lint
-
-  typecheck:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download dependencies
-        uses: actions/download-artifact@v4
-        with:
-          name: deps-${{ needs.setup.outputs.deps-key }}
-          path: |
-            .
-            ~/.cache/
-
-      - name: Run Type Checking
-        run: npm run typecheck
-
-  rust-check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        if: matrix.test == 'e2e'
 
       - name: Install Tauri Linux System Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          # Update package lists
+          sudo apt update
+          # Install required Tauri system dependencies for Ubuntu/Debian
+          sudo apt install -y libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+        if: matrix.test == 'rust-check'
 
       - name: Setup Rust toolchain
         uses: actions-rs/toolchain@v1
@@ -119,67 +54,42 @@ jobs:
           toolchain: stable
           profile: minimal
           override: true
+        if: matrix.test == 'rust-check'
+
+      - name: Run Type Checking
+        run: npm run typecheck
+        if: matrix.test == 'typecheck'
+
+      - name: Run Linting
+        run: npm run lint
+        if: matrix.test == 'lint'
+
+      - name: Build Project for E2E
+        run: npm run build
+        if: matrix.test == 'e2e'
+
+      - name: Run E2E Playwright Tests
+        run: npm run test-local:e2e
+        env:
+          CI: true
+        if: matrix.test == 'e2e'
 
       - name: Run Rust Cargo Check
         run: cd src-tauri && cargo check
+        if: matrix.test == 'rust-check'
 
-  e2e:
-    runs-on: ubuntu-latest
-    needs: setup
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install system dependencies for Playwright
-        run: npx playwright install --with-deps
-
-      - name: Download dependencies
-        uses: actions/download-artifact@v4
-        with:
-          name: deps-${{ needs.setup.outputs.deps-key }}
-          path: |
-            .
-            ~/.cache/
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifact
-          path: dist/
-
-      - name: Run E2E Playwright Tests (Shard ${{ matrix.shard }}/${{ strategy.job-total }})
-        run: npx playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-        env:
-          CI: true
-
-      - name: Upload Playwright report for shard
-        if: always()
+      - name: Upload Playwright report
         uses: actions/upload-artifact@v4
+        if: always() && matrix.test == 'e2e'
         with:
-          name: playwright-report-shard-${{ matrix.shard }}
+          name: playwright-report-${{ matrix.test }}
           path: playwright-report/
           retention-days: 1
 
-  publish-report:
-    runs-on: ubuntu-latest
-    needs: e2e
-    if: always()
-    steps:
-      - name: Download all shard reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: playwright-report-shard-*
-          path: playwright-reports/
-          merge-multiple: true
-
-      - name: Upload combined Playwright report
+      - name: Upload Test Results
         uses: actions/upload-artifact@v4
+        if: always() && matrix.test == 'e2e'
         with:
-          name: playwright-report-combined
-          path: playwright-reports/
+          name: test-results-${{ matrix.test }}
+          path: test-results/
           retention-days: 1
