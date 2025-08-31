@@ -28,6 +28,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -134,9 +135,19 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const [managedChatIds, setManagedChatIds] = useState<Set<string>>(
     chatId ? new Set([chatId]) : new Set(),
   );
-  const [chatHelpersMap, setChatHelpersMap] = useState<
-    Map<string, UseChatHelpers<UIMessage>>
+
+  const chatHelpersMapRef = useRef<Map<string, UseChatHelpers<UIMessage>>>(
+    new Map(),
+  );
+  const [messagesMap, setMessagesMap] = useState<Map<string, UIMessage[]>>(
+    new Map(),
+  );
+  const [statusMap, setStatusMap] = useState<
+    Map<string, UseChatHelpers<UIMessage>["status"]>
   >(new Map());
+  const [errorMap, setErrorMap] = useState<Map<string, Error | undefined>>(
+    new Map(),
+  );
   const [chatModelsMap, setChatModelsMap] = useState<Map<string, ModelConfig>>(
     new Map(),
   );
@@ -157,11 +168,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     });
   }, [managedChatIds, chatModelsMap]);
 
-  const activeChatHelpers = useMemo(() => {
-    if (!chatId) return null;
-    return chatHelpersMap.get(chatId);
-  }, [chatId, chatHelpersMap]);
-
   const activeModel = useMemo(() => {
     if (!chatId) return globalDefaultModel;
     return chatModelsMap.get(chatId) || globalDefaultModel;
@@ -169,19 +175,26 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   const handleControllerUpdate = useCallback(
     (id: string, helpers: UseChatHelpers<UIMessage>) => {
-      setChatHelpersMap((prev) => new Map(prev).set(id, helpers));
+      const currentHelpers = chatHelpersMapRef.current.get(id);
+      chatHelpersMapRef.current.set(id, helpers);
+
+      if (currentHelpers?.messages !== helpers.messages) {
+        setMessagesMap((prev) => new Map(prev).set(id, helpers.messages));
+      }
+      if (currentHelpers?.status !== helpers.status) {
+        setStatusMap((prev) => new Map(prev).set(id, helpers.status));
+      }
+      if (currentHelpers?.error !== helpers.error) {
+        setErrorMap((prev) => new Map(prev).set(id, helpers.error));
+      }
     },
     [],
   );
 
-  useEffect(() => {
-    const pendingState = location.state?.pendingMessage;
-    if (pendingState && activeChatHelpers?.status === "ready") {
-      navigate(location.pathname, { replace: true, state: {} });
-      const { message, options } = pendingState;
-      activeChatHelpers.sendMessage(message, options);
-    }
-  }, [location.state, location.pathname, navigate, activeChatHelpers]);
+  const activeMessages = useMemo(
+    () => (chatId && messagesMap.get(chatId)) || [],
+    [chatId, messagesMap],
+  );
 
   const sendMessageWrapper = useCallback(
     async (
@@ -189,7 +202,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       options?: Parameters<UseChatHelpers<UIMessage>["sendMessage"]>[1],
     ): Promise<void> => {
       if (chatId) {
-        const instance = chatHelpersMap.get(chatId);
+        const instance = chatHelpersMapRef.current.get(chatId);
         if (instance) {
           instance.sendMessage(message, options);
           return;
@@ -207,8 +220,20 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         state: { pendingMessage: { message, options } },
       });
     },
-    [chatId, chatHelpersMap, navigate, globalDefaultModel.id],
+    [chatId, navigate, globalDefaultModel.id],
   );
+
+  useEffect(() => {
+    const pendingState = location.state?.pendingMessage;
+    const helpers = chatId ? chatHelpersMapRef.current.get(chatId) : undefined;
+    const status = chatId ? statusMap.get(chatId) : undefined;
+
+    if (pendingState && (status === "ready" || helpers?.status === "ready")) {
+      navigate(location.pathname, { replace: true, state: {} });
+      const { message, options } = pendingState;
+      helpers?.sendMessage(message, options);
+    }
+  }, [location.state, location.pathname, navigate, chatId, statusMap]);
 
   const setModelForActiveChat = useCallback(
     (modelId: string) => {
@@ -227,27 +252,32 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   const statusValue = useMemo(
     () => ({
-      status: activeChatHelpers?.status || "ready",
-      error: activeChatHelpers?.error,
+      status: (chatId ? statusMap.get(chatId) : undefined) || "ready",
+      error: chatId ? errorMap.get(chatId) : undefined,
     }),
-    [activeChatHelpers?.status, activeChatHelpers?.error],
+    [chatId, statusMap, errorMap],
   );
 
-  const functionsValue = useMemo(
-    () => ({
+  const functionsValue = useMemo(() => {
+    const getHelpers = () =>
+      chatId ? chatHelpersMapRef.current.get(chatId) : undefined;
+    return {
       sendMessage: sendMessageWrapper,
-      addToolResult:
-        activeChatHelpers?.addToolResult || (() => Promise.resolve()),
-      regenerate: activeChatHelpers?.regenerate || (() => Promise.resolve()),
-      resumeStream:
-        activeChatHelpers?.resumeStream || (() => Promise.resolve()),
-      stop: activeChatHelpers?.stop
-        ? () => Promise.resolve(activeChatHelpers.stop())
-        : () => Promise.resolve(),
-      setMessages: activeChatHelpers?.setMessages || (() => {}),
-    }),
-    [sendMessageWrapper, activeChatHelpers],
-  );
+      addToolResult: (
+        ...args: Parameters<UseChatHelpers<UIMessage>["addToolResult"]>
+      ) => getHelpers()?.addToolResult(...args) ?? Promise.resolve(),
+      regenerate: (
+        ...args: Parameters<UseChatHelpers<UIMessage>["regenerate"]>
+      ) => getHelpers()?.regenerate(...args) ?? Promise.resolve(),
+      resumeStream: (
+        ...args: Parameters<UseChatHelpers<UIMessage>["resumeStream"]>
+      ) => getHelpers()?.resumeStream(...args) ?? Promise.resolve(),
+      stop: () => Promise.resolve(getHelpers()?.stop?.()),
+      setMessages: (
+        ...args: Parameters<UseChatHelpers<UIMessage>["setMessages"]>
+      ) => getHelpers()?.setMessages(...args),
+    };
+  }, [chatId, sendMessageWrapper]);
 
   const modelValue = useMemo(
     () => ({
@@ -272,7 +302,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         );
       })}
       <ChatModelContext.Provider value={modelValue}>
-        <ChatMessagesContext.Provider value={activeChatHelpers?.messages || []}>
+        <ChatMessagesContext.Provider value={activeMessages}>
           <ChatStatusContext.Provider value={statusValue}>
             <ChatFunctionsContext.Provider value={functionsValue}>
               {children}
