@@ -1,10 +1,11 @@
 "use client";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { getLogger } from "@/lib/logger";
-import { cn } from "@/lib/utils";
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { getLogger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 
 const logger = getLogger(import.meta.url);
 

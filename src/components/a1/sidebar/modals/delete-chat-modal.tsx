@@ -1,3 +1,5 @@
+import { useNavigate, useParams } from "react-router";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { deleteChat } from "@/lib/ai/persistence";
-import { useNavigate, useParams } from "react-router";
 
 interface DeleteChatModalProps {
   isOpen: boolean;

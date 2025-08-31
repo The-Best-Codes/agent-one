@@ -1,7 +1,8 @@
+import { type FC,useEffect, useState } from "react";
+
 import useSyntaxHighlighter from "@/hooks/use-syntax-highlighter";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-import { useEffect, useState, type FC } from "react";
 
 const logger = getLogger(import.meta.url);
 

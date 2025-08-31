@@ -1,6 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import {
   forwardRef,
@@ -11,6 +9,9 @@ import {
   useRef,
   useState,
 } from "react";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const AT_BOTTOM_THRESHOLD = 10;
 

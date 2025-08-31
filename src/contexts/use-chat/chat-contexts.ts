@@ -1,5 +1,7 @@
-import type { ModelConfig } from "@/lib/ai/models";
 import { createContext } from "react";
+
+import type { ModelConfig } from "@/lib/ai/models";
+
 import type {
   ChatFunctionsContextType,
   ChatMessagesContextType,

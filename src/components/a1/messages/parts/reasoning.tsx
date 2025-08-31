@@ -1,3 +1,7 @@
+import type { ReasoningUIPart } from "ai";
+import { BrainIcon, ChevronDownIcon } from "lucide-react";
+import { useState } from "react";
+
 import {
   Accordion,
   AccordionContent,
@@ -5,9 +9,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { cn } from "@/lib/utils";
-import type { ReasoningUIPart } from "ai";
-import { BrainIcon, ChevronDownIcon } from "lucide-react";
-import { useState } from "react";
 
 export const MessagePartReasoning = ({
   text,

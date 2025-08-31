@@ -1,15 +1,16 @@
+import { RefreshCcwIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import {
-  useChatFunctions,
-  useChatStatus,
-} from "@/contexts/use-chat/chat-hooks";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { RefreshCcwIcon } from "lucide-react";
+import {
+  useChatFunctions,
+  useChatStatus,
+} from "@/contexts/use-chat/chat-hooks";
 
 export const MainInputErrorSection = () => {
   const { error } = useChatStatus();

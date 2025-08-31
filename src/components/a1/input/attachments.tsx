@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
-import formatBytes from "@/lib/format-bytes";
 import { FileIcon, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import formatBytes from "@/lib/format-bytes";
 
 interface AttachmentsProps {
   files: FileList;

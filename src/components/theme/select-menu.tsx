@@ -1,4 +1,7 @@
 "use client";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+
 import {
   Select,
   SelectContent,
@@ -7,8 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 interface ThemeSelectProps {
   className?: string;

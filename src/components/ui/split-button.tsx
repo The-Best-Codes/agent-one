@@ -4,8 +4,8 @@ import { ChevronDownIcon } from "lucide-react";
 import * as React from "react";
 
 import { buttonVariants } from "@/components/ui/variants/button";
-import { cn } from "@/lib/utils";
 import { getLogger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 
 const logger = getLogger(import.meta.url);
 

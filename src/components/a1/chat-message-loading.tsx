@@ -1,5 +1,6 @@
-import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import type { UIMessage } from "ai";
+
+import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 
 export const ChatMessageLoading = ({
   mode = "inLayout",

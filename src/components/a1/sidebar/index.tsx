@@ -1,3 +1,7 @@
+import { PlusIcon, SearchIcon, SidebarIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+
 import { ModelSelector } from "@/components/a1/model-selector";
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -11,9 +15,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-import { PlusIcon, SearchIcon, SidebarIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+
 import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 

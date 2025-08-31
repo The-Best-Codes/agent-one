@@ -1,6 +1,7 @@
+import { PencilIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
-import { PencilIcon } from "lucide-react";
 
 export const EditButton = ({
   className,

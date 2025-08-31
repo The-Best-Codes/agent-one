@@ -1,8 +1,9 @@
+import type { TextUIPart, UIMessage } from "ai";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { getLogger } from "@/lib/logger";
-import type { TextUIPart, UIMessage } from "ai";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const logger = getLogger(import.meta.url);
 

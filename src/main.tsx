@@ -1,8 +1,10 @@
-import ErrorBoundary from "@/components/error-boundary";
-import { ModelProvider } from "@/contexts/use-model/model-context";
 import { ThemeProvider } from "next-themes";
 import React from "react";
 import ReactDOM from "react-dom/client";
+
+import ErrorBoundary from "@/components/error-boundary";
+import { ModelProvider } from "@/contexts/use-model/model-context";
+
 import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

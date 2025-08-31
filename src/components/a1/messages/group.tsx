@@ -1,5 +1,7 @@
-import { cn } from "@/lib/utils";
 import type { UIMessage } from "ai";
+
+import { cn } from "@/lib/utils";
+
 import { MessageActionRow } from "./action-row";
 
 export const MessageGroup = ({

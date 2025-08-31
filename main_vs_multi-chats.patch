@@ -1,0 +1,719 @@
+diff --git a/.github/workflows/pr-tests.yml b/.github/workflows/pr-tests.yml
+index 1de6dc6..c6cb273 100644
+--- a/.github/workflows/pr-tests.yml
++++ b/.github/workflows/pr-tests.yml
+@@ -84,7 +84,7 @@ jobs:
+         with:
+           name: playwright-report-${{ matrix.test }}
+           path: playwright-report/
+-          retention-days: 30
++          retention-days: 1
+ 
+       - name: Upload Test Results
+         uses: actions/upload-artifact@v4
+@@ -92,4 +92,4 @@ jobs:
+         with:
+           name: test-results-${{ matrix.test }}
+           path: test-results/
+-          retention-days: 30
++          retention-days: 1
+diff --git a/TODO.md b/TODO.md
+index 4302ff1..6fe8944 100644
+--- a/TODO.md
++++ b/TODO.md
+@@ -1,5 +1,4 @@
+ - Maybe later: Human-in-the-loop / tool confirmation
+-- Support multi-threading of chats?
+ - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
+ - Allow forking conversations
+ - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
+@@ -11,3 +10,6 @@
+ - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
+ - Continue chat on tool call validation errors (let the model know it made a mistake?)
+ - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
++- Don't disable model selector when streaming (lol) but keep track of what model was used for a chat when switching between chats
++- Make persistence happen more often (like after tool calls etc too) to save progress better
++- Fix user's very first chat when localStorage is clear not showing up in the sidebar
+diff --git a/scripts/docker-test-runner.sh b/scripts/docker-test-runner.sh
+index 3ab84e2..de74797 100755
+--- a/scripts/docker-test-runner.sh
++++ b/scripts/docker-test-runner.sh
+@@ -38,7 +38,7 @@ fi
+ echo "---Setting up Node.js environment---"
+ docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npm ci
+ docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npm run build
+-docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npx -y playwright@1.54.2 install --with-deps
++docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npx -y playwright@1.55.0 install --with-deps
+ 
+ echo "--- Executing command in container: '$@' ---"
+ docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" "$@"
+diff --git a/src/components/a1/model-selector.tsx b/src/components/a1/model-selector.tsx
+index f01c57b..595d90a 100644
+--- a/src/components/a1/model-selector.tsx
++++ b/src/components/a1/model-selector.tsx
+@@ -12,8 +12,7 @@ import {
+   PopoverContent,
+   PopoverTrigger,
+ } from "@/components/ui/popover";
+-import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
+-import { useModel } from "@/contexts/use-model/model-hooks";
++import { useChatModel, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+ import { AVAILABLE_MODELS } from "@/lib/ai/models";
+ import { cn } from "@/lib/utils";
+ import { Check, ChevronsUpDown } from "lucide-react";
+@@ -28,7 +27,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
+   className,
+   popoverClassName,
+ }) => {
+-  const { currentModel, setModel } = useModel();
++  const { model: currentModel, setModel } = useChatModel();
+   const { status } = useChatStatus();
+   const [open, setOpen] = useState(false);
+ 
+diff --git a/src/components/a1/sidebar/search-modal.tsx b/src/components/a1/sidebar/search-modal.tsx
+index 934377a..665fbc6 100644
+--- a/src/components/a1/sidebar/search-modal.tsx
++++ b/src/components/a1/sidebar/search-modal.tsx
+@@ -22,7 +22,7 @@ export const SearchModal = ({
+     <Dialog open={isOpen} onOpenChange={onClose}>
+       <DialogContent
+         showCloseButton={false}
+-        className="flex h-fit max-h-[80svh] max-w-2xl flex-col p-2"
++        className="flex h-fit max-w-2xl flex-col p-2"
+       >
+         <DialogHeader>
+           <DialogTitle className="sr-only flex items-center gap-2">
+@@ -31,7 +31,7 @@ export const SearchModal = ({
+           <DialogDescription className="sr-only">
+             Select a conversation to continue
+           </DialogDescription>
+-          <div className="min-h-0 flex-1">
++          <div className="max-h-[80svh] min-h-0 flex-1">
+             <VirtualizedChatList
+               activeChatId={activeChatId}
+               showNewChatButton={false}
+diff --git a/src/contexts/use-chat/chat-context.tsx b/src/contexts/use-chat/chat-context.tsx
+index d445b8f..d8f2de3 100644
+--- a/src/contexts/use-chat/chat-context.tsx
++++ b/src/contexts/use-chat/chat-context.tsx
+@@ -1,30 +1,42 @@
+ import { useModel } from "@/contexts/use-model/model-hooks";
+ import { useChat } from "@/hooks/ai/useChat";
++import {
++  getDefaultModel,
++  getModelById,
++  type ModelConfig,
++} from "@/lib/ai/models";
+ import {
+   createChat,
++  loadChat,
+   loadChatData,
+   saveChat,
++  saveChatModel,
+   saveChatTitle,
+   saveChatTitleState,
+ } from "@/lib/ai/persistence";
+ import { streamRegistry } from "@/lib/ai/stream-registry";
+ import { generateChatTitle } from "@/lib/ai/title-generator";
+ import { getLogger } from "@/lib/logger";
++import { type UseChatHelpers } from "@ai-sdk/react";
+ import {
+   lastAssistantMessageIsCompleteWithToolCalls,
++  type LanguageModel,
+   type UIMessage,
+ } from "ai";
+ import React, {
++  memo,
+   useCallback,
+   useEffect,
+   useMemo,
+   useRef,
++  useState,
+   type ReactNode,
+ } from "react";
+ import { useLocation, useNavigate } from "react-router";
+ import {
+   ChatFunctionsContext,
+   ChatMessagesContext,
++  ChatModelContext,
+   ChatStatusContext,
+ } from "./chat-contexts";
+ 
+@@ -33,136 +45,271 @@ const logger = getLogger(import.meta.url);
+ interface ChatProviderProps {
+   children: ReactNode;
+   chatId: string | undefined;
+-  initialMessages: UIMessage[];
+ }
+ 
++const ChatController = memo(
++  ({
++    chatId,
++    model,
++    onUpdate,
++  }: {
++    chatId: string;
++    model: LanguageModel;
++    onUpdate: (id: string, helpers: UseChatHelpers<UIMessage>) => void;
++  }) => {
++    const initialMessages = useMemo(() => {
++      try {
++        return loadChat(chatId);
++      } catch (error) {
++        logger.error("Failed to load chat:", chatId, error);
++        return [];
++      }
++    }, [chatId]);
++
++    const chatHelpers = useChat(model, {
++      experimental_throttle: 250,
++      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
++      id: chatId,
++      messages: initialMessages,
++    });
++
++    useEffect(() => {
++      streamRegistry.register(chatId, chatHelpers.stop);
++      return () => {
++        streamRegistry.unregister(chatId);
++      };
++    }, [chatId, chatHelpers.stop]);
++
++    useEffect(() => {
++      onUpdate(chatId, chatHelpers);
++    }, [chatId, onUpdate, chatHelpers]);
++
++    useEffect(() => {
++      if (
++        chatHelpers.status !== "streaming" &&
++        chatHelpers.messages.length > 0
++      ) {
++        try {
++          saveChat({ chatId, messages: chatHelpers.messages });
++
++          const chatData = loadChatData(chatId);
++          const hasUserMessage = chatHelpers.messages.some(
++            (m) => m.role === "user",
++          );
++
++          if (hasUserMessage && !chatData.titleState) {
++            saveChatTitleState({ chatId, titleState: "generating" });
++            generateChatTitle(model, chatHelpers.messages)
++              .then((generatedTitle) => {
++                saveChatTitle({ chatId, title: generatedTitle });
++              })
++              .catch((error) => {
++                logger.error(
++                  "Failed to generate title for chat:",
++                  chatId,
++                  error,
++                );
++                saveChatTitleState({ chatId, titleState: "error" });
++              });
++          }
++        } catch (error) {
++          logger.error("Failed to save chat or generate title:", chatId, error);
++        }
++      }
++    }, [chatId, chatHelpers.messages, chatHelpers.status, model]);
++
++    return null;
++  },
++);
++ChatController.displayName = "ChatController";
++
+ export const ChatProvider: React.FC<ChatProviderProps> = ({
+   children,
+   chatId,
+-  initialMessages,
+ }) => {
+-  const { currentModel } = useModel();
++  const { currentModel: globalDefaultModel, setModel: setGlobalDefaultModel } =
++    useModel();
+   const navigate = useNavigate();
+   const location = useLocation();
+ 
+-  const model = useMemo(() => currentModel.model, [currentModel.model]);
+-
+-  // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
+-  const {
+-    messages,
+-    status,
+-    error,
+-    sendMessage,
+-    addToolResult,
+-    regenerate,
+-    resumeStream,
+-    stop,
+-    setMessages,
+-  } = useChat(model, {
+-    experimental_throttle: 250, // TODO: Allow customizing this in settings
+-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
+-    id: chatId,
+-    messages: initialMessages,
+-  });
+-
+-  const hasMountedRef = useRef(false);
++  const [managedChatIds, setManagedChatIds] = useState<Set<string>>(
++    chatId ? new Set([chatId]) : new Set(),
++  );
+ 
+-  useEffect(() => {
+-    if (!hasMountedRef.current) {
+-      hasMountedRef.current = true;
+-      return;
+-    }
+-    if (chatId && status !== "streaming" && messages.length > 0) {
+-      try {
+-        saveChat({ chatId, messages });
+-
+-        const chatData = loadChatData(chatId);
+-        const hasUserMessage = messages.some((m) => m.role === "user");
+-
+-        if (hasUserMessage && !chatData.titleState) {
+-          saveChatTitleState({ chatId, titleState: "generating" });
+-          generateChatTitle(model, messages)
+-            .then((generatedTitle) => {
+-              saveChatTitle({ chatId, title: generatedTitle });
+-            })
+-            .catch((error) => {
+-              logger.error("Failed to generate title for chat:", chatId, error);
+-              saveChatTitleState({ chatId, titleState: "error" });
+-            });
+-        }
+-      } catch (error) {
+-        logger.error("Failed to save chat or generate title:", chatId, error);
+-      }
+-    }
+-  }, [messages, status, chatId, model]);
++  const chatHelpersMapRef = useRef<Map<string, UseChatHelpers<UIMessage>>>(
++    new Map(),
++  );
++  const [messagesMap, setMessagesMap] = useState<Map<string, UIMessage[]>>(
++    new Map(),
++  );
++  const [statusMap, setStatusMap] = useState<
++    Map<string, UseChatHelpers<UIMessage>["status"]>
++  >(new Map());
++  const [errorMap, setErrorMap] = useState<Map<string, Error | undefined>>(
++    new Map(),
++  );
++  const [chatModelsMap, setChatModelsMap] = useState<Map<string, ModelConfig>>(
++    new Map(),
++  );
+ 
+   useEffect(() => {
+-    const pendingState = location.state?.pendingMessage;
+-    if (pendingState && status === "ready") {
+-      navigate(location.pathname, { replace: true, state: {} });
+-      const { message, options } = pendingState;
+-      sendMessage(message, options);
++    if (chatId && !managedChatIds.has(chatId)) {
++      setManagedChatIds((prev) => new Set(prev).add(chatId));
+     }
+-  }, [location.state, location.pathname, navigate, status, sendMessage]);
++  }, [chatId, managedChatIds]);
+ 
+   useEffect(() => {
+-    if (chatId) {
+-      streamRegistry.register(chatId, stop);
+-      return () => {
+-        streamRegistry.unregister(chatId);
+-      };
+-    }
+-  }, [chatId, stop]);
++    managedChatIds.forEach((id) => {
++      if (!chatModelsMap.has(id)) {
++        const savedData = loadChatData(id);
++        const model = getModelById(savedData.modelId) || getDefaultModel();
++        setChatModelsMap((prev) => new Map(prev).set(id, model));
++      }
++    });
++  }, [managedChatIds, chatModelsMap]);
++
++  const activeModel = useMemo(() => {
++    if (!chatId) return globalDefaultModel;
++    return chatModelsMap.get(chatId) || globalDefaultModel;
++  }, [chatId, chatModelsMap, globalDefaultModel]);
++
++  const handleControllerUpdate = useCallback(
++    (id: string, helpers: UseChatHelpers<UIMessage>) => {
++      const currentHelpers = chatHelpersMapRef.current.get(id);
++      chatHelpersMapRef.current.set(id, helpers);
++
++      if (currentHelpers?.messages !== helpers.messages) {
++        setMessagesMap((prev) => new Map(prev).set(id, helpers.messages));
++      }
++      if (currentHelpers?.status !== helpers.status) {
++        setStatusMap((prev) => new Map(prev).set(id, helpers.status));
++      }
++      if (currentHelpers?.error !== helpers.error) {
++        setErrorMap((prev) => new Map(prev).set(id, helpers.error));
++      }
++    },
++    [],
++  );
++
++  const activeMessages = useMemo(
++    () => (chatId && messagesMap.get(chatId)) || [],
++    [chatId, messagesMap],
++  );
+ 
+   const sendMessageWrapper = useCallback(
+-    (
+-      message: Parameters<typeof sendMessage>[0],
+-      options?: Parameters<typeof sendMessage>[1],
++    async (
++      message: Parameters<UseChatHelpers<UIMessage>["sendMessage"]>[0],
++      options?: Parameters<UseChatHelpers<UIMessage>["sendMessage"]>[1],
+     ): Promise<void> => {
+       if (chatId) {
+-        return sendMessage(message, options);
++        const instance = chatHelpersMapRef.current.get(chatId);
++        if (instance) {
++          instance.sendMessage(message, options);
++          return;
++        }
++        logger.warn(
++          `sendMessageWrapper called for active chat ${chatId}, but no data found.`,
++        );
++        return;
+       }
+ 
+-      const newChatId = createChat();
+-
++      const newChatId = createChat(globalDefaultModel.id);
++      setManagedChatIds((prev) => new Set(prev).add(newChatId));
+       navigate(`/chat/${newChatId}`, {
+         replace: true,
+         state: { pendingMessage: { message, options } },
+       });
+-
+-      return Promise.resolve();
+     },
+-    [chatId, navigate, sendMessage],
++    [chatId, navigate, globalDefaultModel.id],
+   );
+ 
+-  const statusValue = useMemo(() => ({ status, error }), [status, error]);
++  useEffect(() => {
++    const pendingState = location.state?.pendingMessage;
++    const helpers = chatId ? chatHelpersMapRef.current.get(chatId) : undefined;
++    const status = chatId ? statusMap.get(chatId) : undefined;
++
++    if (pendingState && (status === "ready" || helpers?.status === "ready")) {
++      navigate(location.pathname, { replace: true, state: {} });
++      const { message, options } = pendingState;
++      helpers?.sendMessage(message, options);
++    }
++  }, [location.state, location.pathname, navigate, chatId, statusMap]);
++
++  const setModelForActiveChat = useCallback(
++    (modelId: string) => {
++      const newModel = getModelById(modelId);
++      if (!newModel) return;
++
++      if (chatId) {
++        setChatModelsMap((prev) => new Map(prev).set(chatId, newModel));
++        saveChatModel({ chatId, modelId });
++      } else {
++        setGlobalDefaultModel(modelId);
++      }
++    },
++    [chatId, setGlobalDefaultModel],
++  );
+ 
+-  const functionsValue = useMemo(
++  const statusValue = useMemo(
+     () => ({
++      status: (chatId ? statusMap.get(chatId) : undefined) || "ready",
++      error: chatId ? errorMap.get(chatId) : undefined,
++    }),
++    [chatId, statusMap, errorMap],
++  );
++
++  const functionsValue = useMemo(() => {
++    const getHelpers = () =>
++      chatId ? chatHelpersMapRef.current.get(chatId) : undefined;
++    return {
+       sendMessage: sendMessageWrapper,
+-      addToolResult,
+-      regenerate,
+-      resumeStream,
+-      stop,
+-      setMessages,
++      addToolResult: (
++        ...args: Parameters<UseChatHelpers<UIMessage>["addToolResult"]>
++      ) => getHelpers()?.addToolResult(...args) ?? Promise.resolve(),
++      regenerate: (
++        ...args: Parameters<UseChatHelpers<UIMessage>["regenerate"]>
++      ) => getHelpers()?.regenerate(...args) ?? Promise.resolve(),
++      resumeStream: (
++        ...args: Parameters<UseChatHelpers<UIMessage>["resumeStream"]>
++      ) => getHelpers()?.resumeStream(...args) ?? Promise.resolve(),
++      stop: () => Promise.resolve(getHelpers()?.stop?.()),
++      setMessages: (
++        ...args: Parameters<UseChatHelpers<UIMessage>["setMessages"]>
++      ) => getHelpers()?.setMessages(...args),
++    };
++  }, [chatId, sendMessageWrapper]);
++
++  const modelValue = useMemo(
++    () => ({
++      model: activeModel,
++      setModel: setModelForActiveChat,
+     }),
+-    [
+-      sendMessageWrapper,
+-      addToolResult,
+-      regenerate,
+-      resumeStream,
+-      stop,
+-      setMessages,
+-    ],
++    [activeModel, setModelForActiveChat],
+   );
+ 
+   return (
+-    <ChatMessagesContext.Provider value={messages}>
+-      <ChatStatusContext.Provider value={statusValue}>
+-        <ChatFunctionsContext.Provider value={functionsValue}>
+-          {children}
+-        </ChatFunctionsContext.Provider>
+-      </ChatStatusContext.Provider>
+-    </ChatMessagesContext.Provider>
++    <>
++      {Array.from(managedChatIds).map((id) => {
++        const modelConfig = chatModelsMap.get(id);
++        if (!modelConfig) return null;
++        return (
++          <ChatController
++            key={id}
++            chatId={id}
++            model={modelConfig.model}
++            onUpdate={handleControllerUpdate}
++          />
++        );
++      })}
++      <ChatModelContext.Provider value={modelValue}>
++        <ChatMessagesContext.Provider value={activeMessages}>
++          <ChatStatusContext.Provider value={statusValue}>
++            <ChatFunctionsContext.Provider value={functionsValue}>
++              {children}
++            </ChatFunctionsContext.Provider>
++          </ChatStatusContext.Provider>
++        </ChatMessagesContext.Provider>
++      </ChatModelContext.Provider>
++    </>
+   );
+ };
+diff --git a/src/contexts/use-chat/chat-contexts.ts b/src/contexts/use-chat/chat-contexts.ts
+index 2640fe2..95d21dd 100644
+--- a/src/contexts/use-chat/chat-contexts.ts
++++ b/src/contexts/use-chat/chat-contexts.ts
+@@ -1,3 +1,4 @@
++import type { ModelConfig } from "@/lib/ai/models";
+ import { createContext } from "react";
+ import type {
+   ChatFunctionsContextType,
+@@ -15,3 +16,12 @@ export const ChatStatusContext = createContext<
+ export const ChatFunctionsContext = createContext<
+   ChatFunctionsContextType | undefined
+ >(undefined);
++
++export interface ChatModelContextType {
++  model: ModelConfig;
++  setModel: (modelId: string) => void;
++}
++
++export const ChatModelContext = createContext<ChatModelContextType | undefined>(
++  undefined,
++);
+diff --git a/src/contexts/use-chat/chat-hooks.ts b/src/contexts/use-chat/chat-hooks.ts
+index da77655..31cfd16 100644
+--- a/src/contexts/use-chat/chat-hooks.ts
++++ b/src/contexts/use-chat/chat-hooks.ts
+@@ -3,6 +3,8 @@ import { useContext } from "react";
+ import {
+   ChatFunctionsContext,
+   ChatMessagesContext,
++  ChatModelContext,
++  type ChatModelContextType,
+   ChatStatusContext,
+ } from "./chat-contexts";
+ 
+@@ -45,3 +47,11 @@ export const useChatFunctions = (): ChatFunctionsContextType => {
+   }
+   return context;
+ };
++
++export const useChatModel = (): ChatModelContextType => {
++  const context = useContext(ChatModelContext);
++  if (context === undefined) {
++    throw new Error("useChatModel must be used within a ChatProvider");
++  }
++  return context;
++};
+diff --git a/src/lib/ai/persistence/index.ts b/src/lib/ai/persistence/index.ts
+index 93083a8..4580237 100644
+--- a/src/lib/ai/persistence/index.ts
++++ b/src/lib/ai/persistence/index.ts
+@@ -1,6 +1,7 @@
+ import type { UIMessage } from "ai";
+ import { generateId } from "ai";
+ import { getLogger } from "../../logger";
++import { DEFAULT_MODEL_ID } from "../models";
+ import { streamRegistry } from "../stream-registry";
+ 
+ const CHAT_IDS_KEY = "chat-ids";
+@@ -11,6 +12,7 @@ export interface ChatData {
+   messages: UIMessage[];
+   title: string;
+   titleState?: "generating" | "generated" | "error";
++  modelId: string;
+ }
+ 
+ function getChatKey(id: string): string {
+@@ -35,7 +37,7 @@ function saveChatIds(ids: string[]): void {
+   }
+ }
+ 
+-export function createChat(): string {
++export function createChat(modelId: string = DEFAULT_MODEL_ID): string {
+   const id = generateId();
+   try {
+     const chatKey = getChatKey(id);
+@@ -43,6 +45,7 @@ export function createChat(): string {
+       messages: [],
+       title: "New chat",
+       titleState: undefined,
++      modelId: modelId,
+     };
+     localStorage.setItem(chatKey, JSON.stringify(chatData));
+     const currentIds = listChatIds();
+@@ -68,13 +71,16 @@ export function loadChatData(id: string): ChatData {
+     const chatJson = localStorage.getItem(chatKey);
+     if (chatJson) {
+       const parsed = JSON.parse(chatJson);
++      if (!parsed.modelId) {
++        parsed.modelId = DEFAULT_MODEL_ID;
++      }
+       return parsed;
+     }
+     logger.warn(`No chat found for id: ${id}`);
+-    return { messages: [], title: "New chat" };
++    return { messages: [], title: "New chat", modelId: DEFAULT_MODEL_ID };
+   } catch (error) {
+     logger.error(`Failed to load chat ${id} from localStorage`, error);
+-    return { messages: [], title: "New chat" };
++    return { messages: [], title: "New chat", modelId: DEFAULT_MODEL_ID };
+   }
+ }
+ 
+@@ -99,6 +105,27 @@ export function saveChat({
+   }
+ }
+ 
++export function saveChatModel({
++  chatId,
++  modelId,
++}: {
++  chatId: string;
++  modelId: string;
++}): void {
++  try {
++    const chatKey = getChatKey(chatId);
++    const existingData = loadChatData(chatId);
++    const chatData: ChatData = {
++      ...existingData,
++      modelId,
++    };
++    const content = JSON.stringify(chatData);
++    localStorage.setItem(chatKey, content);
++  } catch (error) {
++    logger.error(`Failed to save chat model ${chatId} to localStorage`, error);
++  }
++}
++
+ export function saveChatTitleState({
+   chatId,
+   titleState,
+diff --git a/src/lib/ai/tools/waitNumberMilliseconds.ts b/src/lib/ai/tools/waitNumberMilliseconds.ts
+index 76c0e7a..1887e5a 100644
+--- a/src/lib/ai/tools/waitNumberMilliseconds.ts
++++ b/src/lib/ai/tools/waitNumberMilliseconds.ts
+@@ -4,9 +4,9 @@ import { z } from "zod";
+ export const WaitNumberMillisecondsTool = tool({
+   name: "waitNumberMilliseconds",
+   description:
+-    "Wait for a specified number of milliseconds (min 0 milliseconds, max 10,000 milliseconds)",
++    "Wait for a specified number of milliseconds (min 0 milliseconds, max 60,000 milliseconds)",
+   inputSchema: z.object({
+-    milliseconds: z.number().min(0).max(10000).default(1000),
++    milliseconds: z.number().min(0).max(60000).default(1000),
+   }),
+   execute: async (input, { abortSignal }) => {
+     await new Promise<void>((resolve, reject) => {
+diff --git a/src/routes/chat/index.tsx b/src/routes/chat/index.tsx
+index 48350e9..83543c2 100644
+--- a/src/routes/chat/index.tsx
++++ b/src/routes/chat/index.tsx
+@@ -9,9 +9,8 @@ import { MessageParts } from "@/components/a1/messages";
+ import { Sidebar } from "@/components/a1/sidebar";
+ import { ChatProvider } from "@/contexts/use-chat/chat-context";
+ import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
+-import { loadChat } from "@/lib/ai/persistence";
+ import { cn } from "@/lib/utils";
+-import { useMemo, useRef } from "react";
++import { useRef } from "react";
+ import { useParams } from "react-router";
+ 
+ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
+@@ -63,20 +62,8 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
+ function ChatRoute() {
+   const { id } = useParams<{ id: string }>();
+ 
+-  const initialMessages = useMemo(() => {
+-    if (id) {
+-      try {
+-        return loadChat(id);
+-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+-      } catch (_error) {
+-        return [];
+-      }
+-    }
+-    return [];
+-  }, [id]);
+-
+   return (
+-    <ChatProvider chatId={id} initialMessages={initialMessages}>
++    <ChatProvider chatId={id}>
+       <ChatInterface chatId={id} />
+     </ChatProvider>
+   );
+diff --git a/tests/e2e/smoke.spec.ts b/tests/e2e/smoke.spec.ts
+index 7ea23a1..0c55ff6 100644
+--- a/tests/e2e/smoke.spec.ts
++++ b/tests/e2e/smoke.spec.ts
+@@ -19,13 +19,20 @@ test.describe("App smoke test", () => {
+ 
+   test("console has no severe errors on load", async ({ page }) => {
+     const errors: string[] = [];
++    const errorWhitelist = [
++      'ConsoleError: Viewport argument key "interactive-widget" not recognized and ignored.',
++    ];
++
+     page.on("pageerror", (err) =>
+       errors.push(`PageError: ${err?.message ?? String(err)}`),
+     );
+     page.on("console", (msg) => {
+       const type = msg.type();
+       if (type === "error") {
+-        errors.push(`ConsoleError: ${msg.text()}`);
++        const text = `ConsoleError: ${msg.text()}`;
++        if (!errorWhitelist.includes(text)) {
++          errors.push(text);
++        }
+       }
+     });
+ 

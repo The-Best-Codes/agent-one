@@ -1,5 +1,6 @@
-import { highlighterClient } from "@/lib/syntax-highlighter/worker-client";
 import { useCallback } from "react";
+
+import { highlighterClient } from "@/lib/syntax-highlighter/worker-client";
 
 export interface HighlightResult {
   html: string | null;

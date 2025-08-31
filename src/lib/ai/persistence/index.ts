@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
+
 import { getLogger } from "../../logger";
 import { DEFAULT_MODEL_ID } from "../models";
 import { streamRegistry } from "../stream-registry";

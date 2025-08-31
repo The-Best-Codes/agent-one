@@ -1,12 +1,4 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  useChatFunctions,
-  useChatStatus,
-} from "@/contexts/use-chat/chat-hooks";
-import useMobileDetection from "@/hooks/use-mobile-detection";
-import { getLogger } from "@/lib/logger";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -19,6 +11,16 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useRef, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  useChatFunctions,
+  useChatStatus,
+} from "@/contexts/use-chat/chat-hooks";
+import useMobileDetection from "@/hooks/use-mobile-detection";
+import { getLogger } from "@/lib/logger";
+
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 

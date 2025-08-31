@@ -1,3 +1,20 @@
+import { type UseChatHelpers } from "@ai-sdk/react";
+import {
+  type LanguageModel,
+  lastAssistantMessageIsCompleteWithToolCalls,
+  type UIMessage,
+} from "ai";
+import React, {
+  memo,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useLocation, useNavigate } from "react-router";
+
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
 import {
@@ -17,22 +34,7 @@ import {
 import { streamRegistry } from "@/lib/ai/stream-registry";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
-import { type UseChatHelpers } from "@ai-sdk/react";
-import {
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type LanguageModel,
-  type UIMessage,
-} from "ai";
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import { useLocation, useNavigate } from "react-router";
+
 import {
   ChatFunctionsContext,
   ChatMessagesContext,
