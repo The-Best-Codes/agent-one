@@ -13,3 +13,4 @@
 - Don't disable model selector when streaming (lol) but keep track of what model was used for a chat when switching between chats
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Fix user's very first chat when localStorage is clear not showing up in the sidebar
+- "Unload" chats that aren't currently streaming
