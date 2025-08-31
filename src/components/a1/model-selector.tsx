@@ -14,9 +14,12 @@ import {
 } from "@/components/ui/popover";
 import { useChatModel, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
+import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState, type FC } from "react";
+
+const logger = getLogger(import.meta.url);
 
 interface ModelSelectorProps {
   className?: string;
@@ -30,6 +33,12 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const { model: currentModel, setModel } = useChatModel();
   const { status } = useChatStatus();
   const [open, setOpen] = useState(false);
+
+  logger.verbose("ModelSelector rendered", {
+    currentModel: currentModel.name,
+    status,
+    isDisabled: status === "streaming",
+  });
 
   const isDisabled = status === "streaming";
 
@@ -70,8 +79,21 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                           currentValue.toLowerCase() || m.id === currentValue,
                     );
                     if (selectedModel) {
+                      logger.verbose("Model selected from dropdown", {
+                        selectedModelId: selectedModel.id,
+                        selectedModelName: selectedModel.name,
+                        previousModelId: currentModel.id,
+                        previousModelName: currentModel.name,
+                      });
                       setModel(selectedModel.id);
                       setOpen(false);
+                    } else {
+                      logger.verbose(
+                        "Model selection failed - model not found",
+                        {
+                          currentValue,
+                        },
+                      );
                     }
                   }}
                 >

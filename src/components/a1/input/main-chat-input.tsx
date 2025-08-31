@@ -6,6 +6,7 @@ import {
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
+import { getLogger } from "@/lib/logger";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -20,6 +21,8 @@ import { useTheme } from "next-themes";
 import { useCallback, useRef, useState } from "react";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
+
+const logger = getLogger(import.meta.url);
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -72,6 +75,7 @@ export const MainChatInput = ({
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
+      logger.verbose("Editor content changed, isEmpty:", newIsEmpty);
     }
   };
 
@@ -79,6 +83,11 @@ export const MainChatInput = ({
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
     if ((currentText.trim() || files) && status === "ready") {
+      logger.verbose("Submitting message", {
+        textLength: currentText.length,
+        hasFiles: !!files,
+        fileCount: files?.length || 0,
+      });
       sendMessage({
         text: currentText || "",
         files: files,
@@ -98,6 +107,13 @@ export const MainChatInput = ({
         fileInputRef.current.value = "";
       }
       onAfterSend?.();
+      logger.verbose("Message submitted successfully");
+    } else {
+      logger.verbose("Message submission blocked", {
+        hasText: !!currentText.trim(),
+        hasFiles: !!files,
+        status,
+      });
     }
   };
 
@@ -108,10 +124,19 @@ export const MainChatInput = ({
 
   const addFiles = useCallback(
     (newFiles: FileList) => {
-      if (!newFiles || newFiles.length === 0) return;
+      if (!newFiles || newFiles.length === 0) {
+        logger.verbose("No files to add");
+        return;
+      }
 
       const currentFiles = files ? Array.from(files) : [];
       const newFilesArray = Array.from(newFiles);
+
+      logger.verbose("Adding files", {
+        newFileCount: newFilesArray.length,
+        currentFileCount: currentFiles.length,
+        newFileNames: newFilesArray.map((f) => f.name),
+      });
 
       const combined = [...currentFiles, ...newFilesArray];
 
@@ -123,6 +148,10 @@ export const MainChatInput = ({
       if (fileInputRef.current) {
         fileInputRef.current.files = updatedFileList;
       }
+
+      logger.verbose("Files added successfully", {
+        totalFileCount: updatedFileList.length,
+      });
     },
     [files],
   );
@@ -130,12 +159,22 @@ export const MainChatInput = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = e.target.files;
+      logger.verbose("File input changed", {
+        fileCount: newFiles.length,
+        fileNames: Array.from(newFiles).map((f) => f.name),
+      });
       setFiles(newFiles.length > 0 ? newFiles : undefined);
+    } else {
+      logger.verbose("File input cleared");
+      setFiles(undefined);
     }
   };
 
   const handleRemoveFile = (index: number) => {
-    if (!files) return;
+    if (!files) {
+      logger.verbose("No files to remove");
+      return;
+    }
 
     const filesArray = Array.from(files);
     filesArray.splice(index, 1);
@@ -156,6 +195,7 @@ export const MainChatInput = ({
     e.stopPropagation();
     dragCounter.current++;
     if (e.dataTransfer.types.includes("Files")) {
+      logger.verbose("Drag enter detected, showing drop zone");
       setIsDragging(true);
     }
   }, []);
@@ -165,6 +205,7 @@ export const MainChatInput = ({
     e.stopPropagation();
     dragCounter.current--;
     if (dragCounter.current === 0) {
+      logger.verbose("Drag leave detected, hiding drop zone");
       setIsDragging(false);
     }
   }, []);
@@ -181,8 +222,14 @@ export const MainChatInput = ({
       setIsDragging(false);
       dragCounter.current = 0;
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        logger.verbose("Files dropped", {
+          fileCount: e.dataTransfer.files.length,
+          fileNames: Array.from(e.dataTransfer.files).map((f) => f.name),
+        });
         addFiles(e.dataTransfer.files);
         e.dataTransfer.clearData();
+      } else {
+        logger.verbose("Drop event with no files");
       }
     },
     [addFiles],
@@ -240,6 +287,10 @@ export const MainChatInput = ({
                 paste: (event) => {
                   const pastedFiles = event.clipboardData?.files;
                   if (pastedFiles && pastedFiles.length > 0) {
+                    logger.verbose("Files pasted", {
+                      fileCount: pastedFiles.length,
+                      fileNames: Array.from(pastedFiles).map((f) => f.name),
+                    });
                     addFiles(pastedFiles);
                     event.preventDefault();
                     return true;

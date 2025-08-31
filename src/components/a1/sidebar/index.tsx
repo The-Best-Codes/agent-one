@@ -89,6 +89,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   }, [isCollapsed]);
 
   const handleNewChat = () => {
+    logger.verbose("Creating new chat", { isDesktop, isDrawerOpen });
     navigate("/chat");
     if (!isDesktop) {
       setIsDrawerOpen(false);
@@ -96,6 +97,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   };
 
   const handleSearchClick = () => {
+    logger.verbose("Opening search modal");
     setIsSearchModalOpen(true);
   };
 

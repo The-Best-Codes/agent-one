@@ -1,9 +1,12 @@
 "use client";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+
+const logger = getLogger(import.meta.url);
 
 interface ThemeToggleProps {
   className?: string;
@@ -27,7 +30,13 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
       variant="outline"
       value={theme ?? "system"}
       onValueChange={(value) => {
-        if (value) setTheme(value);
+        if (value) {
+          logger.verbose("Theme changed", {
+            from: theme,
+            to: value,
+          });
+          setTheme(value);
+        }
       }}
       className={cn("w-full", className)}
       aria-label="Select a theme"
