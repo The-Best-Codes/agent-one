@@ -14,3 +14,4 @@
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Fix user's very first chat when localStorage is clear not showing up in the sidebar
 - "Unload" chats that aren't currently streaming
+- Use custom abort error for tools so the tool UI can show "Cancelled" instead of an error?
