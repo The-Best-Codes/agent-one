@@ -2,8 +2,6 @@ import type { UIMessage } from "ai";
 import { generateId } from "ai";
 
 import { getLogger } from "../../logger";
-import { DEFAULT_MODEL_ID } from "../models";
-
 
 const CHAT_IDS_KEY = "chat-ids";
 
@@ -13,7 +11,6 @@ export interface ChatData {
   messages: UIMessage[];
   title: string;
   titleState?: "generating" | "generated" | "error";
-  modelId: string;
 }
 
 function getChatKey(id: string): string {
@@ -38,7 +35,7 @@ function saveChatIds(ids: string[]): void {
   }
 }
 
-export function createChat(modelId: string = DEFAULT_MODEL_ID): string {
+export function createChat(): string {
   const id = generateId();
   try {
     const chatKey = getChatKey(id);
@@ -46,7 +43,6 @@ export function createChat(modelId: string = DEFAULT_MODEL_ID): string {
       messages: [],
       title: "New chat",
       titleState: undefined,
-      modelId: modelId,
     };
     localStorage.setItem(chatKey, JSON.stringify(chatData));
     const currentIds = listChatIds();
@@ -72,16 +68,13 @@ export function loadChatData(id: string): ChatData {
     const chatJson = localStorage.getItem(chatKey);
     if (chatJson) {
       const parsed = JSON.parse(chatJson);
-      if (!parsed.modelId) {
-        parsed.modelId = DEFAULT_MODEL_ID;
-      }
       return parsed;
     }
     logger.warn(`No chat found for id: ${id}`);
-    return { messages: [], title: "New chat", modelId: DEFAULT_MODEL_ID };
+    return { messages: [], title: "New chat" };
   } catch (error) {
     logger.error(`Failed to load chat ${id} from localStorage`, error);
-    return { messages: [], title: "New chat", modelId: DEFAULT_MODEL_ID };
+    return { messages: [], title: "New chat" };
   }
 }
 
@@ -103,27 +96,6 @@ export function saveChat({
     localStorage.setItem(chatKey, content);
   } catch (error) {
     logger.error(`Failed to save chat ${chatId} to localStorage`, error);
-  }
-}
-
-export function saveChatModel({
-  chatId,
-  modelId,
-}: {
-  chatId: string;
-  modelId: string;
-}): void {
-  try {
-    const chatKey = getChatKey(chatId);
-    const existingData = loadChatData(chatId);
-    const chatData: ChatData = {
-      ...existingData,
-      modelId,
-    };
-    const content = JSON.stringify(chatData);
-    localStorage.setItem(chatKey, content);
-  } catch (error) {
-    logger.error(`Failed to save chat model ${chatId} to localStorage`, error);
   }
 }
 

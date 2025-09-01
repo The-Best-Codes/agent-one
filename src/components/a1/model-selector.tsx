@@ -1,5 +1,5 @@
 import { Check, ChevronsUpDown } from "lucide-react";
-import { type FC,useState } from "react";
+import { type FC, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,12 +15,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useChatModel, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useModel } from "@/contexts/use-model/model-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
-import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-
-const logger = getLogger(import.meta.url);
 
 interface ModelSelectorProps {
   className?: string;
@@ -31,15 +29,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   className,
   popoverClassName,
 }) => {
-  const { model: currentModel, setModel } = useChatModel();
+  const { currentModel, setModel } = useModel();
   const { status } = useChatStatus();
   const [open, setOpen] = useState(false);
-
-  logger.verbose("ModelSelector rendered", {
-    currentModel: currentModel.name,
-    status,
-    isDisabled: status === "streaming",
-  });
 
   const isDisabled = status === "streaming";
 
@@ -80,21 +72,8 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                           currentValue.toLowerCase() || m.id === currentValue,
                     );
                     if (selectedModel) {
-                      logger.verbose("Model selected from dropdown", {
-                        selectedModelId: selectedModel.id,
-                        selectedModelName: selectedModel.name,
-                        previousModelId: currentModel.id,
-                        previousModelName: currentModel.name,
-                      });
                       setModel(selectedModel.id);
                       setOpen(false);
-                    } else {
-                      logger.verbose(
-                        "Model selection failed - model not found",
-                        {
-                          currentValue,
-                        },
-                      );
                     }
                   }}
                 >
