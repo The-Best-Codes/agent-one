@@ -1,17 +1,17 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import {
-  lastAssistantMessageIsCompleteWithToolCalls,
   type LanguageModel,
+  lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
 } from "ai";
 import {
   memo,
+  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 
@@ -209,6 +209,7 @@ export const MultiChatProvider = ({
       });
       return Promise.resolve();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [navigate, defaultChat.sendMessage],
   );
 
