@@ -16,3 +16,4 @@
 - "Unload" chats that aren't currently streaming
 - Use custom abort error for tools so the tool UI can show "Cancelled" instead of an error?
 - Kill ongoing stream on chat deletion
+- Introduced in 49d2f3417af8370dc6b0830a7c422c8a2f4aca3f: `stop` doesn't cause a tool to `output-error` anymore, so the tool remains in the `input-available` state, showing a loader even after the tool is cancelled. Related: https://github.com/vercel/ai/pull/7902, https://github.com/vercel/ai/releases/tag/ai%405.0.24
