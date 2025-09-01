@@ -11,3 +11,4 @@
 - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
+- Kill ongoing stream on chat deletion
