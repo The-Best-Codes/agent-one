@@ -1,5 +1,4 @@
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { useChat } from "@/hooks/ai/useChat";
 import {
   createChat,
   loadChatData,
@@ -10,10 +9,7 @@ import {
 import { streamRegistry } from "@/lib/ai/stream-registry";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
-import {
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type UIMessage,
-} from "ai";
+import { type UIMessage } from "ai";
 import React, {
   useCallback,
   useEffect,
@@ -27,6 +23,11 @@ import {
   ChatMessagesContext,
   ChatStatusContext,
 } from "./chat-contexts";
+import { useMultiChat } from "./multi-chat-context";
+import {
+  type ChatStatusContextType,
+  type ChatFunctionsContextType,
+} from "./chat-hooks";
 
 const logger = getLogger(import.meta.url);
 
@@ -36,6 +37,20 @@ interface ChatProviderProps {
   initialMessages: UIMessage[];
 }
 
+const emptyStatus: ChatStatusContextType = {
+  status: "ready",
+  error: undefined,
+};
+
+const emptyFunctions: ChatFunctionsContextType = {
+  sendMessage: async () => {},
+  addToolResult: () => {},
+  regenerate: async () => {},
+  resumeStream: async () => {},
+  stop: () => {},
+  setMessages: () => {},
+};
+
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
   chatId,
@@ -44,13 +59,21 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const { currentModel } = useModel();
   const navigate = useNavigate();
   const location = useLocation();
+  const { getChat, createChat: createManagedChat } = useMultiChat();
 
   const model = useMemo(() => currentModel.model, [currentModel.model]);
 
-  // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
+  useEffect(() => {
+    if (chatId) {
+      createManagedChat(chatId, initialMessages);
+    }
+  }, [chatId, initialMessages, createManagedChat]);
+
+  const chatInstance = chatId ? getChat(chatId) : undefined;
+
   const {
-    messages,
-    status,
+    messages = initialMessages,
+    status = "ready",
     error,
     sendMessage,
     addToolResult,
@@ -58,12 +81,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     resumeStream,
     stop,
     setMessages,
-  } = useChat(model, {
-    experimental_throttle: 250, // TODO: Allow customizing this in settings
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
-    id: chatId,
-    messages: initialMessages,
-  });
+  } = chatInstance || {};
 
   const hasMountedRef = useRef(false);
 
@@ -98,7 +116,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   useEffect(() => {
     const pendingState = location.state?.pendingMessage;
-    if (pendingState && status === "ready") {
+    if (pendingState && status === "ready" && sendMessage) {
       navigate(location.pathname, { replace: true, state: {} });
       const { message, options } = pendingState;
       sendMessage(message, options);
@@ -106,7 +124,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   }, [location.state, location.pathname, navigate, status, sendMessage]);
 
   useEffect(() => {
-    if (chatId) {
+    if (chatId && stop) {
       streamRegistry.register(chatId, stop);
       return () => {
         streamRegistry.unregister(chatId);
@@ -119,7 +137,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       message: Parameters<typeof sendMessage>[0],
       options?: Parameters<typeof sendMessage>[1],
     ): Promise<void> => {
-      if (chatId) {
+      if (chatId && sendMessage) {
         return sendMessage(message, options);
       }
 
@@ -135,18 +153,25 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     [chatId, navigate, sendMessage],
   );
 
-  const statusValue = useMemo(() => ({ status, error }), [status, error]);
+  const statusValue = useMemo(
+    () => (chatInstance ? { status, error } : emptyStatus),
+    [chatInstance, status, error],
+  );
 
   const functionsValue = useMemo(
-    () => ({
-      sendMessage: sendMessageWrapper,
-      addToolResult,
-      regenerate,
-      resumeStream,
-      stop,
-      setMessages,
-    }),
+    () =>
+      chatInstance
+        ? {
+            sendMessage: sendMessageWrapper,
+            addToolResult,
+            regenerate,
+            resumeStream,
+            stop,
+            setMessages,
+          }
+        : { ...emptyFunctions, sendMessage: sendMessageWrapper },
     [
+      chatInstance,
       sendMessageWrapper,
       addToolResult,
       regenerate,
