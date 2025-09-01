@@ -1,33 +1,22 @@
-import { type UseChatHelpers } from "@ai-sdk/react";
 import {
-  type LanguageModel,
   lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
 } from "ai";
 import React, {
-  memo,
   type ReactNode,
   useCallback,
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
 import {
-  getDefaultModel,
-  getModelById,
-  type ModelConfig,
-} from "@/lib/ai/models";
-import {
   createChat,
-  loadChat,
   loadChatData,
   saveChat,
-  saveChatModel,
   saveChatTitle,
   saveChatTitleState,
 } from "@/lib/ai/persistence";
@@ -37,7 +26,6 @@ import { getLogger } from "@/lib/logger";
 import {
   ChatFunctionsContext,
   ChatMessagesContext,
-  ChatModelContext,
   ChatStatusContext,
 } from "./chat-contexts";
 
@@ -46,268 +34,127 @@ const logger = getLogger(import.meta.url);
 interface ChatProviderProps {
   children: ReactNode;
   chatId: string | undefined;
+  initialMessages: UIMessage[];
 }
-
-const ChatController = memo(
-  ({
-    chatId,
-    model,
-    onUpdate,
-    onUnmount,
-  }: {
-    chatId: string;
-    model: LanguageModel;
-    onUpdate: (id: string, helpers: UseChatHelpers<UIMessage>) => void;
-    onUnmount: (id: string) => void;
-  }) => {
-    const initialMessages = useMemo(() => {
-      try {
-        return loadChat(chatId);
-      } catch (error) {
-        logger.error("Failed to load chat:", chatId, error);
-        return [];
-      }
-    }, [chatId]);
-
-    const chatHelpers = useChat(model, {
-      experimental_throttle: 250,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-      id: chatId,
-      messages: initialMessages,
-    });
-
-    useEffect(() => {
-      streamRegistry.register(chatId, chatHelpers.stop);
-      return () => {
-        streamRegistry.unregister(chatId);
-        onUnmount(chatId);
-      };
-    }, [chatId, chatHelpers.stop, onUnmount]);
-
-    useEffect(() => {
-      onUpdate(chatId, chatHelpers);
-    }, [chatId, onUpdate, chatHelpers]);
-
-    useEffect(() => {
-      if (
-        chatHelpers.status !== "streaming" &&
-        chatHelpers.messages.length > 0
-      ) {
-        try {
-          saveChat({ chatId, messages: chatHelpers.messages });
-
-          const chatData = loadChatData(chatId);
-          const hasUserMessage = chatHelpers.messages.some(
-            (m) => m.role === "user",
-          );
-
-          if (hasUserMessage && !chatData.titleState) {
-            saveChatTitleState({ chatId, titleState: "generating" });
-            generateChatTitle(model, chatHelpers.messages)
-              .then((generatedTitle) => {
-                saveChatTitle({ chatId, title: generatedTitle });
-              })
-              .catch((error) => {
-                logger.error(
-                  "Failed to generate title for chat:",
-                  chatId,
-                  error,
-                );
-                saveChatTitleState({ chatId, titleState: "error" });
-              });
-          }
-        } catch (error) {
-          logger.error("Failed to save chat or generate title:", chatId, error);
-        }
-      }
-    }, [chatId, chatHelpers.messages, chatHelpers.status, model]);
-
-    return null;
-  },
-);
-ChatController.displayName = "ChatController";
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
   chatId,
+  initialMessages,
 }) => {
-  const { currentModel: globalDefaultModel, setModel: setGlobalDefaultModel } =
-    useModel();
+  const { currentModel } = useModel();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const chatHelpersMapRef = useRef<Map<string, UseChatHelpers<UIMessage>>>(
-    new Map(),
-  );
-  const [messagesMap, setMessagesMap] = useState<Map<string, UIMessage[]>>(
-    new Map(),
-  );
-  const [statusMap, setStatusMap] = useState<
-    Map<string, UseChatHelpers<UIMessage>["status"]>
-  >(new Map());
-  const [errorMap, setErrorMap] = useState<Map<string, Error | undefined>>(
-    new Map(),
-  );
-  const [chatModelsMap, setChatModelsMap] = useState<Map<string, ModelConfig>>(
-    new Map(),
-  );
+  const model = useMemo(() => currentModel.model, [currentModel.model]);
 
-  const loadedChatIds = useMemo(() => {
-    const streamingChatIds = Array.from(statusMap.entries())
-      .filter(([, status]) => status === "streaming" || status === "submitted")
-      .map(([id]) => id);
+  // https://ai-sdk.dev/docs/migration-guides/migration-guide-5-0#usechat-changes
+  const {
+    messages,
+    status,
+    error,
+    sendMessage,
+    addToolResult,
+    regenerate,
+    resumeStream,
+    stop,
+    setMessages,
+  } = useChat(model, {
+    experimental_throttle: 250, // TODO: Allow customizing this in settings
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // Interesting note: true/false works here. Use for stop button?
+    id: chatId,
+    messages: initialMessages,
+  });
 
-    const ids = new Set(streamingChatIds);
-    if (chatId) {
-      ids.add(chatId);
-    }
-    return ids;
-  }, [chatId, statusMap]);
+  const hasMountedRef = useRef(false);
 
-  const prevLoadedChatIdsRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    const unloadedIds = [...prevLoadedChatIdsRef.current].filter(
-      (id) => !loadedChatIds.has(id),
-    );
-    if (unloadedIds.length > 0) {
-      setMessagesMap((prev) => {
-        const next = new Map(prev);
-        unloadedIds.forEach((id) => next.delete(id));
-        return next;
-      });
-      setStatusMap((prev) => {
-        const next = new Map(prev);
-        unloadedIds.forEach((id) => next.delete(id));
-        return next;
-      });
-      setErrorMap((prev) => {
-        const next = new Map(prev);
-        unloadedIds.forEach((id) => next.delete(id));
-        return next;
-      });
-      setChatModelsMap((prev) => {
-        const next = new Map(prev);
-        unloadedIds.forEach((id) => next.delete(id));
-        return next;
-      });
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
     }
-    prevLoadedChatIdsRef.current = loadedChatIds;
-  }, [loadedChatIds]);
+    if (chatId && status !== "streaming" && messages.length > 0) {
+      try {
+        saveChat({ chatId, messages });
+
+        const chatData = loadChatData(chatId);
+        const hasUserMessage = messages.some((m) => m.role === "user");
+
+        if (hasUserMessage && !chatData.titleState) {
+          saveChatTitleState({ chatId, titleState: "generating" });
+          generateChatTitle(model, messages)
+            .then((generatedTitle) => {
+              saveChatTitle({ chatId, title: generatedTitle });
+            })
+            .catch((error) => {
+              logger.error("Failed to generate title for chat:", chatId, error);
+              saveChatTitleState({ chatId, titleState: "error" });
+            });
+        }
+      } catch (error) {
+        logger.error("Failed to save chat or generate title:", chatId, error);
+      }
+    }
+  }, [messages, status, chatId, model]);
+
+  useEffect(() => {
+    const pendingState = location.state?.pendingMessage;
+    if (pendingState && status === "ready") {
+      navigate(location.pathname, { replace: true, state: {} });
+      const { message, options } = pendingState;
+      sendMessage(message, options);
+    }
+  }, [location.state, location.pathname, navigate, status, sendMessage]);
 
   const sendMessageWrapper = useCallback(
-    async (
-      message: Parameters<UseChatHelpers<UIMessage>["sendMessage"]>[0],
-      options?: Parameters<UseChatHelpers<UIMessage>["sendMessage"]>[1],
+    (
+      message: Parameters<typeof sendMessage>[0],
+      options?: Parameters<typeof sendMessage>[1],
     ): Promise<void> => {
       if (chatId) {
-        const instance = chatHelpersMapRef.current.get(chatId);
-        if (instance) {
-          instance.sendMessage(message, options);
-          return;
-        }
-        logger.warn(
-          `sendMessageWrapper called for active chat ${chatId}, but no instance found.`,
-        );
-        return;
+        return sendMessage(message, options);
       }
 
-      const newChatId = createChat(globalDefaultModel.id);
+      const newChatId = createChat();
+
       navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
       });
+
+      return Promise.resolve();
     },
-    [chatId, navigate, globalDefaultModel.id],
+    [chatId, navigate, sendMessage],
   );
 
-  useEffect(() => {
-    const pendingState = location.state?.pendingMessage;
-    const helpers = chatId ? chatHelpersMapRef.current.get(chatId) : undefined;
-    const status = chatId ? statusMap.get(chatId) : undefined;
+  const statusValue = useMemo(() => ({ status, error }), [status, error]);
 
-    if (pendingState && (status === "ready" || helpers?.status === "ready")) {
-      navigate(location.pathname, { replace: true, state: {} });
-      const { message, options } = pendingState;
-      helpers?.sendMessage(message, options);
-    }
-  }, [location.state, location.pathname, navigate, chatId, statusMap]);
-
-  const setModelForActiveChat = useCallback(
-    (modelId: string) => {
-      const newModel = getModelById(modelId);
-      if (!newModel) return;
-
-      if (chatId) {
-        setChatModelsMap((prev) => new Map(prev).set(chatId, newModel));
-        saveChatModel({ chatId, modelId });
-      } else {
-        setGlobalDefaultModel(modelId);
-      }
-    },
-    [chatId, setGlobalDefaultModel],
-  );
-
-  const statusValue = useMemo(
+  const functionsValue = useMemo(
     () => ({
-      status: (chatId ? statusMap.get(chatId) : undefined) || "ready",
-      error: chatId ? errorMap.get(chatId) : undefined,
-    }),
-    [chatId, statusMap, errorMap],
-  );
-
-  const functionsValue = useMemo(() => {
-    const getHelpers = () =>
-      chatId ? chatHelpersMapRef.current.get(chatId) : undefined;
-    return {
       sendMessage: sendMessageWrapper,
-      addToolResult: (
-        ...args: Parameters<UseChatHelpers<UIMessage>["addToolResult"]>
-      ) => getHelpers()?.addToolResult(...args) ?? Promise.resolve(),
-      regenerate: (
-        ...args: Parameters<UseChatHelpers<UIMessage>["regenerate"]>
-      ) => getHelpers()?.regenerate(...args) ?? Promise.resolve(),
-      resumeStream: (
-        ...args: Parameters<UseChatHelpers<UIMessage>["resumeStream"]>
-      ) => getHelpers()?.resumeStream(...args) ?? Promise.resolve(),
-      stop: () => Promise.resolve(getHelpers()?.stop?.()),
-      setMessages: (
-        ...args: Parameters<UseChatHelpers<UIMessage>["setMessages"]>
-      ) => getHelpers()?.setMessages(...args),
-    };
-  }, [chatId, sendMessageWrapper]);
-
-  const modelValue = useMemo(
-    () => ({
-      model: activeModel,
-      setModel: setModelForActiveChat,
+      addToolResult,
+      regenerate,
+      resumeStream,
+      stop,
+      setMessages,
     }),
-    [activeModel, setModelForActiveChat],
+    [
+      sendMessageWrapper,
+      addToolResult,
+      regenerate,
+      resumeStream,
+      stop,
+      setMessages,
+    ],
   );
 
   return (
-    <>
-      {Array.from(loadedChatIds).map((id) => {
-        const modelConfig = chatModelsMap.get(id);
-        if (!modelConfig) return null;
-        return (
-          <ChatController
-            key={id}
-            chatId={id}
-            model={modelConfig.model}
-            onUpdate={handleControllerUpdate}
-            onUnmount={handleControllerUnmount}
-          />
-        );
-      })}
-      <ChatModelContext.Provider value={modelValue}>
-        <ChatMessagesContext.Provider value={activeMessages}>
-          <ChatStatusContext.Provider value={statusValue}>
-            <ChatFunctionsContext.Provider value={functionsValue}>
-              {children}
-            </ChatFunctionsContext.Provider>
-          </ChatStatusContext.Provider>
-        </ChatMessagesContext.Provider>
-      </ChatModelContext.Provider>
-    </>
+    <ChatMessagesContext.Provider value={messages}>
+      <ChatStatusContext.Provider value={statusValue}>
+        <ChatFunctionsContext.Provider value={functionsValue}>
+          {children}
+        </ChatFunctionsContext.Provider>
+      </ChatStatusContext.Provider>
+    </ChatMessagesContext.Provider>
   );
 };

@@ -4,8 +4,6 @@ import { useContext } from "react";
 import {
   ChatFunctionsContext,
   ChatMessagesContext,
-  ChatModelContext,
-  type ChatModelContextType,
   ChatStatusContext,
 } from "./chat-contexts";
 
@@ -45,14 +43,6 @@ export const useChatFunctions = (): ChatFunctionsContextType => {
   const context = useContext(ChatFunctionsContext);
   if (context === undefined) {
     throw new Error("useChatFunctions must be used within a ChatProvider");
-  }
-  return context;
-};
-
-export const useChatModel = (): ChatModelContextType => {
-  const context = useContext(ChatModelContext);
-  if (context === undefined) {
-    throw new Error("useChatModel must be used within a ChatProvider");
   }
   return context;
 };

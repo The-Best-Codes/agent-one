@@ -1,7 +1,5 @@
 import { createContext } from "react";
 
-import type { ModelConfig } from "@/lib/ai/models";
-
 import type {
   ChatFunctionsContextType,
   ChatMessagesContextType,
@@ -18,12 +16,3 @@ export const ChatStatusContext = createContext<
 export const ChatFunctionsContext = createContext<
   ChatFunctionsContextType | undefined
 >(undefined);
-
-export interface ChatModelContextType {
-  model: ModelConfig;
-  setModel: (modelId: string) => void;
-}
-
-export const ChatModelContext = createContext<ChatModelContextType | undefined>(
-  undefined,
-);
