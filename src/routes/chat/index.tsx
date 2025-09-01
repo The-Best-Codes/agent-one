@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useParams } from "react-router";
 
 import {
@@ -12,6 +12,7 @@ import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
 import { ChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
+import { loadChat } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
@@ -63,8 +64,20 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
 function ChatRoute() {
   const { id } = useParams<{ id: string }>();
 
+  const initialMessages = useMemo(() => {
+    if (id) {
+      try {
+        return loadChat(id);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_error) {
+        return [];
+      }
+    }
+    return [];
+  }, [id]);
+
   return (
-    <ChatProvider chatId={id}>
+    <ChatProvider chatId={id} initialMessages={initialMessages}>
       <ChatInterface chatId={id} />
     </ChatProvider>
   );
