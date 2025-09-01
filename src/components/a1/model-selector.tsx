@@ -15,7 +15,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
@@ -30,10 +29,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   popoverClassName,
 }) => {
   const { currentModel, setModel } = useModel();
-  const { status } = useChatStatus();
   const [open, setOpen] = useState(false);
-
-  const isDisabled = status === "streaming";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -42,7 +38,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          disabled={isDisabled}
           className={cn("w-full justify-between", className)}
           aria-label={`Model: ${currentModel.name}`}
         >
