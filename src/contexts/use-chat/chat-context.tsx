@@ -54,10 +54,12 @@ const ChatController = memo(
     chatId,
     model,
     onUpdate,
+    onUnmount,
   }: {
     chatId: string;
     model: LanguageModel;
     onUpdate: (id: string, helpers: UseChatHelpers<UIMessage>) => void;
+    onUnmount: (id: string) => void;
   }) => {
     const initialMessages = useMemo(() => {
       try {
@@ -79,8 +81,9 @@ const ChatController = memo(
       streamRegistry.register(chatId, chatHelpers.stop);
       return () => {
         streamRegistry.unregister(chatId);
+        onUnmount(chatId);
       };
-    }, [chatId, chatHelpers.stop]);
+    }, [chatId, chatHelpers.stop, onUnmount]);
 
     useEffect(() => {
       onUpdate(chatId, chatHelpers);
@@ -134,10 +137,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [managedChatIds, setManagedChatIds] = useState<Set<string>>(
-    chatId ? new Set([chatId]) : new Set(),
-  );
-
   const chatHelpersMapRef = useRef<Map<string, UseChatHelpers<UIMessage>>>(
     new Map(),
   );
@@ -154,21 +153,61 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     new Map(),
   );
 
-  useEffect(() => {
-    if (chatId && !managedChatIds.has(chatId)) {
-      setManagedChatIds((prev) => new Set(prev).add(chatId));
+  const loadedChatIds = useMemo(() => {
+    const streamingChatIds = Array.from(statusMap.entries())
+      .filter(([, status]) => status === "streaming" || status === "submitted")
+      .map(([id]) => id);
+
+    const ids = new Set(streamingChatIds);
+    if (chatId) {
+      ids.add(chatId);
     }
-  }, [chatId, managedChatIds]);
+    return ids;
+  }, [chatId, statusMap]);
+
+  const prevLoadedChatIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const unloadedIds = [...prevLoadedChatIdsRef.current].filter(
+      (id) => !loadedChatIds.has(id),
+    );
+    if (unloadedIds.length > 0) {
+      setMessagesMap((prev) => {
+        const next = new Map(prev);
+        unloadedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      setStatusMap((prev) => {
+        const next = new Map(prev);
+        unloadedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      setErrorMap((prev) => {
+        const next = new Map(prev);
+        unloadedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      setChatModelsMap((prev) => {
+        const next = new Map(prev);
+        unloadedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    }
+    prevLoadedChatIdsRef.current = loadedChatIds;
+  }, [loadedChatIds]);
 
   useEffect(() => {
-    managedChatIds.forEach((id) => {
+    const modelsToLoad = new Map<string, ModelConfig>();
+    for (const id of loadedChatIds) {
       if (!chatModelsMap.has(id)) {
         const savedData = loadChatData(id);
         const model = getModelById(savedData.modelId) || getDefaultModel();
-        setChatModelsMap((prev) => new Map(prev).set(id, model));
+        modelsToLoad.set(id, model);
       }
-    });
-  }, [managedChatIds, chatModelsMap]);
+    }
+    if (modelsToLoad.size > 0) {
+      setChatModelsMap((prev) => new Map([...prev, ...modelsToLoad]));
+    }
+  }, [loadedChatIds, chatModelsMap]);
 
   const activeModel = useMemo(() => {
     if (!chatId) return globalDefaultModel;
@@ -193,10 +232,18 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     [],
   );
 
-  const activeMessages = useMemo(
-    () => (chatId && messagesMap.get(chatId)) || [],
-    [chatId, messagesMap],
-  );
+  const handleControllerUnmount = useCallback((id: string) => {
+    chatHelpersMapRef.current.delete(id);
+  }, []);
+
+  const activeMessages = useMemo(() => {
+    if (chatId) {
+      const messages = messagesMap.get(chatId);
+      if (messages) return messages;
+      return loadChat(chatId);
+    }
+    return [];
+  }, [chatId, messagesMap]);
 
   const sendMessageWrapper = useCallback(
     async (
@@ -210,13 +257,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
           return;
         }
         logger.warn(
-          `sendMessageWrapper called for active chat ${chatId}, but no data found.`,
+          `sendMessageWrapper called for active chat ${chatId}, but no instance found.`,
         );
         return;
       }
 
       const newChatId = createChat(globalDefaultModel.id);
-      setManagedChatIds((prev) => new Set(prev).add(newChatId));
       navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
@@ -291,7 +337,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
   return (
     <>
-      {Array.from(managedChatIds).map((id) => {
+      {Array.from(loadedChatIds).map((id) => {
         const modelConfig = chatModelsMap.get(id);
         if (!modelConfig) return null;
         return (
@@ -300,6 +346,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
             chatId={id}
             model={modelConfig.model}
             onUpdate={handleControllerUpdate}
+            onUnmount={handleControllerUnmount}
           />
         );
       })}
