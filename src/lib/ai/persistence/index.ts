@@ -3,7 +3,7 @@ import { generateId } from "ai";
 
 import { getLogger } from "../../logger";
 import { DEFAULT_MODEL_ID } from "../models";
-import { streamRegistry } from "../stream-registry";
+
 
 const CHAT_IDS_KEY = "chat-ids";
 
@@ -180,13 +180,6 @@ export function saveChatTitle({
 
 export function deleteChat(chatId: string): void {
   try {
-    const wasStreamActive = streamRegistry.stop(chatId);
-    if (wasStreamActive) {
-      logger.verbose(
-        `Cancelled active stream for chat ${chatId} before deletion`,
-      );
-    }
-
     const chatKey = getChatKey(chatId);
     localStorage.removeItem(chatKey);
 

@@ -31,7 +31,6 @@ import {
   saveChatTitle,
   saveChatTitleState,
 } from "@/lib/ai/persistence";
-import { streamRegistry } from "@/lib/ai/stream-registry";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
 
@@ -194,56 +193,6 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     }
     prevLoadedChatIdsRef.current = loadedChatIds;
   }, [loadedChatIds]);
-
-  useEffect(() => {
-    const modelsToLoad = new Map<string, ModelConfig>();
-    for (const id of loadedChatIds) {
-      if (!chatModelsMap.has(id)) {
-        const savedData = loadChatData(id);
-        const model = getModelById(savedData.modelId) || getDefaultModel();
-        modelsToLoad.set(id, model);
-      }
-    }
-    if (modelsToLoad.size > 0) {
-      setChatModelsMap((prev) => new Map([...prev, ...modelsToLoad]));
-    }
-  }, [loadedChatIds, chatModelsMap]);
-
-  const activeModel = useMemo(() => {
-    if (!chatId) return globalDefaultModel;
-    return chatModelsMap.get(chatId) || globalDefaultModel;
-  }, [chatId, chatModelsMap, globalDefaultModel]);
-
-  const handleControllerUpdate = useCallback(
-    (id: string, helpers: UseChatHelpers<UIMessage>) => {
-      const currentHelpers = chatHelpersMapRef.current.get(id);
-      chatHelpersMapRef.current.set(id, helpers);
-
-      if (currentHelpers?.messages !== helpers.messages) {
-        setMessagesMap((prev) => new Map(prev).set(id, helpers.messages));
-      }
-      if (currentHelpers?.status !== helpers.status) {
-        setStatusMap((prev) => new Map(prev).set(id, helpers.status));
-      }
-      if (currentHelpers?.error !== helpers.error) {
-        setErrorMap((prev) => new Map(prev).set(id, helpers.error));
-      }
-    },
-    [],
-  );
-
-  const handleControllerUnmount = useCallback((id: string) => {
-    chatHelpersMapRef.current.delete(id);
-  }, []);
-
-  const activeMessages = useMemo(() => {
-    if (chatId) {
-      const messages = messagesMap.get(chatId);
-      if (messages) return messages;
-      return loadChat(chatId);
-    }
-    return [];
-  }, [chatId, messagesMap]);
 
   const sendMessageWrapper = useCallback(
     async (

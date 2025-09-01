@@ -15,3 +15,4 @@
 - Fix user's very first chat when localStorage is clear not showing up in the sidebar
 - "Unload" chats that aren't currently streaming
 - Use custom abort error for tools so the tool UI can show "Cancelled" instead of an error?
+- Kill ongoing stream on chat deletion
