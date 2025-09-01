@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useParams } from "react-router";
 
 import {
@@ -10,9 +10,8 @@ import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
-import { ChatProvider } from "@/contexts/use-chat/chat-context";
+import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
-import { loadChat } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
@@ -64,22 +63,10 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
 function ChatRoute() {
   const { id } = useParams<{ id: string }>();
 
-  const initialMessages = useMemo(() => {
-    if (id) {
-      try {
-        return loadChat(id);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_error) {
-        return [];
-      }
-    }
-    return [];
-  }, [id]);
-
   return (
-    <ChatProvider chatId={id} initialMessages={initialMessages}>
+    <MultiChatProvider currentChatId={id}>
       <ChatInterface chatId={id} />
-    </ChatProvider>
+    </MultiChatProvider>
   );
 }
 
