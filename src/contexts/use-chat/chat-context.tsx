@@ -1,11 +1,6 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
+import { type UIMessage } from "ai";
 import {
-  type LanguageModel,
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type UIMessage,
-} from "ai";
-import {
-  memo,
   type ReactNode,
   useCallback,
   useEffect,
@@ -17,15 +12,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
-import {
-  createChat,
-  loadChat,
-  loadChatData,
-  saveChat,
-  saveChatTitle,
-  saveChatTitleState,
-} from "@/lib/ai/persistence";
-import { generateChatTitle } from "@/lib/ai/title-generator";
+import { createChat } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 
 import {
@@ -33,6 +20,7 @@ import {
   ChatMessagesContext,
   ChatStatusContext,
 } from "./chat-contexts";
+import { ChatInstance } from "./chat-instance";
 
 const logger = getLogger(import.meta.url);
 
@@ -42,73 +30,6 @@ const useForceUpdate = () => {
   const [, setTick] = useState(0);
   return useCallback(() => setTick((t) => t + 1), []);
 };
-
-/**
- * A renderless component that encapsulates a single `useChat` hook instance.
- * It reports its state up to the MultiChatProvider and handles its own side effects
- * like saving messages and generating titles.
- */
-const ChatInstance = memo(
-  ({
-    chatId,
-    model,
-    onInstanceUpdate,
-    onStatusChange,
-  }: {
-    chatId: string;
-    model: LanguageModel;
-    onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
-    onStatusChange: (
-      id: string,
-      status: UseChatHelpers<UIMessage>["status"],
-    ) => void;
-  }) => {
-    const initialMessages = useMemo(() => loadChat(chatId), [chatId]);
-
-    const chat = useChat(model, {
-      experimental_throttle: 250,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-      id: chatId,
-      messages: initialMessages,
-    });
-
-    // Effect to save chat history and generate titles
-    useEffect(() => {
-      if (chat.status !== "streaming" && chat.messages.length > 0) {
-        saveChat({ chatId, messages: chat.messages });
-        const chatData = loadChatData(chatId);
-        const hasUserMessage = chat.messages.some((m) => m.role === "user");
-        if (hasUserMessage && !chatData.titleState) {
-          saveChatTitleState({ chatId, titleState: "generating" });
-          generateChatTitle(model, chat.messages)
-            .then((generatedTitle) =>
-              saveChatTitle({ chatId, title: generatedTitle }),
-            )
-            .catch((error) => {
-              logger.error("Failed to generate title for chat:", chatId, error);
-              saveChatTitleState({ chatId, titleState: "error" });
-            });
-        }
-      }
-    }, [chat.messages, chat.status, chatId, model]);
-
-    // Report status changes to the parent provider
-    useEffect(() => {
-      onStatusChange(chatId, chat.status);
-    }, [chatId, chat.status, onStatusChange]);
-
-    // This effect syncs the latest chat state to the parent provider's ref.
-    // It runs on every render of ChatInstance. This is intentional and cheap,
-    // as ChatInstance is renderless. The parent provider will then decide
-    // whether a UI re-render is necessary based on focus.
-    useEffect(() => {
-      onInstanceUpdate(chatId, chat);
-    });
-
-    return null;
-  },
-);
-ChatInstance.displayName = "ChatInstance";
 
 /**
  * Manages multiple chat sessions, keeping background chats alive while they are streaming
