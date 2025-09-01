@@ -1,3 +1,6 @@
+import { useMemo, useRef } from "react";
+import { useParams } from "react-router";
+
 import {
   AutoScrollContainer,
   type AutoScrollHandle,
@@ -11,8 +14,6 @@ import { ChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { loadChat } from "@/lib/ai/persistence";
 import { cn } from "@/lib/utils";
-import { useMemo, useRef } from "react";
-import { useParams } from "react-router";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();

@@ -1,7 +1,9 @@
-import { getLogger } from "@/lib/logger";
 import type { ToolUIPart, UIMessage } from "ai";
 import { deepEqual } from "fast-equals";
 import { memo } from "react";
+
+import { getLogger } from "@/lib/logger";
+
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartToolCall } from "./tools/tool-call";
 import { MessagePartToolDateTime } from "./tools/tool-dateTime";

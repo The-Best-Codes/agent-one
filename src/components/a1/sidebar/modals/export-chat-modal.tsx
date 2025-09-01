@@ -1,3 +1,5 @@
+import { DownloadIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { loadChatData } from "@/lib/ai/persistence";
-import { DownloadIcon } from "lucide-react";
 
 interface ExportChatModalProps {
   isOpen: boolean;

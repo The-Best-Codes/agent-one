@@ -1,11 +1,12 @@
+import type { ToolUIPart } from "ai";
+import { XCircleIcon } from "lucide-react";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
-import type { ToolUIPart } from "ai";
-import { XCircleIcon } from "lucide-react";
 
 interface ToolCallPartProps {
   part: ToolUIPart;

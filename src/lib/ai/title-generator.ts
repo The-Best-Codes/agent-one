@@ -1,6 +1,7 @@
-import { getLogger } from "@/lib/logger";
 import type { LanguageModel, TextPart, UIMessage } from "ai";
 import { generateText } from "ai";
+
+import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 

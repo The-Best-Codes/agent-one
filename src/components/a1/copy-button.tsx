@@ -1,8 +1,9 @@
+import { CopyCheckIcon, CopyIcon, CopyXIcon } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-import { CopyCheckIcon, CopyIcon, CopyXIcon } from "lucide-react";
-import { useState } from "react";
 
 const logger = getLogger(import.meta.url);
 

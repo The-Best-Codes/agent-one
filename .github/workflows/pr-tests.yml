@@ -84,7 +84,7 @@ jobs:
         with:
           name: playwright-report-${{ matrix.test }}
           path: playwright-report/
-          retention-days: 30
+          retention-days: 1
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
@@ -92,4 +92,4 @@ jobs:
         with:
           name: test-results-${{ matrix.test }}
           path: test-results/
-          retention-days: 30
+          retention-days: 1

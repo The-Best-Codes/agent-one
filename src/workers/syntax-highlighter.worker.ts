@@ -1,14 +1,14 @@
+// Themes
+import themeDarkPlus from "@shikijs/themes/dark-plus";
+import themeLightPlus from "@shikijs/themes/light-plus";
 import { createHighlighterCore, type HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
+
+import { getLogger } from "../lib/logger";
 import type {
   HighlightRequest,
   HighlightResponse,
 } from "../lib/syntax-highlighter/types";
-import { getLogger } from "../lib/logger";
-
-// Themes
-import themeDarkPlus from "@shikijs/themes/dark-plus";
-import themeLightPlus from "@shikijs/themes/light-plus";
 
 let highlighter: HighlighterCore | null = null;
 

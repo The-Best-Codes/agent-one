@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { VirtualizedChatList } from "./virtualized-chat-list";
 
 interface SearchModalProps {
@@ -22,7 +23,7 @@ export const SearchModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         showCloseButton={false}
-        className="flex h-fit max-h-[80svh] max-w-2xl flex-col p-2"
+        className="flex h-fit max-w-2xl flex-col p-2"
       >
         <DialogHeader>
           <DialogTitle className="sr-only flex items-center gap-2">
@@ -31,7 +32,7 @@ export const SearchModal = ({
           <DialogDescription className="sr-only">
             Select a conversation to continue
           </DialogDescription>
-          <div className="min-h-0 flex-1">
+          <div className="max-h-[80svh] min-h-0 flex-1">
             <VirtualizedChatList
               activeChatId={activeChatId}
               showNewChatButton={false}

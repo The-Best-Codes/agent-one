@@ -1,6 +1,7 @@
-import { getLogger } from "@/lib/logger";
 import type { ToolUIPart } from "ai";
 import { ClockIcon, Loader2Icon, XCircleIcon } from "lucide-react";
+
+import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 

@@ -1,3 +1,6 @@
+import { Check, ChevronsUpDown } from "lucide-react";
+import { type FC, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -16,8 +19,6 @@ import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { useState, type FC } from "react";
 
 interface ModelSelectorProps {
   className?: string;

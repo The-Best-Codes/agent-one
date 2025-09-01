@@ -1,7 +1,8 @@
+import type { TextUIPart, UIMessage } from "ai";
+
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { TextUIPart, UIMessage } from "ai";
 
 const MAX_CHARS = 100000; // TODO: Allow user to configure this value (in settings?)
 

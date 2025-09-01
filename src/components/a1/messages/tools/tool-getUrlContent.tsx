@@ -1,3 +1,13 @@
+import type { ToolUIPart } from "ai";
+import {
+  ChevronDownIcon,
+  FileTextIcon,
+  GlobeIcon,
+  Loader2Icon,
+  XCircleIcon,
+} from "lucide-react";
+import { memo, useState } from "react";
+
 import {
   Accordion,
   AccordionContent,
@@ -11,15 +21,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ToolUIPart } from "ai";
-import {
-  ChevronDownIcon,
-  FileTextIcon,
-  GlobeIcon,
-  Loader2Icon,
-  XCircleIcon,
-} from "lucide-react";
-import { memo, useState } from "react";
 
 interface GetUrlContentInput {
   urls: string[];

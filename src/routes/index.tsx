@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
+
 import SuspenseFallback from "./suspense-fallback";
 
 export default function IndexRoute() {

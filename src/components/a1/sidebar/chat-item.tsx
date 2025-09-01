@@ -1,11 +1,3 @@
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import {
   DownloadIcon,
   MoreHorizontalIcon,
@@ -14,7 +6,20 @@ import {
 } from "lucide-react";
 import { memo, useState } from "react";
 import { Link } from "react-router";
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { getLogger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
+
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
+
+const logger = getLogger(import.meta.url);
 
 interface ChatItemProps {
   activeChatId?: string;
@@ -73,6 +78,10 @@ export const ChatItem = memo(
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      logger.verbose("Opening change title modal", {
+                        chatId: id,
+                        title,
+                      });
                       setShowChangeTitleModal(true);
                     }}
                   >
@@ -83,6 +92,10 @@ export const ChatItem = memo(
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      logger.verbose("Opening export chat modal", {
+                        chatId: id,
+                        title,
+                      });
                       setShowExportModal(true);
                     }}
                   >
@@ -93,6 +106,10 @@ export const ChatItem = memo(
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
+                      logger.verbose("Opening delete chat modal", {
+                        chatId: id,
+                        title,
+                      });
                       setShowDeleteModal(true);
                     }}
                     variant="destructive"

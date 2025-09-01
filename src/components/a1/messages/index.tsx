@@ -1,11 +1,13 @@
+import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
+import { CheckIcon, RotateCwIcon, XIcon } from "lucide-react";
+import { memo, useCallback, useMemo } from "react";
+
 import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
-import { CheckIcon, RotateCwIcon, XIcon } from "lucide-react";
-import { memo, useCallback, useMemo } from "react";
+
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
 import { InlineTextEditor } from "./inline-text-editor";

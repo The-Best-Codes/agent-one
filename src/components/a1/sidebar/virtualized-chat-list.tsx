@@ -1,11 +1,13 @@
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listChatIds, loadChatData } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { ChatItem } from "./chat-item";
 
 const logger = getLogger(import.meta.url);

@@ -1,12 +1,13 @@
-import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
-import { getLogger } from "@/lib/logger";
 import {
   type UIMessage,
-  type UseChatOptions,
   useChat as useChatSDK,
+  type UseChatOptions,
 } from "@ai-sdk/react";
 import { type ChatInit, type LanguageModel } from "ai";
 import { useEffect, useRef } from "react";
+
+import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
+import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 

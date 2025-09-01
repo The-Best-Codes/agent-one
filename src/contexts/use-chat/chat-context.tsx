@@ -1,3 +1,16 @@
+import {
+  lastAssistantMessageIsCompleteWithToolCalls,
+  type UIMessage,
+} from "ai";
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import { useLocation, useNavigate } from "react-router";
+
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
 import {
@@ -9,18 +22,7 @@ import {
 } from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
-import {
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type UIMessage,
-} from "ai";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  type ReactNode,
-} from "react";
-import { useLocation, useNavigate } from "react-router";
+
 import {
   ChatFunctionsContext,
   ChatMessagesContext,

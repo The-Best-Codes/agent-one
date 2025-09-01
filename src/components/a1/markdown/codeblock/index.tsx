@@ -1,8 +1,10 @@
+import type { UIMessage } from "ai";
+import { PlayIcon, SquareIcon } from "lucide-react";
+
 import { CopyButton } from "@/components/a1/copy-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { UIMessage } from "ai";
-import { PlayIcon, SquareIcon } from "lucide-react";
+
 import { usePreview } from "./preview";
 import { SyntaxHighlighter } from "./shiki-highlighter";
 

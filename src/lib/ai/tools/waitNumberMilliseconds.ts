@@ -4,9 +4,9 @@ import { z } from "zod";
 export const WaitNumberMillisecondsTool = tool({
   name: "waitNumberMilliseconds",
   description:
-    "Wait for a specified number of milliseconds (min 0 milliseconds, max 10,000 milliseconds)",
+    "Wait for a specified number of milliseconds (min 0 milliseconds, max 60,000 milliseconds)",
   inputSchema: z.object({
-    milliseconds: z.number().min(0).max(10000).default(1000),
+    milliseconds: z.number().min(0).max(60000).default(1000),
   }),
   execute: async (input, { abortSignal }) => {
     await new Promise<void>((resolve, reject) => {

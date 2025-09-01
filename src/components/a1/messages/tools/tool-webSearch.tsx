@@ -1,11 +1,3 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/native/accordion";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
 import type { ToolUIPart } from "ai";
 import {
   ChevronDownIcon,
@@ -15,6 +7,15 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import { useState } from "react";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/native/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 interface WebSearchInput {
   query: string;

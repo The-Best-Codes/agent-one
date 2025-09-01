@@ -1,4 +1,5 @@
 import { getLogger } from "@/lib/logger";
+
 import type { HighlightRequest, HighlightResponse } from "./types";
 
 const logger = getLogger(import.meta.url);
