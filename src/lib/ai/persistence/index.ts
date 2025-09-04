@@ -4,6 +4,7 @@ import { generateId } from "ai";
 import { getLogger } from "../../logger";
 
 const CHAT_IDS_KEY = "chat-ids";
+const NEW_CHAT_MODEL_ID_KEY = "new-chat-model-id";
 
 const logger = getLogger(import.meta.url);
 
@@ -11,6 +12,24 @@ export interface ChatData {
   messages: UIMessage[];
   title: string;
   titleState?: "generating" | "generated" | "error";
+  modelId?: string;
+}
+
+export function getNewChatModelId(): string | null {
+  try {
+    return localStorage.getItem(NEW_CHAT_MODEL_ID_KEY);
+  } catch (error) {
+    logger.error("Failed to get new chat model ID from localStorage", error);
+    return null;
+  }
+}
+
+export function saveNewChatModelId(modelId: string): void {
+  try {
+    localStorage.setItem(NEW_CHAT_MODEL_ID_KEY, modelId);
+  } catch (error) {
+    logger.error("Failed to save new chat model ID to localStorage", error);
+  }
 }
 
 function getChatKey(id: string): string {
@@ -35,7 +54,7 @@ function saveChatIds(ids: string[]): void {
   }
 }
 
-export function createChat(): string {
+export function createChat(modelId: string): string {
   const id = generateId();
   try {
     const chatKey = getChatKey(id);
@@ -43,6 +62,7 @@ export function createChat(): string {
       messages: [],
       title: "New chat",
       titleState: undefined,
+      modelId,
     };
     localStorage.setItem(chatKey, JSON.stringify(chatData));
     const currentIds = listChatIds();
@@ -96,6 +116,27 @@ export function saveChat({
     localStorage.setItem(chatKey, content);
   } catch (error) {
     logger.error(`Failed to save chat ${chatId} to localStorage`, error);
+  }
+}
+
+export function saveChatModel({
+  chatId,
+  modelId,
+}: {
+  chatId: string;
+  modelId: string;
+}): void {
+  try {
+    const chatKey = getChatKey(chatId);
+    const existingData = loadChatData(chatId);
+    const chatData: ChatData = {
+      ...existingData,
+      modelId,
+    };
+    const content = JSON.stringify(chatData);
+    localStorage.setItem(chatKey, content);
+  } catch (error) {
+    logger.error(`Failed to save chat model ${chatId} to localStorage`, error);
   }
 }
 

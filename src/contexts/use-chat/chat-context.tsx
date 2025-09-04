@@ -10,9 +10,11 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 
+import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useChat } from "@/hooks/ai/useChat";
-import { createChat } from "@/lib/ai/persistence";
+import { getModelById, type ModelConfig } from "@/lib/ai/models";
+import { createChat, loadChatData, saveChatModel } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 
 import {
@@ -42,11 +44,13 @@ export const MultiChatProvider = ({
   children: ReactNode;
   currentChatId: string | undefined;
 }) => {
-  const { currentModel } = useModel();
+  const {
+    currentModel: defaultModelForNewChats,
+    setModel: setDefaultModelForNewChats,
+  } = useModel();
   const navigate = useNavigate();
   const location = useLocation();
   const forceUpdate = useForceUpdate();
-  const model = useMemo(() => currentModel.model, [currentModel.model]);
 
   // Ref to store all active useChat instances
   const chatInstancesRef = useRef<ChatInstanceCollection>(new Map());
@@ -61,6 +65,54 @@ export const MultiChatProvider = ({
     id: "",
     status: "",
   });
+
+  // Helper to get the model for a given chat ID, with fallback
+  const getModelForChat = useCallback(
+    (chatId: string | undefined): ModelConfig => {
+      if (chatId) {
+        const chatData = loadChatData(chatId);
+        if (chatData.modelId) {
+          const chatModel = getModelById(chatData.modelId);
+          if (chatModel) {
+            return chatModel;
+          }
+        }
+      }
+      // Fallback for new chat or chat with no/invalid model
+      return defaultModelForNewChats;
+    },
+    [defaultModelForNewChats],
+  );
+
+  // The model for the currently focused chat/UI
+  const focusedModel = useMemo(
+    () => getModelForChat(currentChatId),
+    [currentChatId, getModelForChat],
+  );
+
+  // A new setModel function that handles both new and existing chats
+  const setModelForContext = useCallback(
+    (modelId: string) => {
+      if (currentChatId) {
+        // Update the model for the specific chat we're viewing
+        saveChatModel({ chatId: currentChatId, modelId });
+        forceUpdate(); // Re-render to update focusedModel and ChatInstance props
+      } else {
+        // We are on a "new chat" page, update the default model for new chats
+        setDefaultModelForNewChats(modelId);
+      }
+    },
+    [currentChatId, setDefaultModelForNewChats, forceUpdate],
+  );
+
+  // The context value to provide to UI components like ModelSelector
+  const modelContextValue = useMemo(
+    () => ({
+      currentModel: focusedModel,
+      setModel: setModelForContext,
+    }),
+    [focusedModel, setModelForContext],
+  );
 
   // Callback for ChatInstance to register/update itself
   const handleInstanceUpdate = useCallback(
@@ -115,7 +167,7 @@ export const MultiChatProvider = ({
   }, [currentChatId, lastStatusChange]);
 
   // Default `useChat` instance for the "new chat" screen
-  const defaultChat = useChat(model);
+  const defaultChat = useChat(defaultModelForNewChats.model);
 
   // Wrapper for sending a message from the "new chat" screen
   const handleNewChatSubmit = useCallback(
@@ -123,7 +175,7 @@ export const MultiChatProvider = ({
       message: Parameters<typeof defaultChat.sendMessage>[0],
       options?: Parameters<typeof defaultChat.sendMessage>[1],
     ) => {
-      const newChatId = createChat();
+      const newChatId = createChat(focusedModel.id);
       navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
@@ -131,7 +183,7 @@ export const MultiChatProvider = ({
       return Promise.resolve();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigate, defaultChat.sendMessage],
+    [navigate, defaultChat.sendMessage, focusedModel.id],
   );
 
   // Select the currently focused chat instance
@@ -211,16 +263,19 @@ export const MultiChatProvider = ({
   );
 
   return (
-    <>
-      {Array.from(activeChatIds).map((id) => (
-        <ChatInstance
-          key={id}
-          chatId={id}
-          model={model}
-          onInstanceUpdate={handleInstanceUpdate}
-          onStatusChange={handleStatusChange}
-        />
-      ))}
+    <ModelContext.Provider value={modelContextValue}>
+      {Array.from(activeChatIds).map((id) => {
+        const chatModel = getModelForChat(id);
+        return (
+          <ChatInstance
+            key={id}
+            chatId={id}
+            model={chatModel.model}
+            onInstanceUpdate={handleInstanceUpdate}
+            onStatusChange={handleStatusChange}
+          />
+        );
+      })}
       <ChatMessagesContext.Provider value={messages}>
         <ChatStatusContext.Provider value={statusValue}>
           <ChatFunctionsContext.Provider value={functionsValue}>
@@ -228,6 +283,6 @@ export const MultiChatProvider = ({
           </ChatFunctionsContext.Provider>
         </ChatStatusContext.Provider>
       </ChatMessagesContext.Provider>
-    </>
+    </ModelContext.Provider>
   );
 };

@@ -5,6 +5,7 @@ import {
   getModelById,
   type ModelConfig,
 } from "@/lib/ai/models";
+import { getNewChatModelId, saveNewChatModelId } from "@/lib/ai/persistence";
 
 import { ModelContext } from "./model-contexts";
 
@@ -20,7 +21,7 @@ interface ModelProviderProps {
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const [currentModel, setCurrentModel] = useState<ModelConfig>(() => {
     // Try to load from localStorage, fallback to default
-    const savedModelId = localStorage.getItem("selected-model-id");
+    const savedModelId = getNewChatModelId();
     if (savedModelId) {
       const savedModel = getModelById(savedModelId);
       if (savedModel) {
@@ -34,7 +35,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     const model = getModelById(modelId);
     if (model) {
       setCurrentModel(model);
-      localStorage.setItem("selected-model-id", modelId);
+      saveNewChatModelId(modelId);
     }
   }, []);
 
