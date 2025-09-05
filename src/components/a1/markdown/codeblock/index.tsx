@@ -25,7 +25,7 @@ const BestHighlighter = ({
 }) => {
   if (content.length > MAX_CHARS) {
     return (
-      <pre className="max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-xs">
+      <pre className="max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-sm">
         <code className="text-white">{content}</code>
       </pre>
     );

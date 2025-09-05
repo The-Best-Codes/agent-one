@@ -50,7 +50,7 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   }, [code, language, theme, highlight]);
 
   const BASE_STYLES =
-    "[&_pre]:p-2 [&_pre]:bg-[rgb(30,30,30)] [&_pre]:overflow-x-auto";
+    "[&_pre]:p-2 [&_pre]:bg-[rgb(30,30,30)] [&_pre]:overflow-x-auto [&_pre]:text-sm";
 
   if (highlightedHtml && !error) {
     return (
@@ -63,7 +63,7 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
   }
 
   return (
-    <pre className="max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-xs">
+    <pre className="max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-sm">
       <code className="text-white">{code}</code>
     </pre>
   );
