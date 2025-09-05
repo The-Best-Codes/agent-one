@@ -13,10 +13,10 @@ export interface ModelConfig {
 
 export const AVAILABLE_MODELS: ModelConfig[] = [
   {
-    id: "groq-kimi-k2-instruct",
+    id: "groq-kimi-k2-instruct-0905",
     name: "Kimi K2 Instruct",
     provider: "Groq",
-    model: groq("moonshotai/kimi-k2-instruct"),
+    model: groq("moonshotai/kimi-k2-instruct-0905"),
     supportsToolUse: true,
   },
   {
