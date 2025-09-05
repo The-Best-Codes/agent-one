@@ -48,6 +48,7 @@ export const MultiChatProvider = ({
     currentModel: defaultModelForNewChats,
     setModel: setDefaultModelForNewChats,
   } = useModel();
+  if (!defaultModelForNewChats === undefined) throw new Error("");
   const navigate = useNavigate();
   const location = useLocation();
   const forceUpdate = useForceUpdate();
