@@ -6,12 +6,10 @@
 - Fix chat performance when starting a new chat (small period when nothing is shown) and some bugs when going from chat to new and back to chat. Be sure to test in a slow, low performance environment.
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
-- Persist model used to generate message per message
+- Persist model used to generate message per message?
 - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
 - Make persistence happen more often (like after tool calls etc too) to save progress better
-- Fix user's very first chat when localStorage is clear not showing up in the sidebar
-- "Unload" chats that aren't currently streaming
 - Kill ongoing stream on chat deletion
 - Introduced in 49d2f3417af8370dc6b0830a7c422c8a2f4aca3f: `stop` doesn't cause a tool to `output-error` anymore, so the tool remains in the `input-available` state, showing a loader even after the tool is cancelled. Related: https://github.com/vercel/ai/pull/7902, https://github.com/vercel/ai/releases/tag/ai%405.0.24/ So: Use custom abort error for tools so the tool UI can show "Cancelled" instead of an error? Attach onFinish listener to get the reason and update UI? Or something else?
