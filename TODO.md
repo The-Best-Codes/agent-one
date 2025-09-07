@@ -16,4 +16,3 @@
 
 - Clean up MCP server stuff
 - Create dedicated MCP server UI
-- Support `dynamic-tool` UI part
