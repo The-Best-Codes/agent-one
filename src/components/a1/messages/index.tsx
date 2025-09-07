@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
 import { InlineTextEditor } from "./inline-text-editor";
+import { MessagePartDynamicTool } from "./parts/dynamic-tool";
 import { MessagePartFallback } from "./parts/fallback";
 import { MessagePartFile } from "./parts/file";
 import { MessagePartReasoning } from "./parts/reasoning";
@@ -97,6 +98,8 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
           return <MessagePartStepStart key={key} />;
         case "file":
           return <MessagePartFile key={key} file={part} />;
+        case "dynamic-tool":
+          return <MessagePartDynamicTool key={key} part={part} />;
         default:
           if (part.type.startsWith("tool-")) {
             return <MessageToolHandler key={key} part={{ ...part }} />; // Using a spread operator to ensure React.memo will get a new instance of part
