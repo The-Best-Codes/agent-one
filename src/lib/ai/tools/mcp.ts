@@ -11,8 +11,6 @@ import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
-// Based on MCP's Stdio transport, we define a transport that uses Tauri's shell
-// to communicate with a child process over stdin/stdout.
 class TauriStdioMCPTransport implements MCPTransport {
   public onclose?: () => void;
   public onerror?: (error: Error) => void;
@@ -24,7 +22,6 @@ class TauriStdioMCPTransport implements MCPTransport {
 
   async start(): Promise<void> {
     try {
-      // This name must match the one defined in src-tauri/capabilities/default.json
       this.commandInstance = Command.create("npx", [
         "-y",
         "@modelcontextprotocol/server-everything",
@@ -36,12 +33,12 @@ class TauriStdioMCPTransport implements MCPTransport {
       });
 
       this.commandInstance.stderr.on("data", (line: string) => {
-        logger.error(`[MCP Server Stderr]: ${line}`);
+        logger.verbose(`[MCP Server Stderr]: ${line}`);
       });
 
       this.commandInstance.on("error", (error: string) => {
         const err = new Error(error);
-        logger.error(`[MCP Server] Command error:`, err);
+        logger.verbose(`[MCP Server] Command error:`, err);
         this.onerror?.(err);
       });
 
@@ -60,12 +57,14 @@ class TauriStdioMCPTransport implements MCPTransport {
     } catch (error) {
       logger.error("Failed to start MCP server:", error);
       this.onerror?.(error as Error);
-      throw error; // Propagate error to MCPClient
+      throw error;
     }
   }
 
   private processReadBuffer() {
-    // MCP messages are newline-delimited JSON
+    // In most cases I've seen, MCP messages are newline-delimited JSON
+    // This could be a potential cause of MCP-related bugs in the future,
+    // so play around with the code below if any issues arise
     let newlineIndex;
     while ((newlineIndex = this.readBuffer.indexOf("\n")) >= 0) {
       const line = this.readBuffer.slice(0, newlineIndex);
@@ -87,7 +86,8 @@ class TauriStdioMCPTransport implements MCPTransport {
     if (!this.childProcess) {
       throw new Error("MCP server process is not running.");
     }
-    // MCP Server expects newline-delimited JSON
+    // See comments in the `processReadBuffer` method
+    // MCP expects newline-delimited JSON
     const messageString = JSON.stringify(message) + "\n";
     await this.childProcess.write(messageString);
   }
@@ -140,7 +140,6 @@ export async function getMcpTools(): Promise<ToolSet> {
     return tools;
   } catch (error) {
     logger.error("Failed to initialize MCP client or fetch tools:", error);
-    // Return empty object on failure to avoid breaking the app
     return {};
   }
 }

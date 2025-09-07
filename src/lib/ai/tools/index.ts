@@ -31,18 +31,14 @@ export async function getToolsObject(): Promise<ToolSet> {
       ...staticTools,
       ...mcpTools,
     };
-    logger.verbose("All tools loaded (static + MCP).");
+    logger.verbose("MCP and static tools loaded.");
     return allTools;
   } catch (error) {
     logger.error(
       "Failed to get MCP tools, falling back to static tools",
       error,
     );
-    // Fallback to static tools if MCP fails
     allTools = { ...staticTools };
     return allTools;
   }
 }
-
-// Keep the old export for now, but it's better to update references to use getToolsObject
-export const toolsObject = staticTools;
