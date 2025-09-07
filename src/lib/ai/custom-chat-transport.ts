@@ -45,7 +45,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       abortSignal: options.abortSignal,
       tools,
       toolChoice: "auto",
+      // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
+      // stopWhen: stepCountIs(50), // TODO: [TODO: Investigate if this is relevant in AI SDK 5] Allow the user to configure this in settings
+      // experimental_transform: smoothStream(), // TODO: Allow customizing this in settings
     });
 
     return result.toUIMessageStream({
