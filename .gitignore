@@ -39,5 +39,9 @@ playwright-report/
 /.docker-cache
 /docker/cached
 
+# Tauri
+/src-tauri/target/
+/src-tauri/gen/schemas
+
 # Local Uncommitable
 .local-uncommitable
