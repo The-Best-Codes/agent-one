@@ -22,7 +22,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         <div key={callId} className="flex items-center gap-2">
           <XCircleIcon className="text-destructive size-4 shrink-0" />
           <span className="text-destructive text-sm font-bold">
-            Unknown tool "{toolName}"
+            Running unknown tool "{toolName}"
           </span>
         </div>
       );
@@ -39,7 +39,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <XCircleIcon className="text-destructive size-4 shrink-0" />
                 <span className="max-w-2xl truncate">
-                  Unknown tool executing "{toolName}"
+                  Running unknown tool "{toolName}"
                 </span>
               </p>
             </AccordionTrigger>
@@ -69,14 +69,14 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <XCircleIcon className="text-destructive size-4 shrink-0" />
                 <span className="max-w-2xl truncate">
-                  Unknown tool "{toolName}" completed
+                  Unknown tool "{toolName}" finished
                 </span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="p-2 pt-0">
               <div className="text-foreground/80 text-sm">
                 <div className="whitespace-pre-wrap">
-                  Unknown tool output:{" "}
+                  Tool output:{" "}
                   {typeof part.output === "string"
                     ? part.output
                     : JSON.stringify(part.output, null, 2)}

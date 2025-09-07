@@ -13,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 type DynamicToolOutputContentItem = {
@@ -40,7 +41,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="text-foreground text-sm font-bold">
-            Executing "{toolName}" tool...
+            Running "{toolName}" tool...
           </span>
         </div>
       );
@@ -52,7 +53,9 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
-          <span className="max-w-2xl truncate">Executing "{toolName}" tool...</span>
+          <span className="max-w-2xl truncate">
+            Running "{toolName}" tool...
+          </span>
         </div>
       );
     }
@@ -60,8 +63,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
     case "output-available": {
       const output = part.output as DynamicToolOutput;
       const hasError = output?.isError;
-      const outputText =
-        output?.content?.map((item) => item.text).join(" ") || "No output";
+      const outputText = output ? JSON.stringify(output.content) : "No output";
 
       if (hasError) {
         return (
@@ -109,25 +111,29 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="max-w-2xl truncate">Executed "{toolName}" tool</span>
+              <span className="max-w-2xl truncate">
+                "{toolName}" tool finished
+              </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
-              <div className="space-y-2">
-                {part?.input !== null && (
+              <ScrollArea type="always" viewportClassName="max-h-96">
+                <div className="space-y-2">
+                  {part?.input !== null && (
+                    <div>
+                      <span className="font-medium">Parameters:</span>
+                      <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
+                        {JSON.stringify(part.input, null, 2)}
+                      </pre>
+                    </div>
+                  )}
                   <div>
-                    <span className="font-medium">Parameters:</span>
-                    <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
-                      {JSON.stringify(part.input, null, 2)}
-                    </pre>
-                  </div>
-                )}
-                <div>
-                  <span className="font-medium">Result:</span>
-                  <div className="mt-1 rounded bg-transparent p-2 whitespace-pre-wrap">
-                    {outputText}
+                    <span className="font-medium">Result:</span>
+                    <div className="mt-1 rounded bg-transparent p-2 whitespace-pre-wrap">
+                      {outputText}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ScrollArea>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
