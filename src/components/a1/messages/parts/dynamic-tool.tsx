@@ -13,7 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 type DynamicToolOutputContentItem = {
@@ -117,6 +117,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               <ScrollArea type="always" viewportClassName="max-h-96">
+                <ScrollBar orientation="horizontal"></ScrollBar>
                 <div className="space-y-2">
                   {part?.input !== null && (
                     <div>
