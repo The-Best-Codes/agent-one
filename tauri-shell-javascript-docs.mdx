@@ -1,0 +1,2775 @@
+Title: @tauri-apps/plugin-shell
+
+URL Source: https://v2.tauri.app/reference/javascript/shell/
+
+Markdown Content:
+@tauri-apps/plugin-shell | Tauri
+
+===============
+[Skip to content](https://v2.tauri.app/reference/javascript/shell/#_top)
+
+[![Image 1](https://v2.tauri.app/_astro/logo.BQPqkdSq.svg)![Image 2](https://v2.tauri.app/_astro/logo_light.C7Zm2ZoX.svg) Tauri](https://v2.tauri.app/)
+
+Search Ctrl K
+
+Cancel
+
+[Guides](https://v2.tauri.app/start/)[References](https://v2.tauri.app/reference/acl/capability/)[Blog](https://v2.tauri.app/blog/)[Releases](https://v2.tauri.app/release/)
+
+[GitHub](https://github.com/tauri-apps/tauri)[Discord](https://discord.com/invite/tauri)[Twitter](https://twitter.com/TauriApps)[Bluesky](https://bsky.app/profile/tauri.app)[Mastodon](https://fosstodon.org/@TauriApps)[RSS](https://v2.tauri.app/rss)
+
+Select language
+
+- [Guides](https://v2.tauri.app/start/)
+- [References](https://v2.tauri.app/reference/cli/)
+- [Blog](https://v2.tauri.app/blog/)
+
+- [Blog](https://v2.tauri.app/blog/)
+- [Command Line Interface](https://v2.tauri.app/reference/cli/)
+- Security
+  _ [Capability](https://v2.tauri.app/reference/acl/capability/)
+  _ [Permission](https://v2.tauri.app/reference/acl/permission/)
+  _ [Scope](https://v2.tauri.app/reference/acl/scope/)
+  _ [Core Permissions](https://v2.tauri.app/reference/acl/core-permissions/)
+
+- [Configuration](https://v2.tauri.app/reference/config/)
+- [Environment Variables](https://v2.tauri.app/reference/environment-variables/)
+- [Webview Versions](https://v2.tauri.app/reference/webview-versions/)
+- Releases
+  _ [Overview](https://v2.tauri.app/release/)
+  _  
+  @tauri-apps
+  _  
+  api
+  _ [2.8.0](https://v2.tauri.app/release/@tauri-apps/api/v2.8.0/)
+  _ [2.7.0](https://v2.tauri.app/release/@tauri-apps/api/v2.7.0/)
+  _ [2.6.0](https://v2.tauri.app/release/@tauri-apps/api/v2.6.0/)
+  _ [2.5.0](https://v2.tauri.app/release/@tauri-apps/api/v2.5.0/)
+  _ [2.4.1](https://v2.tauri.app/release/@tauri-apps/api/v2.4.1/)
+  _ [2.4.0](https://v2.tauri.app/release/@tauri-apps/api/v2.4.0/)
+  _ [2.3.0](https://v2.tauri.app/release/@tauri-apps/api/v2.3.0/)
+  _ [2.2.0](https://v2.tauri.app/release/@tauri-apps/api/v2.2.0/)
+  _ [2.1.1](https://v2.tauri.app/release/@tauri-apps/api/v2.1.1/)
+  _ [2.1.0](https://v2.tauri.app/release/@tauri-apps/api/v2.1.0/)
+  _ [2.0.3](https://v2.tauri.app/release/@tauri-apps/api/v2.0.3/)
+  _ [2.0.2](https://v2.tauri.app/release/@tauri-apps/api/v2.0.2/)
+  _ [2.0.1](https://v2.tauri.app/release/@tauri-apps/api/v2.0.1/)
+  _ [2.0.0](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0/)
+  _ [2.0.0-rc.6](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-rc.6/)
+  _ [2.0.0-rc.5](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-rc.5/)
+  _ [2.0.0-rc.4](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-rc.4/)
+  _ [2.0.0-rc.3](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-rc.3/)
+  _ [2.0.0-rc.2](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-rc.2/)
+  _ [2.0.0-rc.1](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-rc.1/)
+  _ [2.0.0-rc.0](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-rc.0/)
+  _ [2.0.0-beta.16](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.16/)
+  _ [2.0.0-beta.15](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.15/)
+  _ [2.0.0-beta.14](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.14/)
+  _ [2.0.0-beta.13](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.13/)
+  _ [2.0.0-beta.12](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.12/)
+  _ [2.0.0-beta.11](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.11/)
+  _ [2.0.0-beta.10](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.10/)
+  _ [2.0.0-beta.9](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.9/)
+  _ [2.0.0-beta.8](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.8/)
+  _ [2.0.0-beta.7](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.7/)
+  _ [2.0.0-beta.6](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.6/)
+  _ [2.0.0-beta.5](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.5/)
+  _ [2.0.0-beta.4](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.4/)
+  _ [2.0.0-beta.3](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.3/)
+  _ [2.0.0-beta.2](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.2/)
+  _ [2.0.0-beta.1](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.1/)
+  _ [2.0.0-beta.0](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-beta.0/)
+  _ [2.0.0-alpha.14](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.14/)
+  _ [2.0.0-alpha.13](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.13/)
+  _ [2.0.0-alpha.12](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.12/)
+  _ [2.0.0-alpha.11](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.11/)
+  _ [2.0.0-alpha.10](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.10/)
+  _ [2.0.0-alpha.9](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.9/)
+  _ [2.0.0-alpha.8](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.8/)
+  _ [2.0.0-alpha.7](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.7/)
+  _ [2.0.0-alpha.6](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.6/)
+  _ [2.0.0-alpha.5](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.5/)
+  _ [2.0.0-alpha.4](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.4/)
+  _ [2.0.0-alpha.3](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.3/)
+  _ [2.0.0-alpha.2](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.2/)
+  _ [2.0.0-alpha.1](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.1/)
+  _ [2.0.0-alpha.0](https://v2.tauri.app/release/@tauri-apps/api/v2.0.0-alpha.0/)
+  _ [1.5.3](https://v2.tauri.app/release/@tauri-apps/api/v1.5.3/)
+  _ [1.5.2](https://v2.tauri.app/release/@tauri-apps/api/v1.5.2/)
+  _ [1.5.1](https://v2.tauri.app/release/@tauri-apps/api/v1.5.1/)
+  _ [1.5.0](https://v2.tauri.app/release/@tauri-apps/api/v1.5.0/)
+  _ [1.4.0](https://v2.tauri.app/release/@tauri-apps/api/v1.4.0/)
+  _ [1.3.0](https://v2.tauri.app/release/@tauri-apps/api/v1.3.0/)
+  _ [1.2.0](https://v2.tauri.app/release/@tauri-apps/api/v1.2.0/)
+  _ [1.1.0](https://v2.tauri.app/release/@tauri-apps/api/v1.1.0/)
+  _ [1.0.2](https://v2.tauri.app/release/@tauri-apps/api/v1.0.2/)
+  _ [1.0.1](https://v2.tauri.app/release/@tauri-apps/api/v1.0.1/)
+  _ [1.0.0](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0/)
+  _ [1.0.0-rc.7](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.7/)
+  _ [1.0.0-rc.6](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.6/)
+  _ [1.0.0-rc.5](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.5/)
+  _ [1.0.0-rc.4](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.4/)
+  _ [1.0.0-rc.3](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.3/)
+  _ [1.0.0-rc.2](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.2/)
+  _ [1.0.0-rc.1](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.1/)
+  _ [1.0.0-rc.0](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-rc.0/)
+  _ [1.0.0-beta-rc.3](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta-rc.3/)
+  _ [1.0.0-beta-rc.2](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta-rc.2/)
+  _ [1.0.0-beta-rc.1](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta-rc.1/)
+  _ [1.0.0-beta-rc.0](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta-rc.0/)
+  _ [1.0.0-beta.8](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.8/)
+  _ [1.0.0-beta.7](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.7/)
+  _ [1.0.0-beta.6](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.6/)
+  _ [1.0.0-beta.5](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.5/)
+  _ [1.0.0-beta.4](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.4/)
+  _ [1.0.0-beta.3](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.3/)
+  _ [1.0.0-beta.2](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.2/)
+  _ [1.0.0-beta.1](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.1/)
+  _ [1.0.0-beta.0](https://v2.tauri.app/release/@tauri-apps/api/v1.0.0-beta.0/)
+
+          *
+
+  cli
+  _ [2.8.4](https://v2.tauri.app/release/@tauri-apps/cli/v2.8.4/)
+  _ [2.8.3](https://v2.tauri.app/release/@tauri-apps/cli/v2.8.3/)
+  _ [2.8.2](https://v2.tauri.app/release/@tauri-apps/cli/v2.8.2/)
+  _ [2.8.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.8.1/)
+  _ [2.8.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.8.0/)
+  _ [2.7.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.7.1/)
+  _ [2.7.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.7.0/)
+  _ [2.6.2](https://v2.tauri.app/release/@tauri-apps/cli/v2.6.2/)
+  _ [2.6.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.6.1/)
+  _ [2.6.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.6.0/)
+  _ [2.5.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.5.0/)
+  _ [2.4.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.4.1/)
+  _ [2.4.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.4.0/)
+  _ [2.3.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.3.1/)
+  _ [2.3.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.3.0/)
+  _ [2.2.7](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.7/)
+  _ [2.2.6](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.6/)
+  _ [2.2.5](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.5/)
+  _ [2.2.4](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.4/)
+  _ [2.2.3](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.3/)
+  _ [2.2.2](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.2/)
+  _ [2.2.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.1/)
+  _ [2.2.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.2.0/)
+  _ [2.1.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.1.0/)
+  _ [2.0.4](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.4/)
+  _ [2.0.3](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.3/)
+  _ [2.0.2](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.2/)
+  _ [2.0.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.1/)
+  _ [2.0.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0/)
+  _ [2.0.0-rc.18](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.18/)
+  _ [2.0.0-rc.17](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.17/)
+  _ [2.0.0-rc.16](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.16/)
+  _ [2.0.0-rc.15](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.15/)
+  _ [2.0.0-rc.14](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.14/)
+  _ [2.0.0-rc.13](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.13/)
+  _ [2.0.0-rc.12](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.12/)
+  _ [2.0.0-rc.11](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.11/)
+  _ [2.0.0-rc.10](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.10/)
+  _ [2.0.0-rc.9](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.9/)
+  _ [2.0.0-rc.8](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.8/)
+  _ [2.0.0-rc.7](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.7/)
+  _ [2.0.0-rc.6](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.6/)
+  _ [2.0.0-rc.5](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.5/)
+  _ [2.0.0-rc.4](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.4/)
+  _ [2.0.0-rc.3](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.3/)
+  _ [2.0.0-rc.2](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.2/)
+  _ [2.0.0-rc.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.1/)
+  _ [2.0.0-rc.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-rc.0/)
+  _ [2.0.0-beta.23](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.23/)
+  _ [2.0.0-beta.22](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.22/)
+  _ [2.0.0-beta.21](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.21/)
+  _ [2.0.0-beta.20](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.20/)
+  _ [2.0.0-beta.19](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.19/)
+  _ [2.0.0-beta.18](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.18/)
+  _ [2.0.0-beta.17](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.17/)
+  _ [2.0.0-beta.16](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.16/)
+  _ [2.0.0-beta.15](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.15/)
+  _ [2.0.0-beta.14](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.14/)
+  _ [2.0.0-beta.13](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.13/)
+  _ [2.0.0-beta.12](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.12/)
+  _ [2.0.0-beta.11](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.11/)
+  _ [2.0.0-beta.10](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.10/)
+  _ [2.0.0-beta.9](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.9/)
+  _ [2.0.0-beta.8](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.8/)
+  _ [2.0.0-beta.7](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.7/)
+  _ [2.0.0-beta.6](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.6/)
+  _ [2.0.0-beta.5](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.5/)
+  _ [2.0.0-beta.4](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.4/)
+  _ [2.0.0-beta.3](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.3/)
+  _ [2.0.0-beta.2](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.2/)
+  _ [2.0.0-beta.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.1/)
+  _ [2.0.0-beta.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-beta.0/)
+  _ [2.0.0-alpha.21](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.21/)
+  _ [2.0.0-alpha.20](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.20/)
+  _ [2.0.0-alpha.19](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.19/)
+  _ [2.0.0-alpha.18](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.18/)
+  _ [2.0.0-alpha.17](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.17/)
+  _ [2.0.0-alpha.16](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.16/)
+  _ [2.0.0-alpha.15](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.15/)
+  _ [2.0.0-alpha.14](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.14/)
+  _ [2.0.0-alpha.13](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.13/)
+  _ [2.0.0-alpha.12](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.12/)
+  _ [2.0.0-alpha.11](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.11/)
+  _ [2.0.0-alpha.10](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.10/)
+  _ [2.0.0-alpha.9](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.9/)
+  _ [2.0.0-alpha.8](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.8/)
+  _ [2.0.0-alpha.7](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.7/)
+  _ [2.0.0-alpha.6](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.6/)
+  _ [2.0.0-alpha.5](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.5/)
+  _ [2.0.0-alpha.4](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.4/)
+  _ [2.0.0-alpha.3](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.3/)
+  _ [2.0.0-alpha.2](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.2/)
+  _ [2.0.0-alpha.1](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.1/)
+  _ [2.0.0-alpha.0](https://v2.tauri.app/release/@tauri-apps/cli/v2.0.0-alpha.0/)
+  _ [1.5.11](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.11/)
+  _ [1.5.10](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.10/)
+  _ [1.5.9](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.9/)
+  _ [1.5.8](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.8/)
+  _ [1.5.7](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.7/)
+  _ [1.5.6](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.6/)
+  _ [1.5.5](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.5/)
+  _ [1.5.4](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.4/)
+  _ [1.5.3](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.3/)
+  _ [1.5.2](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.2/)
+  _ [1.5.1](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.1/)
+  _ [1.5.0](https://v2.tauri.app/release/@tauri-apps/cli/v1.5.0/)
+  _ [1.4.0](https://v2.tauri.app/release/@tauri-apps/cli/v1.4.0/)
+  _ [1.3.1](https://v2.tauri.app/release/@tauri-apps/cli/v1.3.1/)
+  _ [1.3.0](https://v2.tauri.app/release/@tauri-apps/cli/v1.3.0/)
+  _ [1.2.3](https://v2.tauri.app/release/@tauri-apps/cli/v1.2.3/)
+  _ [1.2.2](https://v2.tauri.app/release/@tauri-apps/cli/v1.2.2/)
+  _ [1.2.1](https://v2.tauri.app/release/@tauri-apps/cli/v1.2.1/)
+  _ [1.2.0](https://v2.tauri.app/release/@tauri-apps/cli/v1.2.0/)
+  _ [1.1.1](https://v2.tauri.app/release/@tauri-apps/cli/v1.1.1/)
+  _ [1.1.0](https://v2.tauri.app/release/@tauri-apps/cli/v1.1.0/)
+  _ [1.0.5](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.5/)
+  _ [1.0.4](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.4/)
+  _ [1.0.3](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.3/)
+  _ [1.0.2](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.2/)
+  _ [1.0.1](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.1/)
+  _ [1.0.0](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0/)
+  _ [1.0.0-rc.16](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.16/)
+  _ [1.0.0-rc.15](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.15/)
+  _ [1.0.0-rc.14](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.14/)
+  _ [1.0.0-rc.13](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.13/)
+  _ [1.0.0-rc.12](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.12/)
+  _ [1.0.0-rc.11](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.11/)
+  _ [1.0.0-rc.10](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.10/)
+  _ [1.0.0-rc.9](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.9/)
+  _ [1.0.0-rc.8](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.8/)
+  _ [1.0.0-rc.6](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.6/)
+  _ [1.0.0-rc.5](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.5/)
+  _ [1.0.0-rc.4](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.4/)
+  _ [1.0.0-rc.3](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.3/)
+  _ [1.0.0-rc.2](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.2/)
+  _ [1.0.0-rc.1](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.1/) \* [1.0.0-rc.0](https://v2.tauri.app/release/@tauri-apps/cli/v1.0.0-rc.0/)
+
+      *
+
+  tao
+  _ [0.34.3](https://v2.tauri.app/release/tao/v0.34.3/)
+  _ [0.34.2](https://v2.tauri.app/release/tao/v0.34.2/)
+  _ [0.34.1](https://v2.tauri.app/release/tao/v0.34.1/)
+  _ [0.34.0](https://v2.tauri.app/release/tao/v0.34.0/)
+  _ [0.33.0](https://v2.tauri.app/release/tao/v0.33.0/)
+  _ [0.32.8](https://v2.tauri.app/release/tao/v0.32.8/)
+  _ [0.32.7](https://v2.tauri.app/release/tao/v0.32.7/)
+  _ [0.32.6](https://v2.tauri.app/release/tao/v0.32.6/)
+  _ [0.32.5](https://v2.tauri.app/release/tao/v0.32.5/)
+  _ [0.32.4](https://v2.tauri.app/release/tao/v0.32.4/)
+  _ [0.32.3](https://v2.tauri.app/release/tao/v0.32.3/)
+  _ [0.32.2](https://v2.tauri.app/release/tao/v0.32.2/)
+  _ [0.32.1](https://v2.tauri.app/release/tao/v0.32.1/)
+  _ [0.32.0](https://v2.tauri.app/release/tao/v0.32.0/)
+  _ [0.31.1](https://v2.tauri.app/release/tao/v0.31.1/)
+  _ [0.31.0](https://v2.tauri.app/release/tao/v0.31.0/)
+  _ [0.30.7](https://v2.tauri.app/release/tao/v0.30.7/)
+  _ [0.30.6](https://v2.tauri.app/release/tao/v0.30.6/)
+  _ [0.30.5](https://v2.tauri.app/release/tao/v0.30.5/)
+  _ [0.30.4](https://v2.tauri.app/release/tao/v0.30.4/)
+  _ [0.30.3](https://v2.tauri.app/release/tao/v0.30.3/)
+  _ [0.30.2](https://v2.tauri.app/release/tao/v0.30.2/)
+  _ [0.30.1](https://v2.tauri.app/release/tao/v0.30.1/)
+  _ [0.30.0](https://v2.tauri.app/release/tao/v0.30.0/)
+  _ [0.29.1](https://v2.tauri.app/release/tao/v0.29.1/)
+  _ [0.29.0](https://v2.tauri.app/release/tao/v0.29.0/)
+  _ [0.28.1](https://v2.tauri.app/release/tao/v0.28.1/)
+  _ [0.28.0](https://v2.tauri.app/release/tao/v0.28.0/)
+  _ [0.27.1](https://v2.tauri.app/release/tao/v0.27.1/)
+  _ [0.27.0](https://v2.tauri.app/release/tao/v0.27.0/)
+  _ [0.26.2](https://v2.tauri.app/release/tao/v0.26.2/)
+  _ [0.26.1](https://v2.tauri.app/release/tao/v0.26.1/)
+  _ [0.26.0](https://v2.tauri.app/release/tao/v0.26.0/)
+  _ [0.25.0](https://v2.tauri.app/release/tao/v0.25.0/)
+  _ [0.24.1](https://v2.tauri.app/release/tao/v0.24.1/)
+  _ [0.24.0](https://v2.tauri.app/release/tao/v0.24.0/)
+  _ [0.23.0](https://v2.tauri.app/release/tao/v0.23.0/)
+  _ [0.22.3](https://v2.tauri.app/release/tao/v0.22.3/)
+  _ [0.22.2](https://v2.tauri.app/release/tao/v0.22.2/)
+  _ [0.22.1](https://v2.tauri.app/release/tao/v0.22.1/)
+  _ [0.22.0](https://v2.tauri.app/release/tao/v0.22.0/)
+  _ [0.21.1](https://v2.tauri.app/release/tao/v0.21.1/)
+  _ [0.21.0](https://v2.tauri.app/release/tao/v0.21.0/)
+  _ [0.20.0](https://v2.tauri.app/release/tao/v0.20.0/)
+  _ [0.19.1](https://v2.tauri.app/release/tao/v0.19.1/)
+  _ [0.19.0](https://v2.tauri.app/release/tao/v0.19.0/)
+  _ [0.18.3](https://v2.tauri.app/release/tao/v0.18.3/)
+  _ [0.18.2](https://v2.tauri.app/release/tao/v0.18.2/)
+  _ [0.18.1](https://v2.tauri.app/release/tao/v0.18.1/)
+  _ [0.18.0](https://v2.tauri.app/release/tao/v0.18.0/)
+  _ [0.17.0](https://v2.tauri.app/release/tao/v0.17.0/)
+  _ [0.16.0](https://v2.tauri.app/release/tao/v0.16.0/)
+  _ [0.15.9](https://v2.tauri.app/release/tao/v0.15.9/)
+  _ [0.15.8](https://v2.tauri.app/release/tao/v0.15.8/)
+  _ [0.15.7](https://v2.tauri.app/release/tao/v0.15.7/)
+  _ [0.15.6](https://v2.tauri.app/release/tao/v0.15.6/)
+  _ [0.15.5](https://v2.tauri.app/release/tao/v0.15.5/)
+  _ [0.15.4](https://v2.tauri.app/release/tao/v0.15.4/)
+  _ [0.15.3](https://v2.tauri.app/release/tao/v0.15.3/)
+  _ [0.15.2](https://v2.tauri.app/release/tao/v0.15.2/)
+  _ [0.15.1](https://v2.tauri.app/release/tao/v0.15.1/)
+  _ [0.15.0](https://v2.tauri.app/release/tao/v0.15.0/)
+  _ [0.14.0](https://v2.tauri.app/release/tao/v0.14.0/)
+  _ [0.13.3](https://v2.tauri.app/release/tao/v0.13.3/)
+  _ [0.13.2](https://v2.tauri.app/release/tao/v0.13.2/)
+  _ [0.13.1](https://v2.tauri.app/release/tao/v0.13.1/)
+  _ [0.13.0](https://v2.tauri.app/release/tao/v0.13.0/)
+  _ [0.12.2](https://v2.tauri.app/release/tao/v0.12.2/)
+  _ [0.12.1](https://v2.tauri.app/release/tao/v0.12.1/)
+  _ [0.12.0](https://v2.tauri.app/release/tao/v0.12.0/)
+  _ [0.11.2](https://v2.tauri.app/release/tao/v0.11.2/)
+  _ [0.11.1](https://v2.tauri.app/release/tao/v0.11.1/)
+  _ [0.11.0](https://v2.tauri.app/release/tao/v0.11.0/)
+  _ [0.10.0](https://v2.tauri.app/release/tao/v0.10.0/)
+  _ [0.9.1](https://v2.tauri.app/release/tao/v0.9.1/)
+  _ [0.9.0](https://v2.tauri.app/release/tao/v0.9.0/)
+  _ [0.8.5](https://v2.tauri.app/release/tao/v0.8.5/)
+  _ [0.8.4](https://v2.tauri.app/release/tao/v0.8.4/)
+  _ [0.8.3](https://v2.tauri.app/release/tao/v0.8.3/)
+  _ [0.8.2](https://v2.tauri.app/release/tao/v0.8.2/)
+  _ [0.8.1](https://v2.tauri.app/release/tao/v0.8.1/)
+  _ [0.8.0](https://v2.tauri.app/release/tao/v0.8.0/)
+  _ [0.7.0](https://v2.tauri.app/release/tao/v0.7.0/)
+  _ [0.6.4](https://v2.tauri.app/release/tao/v0.6.4/)
+  _ [0.6.3](https://v2.tauri.app/release/tao/v0.6.3/)
+  _ [0.6.2](https://v2.tauri.app/release/tao/v0.6.2/)
+  _ [0.6.1](https://v2.tauri.app/release/tao/v0.6.1/)
+  _ [0.6.0](https://v2.tauri.app/release/tao/v0.6.0/)
+  _ [0.5.2](https://v2.tauri.app/release/tao/v0.5.2/)
+  _ [0.5.1](https://v2.tauri.app/release/tao/v0.5.1/)
+  _ [0.5.0](https://v2.tauri.app/release/tao/v0.5.0/)
+  _ [0.4.0](https://v2.tauri.app/release/tao/v0.4.0/)
+  _ [0.3.1](https://v2.tauri.app/release/tao/v0.3.1/)
+  _ [0.3.0](https://v2.tauri.app/release/tao/v0.3.0/)
+  _ [0.2.6](https://v2.tauri.app/release/tao/v0.2.6/)
+  _ [0.2.5](https://v2.tauri.app/release/tao/v0.2.5/)
+  _ [0.2.4](https://v2.tauri.app/release/tao/v0.2.4/)
+  _ [0.2.3](https://v2.tauri.app/release/tao/v0.2.3/)
+  _ [0.2.2](https://v2.tauri.app/release/tao/v0.2.2/)
+  _ [0.2.1](https://v2.tauri.app/release/tao/v0.2.1/) \* [0.2.0](https://v2.tauri.app/release/tao/v0.2.0/)
+
+      *
+
+  tauri
+  _ [2.8.5](https://v2.tauri.app/release/tauri/v2.8.5/)
+  _ [2.8.4](https://v2.tauri.app/release/tauri/v2.8.4/)
+  _ [2.8.3](https://v2.tauri.app/release/tauri/v2.8.3/)
+  _ [2.8.2](https://v2.tauri.app/release/tauri/v2.8.2/)
+  _ [2.8.1](https://v2.tauri.app/release/tauri/v2.8.1/)
+  _ [2.8.0](https://v2.tauri.app/release/tauri/v2.8.0/)
+  _ [2.7.0](https://v2.tauri.app/release/tauri/v2.7.0/)
+  _ [2.6.2](https://v2.tauri.app/release/tauri/v2.6.2/)
+  _ [2.6.1](https://v2.tauri.app/release/tauri/v2.6.1/)
+  _ [2.6.0](https://v2.tauri.app/release/tauri/v2.6.0/)
+  _ [2.5.1](https://v2.tauri.app/release/tauri/v2.5.1/)
+  _ [2.5.0](https://v2.tauri.app/release/tauri/v2.5.0/)
+  _ [2.4.1](https://v2.tauri.app/release/tauri/v2.4.1/)
+  _ [2.4.0](https://v2.tauri.app/release/tauri/v2.4.0/)
+  _ [2.3.1](https://v2.tauri.app/release/tauri/v2.3.1/)
+  _ [2.3.0](https://v2.tauri.app/release/tauri/v2.3.0/)
+  _ [2.2.5](https://v2.tauri.app/release/tauri/v2.2.5/)
+  _ [2.2.4](https://v2.tauri.app/release/tauri/v2.2.4/)
+  _ [2.2.3](https://v2.tauri.app/release/tauri/v2.2.3/)
+  _ [2.2.2](https://v2.tauri.app/release/tauri/v2.2.2/)
+  _ [2.2.1](https://v2.tauri.app/release/tauri/v2.2.1/)
+  _ [2.2.0](https://v2.tauri.app/release/tauri/v2.2.0/)
+  _ [2.1.1](https://v2.tauri.app/release/tauri/v2.1.1/)
+  _ [2.1.0](https://v2.tauri.app/release/tauri/v2.1.0/)
+  _ [2.0.6](https://v2.tauri.app/release/tauri/v2.0.6/)
+  _ [2.0.5](https://v2.tauri.app/release/tauri/v2.0.5/)
+  _ [2.0.4](https://v2.tauri.app/release/tauri/v2.0.4/)
+  _ [2.0.3](https://v2.tauri.app/release/tauri/v2.0.3/)
+  _ [2.0.2](https://v2.tauri.app/release/tauri/v2.0.2/)
+  _ [2.0.1](https://v2.tauri.app/release/tauri/v2.0.1/)
+  _ [2.0.0](https://v2.tauri.app/release/tauri/v2.0.0/)
+  _ [2.0.0-rc.17](https://v2.tauri.app/release/tauri/v2.0.0-rc.17/)
+  _ [2.0.0-rc.16](https://v2.tauri.app/release/tauri/v2.0.0-rc.16/)
+  _ [2.0.0-rc.15](https://v2.tauri.app/release/tauri/v2.0.0-rc.15/)
+  _ [2.0.0-rc.14](https://v2.tauri.app/release/tauri/v2.0.0-rc.14/)
+  _ [2.0.0-rc.13](https://v2.tauri.app/release/tauri/v2.0.0-rc.13/)
+  _ [2.0.0-rc.12](https://v2.tauri.app/release/tauri/v2.0.0-rc.12/)
+  _ [2.0.0-rc.11](https://v2.tauri.app/release/tauri/v2.0.0-rc.11/)
+  _ [2.0.0-rc.10](https://v2.tauri.app/release/tauri/v2.0.0-rc.10/)
+  _ [2.0.0-rc.9](https://v2.tauri.app/release/tauri/v2.0.0-rc.9/)
+  _ [2.0.0-rc.8](https://v2.tauri.app/release/tauri/v2.0.0-rc.8/)
+  _ [2.0.0-rc.7](https://v2.tauri.app/release/tauri/v2.0.0-rc.7/)
+  _ [2.0.0-rc.6](https://v2.tauri.app/release/tauri/v2.0.0-rc.6/)
+  _ [2.0.0-rc.5](https://v2.tauri.app/release/tauri/v2.0.0-rc.5/)
+  _ [2.0.0-rc.4](https://v2.tauri.app/release/tauri/v2.0.0-rc.4/)
+  _ [2.0.0-rc.3](https://v2.tauri.app/release/tauri/v2.0.0-rc.3/)
+  _ [2.0.0-rc.2](https://v2.tauri.app/release/tauri/v2.0.0-rc.2/)
+  _ [2.0.0-rc.1](https://v2.tauri.app/release/tauri/v2.0.0-rc.1/)
+  _ [2.0.0-rc.0](https://v2.tauri.app/release/tauri/v2.0.0-rc.0/)
+  _ [2.0.0-beta.25](https://v2.tauri.app/release/tauri/v2.0.0-beta.25/)
+  _ [2.0.0-beta.24](https://v2.tauri.app/release/tauri/v2.0.0-beta.24/)
+  _ [2.0.0-beta.23](https://v2.tauri.app/release/tauri/v2.0.0-beta.23/)
+  _ [2.0.0-beta.22](https://v2.tauri.app/release/tauri/v2.0.0-beta.22/)
+  _ [2.0.0-beta.21](https://v2.tauri.app/release/tauri/v2.0.0-beta.21/)
+  _ [2.0.0-beta.20](https://v2.tauri.app/release/tauri/v2.0.0-beta.20/)
+  _ [2.0.0-beta.19](https://v2.tauri.app/release/tauri/v2.0.0-beta.19/)
+  _ [2.0.0-beta.18](https://v2.tauri.app/release/tauri/v2.0.0-beta.18/)
+  _ [2.0.0-beta.17](https://v2.tauri.app/release/tauri/v2.0.0-beta.17/)
+  _ [2.0.0-beta.16](https://v2.tauri.app/release/tauri/v2.0.0-beta.16/)
+  _ [2.0.0-beta.15](https://v2.tauri.app/release/tauri/v2.0.0-beta.15/)
+  _ [2.0.0-beta.14](https://v2.tauri.app/release/tauri/v2.0.0-beta.14/)
+  _ [2.0.0-beta.13](https://v2.tauri.app/release/tauri/v2.0.0-beta.13/)
+  _ [2.0.0-beta.12](https://v2.tauri.app/release/tauri/v2.0.0-beta.12/)
+  _ [2.0.0-beta.11](https://v2.tauri.app/release/tauri/v2.0.0-beta.11/)
+  _ [2.0.0-beta.10](https://v2.tauri.app/release/tauri/v2.0.0-beta.10/)
+  _ [2.0.0-beta.9](https://v2.tauri.app/release/tauri/v2.0.0-beta.9/)
+  _ [2.0.0-beta.8](https://v2.tauri.app/release/tauri/v2.0.0-beta.8/)
+  _ [2.0.0-beta.7](https://v2.tauri.app/release/tauri/v2.0.0-beta.7/)
+  _ [2.0.0-beta.6](https://v2.tauri.app/release/tauri/v2.0.0-beta.6/)
+  _ [2.0.0-beta.5](https://v2.tauri.app/release/tauri/v2.0.0-beta.5/)
+  _ [2.0.0-beta.4](https://v2.tauri.app/release/tauri/v2.0.0-beta.4/)
+  _ [2.0.0-beta.3](https://v2.tauri.app/release/tauri/v2.0.0-beta.3/)
+  _ [2.0.0-beta.2](https://v2.tauri.app/release/tauri/v2.0.0-beta.2/)
+  _ [2.0.0-beta.1](https://v2.tauri.app/release/tauri/v2.0.0-beta.1/)
+  _ [2.0.0-beta.0](https://v2.tauri.app/release/tauri/v2.0.0-beta.0/)
+  _ [2.0.0-alpha.21](https://v2.tauri.app/release/tauri/v2.0.0-alpha.21/)
+  _ [2.0.0-alpha.20](https://v2.tauri.app/release/tauri/v2.0.0-alpha.20/)
+  _ [2.0.0-alpha.19](https://v2.tauri.app/release/tauri/v2.0.0-alpha.19/)
+  _ [2.0.0-alpha.18](https://v2.tauri.app/release/tauri/v2.0.0-alpha.18/)
+  _ [2.0.0-alpha.17](https://v2.tauri.app/release/tauri/v2.0.0-alpha.17/)
+  _ [2.0.0-alpha.16](https://v2.tauri.app/release/tauri/v2.0.0-alpha.16/)
+  _ [2.0.0-alpha.15](https://v2.tauri.app/release/tauri/v2.0.0-alpha.15/)
+  _ [2.0.0-alpha.14](https://v2.tauri.app/release/tauri/v2.0.0-alpha.14/)
+  _ [2.0.0-alpha.13](https://v2.tauri.app/release/tauri/v2.0.0-alpha.13/)
+  _ [2.0.0-alpha.12](https://v2.tauri.app/release/tauri/v2.0.0-alpha.12/)
+  _ [2.0.0-alpha.11](https://v2.tauri.app/release/tauri/v2.0.0-alpha.11/)
+  _ [2.0.0-alpha.10](https://v2.tauri.app/release/tauri/v2.0.0-alpha.10/)
+  _ [2.0.0-alpha.9](https://v2.tauri.app/release/tauri/v2.0.0-alpha.9/)
+  _ [2.0.0-alpha.8](https://v2.tauri.app/release/tauri/v2.0.0-alpha.8/)
+  _ [2.0.0-alpha.7](https://v2.tauri.app/release/tauri/v2.0.0-alpha.7/)
+  _ [2.0.0-alpha.6](https://v2.tauri.app/release/tauri/v2.0.0-alpha.6/)
+  _ [2.0.0-alpha.5](https://v2.tauri.app/release/tauri/v2.0.0-alpha.5/)
+  _ [2.0.0-alpha.4](https://v2.tauri.app/release/tauri/v2.0.0-alpha.4/)
+  _ [2.0.0-alpha.3](https://v2.tauri.app/release/tauri/v2.0.0-alpha.3/)
+  _ [2.0.0-alpha.2](https://v2.tauri.app/release/tauri/v2.0.0-alpha.2/)
+  _ [2.0.0-alpha.1](https://v2.tauri.app/release/tauri/v2.0.0-alpha.1/)
+  _ [2.0.0-alpha.0](https://v2.tauri.app/release/tauri/v2.0.0-alpha.0/)
+  _ [1.6.0](https://v2.tauri.app/release/tauri/v1.6.0/)
+  _ [1.5.4](https://v2.tauri.app/release/tauri/v1.5.4/)
+  _ [1.5.3](https://v2.tauri.app/release/tauri/v1.5.3/)
+  _ [1.5.2](https://v2.tauri.app/release/tauri/v1.5.2/)
+  _ [1.5.1](https://v2.tauri.app/release/tauri/v1.5.1/)
+  _ [1.5.0](https://v2.tauri.app/release/tauri/v1.5.0/)
+  _ [1.4.1](https://v2.tauri.app/release/tauri/v1.4.1/)
+  _ [1.4.0](https://v2.tauri.app/release/tauri/v1.4.0/)
+  _ [1.3.0](https://v2.tauri.app/release/tauri/v1.3.0/)
+  _ [1.2.5](https://v2.tauri.app/release/tauri/v1.2.5/)
+  _ [1.2.4](https://v2.tauri.app/release/tauri/v1.2.4/)
+  _ [1.2.3](https://v2.tauri.app/release/tauri/v1.2.3/)
+  _ [1.2.2](https://v2.tauri.app/release/tauri/v1.2.2/)
+  _ [1.2.1](https://v2.tauri.app/release/tauri/v1.2.1/)
+  _ [1.2.0](https://v2.tauri.app/release/tauri/v1.2.0/)
+  _ [1.1.4](https://v2.tauri.app/release/tauri/v1.1.4/)
+  _ [1.1.3](https://v2.tauri.app/release/tauri/v1.1.3/)
+  _ [1.1.2](https://v2.tauri.app/release/tauri/v1.1.2/)
+  _ [1.1.1](https://v2.tauri.app/release/tauri/v1.1.1/)
+  _ [1.1.0](https://v2.tauri.app/release/tauri/v1.1.0/)
+  _ [1.0.9](https://v2.tauri.app/release/tauri/v1.0.9/)
+  _ [1.0.8](https://v2.tauri.app/release/tauri/v1.0.8/)
+  _ [1.0.7](https://v2.tauri.app/release/tauri/v1.0.7/)
+  _ [1.0.6](https://v2.tauri.app/release/tauri/v1.0.6/)
+  _ [1.0.5](https://v2.tauri.app/release/tauri/v1.0.5/)
+  _ [1.0.4](https://v2.tauri.app/release/tauri/v1.0.4/)
+  _ [1.0.3](https://v2.tauri.app/release/tauri/v1.0.3/)
+  _ [1.0.2](https://v2.tauri.app/release/tauri/v1.0.2/)
+  _ [1.0.1](https://v2.tauri.app/release/tauri/v1.0.1/)
+  _ [1.0.0](https://v2.tauri.app/release/tauri/v1.0.0/)
+  _ [1.0.0-rc.17](https://v2.tauri.app/release/tauri/v1.0.0-rc.17/)
+  _ [1.0.0-rc.16](https://v2.tauri.app/release/tauri/v1.0.0-rc.16/)
+  _ [1.0.0-rc.15](https://v2.tauri.app/release/tauri/v1.0.0-rc.15/)
+  _ [1.0.0-rc.14](https://v2.tauri.app/release/tauri/v1.0.0-rc.14/)
+  _ [1.0.0-rc.13](https://v2.tauri.app/release/tauri/v1.0.0-rc.13/)
+  _ [1.0.0-rc.12](https://v2.tauri.app/release/tauri/v1.0.0-rc.12/)
+  _ [1.0.0-rc.11](https://v2.tauri.app/release/tauri/v1.0.0-rc.11/)
+  _ [1.0.0-rc.10](https://v2.tauri.app/release/tauri/v1.0.0-rc.10/)
+  _ [1.0.0-rc.9](https://v2.tauri.app/release/tauri/v1.0.0-rc.9/)
+  _ [1.0.0-rc.8](https://v2.tauri.app/release/tauri/v1.0.0-rc.8/)
+  _ [1.0.0-rc.7](https://v2.tauri.app/release/tauri/v1.0.0-rc.7/)
+  _ [1.0.0-rc.6](https://v2.tauri.app/release/tauri/v1.0.0-rc.6/)
+  _ [1.0.0-rc.5](https://v2.tauri.app/release/tauri/v1.0.0-rc.5/)
+  _ [1.0.0-rc.4](https://v2.tauri.app/release/tauri/v1.0.0-rc.4/)
+  _ [1.0.0-rc.3](https://v2.tauri.app/release/tauri/v1.0.0-rc.3/)
+  _ [1.0.0-rc.2](https://v2.tauri.app/release/tauri/v1.0.0-rc.2/)
+  _ [1.0.0-rc.1](https://v2.tauri.app/release/tauri/v1.0.0-rc.1/)
+  _ [1.0.0-rc.0](https://v2.tauri.app/release/tauri/v1.0.0-rc.0/)
+  _ [1.0.0-beta-rc.4](https://v2.tauri.app/release/tauri/v1.0.0-beta-rc.4/)
+  _ [1.0.0-beta-rc.3](https://v2.tauri.app/release/tauri/v1.0.0-beta-rc.3/)
+  _ [1.0.0-beta-rc.2](https://v2.tauri.app/release/tauri/v1.0.0-beta-rc.2/)
+  _ [1.0.0-beta-rc.1](https://v2.tauri.app/release/tauri/v1.0.0-beta-rc.1/)
+  _ [1.0.0-beta-rc.0](https://v2.tauri.app/release/tauri/v1.0.0-beta-rc.0/)
+  _ [1.0.0-beta.8](https://v2.tauri.app/release/tauri/v1.0.0-beta.8/)
+  _ [1.0.0-beta.7](https://v2.tauri.app/release/tauri/v1.0.0-beta.7/)
+  _ [1.0.0-beta.6](https://v2.tauri.app/release/tauri/v1.0.0-beta.6/)
+  _ [1.0.0-beta.5](https://v2.tauri.app/release/tauri/v1.0.0-beta.5/)
+  _ [1.0.0-beta.4](https://v2.tauri.app/release/tauri/v1.0.0-beta.4/)
+  _ [1.0.0-beta.3](https://v2.tauri.app/release/tauri/v1.0.0-beta.3/)
+  _ [1.0.0-beta.2](https://v2.tauri.app/release/tauri/v1.0.0-beta.2/)
+  _ [1.0.0-beta.1](https://v2.tauri.app/release/tauri/v1.0.0-beta.1/)
+  _ [1.0.0-beta.0](https://v2.tauri.app/release/tauri/v1.0.0-beta.0/)
+  _ [0.11.1](https://v2.tauri.app/release/tauri/v0.11.1/)
+  _ [0.11.0](https://v2.tauri.app/release/tauri/v0.11.0/)
+  _ [0.10.0](https://v2.tauri.app/release/tauri/v0.10.0/)
+  _ [0.9.2](https://v2.tauri.app/release/tauri/v0.9.2/)
+  _ [0.9.1](https://v2.tauri.app/release/tauri/v0.9.1/)
+  _ [0.9.0](https://v2.tauri.app/release/tauri/v0.9.0/)
+  _ [0.8.0](https://v2.tauri.app/release/tauri/v0.8.0/)
+  _ [0.7.5](https://v2.tauri.app/release/tauri/v0.7.5/)
+  _ [0.7.4](https://v2.tauri.app/release/tauri/v0.7.4/)
+  _ [0.7.3](https://v2.tauri.app/release/tauri/v0.7.3/)
+  _ [0.7.2](https://v2.tauri.app/release/tauri/v0.7.2/)
+  _ [0.7.1](https://v2.tauri.app/release/tauri/v0.7.1/)
+  _ [0.7.0](https://v2.tauri.app/release/tauri/v0.7.0/)
+  _ [0.6.2](https://v2.tauri.app/release/tauri/v0.6.2/)
+  _ [0.6.0](https://v2.tauri.app/release/tauri/v0.6.0/)
+
+      *
+
+  tauri-bundler
+  _ [2.6.1](https://v2.tauri.app/release/tauri-bundler/v2.6.1/)
+  _ [2.6.0](https://v2.tauri.app/release/tauri-bundler/v2.6.0/)
+  _ [2.5.2](https://v2.tauri.app/release/tauri-bundler/v2.5.2/)
+  _ [2.5.1](https://v2.tauri.app/release/tauri-bundler/v2.5.1/)
+  _ [2.5.0](https://v2.tauri.app/release/tauri-bundler/v2.5.0/)
+  _ [2.4.0](https://v2.tauri.app/release/tauri-bundler/v2.4.0/)
+  _ [2.3.1](https://v2.tauri.app/release/tauri-bundler/v2.3.1/)
+  _ [2.3.0](https://v2.tauri.app/release/tauri-bundler/v2.3.0/)
+  _ [2.2.4](https://v2.tauri.app/release/tauri-bundler/v2.2.4/)
+  _ [2.2.3](https://v2.tauri.app/release/tauri-bundler/v2.2.3/)
+  _ [2.2.2](https://v2.tauri.app/release/tauri-bundler/v2.2.2/)
+  _ [2.2.1](https://v2.tauri.app/release/tauri-bundler/v2.2.1/)
+  _ [2.2.0](https://v2.tauri.app/release/tauri-bundler/v2.2.0/)
+  _ [2.1.0](https://v2.tauri.app/release/tauri-bundler/v2.1.0/)
+  _ [2.0.4](https://v2.tauri.app/release/tauri-bundler/v2.0.4/)
+  _ [2.0.3](https://v2.tauri.app/release/tauri-bundler/v2.0.3/)
+  _ [2.0.2](https://v2.tauri.app/release/tauri-bundler/v2.0.2/)
+  _ [2.0.1](https://v2.tauri.app/release/tauri-bundler/v2.0.1/)
+  _ [2.0.1-rc.15](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.15/)
+  _ [2.0.1-rc.14](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.14/)
+  _ [2.0.1-rc.13](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.13/)
+  _ [2.0.1-rc.12](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.12/)
+  _ [2.0.1-rc.11](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.11/)
+  _ [2.0.1-rc.10](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.10/)
+  _ [2.0.1-rc.9](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.9/)
+  _ [2.0.1-rc.8](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.8/)
+  _ [2.0.1-rc.7](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.7/)
+  _ [2.0.1-rc.6](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.6/)
+  _ [2.0.1-rc.5](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.5/)
+  _ [2.0.1-rc.4](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.4/)
+  _ [2.0.1-rc.3](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.3/)
+  _ [2.0.1-rc.2](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.2/)
+  _ [2.0.1-rc.1](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.1/)
+  _ [2.0.1-rc.0](https://v2.tauri.app/release/tauri-bundler/v2.0.1-rc.0/)
+  _ [2.0.1-beta.19](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.19/)
+  _ [2.0.1-beta.18](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.18/)
+  _ [2.0.1-beta.17](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.17/)
+  _ [2.0.1-beta.16](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.16/)
+  _ [2.0.1-beta.15](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.15/)
+  _ [2.0.1-beta.14](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.14/)
+  _ [2.0.1-beta.13](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.13/)
+  _ [2.0.1-beta.12](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.12/)
+  _ [2.0.1-beta.11](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.11/)
+  _ [2.0.1-beta.10](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.10/)
+  _ [2.0.1-beta.9](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.9/)
+  _ [2.0.1-beta.8](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.8/)
+  _ [2.0.1-beta.7](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.7/)
+  _ [2.0.1-beta.6](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.6/)
+  _ [2.0.1-beta.5](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.5/)
+  _ [2.0.1-beta.4](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.4/)
+  _ [2.0.1-beta.3](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.3/)
+  _ [2.0.1-beta.2](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.2/)
+  _ [2.0.1-beta.1](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.1/)
+  _ [2.0.1-beta.0](https://v2.tauri.app/release/tauri-bundler/v2.0.1-beta.0/)
+  _ [2.0.0](https://v2.tauri.app/release/tauri-bundler/v2.0.0/)
+  _ [2.0.0-rc.0](https://v2.tauri.app/release/tauri-bundler/v2.0.0-rc.0/)
+  _ [2.0.0-beta.3](https://v2.tauri.app/release/tauri-bundler/v2.0.0-beta.3/)
+  _ [2.0.0-beta.2](https://v2.tauri.app/release/tauri-bundler/v2.0.0-beta.2/)
+  _ [2.0.0-beta.1](https://v2.tauri.app/release/tauri-bundler/v2.0.0-beta.1/)
+  _ [2.0.0-beta.0](https://v2.tauri.app/release/tauri-bundler/v2.0.0-beta.0/)
+  _ [2.0.0-alpha.14](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.14/)
+  _ [2.0.0-alpha.13](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.13/)
+  _ [2.0.0-alpha.12](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.12/)
+  _ [2.0.0-alpha.11](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.11/)
+  _ [2.0.0-alpha.10](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.10/)
+  _ [2.0.0-alpha.9](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.9/)
+  _ [2.0.0-alpha.8](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.8/)
+  _ [2.0.0-alpha.7](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.7/)
+  _ [2.0.0-alpha.6](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.6/)
+  _ [2.0.0-alpha.5](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.5/)
+  _ [2.0.0-alpha.4](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.4/)
+  _ [2.0.0-alpha.3](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.3/)
+  _ [2.0.0-alpha.2](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.2/)
+  _ [2.0.0-alpha.1](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.1/)
+  _ [2.0.0-alpha.0](https://v2.tauri.app/release/tauri-bundler/v2.0.0-alpha.0/)
+  _ [1.5.1](https://v2.tauri.app/release/tauri-bundler/v1.5.1/)
+  _ [1.5.0](https://v2.tauri.app/release/tauri-bundler/v1.5.0/)
+  _ [1.4.8](https://v2.tauri.app/release/tauri-bundler/v1.4.8/)
+  _ [1.4.7](https://v2.tauri.app/release/tauri-bundler/v1.4.7/)
+  _ [1.4.6](https://v2.tauri.app/release/tauri-bundler/v1.4.6/)
+  _ [1.4.5](https://v2.tauri.app/release/tauri-bundler/v1.4.5/)
+  _ [1.4.4](https://v2.tauri.app/release/tauri-bundler/v1.4.4/)
+  _ [1.4.3](https://v2.tauri.app/release/tauri-bundler/v1.4.3/)
+  _ [1.4.2](https://v2.tauri.app/release/tauri-bundler/v1.4.2/)
+  _ [1.4.1](https://v2.tauri.app/release/tauri-bundler/v1.4.1/)
+  _ [1.4.0](https://v2.tauri.app/release/tauri-bundler/v1.4.0/)
+  _ [1.3.0](https://v2.tauri.app/release/tauri-bundler/v1.3.0/)
+  _ [1.2.1](https://v2.tauri.app/release/tauri-bundler/v1.2.1/)
+  _ [1.2.0](https://v2.tauri.app/release/tauri-bundler/v1.2.0/)
+  _ [1.1.2](https://v2.tauri.app/release/tauri-bundler/v1.1.2/)
+  _ [1.1.1](https://v2.tauri.app/release/tauri-bundler/v1.1.1/)
+  _ [1.1.0](https://v2.tauri.app/release/tauri-bundler/v1.1.0/)
+  _ [1.0.7](https://v2.tauri.app/release/tauri-bundler/v1.0.7/)
+  _ [1.0.6](https://v2.tauri.app/release/tauri-bundler/v1.0.6/)
+  _ [1.0.5](https://v2.tauri.app/release/tauri-bundler/v1.0.5/)
+  _ [1.0.4](https://v2.tauri.app/release/tauri-bundler/v1.0.4/)
+  _ [1.0.3](https://v2.tauri.app/release/tauri-bundler/v1.0.3/)
+  _ [1.0.2](https://v2.tauri.app/release/tauri-bundler/v1.0.2/)
+  _ [1.0.1](https://v2.tauri.app/release/tauri-bundler/v1.0.1/)
+  _ [1.0.0](https://v2.tauri.app/release/tauri-bundler/v1.0.0/)
+  _ [1.0.0-rc.10](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.10/)
+  _ [1.0.0-rc.9](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.9/)
+  _ [1.0.0-rc.8](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.8/)
+  _ [1.0.0-rc.7](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.7/)
+  _ [1.0.0-rc.6](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.6/)
+  _ [1.0.0-rc.5](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.5/)
+  _ [1.0.0-rc.4](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.4/)
+  _ [1.0.0-rc.3](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.3/)
+  _ [1.0.0-rc.2](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.2/)
+  _ [1.0.0-rc.1](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.1/)
+  _ [1.0.0-rc.0](https://v2.tauri.app/release/tauri-bundler/v1.0.0-rc.0/)
+  _ [1.0.0-beta-rc.1](https://v2.tauri.app/release/tauri-bundler/v1.0.0-beta-rc.1/)
+  _ [1.0.0-beta-rc.0](https://v2.tauri.app/release/tauri-bundler/v1.0.0-beta-rc.0/)
+  _ [1.0.0-beta.4](https://v2.tauri.app/release/tauri-bundler/v1.0.0-beta.4/)
+  _ [1.0.0-beta.3](https://v2.tauri.app/release/tauri-bundler/v1.0.0-beta.3/)
+  _ [1.0.0-beta.2](https://v2.tauri.app/release/tauri-bundler/v1.0.0-beta.2/)
+  _ [1.0.0-beta.1](https://v2.tauri.app/release/tauri-bundler/v1.0.0-beta.1/)
+  _ [1.0.0-beta.0](https://v2.tauri.app/release/tauri-bundler/v1.0.0-beta.0/)
+  _ [0.9.4](https://v2.tauri.app/release/tauri-bundler/v0.9.4/)
+  _ [0.9.3](https://v2.tauri.app/release/tauri-bundler/v0.9.3/)
+  _ [0.9.2](https://v2.tauri.app/release/tauri-bundler/v0.9.2/)
+  _ [0.9.1](https://v2.tauri.app/release/tauri-bundler/v0.9.1/)
+  _ [0.9.0](https://v2.tauri.app/release/tauri-bundler/v0.9.0/)
+  _ [0.8.5](https://v2.tauri.app/release/tauri-bundler/v0.8.5/)
+  _ [0.8.4](https://v2.tauri.app/release/tauri-bundler/v0.8.4/)
+  _ [0.8.3](https://v2.tauri.app/release/tauri-bundler/v0.8.3/)
+  _ [0.8.2](https://v2.tauri.app/release/tauri-bundler/v0.8.2/)
+  _ [0.8.1](https://v2.tauri.app/release/tauri-bundler/v0.8.1/)
+  _ [0.8.0](https://v2.tauri.app/release/tauri-bundler/v0.8.0/)
+  _ [0.7.0](https://v2.tauri.app/release/tauri-bundler/v0.7.0/)
+
+      *
+
+  tauri-cli
+  _ [2.8.4](https://v2.tauri.app/release/tauri-cli/v2.8.4/)
+  _ [2.8.3](https://v2.tauri.app/release/tauri-cli/v2.8.3/)
+  _ [2.8.1](https://v2.tauri.app/release/tauri-cli/v2.8.1/)
+  _ [2.8.0](https://v2.tauri.app/release/tauri-cli/v2.8.0/)
+  _ [2.7.1](https://v2.tauri.app/release/tauri-cli/v2.7.1/)
+  _ [2.7.0](https://v2.tauri.app/release/tauri-cli/v2.7.0/)
+  _ [2.6.2](https://v2.tauri.app/release/tauri-cli/v2.6.2/)
+  _ [2.6.1](https://v2.tauri.app/release/tauri-cli/v2.6.1/)
+  _ [2.6.0](https://v2.tauri.app/release/tauri-cli/v2.6.0/)
+  _ [2.5.0](https://v2.tauri.app/release/tauri-cli/v2.5.0/)
+  _ [2.4.1](https://v2.tauri.app/release/tauri-cli/v2.4.1/)
+  _ [2.4.0](https://v2.tauri.app/release/tauri-cli/v2.4.0/)
+  _ [2.3.1](https://v2.tauri.app/release/tauri-cli/v2.3.1/)
+  _ [2.3.0](https://v2.tauri.app/release/tauri-cli/v2.3.0/)
+  _ [2.2.7](https://v2.tauri.app/release/tauri-cli/v2.2.7/)
+  _ [2.2.6](https://v2.tauri.app/release/tauri-cli/v2.2.6/)
+  _ [2.2.5](https://v2.tauri.app/release/tauri-cli/v2.2.5/)
+  _ [2.2.4](https://v2.tauri.app/release/tauri-cli/v2.2.4/)
+  _ [2.2.3](https://v2.tauri.app/release/tauri-cli/v2.2.3/)
+  _ [2.2.2](https://v2.tauri.app/release/tauri-cli/v2.2.2/)
+  _ [2.2.1](https://v2.tauri.app/release/tauri-cli/v2.2.1/)
+  _ [2.2.0](https://v2.tauri.app/release/tauri-cli/v2.2.0/)
+  _ [2.1.0](https://v2.tauri.app/release/tauri-cli/v2.1.0/)
+  _ [2.0.4](https://v2.tauri.app/release/tauri-cli/v2.0.4/)
+  _ [2.0.3](https://v2.tauri.app/release/tauri-cli/v2.0.3/)
+  _ [2.0.2](https://v2.tauri.app/release/tauri-cli/v2.0.2/)
+  _ [2.0.1](https://v2.tauri.app/release/tauri-cli/v2.0.1/)
+  _ [2.0.0](https://v2.tauri.app/release/tauri-cli/v2.0.0/)
+  _ [2.0.0-rc.18](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.18/)
+  _ [2.0.0-rc.17](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.17/)
+  _ [2.0.0-rc.16](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.16/)
+  _ [2.0.0-rc.15](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.15/)
+  _ [2.0.0-rc.13](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.13/)
+  _ [2.0.0-rc.12](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.12/)
+  _ [2.0.0-rc.11](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.11/)
+  _ [2.0.0-rc.10](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.10/)
+  _ [2.0.0-rc.9](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.9/)
+  _ [2.0.0-rc.8](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.8/)
+  _ [2.0.0-rc.7](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.7/)
+  _ [2.0.0-rc.6](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.6/)
+  _ [2.0.0-rc.5](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.5/)
+  _ [2.0.0-rc.4](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.4/)
+  _ [2.0.0-rc.3](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.3/)
+  _ [2.0.0-rc.2](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.2/)
+  _ [2.0.0-rc.1](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.1/)
+  _ [2.0.0-rc.0](https://v2.tauri.app/release/tauri-cli/v2.0.0-rc.0/)
+  _ [2.0.0-beta.23](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.23/)
+  _ [2.0.0-beta.22](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.22/)
+  _ [2.0.0-beta.21](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.21/)
+  _ [2.0.0-beta.20](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.20/)
+  _ [2.0.0-beta.19](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.19/)
+  _ [2.0.0-beta.18](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.18/)
+  _ [2.0.0-beta.17](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.17/)
+  _ [2.0.0-beta.16](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.16/)
+  _ [2.0.0-beta.15](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.15/)
+  _ [2.0.0-beta.14](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.14/)
+  _ [2.0.0-beta.13](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.13/)
+  _ [2.0.0-beta.12](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.12/)
+  _ [2.0.0-beta.11](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.11/)
+  _ [2.0.0-beta.10](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.10/)
+  _ [2.0.0-beta.9](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.9/)
+  _ [2.0.0-beta.8](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.8/)
+  _ [2.0.0-beta.7](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.7/)
+  _ [2.0.0-beta.6](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.6/)
+  _ [2.0.0-beta.5](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.5/)
+  _ [2.0.0-beta.4](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.4/)
+  _ [2.0.0-beta.3](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.3/)
+  _ [2.0.0-beta.2](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.2/)
+  _ [2.0.0-beta.1](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.1/)
+  _ [2.0.0-beta.0](https://v2.tauri.app/release/tauri-cli/v2.0.0-beta.0/)
+  _ [2.0.0-alpha.21](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.21/)
+  _ [2.0.0-alpha.20](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.20/)
+  _ [2.0.0-alpha.19](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.19/)
+  _ [2.0.0-alpha.18](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.18/)
+  _ [2.0.0-alpha.17](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.17/)
+  _ [2.0.0-alpha.16](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.16/)
+  _ [2.0.0-alpha.15](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.15/)
+  _ [2.0.0-alpha.14](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.14/)
+  _ [2.0.0-alpha.13](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.13/)
+  _ [2.0.0-alpha.12](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.12/)
+  _ [2.0.0-alpha.11](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.11/)
+  _ [2.0.0-alpha.10](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.10/)
+  _ [2.0.0-alpha.9](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.9/)
+  _ [2.0.0-alpha.8](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.8/)
+  _ [2.0.0-alpha.7](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.7/)
+  _ [2.0.0-alpha.6](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.6/)
+  _ [2.0.0-alpha.5](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.5/)
+  _ [2.0.0-alpha.4](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.4/)
+  _ [2.0.0-alpha.3](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.3/)
+  _ [2.0.0-alpha.2](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.2/)
+  _ [2.0.0-alpha.1](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.1/)
+  _ [2.0.0-alpha.0](https://v2.tauri.app/release/tauri-cli/v2.0.0-alpha.0/)
+  _ [1.5.11](https://v2.tauri.app/release/tauri-cli/v1.5.11/)
+  _ [1.5.10](https://v2.tauri.app/release/tauri-cli/v1.5.10/)
+  _ [1.5.9](https://v2.tauri.app/release/tauri-cli/v1.5.9/)
+  _ [1.5.8](https://v2.tauri.app/release/tauri-cli/v1.5.8/)
+  _ [1.5.7](https://v2.tauri.app/release/tauri-cli/v1.5.7/)
+  _ [1.5.6](https://v2.tauri.app/release/tauri-cli/v1.5.6/)
+  _ [1.5.5](https://v2.tauri.app/release/tauri-cli/v1.5.5/)
+  _ [1.5.4](https://v2.tauri.app/release/tauri-cli/v1.5.4/)
+  _ [1.5.3](https://v2.tauri.app/release/tauri-cli/v1.5.3/)
+  _ [1.5.2](https://v2.tauri.app/release/tauri-cli/v1.5.2/)
+  _ [1.5.1](https://v2.tauri.app/release/tauri-cli/v1.5.1/)
+  _ [1.5.0](https://v2.tauri.app/release/tauri-cli/v1.5.0/)
+  _ [1.4.0](https://v2.tauri.app/release/tauri-cli/v1.4.0/)
+  _ [1.3.1](https://v2.tauri.app/release/tauri-cli/v1.3.1/)
+  _ [1.3.0](https://v2.tauri.app/release/tauri-cli/v1.3.0/)
+  _ [1.2.3](https://v2.tauri.app/release/tauri-cli/v1.2.3/)
+  _ [1.2.2](https://v2.tauri.app/release/tauri-cli/v1.2.2/)
+  _ [1.2.1](https://v2.tauri.app/release/tauri-cli/v1.2.1/)
+  _ [1.2.0](https://v2.tauri.app/release/tauri-cli/v1.2.0/)
+  _ [1.1.1](https://v2.tauri.app/release/tauri-cli/v1.1.1/)
+  _ [1.1.0](https://v2.tauri.app/release/tauri-cli/v1.1.0/)
+  _ [1.0.5](https://v2.tauri.app/release/tauri-cli/v1.0.5/)
+  _ [1.0.4](https://v2.tauri.app/release/tauri-cli/v1.0.4/)
+  _ [1.0.3](https://v2.tauri.app/release/tauri-cli/v1.0.3/)
+  _ [1.0.2](https://v2.tauri.app/release/tauri-cli/v1.0.2/)
+  _ [1.0.1](https://v2.tauri.app/release/tauri-cli/v1.0.1/)
+  _ [1.0.0](https://v2.tauri.app/release/tauri-cli/v1.0.0/)
+  _ [1.0.0-rc.16](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.16/)
+  _ [1.0.0-rc.15](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.15/)
+  _ [1.0.0-rc.14](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.14/)
+  _ [1.0.0-rc.13](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.13/)
+  _ [1.0.0-rc.12](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.12/)
+  _ [1.0.0-rc.11](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.11/)
+  _ [1.0.0-rc.10](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.10/)
+  _ [1.0.0-rc.9](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.9/)
+  _ [1.0.0-rc.8](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.8/)
+  _ [1.0.0-rc.7](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.7/)
+  _ [1.0.0-rc.6](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.6/)
+  _ [1.0.0-rc.5](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.5/)
+  _ [1.0.0-rc.4](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.4/)
+  _ [1.0.0-rc.3](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.3/)
+  _ [1.0.0-rc.2](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.2/)
+  _ [1.0.0-rc.1](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.1/)
+  _ [1.0.0-rc.0](https://v2.tauri.app/release/tauri-cli/v1.0.0-rc.0/)
+  _ [1.0.0-beta-rc.4](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta-rc.4/)
+  _ [1.0.0-beta-rc.3](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta-rc.3/)
+  _ [1.0.0-beta-rc.2](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta-rc.2/)
+  _ [1.0.0-beta-rc.1](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta-rc.1/)
+  _ [1.0.0-beta-rc.0](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta-rc.0/)
+  _ [1.0.0-beta.7](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.7/)
+  _ [1.0.0-beta.6](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.6/)
+  _ [1.0.0-beta.5](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.5/)
+  _ [1.0.0-beta.4](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.4/)
+  _ [1.0.0-beta.3](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.3/)
+  _ [1.0.0-beta.2](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.2/)
+  _ [1.0.0-beta.1](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.1/) \* [1.0.0-beta.0](https://v2.tauri.app/release/tauri-cli/v1.0.0-beta.0/)
+
+      *
+
+  wry
+  _ [0.53.3](https://v2.tauri.app/release/wry/v0.53.3/)
+  _ [0.53.2](https://v2.tauri.app/release/wry/v0.53.2/)
+  _ [0.53.1](https://v2.tauri.app/release/wry/v0.53.1/)
+  _ [0.53.0](https://v2.tauri.app/release/wry/v0.53.0/)
+  _ [0.52.1](https://v2.tauri.app/release/wry/v0.52.1/)
+  _ [0.52.0](https://v2.tauri.app/release/wry/v0.52.0/)
+  _ [0.51.2](https://v2.tauri.app/release/wry/v0.51.2/)
+  _ [0.51.1](https://v2.tauri.app/release/wry/v0.51.1/)
+  _ [0.51.0](https://v2.tauri.app/release/wry/v0.51.0/)
+  _ [0.50.5](https://v2.tauri.app/release/wry/v0.50.5/)
+  _ [0.50.4](https://v2.tauri.app/release/wry/v0.50.4/)
+  _ [0.50.3](https://v2.tauri.app/release/wry/v0.50.3/)
+  _ [0.50.2](https://v2.tauri.app/release/wry/v0.50.2/)
+  _ [0.50.1](https://v2.tauri.app/release/wry/v0.50.1/)
+  _ [0.50.0](https://v2.tauri.app/release/wry/v0.50.0/)
+  _ [0.49.0](https://v2.tauri.app/release/wry/v0.49.0/)
+  _ [0.48.1](https://v2.tauri.app/release/wry/v0.48.1/)
+  _ [0.48.0](https://v2.tauri.app/release/wry/v0.48.0/)
+  _ [0.47.2](https://v2.tauri.app/release/wry/v0.47.2/)
+  _ [0.47.1](https://v2.tauri.app/release/wry/v0.47.1/)
+  _ [0.47.0](https://v2.tauri.app/release/wry/v0.47.0/)
+  _ [0.46.3](https://v2.tauri.app/release/wry/v0.46.3/)
+  _ [0.46.2](https://v2.tauri.app/release/wry/v0.46.2/)
+  _ [0.46.1](https://v2.tauri.app/release/wry/v0.46.1/)
+  _ [0.46.0](https://v2.tauri.app/release/wry/v0.46.0/)
+  _ [0.45.0](https://v2.tauri.app/release/wry/v0.45.0/)
+  _ [0.44.1](https://v2.tauri.app/release/wry/v0.44.1/)
+  _ [0.44.0](https://v2.tauri.app/release/wry/v0.44.0/)
+  _ [0.43.1](https://v2.tauri.app/release/wry/v0.43.1/)
+  _ [0.43.0](https://v2.tauri.app/release/wry/v0.43.0/)
+  _ [0.42.0](https://v2.tauri.app/release/wry/v0.42.0/)
+  _ [0.41.0](https://v2.tauri.app/release/wry/v0.41.0/)
+  _ [0.40.1](https://v2.tauri.app/release/wry/v0.40.1/)
+  _ [0.40.0](https://v2.tauri.app/release/wry/v0.40.0/)
+  _ [0.39.5](https://v2.tauri.app/release/wry/v0.39.5/)
+  _ [0.39.4](https://v2.tauri.app/release/wry/v0.39.4/)
+  _ [0.39.3](https://v2.tauri.app/release/wry/v0.39.3/)
+  _ [0.39.2](https://v2.tauri.app/release/wry/v0.39.2/)
+  _ [0.39.1](https://v2.tauri.app/release/wry/v0.39.1/)
+  _ [0.39.0](https://v2.tauri.app/release/wry/v0.39.0/)
+  _ [0.38.2](https://v2.tauri.app/release/wry/v0.38.2/)
+  _ [0.38.1](https://v2.tauri.app/release/wry/v0.38.1/)
+  _ [0.38.0](https://v2.tauri.app/release/wry/v0.38.0/)
+  _ [0.37.0](https://v2.tauri.app/release/wry/v0.37.0/)
+  _ [0.36.0](https://v2.tauri.app/release/wry/v0.36.0/)
+  _ [0.35.2](https://v2.tauri.app/release/wry/v0.35.2/)
+  _ [0.35.1](https://v2.tauri.app/release/wry/v0.35.1/)
+  _ [0.35.0](https://v2.tauri.app/release/wry/v0.35.0/)
+  _ [0.34.2](https://v2.tauri.app/release/wry/v0.34.2/)
+  _ [0.34.1](https://v2.tauri.app/release/wry/v0.34.1/)
+  _ [0.34.0](https://v2.tauri.app/release/wry/v0.34.0/)
+  _ [0.33.1](https://v2.tauri.app/release/wry/v0.33.1/)
+  _ [0.33.0](https://v2.tauri.app/release/wry/v0.33.0/)
+  _ [0.32.0](https://v2.tauri.app/release/wry/v0.32.0/)
+  _ [0.31.0](https://v2.tauri.app/release/wry/v0.31.0/)
+  _ [0.30.0](https://v2.tauri.app/release/wry/v0.30.0/)
+  _ [0.29.0](https://v2.tauri.app/release/wry/v0.29.0/)
+  _ [0.28.3](https://v2.tauri.app/release/wry/v0.28.3/)
+  _ [0.28.2](https://v2.tauri.app/release/wry/v0.28.2/)
+  _ [0.28.1](https://v2.tauri.app/release/wry/v0.28.1/)
+  _ [0.28.0](https://v2.tauri.app/release/wry/v0.28.0/)
+  _ [0.27.3](https://v2.tauri.app/release/wry/v0.27.3/)
+  _ [0.27.2](https://v2.tauri.app/release/wry/v0.27.2/)
+  _ [0.27.1](https://v2.tauri.app/release/wry/v0.27.1/)
+  _ [0.27.0](https://v2.tauri.app/release/wry/v0.27.0/)
+  _ [0.26.0](https://v2.tauri.app/release/wry/v0.26.0/)
+  _ [0.25.0](https://v2.tauri.app/release/wry/v0.25.0/)
+  _ [0.24.1](https://v2.tauri.app/release/wry/v0.24.1/)
+  _ [0.24.0](https://v2.tauri.app/release/wry/v0.24.0/)
+  _ [0.23.4](https://v2.tauri.app/release/wry/v0.23.4/)
+  _ [0.23.3](https://v2.tauri.app/release/wry/v0.23.3/)
+  _ [0.23.2](https://v2.tauri.app/release/wry/v0.23.2/)
+  _ [0.23.1](https://v2.tauri.app/release/wry/v0.23.1/)
+  _ [0.23.0](https://v2.tauri.app/release/wry/v0.23.0/)
+  _ [0.22.6](https://v2.tauri.app/release/wry/v0.22.6/)
+  _ [0.22.5](https://v2.tauri.app/release/wry/v0.22.5/)
+  _ [0.22.4](https://v2.tauri.app/release/wry/v0.22.4/)
+  _ [0.22.3](https://v2.tauri.app/release/wry/v0.22.3/)
+  _ [0.22.2](https://v2.tauri.app/release/wry/v0.22.2/)
+  _ [0.22.1](https://v2.tauri.app/release/wry/v0.22.1/)
+  _ [0.22.0](https://v2.tauri.app/release/wry/v0.22.0/)
+  _ [0.21.1](https://v2.tauri.app/release/wry/v0.21.1/)
+  _ [0.21.0](https://v2.tauri.app/release/wry/v0.21.0/)
+  _ [0.20.2](https://v2.tauri.app/release/wry/v0.20.2/)
+  _ [0.20.1](https://v2.tauri.app/release/wry/v0.20.1/)
+  _ [0.20.0](https://v2.tauri.app/release/wry/v0.20.0/)
+  _ [0.19.0](https://v2.tauri.app/release/wry/v0.19.0/)
+  _ [0.18.3](https://v2.tauri.app/release/wry/v0.18.3/)
+  _ [0.18.2](https://v2.tauri.app/release/wry/v0.18.2/)
+  _ [0.18.1](https://v2.tauri.app/release/wry/v0.18.1/)
+  _ [0.18.0](https://v2.tauri.app/release/wry/v0.18.0/)
+  _ [0.17.0](https://v2.tauri.app/release/wry/v0.17.0/)
+  _ [0.16.2](https://v2.tauri.app/release/wry/v0.16.2/)
+  _ [0.16.1](https://v2.tauri.app/release/wry/v0.16.1/)
+  _ [0.16.0](https://v2.tauri.app/release/wry/v0.16.0/)
+  _ [0.15.1](https://v2.tauri.app/release/wry/v0.15.1/)
+  _ [0.15.0](https://v2.tauri.app/release/wry/v0.15.0/)
+  _ [0.14.0](https://v2.tauri.app/release/wry/v0.14.0/)
+  _ [0.13.3](https://v2.tauri.app/release/wry/v0.13.3/)
+  _ [0.13.2](https://v2.tauri.app/release/wry/v0.13.2/)
+  _ [0.13.1](https://v2.tauri.app/release/wry/v0.13.1/)
+  _ [0.13.0](https://v2.tauri.app/release/wry/v0.13.0/)
+  _ [0.12.2](https://v2.tauri.app/release/wry/v0.12.2/)
+  _ [0.12.1](https://v2.tauri.app/release/wry/v0.12.1/)
+  _ [0.12.0](https://v2.tauri.app/release/wry/v0.12.0/)
+  _ [0.11.0](https://v2.tauri.app/release/wry/v0.11.0/)
+  _ [0.10.3](https://v2.tauri.app/release/wry/v0.10.3/)
+  _ [0.10.2](https://v2.tauri.app/release/wry/v0.10.2/)
+  _ [0.10.1](https://v2.tauri.app/release/wry/v0.10.1/)
+  _ [0.10.0](https://v2.tauri.app/release/wry/v0.10.0/)
+  _ [0.9.4](https://v2.tauri.app/release/wry/v0.9.4/)
+  _ [0.9.3](https://v2.tauri.app/release/wry/v0.9.3/)
+  _ [0.9.2](https://v2.tauri.app/release/wry/v0.9.2/)
+  _ [0.9.1](https://v2.tauri.app/release/wry/v0.9.1/)
+  _ [0.9.0](https://v2.tauri.app/release/wry/v0.9.0/)
+  _ [0.8.0](https://v2.tauri.app/release/wry/v0.8.0/)
+  _ [0.7.0](https://v2.tauri.app/release/wry/v0.7.0/)
+  _ [0.6.2](https://v2.tauri.app/release/wry/v0.6.2/)
+  _ [0.6.1](https://v2.tauri.app/release/wry/v0.6.1/)
+  _ [0.6.0](https://v2.tauri.app/release/wry/v0.6.0/)
+
+- JavaScript
+  _  
+  api
+  _ [@tauri-apps/api](https://v2.tauri.app/reference/javascript/api/)
+  _ [app](https://v2.tauri.app/reference/javascript/api/namespaceapp/)
+  _ [core](https://v2.tauri.app/reference/javascript/api/namespacecore/)
+  _ [dpi](https://v2.tauri.app/reference/javascript/api/namespacedpi/)
+  _ [event](https://v2.tauri.app/reference/javascript/api/namespaceevent/)
+  _ [image](https://v2.tauri.app/reference/javascript/api/namespaceimage/)
+  _ [menu](https://v2.tauri.app/reference/javascript/api/namespacemenu/)
+  _ [mocks](https://v2.tauri.app/reference/javascript/api/namespacemocks/)
+  _ [path](https://v2.tauri.app/reference/javascript/api/namespacepath/)
+  _ [tray](https://v2.tauri.app/reference/javascript/api/namespacetray/)
+  _ [webview](https://v2.tauri.app/reference/javascript/api/namespacewebview/)
+  _ [webviewWindow](https://v2.tauri.app/reference/javascript/api/namespacewebviewwindow/)
+  _ [window](https://v2.tauri.app/reference/javascript/api/namespacewindow/)
+
+      *   [autostart](https://v2.tauri.app/reference/javascript/autostart/)
+      *   [barcode-scanner](https://v2.tauri.app/reference/javascript/barcode-scanner/)
+      *   [biometric](https://v2.tauri.app/reference/javascript/biometric/)
+      *   [cli](https://v2.tauri.app/reference/javascript/cli/)
+      *   [clipboard-manager](https://v2.tauri.app/reference/javascript/clipboard-manager/)
+      *   [deep-link](https://v2.tauri.app/reference/javascript/deep-link/)
+      *   [dialog](https://v2.tauri.app/reference/javascript/dialog/)
+      *   [fs](https://v2.tauri.app/reference/javascript/fs/)
+      *   [global-shortcut](https://v2.tauri.app/reference/javascript/global-shortcut/)
+      *   [http](https://v2.tauri.app/reference/javascript/http/)
+      *   [log](https://v2.tauri.app/reference/javascript/log/)
+      *   [nfc](https://v2.tauri.app/reference/javascript/nfc/)
+      *   [notification](https://v2.tauri.app/reference/javascript/notification/)
+      *   [opener](https://v2.tauri.app/reference/javascript/opener/)
+      *   [os](https://v2.tauri.app/reference/javascript/os/)
+      *   [positioner](https://v2.tauri.app/reference/javascript/positioner/)
+      *   [process](https://v2.tauri.app/reference/javascript/process/)
+      *   [shell](https://v2.tauri.app/reference/javascript/shell/)
+      *   [sql](https://v2.tauri.app/reference/javascript/sql/)
+      *   [store](https://v2.tauri.app/reference/javascript/store/)
+      *   [stronghold](https://v2.tauri.app/reference/javascript/stronghold/)
+      *   [updater](https://v2.tauri.app/reference/javascript/updater/)
+      *   [upload](https://v2.tauri.app/reference/javascript/upload/)
+      *   [websocket](https://v2.tauri.app/reference/javascript/websocket/)
+      *   [window-state](https://v2.tauri.app/reference/javascript/window-state/)
+
+- [Rust (docs.rs)](https://docs.rs/tauri/~2/)
+
+[GitHub](https://github.com/tauri-apps/tauri)[Discord](https://discord.com/invite/tauri)[Twitter](https://twitter.com/TauriApps)[Bluesky](https://bsky.app/profile/tauri.app)[Mastodon](https://fosstodon.org/@TauriApps)[RSS](https://v2.tauri.app/rss)
+
+Select language
+
+On this page
+
+- [Overview](https://v2.tauri.app/reference/javascript/shell/#_top)
+- [Security](https://v2.tauri.app/reference/javascript/shell/#security)
+  - [Restricting access to the open API](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-open-api)
+  - [Restricting access to the Command APIs](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-command-apis)
+    - [Example scope configuration](https://v2.tauri.app/reference/javascript/shell/#example-scope-configuration)
+
+- [Classes](https://v2.tauri.app/reference/javascript/shell/#classes)
+  - [Child](https://v2.tauri.app/reference/javascript/shell/#child)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since)
+    - [Constructors](https://v2.tauri.app/reference/javascript/shell/#constructors)
+      - [new Child()](https://v2.tauri.app/reference/javascript/shell/#new-child)
+
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties)
+    - [Methods](https://v2.tauri.app/reference/javascript/shell/#methods)
+      - [kill()](https://v2.tauri.app/reference/javascript/shell/#kill)
+      - [write()](https://v2.tauri.app/reference/javascript/shell/#write)
+
+  - [Command<O>](https://v2.tauri.app/reference/javascript/shell/#commando)
+    - [Example](https://v2.tauri.app/reference/javascript/shell/#example-1)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-3)
+    - [Extends](https://v2.tauri.app/reference/javascript/shell/#extends)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-1)
+    - [Methods](https://v2.tauri.app/reference/javascript/shell/#methods-1)
+      - [addListener()](https://v2.tauri.app/reference/javascript/shell/#addlistener)
+      - [execute()](https://v2.tauri.app/reference/javascript/shell/#execute)
+      - [listenerCount()](https://v2.tauri.app/reference/javascript/shell/#listenercount)
+      - [off()](https://v2.tauri.app/reference/javascript/shell/#off)
+      - [on()](https://v2.tauri.app/reference/javascript/shell/#on)
+      - [once()](https://v2.tauri.app/reference/javascript/shell/#once)
+      - [prependListener()](https://v2.tauri.app/reference/javascript/shell/#prependlistener)
+      - [prependOnceListener()](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener)
+      - [removeAllListeners()](https://v2.tauri.app/reference/javascript/shell/#removealllisteners)
+      - [removeListener()](https://v2.tauri.app/reference/javascript/shell/#removelistener)
+      - [spawn()](https://v2.tauri.app/reference/javascript/shell/#spawn)
+      - [create()](https://v2.tauri.app/reference/javascript/shell/#create)
+      - [sidecar()](https://v2.tauri.app/reference/javascript/shell/#sidecar)
+
+  - [EventEmitter<E>](https://v2.tauri.app/reference/javascript/shell/#eventemittere)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-15)
+    - [Extended by](https://v2.tauri.app/reference/javascript/shell/#extended-by)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-10)
+    - [Constructors](https://v2.tauri.app/reference/javascript/shell/#constructors-1)
+      - [new EventEmitter()](https://v2.tauri.app/reference/javascript/shell/#new-eventemitter)
+
+    - [Methods](https://v2.tauri.app/reference/javascript/shell/#methods-2)
+      - [addListener()](https://v2.tauri.app/reference/javascript/shell/#addlistener-1)
+      - [listenerCount()](https://v2.tauri.app/reference/javascript/shell/#listenercount-1)
+      - [off()](https://v2.tauri.app/reference/javascript/shell/#off-1)
+      - [on()](https://v2.tauri.app/reference/javascript/shell/#on-1)
+      - [once()](https://v2.tauri.app/reference/javascript/shell/#once-1)
+      - [prependListener()](https://v2.tauri.app/reference/javascript/shell/#prependlistener-1)
+      - [prependOnceListener()](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener-1)
+      - [removeAllListeners()](https://v2.tauri.app/reference/javascript/shell/#removealllisteners-1)
+      - [removeListener()](https://v2.tauri.app/reference/javascript/shell/#removelistener-1)
+
+- [Interfaces](https://v2.tauri.app/reference/javascript/shell/#interfaces)
+  - [ChildProcess<O>](https://v2.tauri.app/reference/javascript/shell/#childprocesso)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-25)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-20)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-2)
+
+  - [CommandEvents](https://v2.tauri.app/reference/javascript/shell/#commandevents)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-3)
+
+  - [OutputEvents<O>](https://v2.tauri.app/reference/javascript/shell/#outputeventso)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-21)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-4)
+
+  - [SpawnOptions](https://v2.tauri.app/reference/javascript/shell/#spawnoptions)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-26)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-5)
+
+  - [TerminatedPayload](https://v2.tauri.app/reference/javascript/shell/#terminatedpayload)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-6)
+
+- [Type Aliases](https://v2.tauri.app/reference/javascript/shell/#type-aliases)
+  - [IOPayload](https://v2.tauri.app/reference/javascript/shell/#iopayload)
+
+- [Functions](https://v2.tauri.app/reference/javascript/shell/#functions)
+  - [open()](https://v2.tauri.app/reference/javascript/shell/#open)
+    - [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-26)
+    - [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-30)
+    - [Example](https://v2.tauri.app/reference/javascript/shell/#example-11)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-27)
+
+## On this page
+
+- [Overview](https://v2.tauri.app/reference/javascript/shell/#_top)
+- [Security](https://v2.tauri.app/reference/javascript/shell/#security)
+  - [Restricting access to the open API](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-open-api)
+  - [Restricting access to the Command APIs](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-command-apis)
+    - [Example scope configuration](https://v2.tauri.app/reference/javascript/shell/#example-scope-configuration)
+
+- [Classes](https://v2.tauri.app/reference/javascript/shell/#classes)
+  - [Child](https://v2.tauri.app/reference/javascript/shell/#child)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since)
+    - [Constructors](https://v2.tauri.app/reference/javascript/shell/#constructors)
+      - [new Child()](https://v2.tauri.app/reference/javascript/shell/#new-child)
+
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties)
+    - [Methods](https://v2.tauri.app/reference/javascript/shell/#methods)
+      - [kill()](https://v2.tauri.app/reference/javascript/shell/#kill)
+      - [write()](https://v2.tauri.app/reference/javascript/shell/#write)
+
+  - [Command<O>](https://v2.tauri.app/reference/javascript/shell/#commando)
+    - [Example](https://v2.tauri.app/reference/javascript/shell/#example-1)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-3)
+    - [Extends](https://v2.tauri.app/reference/javascript/shell/#extends)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-1)
+    - [Methods](https://v2.tauri.app/reference/javascript/shell/#methods-1)
+      - [addListener()](https://v2.tauri.app/reference/javascript/shell/#addlistener)
+      - [execute()](https://v2.tauri.app/reference/javascript/shell/#execute)
+      - [listenerCount()](https://v2.tauri.app/reference/javascript/shell/#listenercount)
+      - [off()](https://v2.tauri.app/reference/javascript/shell/#off)
+      - [on()](https://v2.tauri.app/reference/javascript/shell/#on)
+      - [once()](https://v2.tauri.app/reference/javascript/shell/#once)
+      - [prependListener()](https://v2.tauri.app/reference/javascript/shell/#prependlistener)
+      - [prependOnceListener()](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener)
+      - [removeAllListeners()](https://v2.tauri.app/reference/javascript/shell/#removealllisteners)
+      - [removeListener()](https://v2.tauri.app/reference/javascript/shell/#removelistener)
+      - [spawn()](https://v2.tauri.app/reference/javascript/shell/#spawn)
+      - [create()](https://v2.tauri.app/reference/javascript/shell/#create)
+      - [sidecar()](https://v2.tauri.app/reference/javascript/shell/#sidecar)
+
+  - [EventEmitter<E>](https://v2.tauri.app/reference/javascript/shell/#eventemittere)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-15)
+    - [Extended by](https://v2.tauri.app/reference/javascript/shell/#extended-by)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-10)
+    - [Constructors](https://v2.tauri.app/reference/javascript/shell/#constructors-1)
+      - [new EventEmitter()](https://v2.tauri.app/reference/javascript/shell/#new-eventemitter)
+
+    - [Methods](https://v2.tauri.app/reference/javascript/shell/#methods-2)
+      - [addListener()](https://v2.tauri.app/reference/javascript/shell/#addlistener-1)
+      - [listenerCount()](https://v2.tauri.app/reference/javascript/shell/#listenercount-1)
+      - [off()](https://v2.tauri.app/reference/javascript/shell/#off-1)
+      - [on()](https://v2.tauri.app/reference/javascript/shell/#on-1)
+      - [once()](https://v2.tauri.app/reference/javascript/shell/#once-1)
+      - [prependListener()](https://v2.tauri.app/reference/javascript/shell/#prependlistener-1)
+      - [prependOnceListener()](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener-1)
+      - [removeAllListeners()](https://v2.tauri.app/reference/javascript/shell/#removealllisteners-1)
+      - [removeListener()](https://v2.tauri.app/reference/javascript/shell/#removelistener-1)
+
+- [Interfaces](https://v2.tauri.app/reference/javascript/shell/#interfaces)
+  - [ChildProcess<O>](https://v2.tauri.app/reference/javascript/shell/#childprocesso)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-25)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-20)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-2)
+
+  - [CommandEvents](https://v2.tauri.app/reference/javascript/shell/#commandevents)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-3)
+
+  - [OutputEvents<O>](https://v2.tauri.app/reference/javascript/shell/#outputeventso)
+    - [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-21)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-4)
+
+  - [SpawnOptions](https://v2.tauri.app/reference/javascript/shell/#spawnoptions)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-26)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-5)
+
+  - [TerminatedPayload](https://v2.tauri.app/reference/javascript/shell/#terminatedpayload)
+    - [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-6)
+
+- [Type Aliases](https://v2.tauri.app/reference/javascript/shell/#type-aliases)
+  - [IOPayload](https://v2.tauri.app/reference/javascript/shell/#iopayload)
+
+- [Functions](https://v2.tauri.app/reference/javascript/shell/#functions)
+  - [open()](https://v2.tauri.app/reference/javascript/shell/#open)
+    - [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-26)
+    - [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-30)
+    - [Example](https://v2.tauri.app/reference/javascript/shell/#example-11)
+    - [Since](https://v2.tauri.app/reference/javascript/shell/#since-27)
+
+# @tauri-apps/plugin-shell
+
+Access the system shell. Allows you to spawn child processes and manage files and URLs using their default application.
+
+## [Security](https://v2.tauri.app/reference/javascript/shell/#security)
+
+[Section titled “Security”](https://v2.tauri.app/reference/javascript/shell/#security)
+
+This API has a scope configuration that forces you to restrict the programs and arguments that can be used.
+
+### [Restricting access to the](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-open-api)[`open`](https://v2.tauri.app/reference/javascript/shell/#open) API
+
+[Section titled “Restricting access to the open API”](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-open-api)
+
+On the configuration object, `open: true` means that the [open](https://v2.tauri.app/reference/javascript/shell/#open) API can be used with any URL, as the argument is validated with the `^((mailto:\w+)|(tel:\w+)|(https?://\w+)).+` regex. You can change that regex by changing the boolean value to a string, e.g. `open: ^https://github.com/`.
+
+### [Restricting access to the](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-command-apis)[`Command`](https://v2.tauri.app/reference/javascript/shell/#commando) APIs
+
+[Section titled “Restricting access to the Command APIs”](https://v2.tauri.app/reference/javascript/shell/#restricting-access-to-the-command-apis)
+
+The plugin permissions object has a `scope` field that defines an array of CLIs that can be used. Each CLI is a configuration object `{ name: string, cmd: string, sidecar?: bool, args?: boolean | Arg[] }`.
+
+- `name`: the unique identifier of the command, passed to the [Command.create function](https://v2.tauri.app/reference/javascript/shell/#create). If it’s a sidecar, this must be the value defined on `tauri.conf.json > bundle > externalBin`.
+- `cmd`: the program that is executed on this configuration. If it’s a sidecar, this value is ignored.
+- `sidecar`: whether the object configures a sidecar or a system program.
+- `args`: the arguments that can be passed to the program. By default no arguments are allowed.
+  - `true` means that any argument list is allowed.
+  - `false` means that no arguments are allowed.
+  - otherwise an array can be configured. Each item is either a string representing the fixed argument value or a `{ validator: string }` that defines a regex validating the argument value.
+
+#### [Example scope configuration](https://v2.tauri.app/reference/javascript/shell/#example-scope-configuration)
+
+[Section titled “Example scope configuration”](https://v2.tauri.app/reference/javascript/shell/#example-scope-configuration)
+
+CLI: `git commit -m "the commit message"`
+
+Capability:
+
+`{  "permissions": [    {      "identifier": "shell:allow-execute",      "allow": [        {          "name": "run-git-commit",          "cmd": "git",          "args": ["commit", "-m", { "validator": "\\S+" }]        }      ]    }  ]}`
+
+Usage:
+
+`import { Command } from '@tauri-apps/plugin-shell'Command.create('run-git-commit', ['commit', '-m', 'the commit message'])`
+
+Trying to execute any API with a program not configured on the scope results in a promise rejection due to denied access.
+
+## [Classes](https://v2.tauri.app/reference/javascript/shell/#classes)
+
+[Section titled “Classes”](https://v2.tauri.app/reference/javascript/shell/#classes)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [Child](https://v2.tauri.app/reference/javascript/shell/#child)
+
+[Section titled “Child”](https://v2.tauri.app/reference/javascript/shell/#child)
+
+#### [Since](https://v2.tauri.app/reference/javascript/shell/#since)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since)
+
+2.0.0
+
+#### [Constructors](https://v2.tauri.app/reference/javascript/shell/#constructors)
+
+[Section titled “Constructors”](https://v2.tauri.app/reference/javascript/shell/#constructors)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [new Child()](https://v2.tauri.app/reference/javascript/shell/#new-child)
+
+[Section titled “new Child()”](https://v2.tauri.app/reference/javascript/shell/#new-child)
+
+`new Child(pid): Child`
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters)
+
+| Parameter | Type     |
+| --------- | -------- |
+| `pid`     | `number` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns)
+
+[`Child`](https://v2.tauri.app/reference/javascript/shell/#child)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L301](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L301)
+
+#### [Properties](https://v2.tauri.app/reference/javascript/shell/#properties)
+
+[Section titled “Properties”](https://v2.tauri.app/reference/javascript/shell/#properties)
+
+| Property                                                  | Type     | Description              | Defined in                                                                                                                                                                                               |
+| --------------------------------------------------------- | -------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [](https://v2.tauri.app/reference/javascript/shell/)`pid` | `number` | The child process `pid`. | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L299](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L299) |
+
+#### [Methods](https://v2.tauri.app/reference/javascript/shell/#methods)
+
+[Section titled “Methods”](https://v2.tauri.app/reference/javascript/shell/#methods)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [kill()](https://v2.tauri.app/reference/javascript/shell/#kill)
+
+[Section titled “kill()”](https://v2.tauri.app/reference/javascript/shell/#kill)
+
+`kill(): Promise<void>`
+
+Kills the child process.
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-1)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-1)
+
+[`Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<`void`>
+
+A promise indicating the success or failure of the operation.
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-1)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-1)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L336](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L336)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [write()](https://v2.tauri.app/reference/javascript/shell/#write)
+
+[Section titled “write()”](https://v2.tauri.app/reference/javascript/shell/#write)
+
+`write(data): Promise<void>`
+
+Writes `data` to the `stdin`.
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-1)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-1)
+
+| Parameter | Type                                                                      | Description |
+| --------- | ------------------------------------------------------------------------- | ----------- | ------------------------------------------------------ |
+| `data`    | [`IOPayload`](https://v2.tauri.app/reference/javascript/shell/#iopayload) | `number`[]  | The message to write, either a string or a byte array. |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-2)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-2)
+
+[`Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<`void`>
+
+A promise indicating the success or failure of the operation.
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.create('node');const child = await command.spawn();await child.write('message');await child.write([0, 1, 2, 3, 4, 5]);`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-2)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-2)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L322](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L322)
+
+---
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [Command<O>](https://v2.tauri.app/reference/javascript/shell/#commando)
+
+[Section titled “Command<O>”](https://v2.tauri.app/reference/javascript/shell/#commando)
+
+The entry point for spawning child processes. It emits the `close` and `error` events.
+
+#### [Example](https://v2.tauri.app/reference/javascript/shell/#example-1)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-1)
+
+```
+import { Command } from '@tauri-apps/plugin-shell';const command = Command.create('node');command.on('close', data => {  console.log(`command finished with code ${data.code} and signal ${data.signal}`)});command.on('error', error => console.error(`command error: "${error}"`));command.stdout.on('data', line => console.log(`command stdout: "${line}"`));command.stderr.on('data', line => console.log(`command stderr: "${line}"`));
+const child = await command.spawn();console.log('pid:', child.pid);
+```
+
+#### [Since](https://v2.tauri.app/reference/javascript/shell/#since-3)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-3)
+
+2.0.0
+
+#### [Extends](https://v2.tauri.app/reference/javascript/shell/#extends)
+
+[Section titled “Extends”](https://v2.tauri.app/reference/javascript/shell/#extends)
+
+- [`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere)<[`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents)>
+
+#### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters)
+
+| Type Parameter                                                                        |
+| ------------------------------------------------------------------------------------- |
+| `O`_extends_[`IOPayload`](https://v2.tauri.app/reference/javascript/shell/#iopayload) |
+
+#### [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-1)
+
+[Section titled “Properties”](https://v2.tauri.app/reference/javascript/shell/#properties-1)
+
+| Property                                                     | Modifier   | Type                                                                                                                                                                    | Description                                             | Defined in                                                                                                                                                                                               |
+| ------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [](https://v2.tauri.app/reference/javascript/shell/)`stderr` | `readonly` | [`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere)<[`OutputEvents`](https://v2.tauri.app/reference/javascript/shell/#outputeventso)<`O`>> | Event emitter for the `stderr`. Emits the `data` event. | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L384](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L384) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`stdout` | `readonly` | [`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere)<[`OutputEvents`](https://v2.tauri.app/reference/javascript/shell/#outputeventso)<`O`>> | Event emitter for the `stdout`. Emits the `data` event. | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L382](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L382) |
+
+#### [Methods](https://v2.tauri.app/reference/javascript/shell/#methods-1)
+
+[Section titled “Methods”](https://v2.tauri.app/reference/javascript/shell/#methods-1)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [addListener()](https://v2.tauri.app/reference/javascript/shell/#addlistener)
+
+[Section titled “addListener()”](https://v2.tauri.app/reference/javascript/shell/#addlistener)
+
+`addListener<N>(eventName, listener): this`
+
+Alias for `emitter.on(eventName, listener)`.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-1)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-1)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-2)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-2)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-3)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-3)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-4)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-4)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`addListener`](https://v2.tauri.app/reference/javascript/shell/#addlistener-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L118](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L118)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [execute()](https://v2.tauri.app/reference/javascript/shell/#execute)
+
+[Section titled “execute()”](https://v2.tauri.app/reference/javascript/shell/#execute)
+
+`execute(): Promise<ChildProcess<O>>`
+
+Executes the command as a child process, waiting for it to finish and collecting all of its output.
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-4)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-4)
+
+[`Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[`ChildProcess`](https://v2.tauri.app/reference/javascript/shell/#childprocesso)<`O`>>
+
+A promise resolving to the child process output.
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-2)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-2)
+
+`import { Command } from '@tauri-apps/plugin-shell';const output = await Command.create('echo', 'message').execute();assert(output.code === 0);assert(output.signal === null);assert(output.stdout === 'message');assert(output.stderr === '');`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-5)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-5)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L530](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L530)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [listenerCount()](https://v2.tauri.app/reference/javascript/shell/#listenercount)
+
+[Section titled “listenerCount()”](https://v2.tauri.app/reference/javascript/shell/#listenercount)
+
+`listenerCount<N>(eventName): number`
+
+Returns the number of listeners listening to the event named `eventName`.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-2)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-2)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-3)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-3)
+
+| Parameter   | Type |
+| ----------- | ---- |
+| `eventName` | `N`  |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-5)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-5)
+
+`number`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-6)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-6)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-1)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-1)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`listenerCount`](https://v2.tauri.app/reference/javascript/shell/#listenercount-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L241](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L241)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [off()](https://v2.tauri.app/reference/javascript/shell/#off)
+
+[Section titled “off()”](https://v2.tauri.app/reference/javascript/shell/#off)
+
+`off<N>(eventName, listener): this`
+
+Removes the all specified listener from the listener array for the event eventName Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-3)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-3)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-4)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-4)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-6)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-6)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-7)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-7)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-2)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-2)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`off`](https://v2.tauri.app/reference/javascript/shell/#off-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L186](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L186)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [on()](https://v2.tauri.app/reference/javascript/shell/#on)
+
+[Section titled “on()”](https://v2.tauri.app/reference/javascript/shell/#on)
+
+`on<N>(eventName, listener): this`
+
+Adds the `listener` function to the end of the listeners array for the event named `eventName`. No checks are made to see if the `listener` has already been added. Multiple calls passing the same combination of `eventName`and `listener` will result in the `listener` being added, and called, multiple times.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-4)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-4)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-5)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-5)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-7)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-7)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-8)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-8)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-3)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-3)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`on`](https://v2.tauri.app/reference/javascript/shell/#on-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L147](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L147)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [once()](https://v2.tauri.app/reference/javascript/shell/#once)
+
+[Section titled “once()”](https://v2.tauri.app/reference/javascript/shell/#once)
+
+`once<N>(eventName, listener): this`
+
+Adds a **one-time**`listener` function for the event named `eventName`. The next time `eventName` is triggered, this listener is removed and then invoked.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-5)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-5)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-6)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-6)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-8)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-8)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-9)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-9)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-4)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-4)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`once`](https://v2.tauri.app/reference/javascript/shell/#once-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L169](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L169)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [prependListener()](https://v2.tauri.app/reference/javascript/shell/#prependlistener)
+
+[Section titled “prependListener()”](https://v2.tauri.app/reference/javascript/shell/#prependlistener)
+
+`prependListener<N>(eventName, listener): this`
+
+Adds the `listener` function to the _beginning_ of the listeners array for the event named `eventName`. No checks are made to see if the `listener` has already been added. Multiple calls passing the same combination of `eventName`and `listener` will result in the `listener` being added, and called, multiple times.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-6)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-6)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-7)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-7)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-9)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-9)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-10)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-10)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-5)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-5)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`prependListener`](https://v2.tauri.app/reference/javascript/shell/#prependlistener-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L258](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L258)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [prependOnceListener()](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener)
+
+[Section titled “prependOnceListener()”](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener)
+
+`prependOnceListener<N>(eventName, listener): this`
+
+Adds a **one-time**`listener` function for the event named `eventName` to the*beginning* of the listeners array. The next time `eventName` is triggered, this listener is removed, and then invoked.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-7)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-7)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-8)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-8)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-10)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-10)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-11)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-11)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-6)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-6)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`prependOnceListener`](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L280](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L280)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [removeAllListeners()](https://v2.tauri.app/reference/javascript/shell/#removealllisteners)
+
+[Section titled “removeAllListeners()”](https://v2.tauri.app/reference/javascript/shell/#removealllisteners)
+
+`removeAllListeners<N>(event?): this`
+
+Removes all listeners, or those of the specified eventName.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-8)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-8)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-9)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-9)
+
+| Parameter | Type |
+| --------- | ---- |
+| `event`?  | `N`  |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-11)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-11)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-12)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-12)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-7)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-7)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`removeAllListeners`](https://v2.tauri.app/reference/javascript/shell/#removealllisteners-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L206](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L206)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [removeListener()](https://v2.tauri.app/reference/javascript/shell/#removelistener)
+
+[Section titled “removeListener()”](https://v2.tauri.app/reference/javascript/shell/#removelistener)
+
+`removeListener<N>(eventName, listener): this`
+
+Alias for `emitter.off(eventName, listener)`.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-9)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-9)
+
+| Type Parameter                                                                                       |
+| ---------------------------------------------------------------------------------------------------- |
+| `N`_extends_ keyof [`CommandEvents`](https://v2.tauri.app/reference/javascript/shell/#commandevents) |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-10)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-10)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-12)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-12)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-13)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-13)
+
+2.0.0
+
+###### [Inherited from](https://v2.tauri.app/reference/javascript/shell/#inherited-from-8)
+
+[Section titled “Inherited from”](https://v2.tauri.app/reference/javascript/shell/#inherited-from-8)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere).[`removeListener`](https://v2.tauri.app/reference/javascript/shell/#removelistener-1)
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L130](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L130)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [spawn()](https://v2.tauri.app/reference/javascript/shell/#spawn)
+
+[Section titled “spawn()”](https://v2.tauri.app/reference/javascript/shell/#spawn)
+
+`spawn(): Promise<Child>`
+
+Executes the command as a child process, returning a handle to it.
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-13)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-13)
+
+[`Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[`Child`](https://v2.tauri.app/reference/javascript/shell/#child)>
+
+A promise resolving to the child process handle.
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-14)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-14)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L479](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L479)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [create()](https://v2.tauri.app/reference/javascript/shell/#create)
+
+[Section titled “create()”](https://v2.tauri.app/reference/javascript/shell/#create)
+
+Creates a command to execute the given program.
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-3)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-3)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.create('my-app', ['run', 'tauri']);const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+###### [create(program, args)](https://v2.tauri.app/reference/javascript/shell/#createprogram-args)
+
+[Section titled “create(program, args)”](https://v2.tauri.app/reference/javascript/shell/#createprogram-args)
+
+`static create(program, args?): Command<string>`
+
+Creates a command to execute the given program.
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-11)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-11)
+
+| Parameter | Type     |
+| --------- | -------- | ---------- |
+| `program` | `string` |
+| `args`?   | `string` | `string`[] |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-14)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-14)
+
+[`Command`](https://v2.tauri.app/reference/javascript/shell/#commando)<`string`>
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-4)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-4)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.create('my-app', ['run', 'tauri']);const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param-1)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param-1)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L406](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L406)
+
+###### [create(program, args, options)](https://v2.tauri.app/reference/javascript/shell/#createprogram-args-options)
+
+[Section titled “create(program, args, options)”](https://v2.tauri.app/reference/javascript/shell/#createprogram-args-options)
+
+`static create(   program,   args?,options?): Command<Uint8Array>`
+
+Creates a command to execute the given program.
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-12)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-12)
+
+| Parameter  | Type                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------- | ---------- |
+| `program`  | `string`                                                                                 |
+| `args`?    | `string`                                                                                 | `string`[] |
+| `options`? | [`SpawnOptions`](https://v2.tauri.app/reference/javascript/shell/#spawnoptions)&`object` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-15)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-15)
+
+[`Command`](https://v2.tauri.app/reference/javascript/shell/#commando)<[`Uint8Array`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)>
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-5)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-5)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.create('my-app', ['run', 'tauri']);const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param-2)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param-2)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L407](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L407)
+
+###### [create(program, args, options)](https://v2.tauri.app/reference/javascript/shell/#createprogram-args-options-1)
+
+[Section titled “create(program, args, options)”](https://v2.tauri.app/reference/javascript/shell/#createprogram-args-options-1)
+
+`static create(   program,   args?,options?): Command<string>`
+
+Creates a command to execute the given program.
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-13)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-13)
+
+| Parameter  | Type                                                                            |
+| ---------- | ------------------------------------------------------------------------------- | ---------- |
+| `program`  | `string`                                                                        |
+| `args`?    | `string`                                                                        | `string`[] |
+| `options`? | [`SpawnOptions`](https://v2.tauri.app/reference/javascript/shell/#spawnoptions) |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-16)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-16)
+
+[`Command`](https://v2.tauri.app/reference/javascript/shell/#commando)<`string`>
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-6)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-6)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.create('my-app', ['run', 'tauri']);const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param-3)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param-3)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L412](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L412)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [sidecar()](https://v2.tauri.app/reference/javascript/shell/#sidecar)
+
+[Section titled “sidecar()”](https://v2.tauri.app/reference/javascript/shell/#sidecar)
+
+Creates a command to execute the given sidecar program.
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-7)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-7)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.sidecar('my-sidecar');const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param-4)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param-4)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+###### [sidecar(program, args)](https://v2.tauri.app/reference/javascript/shell/#sidecarprogram-args)
+
+[Section titled “sidecar(program, args)”](https://v2.tauri.app/reference/javascript/shell/#sidecarprogram-args)
+
+`static sidecar(program, args?): Command<string>`
+
+Creates a command to execute the given sidecar program.
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-14)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-14)
+
+| Parameter | Type     |
+| --------- | -------- | ---------- |
+| `program` | `string` |
+| `args`?   | `string` | `string`[] |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-17)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-17)
+
+[`Command`](https://v2.tauri.app/reference/javascript/shell/#commando)<`string`>
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-8)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-8)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.sidecar('my-sidecar');const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param-5)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param-5)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L438](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L438)
+
+###### [sidecar(program, args, options)](https://v2.tauri.app/reference/javascript/shell/#sidecarprogram-args-options)
+
+[Section titled “sidecar(program, args, options)”](https://v2.tauri.app/reference/javascript/shell/#sidecarprogram-args-options)
+
+`static sidecar(   program,   args?,options?): Command<Uint8Array>`
+
+Creates a command to execute the given sidecar program.
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-15)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-15)
+
+| Parameter  | Type                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------- | ---------- |
+| `program`  | `string`                                                                                 |
+| `args`?    | `string`                                                                                 | `string`[] |
+| `options`? | [`SpawnOptions`](https://v2.tauri.app/reference/javascript/shell/#spawnoptions)&`object` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-18)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-18)
+
+[`Command`](https://v2.tauri.app/reference/javascript/shell/#commando)<[`Uint8Array`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)>
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-9)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-9)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.sidecar('my-sidecar');const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param-6)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param-6)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L439](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L439)
+
+###### [sidecar(program, args, options)](https://v2.tauri.app/reference/javascript/shell/#sidecarprogram-args-options-1)
+
+[Section titled “sidecar(program, args, options)”](https://v2.tauri.app/reference/javascript/shell/#sidecarprogram-args-options-1)
+
+`static sidecar(   program,   args?,options?): Command<string>`
+
+Creates a command to execute the given sidecar program.
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-16)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-16)
+
+| Parameter  | Type                                                                            |
+| ---------- | ------------------------------------------------------------------------------- | ---------- |
+| `program`  | `string`                                                                        |
+| `args`?    | `string`                                                                        | `string`[] |
+| `options`? | [`SpawnOptions`](https://v2.tauri.app/reference/javascript/shell/#spawnoptions) |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-19)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-19)
+
+[`Command`](https://v2.tauri.app/reference/javascript/shell/#commando)<`string`>
+
+###### [Example](https://v2.tauri.app/reference/javascript/shell/#example-10)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-10)
+
+`import { Command } from '@tauri-apps/plugin-shell';const command = Command.sidecar('my-sidecar');const output = await command.execute();`
+
+###### [Param](https://v2.tauri.app/reference/javascript/shell/#param-7)
+
+[Section titled “Param”](https://v2.tauri.app/reference/javascript/shell/#param-7)
+
+The program to execute. It must be configured in your project’s capabilities.
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L444](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L444)
+
+---
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [EventEmitter<E>](https://v2.tauri.app/reference/javascript/shell/#eventemittere)
+
+[Section titled “EventEmitter<E>”](https://v2.tauri.app/reference/javascript/shell/#eventemittere)
+
+#### [Since](https://v2.tauri.app/reference/javascript/shell/#since-15)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-15)
+
+2.0.0
+
+#### [Extended by](https://v2.tauri.app/reference/javascript/shell/#extended-by)
+
+[Section titled “Extended by”](https://v2.tauri.app/reference/javascript/shell/#extended-by)
+
+- [`Command`](https://v2.tauri.app/reference/javascript/shell/#commando)
+
+#### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-10)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-10)
+
+| Type Parameter                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------ |
+| `E`_extends_[`Record`](https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type)<`string`, `any`> |
+
+#### [Constructors](https://v2.tauri.app/reference/javascript/shell/#constructors-1)
+
+[Section titled “Constructors”](https://v2.tauri.app/reference/javascript/shell/#constructors-1)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [new EventEmitter()](https://v2.tauri.app/reference/javascript/shell/#new-eventemitter)
+
+[Section titled “new EventEmitter()”](https://v2.tauri.app/reference/javascript/shell/#new-eventemitter)
+
+`new EventEmitter<E>(): EventEmitter<E>`
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-20)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-20)
+
+[`EventEmitter`](https://v2.tauri.app/reference/javascript/shell/#eventemittere)<`E`>
+
+#### [Methods](https://v2.tauri.app/reference/javascript/shell/#methods-2)
+
+[Section titled “Methods”](https://v2.tauri.app/reference/javascript/shell/#methods-2)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [addListener()](https://v2.tauri.app/reference/javascript/shell/#addlistener-1)
+
+[Section titled “addListener()”](https://v2.tauri.app/reference/javascript/shell/#addlistener-1)
+
+`addListener<N>(eventName, listener): this`
+
+Alias for `emitter.on(eventName, listener)`.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-11)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-11)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-17)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-17)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-21)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-21)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-16)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-16)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L118](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L118)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [listenerCount()](https://v2.tauri.app/reference/javascript/shell/#listenercount-1)
+
+[Section titled “listenerCount()”](https://v2.tauri.app/reference/javascript/shell/#listenercount-1)
+
+`listenerCount<N>(eventName): number`
+
+Returns the number of listeners listening to the event named `eventName`.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-12)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-12)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-18)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-18)
+
+| Parameter   | Type |
+| ----------- | ---- |
+| `eventName` | `N`  |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-22)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-22)
+
+`number`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-17)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-17)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L241](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L241)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [off()](https://v2.tauri.app/reference/javascript/shell/#off-1)
+
+[Section titled “off()”](https://v2.tauri.app/reference/javascript/shell/#off-1)
+
+`off<N>(eventName, listener): this`
+
+Removes the all specified listener from the listener array for the event eventName Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-13)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-13)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-19)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-19)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-23)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-23)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-18)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-18)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L186](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L186)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [on()](https://v2.tauri.app/reference/javascript/shell/#on-1)
+
+[Section titled “on()”](https://v2.tauri.app/reference/javascript/shell/#on-1)
+
+`on<N>(eventName, listener): this`
+
+Adds the `listener` function to the end of the listeners array for the event named `eventName`. No checks are made to see if the `listener` has already been added. Multiple calls passing the same combination of `eventName`and `listener` will result in the `listener` being added, and called, multiple times.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-14)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-14)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-20)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-20)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-24)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-24)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-19)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-19)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L147](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L147)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [once()](https://v2.tauri.app/reference/javascript/shell/#once-1)
+
+[Section titled “once()”](https://v2.tauri.app/reference/javascript/shell/#once-1)
+
+`once<N>(eventName, listener): this`
+
+Adds a **one-time**`listener` function for the event named `eventName`. The next time `eventName` is triggered, this listener is removed and then invoked.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-15)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-15)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-21)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-21)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-25)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-25)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-20)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-20)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L169](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L169)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [prependListener()](https://v2.tauri.app/reference/javascript/shell/#prependlistener-1)
+
+[Section titled “prependListener()”](https://v2.tauri.app/reference/javascript/shell/#prependlistener-1)
+
+`prependListener<N>(eventName, listener): this`
+
+Adds the `listener` function to the _beginning_ of the listeners array for the event named `eventName`. No checks are made to see if the `listener` has already been added. Multiple calls passing the same combination of `eventName`and `listener` will result in the `listener` being added, and called, multiple times.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-16)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-16)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-22)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-22)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-26)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-26)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-21)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-21)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L258](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L258)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [prependOnceListener()](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener-1)
+
+[Section titled “prependOnceListener()”](https://v2.tauri.app/reference/javascript/shell/#prependoncelistener-1)
+
+`prependOnceListener<N>(eventName, listener): this`
+
+Adds a **one-time**`listener` function for the event named `eventName` to the*beginning* of the listeners array. The next time `eventName` is triggered, this listener is removed, and then invoked.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-17)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-17)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-23)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-23)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-27)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-27)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-22)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-22)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L280](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L280)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [removeAllListeners()](https://v2.tauri.app/reference/javascript/shell/#removealllisteners-1)
+
+[Section titled “removeAllListeners()”](https://v2.tauri.app/reference/javascript/shell/#removealllisteners-1)
+
+`removeAllListeners<N>(event?): this`
+
+Removes all listeners, or those of the specified eventName.
+
+Returns a reference to the `EventEmitter`, so that calls can be chained.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-18)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-18)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-24)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-24)
+
+| Parameter | Type |
+| --------- | ---- |
+| `event`?  | `N`  |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-28)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-28)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-23)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-23)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L206](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L206)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+##### [removeListener()](https://v2.tauri.app/reference/javascript/shell/#removelistener-1)
+
+[Section titled “removeListener()”](https://v2.tauri.app/reference/javascript/shell/#removelistener-1)
+
+`removeListener<N>(eventName, listener): this`
+
+Alias for `emitter.off(eventName, listener)`.
+
+###### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-19)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-19)
+
+| Type Parameter       |
+| -------------------- | -------- | -------- |
+| `N`_extends_`string` | `number` | `symbol` |
+
+###### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-25)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-25)
+
+| Parameter   | Type             |
+| ----------- | ---------------- |
+| `eventName` | `N`              |
+| `listener`  | (`arg`) =>`void` |
+
+###### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-29)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-29)
+
+`this`
+
+###### [Since](https://v2.tauri.app/reference/javascript/shell/#since-24)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-24)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L130](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L130)
+
+## [Interfaces](https://v2.tauri.app/reference/javascript/shell/#interfaces)
+
+[Section titled “Interfaces”](https://v2.tauri.app/reference/javascript/shell/#interfaces)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [ChildProcess<O>](https://v2.tauri.app/reference/javascript/shell/#childprocesso)
+
+[Section titled “ChildProcess<O>”](https://v2.tauri.app/reference/javascript/shell/#childprocesso)
+
+#### [Since](https://v2.tauri.app/reference/javascript/shell/#since-25)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-25)
+
+2.0.0
+
+#### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-20)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-20)
+
+| Type Parameter                                                                        |
+| ------------------------------------------------------------------------------------- |
+| `O`_extends_[`IOPayload`](https://v2.tauri.app/reference/javascript/shell/#iopayload) |
+
+#### [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-2)
+
+[Section titled “Properties”](https://v2.tauri.app/reference/javascript/shell/#properties-2)
+
+| Property                                                     | Type   | Description                                  | Defined in                                                                                                                                                                                               |
+| ------------------------------------------------------------ | ------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [](https://v2.tauri.app/reference/javascript/shell/)`code`   | `null` | `number`                                     | Exit code of the process. `null` if the process was terminated by a signal on Unix.                                                                                                                      | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L94](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L94) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`signal` | `null` | `number`                                     | If the process was terminated by a signal, represents that signal.                                                                                                                                       | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L96](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L96) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`stderr` | `O`    | The data that the process wrote to `stderr`. | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L100](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L100) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`stdout` | `O`    | The data that the process wrote to `stdout`. | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L98](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L98)   |
+
+---
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [CommandEvents](https://v2.tauri.app/reference/javascript/shell/#commandevents)
+
+[Section titled “CommandEvents”](https://v2.tauri.app/reference/javascript/shell/#commandevents)
+
+#### [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-3)
+
+[Section titled “Properties”](https://v2.tauri.app/reference/javascript/shell/#properties-3)
+
+| Property                                                    | Type                                                                                      | Defined in                                                                                                                                                                                               |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [](https://v2.tauri.app/reference/javascript/shell/)`close` | [`TerminatedPayload`](https://v2.tauri.app/reference/javascript/shell/#terminatedpayload) | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L345](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L345) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`error` | `string`                                                                                  | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L346](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L346) |
+
+---
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [OutputEvents<O>](https://v2.tauri.app/reference/javascript/shell/#outputeventso)
+
+[Section titled “OutputEvents<O>”](https://v2.tauri.app/reference/javascript/shell/#outputeventso)
+
+#### [Type Parameters](https://v2.tauri.app/reference/javascript/shell/#type-parameters-21)
+
+[Section titled “Type Parameters”](https://v2.tauri.app/reference/javascript/shell/#type-parameters-21)
+
+| Type Parameter                                                                        |
+| ------------------------------------------------------------------------------------- |
+| `O`_extends_[`IOPayload`](https://v2.tauri.app/reference/javascript/shell/#iopayload) |
+
+#### [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-4)
+
+[Section titled “Properties”](https://v2.tauri.app/reference/javascript/shell/#properties-4)
+
+| Property                                                   | Type | Defined in                                                                                                                                                                                               |
+| ---------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [](https://v2.tauri.app/reference/javascript/shell/)`data` | `O`  | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L350](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L350) |
+
+---
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [SpawnOptions](https://v2.tauri.app/reference/javascript/shell/#spawnoptions)
+
+[Section titled “SpawnOptions”](https://v2.tauri.app/reference/javascript/shell/#spawnoptions)
+
+#### [Since](https://v2.tauri.app/reference/javascript/shell/#since-26)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-26)
+
+2.0.0
+
+#### [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-5)
+
+[Section titled “Properties”](https://v2.tauri.app/reference/javascript/shell/#properties-5)
+
+| Property                                                        | Type                                                                                                            | Description                                                    | Defined in                                                                                                                                                                                             |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [](https://v2.tauri.app/reference/javascript/shell/)`cwd?`      | `string`                                                                                                        | Current working directory.                                     | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L73](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L73) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`encoding?` | `string`                                                                                                        | Character encoding for stdout/stderr **Since** 2.0.0           | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L81](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L81) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`env?`      | [`Record`](https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type)<`string`, `string`> | Environment variables. set to `null` to clear the process env. | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L75](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L75) |
+
+---
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [TerminatedPayload](https://v2.tauri.app/reference/javascript/shell/#terminatedpayload)
+
+[Section titled “TerminatedPayload”](https://v2.tauri.app/reference/javascript/shell/#terminatedpayload)
+
+Payload for the `Terminated` command event.
+
+#### [Properties](https://v2.tauri.app/reference/javascript/shell/#properties-6)
+
+[Section titled “Properties”](https://v2.tauri.app/reference/javascript/shell/#properties-6)
+
+| Property                                                     | Type   | Description | Defined in                                                                          |
+| ------------------------------------------------------------ | ------ | ----------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [](https://v2.tauri.app/reference/javascript/shell/)`code`   | `null` | `number`    | Exit code of the process. `null` if the process was terminated by a signal on Unix. | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L560](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L560) |
+| [](https://v2.tauri.app/reference/javascript/shell/)`signal` | `null` | `number`    | If the process was terminated by a signal, represents that signal.                  | **Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L562](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L562) |
+
+## [Type Aliases](https://v2.tauri.app/reference/javascript/shell/#type-aliases)
+
+[Section titled “Type Aliases”](https://v2.tauri.app/reference/javascript/shell/#type-aliases)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [IOPayload](https://v2.tauri.app/reference/javascript/shell/#iopayload)
+
+[Section titled “IOPayload”](https://v2.tauri.app/reference/javascript/shell/#iopayload)
+
+`type IOPayload: string | Uint8Array;`
+
+Event payload type
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L566](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L566)
+
+## [Functions](https://v2.tauri.app/reference/javascript/shell/#functions)
+
+[Section titled “Functions”](https://v2.tauri.app/reference/javascript/shell/#functions)
+
+[](https://v2.tauri.app/reference/javascript/shell/)
+
+### [open()](https://v2.tauri.app/reference/javascript/shell/#open)
+
+[Section titled “open()”](https://v2.tauri.app/reference/javascript/shell/#open)
+
+`function open(path, openWith?): Promise<void>`
+
+Opens a path or URL with the system’s default app, or the one specified with `openWith`.
+
+The `openWith` value must be one of `firefox`, `google chrome`, `chromium``safari`, `open`, `start`, `xdg-open`, `gio`, `gnome-open`, `kde-open` or `wslview`.
+
+#### [Parameters](https://v2.tauri.app/reference/javascript/shell/#parameters-26)
+
+[Section titled “Parameters”](https://v2.tauri.app/reference/javascript/shell/#parameters-26)
+
+| Parameter   | Type     | Description                                                                                                                                                      |
+| ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `path`      | `string` | The path or URL to open. This value is matched against the string regex defined on `tauri.conf.json > plugins > shell > open`, which defaults to `^((mailto:\w+) |
+| `openWith`? | `string` | The app to open the file or URL with. Defaults to the system default application for the specified path type.                                                    |
+
+#### [Returns](https://v2.tauri.app/reference/javascript/shell/#returns-30)
+
+[Section titled “Returns”](https://v2.tauri.app/reference/javascript/shell/#returns-30)
+
+[`Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<`void`>
+
+#### [Example](https://v2.tauri.app/reference/javascript/shell/#example-11)
+
+[Section titled “Example”](https://v2.tauri.app/reference/javascript/shell/#example-11)
+
+`import { open } from '@tauri-apps/plugin-shell';// opens the given URL on the default browser:await open('https://github.com/tauri-apps/tauri');// opens the given URL using `firefox`:await open('https://github.com/tauri-apps/tauri', 'firefox');// opens a file using the default program:await open('/path/to/file');`
+
+#### [Since](https://v2.tauri.app/reference/javascript/shell/#since-27)
+
+[Section titled “Since”](https://v2.tauri.app/reference/javascript/shell/#since-27)
+
+2.0.0
+
+**Source**: [https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L601](https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/shell/guest-js/index.ts#L601)
+
+[Previous process](https://v2.tauri.app/reference/javascript/process/)[Next sql](https://v2.tauri.app/reference/javascript/sql/)
+
+---
+
+[Support on Open Collective](https://opencollective.com/tauri)[Sponsor on GitHub](https://github.com/sponsors/tauri-apps)
+
+© 2025 Tauri Contributors. CC-BY / MIT

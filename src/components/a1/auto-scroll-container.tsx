@@ -59,7 +59,7 @@ export const AutoScrollContainer = forwardRef<
     ref,
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [buttonOffset, setButtonOffset] = useState(0);
+    const [buttonOffset, setButtonOffset] = useState(60);
     const isAtBottomRef = useRef(true);
 
     const scrollToBottom = useCallback(

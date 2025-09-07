@@ -4,8 +4,6 @@ import {
   type ChatTransport,
   convertToModelMessages,
   type LanguageModel,
-  // smoothStream,
-  // stepCountIs,
   streamText,
   type UIMessageChunk,
 } from "ai";
@@ -13,7 +11,7 @@ import {
 import { getLogger } from "@/lib/logger";
 
 import { SYSTEM_PROMPT } from "./system-prompt";
-import { toolsObject } from "./tools";
+import { getToolsObject } from "./tools";
 
 const logger = getLogger(import.meta.url);
 
@@ -39,13 +37,15 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messageId: string | undefined;
     } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
+    const tools = await getToolsObject();
+
     const result = streamText({
       model: this.model,
       messages: convertToModelMessages(options.messages),
       abortSignal: options.abortSignal,
-      tools: toolsObject,
+      tools,
       toolChoice: "auto",
-      //activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
+      // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
       // stopWhen: stepCountIs(50), // TODO: [TODO: Investigate if this is relevant in AI SDK 5] Allow the user to configure this in settings
       // experimental_transform: smoothStream(), // TODO: Allow customizing this in settings

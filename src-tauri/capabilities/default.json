@@ -7,6 +7,26 @@
     "core:default",
     "core:webview:allow-create-webview",
     "opener:default",
-    "sql:default"
+    "sql:default",
+    "shell:default",
+    "shell:allow-execute",
+    "shell:allow-stdin-write",
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        {
+          "name": "npx",
+          "cmd": "npx",
+          "args": true,
+          "sidecar": false
+        },
+        {
+          "name": "node",
+          "cmd": "node",
+          "args": true,
+          "sidecar": false
+        }
+      ]
+    }
   ]
 }
