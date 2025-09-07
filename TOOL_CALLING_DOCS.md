@@ -1,4 +1,3 @@
-
 # Tool Calling
 
 As covered under Foundations, [tools](/docs/foundations/tools) are objects that can be called by the model to perform a specific task.
@@ -16,16 +15,16 @@ AI SDK Core tools contain three elements:
 The `tools` parameter of `generateText` and `streamText` is an object that has the tool names as keys and the tools as values:
 
 ```ts highlight="6-17"
-import { z } from 'zod';
-import { generateText, tool } from 'ai';
+import { z } from "zod";
+import { generateText, tool } from "ai";
 
 const result = await generateText({
-  model: 'openai/gpt-4o',
+  model: "openai/gpt-4o",
   tools: {
     weather: tool({
-      description: 'Get the weather in a location',
+      description: "Get the weather in a location",
       inputSchema: z.object({
-        location: z.string().describe('The location to get the weather for'),
+        location: z.string().describe("The location to get the weather for"),
       }),
       execute: async ({ location }) => ({
         location,
@@ -33,7 +32,7 @@ const result = await generateText({
       }),
     }),
   },
-  prompt: 'What is the weather in San Francisco?',
+  prompt: "What is the weather in San Francisco?",
 });
 ```
 
@@ -73,16 +72,16 @@ In the following example, there are two steps:
    1. The model generates a response considering the tool result.
 
 ```ts highlight="18-19"
-import { z } from 'zod';
-import { generateText, tool, stepCountIs } from 'ai';
+import { z } from "zod";
+import { generateText, tool, stepCountIs } from "ai";
 
 const { text, steps } = await generateText({
-  model: 'openai/gpt-4o',
+  model: "openai/gpt-4o",
   tools: {
     weather: tool({
-      description: 'Get the weather in a location',
+      description: "Get the weather in a location",
       inputSchema: z.object({
-        location: z.string().describe('The location to get the weather for'),
+        location: z.string().describe("The location to get the weather for"),
       }),
       execute: async ({ location }) => ({
         location,
@@ -91,7 +90,7 @@ const { text, steps } = await generateText({
     }),
   },
   stopWhen: stepCountIs(5), // stop after a maximum of 5 steps if tools were called
-  prompt: 'What is the weather in San Francisco?',
+  prompt: "What is the weather in San Francisco?",
 });
 ```
 
@@ -106,16 +105,16 @@ It contains all the text, tool calls, tool results, and more from each step.
 #### Example: Extract tool results from all steps
 
 ```ts highlight="3,9-10"
-import { generateText } from 'ai';
+import { generateText } from "ai";
 
 const { steps } = await generateText({
-  model: openai('gpt-4o'),
+  model: openai("gpt-4o"),
   stopWhen: stepCountIs(10),
   // ...
 });
 
 // extract all tool calls from the steps:
-const allToolCalls = steps.flatMap(step => step.toolCalls);
+const allToolCalls = steps.flatMap((step) => step.toolCalls);
 ```
 
 ### `onStepFinish` callback
@@ -126,7 +125,7 @@ i.e. all text deltas, tool calls, and tool results for the step are available.
 When you have multiple steps, the callback is triggered for each step.
 
 ```tsx highlight="5-7"
-import { generateText } from 'ai';
+import { generateText } from "ai";
 
 const result = await generateText({
   // ...
@@ -151,7 +150,7 @@ It is called with the following parameters:
 You can use it to provide different settings for a step, including modifying the input messages.
 
 ```tsx highlight="5-7"
-import { generateText } from 'ai';
+import { generateText } from "ai";
 
 const result = await generateText({
   // ...
@@ -161,9 +160,9 @@ const result = await generateText({
         // use a different model for this step:
         model: modelForThisParticularStep,
         // force a tool choice for this step:
-        toolChoice: { type: 'tool', toolName: 'tool1' },
+        toolChoice: { type: "tool", toolName: "tool1" },
         // limit the tools that are available for this step:
-        activeTools: ['tool1'],
+        activeTools: ["tool1"],
       };
     }
 
@@ -201,7 +200,7 @@ It is also available in the `onFinish` callback of `streamText`.
 The `response.messages` property contains an array of `ModelMessage` objects that you can add to your conversation history:
 
 ```ts
-import { generateText, ModelMessage } from 'ai';
+import { generateText, ModelMessage } from "ai";
 
 const messages: ModelMessage[] = [
   // ...
@@ -229,13 +228,13 @@ AI SDK Core supports dynamic tools for scenarios where tool schemas are not know
 The `dynamicTool` helper creates tools with unknown input/output types:
 
 ```ts
-import { dynamicTool } from 'ai';
-import { z } from 'zod';
+import { dynamicTool } from "ai";
+import { z } from "zod";
 
 const customTool = dynamicTool({
-  description: 'Execute a custom function',
+  description: "Execute a custom function",
   inputSchema: z.object({}),
-  execute: async input => {
+  execute: async (input) => {
     // input is typed as 'unknown'
     // You need to validate/cast it at runtime
     const { action, parameters } = input as any;
@@ -252,7 +251,7 @@ When using both static and dynamic tools, use the `dynamic` flag for type narrow
 
 ```ts
 const result = await generateText({
-  model: 'openai/gpt-4o',
+  model: "openai/gpt-4o",
   tools: {
     // Static tool with known types
     weather: weatherTool,
@@ -266,13 +265,13 @@ const result = await generateText({
     for (const toolCall of toolCalls) {
       if (toolCall.dynamic) {
         // Dynamic tool: input is 'unknown'
-        console.log('Dynamic:', toolCall.toolName, toolCall.input);
+        console.log("Dynamic:", toolCall.toolName, toolCall.input);
         continue;
       }
 
       // Static tool: full type inference
       switch (toolCall.toolName) {
-        case 'weather':
+        case "weather":
           console.log(toolCall.input.location); // typed as string
           break;
       }
@@ -291,23 +290,23 @@ during the tool execution:
 
 ```ts
 tool({
-  description: 'Get the current weather.',
+  description: "Get the current weather.",
   inputSchema: z.object({
     location: z.string(),
   }),
   async *execute({ location }) {
     yield {
-      status: 'loading' as const,
+      status: "loading" as const,
       text: `Getting weather for ${location}`,
       weather: undefined,
     };
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const temperature = 72 + Math.floor(Math.random() * 21) - 10;
 
     yield {
-      status: 'success' as const,
+      status: "success" as const,
       text: `The weather in ${location} is ${temperature}°F`,
       temperature,
     };
@@ -326,16 +325,16 @@ It supports the following settings:
 - `{ type: 'tool', toolName: string (typed) }`: the model must call the specified tool
 
 ```ts highlight="18"
-import { z } from 'zod';
-import { generateText, tool } from 'ai';
+import { z } from "zod";
+import { generateText, tool } from "ai";
 
 const result = await generateText({
-  model: 'openai/gpt-4o',
+  model: "openai/gpt-4o",
   tools: {
     weather: tool({
-      description: 'Get the weather in a location',
+      description: "Get the weather in a location",
       inputSchema: z.object({
-        location: z.string().describe('The location to get the weather for'),
+        location: z.string().describe("The location to get the weather for"),
       }),
       execute: async ({ location }) => ({
         location,
@@ -343,8 +342,8 @@ const result = await generateText({
       }),
     }),
   },
-  toolChoice: 'required', // force the model to call a tool
-  prompt: 'What is the weather in San Francisco?',
+  toolChoice: "required", // force the model to call a tool
+  prompt: "What is the weather in San Francisco?",
 });
 ```
 
@@ -363,7 +362,7 @@ import {
   tool,
   createUIMessageStream,
   createUIMessageStreamResponse,
-} from 'ai';
+} from "ai";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -379,11 +378,11 @@ export async function POST(req: Request) {
             execute: async (args, { toolCallId }) => {
               // return e.g. custom status for tool call
               writer.write({
-                type: 'data-tool-status',
+                type: "data-tool-status",
                 id: toolCallId,
                 data: {
-                  name: 'myTool',
-                  status: 'in-progress',
+                  name: "myTool",
+                  status: "in-progress",
                 },
               });
               // ...
@@ -429,15 +428,15 @@ The abort signals from `generateText` and `streamText` are forwarded to the tool
 You can access them in the second parameter of the `execute` function and e.g. abort long-running computations or forward them to fetch calls inside tools.
 
 ```ts highlight="6,11,14"
-import { z } from 'zod';
-import { generateText, tool } from 'ai';
+import { z } from "zod";
+import { generateText, tool } from "ai";
 
 const result = await generateText({
-  model: 'openai/gpt-4.1',
+  model: "openai/gpt-4.1",
   abortSignal: myAbortSignal, // signal that will be forwarded to tools
   tools: {
     weather: tool({
-      description: 'Get the weather in a location',
+      description: "Get the weather in a location",
       inputSchema: z.object({ location: z.string() }),
       execute: async ({ location }, { abortSignal }) => {
         return fetch(
@@ -447,7 +446,7 @@ const result = await generateText({
       },
     }),
   },
-  prompt: 'What is the weather in San Francisco?',
+  prompt: "What is the weather in San Francisco?",
 });
 ```
 
@@ -468,7 +467,7 @@ const result = await generateText({
       },
     }),
   },
-  experimental_context: { example: '123' },
+  experimental_context: { example: "123" },
 });
 ```
 
@@ -490,18 +489,18 @@ and `TypedToolResult<TOOLS extends ToolSet>` can be used to
 extract the tool call and tool result types from the tools.
 
 ```ts highlight="18-19,23-24"
-import { openai } from '@ai-sdk/openai';
-import { TypedToolCall, TypedToolResult, generateText, tool } from 'ai';
-import { z } from 'zod';
+import { openai } from "@ai-sdk/openai";
+import { TypedToolCall, TypedToolResult, generateText, tool } from "ai";
+import { z } from "zod";
 
 const myToolSet = {
   firstTool: tool({
-    description: 'Greets the user',
+    description: "Greets the user",
     inputSchema: z.object({ name: z.string() }),
     execute: async ({ name }) => `Hello, ${name}!`,
   }),
   secondTool: tool({
-    description: 'Tells the user their age',
+    description: "Tells the user their age",
     inputSchema: z.object({ age: z.number() }),
     execute: async ({ age }) => `You are ${age} years old!`,
   }),
@@ -516,7 +515,7 @@ async function generateSomething(prompt: string): Promise<{
   toolResults: Array<MyToolResult>; // typed tool results
 }> {
   return generateText({
-    model: openai('gpt-4.1'),
+    model: openai("gpt-4.1"),
     tools: myToolSet,
     prompt,
   });
@@ -561,14 +560,14 @@ const { steps } = await generateText({
 });
 
 // check for tool errors in the steps
-const toolErrors = steps.flatMap(step =>
-  step.content.filter(part => part.type === 'tool-error'),
+const toolErrors = steps.flatMap((step) =>
+  step.content.filter((part) => part.type === "tool-error"),
 );
 
-toolErrors.forEach(toolError => {
-  console.log('Tool error:', toolError.error);
-  console.log('Tool name:', toolError.toolName);
-  console.log('Tool input:', toolError.input);
+toolErrors.forEach((toolError) => {
+  console.log("Tool error:", toolError.error);
+  console.log("Tool name:", toolError.toolName);
+  console.log("Tool input:", toolError.input);
 });
 ```
 
@@ -584,13 +583,13 @@ const result = streamText({
 });
 
 return result.toUIMessageStreamResponse({
-  onError: error => {
+  onError: (error) => {
     if (NoSuchToolError.isInstance(error)) {
-      return 'The model tried to call a unknown tool.';
+      return "The model tried to call a unknown tool.";
     } else if (InvalidToolInputError.isInstance(error)) {
-      return 'The model called a tool with invalid inputs.';
+      return "The model called a tool with invalid inputs.";
     } else {
-      return 'An unknown error occurred.';
+      return "An unknown error occurred.";
     }
   },
 });
@@ -622,8 +621,8 @@ You can use different strategies to repair the tool call:
 ### Example: Use a model with structured outputs for repair
 
 ```ts
-import { openai } from '@ai-sdk/openai';
-import { generateObject, generateText, NoSuchToolError, tool } from 'ai';
+import { openai } from "@ai-sdk/openai";
+import { generateObject, generateText, NoSuchToolError, tool } from "ai";
 
 const result = await generateText({
   model,
@@ -643,7 +642,7 @@ const result = await generateText({
     const tool = tools[toolCall.toolName as keyof typeof tools];
 
     const { object: repairedArgs } = await generateObject({
-      model: openai('gpt-4.1'),
+      model: openai("gpt-4.1"),
       schema: tool.inputSchema,
       prompt: [
         `The model tried to call the tool "${toolCall.toolName}"` +
@@ -651,8 +650,8 @@ const result = await generateText({
         JSON.stringify(toolCall.input),
         `The tool accepts the following schema:`,
         JSON.stringify(inputSchema(toolCall)),
-        'Please fix the inputs.',
-      ].join('\n'),
+        "Please fix the inputs.",
+      ].join("\n"),
     });
 
     return { ...toolCall, input: JSON.stringify(repairedArgs) };
@@ -663,8 +662,8 @@ const result = await generateText({
 ### Example: Use the re-ask strategy for repair
 
 ```ts
-import { openai } from '@ai-sdk/openai';
-import { generateObject, generateText, NoSuchToolError, tool } from 'ai';
+import { openai } from "@ai-sdk/openai";
+import { generateObject, generateText, NoSuchToolError, tool } from "ai";
 
 const result = await generateText({
   model,
@@ -684,10 +683,10 @@ const result = await generateText({
       messages: [
         ...messages,
         {
-          role: 'assistant',
+          role: "assistant",
           content: [
             {
-              type: 'tool-call',
+              type: "tool-call",
               toolCallId: toolCall.toolCallId,
               toolName: toolCall.toolName,
               input: toolCall.input,
@@ -695,10 +694,10 @@ const result = await generateText({
           ],
         },
         {
-          role: 'tool' as const,
+          role: "tool" as const,
           content: [
             {
-              type: 'tool-result',
+              type: "tool-result",
               toolCallId: toolCall.toolCallId,
               toolName: toolCall.toolName,
               output: error.message,
@@ -710,12 +709,12 @@ const result = await generateText({
     });
 
     const newToolCall = result.toolCalls.find(
-      newToolCall => newToolCall.toolName === toolCall.toolName,
+      (newToolCall) => newToolCall.toolName === toolCall.toolName,
     );
 
     return newToolCall != null
       ? {
-          toolCallType: 'function' as const,
+          toolCallType: "function" as const,
           toolCallId: toolCall.toolCallId,
           toolName: toolCall.toolName,
           input: JSON.stringify(newToolCall.input),
@@ -735,13 +734,13 @@ It is an array of tool names that are currently active.
 By default, the value is `undefined` and all tools are active.
 
 ```ts highlight="7"
-import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
 
 const { text } = await generateText({
-  model: openai('gpt-4.1'),
+  model: openai("gpt-4.1"),
   tools: myToolSet,
-  activeTools: ['firstTool'],
+  activeTools: ["firstTool"],
 });
 ```
 
@@ -761,18 +760,18 @@ Here is an example for converting a screenshot into a content part:
 
 ```ts highlight="22-27"
 const result = await generateText({
-  model: anthropic('claude-3-5-sonnet-20241022'),
+  model: anthropic("claude-3-5-sonnet-20241022"),
   tools: {
     computer: anthropic.tools.computer_20241022({
       // ...
       async execute({ action, coordinate, text }) {
         switch (action) {
-          case 'screenshot': {
+          case "screenshot": {
             return {
-              type: 'image',
+              type: "image",
               data: fs
-                .readFileSync('./data/screenshot-editor.png')
-                .toString('base64'),
+                .readFileSync("./data/screenshot-editor.png")
+                .toString("base64"),
             };
           }
           default: {
@@ -784,11 +783,11 @@ const result = await generateText({
       // map to tool result content for LLM consumption:
       toModelOutput(result) {
         return {
-          type: 'content',
+          type: "content",
           value:
-            typeof result === 'string'
-              ? [{ type: 'text', text: result }]
-              : [{ type: 'image', data: result.data, mediaType: 'image/png' }],
+            typeof result === "string"
+              ? [{ type: "text", text: result }]
+              : [{ type: "image", data: result.data, mediaType: "image/png" }],
         };
       },
     }),
@@ -805,14 +804,14 @@ The `tool` helper function is crucial for this, because it ensures correct type 
 Here is an example of an extracted tool:
 
 ```ts filename="tools/weather-tool.ts" highlight="1,4-5"
-import { tool } from 'ai';
-import { z } from 'zod';
+import { tool } from "ai";
+import { z } from "zod";
 
 // the `tool` helper function ensures correct type inference:
 export const weatherTool = tool({
-  description: 'Get the weather in a location',
+  description: "Get the weather in a location",
   inputSchema: z.object({
-    location: z.string().describe('The location to get the weather for'),
+    location: z.string().describe("The location to get the weather for"),
   }),
   execute: async ({ location }) => ({
     location,
@@ -843,16 +842,16 @@ Create an MCP client using either:
 The SSE can be configured using a simple object with a `type` and `url` property:
 
 ```typescript
-import { experimental_createMCPClient as createMCPClient } from 'ai';
+import { experimental_createMCPClient as createMCPClient } from "ai";
 
 const mcpClient = await createMCPClient({
   transport: {
-    type: 'sse',
-    url: 'https://my-server.com/sse',
+    type: "sse",
+    url: "https://my-server.com/sse",
 
     // optional: configure HTTP headers, e.g. for authentication
     headers: {
-      Authorization: 'Bearer my-api-key',
+      Authorization: "Bearer my-api-key",
     },
   },
 });
@@ -863,13 +862,13 @@ const mcpClient = await createMCPClient({
 The Stdio transport requires importing the `StdioMCPTransport` class from the `ai/mcp-stdio` package:
 
 ```typescript
-import { experimental_createMCPClient as createMCPClient } from 'ai';
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio';
+import { experimental_createMCPClient as createMCPClient } from "ai";
+import { Experimental_StdioMCPTransport as StdioMCPTransport } from "ai/mcp-stdio";
 
 const mcpClient = await createMCPClient({
   transport: new StdioMCPTransport({
-    command: 'node',
-    args: ['src/stdio/dist/server.js'],
+    command: "node",
+    args: ["src/stdio/dist/server.js"],
   }),
 });
 ```
@@ -882,13 +881,13 @@ You can also bring your own transport, as long as it implements the `MCPTranspor
 import {
   MCPTransport,
   experimental_createMCPClient as createMCPClient,
-} from 'ai';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp';
+} from "ai";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 
-const url = new URL('http://localhost:3000/mcp');
+const url = new URL("http://localhost:3000/mcp");
 const mcpClient = await createMCPClient({
   transport: new StreamableHTTPClientTransport(url, {
-    sessionId: 'session_123',
+    sessionId: "session_123",
   }),
 });
 ```
@@ -917,9 +916,9 @@ const mcpClient = await experimental_createMCPClient({
 const tools = await mcpClient.tools();
 
 const result = await streamText({
-  model: openai('gpt-4.1'),
+  model: openai("gpt-4.1"),
   tools,
-  prompt: 'What is the weather in Brooklyn, New York?',
+  prompt: "What is the weather in Brooklyn, New York?",
   onFinish: async () => {
     await mcpClient.close();
   },
@@ -969,18 +968,18 @@ const tools = await mcpClient.tools();
 You can also define the tools and their input schemas explicitly in your client code:
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const tools = await mcpClient.tools({
   schemas: {
-    'get-data': {
+    "get-data": {
       inputSchema: z.object({
-        query: z.string().describe('The data query'),
-        format: z.enum(['json', 'text']).optional(),
+        query: z.string().describe("The data query"),
+        format: z.enum(["json", "text"]).optional(),
       }),
     },
     // For tools with zero inputs, you should use an empty object:
-    'tool-with-no-args': {
+    "tool-with-no-args": {
       inputSchema: z.object({}),
     },
   },
@@ -1010,18 +1009,18 @@ When you define `schemas`, the client will only pull the explicitly defined tool
 You can see tools in action using various frameworks in the following examples:
 
 <ExampleLinks
-  examples={[
-    {
-      title: 'Learn to use tools in Node.js',
-      link: '/cookbook/node/call-tools',
-    },
-    {
-      title: 'Learn to use tools in Next.js with Route Handlers',
-      link: '/cookbook/next/call-tools',
-    },
-    {
-      title: 'Learn to use MCP tools in Node.js',
-      link: '/cookbook/node/mcp-tools',
-    },
-  ]}
+examples={[
+{
+title: 'Learn to use tools in Node.js',
+link: '/cookbook/node/call-tools',
+},
+{
+title: 'Learn to use tools in Next.js with Route Handlers',
+link: '/cookbook/next/call-tools',
+},
+{
+title: 'Learn to use MCP tools in Node.js',
+link: '/cookbook/node/mcp-tools',
+},
+]}
 />
