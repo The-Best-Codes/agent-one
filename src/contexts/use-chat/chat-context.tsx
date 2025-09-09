@@ -28,11 +28,6 @@ const logger = getLogger(import.meta.url);
 
 type ChatInstanceCollection = Map<string, UseChatHelpers<UIMessage>>;
 
-const useForceUpdate = () => {
-  const [, setTick] = useState(0);
-  return useCallback(() => setTick((t) => t + 1), []);
-};
-
 /**
  * Manages multiple chat sessions, keeping background chats alive while they are streaming
  * and only forwarding the state of the currently focused chat to the UI.
@@ -50,7 +45,8 @@ export const MultiChatProvider = ({
   } = useModel();
   const navigate = useNavigate();
   const location = useLocation();
-  const forceUpdate = useForceUpdate();
+  const [updateKey, setUpdateKey] = useState(0);
+  const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
 
   // Ref to store all active useChat instances
   const chatInstancesRef = useRef<ChatInstanceCollection>(new Map());
@@ -81,7 +77,8 @@ export const MultiChatProvider = ({
       // Fallback for new chat or chat with no/invalid model
       return defaultModelForNewChats;
     },
-    [defaultModelForNewChats],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [defaultModelForNewChats, updateKey],
   );
 
   // The model for the currently focused chat/UI
