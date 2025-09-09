@@ -19,6 +19,8 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
 
+// TODO: Show tooltip to view full model name on truncated models, or a scroller or something
+
 interface ModelSelectorProps {
   className?: string;
   popoverClassName?: string;
@@ -41,11 +43,13 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           className={cn("w-full justify-between", className)}
           aria-label={`Model: ${currentModel.name}`}
         >
-          <div className="flex flex-row items-center">
-            <span className="text-muted-foreground text-xs">
-              {currentModel.provider}/
-            </span>
-            <span className="font-medium">{currentModel.name}</span>
+          <div className="flex-1 min-w-0">
+            <div className="truncate">
+              <span className="text-muted-foreground text-xs">
+                {currentModel.provider}/
+              </span>
+              <span className="font-medium">{currentModel.name}</span>
+            </div>
           </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -72,11 +76,13 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                     }
                   }}
                 >
-                  <div className="flex flex-row items-center">
-                    <span className="text-muted-foreground text-xs">
-                      {model.provider}/
-                    </span>
-                    <span className="font-medium">{model.name}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="truncate">
+                      <span className="text-muted-foreground text-xs">
+                        {model.provider}/
+                      </span>
+                      <span className="font-medium">{model.name}</span>
+                    </div>
                   </div>
                   <Check
                     className={cn(

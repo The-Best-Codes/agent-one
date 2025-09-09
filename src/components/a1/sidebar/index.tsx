@@ -49,7 +49,7 @@ const SidebarContent = ({
       </div>
 
       <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
-        <ModelSelector className="w-full" popoverClassName="w-full" />
+        <ModelSelector className="w-full" popoverClassName="w-full max-w-60" />
         <ThemeToggle className="w-full" />
       </div>
     </div>
