@@ -2,6 +2,7 @@ import type { LanguageModel } from "ai";
 
 import { google } from "./providers/google";
 import { groq } from "./providers/groq";
+import { openRouter } from "./providers/openrouter";
 
 export interface ModelConfig {
   id: string;
@@ -45,6 +46,13 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
     name: "Gemini 2.5 Flash",
     provider: "Google",
     model: google("gemini-2.5-flash"),
+    supportsToolUse: true,
+  },
+  {
+    id: "openrouter-nvidia-nemotron-nano-9b-v2",
+    name: "Nemotron Nano 9B V2",
+    provider: "OpenRouter",
+    model: openRouter("nvidia/nemotron-nano-9b-v2"),
     supportsToolUse: true,
   },
 ];
