@@ -60,8 +60,8 @@ export const MessagePartReasoning = ({
         >
           <span className="max-w-2xl truncate">Reasoning</span>
         </AccordionTrigger>
-        <AccordionContent className="prose dark:prose-invert prose-sm prose-neutral prose-code:select-all p-0 pt-2 text-base">
-          <pre>{text}</pre>
+        <AccordionContent className="prose dark:prose-invert prose-sm prose-neutral max-h-96 max-w-full overflow-auto p-0 pt-2 text-base">
+          <pre className="w-fit max-w-none">{text}</pre>
         </AccordionContent>
       </AccordionItem>
     </Accordion>
