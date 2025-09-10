@@ -12,7 +12,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { useChat } from "@/hooks/ai/useChat";
+import { useChat } from "@/hooks/ai/use-chat";
 import { getModelById, type ModelConfig } from "@/lib/ai/models";
 import { createChat, loadChatData, saveChatModel } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";

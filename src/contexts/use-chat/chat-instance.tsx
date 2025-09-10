@@ -6,7 +6,7 @@ import {
 } from "ai";
 import { memo, useEffect, useMemo } from "react";
 
-import { useChat } from "@/hooks/ai/useChat";
+import { useChat } from "@/hooks/ai/use-chat";
 import {
   loadChat,
   loadChatData,
