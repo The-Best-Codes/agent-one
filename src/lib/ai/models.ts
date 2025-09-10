@@ -50,7 +50,7 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
   },
   {
     id: "openrouter-nvidia-nemotron-nano-9b-v2",
-    name: "Nemotron Nano 9B V2 With a Long Name",
+    name: "Nemotron Nano 9B V2",
     provider: "OpenRouter",
     model: openRouter("nvidia/nemotron-nano-9b-v2"),
     supportsToolUse: true,
