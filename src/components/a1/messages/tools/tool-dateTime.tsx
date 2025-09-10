@@ -52,6 +52,16 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       );
 
     case "output-error":
+      if (part.errorText === "agent-one::cancelled-by-user") {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              Date and time check cancelled
+            </span>
+          </div>
+        );
+      }
       return (
         <div key={callId} className="flex items-center gap-1">
           <XCircleIcon className="text-destructive size-4 shrink-0" />

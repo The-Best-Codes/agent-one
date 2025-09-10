@@ -88,6 +88,16 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       );
 
     case "output-error":
+      if (part.errorText === "agent-one::cancelled-by-user") {
+        return (
+          <div key={callId} className="flex items-center gap-2">
+            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              Tool "{toolName}" cancelled
+            </span>
+          </div>
+        );
+      }
       return (
         <div key={callId} className="flex items-center gap-2">
           <XCircleIcon className="text-destructive size-4 shrink-0" />

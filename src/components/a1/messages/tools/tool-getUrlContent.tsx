@@ -243,7 +243,26 @@ export const MessagePartToolGetUrlContent = ({
       );
     }
 
-    case "output-error":
+    case "output-error": {
+      if (part.errorText === "agent-one::cancelled-by-user") {
+        const singleUrl = input?.urls?.[0];
+
+        let message = "Browsing cancelled";
+        if (urlCount === 1 && singleUrl) {
+          message = `Browsing ${formatUrl(singleUrl)} cancelled`;
+        } else if (urlCount > 1) {
+          message = `Browsing ${urlCount} URLs cancelled`;
+        }
+
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              {message}
+            </span>
+          </div>
+        );
+      }
       return (
         <div key={callId} className="flex items-center gap-1">
           <XCircleIcon className="text-destructive size-4 shrink-0" />
@@ -255,6 +274,7 @@ export const MessagePartToolGetUrlContent = ({
           </span>
         </div>
       );
+    }
 
     default:
       return (
