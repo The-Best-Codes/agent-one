@@ -6,27 +6,24 @@ import { globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config([
+export default [
   globalIgnores(["dist"]),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  reactHooks.configs["recommended-latest"],
+  reactRefresh.configs.vite,
   {
     files: ["**/*.{ts,tsx}"],
-    extends: [
-      js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs["recommended-latest"],
-      reactRefresh.configs.vite,
-    ],
     plugins: {
       "simple-import-sort": simpleImportSort,
     },
     rules: {
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
-      "preserve-caught-error": "off", // We target ES2020 which doesn't support { cause } in Error constructor
     },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
     },
   },
-]);
+];
