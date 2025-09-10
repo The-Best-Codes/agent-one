@@ -22,6 +22,7 @@ export default tseslint.config([
     rules: {
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
+      "preserve-caught-error": "off", // We target ES2020 which doesn't support { cause } in Error constructor
     },
     languageOptions: {
       ecmaVersion: 2020,
