@@ -28,10 +28,6 @@ const logger = getLogger(import.meta.url);
 
 type ChatInstanceCollection = Map<string, UseChatHelpers<UIMessage>>;
 
-/**
- * Manages multiple chat sessions, keeping background chats alive while they are streaming
- * and only forwarding the state of the currently focused chat to the UI.
- */
 export const MultiChatProvider = ({
   children,
   currentChatId,
@@ -48,21 +44,17 @@ export const MultiChatProvider = ({
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
 
-  // Ref to store all active useChat instances
   const chatInstancesRef = useRef<ChatInstanceCollection>(new Map());
 
-  // State to track which chat IDs need to be kept in memory
   const [activeChatIds, setActiveChatIds] = useState<Set<string>>(() =>
     currentChatId ? new Set([currentChatId]) : new Set(),
   );
 
-  // State to trigger cleanup effect when any chat's status changes
   const [lastStatusChange, setLastStatusChange] = useState({
     id: "",
     status: "",
   });
 
-  // Helper to get the model for a given chat ID, with fallback
   const getModelForChat = useCallback(
     (chatId: string | undefined): ModelConfig => {
       if (chatId) {
@@ -74,35 +66,29 @@ export const MultiChatProvider = ({
           }
         }
       }
-      // Fallback for new chat or chat with no/invalid model
       return defaultModelForNewChats;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [defaultModelForNewChats, updateKey],
   );
 
-  // The model for the currently focused chat/UI
   const focusedModel = useMemo(
     () => getModelForChat(currentChatId),
     [currentChatId, getModelForChat],
   );
 
-  // A new setModel function that handles both new and existing chats
   const setModelForContext = useCallback(
     (modelId: string) => {
       if (currentChatId) {
-        // Update the model for the specific chat we're viewing
         saveChatModel({ chatId: currentChatId, modelId });
-        forceUpdate(); // Re-render to update focusedModel and ChatInstance props
+        forceUpdate();
       } else {
-        // We are on a "new chat" page, update the default model for new chats
         setDefaultModelForNewChats(modelId);
       }
     },
     [currentChatId, setDefaultModelForNewChats, forceUpdate],
   );
 
-  // The context value to provide to UI components like ModelSelector
   const modelContextValue = useMemo(
     () => ({
       currentModel: focusedModel,
@@ -111,7 +97,6 @@ export const MultiChatProvider = ({
     [focusedModel, setModelForContext],
   );
 
-  // Callback for ChatInstance to register/update itself
   const handleInstanceUpdate = useCallback(
     (id: string, instance: UseChatHelpers<UIMessage> | null) => {
       if (instance) {
@@ -119,9 +104,6 @@ export const MultiChatProvider = ({
       } else {
         chatInstancesRef.current.delete(id);
       }
-      // Only trigger a re-render of the provider if the updated
-      // chat is the one currently being displayed. Background chats
-      // will update their state in the ref without causing a UI update.
       if (id === currentChatId) {
         forceUpdate();
       }
@@ -129,12 +111,10 @@ export const MultiChatProvider = ({
     [currentChatId, forceUpdate],
   );
 
-  // Callback for ChatInstance to report status changes
   const handleStatusChange = useCallback((id: string, status: string) => {
     setLastStatusChange({ id, status });
   }, []);
 
-  // Effect to manage which chats are active (focused or streaming in background)
   useEffect(() => {
     const newActiveIds = new Set<string>();
     if (currentChatId) {
@@ -163,10 +143,8 @@ export const MultiChatProvider = ({
     });
   }, [currentChatId, lastStatusChange]);
 
-  // Default `useChat` instance for the "new chat" screen
   const defaultChat = useChat(defaultModelForNewChats.model);
 
-  // Wrapper for sending a message from the "new chat" screen
   const handleNewChatSubmit = useCallback(
     (
       message: Parameters<typeof defaultChat.sendMessage>[0],
@@ -183,13 +161,11 @@ export const MultiChatProvider = ({
     [navigate, defaultChat.sendMessage, focusedModel.id],
   );
 
-  // Select the currently focused chat instance
   const isNewChat = !currentChatId;
   const focusedChatInstance = currentChatId
     ? chatInstancesRef.current.get(currentChatId)
     : undefined;
 
-  // Handle submitting a message passed via navigation state
   useEffect(() => {
     const pendingState = location.state?.pendingMessage;
     if (
@@ -212,7 +188,6 @@ export const MultiChatProvider = ({
     currentChatId,
   ]);
 
-  // Memoize context values to prevent unnecessary re-renders
   const messages = focusedChatInstance?.messages ?? defaultChat.messages;
 
   const statusValue = useMemo(

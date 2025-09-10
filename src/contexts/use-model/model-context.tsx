@@ -20,7 +20,6 @@ interface ModelProviderProps {
 
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const [currentModel, setCurrentModel] = useState<ModelConfig>(() => {
-    // Try to load from localStorage, fallback to default
     const savedModelId = getNewChatModelId();
     if (savedModelId) {
       const savedModel = getModelById(savedModelId);

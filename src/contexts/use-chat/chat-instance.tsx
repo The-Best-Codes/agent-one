@@ -19,11 +19,6 @@ import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
-/**
- * A renderless component that encapsulates a single `useChat` hook instance.
- * It reports its state up to the MultiChatProvider and handles its own side effects
- * like saving messages and generating titles.
- */
 export const ChatInstance = memo(
   ({
     chatId,
@@ -48,7 +43,6 @@ export const ChatInstance = memo(
       messages: initialMessages,
     });
 
-    // Effect to save chat history and generate titles
     useEffect(() => {
       if (chat.status !== "streaming" && chat.messages.length > 0) {
         saveChat({ chatId, messages: chat.messages });
@@ -68,15 +62,10 @@ export const ChatInstance = memo(
       }
     }, [chat.messages, chat.status, chatId, model]);
 
-    // Report status changes to the parent provider
     useEffect(() => {
       onStatusChange(chatId, chat.status);
     }, [chatId, chat.status, onStatusChange]);
 
-    // This effect syncs the latest chat state to the parent provider's ref.
-    // It runs on every render of ChatInstance. This is intentional and cheap,
-    // as ChatInstance is renderless. The parent provider will then decide
-    // whether a UI re-render is necessary based on focus.
     useEffect(() => {
       onInstanceUpdate(chatId, chat);
     });
