@@ -43,8 +43,8 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           className={cn("w-full justify-between", className)}
           aria-label={`Model: ${currentModel.name}`}
         >
-          <div className="flex-1 min-w-0">
-            <div className="truncate">
+          <div className="min-w-0 flex-1">
+            <div className="w-full truncate text-left">
               <span className="text-muted-foreground text-xs">
                 {currentModel.provider}/
               </span>
@@ -76,7 +76,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                     }
                   }}
                 >
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="truncate">
                       <span className="text-muted-foreground text-xs">
                         {model.provider}/
