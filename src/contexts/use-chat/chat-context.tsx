@@ -1,5 +1,5 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
-import { type UIMessage } from "ai";
+import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
 import {
   type ReactNode,
   useCallback,
@@ -237,6 +237,50 @@ export const MultiChatProvider = ({
     setMessages,
     sendMessage,
   } = instanceForFunctions;
+
+  const wasStreamingRef = useRef(false);
+  useEffect(() => {
+    if (statusValue.status === "streaming") {
+      wasStreamingRef.current = true;
+    }
+
+    if (wasStreamingRef.current && statusValue.status === "ready") {
+      wasStreamingRef.current = false;
+
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.role === "assistant") {
+        let hasChanges = false;
+        const newParts = lastMessage.parts.map((part) => {
+          if (
+            (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
+            "state" in part &&
+            (part.state === "input-streaming" ||
+              part.state === "input-available")
+          ) {
+            hasChanges = true;
+            return {
+              ...part,
+              state: "output-error",
+              errorText: "agent-one::cancelled-by-user",
+            } as UIToolInvocation<UITool>;
+          }
+          return part;
+        });
+
+        if (hasChanges) {
+          const updatedMessage: UIMessage = {
+            ...lastMessage,
+            parts: newParts as UIMessage["parts"],
+          };
+
+          const newMessages = [...messages.slice(0, -1), updatedMessage];
+          if (setMessages) {
+            setMessages(newMessages);
+          }
+        }
+      }
+    }
+  }, [statusValue.status, messages, setMessages]);
 
   const functionsValue = useMemo(
     () => ({
