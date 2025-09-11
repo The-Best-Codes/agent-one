@@ -4,13 +4,9 @@ export interface SettingValue<T> {
 }
 
 export interface SettingsType {
-  APP_LANGUAGE: SettingValue<string>;
-  THEME_MODE: SettingValue<"light" | "dark" | "system">;
-  AUTO_SAVE: SettingValue<boolean>;
+  MARKDOWN_HIGHLIGHTING: SettingValue<boolean>;
 }
 
 export const DEFAULT_SETTINGS = {
-  APP_LANGUAGE: "en",
-  THEME_MODE: "system" as const,
-  AUTO_SAVE: true,
+  MARKDOWN_HIGHLIGHTING: true,
 };

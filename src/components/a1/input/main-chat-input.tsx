@@ -18,6 +18,7 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { getLogger } from "@/lib/logger";
 
@@ -59,6 +60,7 @@ export const MainChatInput = ({
   const { status } = useChatStatus();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
+  const { settings } = useSettings();
   const isMobile = useMobileDetection({
     anyHover: true,
     pointerCoarse: true,
@@ -277,7 +279,7 @@ export const MainChatInput = ({
             placeholder="Ask anything..."
             className="bg-transparent text-sm"
             extensions={[
-              markdown({ base: markdownLanguage }),
+              ...(settings.MARKDOWN_HIGHLIGHTING.value ? [markdown({ base: markdownLanguage })] : []),
               editorTheme,
               EditorView.lineWrapping,
               EditorView.contentAttributes.of({

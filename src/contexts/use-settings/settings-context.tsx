@@ -16,46 +16,19 @@ interface SettingsProviderProps {
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }) => {
-  const [appLanguage, setAppLanguage] = useState(() =>
-    getSetting("APP_LANGUAGE", DEFAULT_SETTINGS.APP_LANGUAGE),
-  );
-  const [themeMode, setThemeMode] = useState<"light" | "dark" | "system">(() =>
-    getSetting("THEME_MODE", DEFAULT_SETTINGS.THEME_MODE),
-  );
-  const [autoSave, setAutoSave] = useState(() =>
-    getSetting("AUTO_SAVE", DEFAULT_SETTINGS.AUTO_SAVE),
+  const [markdownHighlighting, setMarkdownHighlighting] = useState(() =>
+    getSetting("MARKDOWN_HIGHLIGHTING", DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING),
   );
 
-  const handleSetAppLanguage = useCallback((value: string) => {
-    setAppLanguage(value);
-    saveSetting("APP_LANGUAGE", value);
-  }, []);
-
-  const handleSetThemeMode = useCallback(
-    (value: "light" | "dark" | "system") => {
-      setThemeMode(value);
-      saveSetting("THEME_MODE", value);
-    },
-    [],
-  );
-
-  const handleSetAutoSave = useCallback((value: boolean) => {
-    setAutoSave(value);
-    saveSetting("AUTO_SAVE", value);
+  const handleSetMarkdownHighlighting = useCallback((value: boolean) => {
+    setMarkdownHighlighting(value);
+    saveSetting("MARKDOWN_HIGHLIGHTING", value);
   }, []);
 
   const settings: SettingsType = {
-    APP_LANGUAGE: {
-      value: appLanguage,
-      set: handleSetAppLanguage,
-    },
-    THEME_MODE: {
-      value: themeMode,
-      set: handleSetThemeMode,
-    },
-    AUTO_SAVE: {
-      value: autoSave,
-      set: handleSetAutoSave,
+    MARKDOWN_HIGHLIGHTING: {
+      value: markdownHighlighting,
+      set: handleSetMarkdownHighlighting,
     },
   };
 

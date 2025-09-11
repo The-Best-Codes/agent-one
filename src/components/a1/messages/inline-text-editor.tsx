@@ -6,6 +6,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { useTheme } from "next-themes";
 import { memo, useRef } from "react";
 
+import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { cn } from "@/lib/utils";
 
 const editorTheme = EditorView.theme({
@@ -50,6 +51,7 @@ const InlineTextEditorImpl = ({
   onCancel,
 }: InlineTextEditorProps) => {
   const { resolvedTheme } = useTheme();
+  const { settings } = useSettings();
   const editorViewRef = useRef<EditorView | null>(null);
 
   return (
@@ -61,7 +63,7 @@ const InlineTextEditorImpl = ({
       maxHeight="384px"
       className={cn("bg-transparent text-sm", className)}
       extensions={[
-        markdown({ base: markdownLanguage }),
+        ...(settings.MARKDOWN_HIGHLIGHTING.value ? [markdown({ base: markdownLanguage })] : []),
         editorTheme,
         EditorView.lineWrapping,
         EditorView.contentAttributes.of({ spellcheck: "true" }),
