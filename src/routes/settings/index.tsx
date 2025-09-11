@@ -66,7 +66,7 @@ export default function SettingsRoute() {
               <CardTitle>Messages</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
                 <div className="flex flex-col items-start">
                   <label className="text-sm font-medium">
                     Markdown Rendering
@@ -79,7 +79,10 @@ export default function SettingsRoute() {
                   value={settings.MARKDOWN_RENDERING.value}
                   onValueChange={settings.MARKDOWN_RENDERING.set}
                 >
-                  <SelectTrigger size="sm" className="max-w-96">
+                  <SelectTrigger
+                    size="sm"
+                    className="w-full md:w-fit md:max-w-96"
+                  >
                     <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
