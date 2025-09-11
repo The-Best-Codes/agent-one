@@ -12,6 +12,5 @@
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Instead of just the default MCP server, allow managing multiple MCP servers in settings
-- Investigate model persistence bugs, esp. when regenerating messages etc.
 - Sidecar node, npx, uv, and upx to support MCP servers on all OSes even without those installed
 - Allow changing stop behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point
