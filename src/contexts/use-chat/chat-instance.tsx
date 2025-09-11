@@ -8,6 +8,7 @@ import { memo, useEffect, useMemo } from "react";
 
 import { useChat } from "@/hooks/ai/use-chat";
 import {
+  listChatIds,
   loadChat,
   loadChatData,
   saveChat,
@@ -45,6 +46,10 @@ export const ChatInstance = memo(
 
     useEffect(() => {
       if (chat.status !== "streaming" && chat.messages.length > 0) {
+        if (!listChatIds().includes(chatId)) {
+          return;
+        }
+
         saveChat({ chatId, messages: chat.messages });
         const chatData = loadChatData(chatId);
         const hasUserMessage = chat.messages.some((m) => m.role === "user");
