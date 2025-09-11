@@ -12,7 +12,6 @@
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Kill ongoing stream on chat deletion
-- Introduced in 49d2f3417af8370dc6b0830a7c422c8a2f4aca3f: `stop` doesn't cause a tool to `output-error` anymore, so the tool remains in the `input-available` state, showing a loader even after the tool is cancelled. Related: https://github.com/vercel/ai/pull/7902, https://github.com/vercel/ai/releases/tag/ai%405.0.24/ So: Use custom abort error for tools so the tool UI can show "Cancelled" instead of an error? Attach onFinish listener to get the reason and update UI? Or something else?
 - Instead of just the default MCP server, allow managing multiple MCP servers in settings
 - Investigate model persistence bugs, esp. when regenerating messages etc.
 - Sidecar node, npx, uv, and upx to support MCP servers on all OSes even without those installed
