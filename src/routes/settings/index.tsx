@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Toggle } from "@/components/ui/toggle";
+import { Switch } from "@/components/ui/switch";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
 
 export default function SettingsRoute() {
@@ -21,7 +21,7 @@ export default function SettingsRoute() {
           >
             <Link to="/chat">
               <ArrowLeftIcon className="h-4 w-4" />
-              Back to Chat
+              <span className="sr-only md:not-sr-only">Back to Chat</span>
             </Link>
           </Button>
           <h1 className="text-2xl font-bold">Settings</h1>
@@ -33,20 +33,23 @@ export default function SettingsRoute() {
               <CardTitle>Editor</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-sm font-medium">Markdown Highlighting</label>
-                  <p className="text-muted-foreground text-sm">
-                    Enable syntax highlighting for Markdown in editors
-                  </p>
+              <div className="flex flex-col items-center">
+                <div className="flex w-full flex-1 flex-row items-center justify-between">
+                  <label className="text-sm font-medium">
+                    Markdown Highlighting
+                  </label>
+                  <Switch
+                    checked={settings.MARKDOWN_HIGHLIGHTING.value}
+                    onCheckedChange={settings.MARKDOWN_HIGHLIGHTING.set}
+                    aria-label="Toggle markdown highlighting"
+                  />
                 </div>
-                <Toggle
-                  pressed={settings.MARKDOWN_HIGHLIGHTING.value}
-                  onPressedChange={settings.MARKDOWN_HIGHLIGHTING.set}
-                  aria-label="Toggle markdown highlighting"
-                >
-                  {settings.MARKDOWN_HIGHLIGHTING.value ? "On" : "Off"}
-                </Toggle>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  When enabled, text formatting like **bold**, *italic*, and
+                  `code` will be visually highlighted as you type. When
+                  disabled, you'll see plain text without any special formatting
+                  colors or styles.
+                </p>
               </div>
             </CardContent>
           </Card>
