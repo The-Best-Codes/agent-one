@@ -257,6 +257,27 @@ export const MultiChatProvider = ({
     }
   }, [statusValue.status, messages, setMessages]);
 
+  useEffect(() => {
+    const handleChatDeleted = (event: Event) => {
+      const { chatId } = (event as CustomEvent).detail;
+      if (chatId) {
+        const instance = chatInstancesRef.current.get(chatId);
+        if (instance) {
+          const { status, stop } = instance;
+          if (status === "streaming" || status === "submitted") {
+            logger.verbose(`Stopping stream for deleted chat: ${chatId}`);
+            stop();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("persistence:chat-deleted", handleChatDeleted);
+    return () => {
+      window.removeEventListener("persistence:chat-deleted", handleChatDeleted);
+    };
+  }, []);
+
   const functionsValue = useMemo(
     () => ({
       sendMessage: isNewChat ? handleNewChatSubmit : sendMessage,

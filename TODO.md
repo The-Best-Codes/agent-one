@@ -11,7 +11,6 @@
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
 - Make persistence happen more often (like after tool calls etc too) to save progress better
-- Kill ongoing stream on chat deletion
 - Instead of just the default MCP server, allow managing multiple MCP servers in settings
 - Investigate model persistence bugs, esp. when regenerating messages etc.
 - Sidecar node, npx, uv, and upx to support MCP servers on all OSes even without those installed
