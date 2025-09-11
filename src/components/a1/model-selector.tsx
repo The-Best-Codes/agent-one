@@ -19,8 +19,6 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
 
-// TODO: Show tooltip to view full model name on truncated models, or a scroller or something
-
 interface ModelSelectorProps {
   className?: string;
   popoverClassName?: string;
@@ -44,7 +42,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-label={`Model: ${currentModel.name}`}
         >
           <div className="min-w-0 flex-1">
-            <div className="w-full truncate text-left">
+            <div className="scrollbar-hidden w-full overflow-x-auto text-left whitespace-nowrap">
               <span className="text-muted-foreground text-xs">
                 {currentModel.provider}/
               </span>
@@ -77,7 +75,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                   }}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="truncate">
+                    <div className="scrollbar-hidden overflow-x-auto whitespace-nowrap">
                       <span className="text-muted-foreground text-xs">
                         {model.provider}/
                       </span>

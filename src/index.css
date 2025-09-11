@@ -160,6 +160,8 @@
   &::-webkit-scrollbar {
     display: none;
   }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @utility accordion-details-animated {
