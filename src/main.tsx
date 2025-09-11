@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 
 import ErrorBoundary from "@/components/error-boundary";
 import { ModelProvider } from "@/contexts/use-model/model-context";
+import { SettingsProvider } from "@/contexts/use-settings/settings-context";
 
 import App from "./App";
 
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         storageKey="theme"
       >
         <ModelProvider>
-          <App />
+          <SettingsProvider>
+            <App />
+          </SettingsProvider>
         </ModelProvider>
       </ThemeProvider>
     </ErrorBoundary>

@@ -1,6 +1,6 @@
-import { PlusIcon, SearchIcon, SidebarIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, SettingsIcon, SidebarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 import { ModelSelector } from "@/components/a1/model-selector";
 import ThemeToggle from "@/components/theme/toggle-menu";
@@ -51,6 +51,16 @@ const SidebarContent = ({
       <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
         <ModelSelector className="w-full" popoverClassName="w-full max-w-60" />
         <ThemeToggle className="w-full" />
+        <Button
+          variant="outline"
+          className="w-full justify-start"
+          asChild
+        >
+          <Link to="/settings">
+            <SettingsIcon className="h-4 w-4" />
+            Settings
+          </Link>
+        </Button>
       </div>
     </div>
   );
