@@ -19,7 +19,7 @@ export default function SettingsRoute() {
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-2xl p-6">
-        <div className="relative mb-2 flex items-center justify-center gap-4">
+        <div className="relative mb-4 flex items-center justify-center gap-4">
           <Button
             variant="outline"
             size="sm"
@@ -34,7 +34,7 @@ export default function SettingsRoute() {
           <h1 className="text-2xl font-bold">Settings</h1>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-2">
           <Card>
             <CardHeader>
               <CardTitle>Editor</CardTitle>
