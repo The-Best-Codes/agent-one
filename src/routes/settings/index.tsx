@@ -1,5 +1,5 @@
-import { ArrowLeftIcon } from "lucide-react";
-import { Link } from "react-router";
+import { ArrowLeftIcon, HomeIcon } from "lucide-react";
+import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { useSettings } from "@/contexts/use-settings/settings-hooks";
 
 export default function SettingsRoute() {
   const { settings } = useSettings();
+  const navigate = useNavigate();
 
   return (
     <div className="bg-background min-h-screen">
@@ -24,12 +25,19 @@ export default function SettingsRoute() {
             variant="outline"
             size="sm"
             className="absolute top-0 left-0"
-            asChild
+            onClick={() => navigate(-1)}
           >
-            <Link to="/chat">
-              <ArrowLeftIcon className="h-4 w-4" />
-              <span className="sr-only md:not-sr-only">Back to Chat</span>
-            </Link>
+            <ArrowLeftIcon className="h-4 w-4" />
+            <span className="sr-only md:not-sr-only">Back to Chat</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="absolute top-0 right-0"
+            onClick={() => navigate("/chat")}
+          >
+            <HomeIcon className="h-4 w-4" />
+            <span className="sr-only md:not-sr-only">Home</span>
           </Button>
           <h1 className="text-2xl font-bold">Settings</h1>
         </div>
