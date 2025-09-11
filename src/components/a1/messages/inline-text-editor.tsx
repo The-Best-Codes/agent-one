@@ -63,7 +63,9 @@ const InlineTextEditorImpl = ({
       maxHeight="384px"
       className={cn("bg-transparent text-sm", className)}
       extensions={[
-        ...(settings.MARKDOWN_HIGHLIGHTING.value ? [markdown({ base: markdownLanguage })] : []),
+        ...(settings.MARKDOWN_HIGHLIGHTING.value
+          ? [markdown({ base: markdownLanguage })]
+          : []),
         editorTheme,
         EditorView.lineWrapping,
         EditorView.contentAttributes.of({ spellcheck: "true" }),

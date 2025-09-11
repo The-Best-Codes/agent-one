@@ -36,7 +36,9 @@ export const PerformantMarkdown = memo(({ content }: { content: string }) => {
         maxHeight="384px"
         className="w-full bg-transparent text-sm"
         extensions={[
-          ...(settings.MARKDOWN_HIGHLIGHTING.value ? [markdown({ base: markdownLanguage })] : []),
+          ...(settings.MARKDOWN_HIGHLIGHTING.value
+            ? [markdown({ base: markdownLanguage })]
+            : []),
           editorTheme,
           EditorView.lineWrapping,
           EditorView.editable.of(false),

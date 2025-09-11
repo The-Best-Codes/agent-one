@@ -279,7 +279,9 @@ export const MainChatInput = ({
             placeholder="Ask anything..."
             className="bg-transparent text-sm"
             extensions={[
-              ...(settings.MARKDOWN_HIGHLIGHTING.value ? [markdown({ base: markdownLanguage })] : []),
+              ...(settings.MARKDOWN_HIGHLIGHTING.value
+                ? [markdown({ base: markdownLanguage })]
+                : []),
               editorTheme,
               EditorView.lineWrapping,
               EditorView.contentAttributes.of({
