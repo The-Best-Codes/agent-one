@@ -20,7 +20,7 @@ export const RetryButton = ({
 
   const handleRetry = () => {
     if (!isDisabled) {
-      regenerate({ messageId }); // TODO: Confirm dialog before doing this, as it discards all messages after the one being regenerated?
+      regenerate({ messageId });
     }
   };
 
