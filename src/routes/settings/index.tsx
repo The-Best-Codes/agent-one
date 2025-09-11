@@ -1,6 +1,7 @@
 import { ArrowLeftIcon, HomeIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 
+import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -102,6 +103,23 @@ export default function SettingsRoute() {
                     <SelectItem value="neither">No messages</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col items-center justify-between gap-2 md:flex-row">
+                <div className="flex flex-col items-start">
+                  <label className="text-sm font-medium">Theme</label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Choose your preferred theme for the application.
+                  </p>
+                </div>
+                <ThemeToggle className="w-full md:max-w-64" />
               </div>
             </CardContent>
           </Card>
