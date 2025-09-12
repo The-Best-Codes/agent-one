@@ -8,7 +8,6 @@
 - Persist model used to generate message per message?
 - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
-- Fix drawer shrinking and not reverting to original size when opening keyboard on mobile devices
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Instead of just the default MCP server, allow managing multiple MCP servers in settings
 - Sidecar node, npx, uv, and upx to support MCP servers on all OSes even without those installed
