@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { type FC, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
               <span className="font-medium">{currentModel.name}</span>
             </div>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className={cn("w-full p-0", popoverClassName)}>
@@ -82,14 +82,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                       <span className="font-medium">{model.name}</span>
                     </div>
                   </div>
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      currentModel.id === model.id
-                        ? "opacity-100"
-                        : "opacity-0",
-                    )}
-                  />
                 </CommandItem>
               ))}
             </CommandGroup>
