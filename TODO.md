@@ -2,7 +2,6 @@
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
 - Allow forking conversations
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
-- Fix chat performance when starting a new chat (small period when nothing is shown) and some bugs when going from chat to new and back to chat. Be sure to test in a slow, low performance environment.
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
 - Persist model used to generate message per message?
