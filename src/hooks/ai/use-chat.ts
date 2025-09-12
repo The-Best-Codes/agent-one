@@ -6,9 +6,9 @@ import {
 import { type ChatInit, type LanguageModel } from "ai";
 import { useEffect, useRef } from "react";
 
+import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { getLogger } from "@/lib/logger";
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
 
 const logger = getLogger(import.meta.url);
 
