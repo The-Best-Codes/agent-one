@@ -72,7 +72,7 @@ const InlineTextEditorImpl = ({
         Prec.highest(
           keymap.of([
             {
-              key: "Enter",
+              key: settings.SUBMIT_KEY.value === "enter" ? "Enter" : "Ctrl-Enter",
               run: () => {
                 if (!disableEnter && onEnter) {
                   onEnter();
