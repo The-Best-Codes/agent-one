@@ -6,8 +6,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { cn } from "@/lib/utils";
 
-const MAX_CHARS = 100000; // TODO: Allow user to configure this value (in settings?)
-
 export const MessagePartText = ({
   id,
   text,
@@ -18,7 +16,8 @@ export const MessagePartText = ({
   messageRole: UIMessage["role"];
 }) => {
   const { settings } = useSettings();
-  const shouldUsePerformantRenderer = text.length > MAX_CHARS;
+  const shouldUsePerformantRenderer =
+    text.length > settings.MAX_MESSAGE_LENGTH.value;
 
   if (!text) return null;
 
@@ -44,8 +43,9 @@ export const MessagePartText = ({
           <Alert variant="destructive" className="mb-2">
             <AlertTitle>Performance Alert</AlertTitle>
             <AlertDescription>
-              This message is longer than {MAX_CHARS} characters. Syntax
-              highlighting and markdown rendering are disabled.
+              This message is longer than{" "}
+              {settings.MAX_MESSAGE_LENGTH.value.toLocaleString()} characters.
+              Syntax highlighting and markdown rendering are disabled.
             </AlertDescription>
           </Alert>
           <PerformantMarkdown content={text} />

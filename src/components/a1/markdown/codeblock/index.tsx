@@ -3,6 +3,7 @@ import { PlayIcon, SquareIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { Button } from "@/components/ui/button";
+import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { cn } from "@/lib/utils";
 
 import { usePreview } from "./preview";
@@ -14,16 +15,16 @@ type CodeBlockProps = {
   messageRole?: UIMessage["role"];
 };
 
-const MAX_CHARS = 100000; // TODO: Allow user to configure this (in settings?)
-
 const BestHighlighter = ({
   content,
   lang,
+  maxChars,
 }: {
   content: string;
   lang?: string;
+  maxChars: number;
 }) => {
-  if (content.length > MAX_CHARS) {
+  if (content.length > maxChars) {
     return (
       <pre className="max-w-full overflow-auto bg-[rgb(30,30,30)] p-2 text-sm">
         <code className="text-white">{content}</code>
@@ -35,6 +36,7 @@ const BestHighlighter = ({
 };
 
 export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
+  const { settings } = useSettings();
   const {
     isPreviewMode,
     togglePreview,
@@ -77,7 +79,11 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
         {isPreviewMode && PreviewComponent ? (
           <PreviewComponent content={content} />
         ) : (
-          <BestHighlighter lang={lang || "text"} content={content} />
+          <BestHighlighter
+            lang={lang || "text"}
+            content={content}
+            maxChars={settings.MAX_CODEBLOCK_CHARS.value}
+          />
         )}
       </div>
     </div>

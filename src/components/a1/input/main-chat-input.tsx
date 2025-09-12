@@ -307,10 +307,12 @@ export const MainChatInput = ({
               Prec.highest(
                 keymap.of([
                   {
-                    // TODO: Later, allow changing the send key to CTRL/CMD + Enter
-                    key: "Enter",
+                    key:
+                      settings.SUBMIT_KEY.value === "enter"
+                        ? "Enter"
+                        : "Ctrl-Enter",
                     run: () => {
-                      if (isMobile) {
+                      if (isMobile && settings.SUBMIT_KEY.value === "enter") {
                         return false;
                       }
                       submitMessage();

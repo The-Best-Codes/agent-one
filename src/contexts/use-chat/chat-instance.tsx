@@ -6,6 +6,7 @@ import {
 } from "ai";
 import { memo, useEffect, useMemo } from "react";
 
+import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import {
   listChatIds,
@@ -35,10 +36,13 @@ export const ChatInstance = memo(
       status: UseChatHelpers<UIMessage>["status"],
     ) => void;
   }) => {
+    const { settings } = useSettings();
     const initialMessages = useMemo(() => loadChat(chatId), [chatId]);
 
     const chat = useChat(model, {
-      experimental_throttle: 250, // TODO: Allow user to configure this
+      experimental_throttle: settings.EXPERIMENTAL_THROTTLE_ENABLED.value
+        ? settings.EXPERIMENTAL_THROTTLE_VALUE.value
+        : undefined,
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
       id: chatId,
       messages: initialMessages,

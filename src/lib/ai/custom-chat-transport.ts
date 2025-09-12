@@ -4,11 +4,13 @@ import {
   type ChatTransport,
   convertToModelMessages,
   type LanguageModel,
+  smoothStream,
   streamText,
   type UIMessageChunk,
 } from "ai";
 
 import { getLogger } from "@/lib/logger";
+import type { SettingsType } from "@/lib/settings/types";
 
 import { SYSTEM_PROMPT } from "./system-prompt";
 import { getToolsObject } from "./tools";
@@ -17,14 +19,21 @@ const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel;
+  private settings: SettingsType;
 
-  constructor(model: LanguageModel) {
+  constructor(model: LanguageModel, settings: SettingsType) {
     this.model = model;
+    this.settings = settings;
   }
 
   updateModel(model: LanguageModel) {
     this.model = model;
     logger.verbose("CustomChatTransport model updated to:", model);
+  }
+
+  updateSettings(settings: SettingsType) {
+    this.settings = settings;
+    logger.verbose("CustomChatTransport settings updated");
   }
 
   async sendMessages(
@@ -47,7 +56,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: "auto",
       // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
-      // experimental_transform: smoothStream(), // TODO: Allow customizing this in settings
+      ...(this.settings.SMOOTH_STREAM_ENABLED.value && {
+        experimental_transform: smoothStream(),
+      }),
     });
 
     return result.toUIMessageStream({
