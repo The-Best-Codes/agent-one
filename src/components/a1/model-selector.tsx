@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
 import { cn } from "@/lib/utils";
@@ -42,12 +43,15 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-label={`Model: ${currentModel.name}`}
         >
           <div className="min-w-0 flex-1">
-            <div className="scrollbar-hidden w-full overflow-x-auto text-left whitespace-nowrap">
-              <span className="text-muted-foreground text-xs">
-                {currentModel.provider}/
-              </span>
-              <span className="font-medium">{currentModel.name}</span>
-            </div>
+            <ScrollArea className="w-full">
+              <div className="w-full text-left whitespace-nowrap">
+                <span className="text-muted-foreground text-xs">
+                  {currentModel.provider}/
+                </span>
+                <span className="font-medium">{currentModel.name}</span>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
           <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
         </Button>
@@ -75,12 +79,15 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                   }}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="scrollbar-hidden overflow-x-auto whitespace-nowrap">
-                      <span className="text-muted-foreground text-xs">
-                        {model.provider}/
-                      </span>
-                      <span className="font-medium">{model.name}</span>
-                    </div>
+                    <ScrollArea className="w-full">
+                      <div className="whitespace-nowrap">
+                        <span className="text-muted-foreground text-xs">
+                          {model.provider}/
+                        </span>
+                        <span className="font-medium">{model.name}</span>
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
                   </div>
                 </CommandItem>
               ))}
