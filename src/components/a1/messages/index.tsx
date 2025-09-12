@@ -1,6 +1,6 @@
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
 import { CheckIcon, RotateCwIcon, XIcon } from "lucide-react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
@@ -34,6 +34,20 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     handleTextChange,
     initialValues,
   } = useMessageEditing({ message });
+
+  const selectedActionRef = useRef<string>("save");
+
+  const handleSelectedActionChange = useCallback((optionId: string) => {
+    selectedActionRef.current = optionId;
+  }, []);
+
+  const handleEnterKey = useCallback(() => {
+    if (message.role === "user") {
+      handleSave(selectedActionRef.current === "save-regenerate");
+    } else {
+      handleSave(false);
+    }
+  }, [handleSave, message.role]);
 
   const getCopyContent = useCallback(() => {
     return message.parts
@@ -76,7 +90,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
                   onChange={(v) => handleTextChange(thisIndex, v)}
                   autoFocus={thisIndex === lastTextIndex}
                   disableEnter={isMobile}
-                  onEnter={!isMobile ? handleSave : undefined}
+                  onEnter={!isMobile ? handleEnterKey : undefined}
                   onCancel={handleCancel}
                   className={cn(thisIndex > 0 ? "mt-1" : "")}
                 />
@@ -112,7 +126,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     handleCancel,
-    handleSave,
+    handleEnterKey,
     handleTextChange,
     initialValues.length,
     isEditing,
@@ -157,6 +171,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
               size="sm"
               className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
               storageKey="message-edit-action"
+              onSelectedOptionChange={handleSelectedActionChange}
               options={[
                 {
                   id: "save",

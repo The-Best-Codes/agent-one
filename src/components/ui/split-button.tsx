@@ -25,6 +25,10 @@ interface SplitButtonProps
   dropdownSideOffset?: number;
   dropdownAlign?: "start" | "center" | "end";
   dropdownSide?: "top" | "right" | "bottom" | "left";
+  onSelectedOptionChange?: (
+    optionId: string,
+    option: SplitButtonOption,
+  ) => void;
 }
 
 function SplitButton({
@@ -38,6 +42,7 @@ function SplitButton({
   dropdownSideOffset,
   dropdownSide,
   disabled,
+  onSelectedOptionChange,
   ...props
 }: SplitButtonProps) {
   const [selectedOptionId, setSelectedOptionId] = React.useState<string>(() => {
@@ -62,6 +67,12 @@ function SplitButton({
     [options, selectedOptionId],
   );
 
+  React.useEffect(() => {
+    if (selectedOption && onSelectedOptionChange) {
+      onSelectedOptionChange(selectedOptionId, selectedOption);
+    }
+  }, [selectedOptionId, selectedOption, onSelectedOptionChange]);
+
   const handleOptionSelect = React.useCallback(
     (optionId: string) => {
       setSelectedOptionId(optionId);
@@ -77,9 +88,10 @@ function SplitButton({
       const option = options.find((opt) => opt.id === optionId);
       if (option && !option.disabled) {
         option.onClick();
+        onSelectedOptionChange?.(optionId, option);
       }
     },
-    [options, storageKey],
+    [options, storageKey, onSelectedOptionChange],
   );
 
   const handleMainButtonClick = React.useCallback(() => {
