@@ -1,10 +1,12 @@
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
 import { CheckIcon, RotateCwIcon, XIcon } from "lucide-react";
 import { memo, useCallback, useMemo, useRef } from "react";
+import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
 import { useMessageEditing } from "@/hooks/use-message-editing";
+import { forkChat } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +37,9 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     initialValues,
   } = useMessageEditing({ message });
 
+  const navigate = useNavigate();
+  const { id: activeChatId } = useParams<{ id: string }>();
+
   const selectedActionRef = useRef<string>("save");
 
   const handleSelectedActionChange = useCallback((optionId: string) => {
@@ -48,6 +53,22 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
       handleSave(false);
     }
   }, [handleSave, message.role]);
+
+  const handleFork = useCallback(() => {
+    if (!activeChatId) {
+      logger.error("Cannot fork a new, unsaved chat.");
+      return;
+    }
+    try {
+      const newChatId = forkChat({
+        originalChatId: activeChatId,
+        forkFromMessageId: message.id,
+      });
+      navigate(`/chat/${newChatId}`);
+    } catch (error) {
+      logger.error("Failed to fork chat:", error);
+    }
+  }, [activeChatId, message.id, navigate]);
 
   const getCopyContent = useCallback(() => {
     return message.parts
@@ -219,6 +240,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
       messageRole={message.role}
       messageId={message.id}
       onEdit={canEdit ? handleEdit : undefined}
+      onFork={activeChatId ? handleFork : undefined}
     >
       {content}
     </MessageGroup>

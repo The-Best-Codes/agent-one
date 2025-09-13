@@ -4,6 +4,7 @@ import { CopyButton } from "@/components/a1/copy-button";
 import { cn } from "@/lib/utils";
 
 import { EditButton } from "./edit-button";
+import { ForkButton } from "./fork-button";
 import { RetryButton } from "./retry-button";
 
 export const MessageActionRow = ({
@@ -11,11 +12,13 @@ export const MessageActionRow = ({
   messageRole,
   messageId,
   onEdit,
+  onFork,
 }: {
   contentToCopy: string;
   messageRole: UIMessage["role"];
   messageId: UIMessage["id"];
   onEdit?: () => void;
+  onFork?: () => void;
 }) => {
   return (
     <div
@@ -34,6 +37,9 @@ export const MessageActionRow = ({
         }}
         text={contentToCopy}
       />
+      {onFork && messageRole === "assistant" && (
+        <ForkButton onFork={onFork} className="size-6" />
+      )}
       {messageRole === "assistant" && (
         <RetryButton messageId={messageId} className="size-6" />
       )}

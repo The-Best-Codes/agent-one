@@ -207,3 +207,58 @@ export function deleteChat(chatId: string): void {
     logger.error(`Failed to delete chat ${chatId} from localStorage`, error);
   }
 }
+
+export function forkChat({
+  originalChatId,
+  forkFromMessageId,
+}: {
+  originalChatId: string;
+  forkFromMessageId: string;
+}): string {
+  try {
+    const originalChatData = loadChatData(originalChatId);
+    if (!originalChatData) {
+      throw new Error(`Original chat with ID ${originalChatId} not found.`);
+    }
+
+    const forkIndex = originalChatData.messages.findIndex(
+      (m) => m.id === forkFromMessageId,
+    );
+
+    if (forkIndex === -1) {
+      throw new Error(
+        `Message with ID ${forkFromMessageId} not found in chat ${originalChatId}.`,
+      );
+    }
+
+    const forkedMessages = originalChatData.messages.slice(0, forkIndex + 1);
+
+    const newId = generateId();
+    const newTitle = `Fork of ${originalChatData.title}`;
+
+    const newChatData: ChatData = {
+      messages: forkedMessages,
+      title: newTitle,
+      titleState: "generated",
+      modelId: originalChatData.modelId,
+    };
+
+    const chatKey = getChatKey(newId);
+    localStorage.setItem(chatKey, JSON.stringify(newChatData));
+
+    const currentIds = listChatIds();
+    saveChatIds([newId, ...currentIds]);
+
+    window.dispatchEvent(
+      new CustomEvent("persistence:chat-created", {
+        detail: { chatId: newId },
+      }),
+    );
+
+    logger.verbose(`Chat ${originalChatId} forked to new chat ${newId}`);
+    return newId;
+  } catch (error) {
+    logger.error("Failed to fork chat in localStorage", error);
+    throw new Error("Failed to fork chat.");
+  }
+}
