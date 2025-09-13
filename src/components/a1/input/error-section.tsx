@@ -23,15 +23,16 @@ export const MainInputErrorSection = () => {
   }
 
   return (
-    <div className="bg-destructive text-primary-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none p-2 md:mb-2 md:rounded-md">
-      <span className="max-h-10 max-w-full overflow-auto">
-        {errorText || "An unknown error occurred"}
-      </span>
+    <div className="bg-destructive/20 border-destructive text-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none border-1 p-2 md:mb-2 md:rounded-md">
+      <div className="flex max-h-24 w-full flex-col items-start overflow-auto">
+        <h3 className="text-lg font-bold">An error occurred:</h3>
+        <span>{errorText || "Unknown error"}</span>
+      </div>
       <div className="flex flex-row items-center gap-2">
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <Button onClick={() => regenerate()} variant="secondary">
+              <Button onClick={() => regenerate()} variant="destructive">
                 <RefreshCcwIcon />
                 Retry
               </Button>
