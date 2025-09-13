@@ -1,6 +1,5 @@
 - Maybe later: Human-in-the-loop / tool confirmation
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
-- Allow forking conversations
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - Allow dragging and dropping chats into the main chat input (as files or summaries of the chats for context)
 - Bulk actions in sidebar
