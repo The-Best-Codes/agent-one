@@ -11,3 +11,4 @@
 - Sidecar node, npx, uv, and upx to support MCP servers on all OSes even without those installed
 - Allow changing stop behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point
 - If response is streaming, scroll to bottom button action should scroll instantly and not smoothly
+- Persist useChat values (status, etc.) not just messages?
