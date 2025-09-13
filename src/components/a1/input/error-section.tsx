@@ -11,22 +11,28 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
 
 export const MainInputErrorSection = () => {
   const { error } = useChatStatus();
   const { regenerate } = useChatFunctions();
 
-  const errorText = error ? error.message : "";
-
   if (!error) {
     return null;
   }
 
+  const { message: displayMessage, description: displayDescription } =
+    getAiErrorMessageUx(error.message);
+
   return (
     <div className="bg-destructive/20 border-destructive text-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none border-1 p-2 md:mb-2 md:rounded-md">
       <div className="flex max-h-24 w-full flex-col items-start overflow-auto">
-        <h3 className="text-lg font-bold">An error occurred:</h3>
-        <span>{errorText || "Unknown error"}</span>
+        {displayMessage && (
+          <h3 className="text-lg font-bold">{displayMessage}</h3>
+        )}
+        {displayDescription && (
+          <span className="text-base">{displayDescription}</span>
+        )}
       </div>
       <div className="flex flex-row items-center gap-2">
         <TooltipProvider>
