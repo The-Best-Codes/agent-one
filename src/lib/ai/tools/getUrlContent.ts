@@ -2,8 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { getError } from "@/lib/error/get-error";
 import { fixUrl } from "@/lib/fix-url";
-import { getError } from "@/lib/get-error";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
