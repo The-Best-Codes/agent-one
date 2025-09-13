@@ -36,10 +36,7 @@ export const MainInputErrorSection = () => {
                 Retry
               </Button>
             </TooltipTrigger>
-            <TooltipContent
-              side="right"
-              className="max-h-48 max-w-48 overflow-auto"
-            >
+            <TooltipContent className="max-h-48 max-w-48">
               Discards the last AI message (if any) and retries
             </TooltipContent>
           </Tooltip>
