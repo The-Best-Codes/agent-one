@@ -25,7 +25,6 @@ export interface FnmInstallResult {
   path: string | null;
 }
 
-// TODO: Can we use @/lib/format-bytes.ts here?
 function parseSizeToBytes(sizeStr: string): number {
   const [value, unit] = sizeStr.trim().split(" ");
   const numValue = parseFloat(value);
