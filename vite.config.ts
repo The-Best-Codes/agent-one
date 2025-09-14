@@ -2,7 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
-import { defineConfig, UserConfig } from "vite";
+import { defineConfig, ViteUserConfig } from "vitest/config";
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -22,6 +22,13 @@ export default defineConfig(
           filename: "dist/stats.html",
         }),
       ],
+
+      test: {
+        globals: true,
+        environment: "jsdom",
+        include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+        exclude: ["tests/e2e/**"],
+      },
 
       resolve: {
         alias: {
@@ -99,5 +106,5 @@ export default defineConfig(
           },
         },
       },
-    }) satisfies UserConfig,
+    }) satisfies ViteUserConfig,
 );
