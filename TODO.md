@@ -12,3 +12,4 @@
 - Allow changing stop behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point
 - If response is streaming, scroll to bottom button action should scroll instantly and not smoothly
 - Persist useChat values (status, etc.) not just messages?
+- During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
