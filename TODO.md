@@ -8,7 +8,7 @@
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Instead of just the default MCP server, allow managing multiple MCP servers in settings
-- Sidecar node, npx, uv, and upx to support MCP servers on all OSes even without those installed
+- Sidecar node, npx, uv, and uvx to support MCP servers on all OSes even without those installed
 - Allow changing stop behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point
 - Persist useChat values (status, etc.) not just messages?
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
