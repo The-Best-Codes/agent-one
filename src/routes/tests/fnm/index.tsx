@@ -159,12 +159,12 @@ export default function FnmTestRoute() {
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => navigate("/tests")}
             className="gap-2"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
+            <ArrowLeftIcon className="size-4" />
             Back to Tests
           </Button>
           <h1 className="text-2xl font-bold">FNM Node Installation Test</h1>
