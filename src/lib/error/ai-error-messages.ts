@@ -4,7 +4,7 @@ interface UxErrorConfig {
   description: string;
 }
 
-export const aiErrorMessgages = new Set<UxErrorConfig>([
+export const aiErrorMessages = new Set<UxErrorConfig>([
   {
     key: "Failed to fetch",
     uxError: "Failed to connect to AI model.",
@@ -32,7 +32,7 @@ export const getAiErrorMessageUx = (
     };
   }
 
-  for (const config of aiErrorMessgages) {
+  for (const config of aiErrorMessages) {
     if (actualErrorMessage.toLowerCase().includes(config.key.toLowerCase())) {
       return {
         message: config.uxError,
