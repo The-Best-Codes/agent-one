@@ -26,6 +26,8 @@ export interface AutoScrollContainerProps
     "className" | "children" | "onClick"
   >;
   behavior?: "smooth" | "instant";
+  /** Scroll behavior for the scroll-to-bottom button. Defaults to "smooth". */
+  buttonScrollBehavior?: "smooth" | "instant";
   /** Whether to watch resize events on the container. Defaults to false for performance. */
   watchResize?: boolean;
   /** Distance from bottom (in px) where button starts sliding out. Defaults to 50px. */
@@ -51,6 +53,7 @@ export const AutoScrollContainer = forwardRef<
       scrollButtonChildren,
       scrollButtonProps,
       behavior = "instant",
+      buttonScrollBehavior = "smooth",
       watchResize = false,
       slideStartDistance = 50,
       slideEndDistance = 10,
@@ -78,7 +81,7 @@ export const AutoScrollContainer = forwardRef<
     const handleScrollButtonClick = () => {
       isAtBottomRef.current = true;
       setButtonOffset(0);
-      scrollToBottom("smooth");
+      scrollToBottom(buttonScrollBehavior);
     };
 
     useImperativeHandle(

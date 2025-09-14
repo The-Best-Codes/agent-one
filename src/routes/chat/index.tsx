@@ -11,11 +11,12 @@ import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
-import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
+import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
+  const { status } = useChatStatus();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
 
   return (
@@ -33,6 +34,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
             scrollableClassName="pr-2 h-full"
             scrollButtonClassName="mr-2"
             behavior="instant"
+            buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
           >
             {messages.length === 0 && <NoMessagesGreeting />}
             {messages.map((message) => (
