@@ -2,9 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "permissions": [
     "core:default",
     "core:webview:allow-create-webview",
@@ -17,16 +15,19 @@
       "identifier": "shell:allow-spawn",
       "allow": [
         {
-          "name": "npx",
-          "cmd": "npx",
-          "args": true,
-          "sidecar": false
+          "name": "fnm",
+          "cmd": "fnm",
+          "args": true
         },
         {
-          "name": "node",
-          "cmd": "node",
-          "args": true,
-          "sidecar": false
+          "name": "npx",
+          "cmd": "npx",
+          "args": true
+        },
+        {
+          "name": "npm",
+          "cmd": "npm",
+          "args": true
         }
       ]
     },
