@@ -67,7 +67,7 @@ export function installNodeVersion(
       }
     };
 
-    const command = Command.sidecar("fnm", ["install", version]);
+    const command = Command.sidecar("binaries/fnm", ["install", version]);
 
     command.stdout.on("data", (line: string) => {
       logger.verbose(`[fnm stdout]: ${line.trim()}`);

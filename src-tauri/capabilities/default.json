@@ -15,9 +15,9 @@
       "identifier": "shell:allow-spawn",
       "allow": [
         {
-          "name": "fnm",
-          "cmd": "fnm",
-          "args": true
+          "name": "binaries/fnm",
+          "args": true,
+          "sidecar": true
         },
         {
           "name": "npx",
