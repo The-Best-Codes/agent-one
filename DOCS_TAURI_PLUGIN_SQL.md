@@ -8,42 +8,42 @@ Plugin providing an interface for the frontend to communicate with SQL databases
 _This plugin requires a Rust version of at least **1.77.2**_
 
 | Platform | Level | Notes |
-| --- | --- | --- |
-| windows |  |  |
-| linux |  |  |
-| macos |  |  |
-| android |  |  |
-| ios |  |  |
+| -------- | ----- | ----- |
+| windows  |       |       |
+| linux    |       |       |
+| macos    |       |       |
+| android  |       |       |
+| ios      |       |       |
 
 Install the SQL plugin to get started.
 
-*   [Automatic](https://v2.tauri.app/plugin/sql/#tab-panel-1130)
-*   [Manual](https://v2.tauri.app/plugin/sql/#tab-panel-1131)
+- [Automatic](https://v2.tauri.app/plugin/sql/#tab-panel-1130)
+- [Manual](https://v2.tauri.app/plugin/sql/#tab-panel-1131)
 
 Use your project’s package manager to add the dependency:
 
-*   [npm](https://v2.tauri.app/plugin/sql/#tab-panel-1119)
-*   [yarn](https://v2.tauri.app/plugin/sql/#tab-panel-1120)
-*   [pnpm](https://v2.tauri.app/plugin/sql/#tab-panel-1121)
-*   [deno](https://v2.tauri.app/plugin/sql/#tab-panel-1122)
-*   [bun](https://v2.tauri.app/plugin/sql/#tab-panel-1123)
-*   [cargo](https://v2.tauri.app/plugin/sql/#tab-panel-1124)
+- [npm](https://v2.tauri.app/plugin/sql/#tab-panel-1119)
+- [yarn](https://v2.tauri.app/plugin/sql/#tab-panel-1120)
+- [pnpm](https://v2.tauri.app/plugin/sql/#tab-panel-1121)
+- [deno](https://v2.tauri.app/plugin/sql/#tab-panel-1122)
+- [bun](https://v2.tauri.app/plugin/sql/#tab-panel-1123)
+- [cargo](https://v2.tauri.app/plugin/sql/#tab-panel-1124)
 
 `npm run tauri add sql`
 
 After installing the plugin, you must select the supported database engine. The available engines are Sqlite, MySQL and PostgreSQL. Run the following command in the `src-tauri` folder to enable your preferred engine:
 
-*   [SQLite](https://v2.tauri.app/plugin/sql/#tab-panel-1110)
-*   [MySQL](https://v2.tauri.app/plugin/sql/#tab-panel-1111)
-*   [PostgreSQL](https://v2.tauri.app/plugin/sql/#tab-panel-1112)
+- [SQLite](https://v2.tauri.app/plugin/sql/#tab-panel-1110)
+- [MySQL](https://v2.tauri.app/plugin/sql/#tab-panel-1111)
+- [PostgreSQL](https://v2.tauri.app/plugin/sql/#tab-panel-1112)
 
 `cargo add tauri-plugin-sql --features sqlite`
 
 All the plugin’s APIs are available through the JavaScript guest bindings:
 
-*   [SQLite](https://v2.tauri.app/plugin/sql/#tab-panel-1113)
-*   [MySQL](https://v2.tauri.app/plugin/sql/#tab-panel-1114)
-*   [PostgreSQL](https://v2.tauri.app/plugin/sql/#tab-panel-1115)
+- [SQLite](https://v2.tauri.app/plugin/sql/#tab-panel-1113)
+- [MySQL](https://v2.tauri.app/plugin/sql/#tab-panel-1114)
+- [PostgreSQL](https://v2.tauri.app/plugin/sql/#tab-panel-1115)
 
 The path is relative to [`tauri::api::path::BaseDirectory::AppConfig`](https://docs.rs/tauri/2.0.0/tauri/path/enum.BaseDirectory.html#variant.AppConfig).
 
@@ -51,9 +51,9 @@ The path is relative to [`tauri::api::path::BaseDirectory::AppConfig`](https://d
 
 We use [sqlx](https://docs.rs/sqlx/latest/sqlx/) as the underlying library and adopt their query syntax.
 
-*   [SQLite](https://v2.tauri.app/plugin/sql/#tab-panel-1116)
-*   [MySQL](https://v2.tauri.app/plugin/sql/#tab-panel-1117)
-*   [PostgreSQL](https://v2.tauri.app/plugin/sql/#tab-panel-1118)
+- [SQLite](https://v2.tauri.app/plugin/sql/#tab-panel-1116)
+- [MySQL](https://v2.tauri.app/plugin/sql/#tab-panel-1117)
+- [PostgreSQL](https://v2.tauri.app/plugin/sql/#tab-panel-1118)
 
 Use the ”$#” syntax when substituting query data
 
@@ -87,9 +87,9 @@ Alternatively, the client side `load()` also runs the migrations for a given con
 
 Ensure that the migrations are defined in the correct order and are safe to run multiple times.
 
-*   **Version Control**: Each migration must have a unique version number. This is crucial for ensuring the migrations are applied in the correct order.
-*   **Idempotency**: Write migrations in a way that they can be safely re-run without causing errors or unintended consequences.
-*   **Testing**: Thoroughly test migrations to ensure they work as expected and do not compromise the integrity of your database.
+- **Version Control**: Each migration must have a unique version number. This is crucial for ensuring the migrations are applied in the correct order.
+- **Idempotency**: Write migrations in a way that they can be safely re-run without causing errors or unintended consequences.
+- **Testing**: Thoroughly test migrations to ensure they work as expected and do not compromise the integrity of your database.
 
 By default all potentially dangerous plugin commands and scopes are blocked and cannot be accessed. You must modify the permissions in your `capabilities` configuration to enable these.
 
@@ -97,8 +97,7 @@ See the [Capabilities Overview](https://v2.tauri.app/security/capabilities/) for
 
 `{  "permissions": [    ...,    "sql:default",    "sql:allow-execute",  ]}`
 
-[Default Permission](https://v2.tauri.app/plugin/sql/#default-permission)
--------------------------------------------------------------------------
+## [Default Permission](https://v2.tauri.app/plugin/sql/#default-permission)
 
 ### [Default Permissions](https://v2.tauri.app/plugin/sql/#default-permissions)
 
@@ -110,24 +109,23 @@ All reading related operations are enabled. Also allows to load or close a conne
 
 #### This default permission set includes the following:
 
-*   `allow-close`
-*   `allow-load`
-*   `allow-select`
+- `allow-close`
+- `allow-load`
+- `allow-select`
 
-Permission Table
-----------------
+## Permission Table
 
-| Identifier | Description |
-| --- | --- |
-| `sql:allow-close` | Enables the close command without any pre-configured scope. |
-| `sql:deny-close` | Denies the close command without any pre-configured scope. |
+| Identifier          | Description                                                   |
+| ------------------- | ------------------------------------------------------------- |
+| `sql:allow-close`   | Enables the close command without any pre-configured scope.   |
+| `sql:deny-close`    | Denies the close command without any pre-configured scope.    |
 | `sql:allow-execute` | Enables the execute command without any pre-configured scope. |
-| `sql:deny-execute` | Denies the execute command without any pre-configured scope. |
-| `sql:allow-load` | Enables the load command without any pre-configured scope. |
-| `sql:deny-load` | Denies the load command without any pre-configured scope. |
-| `sql:allow-select` | Enables the select command without any pre-configured scope. |
-| `sql:deny-select` | Denies the select command without any pre-configured scope. |
+| `sql:deny-execute`  | Denies the execute command without any pre-configured scope.  |
+| `sql:allow-load`    | Enables the load command without any pre-configured scope.    |
+| `sql:deny-load`     | Denies the load command without any pre-configured scope.     |
+| `sql:allow-select`  | Enables the select command without any pre-configured scope.  |
+| `sql:deny-select`   | Denies the select command without any pre-configured scope.   |
 
-* * *
+---
 
 © 2025 Tauri Contributors. CC-BY / MIT
