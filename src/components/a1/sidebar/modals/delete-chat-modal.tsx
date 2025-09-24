@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { deleteChat } from "@/lib/ai/persistence";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 
 interface DeleteChatModalProps {
   isOpen: boolean;
@@ -26,9 +26,10 @@ export const DeleteChatModal = ({
 }: DeleteChatModalProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { deleteChat } = usePersistence();
 
-  const handleDelete = () => {
-    deleteChat(chatId);
+  const handleDelete = async () => {
+    await deleteChat(chatId);
     if (activeChatId === chatId) {
       navigate("/chat");
     }

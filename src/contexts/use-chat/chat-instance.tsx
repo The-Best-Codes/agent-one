@@ -4,18 +4,11 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
 } from "ai";
-import { memo, useEffect, useMemo } from "react";
+import { memo, useEffect, useRef } from "react";
 
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import {
-  listChatIds,
-  loadChat,
-  loadChatData,
-  saveChat,
-  saveChatTitle,
-  saveChatTitleState,
-} from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
 
@@ -37,39 +30,59 @@ export const ChatInstance = memo(
     ) => void;
   }) => {
     const { settings } = useSettings();
-    const initialMessages = useMemo(() => loadChat(chatId), [chatId]);
+    const persistence = usePersistence();
+    const isLoadedRef = useRef(false);
 
     const chat = useChat(model, {
       experimental_throttle: settings.EXPERIMENTAL_THROTTLE_ENABLED.value
         ? settings.EXPERIMENTAL_THROTTLE_VALUE.value
         : undefined,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
+      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
       id: chatId,
-      messages: initialMessages,
+      messages: [], // Start with empty, load from persistence
     });
 
     useEffect(() => {
-      if (chat.status !== "streaming" && chat.messages.length > 0) {
-        if (!listChatIds().includes(chatId)) {
-          return;
+      const loadInitialMessages = async () => {
+        if (!isLoadedRef.current) {
+          const chatData = await persistence.loadChat(chatId);
+          if (chatData?.messages) {
+            isLoadedRef.current = true;
+            chat.setMessages(chatData.messages);
+          }
         }
+      };
+      loadInitialMessages();
+    }, [chatId, persistence, chat]);
 
-        saveChat({ chatId, messages: chat.messages });
-        const chatData = loadChatData(chatId);
-        const hasUserMessage = chat.messages.some((m) => m.role === "user");
-        if (hasUserMessage && !chatData.titleState) {
-          saveChatTitleState({ chatId, titleState: "generating" });
-          generateChatTitle(model, chat.messages)
-            .then((generatedTitle) =>
-              saveChatTitle({ chatId, title: generatedTitle }),
-            )
-            .catch((error) => {
+    useEffect(() => {
+      const saveAndGenerateTitle = async () => {
+        if (
+          chat.status !== "streaming" &&
+          chat.messages.length > 0 &&
+          isLoadedRef.current
+        ) {
+          await persistence.saveChat({ id: chatId, messages: chat.messages });
+          const chatData = await persistence.loadChat(chatId);
+          const hasUserMessage = chat.messages.some((m) => m.role === "user");
+
+          if (hasUserMessage && !chatData?.titleState) {
+            await persistence.saveChatTitleState(chatId, "generating");
+            try {
+              const generatedTitle = await generateChatTitle(
+                model,
+                chat.messages,
+              );
+              await persistence.updateChatTitle(chatId, generatedTitle);
+            } catch (error) {
               logger.error("Failed to generate title for chat:", chatId, error);
-              saveChatTitleState({ chatId, titleState: "error" });
-            });
+              await persistence.saveChatTitleState(chatId, "error");
+            }
+          }
         }
-      }
-    }, [chat.messages, chat.status, chatId, model]);
+      };
+      saveAndGenerateTitle();
+    }, [chat.messages, chat.status, chatId, model, persistence]);
 
     useEffect(() => {
       onStatusChange(chatId, chat.status);

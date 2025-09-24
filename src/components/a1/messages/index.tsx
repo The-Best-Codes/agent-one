@@ -5,8 +5,8 @@ import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
-import { forkChat } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
 
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
+  const { forkChat } = usePersistence();
 
   const selectedActionRef = useRef<string>("save");
 
@@ -54,21 +55,20 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     }
   }, [handleSave, message.role]);
 
-  const handleFork = useCallback(() => {
+  const handleFork = useCallback(async () => {
     if (!activeChatId) {
       logger.error("Cannot fork a new, unsaved chat.");
       return;
     }
     try {
-      const newChatId = forkChat({
-        originalChatId: activeChatId,
-        forkFromMessageId: message.id,
-      });
-      navigate(`/chat/${newChatId}`);
+      const newChatId = await forkChat(activeChatId, message.id);
+      if (newChatId) {
+        navigate(`/chat/${newChatId}`);
+      }
     } catch (error) {
       logger.error("Failed to fork chat:", error);
     }
-  }, [activeChatId, message.id, navigate]);
+  }, [activeChatId, message.id, navigate, forkChat]);
 
   const getCopyContent = useCallback(() => {
     return message.parts

@@ -12,9 +12,9 @@ import { useLocation, useNavigate } from "react-router";
 
 import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { getModelById, type ModelConfig } from "@/lib/ai/models";
-import { createChat, loadChatData, saveChatModel } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 
 import {
@@ -39,6 +39,7 @@ export const MultiChatProvider = ({
     currentModel: defaultModelForNewChats,
     setModel: setDefaultModelForNewChats,
   } = useModel();
+  const persistence = usePersistence();
   const navigate = useNavigate();
   const location = useLocation();
   const [updateKey, setUpdateKey] = useState(0);
@@ -55,21 +56,32 @@ export const MultiChatProvider = ({
     status: "",
   });
 
-  const getModelForChat = useCallback(
-    (chatId: string | undefined): ModelConfig => {
-      if (chatId) {
-        const chatData = loadChatData(chatId);
-        if (chatData.modelId) {
-          const chatModel = getModelById(chatData.modelId);
-          if (chatModel) {
-            return chatModel;
+  const [chatModels, setChatModels] = useState<Record<string, ModelConfig>>({});
+
+  useEffect(() => {
+    const fetchChatModels = async () => {
+      if (currentChatId) {
+        const chatData = await persistence.loadChat(currentChatId);
+        if (chatData?.modelId) {
+          const model = getModelById(chatData.modelId);
+          if (model) {
+            setChatModels((prev) => ({ ...prev, [currentChatId]: model }));
           }
         }
+      }
+    };
+    fetchChatModels();
+  }, [currentChatId, persistence]);
+
+  const getModelForChat = useCallback(
+    (chatId: string | undefined): ModelConfig => {
+      if (chatId && chatModels[chatId]) {
+        return chatModels[chatId];
       }
       return defaultModelForNewChats;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [defaultModelForNewChats, updateKey],
+    [chatModels, defaultModelForNewChats, updateKey],
   );
 
   const focusedModel = useMemo(
@@ -80,13 +92,17 @@ export const MultiChatProvider = ({
   const setModelForContext = useCallback(
     (modelId: string) => {
       if (currentChatId) {
-        saveChatModel({ chatId: currentChatId, modelId });
+        persistence.saveChatModel(currentChatId, modelId);
+        const model = getModelById(modelId);
+        if (model) {
+          setChatModels((prev) => ({ ...prev, [currentChatId]: model }));
+        }
         forceUpdate();
       } else {
         setDefaultModelForNewChats(modelId);
       }
     },
-    [currentChatId, setDefaultModelForNewChats, forceUpdate],
+    [currentChatId, setDefaultModelForNewChats, forceUpdate, persistence],
   );
 
   const modelContextValue = useMemo(
@@ -146,19 +162,17 @@ export const MultiChatProvider = ({
   const defaultChat = useChat(defaultModelForNewChats.model);
 
   const handleNewChatSubmit = useCallback(
-    (
+    async (
       message: Parameters<typeof defaultChat.sendMessage>[0],
       options?: Parameters<typeof defaultChat.sendMessage>[1],
     ) => {
-      const newChatId = createChat(focusedModel.id);
+      const newChatId = await persistence.createChat(focusedModel.id);
       navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
       });
-      return Promise.resolve();
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigate, defaultChat.sendMessage, focusedModel.id],
+    [navigate, persistence, focusedModel.id, defaultChat],
   );
 
   const isNewChat = !currentChatId;
@@ -256,27 +270,6 @@ export const MultiChatProvider = ({
       }
     }
   }, [statusValue.status, messages, setMessages]);
-
-  useEffect(() => {
-    const handleChatDeleted = (event: Event) => {
-      const { chatId } = (event as CustomEvent).detail;
-      if (chatId) {
-        const instance = chatInstancesRef.current.get(chatId);
-        if (instance) {
-          const { status, stop } = instance;
-          if (status === "streaming" || status === "submitted") {
-            logger.verbose(`Stopping stream for deleted chat: ${chatId}`);
-            stop();
-          }
-        }
-      }
-    };
-
-    window.addEventListener("persistence:chat-deleted", handleChatDeleted);
-    return () => {
-      window.removeEventListener("persistence:chat-deleted", handleChatDeleted);
-    };
-  }, []);
 
   const functionsValue = useMemo(
     () => ({

@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { loadChatData } from "@/lib/ai/persistence";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 
 interface ExportChatModalProps {
   isOpen: boolean;
@@ -24,9 +24,13 @@ export const ExportChatModal = ({
   chatId,
   chatTitle,
 }: ExportChatModalProps) => {
+  const { loadChat } = usePersistence();
+
   // TODO: Use Tauri file modal to choose saving location, name, etc.
-  const handleExportJSON = () => {
-    const chatData = loadChatData(chatId);
+  const handleExportJSON = async () => {
+    const chatData = await loadChat(chatId);
+    if (!chatData) return;
+
     const dataStr = JSON.stringify(chatData, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
