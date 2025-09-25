@@ -58,21 +58,19 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
       try {
         const idsJson = await ls.getItem(CHAT_IDS_KEY);
         const ids: string[] = idsJson ? JSON.parse(idsJson) : [];
-        const loadedChats = await Promise.all(
-          ids.map(async (id) => {
+        const chatPromises = ids.map(
+          async (id): Promise<ChatMetadata | null> => {
             const data = await loadChat(id);
             if (!data) return null;
-            const metadata: ChatMetadata = {
+            return {
               id,
               title: data.title,
               modelId: data.modelId,
               createdAt: data.createdAt,
             };
-            return metadata;
-          }),
+          },
         );
-
-        const chatMetadataList = loadedChats.filter(
+        const chatMetadataList = (await Promise.all(chatPromises)).filter(
           (c): c is ChatMetadata => c !== null,
         );
 

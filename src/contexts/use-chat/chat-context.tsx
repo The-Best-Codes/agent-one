@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
@@ -41,7 +41,6 @@ export const MultiChatProvider = ({
   } = useModel();
   const persistence = usePersistence();
   const navigate = useNavigate();
-  const location = useLocation();
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
 
@@ -172,35 +171,14 @@ export const MultiChatProvider = ({
         state: { pendingMessage: { message, options } },
       });
     },
-    [navigate, persistence, focusedModel.id, defaultChat],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [navigate, persistence, focusedModel.id, defaultChat.sendMessage],
   );
 
   const isNewChat = !currentChatId;
   const focusedChatInstance = currentChatId
     ? chatInstancesRef.current.get(currentChatId)
     : undefined;
-
-  useEffect(() => {
-    const pendingState = location.state?.pendingMessage;
-    if (
-      pendingState &&
-      focusedChatInstance?.status === "ready" &&
-      currentChatId
-    ) {
-      const instance = chatInstancesRef.current.get(currentChatId);
-      if (instance?.sendMessage) {
-        navigate(location.pathname, { replace: true, state: {} });
-        const { message, options } = pendingState;
-        instance.sendMessage(message, options);
-      }
-    }
-  }, [
-    location.state,
-    location.pathname,
-    navigate,
-    focusedChatInstance?.status,
-    currentChatId,
-  ]);
 
   const messages = focusedChatInstance?.messages ?? defaultChat.messages;
 

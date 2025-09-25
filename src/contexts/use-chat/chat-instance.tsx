@@ -5,6 +5,7 @@ import {
   type UIMessage,
 } from "ai";
 import { memo, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
@@ -31,7 +32,10 @@ export const ChatInstance = memo(
   }) => {
     const { settings } = useSettings();
     const persistence = usePersistence();
-    const isLoadedRef = useRef(false);
+    const isInitialized = useRef(false);
+
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const chat = useChat(model, {
       experimental_throttle: settings.EXPERIMENTAL_THROTTLE_ENABLED.value
@@ -39,45 +43,61 @@ export const ChatInstance = memo(
         : undefined,
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
       id: chatId,
-      messages: [], // Start with empty, load from persistence
+      messages: [],
     });
 
     useEffect(() => {
-      const loadInitialMessages = async () => {
-        if (!isLoadedRef.current) {
-          const chatData = await persistence.loadChat(chatId);
-          if (chatData?.messages) {
-            isLoadedRef.current = true;
-            chat.setMessages(chatData.messages);
-          }
+      const initializeChat = async () => {
+        if (isInitialized.current) return;
+        isInitialized.current = true;
+
+        // 1. Load existing messages if any
+        const chatData = await persistence.loadChat(chatId);
+        if (chatData?.messages && chatData.messages.length > 0) {
+          chat.setMessages(chatData.messages);
+        }
+
+        // 2. Check for and process a pending message (for new chats)
+        const pendingState = location.state?.pendingMessage;
+        if (pendingState) {
+          // Clear location state immediately to prevent re-sending on refresh/re-render
+          navigate(location.pathname, { replace: true, state: {} });
+          const { message, options } = pendingState;
+          // This will correctly add the user's message to the UI first
+          await chat.sendMessage(message, options);
         }
       };
-      loadInitialMessages();
-    }, [chatId, persistence, chat]);
 
+      initializeChat();
+    }, [chat, chatId, location, navigate, persistence]);
+
+    // Save and generate title logic
     useEffect(() => {
       const saveAndGenerateTitle = async () => {
+        // Only run after initialization is complete and there are messages
         if (
-          chat.status !== "streaming" &&
-          chat.messages.length > 0 &&
-          isLoadedRef.current
+          !isInitialized.current ||
+          chat.status === "streaming" ||
+          chat.messages.length === 0
         ) {
-          await persistence.saveChat({ id: chatId, messages: chat.messages });
-          const chatData = await persistence.loadChat(chatId);
-          const hasUserMessage = chat.messages.some((m) => m.role === "user");
+          return;
+        }
 
-          if (hasUserMessage && !chatData?.titleState) {
-            await persistence.saveChatTitleState(chatId, "generating");
-            try {
-              const generatedTitle = await generateChatTitle(
-                model,
-                chat.messages,
-              );
-              await persistence.updateChatTitle(chatId, generatedTitle);
-            } catch (error) {
-              logger.error("Failed to generate title for chat:", chatId, error);
-              await persistence.saveChatTitleState(chatId, "error");
-            }
+        await persistence.saveChat({ id: chatId, messages: chat.messages });
+        const chatData = await persistence.loadChat(chatId);
+        const hasUserMessage = chat.messages.some((m) => m.role === "user");
+
+        if (hasUserMessage && !chatData?.titleState) {
+          await persistence.saveChatTitleState(chatId, "generating");
+          try {
+            const generatedTitle = await generateChatTitle(
+              model,
+              chat.messages,
+            );
+            await persistence.updateChatTitle(chatId, generatedTitle);
+          } catch (error) {
+            logger.error("Failed to generate title for chat:", chatId, error);
+            await persistence.saveChatTitleState(chatId, "error");
           }
         }
       };
