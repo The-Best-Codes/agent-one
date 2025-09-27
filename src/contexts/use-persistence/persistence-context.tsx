@@ -20,10 +20,24 @@ const logger = getLogger(import.meta.url);
 
 // Mock async storage for future compatibility
 const ls = {
-  getItem: (key: string) => Promise.resolve(localStorage.getItem(key)),
+  getItem: (key: string) =>
+    new Promise<string | null>((resolve) => {
+      setTimeout(() => resolve(localStorage.getItem(key)), 1000);
+    }),
   setItem: (key: string, value: string) =>
-    Promise.resolve(localStorage.setItem(key, value)),
-  removeItem: (key: string) => Promise.resolve(localStorage.removeItem(key)),
+    new Promise<void>((resolve) => {
+      setTimeout(() => {
+        localStorage.setItem(key, value);
+        resolve();
+      }, 1000);
+    }),
+  removeItem: (key: string) =>
+    new Promise<void>((resolve) => {
+      setTimeout(() => {
+        localStorage.removeItem(key);
+        resolve();
+      }, 1000);
+    }),
 };
 
 interface PersistenceProviderProps {
@@ -34,6 +48,7 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
   children,
 }) => {
   const [chats, setChats] = useState<ChatMetadata[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadChat = useCallback(
     async (chatId: string): Promise<ChatData | null> => {
@@ -76,8 +91,10 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
 
         chatMetadataList.sort((a, b) => b.createdAt - a.createdAt);
         setChats(chatMetadataList);
+        setIsLoading(false);
       } catch (error) {
         logger.error("Failed to load initial chats", error);
+        setIsLoading(false);
       }
     };
     loadInitialChats();
@@ -92,35 +109,41 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
     await ls.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
   }, []);
 
-  const createChat = useCallback(
-    async (modelId: string): Promise<string> => {
-      const id = generateId();
-      const newChatData: ChatData = {
+  const createChat = useCallback(async (modelId: string): Promise<string> => {
+    const id = generateId();
+    const newChatData: ChatData = {
+      id,
+      messages: [],
+      title: "New chat",
+      modelId,
+      createdAt: Date.now(),
+    };
+
+    ls.setItem(getChatKey(id), JSON.stringify(newChatData));
+    setChats((prev) => [
+      {
         id,
-        messages: [],
-        title: "New chat",
-        modelId,
-        createdAt: Date.now(),
-      };
+        title: newChatData.title,
+        modelId: newChatData.modelId,
+        createdAt: newChatData.createdAt,
+      },
+      ...prev,
+    ]);
 
-      await ls.setItem(getChatKey(id), JSON.stringify(newChatData));
-      const currentIds = await getChatIds();
-      await saveChatIds([id, ...currentIds]);
+    (async () => {
+      try {
+        const idsJson = await ls.getItem(CHAT_IDS_KEY);
+        const ids: string[] = idsJson ? JSON.parse(idsJson) : [];
+        if (!ids.includes(id)) {
+          await ls.setItem(CHAT_IDS_KEY, JSON.stringify([id, ...ids]));
+        }
+      } catch (error) {
+        logger.error(`Failed to update chat IDs for new chat ${id}`, error);
+      }
+    })();
 
-      setChats((prev) => [
-        {
-          id,
-          title: newChatData.title,
-          modelId: newChatData.modelId,
-          createdAt: newChatData.createdAt,
-        },
-        ...prev,
-      ]);
-
-      return id;
-    },
-    [getChatIds, saveChatIds],
-  );
+    return id;
+  }, []);
 
   const saveChat = useCallback(
     async (chatData: Pick<ChatData, "id" | "messages"> & Partial<ChatData>) => {
@@ -206,11 +229,11 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
   );
 
   const getNewChatModelId = useCallback(
-    () => localStorage.getItem(NEW_CHAT_MODEL_ID_KEY),
+    () => ls.getItem(NEW_CHAT_MODEL_ID_KEY),
     [],
   );
   const saveNewChatModelId = useCallback(
-    (modelId: string) => localStorage.setItem(NEW_CHAT_MODEL_ID_KEY, modelId),
+    (modelId: string) => ls.setItem(NEW_CHAT_MODEL_ID_KEY, modelId),
     [],
   );
 
@@ -238,6 +261,7 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
   const contextValue = useMemo(
     () => ({
       chats,
+      isLoading,
       createChat,
       deleteChat,
       updateChatTitle,
@@ -251,6 +275,7 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
     }),
     [
       chats,
+      isLoading,
       createChat,
       deleteChat,
       updateChatTitle,

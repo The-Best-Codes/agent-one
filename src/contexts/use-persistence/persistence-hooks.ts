@@ -35,6 +35,7 @@ export interface PersistenceContextType {
     chatId: string,
     titleState: ChatData["titleState"],
   ) => Promise<void>;
+  isLoading: boolean;
 }
 
 export const usePersistence = (): PersistenceContextType => {

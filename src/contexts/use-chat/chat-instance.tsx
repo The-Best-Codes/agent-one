@@ -51,14 +51,17 @@ export const ChatInstance = memo(
         if (isInitialized.current) return;
         isInitialized.current = true;
 
-        // 1. Load existing messages if any
-        const chatData = await persistence.loadChat(chatId);
-        if (chatData?.messages && chatData.messages.length > 0) {
-          chat.setMessages(chatData.messages);
+        const pendingState = location.state?.pendingMessage;
+
+        if (!pendingState) {
+          // 1. Load existing messages if any
+          const chatData = await persistence.loadChat(chatId);
+          if (chatData?.messages && chatData.messages.length > 0) {
+            chat.setMessages(chatData.messages);
+          }
         }
 
         // 2. Check for and process a pending message (for new chats)
-        const pendingState = location.state?.pendingMessage;
         if (pendingState) {
           // Clear location state immediately to prevent re-sending on refresh/re-render
           navigate(location.pathname, { replace: true, state: {} });

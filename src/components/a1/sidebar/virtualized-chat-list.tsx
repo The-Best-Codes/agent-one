@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
+import { InboxIcon, Loader2, PlusIcon, SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ export const VirtualizedChatList = ({
   className = "w-full",
   additionalOnChatClickCallback,
 }: VirtualizedChatListProps) => {
-  const { chats } = usePersistence();
+  const { chats, isLoading } = usePersistence();
   const [searchQuery, setSearchQuery] = useState("");
   const [isOverflowing, setIsOverflowing] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -65,9 +65,12 @@ export const VirtualizedChatList = ({
     };
   }, [filteredChats.length]);
 
-  const showNoChatsPlaceholder = chats.length === 0;
+  const showNoChatsPlaceholder = !isLoading && chats.length === 0;
   const showNoSearchResults =
-    chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
+    !isLoading &&
+    chats.length > 0 &&
+    filteredChats.length === 0 &&
+    searchQuery.trim();
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
@@ -111,7 +114,12 @@ export const VirtualizedChatList = ({
         ref={parentRef}
         className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}
       >
-        {showNoChatsPlaceholder ? (
+        {isLoading ? (
+          <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <span>Loading chats...</span>
+          </div>
+        ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <InboxIcon className="text-muted-foreground size-16" />
             <p className="max-w-full min-w-0 truncate">No chats yet</p>

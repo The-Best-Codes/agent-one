@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import { useRef } from "react";
 import { useParams } from "react-router";
 
@@ -36,18 +37,26 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
             behavior="instant"
             buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
           >
-            {messages.length === 0 && <NoMessagesGreeting />}
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "flex",
-                  message.role === "user" ? "justify-end" : "justify-start",
-                )}
-              >
-                <MessageParts message={message} />
+            {chatId && messages.length === 0 && status === "ready" ? (
+              <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>Loading chat...</span>
               </div>
-            ))}
+            ) : messages.length === 0 ? (
+              <NoMessagesGreeting />
+            ) : (
+              messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={cn(
+                    "flex",
+                    message.role === "user" ? "justify-end" : "justify-start",
+                  )}
+                >
+                  <MessageParts message={message} />
+                </div>
+              ))
+            )}
             {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
           </AutoScrollContainer>
           <MainChatInput
