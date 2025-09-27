@@ -16,3 +16,4 @@
 - Allow chats to have a "branchOf" property to indicate which chat ID they branched from.
 - Later, just show a branch icon next to chats with a branchOf property instead of naming them "Branch of [chat]".
 - Investigate chats disappearing when maximizing and then restoring the window (likely a Tanstack Window issue)
+- Chat title generates twice (should just once)
