@@ -89,16 +89,16 @@ export const MultiChatProvider = ({
   );
 
   const setModelForContext = useCallback(
-    (modelId: string) => {
+    async (modelId: string) => {
       if (currentChatId) {
-        persistence.saveChatModel(currentChatId, modelId);
+        await persistence.saveChatModel(currentChatId, modelId);
         const model = getModelById(modelId);
         if (model) {
           setChatModels((prev) => ({ ...prev, [currentChatId]: model }));
         }
         forceUpdate();
       } else {
-        setDefaultModelForNewChats(modelId);
+        await setDefaultModelForNewChats(modelId);
       }
     },
     [currentChatId, setDefaultModelForNewChats, forceUpdate, persistence],

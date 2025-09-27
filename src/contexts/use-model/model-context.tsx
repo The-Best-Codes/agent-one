@@ -1,4 +1,4 @@
-import React, { type ReactNode, useCallback, useState } from "react";
+import React, { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import {
@@ -11,7 +11,7 @@ import { ModelContext } from "./model-contexts";
 
 export interface ModelContextType {
   currentModel: ModelConfig;
-  setModel: (modelId: string) => void;
+  setModel: (modelId: string) => Promise<void>;
 }
 
 interface ModelProviderProps {
@@ -21,23 +21,30 @@ interface ModelProviderProps {
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const { getNewChatModelId, saveNewChatModelId } = usePersistence();
 
-  const [currentModel, setCurrentModel] = useState<ModelConfig>(() => {
-    const savedModelId = getNewChatModelId();
-    if (savedModelId) {
-      const savedModel = getModelById(savedModelId);
-      if (savedModel) {
-        return savedModel;
+  const [currentModel, setCurrentModel] =
+    useState<ModelConfig>(getDefaultModel());
+
+  useEffect(() => {
+    const loadModel = async () => {
+      const savedModelId = await getNewChatModelId();
+      if (savedModelId) {
+        const savedModel = getModelById(savedModelId);
+        if (savedModel) {
+          setCurrentModel(savedModel);
+          return;
+        }
       }
-    }
-    return getDefaultModel();
-  });
+      setCurrentModel(getDefaultModel());
+    };
+    loadModel();
+  }, [getNewChatModelId]);
 
   const setModel = useCallback(
-    (modelId: string) => {
+    async (modelId: string) => {
       const model = getModelById(modelId);
       if (model) {
         setCurrentModel(model);
-        saveNewChatModelId(modelId);
+        await saveNewChatModelId(modelId);
       }
     },
     [saveNewChatModelId],
