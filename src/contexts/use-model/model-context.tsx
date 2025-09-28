@@ -11,7 +11,7 @@ import { ModelContext } from "./model-contexts";
 
 export interface ModelContextType {
   currentModel: ModelConfig;
-  setModel: (modelId: string) => Promise<void>;
+  setModel: (modelId: string) => void;
 }
 
 interface ModelProviderProps {
@@ -40,11 +40,11 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   }, [getNewChatModelId]);
 
   const setModel = useCallback(
-    async (modelId: string) => {
+    (modelId: string) => {
       const model = getModelById(modelId);
       if (model) {
         setCurrentModel(model);
-        await saveNewChatModelId(modelId);
+        saveNewChatModelId(modelId);
       }
     },
     [saveNewChatModelId],

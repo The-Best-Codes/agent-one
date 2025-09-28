@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -41,8 +42,7 @@ export const MultiChatProvider = ({
   } = useModel();
   const persistence = usePersistence();
   const navigate = useNavigate();
-  const [updateKey, setUpdateKey] = useState(0);
-  const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const chatInstancesRef = useRef<ChatInstanceCollection>(new Map());
 
@@ -55,53 +55,54 @@ export const MultiChatProvider = ({
     status: "",
   });
 
-  const [chatModels, setChatModels] = useState<Record<string, ModelConfig>>({});
+  const [focusedModel, setFocusedModel] = useState<ModelConfig>(
+    defaultModelForNewChats,
+  );
 
   useEffect(() => {
-    const fetchChatModels = async () => {
+    let active = true;
+    const fetchChatModel = async () => {
       if (currentChatId) {
         const chatData = await persistence.loadChat(currentChatId);
-        if (chatData?.modelId) {
-          const model = getModelById(chatData.modelId);
-          if (model) {
-            setChatModels((prev) => ({ ...prev, [currentChatId]: model }));
-          }
-        }
+        if (!active) return;
+        const modelId = chatData?.modelId;
+        const model = modelId
+          ? (getModelById(modelId) ?? defaultModelForNewChats)
+          : defaultModelForNewChats;
+        setFocusedModel(model);
+      } else {
+        setFocusedModel(defaultModelForNewChats);
       }
     };
-    fetchChatModels();
-  }, [currentChatId, persistence]);
+    fetchChatModel();
+    return () => {
+      active = false;
+    };
+  }, [currentChatId, persistence, defaultModelForNewChats]);
 
   const getModelForChat = useCallback(
     (chatId: string | undefined): ModelConfig => {
-      if (chatId && chatModels[chatId]) {
-        return chatModels[chatId];
+      if (chatId === currentChatId) {
+        return focusedModel;
       }
       return defaultModelForNewChats;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chatModels, defaultModelForNewChats, updateKey],
-  );
-
-  const focusedModel = useMemo(
-    () => getModelForChat(currentChatId),
-    [currentChatId, getModelForChat],
+    [currentChatId, focusedModel, defaultModelForNewChats],
   );
 
   const setModelForContext = useCallback(
-    async (modelId: string) => {
+    (modelId: string) => {
+      const model = getModelById(modelId);
+      if (!model) return;
+
       if (currentChatId) {
-        await persistence.saveChatModel(currentChatId, modelId);
-        const model = getModelById(modelId);
-        if (model) {
-          setChatModels((prev) => ({ ...prev, [currentChatId]: model }));
-        }
-        forceUpdate();
+        setFocusedModel(model);
+        persistence.saveChatModel(currentChatId, modelId);
       } else {
-        await setDefaultModelForNewChats(modelId);
+        setDefaultModelForNewChats(modelId);
       }
     },
-    [currentChatId, setDefaultModelForNewChats, forceUpdate, persistence],
+    [currentChatId, persistence, setDefaultModelForNewChats],
   );
 
   const modelContextValue = useMemo(

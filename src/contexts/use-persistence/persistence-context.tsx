@@ -232,20 +232,21 @@ export const PersistenceProvider: React.FC<PersistenceProviderProps> = ({
     () => ls.getItem(NEW_CHAT_MODEL_ID_KEY),
     [],
   );
-  const saveNewChatModelId = useCallback(
-    (modelId: string) => ls.setItem(NEW_CHAT_MODEL_ID_KEY, modelId),
-    [],
-  );
+  const saveNewChatModelId = useCallback((modelId: string) => {
+    ls.setItem(NEW_CHAT_MODEL_ID_KEY, modelId);
+  }, []);
 
   const saveChatModel = useCallback(
-    async (chatId: string, modelId: string) => {
-      const existing = await loadChat(chatId);
-      if (existing) {
-        await saveChat({ ...existing, modelId });
-        setChats((prev) =>
-          prev.map((c) => (c.id === chatId ? { ...c, modelId } : c)),
-        );
-      }
+    (chatId: string, modelId: string) => {
+      setChats((prev) =>
+        prev.map((c) => (c.id === chatId ? { ...c, modelId } : c)),
+      );
+      (async () => {
+        const existing = await loadChat(chatId);
+        if (existing) {
+          await saveChat({ ...existing, modelId });
+        }
+      })();
     },
     [loadChat, saveChat],
   );

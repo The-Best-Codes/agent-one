@@ -29,8 +29,8 @@ export interface PersistenceContextType {
     forkFromMessageId: string,
   ) => Promise<string | null>;
   getNewChatModelId: () => Promise<string | null>;
-  saveNewChatModelId: (modelId: string) => Promise<void>;
-  saveChatModel: (chatId: string, modelId: string) => Promise<void>;
+  saveNewChatModelId: (modelId: string) => void;
+  saveChatModel: (chatId: string, modelId: string) => void;
   saveChatTitleState: (
     chatId: string,
     titleState: ChatData["titleState"],
