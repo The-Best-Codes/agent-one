@@ -2,7 +2,7 @@
 
 ## Acceptable commands
 
-Assume that these commands are allowed and **no others unless specified**:
+Assume that these bash commands are allowed and no others unless specified:
 
 - Run typecheck: `npm run typecheck`
 - Run ESLint: `npm run lint`
