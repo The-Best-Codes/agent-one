@@ -13,3 +13,7 @@
 - Persist useChat values (status, etc.) not just messages?
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Since we sidecar fnm, make note of it and include its license text and info (it's GPLv3, see https://github.com/Schniz/fnm/blob/master/LICENSE)
+- Allow chats to have a "branchOf" property to indicate which chat ID they branched from.
+- Later, just show a branch icon next to chats with a branchOf property instead of naming them "Branch of [chat]".
+- Investigate chats disappearing when resizing (likely a Tanstack Window issue)
+- Chat title generates many times (should just generate once)
