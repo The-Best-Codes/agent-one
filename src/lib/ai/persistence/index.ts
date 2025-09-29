@@ -238,11 +238,10 @@ export function branchChat({
     );
 
     const newId = generateId();
-    const newTitle = `Branch of ${originalChatData.title}`;
 
     const newChatData: ChatData = {
       messages: branchedMessages,
-      title: newTitle,
+      title: originalChatData.title,
       titleState: "generated",
       modelId: originalChatData.modelId,
       branchOf: originalChatId,
