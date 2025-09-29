@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b --noEmit",
     "format": "npm run format:main && npm run format:rust",
     "format:main": "prettier --write .",
     "format:rust": "cd src-tauri && cargo fmt && cd ..",

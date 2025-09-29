@@ -45,3 +45,7 @@ playwright-report/
 
 # Local Uncommitable
 .local-uncommitable
+
+# tsc -b --noEmit
+tsconfig.tsbuildinfo
+tsconfig.node.tsbuildinfo
