@@ -1,5 +1,6 @@
 import {
   DownloadIcon,
+  GitBranch,
   MoreHorizontalIcon,
   PencilIcon,
   TrashIcon,
@@ -26,6 +27,7 @@ interface ChatItemProps {
   additionalOnChatClickCallback?: (id: string) => void;
   id: string;
   title: string;
+  branchOf?: string;
 }
 
 export const ChatItem = memo(
@@ -34,6 +36,7 @@ export const ChatItem = memo(
     additionalOnChatClickCallback,
     id,
     title,
+    branchOf,
   }: ChatItemProps) => {
     const [showChangeTitleModal, setShowChangeTitleModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -52,7 +55,10 @@ export const ChatItem = memo(
           }
         >
           <Link to={`/chat/${id}`} className="relative block overflow-hidden">
-            <span className="truncate text-sm font-normal">{title}</span>
+            <span className="flex items-center gap-1 truncate text-sm font-normal">
+              {branchOf && <GitBranch className="text-foreground size-3" />}
+              {title}
+            </span>
             <div
               className={cn(
                 "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100",

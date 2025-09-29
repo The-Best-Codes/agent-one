@@ -15,6 +15,7 @@ const logger = getLogger(import.meta.url);
 interface ChatListItem {
   id: string;
   title: string;
+  branchOf?: string;
 }
 
 const getChatTitle = (title: string): string => {
@@ -50,12 +51,14 @@ export const VirtualizedChatList = ({
           return {
             id,
             title: getChatTitle(chatData?.title || `Chat ${id.slice(0, 8)}`),
+            branchOf: chatData?.branchOf,
           };
         } catch (error) {
           logger.error(`Error loading chat ${id}:`, error);
           return {
             id,
             title: `Chat ${id.slice(0, 8)}`,
+            branchOf: undefined,
           };
         }
       });
@@ -115,6 +118,7 @@ export const VirtualizedChatList = ({
         {
           id: chatId,
           title: getChatTitle(chatData.title),
+          branchOf: chatData?.branchOf,
         },
         ...prev,
       ]);
@@ -241,6 +245,7 @@ export const VirtualizedChatList = ({
                     activeChatId={activeChatId}
                     id={chat.id}
                     title={chat.title}
+                    branchOf={chat.branchOf}
                     additionalOnChatClickCallback={
                       additionalOnChatClickCallback
                     }

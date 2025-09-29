@@ -13,6 +13,7 @@ export interface ChatData {
   title: string;
   titleState?: "generating" | "generated" | "error";
   modelId?: string;
+  branchOf?: string;
 }
 
 export function getNewChatModelId(): string | null {
@@ -208,7 +209,7 @@ export function deleteChat(chatId: string): void {
   }
 }
 
-export function forkChat({
+export function branchChat({
   originalChatId,
   forkFromMessageId,
 }: {
@@ -234,13 +235,14 @@ export function forkChat({
     const forkedMessages = originalChatData.messages.slice(0, forkIndex + 1);
 
     const newId = generateId();
-    const newTitle = `Fork of ${originalChatData.title}`;
+    const newTitle = originalChatData.title;
 
     const newChatData: ChatData = {
       messages: forkedMessages,
       title: newTitle,
       titleState: "generated",
       modelId: originalChatData.modelId,
+      branchOf: originalChatId,
     };
 
     const chatKey = getChatKey(newId);
