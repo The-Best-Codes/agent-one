@@ -1,28 +1,28 @@
-import { GitFork } from "lucide-react";
+import { GitBranch } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 
-export const ForkButton = ({
+export const BranchButton = ({
   className,
-  onFork,
+  onBranch,
 }: {
   className?: string;
-  onFork: () => void;
+  onBranch: () => void;
 }) => {
   const { status } = useChatStatus();
   const isStreaming = status === "streaming" || status === "submitted";
 
   return (
     <Button
-      onClick={onFork}
+      onClick={onBranch}
       disabled={isStreaming}
       className={className}
       size="icon"
       variant="secondary"
-      aria-label="Fork conversation from this message"
+      aria-label="Branch conversation from this message"
     >
-      <GitFork />
+      <GitBranch />
     </Button>
   );
 };

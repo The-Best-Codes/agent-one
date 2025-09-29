@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
 import { useMessageEditing } from "@/hooks/use-message-editing";
-import { forkChat } from "@/lib/ai/persistence";
+import { branchChat } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -54,19 +54,19 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     }
   }, [handleSave, message.role]);
 
-  const handleFork = useCallback(() => {
+  const handleBranch = useCallback(() => {
     if (!activeChatId) {
-      logger.error("Cannot fork a new, unsaved chat.");
+      logger.error("Cannot branch a new, unsaved chat.");
       return;
     }
     try {
-      const newChatId = forkChat({
+      const newChatId = branchChat({
         originalChatId: activeChatId,
-        forkFromMessageId: message.id,
+        branchFromMessageId: message.id,
       });
       navigate(`/chat/${newChatId}`);
     } catch (error) {
-      logger.error("Failed to fork chat:", error);
+      logger.error("Failed to branch chat:", error);
     }
   }, [activeChatId, message.id, navigate]);
 
@@ -240,7 +240,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
       messageRole={message.role}
       messageId={message.id}
       onEdit={canEdit ? handleEdit : undefined}
-      onFork={activeChatId ? handleFork : undefined}
+      onBranch={activeChatId ? handleBranch : undefined}
     >
       {content}
     </MessageGroup>

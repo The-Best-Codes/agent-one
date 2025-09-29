@@ -211,10 +211,10 @@ export function deleteChat(chatId: string): void {
 
 export function branchChat({
   originalChatId,
-  forkFromMessageId,
+  branchFromMessageId,
 }: {
   originalChatId: string;
-  forkFromMessageId: string;
+  branchFromMessageId: string;
 }): string {
   try {
     const originalChatData = loadChatData(originalChatId);
@@ -222,23 +222,26 @@ export function branchChat({
       throw new Error(`Original chat with ID ${originalChatId} not found.`);
     }
 
-    const forkIndex = originalChatData.messages.findIndex(
-      (m) => m.id === forkFromMessageId,
+    const branchIndex = originalChatData.messages.findIndex(
+      (m) => m.id === branchFromMessageId,
     );
 
-    if (forkIndex === -1) {
+    if (branchIndex === -1) {
       throw new Error(
-        `Message with ID ${forkFromMessageId} not found in chat ${originalChatId}.`,
+        `Message with ID ${branchFromMessageId} not found in chat ${originalChatId}.`,
       );
     }
 
-    const forkedMessages = originalChatData.messages.slice(0, forkIndex + 1);
+    const branchedMessages = originalChatData.messages.slice(
+      0,
+      branchIndex + 1,
+    );
 
     const newId = generateId();
-    const newTitle = originalChatData.title;
+    const newTitle = `Branch of ${originalChatData.title}`;
 
     const newChatData: ChatData = {
-      messages: forkedMessages,
+      messages: branchedMessages,
       title: newTitle,
       titleState: "generated",
       modelId: originalChatData.modelId,
@@ -257,10 +260,10 @@ export function branchChat({
       }),
     );
 
-    logger.verbose(`Chat ${originalChatId} forked to new chat ${newId}`);
+    logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
     return newId;
   } catch (error) {
-    logger.error("Failed to fork chat in localStorage", error);
-    throw new Error("Failed to fork chat.");
+    logger.error("Failed to branch chat in localStorage", error);
+    throw new Error("Failed to branch chat.");
   }
 }

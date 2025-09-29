@@ -10,14 +10,14 @@ export const MessageGroup = ({
   contentToCopy,
   messageId,
   onEdit,
-  onFork,
+  onBranch,
 }: {
   children: React.ReactNode;
   messageRole: UIMessage["role"];
   contentToCopy: string;
   messageId: UIMessage["id"];
   onEdit?: () => void;
-  onFork?: () => void;
+  onBranch?: () => void;
 }) => {
   return (
     <div
@@ -43,7 +43,7 @@ export const MessageGroup = ({
         messageRole={messageRole}
         messageId={messageId}
         onEdit={onEdit}
-        onFork={onFork}
+        onBranch={onBranch}
       />
     </div>
   );

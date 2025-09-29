@@ -3,8 +3,8 @@ import type { UIMessage } from "ai";
 import { CopyButton } from "@/components/a1/copy-button";
 import { cn } from "@/lib/utils";
 
+import { BranchButton } from "./branch-button";
 import { EditButton } from "./edit-button";
-import { ForkButton } from "./fork-button";
 import { RetryButton } from "./retry-button";
 
 export const MessageActionRow = ({
@@ -12,13 +12,13 @@ export const MessageActionRow = ({
   messageRole,
   messageId,
   onEdit,
-  onFork,
+  onBranch,
 }: {
   contentToCopy: string;
   messageRole: UIMessage["role"];
   messageId: UIMessage["id"];
   onEdit?: () => void;
-  onFork?: () => void;
+  onBranch?: () => void;
 }) => {
   return (
     <div
@@ -37,8 +37,8 @@ export const MessageActionRow = ({
         }}
         text={contentToCopy}
       />
-      {onFork && messageRole === "assistant" && (
-        <ForkButton onFork={onFork} className="size-6" />
+      {onBranch && messageRole === "assistant" && (
+        <BranchButton onBranch={onBranch} className="size-6" />
       )}
       {messageRole === "assistant" && (
         <RetryButton messageId={messageId} className="size-6" />

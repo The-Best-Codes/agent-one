@@ -2,9 +2,9 @@ import type { UIMessage } from "ai";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
+  branchChat,
   createChat,
   deleteChat,
-  forkChat,
   getNewChatModelId,
   listChatIds,
   loadChatData,
@@ -139,7 +139,7 @@ describe("Chat Persistence", () => {
       expect(chatData.titleState).toBe("error");
     });
 
-    it("should fork a chat correctly", () => {
+    it("should branch a chat correctly", () => {
       const modelId = "gemini-pro";
       const originalChatId = createChat(modelId);
       const messages: UIMessage[] = [
@@ -154,18 +154,21 @@ describe("Chat Persistence", () => {
       saveChat({ chatId: originalChatId, messages });
       saveChatTitle({ chatId: originalChatId, title: "Original Title" });
 
-      const forkFromMessageId = "2";
-      const forkedChatId = forkChat({ originalChatId, forkFromMessageId });
+      const branchFromMessageId = "2";
+      const branchedChatId = branchChat({
+        originalChatId,
+        branchFromMessageId,
+      });
 
-      const forkedChatData = loadChatData(forkedChatId);
-      expect(forkedChatData.title).toBe("Fork of Original Title");
-      expect(forkedChatData.messages.length).toBe(2);
-      expect(forkedChatData.messages[0].id).toBe("1");
-      expect(forkedChatData.messages[1].id).toBe("2");
-      expect(forkedChatData.modelId).toBe(modelId);
+      const branchedChatData = loadChatData(branchedChatId);
+      expect(branchedChatData.title).toBe("Branch of Original Title");
+      expect(branchedChatData.messages.length).toBe(2);
+      expect(branchedChatData.messages[0].id).toBe("1");
+      expect(branchedChatData.messages[1].id).toBe("2");
+      expect(branchedChatData.modelId).toBe(modelId);
 
       const chatIds = listChatIds();
-      expect(chatIds).toContain(forkedChatId);
+      expect(chatIds).toContain(branchedChatId);
     });
 
     it("should dispatch events on create, delete, and title update", () => {
