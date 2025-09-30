@@ -48,10 +48,10 @@ export const GetUrlContentTool = tool({
       .describe("Timeout in seconds per URL"),
     useWebview: z
       .boolean()
-      .default(true)
+      .default(false)
       .optional()
       .describe(
-        "Use webview for fetching (recommended for JS-heavy sites, but may have issues with the system)",
+        "Whether to use webview for fetching. Use this for JS-heavy sites, sites that return bot challenges, etc",
       ),
   }),
   execute: async (input, { abortSignal }) => {
