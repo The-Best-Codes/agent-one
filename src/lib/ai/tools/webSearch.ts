@@ -46,9 +46,9 @@ export const WebSearchTool = tool({
       .describe("Timeout in seconds for the search request"),
     useWebview: z
       .boolean()
-      .default(true)
+      .default(false)
       .optional()
-      .describe("Use webview to avoid bot detection (recommended)"),
+      .describe("Whether to use webview to avoid bot detection"),
   }),
   execute: async (input, { abortSignal }) => {
     const timeoutMs = (input.timeoutSeconds || 30) * 1000 + 5000;
