@@ -39,19 +39,21 @@ export const WebSearchTool = tool({
       .describe("Maximum number of search results to return (1-20)"),
     timeoutSeconds: z
       .number()
-      .min(5)
+      .min(1)
       .max(60)
-      .default(30)
+      .default(5)
       .optional()
       .describe("Timeout in seconds for the search request"),
     useWebview: z
       .boolean()
       .default(false)
       .optional()
-      .describe("Whether to use webview to avoid bot detection"),
+      .describe(
+        "Whether to use webview to avoid bot detection, not recommended unless bot detection issues repeatedly occur",
+      ),
   }),
   execute: async (input, { abortSignal }) => {
-    const timeoutMs = (input.timeoutSeconds || 30) * 1000 + 5000;
+    const timeoutMs = (input.timeoutSeconds || 5) * 1000;
 
     logger.verbose("Executing webSearch tool with input:", input);
 

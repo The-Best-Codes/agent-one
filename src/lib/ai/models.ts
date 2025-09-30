@@ -49,6 +49,13 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
     supportsToolUse: true,
   },
   {
+    id: "google-gemini-2.5-flash-09-25",
+    name: "Gemini 2.5 Flash Preview (09/25)",
+    provider: "Google",
+    model: google("gemini-2.5-flash-preview-09-2025"),
+    supportsToolUse: true,
+  },
+  {
     id: "openrouter-nvidia-nemotron-nano-9b-v2",
     name: "Nemotron Nano 9B V2",
     provider: "OpenRouter",
