@@ -12,6 +12,6 @@
 - Persist useChat values (status, etc.) not just messages?
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Since we sidecar fnm, make note of it and include its license text and info (it's GPLv3, see https://github.com/Schniz/fnm/blob/master/LICENSE)
-- Chat title generates many times (should just generate once)
+- Chat title generates many times (should just generate once) UPDATE: Investigate if this is still an issue
 - When starting a new chat and sending the first message, the scroll to bottom button appears and then disappears right after. Why?
 - All messages in chat rerender when renaming it. Ideally it should do it never, right now it does it even if you aren't renaming the active chat.
