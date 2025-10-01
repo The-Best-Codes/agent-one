@@ -6,16 +6,9 @@ import {
 } from "ai";
 import { memo, useEffect, useMemo } from "react";
 
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import {
-  listChatIds,
-  loadChat,
-  loadChatData,
-  saveChat,
-  saveChatTitle,
-  saveChatTitleState,
-} from "@/lib/ai/persistence";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { getLogger } from "@/lib/logger";
 
@@ -37,7 +30,15 @@ export const ChatInstance = memo(
     ) => void;
   }) => {
     const { settings } = useSettings();
-    const initialMessages = useMemo(() => loadChat(chatId), [chatId]);
+    const {
+      listChatIds,
+      loadChat,
+      loadChatData,
+      saveChat,
+      saveChatTitleState,
+      saveChatTitle,
+    } = usePersistence();
+    const initialMessages = useMemo(() => loadChat(chatId), [chatId, loadChat]);
 
     const chat = useChat(model, {
       experimental_throttle: settings.EXPERIMENTAL_THROTTLE_ENABLED.value
@@ -69,7 +70,17 @@ export const ChatInstance = memo(
             });
         }
       }
-    }, [chat.messages, chat.status, chatId, model]);
+    }, [
+      chat.messages,
+      chat.status,
+      chatId,
+      model,
+      listChatIds,
+      loadChatData,
+      saveChat,
+      saveChatTitle,
+      saveChatTitleState,
+    ]);
 
     useEffect(() => {
       onStatusChange(chatId, chat.status);

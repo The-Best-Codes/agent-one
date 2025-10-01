@@ -12,9 +12,9 @@ import { useLocation, useNavigate } from "react-router";
 
 import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { getModelById, type ModelConfig } from "@/lib/ai/models";
-import { createChat, loadChatData, saveChatModel } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 
 import {
@@ -39,6 +39,7 @@ export const MultiChatProvider = ({
     currentModel: defaultModelForNewChats,
     setModel: setDefaultModelForNewChats,
   } = useModel();
+  const { createChat, loadChatData, saveChatModel } = usePersistence();
   const navigate = useNavigate();
   const location = useLocation();
   const [updateKey, setUpdateKey] = useState(0);
@@ -86,7 +87,7 @@ export const MultiChatProvider = ({
         setDefaultModelForNewChats(modelId);
       }
     },
-    [currentChatId, setDefaultModelForNewChats, forceUpdate],
+    [currentChatId, setDefaultModelForNewChats, forceUpdate, saveChatModel],
   );
 
   const modelContextValue = useMemo(

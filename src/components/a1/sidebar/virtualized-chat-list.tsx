@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { listChatIds, loadChatData } from "@/lib/ai/persistence";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -41,11 +41,12 @@ export const VirtualizedChatList = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isOverflowing, setIsOverflowing] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
+  const { listChatIds, loadChatData, chatUpdateTrigger } = usePersistence();
 
   const loadChats = useCallback(() => {
     try {
       const chatIds = listChatIds();
-      const loadedChats = chatIds.map((id) => {
+      const loadedChats = chatIds.map((id: string) => {
         try {
           const chatData = loadChatData(id);
           return {
@@ -67,11 +68,11 @@ export const VirtualizedChatList = ({
     } catch (error) {
       logger.error("Error loading chats:", error);
     }
-  }, []);
+  }, [listChatIds, loadChatData]);
 
   useEffect(() => {
     loadChats();
-  }, [loadChats]);
+  }, [loadChats, chatUpdateTrigger]);
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
@@ -151,7 +152,7 @@ export const VirtualizedChatList = ({
         handleChatTitleUpdated,
       );
     };
-  }, []);
+  }, [loadChatData]);
 
   // This causes an infinite rerender bug
   // useEffect(() => {

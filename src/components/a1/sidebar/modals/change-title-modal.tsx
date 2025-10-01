@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { saveChatTitle } from "@/lib/ai/persistence";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 
 interface ChangeTitleModalProps {
   isOpen: boolean;
@@ -32,6 +32,7 @@ export const ChangeTitleModal = ({
       setTitle(currentTitle);
     }
   }, [isOpen, currentTitle]);
+  const { saveChatTitle } = usePersistence();
 
   const handleSave = () => {
     if (title.trim() && title.trim() !== currentTitle) {
