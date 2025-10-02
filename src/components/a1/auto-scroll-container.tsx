@@ -80,7 +80,7 @@ export const AutoScrollContainer = forwardRef<
 
     const handleScrollButtonClick = () => {
       isAtBottomRef.current = true;
-      setButtonOffset(0);
+      setButtonOffset(60);
       scrollToBottom(buttonScrollBehavior);
     };
 
@@ -89,7 +89,7 @@ export const AutoScrollContainer = forwardRef<
       () => ({
         scrollToBottom: () => {
           isAtBottomRef.current = true;
-          setButtonOffset(0);
+          setButtonOffset(60);
           scrollToBottom();
         },
       }),
@@ -100,7 +100,6 @@ export const AutoScrollContainer = forwardRef<
       const container = containerRef.current;
       if (!container) return;
 
-      setButtonOffset(0);
       isAtBottomRef.current = true;
 
       const handleScroll = () => {
@@ -133,8 +132,10 @@ export const AutoScrollContainer = forwardRef<
       const observerCallback = () => {
         if (isAtBottomRef.current) {
           scrollToBottom("instant");
+          setButtonOffset(60);
+        } else {
+          handleScroll();
         }
-        handleScroll();
       };
 
       scrollToBottom("instant");
