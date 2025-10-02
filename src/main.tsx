@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 
 import ErrorBoundary from "@/components/error-boundary";
 import { ModelProvider } from "@/contexts/use-model/model-context";
+import { PersistenceProvider } from "@/contexts/use-persistence/persistence-context";
 import { SettingsProvider } from "@/contexts/use-settings/settings-context";
 
 import App from "./App";
@@ -17,11 +18,13 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         enableSystem={true}
         storageKey="theme"
       >
-        <ModelProvider>
-          <SettingsProvider>
-            <App />
-          </SettingsProvider>
-        </ModelProvider>
+        <PersistenceProvider>
+          <ModelProvider>
+            <SettingsProvider>
+              <App />
+            </SettingsProvider>
+          </ModelProvider>
+        </PersistenceProvider>
       </ThemeProvider>
     </ErrorBoundary>
   </React.StrictMode>,

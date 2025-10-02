@@ -5,8 +5,8 @@ import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
-import { branchChat } from "@/lib/ai/persistence";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
 
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
+  const { branchChat } = usePersistence();
 
   const selectedActionRef = useRef<string>("save");
 
@@ -68,7 +69,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     } catch (error) {
       logger.error("Failed to branch chat:", error);
     }
-  }, [activeChatId, message.id, navigate]);
+  }, [activeChatId, message.id, navigate, branchChat]);
 
   const getCopyContent = useCallback(() => {
     return message.parts

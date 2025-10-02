@@ -1,11 +1,11 @@
 import React, { type ReactNode, useCallback, useState } from "react";
 
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import {
   getDefaultModel,
   getModelById,
   type ModelConfig,
 } from "@/lib/ai/models";
-import { getNewChatModelId, saveNewChatModelId } from "@/lib/ai/persistence";
 
 import { ModelContext } from "./model-contexts";
 
@@ -19,6 +19,8 @@ interface ModelProviderProps {
 }
 
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
+  const { getNewChatModelId, saveNewChatModelId } = usePersistence();
+
   const [currentModel, setCurrentModel] = useState<ModelConfig>(() => {
     const savedModelId = getNewChatModelId();
     if (savedModelId) {
@@ -30,13 +32,16 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     return getDefaultModel();
   });
 
-  const setModel = useCallback((modelId: string) => {
-    const model = getModelById(modelId);
-    if (model) {
-      setCurrentModel(model);
-      saveNewChatModelId(modelId);
-    }
-  }, []);
+  const setModel = useCallback(
+    (modelId: string) => {
+      const model = getModelById(modelId);
+      if (model) {
+        setCurrentModel(model);
+        saveNewChatModelId(modelId);
+      }
+    },
+    [saveNewChatModelId],
+  );
 
   return (
     <ModelContext.Provider value={{ currentModel, setModel }}>

@@ -1,10 +1,12 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useAtom } from "jotai";
 import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { listChatIds, loadChatData } from "@/lib/ai/persistence";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -41,11 +43,13 @@ export const VirtualizedChatList = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isOverflowing, setIsOverflowing] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
+  const [chatIds] = useAtom(chatIdsAtom);
+  const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
+  const { loadChatData } = usePersistence();
 
   const loadChats = useCallback(() => {
     try {
-      const chatIds = listChatIds();
-      const loadedChats = chatIds.map((id) => {
+      const loadedChats = chatIds.map((id: string) => {
         try {
           const chatData = loadChatData(id);
           return {
@@ -67,11 +71,11 @@ export const VirtualizedChatList = ({
     } catch (error) {
       logger.error("Error loading chats:", error);
     }
-  }, []);
+  }, [chatIds, loadChatData]);
 
   useEffect(() => {
     loadChats();
-  }, [loadChats]);
+  }, [loadChats, chatIds, chatUpdateTrigger]);
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
@@ -108,50 +112,6 @@ export const VirtualizedChatList = ({
       resizeObserver.disconnect();
     };
   }, [filteredChats.length]);
-
-  // Event handlers for persistence events
-  useEffect(() => {
-    const handleChatCreated = (event: Event) => {
-      const { chatId } = (event as CustomEvent).detail;
-      const chatData = loadChatData(chatId);
-      setChats((prev) => [
-        {
-          id: chatId,
-          title: getChatTitle(chatData.title),
-          branchOf: chatData?.branchOf,
-        },
-        ...prev,
-      ]);
-    };
-
-    const handleChatTitleUpdated = (event: Event) => {
-      const { chatId, title } = (event as CustomEvent).detail;
-      setChats((prev) =>
-        prev.map((chat) => (chat.id === chatId ? { ...chat, title } : chat)),
-      );
-    };
-
-    const handleChatDeleted = (event: Event) => {
-      const { chatId } = (event as CustomEvent).detail;
-      setChats((prev) => prev.filter((chat) => chat.id !== chatId));
-    };
-
-    window.addEventListener("persistence:chat-created", handleChatCreated);
-    window.addEventListener("persistence:chat-deleted", handleChatDeleted);
-    window.addEventListener(
-      "persistence:chat-title-updated",
-      handleChatTitleUpdated,
-    );
-
-    return () => {
-      window.removeEventListener("persistence:chat-created", handleChatCreated);
-      window.removeEventListener("persistence:chat-deleted", handleChatDeleted);
-      window.removeEventListener(
-        "persistence:chat-title-updated",
-        handleChatTitleUpdated,
-      );
-    };
-  }, []);
 
   // This causes an infinite rerender bug
   // useEffect(() => {
