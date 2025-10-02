@@ -15,4 +15,3 @@
 - Chat title generates many times (should just generate once) UPDATE: Investigate if this is still an issue
 - When starting a new chat and sending the first message, the scroll to bottom button appears and then disappears right after. Why?
 - All messages in chat rerender when renaming it. Ideally this should never happen, right now it does it even if the chat you are renaming isn't active.
-- Investigate using jotai for other contexts (settings, multi chat provider, etc.)
