@@ -1,7 +1,12 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
 import { useAtom } from "jotai";
-import React, { type ReactNode, useCallback, useEffect } from "react";
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+} from "react";
 
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
@@ -55,7 +60,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     chatUpdateTriggerAtom,
   );
 
-  useEffect(() => {
+  // Read https://react.dev/learn/separating-events-from-effects#extracting-non-reactive-logic-out-of-effects for more info about useEffectEvent
+  const loadInitialChatIds = useEffectEvent(() => {
     try {
       const idsJson = localStorage.getItem(CHAT_IDS_KEY);
       if (idsJson) {
@@ -64,7 +70,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     } catch (error) {
       logger.error("Failed to load chat IDs from localStorage", error);
     }
-  }, [setChatIds]);
+  });
+
+  useEffect(() => {
+    loadInitialChatIds();
+  }, []);
 
   const getNewChatModelId = useCallback(() => {
     try {
