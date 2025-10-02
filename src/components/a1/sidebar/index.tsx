@@ -1,5 +1,5 @@
 import { PlusIcon, SearchIcon, SettingsIcon, SidebarIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Activity, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { ModelSelector } from "@/components/a1/model-selector";
@@ -203,10 +203,12 @@ export const Sidebar = ({ className }: SidebarProps) => {
               isSidebarSmall ? "scale-95 opacity-0" : "scale-100 opacity-100",
             )}
           >
-            <SidebarContent
-              activeChatId={activeChatId}
-              handleNewChat={handleNewChat}
-            />
+            <Activity mode={isSidebarSmall ? "hidden" : "visible"}>
+              <SidebarContent
+                activeChatId={activeChatId}
+                handleNewChat={handleNewChat}
+              />
+            </Activity>
           </div>
         </aside>
       )}
