@@ -1,7 +1,9 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
-import React, { type ReactNode, useCallback, useState } from "react";
+import { useAtom } from "jotai";
+import React, { type ReactNode, useCallback, useEffect } from "react";
 
+import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 
 import { PersistenceContext } from "./persistence-contexts";
@@ -48,17 +50,21 @@ function getChatKey(id: string): string {
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [chatIds, setChatIds] = useState<string[]>(() => {
+  const [chatIds, setChatIds] = useAtom(chatIdsAtom);
+  const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(
+    chatUpdateTriggerAtom,
+  );
+
+  useEffect(() => {
     try {
       const idsJson = localStorage.getItem(CHAT_IDS_KEY);
-      return idsJson ? JSON.parse(idsJson) : [];
+      if (idsJson) {
+        setChatIds(JSON.parse(idsJson));
+      }
     } catch (error) {
       logger.error("Failed to load chat IDs from localStorage", error);
-      return [];
     }
-  });
-
-  const [chatUpdateTrigger, setChatUpdateTrigger] = useState(0);
+  }, [setChatIds]);
 
   const getNewChatModelId = useCallback(() => {
     try {
@@ -81,14 +87,17 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     return chatIds;
   }, [chatIds]);
 
-  const saveChatIds = useCallback((ids: string[]) => {
-    try {
-      localStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
-      setChatIds(ids);
-    } catch (error) {
-      logger.error("Failed to save chat IDs to localStorage", error);
-    }
-  }, []);
+  const saveChatIds = useCallback(
+    (ids: string[]) => {
+      try {
+        localStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
+        setChatIds(ids);
+      } catch (error) {
+        logger.error("Failed to save chat IDs to localStorage", error);
+      }
+    },
+    [setChatIds],
+  );
 
   const createChat = useCallback(
     (modelId: string) => {
@@ -104,13 +113,14 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         localStorage.setItem(chatKey, JSON.stringify(chatData));
         const currentIds = listChatIds();
         saveChatIds([id, ...currentIds]);
+        setChatUpdateTrigger((prev) => prev + 1);
         return id;
       } catch (error) {
         logger.error("Failed to create chat in localStorage", error);
         throw new Error("Failed to create new chat in localStorage.");
       }
     },
-    [listChatIds, saveChatIds],
+    [listChatIds, saveChatIds, setChatUpdateTrigger],
   );
 
   const loadChatData = useCallback((id: string) => {
@@ -201,7 +211,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         );
       }
     },
-    [loadChatData],
+    [loadChatData, setChatUpdateTrigger],
   );
 
   const saveChatTitle = useCallback(
@@ -224,7 +234,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         );
       }
     },
-    [loadChatData],
+    [loadChatData, setChatUpdateTrigger],
   );
 
   const deleteChat = useCallback(
@@ -236,6 +246,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         const ids = listChatIds();
         const newIds = ids.filter((id: string) => id !== chatId);
         saveChatIds(newIds);
+        setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(
           `Failed to delete chat ${chatId} from localStorage`,
@@ -243,7 +254,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         );
       }
     },
-    [listChatIds, saveChatIds],
+    [listChatIds, saveChatIds, setChatUpdateTrigger],
   );
 
   const branchChat = useCallback(
@@ -290,6 +301,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
 
         const currentIds = listChatIds();
         saveChatIds([newId, ...currentIds]);
+        setChatUpdateTrigger((prev) => prev + 1);
 
         logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
         return newId;
@@ -298,7 +310,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         throw new Error("Failed to branch chat.");
       }
     },
-    [loadChatData, listChatIds, saveChatIds],
+    [loadChatData, listChatIds, saveChatIds, setChatUpdateTrigger],
   );
 
   const contextValue: PersistenceContextType = {

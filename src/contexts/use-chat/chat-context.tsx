@@ -1,5 +1,6 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
+import { useAtom } from "jotai";
 import {
   type ReactNode,
   useCallback,
@@ -15,6 +16,7 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { getModelById, type ModelConfig } from "@/lib/ai/models";
+import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 
 import {
@@ -44,6 +46,7 @@ export const MultiChatProvider = ({
   const location = useLocation();
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
+  const [chatIds] = useAtom(chatIdsAtom);
 
   const chatInstancesRef = useRef<ChatInstanceCollection>(new Map());
 
@@ -259,25 +262,17 @@ export const MultiChatProvider = ({
   }, [statusValue.status, messages, setMessages]);
 
   useEffect(() => {
-    const handleChatDeleted = (event: Event) => {
-      const { chatId } = (event as CustomEvent).detail;
-      if (chatId) {
-        const instance = chatInstancesRef.current.get(chatId);
-        if (instance) {
-          const { status, stop } = instance;
-          if (status === "streaming" || status === "submitted") {
-            logger.verbose(`Stopping stream for deleted chat: ${chatId}`);
-            stop();
-          }
+    if (currentChatId && !chatIds.includes(currentChatId)) {
+      const instance = chatInstancesRef.current.get(currentChatId);
+      if (instance) {
+        const { status, stop } = instance;
+        if (status === "streaming" || status === "submitted") {
+          logger.verbose(`Stopping stream for deleted chat: ${currentChatId}`);
+          stop();
         }
       }
-    };
-
-    window.addEventListener("persistence:chat-deleted", handleChatDeleted);
-    return () => {
-      window.removeEventListener("persistence:chat-deleted", handleChatDeleted);
-    };
-  }, []);
+    }
+  }, [currentChatId, chatIds]);
 
   const functionsValue = useMemo(
     () => ({
