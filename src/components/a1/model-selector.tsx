@@ -25,6 +25,7 @@ import {
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { AVAILABLE_MODELS } from "@/lib/ai/models";
+import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
 interface ModelSelectorProps {
@@ -41,14 +42,21 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // TODO: Use cmdk sorting here
   const filteredModels = useMemo(() => {
-    if (!searchQuery.trim()) return AVAILABLE_MODELS;
-    return AVAILABLE_MODELS.filter((model) =>
-      `${model.provider}/${model.name}`
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()),
-    );
+    if (!searchQuery.trim()) {
+      return AVAILABLE_MODELS;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const scoredModels = AVAILABLE_MODELS.map((model) => {
+      const targetString = `${model.provider}/${model.name}`;
+      const score = commandScore(targetString, query, [model?.id || ""]);
+      return { model, score };
+    }).filter(({ score }) => score > 0);
+
+    return scoredModels
+      .sort((a, b) => b.score - a.score)
+      .map(({ model }) => model);
   }, [searchQuery]);
 
   const virtualizer = useVirtualizer({
