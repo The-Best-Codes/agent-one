@@ -57,6 +57,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
 
   const handleBranch = useCallback(() => {
     if (!activeChatId) {
+      // TODO: Ensure the button is hidden from the UI in this case or give UI feedback?
       logger.error("Cannot branch a new, unsaved chat.");
       return;
     }
