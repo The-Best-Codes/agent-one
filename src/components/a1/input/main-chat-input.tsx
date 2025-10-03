@@ -144,8 +144,19 @@ export const MainChatInput = ({
 
       const combined = [...currentFiles, ...newFilesArray];
 
+      const uniqueFiles: File[] = [];
+      const seen = new Set<string>();
+
+      for (const file of combined) {
+        const key = `${file.name}-${file.size}-${file.lastModified}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueFiles.push(file);
+        }
+      }
+
       const dt = new DataTransfer();
-      combined.forEach((file) => dt.items.add(file));
+      uniqueFiles.forEach((file) => dt.items.add(file));
       const updatedFileList = dt.files;
 
       setFiles(updatedFileList.length > 0 ? updatedFileList : undefined);
@@ -169,8 +180,9 @@ export const MainChatInput = ({
       });
       setFiles(newFiles.length > 0 ? newFiles : undefined);
     } else {
-      logger.verbose("File input cleared");
-      setFiles(undefined);
+      // Undesired behavior, so disabled for now
+      // logger.verbose("File input cleared");
+      // setFiles(undefined);
     }
   };
 
