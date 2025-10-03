@@ -217,6 +217,7 @@ export const MainChatInput = ({
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
+    // TODO: Consider using `relatedTarget` here
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current--;
