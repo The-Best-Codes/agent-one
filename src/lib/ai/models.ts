@@ -16,9 +16,23 @@ export interface ModelConfig {
   supportsToolUse: boolean;
 }
 
+const getPartAfterSlash = (str: string) => {
+  try {
+    if (!str) return str;
+    if (str.includes("/")) {
+      const partAfterSlash = str.slice(str.indexOf("/") + 1);
+      return partAfterSlash;
+    }
+    return str;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return str;
+  }
+};
+
 function mapGoogleModels(): ModelConfig[] {
   return googleModelsData.models.map((model) => ({
-    id: model.name,
+    id: `google-${model.name}`,
     name: model.displayName,
     provider: "Google",
     model: google(model.name),
@@ -29,8 +43,8 @@ function mapGoogleModels(): ModelConfig[] {
 
 function mapGroqModels(): ModelConfig[] {
   return groqModelsData.data.map((model) => ({
-    id: model.id,
-    name: model.id,
+    id: `groq-${model.id}`,
+    name: getPartAfterSlash(model.id),
     provider: "Groq",
     model: groq(model.id),
     supportsToolUse: true,
@@ -39,7 +53,7 @@ function mapGroqModels(): ModelConfig[] {
 
 function mapOpenRouterModels(): ModelConfig[] {
   return openRouterModelsData.data.map((model) => ({
-    id: model.id,
+    id: `openrouter-${model.id}`,
     name: model.name,
     provider: "OpenRouter",
     model: openRouter(model.id),
@@ -53,7 +67,7 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
   ...mapOpenRouterModels(),
 ];
 
-export const DEFAULT_MODEL_ID = "groq-kimi-k2-instruct-0905";
+export const DEFAULT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
 export function getModelById(id: string): ModelConfig | undefined {
   return AVAILABLE_MODELS.find((model) => model.id === id);
