@@ -19,18 +19,18 @@ if [ -z "$VITE_GROQ_API_KEY" ] || [ -z "$VITE_GOOGLE_GENERATIVE_AI_API_KEY" ]; t
 fi
 
 # Create public directory if it doesn't exist
-mkdir -p ./public/model-lists
+mkdir -p ./src/assets/model-lists
 
 # Download OpenRouter models
 echo "Downloading OpenRouter models..."
-curl -s "https://openrouter.ai/api/v1/models" -o ./public/model-lists/openrouter-models.json
+curl -s "https://openrouter.ai/api/v1/models" -o ./src/assets/model-lists/openrouter-models.json
 
 # Download Groq models
 echo "Downloading Groq models..."
-curl -s -H "Authorization: Bearer $VITE_GROQ_API_KEY" "https://api.groq.com/openai/v1/models" -o ./public/model-lists/groq-models.json
+curl -s -H "Authorization: Bearer $VITE_GROQ_API_KEY" "https://api.groq.com/openai/v1/models" -o ./src/assets/model-lists/groq-models.json
 
 # Download Google models
 echo "Downloading Google models..."
-curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$VITE_GOOGLE_GENERATIVE_AI_API_KEY" -o ./public/model-lists/google-models.json
+curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$VITE_GOOGLE_GENERATIVE_AI_API_KEY" -o ./src/assets/model-lists/google-models.json
 
 echo "Model lists updated successfully!"
