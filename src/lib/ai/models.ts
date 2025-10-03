@@ -62,13 +62,6 @@ export const AVAILABLE_MODELS: ModelConfig[] = [
     model: openRouter("nvidia/nemotron-nano-9b-v2"),
     supportsToolUse: true,
   },
-  {
-    id: "openrouter-xai-grok-4-fast-free",
-    name: "Grok 4 Fast Free",
-    provider: "OpenRouter",
-    model: openRouter("x-ai/grok-4-fast:free"),
-    supportsToolUse: true,
-  },
 ];
 
 export const DEFAULT_MODEL_ID = "groq-kimi-k2-instruct-0905";
