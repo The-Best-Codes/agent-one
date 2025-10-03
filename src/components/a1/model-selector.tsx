@@ -1,5 +1,13 @@
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronsUpDown } from "lucide-react";
-import { type FC, useState } from "react";
+import {
+  type FC,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -7,7 +15,6 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
 } from "@/components/ui/command";
 import {
@@ -31,9 +38,54 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 }) => {
   const { currentModel, setModel } = useModel();
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  // TODO: Use cmdk sorting here
+  const filteredModels = useMemo(() => {
+    if (!searchQuery.trim()) return AVAILABLE_MODELS;
+    return AVAILABLE_MODELS.filter((model) =>
+      `${model.provider}/${model.name}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
+    );
+  }, [searchQuery]);
+
+  const virtualizer = useVirtualizer({
+    count: filteredModels.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 32,
+    overscan: 10,
+  });
+
+  // Read https://react.dev/learn/separating-events-from-effects#extracting-non-reactive-logic-out-of-effects for more info about useEffectEvent
+  const measureVirtualizer = useEffectEvent(() => {
+    if (open) {
+      const frame = requestAnimationFrame(() => {
+        virtualizer.measure();
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  });
+
+  useEffect(() => {
+    measureVirtualizer();
+  }, [open]);
+
+  const handleSelect = (modelId: string) => {
+    setModel(modelId);
+    setOpen(false);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery("");
+    }
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -57,41 +109,71 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className={cn("w-full p-0", popoverClassName)}>
-        <Command>
-          <CommandInput placeholder="Search models..." className="h-9" />
-          <CommandList>
-            <CommandEmpty>No model found.</CommandEmpty>
-            <CommandGroup>
-              {AVAILABLE_MODELS.map((model) => (
-                <CommandItem
-                  key={model.id}
-                  value={`${model.provider}/${model.name}`}
-                  onSelect={(currentValue) => {
-                    const selectedModel = AVAILABLE_MODELS.find(
-                      (m) =>
-                        `${m.provider}/${m.name}`.toLowerCase() ===
-                          currentValue.toLowerCase() || m.id === currentValue,
-                    );
-                    if (selectedModel) {
-                      setModel(selectedModel.id);
-                      setOpen(false);
-                    }
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search models..."
+            className="h-9"
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+          />
+          <CommandList ref={parentRef}>
+            {filteredModels.length === 0 ? (
+              <CommandEmpty>No model found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                <div
+                  style={{
+                    height: `${virtualizer.getTotalSize()}px`,
+                    width: "100%",
+                    position: "relative",
                   }}
                 >
-                  <div className="min-w-0 flex-1">
-                    <ScrollArea className="w-full">
-                      <div className="whitespace-nowrap">
-                        <span className="text-muted-foreground text-xs">
-                          {model.provider}/
-                        </span>
-                        <span className="font-medium">{model.name}</span>
+                  {virtualizer.getVirtualItems().map((virtualItem) => {
+                    const model = filteredModels[virtualItem.index];
+                    return (
+                      <div
+                        key={virtualItem.key}
+                        data-slot="command-item"
+                        className={cn(
+                          "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground hover:bg-accent hover:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                        )}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: `${virtualItem.size}px`,
+                          transform: `translateY(${virtualItem.start}px)`,
+                        }}
+                        onClick={() => handleSelect(model.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleSelect(model.id);
+                          }
+                        }}
+                        role="option"
+                        aria-selected={currentModel.id === model.id}
+                        data-selected={currentModel.id === model.id}
+                        tabIndex={0}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <ScrollArea className="w-full">
+                            <div className="whitespace-nowrap">
+                              <span className="text-muted-foreground text-xs">
+                                {model.provider}/
+                              </span>
+                              <span className="font-medium">{model.name}</span>
+                            </div>
+                            <ScrollBar orientation="horizontal" />
+                          </ScrollArea>
+                        </div>
                       </div>
-                      <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
+                    );
+                  })}
+                </div>
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
