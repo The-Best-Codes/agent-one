@@ -186,6 +186,8 @@ export const AutoScrollContainer = forwardRef<
             }}
             variant="secondary"
             aria-label="Scroll to bottom"
+            aria-hidden={buttonOffset >= 60}
+            tabIndex={buttonOffset >= 60 ? -1 : 0}
             {...scrollButtonProps}
           >
             {scrollButtonChildren || (
