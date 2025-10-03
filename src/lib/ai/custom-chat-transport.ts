@@ -59,11 +59,20 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       ...(this.settings.SMOOTH_STREAM_ENABLED.value && {
         experimental_transform: smoothStream(),
       }),
+      onError: (error) => {
+        logger.error(
+          "Error occurred in CustomChatTransport streamText:",
+          error,
+        );
+      },
     });
 
     return result.toUIMessageStream({
       onError: (error) => {
-        logger.error("Error occurred in CustomChatTransport:", error);
+        logger.error(
+          "Error occurred in CustomChatTransport toUIMessageStream:",
+          error,
+        );
 
         if (error == null) {
           return "Unknown error";
