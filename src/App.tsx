@@ -7,6 +7,7 @@ import TestsRoute from "@/routes/tests";
 import FnmTestRoute from "@/routes/tests/fnm";
 
 import { KbdRegistry } from "./kbd-shortcuts";
+import NotFoundRoute from "./routes/not-found";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/settings" element={<SettingsRoute />} />
         <Route path="/tests" element={<TestsRoute />} />
         <Route path="/tests/fnm" element={<FnmTestRoute />} />
+        <Route path="*" element={<NotFoundRoute />} />
       </Routes>
     </BrowserRouter>
   );
