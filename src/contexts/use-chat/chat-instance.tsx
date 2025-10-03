@@ -59,6 +59,9 @@ export const ChatInstance = memo(
         const chatData = loadChatData(chatId);
         const hasUserMessage = chat.messages.some((m) => m.role === "user");
         if (hasUserMessage && !chatData.titleState) {
+          logger.verbose(
+            `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
+          );
           saveChatTitleState({ chatId, titleState: "generating" });
           generateChatTitle(model, chat.messages)
             .then((generatedTitle) =>

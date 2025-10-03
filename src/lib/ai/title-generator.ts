@@ -9,6 +9,7 @@ export async function generateChatTitle(
   model: LanguageModel,
   messages: UIMessage[],
 ): Promise<string> {
+  logger.verbose(`Generating title for chat with ${messages.length} messages`);
   try {
     const relevantMessages = messages.slice(0, 2);
 
