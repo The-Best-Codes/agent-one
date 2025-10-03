@@ -97,7 +97,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          role="combobox"
+          aria-haspopup="listbox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
           aria-label={`Model: ${currentModel.name}`}
