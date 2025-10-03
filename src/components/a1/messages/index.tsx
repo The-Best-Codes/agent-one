@@ -74,6 +74,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
   const getCopyContent = useCallback(() => {
     return message.parts
       .map((part) => {
+        // TODO: Handle all part types ("step-start" | `data-${string}` | "text" | "reasoning" | "dynamic-tool" | "source-url" | "source-document" | "file" | `tool-${string}`)
         if (part.type === "text") {
           return (part as TextUIPart).text;
         } else if (part.type === "file") {
