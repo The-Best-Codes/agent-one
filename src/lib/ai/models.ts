@@ -1,5 +1,9 @@
 import type { LanguageModel } from "ai";
 
+import googleModelsData from "@/assets/model-lists/google-models.json";
+import groqModelsData from "@/assets/model-lists/groq-models.json";
+import openRouterModelsData from "@/assets/model-lists/openrouter-models.json";
+
 import { google } from "./providers/google";
 import { groq } from "./providers/groq";
 import { openRouter } from "./providers/openrouter";
@@ -12,56 +16,41 @@ export interface ModelConfig {
   supportsToolUse: boolean;
 }
 
-export const AVAILABLE_MODELS: ModelConfig[] = [
-  {
-    id: "groq-kimi-k2-instruct-0905",
-    name: "Kimi K2 Instruct",
-    provider: "Groq",
-    model: groq("moonshotai/kimi-k2-instruct-0905"),
-    supportsToolUse: true,
-  },
-  {
-    id: "groq-llama-3.3-70b-versatile",
-    name: "Llama 3.3 70B",
-    provider: "Groq",
-    model: groq("llama-3.3-70b-versatile"),
-    supportsToolUse: true,
-  },
-  {
-    id: "groq-openai-gpt-oss-120b",
-    name: "GPT-OSS 120B",
-    provider: "Groq",
-    model: groq("openai/gpt-oss-120b"),
-    supportsToolUse: true,
-  },
-  {
-    id: "google-gemini-2.0-flash",
-    name: "Gemini 2.0 Flash",
+function mapGoogleModels(): ModelConfig[] {
+  return googleModelsData.models.map((model) => ({
+    id: model.name,
+    name: model.displayName,
     provider: "Google",
-    model: google("gemini-2.0-flash"),
+    model: google(model.name),
+    supportsToolUse:
+      model.supportedGenerationMethods.includes("generateContent"),
+  }));
+}
+
+function mapGroqModels(): ModelConfig[] {
+  return groqModelsData.data.map((model) => ({
+    id: model.id,
+    name: model.id,
+    provider: "Groq",
+    model: groq(model.id),
     supportsToolUse: true,
-  },
-  {
-    id: "google-gemini-2.5-flash",
-    name: "Gemini 2.5 Flash",
-    provider: "Google",
-    model: google("gemini-2.5-flash"),
-    supportsToolUse: true,
-  },
-  {
-    id: "google-gemini-2.5-flash-09-25",
-    name: "Gemini 2.5 Flash Preview (09/25)",
-    provider: "Google",
-    model: google("gemini-2.5-flash-preview-09-2025"),
-    supportsToolUse: true,
-  },
-  {
-    id: "openrouter-nvidia-nemotron-nano-9b-v2",
-    name: "Nemotron Nano 9B V2",
+  }));
+}
+
+function mapOpenRouterModels(): ModelConfig[] {
+  return openRouterModelsData.data.map((model) => ({
+    id: model.id,
+    name: model.name,
     provider: "OpenRouter",
-    model: openRouter("nvidia/nemotron-nano-9b-v2"),
-    supportsToolUse: true,
-  },
+    model: openRouter(model.id),
+    supportsToolUse: (model.supported_parameters as string[]).includes("tools"),
+  }));
+}
+
+export const AVAILABLE_MODELS: ModelConfig[] = [
+  ...mapGoogleModels(),
+  ...mapGroqModels(),
+  ...mapOpenRouterModels(),
 ];
 
 export const DEFAULT_MODEL_ID = "groq-kimi-k2-instruct-0905";
