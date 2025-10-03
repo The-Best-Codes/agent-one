@@ -1,5 +1,5 @@
 import { ArrowLeftIcon, HomeIcon } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -256,6 +256,17 @@ export default function SettingsRoute() {
                   />
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>About</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/credits">View Credits and Licenses</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>

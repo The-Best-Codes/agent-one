@@ -1,0 +1,10 @@
+fnm (Fast Node Manager) Copyright (C) 2019 Gal Schlezinger
+
+This application bundles fnm, which is licensed under the GNU General Public License v3.0.
+
+For the complete license text, see gpl-3.0.txt in this directory.
+
+Source code for fnm is available at: https://github.com/Schniz/fnm
+
+Written Offer for Source Code:
+We offer to provide the complete corresponding source code for the fnm binary bundled with this application for a period of three years from the date of distribution. To obtain the source code, please contact us at hello@bestcodes.dev. The source code will be provided at no charge.

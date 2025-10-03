@@ -1,3 +1,7 @@
+// This file uses fnm (Fast Node Manager) as a sidecar binary.
+// fnm is licensed under GPLv3. See licenses/fnm-copyright.txt for details.
+// Source: https://github.com/Schniz/fnm
+
 import { type Child, Command } from "@tauri-apps/plugin-shell";
 
 import { getLogger } from "@/lib/logger";
