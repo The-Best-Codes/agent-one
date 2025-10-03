@@ -62,6 +62,7 @@ export const ChatInstance = memo(
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
+          // TODO: We need to make this state in-memory if we migrate to an async DB, otherwise rerenders, new messages, etc. will trigger title generation again
           saveChatTitleState({ chatId, titleState: "generating" });
           generateChatTitle(model, chat.messages)
             .then((generatedTitle) =>
