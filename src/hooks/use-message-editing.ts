@@ -41,7 +41,6 @@ export const useMessageEditing = ({
 
   const textValuesRef = useRef<string[]>(initialValues);
   const editorRefs = useRef<(HTMLDivElement | null)[]>([]);
-  editorRefs.current.length = initialValues.length;
 
   const isMobile = useMobileDetection({
     anyHover: true,
@@ -56,6 +55,7 @@ export const useMessageEditing = ({
 
   useEffect(() => {
     textValuesRef.current = [...initialValues];
+    editorRefs.current.length = initialValues.length;
   }, [initialValues]);
 
   const handleEdit = useCallback(() => {
