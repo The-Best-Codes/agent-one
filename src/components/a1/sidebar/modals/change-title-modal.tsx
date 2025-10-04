@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,19 +19,16 @@ interface ChangeTitleModalProps {
   currentTitle: string;
 }
 
-export const ChangeTitleModal = ({
-  isOpen,
-  onClose,
-  chatId,
+const ChangeTitleForm = ({
   currentTitle,
-}: ChangeTitleModalProps) => {
+  chatId,
+  onClose,
+}: {
+  currentTitle: string;
+  chatId: string;
+  onClose: () => void;
+}) => {
   const [title, setTitle] = useState(currentTitle);
-
-  useEffect(() => {
-    if (isOpen) {
-      setTitle(currentTitle);
-    }
-  }, [isOpen, currentTitle]);
   const { saveChatTitle } = usePersistence();
 
   const handleSave = () => {
@@ -48,6 +45,33 @@ export const ChangeTitleModal = ({
   };
 
   return (
+    <>
+      <Input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Enter chat title..."
+        autoFocus
+      />
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={handleSave} disabled={!title.trim()}>
+          Save
+        </Button>
+      </DialogFooter>
+    </>
+  );
+};
+
+export const ChangeTitleModal = ({
+  isOpen,
+  onClose,
+  chatId,
+  currentTitle,
+}: ChangeTitleModalProps) => {
+  return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
@@ -56,21 +80,11 @@ export const ChangeTitleModal = ({
             Enter a new title for this chat conversation.
           </DialogDescription>
         </DialogHeader>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Enter chat title..."
-          autoFocus
+        <ChangeTitleForm
+          currentTitle={currentTitle}
+          chatId={chatId}
+          onClose={onClose}
         />
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={!title.trim()}>
-            Save
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
