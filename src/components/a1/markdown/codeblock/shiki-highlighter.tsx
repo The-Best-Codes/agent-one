@@ -26,10 +26,10 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
 
   useEffect(() => {
     let cancelled = false;
-    setError(null);
-
     highlight(code, language, theme).then((result) => {
       if (cancelled) return;
+
+      setError(null);
 
       if (result.html) {
         setHighlightedHtml(result.html);
