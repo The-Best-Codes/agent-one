@@ -1,4 +1,7 @@
 "use client";
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { Prec } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import {
   ArrowUpIcon,
@@ -7,7 +10,7 @@ import {
   SquareIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +19,6 @@ import {
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
-import { useCodeMirrorExtensions } from "@/hooks/use-codemirror-extensions";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { getLogger } from "@/lib/logger";
 
@@ -24,6 +26,31 @@ import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 
 const logger = getLogger(import.meta.url);
+
+const editorTheme = EditorView.theme({
+  "&": {
+    border: "none",
+    backgroundColor: "transparent !important",
+  },
+  "& .cm-placeholder": {
+    color: "var(--muted-foreground);",
+  },
+  "&.cm-focused": {
+    outline: "none",
+  },
+  ".cm-scroller": {
+    overflow: "auto",
+    fontFamily: "inherit",
+  },
+  ".cm-content": {
+    paddingTop: "0px",
+    paddingBottom: "0px",
+    color: "var(--foreground);",
+  },
+  ".cm-line": {
+    padding: "0 0.125rem 0 0.625rem",
+  },
+});
 
 export const MainChatInput = ({
   onAfterSend,
@@ -56,7 +83,7 @@ export const MainChatInput = ({
     }
   };
 
-  const submitMessage = useCallback(() => {
+  const submitMessage = () => {
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
     if ((currentText.trim() || files) && status === "ready") {
@@ -92,16 +119,7 @@ export const MainChatInput = ({
         status,
       });
     }
-  }, [
-    editorViewRef,
-    files,
-    status,
-    sendMessage,
-    onAfterSend,
-    fileInputRef,
-    setIsEmpty,
-    setFiles,
-  ]);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -234,13 +252,6 @@ export const MainChatInput = ({
     [addFiles],
   );
 
-  const extensions = useCodeMirrorExtensions({
-    settings,
-    addFiles,
-    submitMessage,
-    isMobile,
-  });
-
   return (
     <div className="px-0 md:px-2">
       <MainInputErrorSection />
@@ -280,7 +291,50 @@ export const MainChatInput = ({
             maxHeight="160px"
             placeholder="Ask anything..."
             className="bg-transparent text-sm"
-            extensions={extensions}
+            extensions={[
+              ...(settings.MARKDOWN_HIGHLIGHTING.value
+                ? [markdown({ base: markdownLanguage })]
+                : []),
+              editorTheme,
+              EditorView.lineWrapping,
+              EditorView.contentAttributes.of({
+                spellcheck: "true",
+                "aria-label": "Chat message input",
+                "data-testid": "chat-editor",
+              }),
+              EditorView.domEventHandlers({
+                paste: (event) => {
+                  const pastedFiles = event.clipboardData?.files;
+                  if (pastedFiles && pastedFiles.length > 0) {
+                    logger.verbose("Files pasted", {
+                      fileCount: pastedFiles.length,
+                      fileNames: Array.from(pastedFiles).map((f) => f.name),
+                    });
+                    addFiles(pastedFiles);
+                    event.preventDefault();
+                    return true;
+                  }
+                  return false;
+                },
+              }),
+              Prec.highest(
+                keymap.of([
+                  {
+                    key:
+                      settings.SUBMIT_KEY.value === "enter"
+                        ? "Enter"
+                        : "Ctrl-Enter",
+                    run: () => {
+                      if (isMobile && settings.SUBMIT_KEY.value === "enter") {
+                        return false;
+                      }
+                      submitMessage();
+                      return true;
+                    },
+                  },
+                ]),
+              ),
+            ]}
             onChange={handleEditorChange}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
