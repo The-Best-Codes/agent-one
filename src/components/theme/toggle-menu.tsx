@@ -1,7 +1,6 @@
 "use client";
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { getLogger } from "@/lib/logger";
@@ -14,14 +13,9 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle = ({ className }: ThemeToggleProps) => {
-  const { setTheme, theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { setTheme, theme, resolvedTheme } = useTheme();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
+  if (!resolvedTheme) {
     return null;
   }
 
