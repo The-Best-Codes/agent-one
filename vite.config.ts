@@ -74,6 +74,7 @@ export default defineConfig(
                 "codemirror",
                 "@uiw/react-codemirror",
                 "@codemirror/view",
+                "@codemirror/state",
               ],
               codemirrorLangs: ["@codemirror/lang-markdown"],
               markdown: [

@@ -1,8 +1,8 @@
 import type { LanguageModel } from "ai";
 
-import googleModelsData from "@/assets/model-lists/google-models.json";
-import groqModelsData from "@/assets/model-lists/groq-models.json";
-import openRouterModelsData from "@/assets/model-lists/openrouter-models.json";
+import { googleModelsData } from "@/assets/model-lists/google-models";
+import { groqModelsData } from "@/assets/model-lists/groq-models";
+import { openRouterModelsData } from "@/assets/model-lists/openrouter-models";
 
 import { google } from "./providers/google";
 import { groq } from "./providers/groq";
