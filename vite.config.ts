@@ -6,6 +6,46 @@ import { defineConfig, ViteUserConfig } from "vitest/config";
 
 const host = process.env.TAURI_DEV_HOST;
 
+const vendorManualChunks = {
+  react: ["react", "react-dom", "react-dom/client"],
+  reactRouter: ["react-router"],
+  aiSdk: [
+    "ai",
+    "@ai-sdk/react",
+    "@ai-sdk/google",
+    "@ai-sdk/groq",
+    "@openrouter/ai-sdk-provider",
+  ],
+  codemirror: [
+    "codemirror",
+    "@uiw/react-codemirror",
+    "@codemirror/view",
+    "@codemirror/state",
+  ],
+  codemirrorLangs: ["@codemirror/lang-markdown"],
+  markdown: ["react-markdown", "remark-breaks", "remark-gfm", "marked"],
+  radixUi: [
+    "@radix-ui/react-toggle-group",
+    "@radix-ui/react-roving-focus",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-popper",
+    "@radix-ui/react-popover",
+    "@radix-ui/react-tooltip",
+    "@radix-ui/react-slider",
+    "@radix-ui/react-scroll-area",
+    "@radix-ui/react-switch",
+    "@radix-ui/react-menu",
+    "@radix-ui/react-select",
+    "@radix-ui/react-primitive",
+    "@radix-ui/react-use-controllable-state",
+    "@radix-ui/react-collection",
+    "@radix-ui/react-slot",
+    "@radix-ui/react-direction",
+    "@radix-ui/react-visually-hidden",
+  ],
+  miscUi: ["vaul", "tailwind-merge"],
+};
+
 export default defineConfig(
   async () =>
     ({
@@ -60,49 +100,24 @@ export default defineConfig(
       build: {
         rollupOptions: {
           output: {
-            manualChunks: {
-              react: ["react", "react-dom", "react-dom/client"],
-              reactRouter: ["react-router"],
-              aiSdk: [
-                "ai",
-                "@ai-sdk/react",
-                "@ai-sdk/google",
-                "@ai-sdk/groq",
-                "@openrouter/ai-sdk-provider",
-              ],
-              codemirror: [
-                "codemirror",
-                "@uiw/react-codemirror",
-                "@codemirror/view",
-                "@codemirror/state",
-              ],
-              codemirrorLangs: ["@codemirror/lang-markdown"],
-              markdown: [
-                "react-markdown",
-                "remark-breaks",
-                "remark-gfm",
-                "marked",
-              ],
-              radixUi: [
-                "@radix-ui/react-toggle-group",
-                "@radix-ui/react-roving-focus",
-                "@radix-ui/react-dropdown-menu",
-                "@radix-ui/react-popper",
-                "@radix-ui/react-popover",
-                "@radix-ui/react-tooltip",
-                "@radix-ui/react-slider",
-                "@radix-ui/react-scroll-area",
-                "@radix-ui/react-switch",
-                "@radix-ui/react-menu",
-                "@radix-ui/react-select",
-                "@radix-ui/react-primitive",
-                "@radix-ui/react-use-controllable-state",
-                "@radix-ui/react-collection",
-                "@radix-ui/react-slot",
-                "@radix-ui/react-direction",
-                "@radix-ui/react-visually-hidden",
-              ],
-              miscUi: ["vaul", "tailwind-merge"],
+            manualChunks(id: string) {
+              if (
+                id.includes(path.join(__dirname, "src/assets/model-lists/"))
+              ) {
+                return path.parse(id).name;
+              }
+
+              if (id.includes("node_modules")) {
+                for (const [chunkName, packages] of Object.entries(
+                  vendorManualChunks,
+                )) {
+                  if (
+                    packages.some((pkg) => id.includes(`/node_modules/${pkg}/`))
+                  ) {
+                    return chunkName;
+                  }
+                }
+              }
             },
           },
         },
