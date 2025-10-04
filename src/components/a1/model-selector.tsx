@@ -59,6 +59,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       .map(({ model }) => model);
   }, [searchQuery]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredModels.length,
     getScrollElement: () => parentRef.current,
