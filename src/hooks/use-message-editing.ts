@@ -40,7 +40,9 @@ export const useMessageEditing = ({
   }, [message.parts]);
 
   const textValuesRef = useRef<string[]>(initialValues);
-  const editorRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const editorRefs = useRef<(HTMLDivElement | null)[]>(
+    Array(initialValues.length).fill(null),
+  );
 
   const isMobile = useMobileDetection({
     anyHover: true,
