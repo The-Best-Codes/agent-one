@@ -9,5 +9,7 @@ export const chatDataAtom = atom<Record<string, unknown>>({});
 
 export const sidebarCollapsedAtom = atomWithStorage(
   "agent-one-sidebar-collapsed",
-  true,
+  typeof window !== "undefined"
+    ? localStorage.getItem("agent-one-sidebar-collapsed") === "true"
+    : true,
 );
