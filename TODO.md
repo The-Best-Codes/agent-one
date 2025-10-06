@@ -13,3 +13,4 @@
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Since we sidecar fnm, make note of it and include its license text and info (it's GPLv3, see https://github.com/Schniz/fnm/blob/master/LICENSE)
 - Changing settings rerenders like the whole UI, fix this
+- Fix sidebar animating on initial page load if in expanded state
