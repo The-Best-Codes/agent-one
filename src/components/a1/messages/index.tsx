@@ -78,11 +78,24 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
   const getCopyContent = useCallback(() => {
     return message.parts
       .map((part) => {
-        // TODO: Handle all part types ("step-start" | `data-${string}` | "text" | "reasoning" | "dynamic-tool" | "source-url" | "source-document" | "file" | `tool-${string}`)
         if (part.type === "text") {
           return (part as TextUIPart).text;
         } else if (part.type === "file") {
           return `[File: ${part.filename || "Unnamed file"}]`;
+        } else if (part.type === "reasoning") {
+          return `[Reasoning: ${part.text}]`;
+        } else if (part.type === "source-url") {
+          return `[Source URL: ${part?.title || "Untitled URL"}, ${part?.url || "Unknown URL"}]`;
+        } else if (part.type === "source-document") {
+          return `[Source Document: ${part?.title || "Unnamed document"}, ${part?.filename || "Unnamed file"}]`;
+        } else if (part.type.startsWith("data-")) {
+          return `[Data: ${JSON.stringify(part)}]`;
+        } else if (part.type.startsWith("tool-")) {
+          return `[Tool: ${part.type}]`;
+        } else if (part.type === "dynamic-tool") {
+          return `[Dynamic Tool: ${part.toolName}]`;
+        } else if (part.type === "step-start") {
+          return null; // Nothing for now
         }
         return "";
       })
