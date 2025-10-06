@@ -61,6 +61,7 @@ const SidebarContent = ({
 };
 
 export const Sidebar = ({ className }: SidebarProps) => {
+  // TODO: Use jotai atomWithStorage here?
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
       const saved = localStorage.getItem(LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY);
@@ -72,16 +73,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
   });
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
 
   const isSidebarSmall = isCollapsed || !isDesktop;
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     try {
@@ -148,19 +144,18 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 z-50 md:top-2 md:left-2">
+      <div className="animate-in fade-in-0 fixed top-0 left-0 z-50 duration-300 md:top-2 md:left-2">
         <div
           className={cn(
             "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r-1 border-b-1 p-1 transition-[border,padding,background-color] duration-200 md:rounded-md md:border-1",
-            (!isSidebarSmall || !isMounted) &&
-              "border-transparent bg-transparent pt-0 pl-0",
+            !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
           )}
         >
           {sidebarButton}
           <div
             className={cn(
               "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
-              (!isSidebarSmall || !isMounted) &&
+              !isSidebarSmall &&
                 "pointer-events-none -translate-x-2 scale-95 opacity-0",
             )}
             inert={!isCollapsed}

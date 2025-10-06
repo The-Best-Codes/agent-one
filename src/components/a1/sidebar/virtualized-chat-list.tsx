@@ -84,6 +84,7 @@ export const VirtualizedChatList = ({
     );
   }, [chats, searchQuery]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredChats.length,
     getScrollElement: () => parentRef.current,

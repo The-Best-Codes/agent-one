@@ -302,6 +302,7 @@ export const MainChatInput = ({
                 "aria-label": "Chat message input",
                 "data-testid": "chat-editor",
               }),
+              // eslint-disable-next-line react-hooks/refs
               EditorView.domEventHandlers({
                 paste: (event) => {
                   const pastedFiles = event.clipboardData?.files;
@@ -318,6 +319,7 @@ export const MainChatInput = ({
                 },
               }),
               Prec.highest(
+                // eslint-disable-next-line react-hooks/refs
                 keymap.of([
                   {
                     key:

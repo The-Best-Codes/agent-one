@@ -4,7 +4,7 @@ import {
   type UseChatOptions,
 } from "@ai-sdk/react";
 import { type ChatInit, type LanguageModel } from "ai";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
@@ -17,28 +17,20 @@ type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
 
 export function useChat(model: LanguageModel, options?: CustomChatOptions) {
   const { settings } = useSettings();
-  const transportRef = useRef<CustomChatTransport | null>(null);
-
-  if (!transportRef.current) {
-    transportRef.current = new CustomChatTransport(model, settings);
-  }
+  const [transport] = useState(() => new CustomChatTransport(model, settings));
 
   useEffect(() => {
-    if (transportRef.current) {
-      transportRef.current.updateModel(model);
-      logger.verbose("Updated chat transport with new model:", model);
-    }
-  }, [model]);
+    transport.updateModel(model);
+    logger.verbose("Updated chat transport with new model:", model);
+  }, [model, transport]);
 
   useEffect(() => {
-    if (transportRef.current) {
-      transportRef.current.updateSettings(settings);
-      logger.verbose("Updated chat transport with new settings");
-    }
-  }, [settings]);
+    transport.updateSettings(settings);
+    logger.verbose("Updated chat transport with new settings");
+  }, [settings, transport]);
 
   const chatResult = useChatSDK({
-    transport: transportRef.current,
+    transport: transport,
     ...options,
   });
 
