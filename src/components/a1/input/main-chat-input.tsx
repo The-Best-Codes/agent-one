@@ -326,7 +326,10 @@ export const MainChatInput = ({
                       settings.SUBMIT_KEY.value === "enter"
                         ? "Enter"
                         : "Ctrl-Enter",
-                    run: () => {
+                    run: (view) => {
+                      if (view.composing) {
+                        return false;
+                      }
                       if (isMobile && settings.SUBMIT_KEY.value === "enter") {
                         return false;
                       }

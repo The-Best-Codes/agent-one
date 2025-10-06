@@ -74,7 +74,10 @@ const InlineTextEditorImpl = ({
             {
               key:
                 settings.SUBMIT_KEY.value === "enter" ? "Enter" : "Ctrl-Enter",
-              run: () => {
+              run: (view) => {
+                if (view.composing) {
+                  return false;
+                }
                 if (!disableEnter && onEnter) {
                   onEnter();
                   return true;

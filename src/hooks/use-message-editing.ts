@@ -147,15 +147,12 @@ export const useMessageEditing = ({
     isEditing,
     canEdit,
     isMobile,
-
     textValuesRef,
     editorRefs,
-
     handleEdit,
     handleCancel,
     handleSave,
     handleTextChange,
-
     initialValues,
   };
 };
