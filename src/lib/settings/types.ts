@@ -15,6 +15,7 @@ export interface SettingsType {
   EXPERIMENTAL_THROTTLE_ENABLED: SettingValue<boolean>;
   EXPERIMENTAL_THROTTLE_VALUE: SettingValue<number>;
   SMOOTH_STREAM_ENABLED: SettingValue<boolean>;
+  REGENERATE_ON_SAVE: SettingValue<boolean>;
 }
 
 export const DEFAULT_SETTINGS = {
@@ -26,4 +27,5 @@ export const DEFAULT_SETTINGS = {
   EXPERIMENTAL_THROTTLE_ENABLED: true,
   EXPERIMENTAL_THROTTLE_VALUE: 250,
   SMOOTH_STREAM_ENABLED: false,
+  REGENERATE_ON_SAVE: false,
 };

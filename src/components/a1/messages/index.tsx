@@ -1,11 +1,18 @@
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
-import { CheckIcon, RotateCwIcon, XIcon } from "lucide-react";
-import { memo, useCallback, useMemo, useRef } from "react";
+import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
+import { memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
-import { SplitButton } from "@/components/ui/split-button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -41,19 +48,15 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
   const { id: activeChatId } = useParams<{ id: string }>();
   const { branchChat } = usePersistence();
 
-  const selectedActionRef = useRef<string>("save");
-
-  const handleSelectedActionChange = useCallback((optionId: string) => {
-    selectedActionRef.current = optionId;
-  }, []);
+  const { settings } = useSettings();
 
   const handleEnterKey = useCallback(() => {
     if (message.role === "user") {
-      handleSave(selectedActionRef.current === "save-regenerate");
+      handleSave(settings.REGENERATE_ON_SAVE.value);
     } else {
       handleSave(false);
     }
-  }, [handleSave, message.role]);
+  }, [handleSave, message.role, settings.REGENERATE_ON_SAVE.value]);
 
   const handleBranch = useCallback(() => {
     if (!activeChatId) {
@@ -191,36 +194,45 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
             Cancel
           </Button>
           {message.role === "user" ? (
-            <SplitButton
-              size="sm"
-              className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
-              storageKey="message-edit-action"
-              onSelectedOptionChange={handleSelectedActionChange}
-              options={[
-                {
-                  id: "save",
-                  label: (
-                    <>
-                      <CheckIcon className="size-4" />
-                      Save
-                    </>
-                  ),
-                  onClick: () => handleSave(false),
-                },
-                {
-                  id: "save-regenerate",
-                  label: (
-                    <>
-                      <RotateCwIcon className="size-4" />
-                      Save & Regenerate
-                    </>
-                  ),
-                  onClick: () => {
-                    handleSave(true);
-                  },
-                },
-              ]}
-            />
+            <ButtonGroup className="flex items-center">
+              <Button
+                size="sm"
+                variant="default"
+                className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
+                onClick={() => handleSave(settings.REGENERATE_ON_SAVE.value)}
+              >
+                <CheckIcon className="size-4" />
+                Save
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
+                  >
+                    <ChevronDownIcon className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <div className="flex items-center space-x-2 p-2">
+                    <Checkbox
+                      id="regenerate-on-save"
+                      checked={settings.REGENERATE_ON_SAVE.value}
+                      onCheckedChange={(checked) =>
+                        settings.REGENERATE_ON_SAVE.set(checked as boolean)
+                      }
+                    />
+                    <label
+                      htmlFor="regenerate-on-save"
+                      className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Regenerate when Saved
+                    </label>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ButtonGroup>
           ) : (
             <Button
               size="sm"

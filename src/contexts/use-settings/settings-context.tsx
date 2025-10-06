@@ -67,6 +67,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     getSetting("SMOOTH_STREAM_ENABLED", DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED),
   );
 
+  const [regenerateOnSave, setRegenerateOnSave] = useState(() =>
+    getSetting("REGENERATE_ON_SAVE", DEFAULT_SETTINGS.REGENERATE_ON_SAVE),
+  );
+
   const handleSetMarkdownHighlighting = useCallback((value: boolean) => {
     setMarkdownHighlighting(value);
     saveSetting("MARKDOWN_HIGHLIGHTING", value);
@@ -110,6 +114,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     saveSetting("SMOOTH_STREAM_ENABLED", value);
   }, []);
 
+  const handleSetRegenerateOnSave = useCallback((value: boolean) => {
+    setRegenerateOnSave(value);
+    saveSetting("REGENERATE_ON_SAVE", value);
+  }, []);
+
   const settings: SettingsType = {
     MARKDOWN_HIGHLIGHTING: {
       value: markdownHighlighting,
@@ -142,6 +151,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     SMOOTH_STREAM_ENABLED: {
       value: smoothStreamEnabled,
       set: handleSetSmoothStreamEnabled,
+    },
+    REGENERATE_ON_SAVE: {
+      value: regenerateOnSave,
+      set: handleSetRegenerateOnSave,
     },
   };
 
