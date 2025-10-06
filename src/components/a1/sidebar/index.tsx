@@ -1,5 +1,6 @@
+import { useAtom } from "jotai";
 import { PlusIcon, SearchIcon, SettingsIcon, SidebarIcon } from "lucide-react";
-import { Activity, useEffect, useState } from "react";
+import { Activity, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { ModelSelector } from "@/components/a1/model-selector";
@@ -12,6 +13,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { sidebarCollapsedAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +21,6 @@ import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 
 const logger = getLogger(import.meta.url);
-const LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY = "agent-one-sidebar-collapsed";
 
 interface SidebarProps {
   className?: string;
@@ -61,16 +62,7 @@ const SidebarContent = ({
 };
 
 export const Sidebar = ({ className }: SidebarProps) => {
-  // TODO: Use jotai atomWithStorage here?
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    try {
-      const saved = localStorage.getItem(LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY);
-      return saved ? JSON.parse(saved) : false;
-    } catch (error) {
-      logger.error("Error retrieving sidebar state from localStorage:", error);
-      return false;
-    }
-  });
+  const [isCollapsed, setIsCollapsed] = useAtom(sidebarCollapsedAtom);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -78,17 +70,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
 
   const isSidebarSmall = isCollapsed || !isDesktop;
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        LOCALSTORAGE_SIDEBAR_COLLAPSED_KEY,
-        JSON.stringify(isCollapsed),
-      );
-    } catch (error) {
-      logger.error("Error saving sidebar state to localStorage:", error);
-    }
-  }, [isCollapsed]);
 
   const handleNewChat = () => {
     logger.verbose("Creating new chat", { isDesktop, isDrawerOpen });
