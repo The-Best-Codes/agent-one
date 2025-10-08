@@ -4,4 +4,5 @@ export const kbdRegistry = {
   openTests: "ctrl+shift+q",
   newChat: "ctrl+n",
   focusChatSearch: "ctrl+k",
+  focusChatSearchCollapsed: "ctrl+k",
 };
