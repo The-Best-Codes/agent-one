@@ -16,6 +16,11 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
@@ -367,54 +372,69 @@ export const MainChatInput = ({
         </div>
         <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
           <div className="relative">
-            <Button
-              data-testid="attach-button"
-              type="button"
-              disabled={status !== "ready"}
-              size="icon"
-              variant="outline"
-              onClick={() => {
-                fileInputRef.current?.click();
-              }}
-              className="relative"
-              aria-label="Attach files"
-            >
-              {files && files?.length > 0 && (
-                <Badge
-                  variant="default"
-                  className="absolute -top-2 -right-2 z-10 shadow-md"
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  data-testid="attach-button"
+                  type="button"
+                  disabled={status !== "ready"}
+                  size="icon"
+                  variant="outline"
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                  }}
+                  className="relative"
+                  aria-label="Attach files"
                 >
-                  {files?.length}
-                </Badge>
-              )}
-              <PaperclipIcon />
-            </Button>
+                  {files && files?.length > 0 && (
+                    <Badge
+                      variant="default"
+                      className="absolute -top-2 -right-2 z-10 shadow-md"
+                    >
+                      {files?.length}
+                    </Badge>
+                  )}
+                  <PaperclipIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Attach files to your message</TooltipContent>
+            </Tooltip>
           </div>
           <div>
             {status === "streaming" ? (
-              <Button
-                variant="destructive"
-                type="button"
-                size="icon"
-                onClick={() => stop()}
-                aria-label="Stop response"
-              >
-                <SquareIcon />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    type="button"
+                    size="icon"
+                    onClick={() => stop()}
+                    aria-label="Stop response"
+                  >
+                    <SquareIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Stop the current response</TooltipContent>
+              </Tooltip>
             ) : (
-              <Button
-                data-testid="send-button"
-                type="submit"
-                size="icon"
-                disabled={status !== "ready" || (isEmpty && !files)}
-                aria-label="Send message"
-              >
-                {status === "submitted" ? (
-                  <Loader2Icon className="animate-spin" />
-                ) : (
-                  <ArrowUpIcon />
-                )}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    data-testid="send-button"
+                    type="submit"
+                    size="icon"
+                    disabled={status !== "ready" || (isEmpty && !files)}
+                    aria-label="Send message"
+                  >
+                    {status === "submitted" ? (
+                      <Loader2Icon className="animate-spin" />
+                    ) : (
+                      <ArrowUpIcon />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Send your message</TooltipContent>
+              </Tooltip>
             )}
           </div>
         </div>

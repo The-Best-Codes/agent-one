@@ -2,6 +2,11 @@ import { CopyCheckIcon, CopyIcon, CopyXIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -77,14 +82,19 @@ export const CopyButton = ({
   };
 
   return (
-    <Button
-      onClick={handleCopy}
-      disabled={copyState !== "idle"}
-      className={cn("size-8 cursor-copy", className)}
-      size={size || "icon"}
-      variant={getButtonVariant()}
-    >
-      {getButtonIcon()}
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          onClick={handleCopy}
+          disabled={copyState !== "idle"}
+          className={cn("size-8 cursor-copy", className)}
+          size={size || "icon"}
+          variant={getButtonVariant()}
+        >
+          {getButtonIcon()}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Copy to clipboard</TooltipContent>
+    </Tooltip>
   );
 };
