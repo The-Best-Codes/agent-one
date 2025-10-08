@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { PlusIcon, SearchIcon, SettingsIcon, SidebarIcon } from "lucide-react";
 import { Activity, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { ModelSelector } from "@/components/a1/model-selector";
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/atoms";
+import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +72,17 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
 
   const isSidebarSmall = isCollapsed || !isDesktop;
+
+  useHotkeys(kbdRegistry.focusChatSearchCollapsed, () => {
+    if (isSidebarSmall) {
+      setIsSearchModalOpen(true);
+    }
+  });
+
+  useHotkeys(kbdRegistry.toggleSidebar, () => {
+    setIsSearchModalOpen(false);
+    setIsCollapsed(!isCollapsed);
+  });
 
   const handleNewChat = () => {
     logger.verbose("Creating new chat", { isDesktop, isDrawerOpen });

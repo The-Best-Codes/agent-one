@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
+import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 
 import { Attachments } from "./attachments";
@@ -74,6 +76,10 @@ export const MainChatInput = ({
   const editorViewRef = useRef<EditorView | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounter = useRef(0);
+
+  useHotkeys(kbdRegistry.focusMainChatInput, () => {
+    editorViewRef.current?.focus();
+  });
 
   const handleEditorChange = (newValue: string) => {
     const newIsEmpty = !newValue.trim();
