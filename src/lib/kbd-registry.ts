@@ -5,4 +5,5 @@ export const kbdRegistry = {
   newChat: "ctrl+n",
   focusChatSearch: "ctrl+k",
   focusChatSearchCollapsed: "ctrl+k",
+  toggleSidebar: "ctrl+b",
 };

@@ -79,6 +79,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
     }
   });
 
+  useHotkeys(kbdRegistry.toggleSidebar, () => {
+    setIsSearchModalOpen(false);
+    setIsCollapsed(!isCollapsed);
+  });
+
   const handleNewChat = () => {
     logger.verbose("Creating new chat", { isDesktop, isDrawerOpen });
     navigate("/chat");
