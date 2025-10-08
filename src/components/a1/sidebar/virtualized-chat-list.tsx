@@ -2,11 +2,13 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
 import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
+import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +45,12 @@ export const VirtualizedChatList = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isOverflowing, setIsOverflowing] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [chatIds] = useAtom(chatIdsAtom);
+
+  useHotkeys(kbdRegistry.focusChatSearch, () => {
+    searchInputRef.current?.focus();
+  });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
   const { loadChatData } = usePersistence();
 
@@ -140,6 +147,7 @@ export const VirtualizedChatList = ({
           <div className="group/sidebar-search-input relative">
             <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
             <Input
+              ref={searchInputRef}
               placeholder="Search chats..."
               className="pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
               value={searchQuery}
@@ -154,6 +162,7 @@ export const VirtualizedChatList = ({
           <div className="group/sidebar-search-input relative">
             <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
             <Input
+              ref={searchInputRef}
               placeholder="Search chats..."
               className="pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
               value={searchQuery}

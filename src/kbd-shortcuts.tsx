@@ -12,6 +12,9 @@ export function KbdRegistry() {
   useHotkeys(kbdRegistry.openSettings, () => {
     navigate("/settings");
   });
+  useHotkeys(kbdRegistry.newChat, () => {
+    navigate("/chat");
+  });
 
   return null;
 }
