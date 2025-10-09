@@ -8,23 +8,13 @@ import { globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-/**
- * Ensure we always return an array of config objects,
- * flattening away any nested arrays that plugins export.
- */
-const safeFlatten = (item) => {
-  if (!item) return [];
-  if (Array.isArray(item)) return item.flat(Infinity);
-  return [item];
-};
-
 export default [
-  ...safeFlatten(globalIgnores(["dist"])),
-  ...safeFlatten(js.configs.recommended),
-  ...safeFlatten(tseslint.configs.recommended),
-  ...safeFlatten(reactHooks.configs["recommended-latest"]),
-  ...safeFlatten(reactRefresh.configs.vite),
-  ...safeFlatten(cspellESLintPluginRecommended),
+  globalIgnores(["dist"]),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  reactHooks.configs.flat.recommended,
+  reactRefresh.configs.vite,
+  cspellESLintPluginRecommended,
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
