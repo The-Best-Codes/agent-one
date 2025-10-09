@@ -12,4 +12,4 @@
 - Persist useChat values (status, etc.) not just messages?
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Changing settings rerenders like the whole UI, fix this
-- URGENT: Fix tooltips conflicting with clicks on buttons on touchscreens
+- URGENT: Fix tooltips conflicting with clicks on buttons on touchscreens | TODO: See if this is still a bug (test on real phone)
