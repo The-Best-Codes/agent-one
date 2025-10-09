@@ -1,15 +1,21 @@
 import { PencilIcon } from "lucide-react";
+import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 
-export const EditButton = ({
-  className,
-  onEdit,
-}: {
-  className?: string;
+type EditButtonProps = {
   onEdit: () => void;
-}) => {
+} & Omit<
+  ComponentProps<typeof Button>,
+  "onClick" | "disabled" | "size" | "variant" | "aria-label" | "children"
+>;
+
+export const EditButton = ({
+  onEdit,
+  className,
+  ...props
+}: EditButtonProps) => {
   const { status } = useChatStatus();
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -21,6 +27,7 @@ export const EditButton = ({
       size="icon"
       variant="secondary"
       aria-label="Edit message"
+      {...props}
     >
       <PencilIcon />
     </Button>

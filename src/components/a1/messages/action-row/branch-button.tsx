@@ -1,15 +1,21 @@
 import { GitBranch } from "lucide-react";
+import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 
-export const BranchButton = ({
-  className,
-  onBranch,
-}: {
-  className?: string;
+type BranchButtonProps = {
   onBranch: () => void;
-}) => {
+} & Omit<
+  ComponentProps<typeof Button>,
+  "onClick" | "disabled" | "size" | "variant" | "aria-label" | "children"
+>;
+
+export const BranchButton = ({
+  onBranch,
+  className,
+  ...props
+}: BranchButtonProps) => {
   const { status } = useChatStatus();
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -21,6 +27,7 @@ export const BranchButton = ({
       size="icon"
       variant="secondary"
       aria-label="Branch conversation from this message"
+      {...props}
     >
       <GitBranch />
     </Button>

@@ -1,5 +1,5 @@
 import { CopyCheckIcon, CopyIcon, CopyXIcon } from "lucide-react";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { getLogger } from "@/lib/logger";
@@ -15,13 +15,7 @@ type ButtonVariant =
   | "ghost"
   | "link";
 
-export const CopyButton = ({
-  text,
-  disabledDuration,
-  variants,
-  size,
-  className,
-}: {
+type CopyButtonProps = {
   text: string;
   disabledDuration?: number;
   variants?: {
@@ -30,9 +24,19 @@ export const CopyButton = ({
     success: ButtonVariant;
     error: ButtonVariant;
   };
-  size?: "default" | "sm" | "lg" | "icon";
-  className?: string;
-}) => {
+} & Omit<
+  ComponentProps<typeof Button>,
+  "onClick" | "disabled" | "variant" | "children"
+>;
+
+export const CopyButton = ({
+  text,
+  disabledDuration,
+  variants,
+  className,
+  size,
+  ...props
+}: CopyButtonProps) => {
   const [copyState, setCopyState] = useState<
     "idle" | "copying" | "success" | "error"
   >("idle");
@@ -83,6 +87,7 @@ export const CopyButton = ({
       className={cn("size-8 cursor-copy", className)}
       size={size || "icon"}
       variant={getButtonVariant()}
+      {...props}
     >
       {getButtonIcon()}
     </Button>

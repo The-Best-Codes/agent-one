@@ -1,4 +1,5 @@
 import { RefreshCcwIcon } from "lucide-react";
+import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -6,13 +7,18 @@ import {
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
 
+type RetryButtonProps = {
+  messageId: string;
+} & Omit<
+  ComponentProps<typeof Button>,
+  "onClick" | "disabled" | "size" | "variant" | "aria-label" | "children"
+>;
+
 export const RetryButton = ({
   messageId,
   className,
-}: {
-  messageId: string;
-  className?: string;
-}) => {
+  ...props
+}: RetryButtonProps) => {
   const { regenerate } = useChatFunctions();
   const { status } = useChatStatus();
 
@@ -32,6 +38,7 @@ export const RetryButton = ({
       size="icon"
       variant="secondary"
       aria-label="Regenerate response"
+      {...props}
     >
       <RefreshCcwIcon />
     </Button>
