@@ -33,7 +33,7 @@ export const MessageActionRow = ({
         messageRole !== "user" && "ml-2",
       )}
     >
-      <TooltipProvider disableHoverableContent>
+      <TooltipProvider>
         <TooltipRoot>
           <TooltipTrigger asChild>
             <CopyButton
