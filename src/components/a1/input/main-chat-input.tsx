@@ -225,7 +225,7 @@ export const MainChatInput = ({
     dragCounter.current++;
     if (
       e.dataTransfer.types.includes("Files") ||
-      e.dataTransfer.types.includes("application/json")
+      e.dataTransfer.types.includes("application/agent-one-chat")
     ) {
       logger.verbose("Drag enter detected, showing drop zone");
       setIsDragging(true);
@@ -308,11 +308,11 @@ export const MainChatInput = ({
         addFiles(e.dataTransfer.files);
         e.dataTransfer.clearData();
       } else {
-        const chatData = e.dataTransfer.getData("application/json");
+        const chatData = e.dataTransfer.getData("application/agent-one-chat");
         if (chatData) {
           try {
             const { chatId, title } = JSON.parse(chatData);
-            logger.verbose("Chat dropped", { chatId, title });
+            logger.verbose("AgentOne chat dropped", { chatId, title });
             handleChatDrop(chatId, title);
             e.dataTransfer.clearData();
           } catch (error) {
