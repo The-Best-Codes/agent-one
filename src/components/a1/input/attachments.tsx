@@ -1,4 +1,4 @@
-import { FileIcon, X } from "lucide-react";
+import { FileIcon, MessageCircle, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,10 @@ export const Attachments: React.FC<AttachmentsProps> = ({
                   className="h-full w-full object-cover"
                 />
               </div>
+            ) : file.name.includes("_agent-one_chat") ? (
+              <div className="bg-muted/70 relative flex h-12 w-12 items-center justify-center rounded-md border">
+                <MessageCircle className="text-muted-foreground h-6 w-6" />
+              </div>
             ) : (
               <div className="bg-muted/70 relative flex h-12 w-12 items-center justify-center rounded-md border">
                 <FileIcon className="text-muted-foreground h-6 w-6" />
@@ -78,7 +82,11 @@ export const Attachments: React.FC<AttachmentsProps> = ({
                 {file.type && (
                   <>
                     <span>&middot;</span>
-                    <span className="truncate">{file.type}</span>
+                    <span className="truncate">
+                      {file.name.includes("_agent-one_chat")
+                        ? "AgentOne Chat"
+                        : file.type}
+                    </span>
                   </>
                 )}
               </div>

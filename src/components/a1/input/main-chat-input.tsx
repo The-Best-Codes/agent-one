@@ -274,7 +274,7 @@ export const MainChatInput = ({
       });
       const file = new File(
         [blob],
-        `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_chat.txt`,
+        `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_agent-one_chat.txt`,
         {
           type: "text/plain",
         },
