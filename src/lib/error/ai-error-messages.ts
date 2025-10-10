@@ -11,6 +11,12 @@ export const aiErrorMessages = new Set<UxErrorConfig>([
     description:
       "AgentOne couldn't connect to the provider of the AI model you've chosen. Try a different model and check your internet connection.",
   },
+  {
+    key: "'Non-image file content parts' functionality not supported.",
+    uxError: "Only image files are supported by this model.",
+    description:
+      "The AI model you've chosen does not support non-image files. Please choose a different model or file type.",
+  },
 ]);
 
 /**

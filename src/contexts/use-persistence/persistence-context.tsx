@@ -100,13 +100,17 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const saveChatIds = useCallback(
     (ids: string[]) => {
       try {
+        logger.verbose("Saving chat IDs to localStorage", {
+          ids,
+          previousIds: chatIds,
+        });
         localStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
         setChatIds(ids);
       } catch (error) {
         logger.error("Failed to save chat IDs to localStorage", error);
       }
     },
-    [setChatIds],
+    [setChatIds, chatIds],
   );
 
   const createChat = useCallback(

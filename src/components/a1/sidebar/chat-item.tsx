@@ -50,6 +50,14 @@ export const ChatItem = memo(
           size="sm"
           className="group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none"
           asChild
+          draggable={true}
+          onDragStart={(e) => {
+            e.dataTransfer.setData(
+              "application/agent-one-chat",
+              JSON.stringify({ chatId: id, title }),
+            );
+            e.dataTransfer.effectAllowed = "copy";
+          }}
           onClick={() =>
             additionalOnChatClickCallback && additionalOnChatClickCallback(id)
           }

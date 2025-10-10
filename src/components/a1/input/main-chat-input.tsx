@@ -24,6 +24,7 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { kbdRegistry } from "@/lib/kbd-registry";
@@ -68,6 +69,7 @@ export const MainChatInput = ({
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
   const { settings } = useSettings();
+  const { loadChat, listChatIds } = usePersistence();
   const isMobile = useMobileDetection({
     anyHover: true,
     pointerCoarse: true,
@@ -221,7 +223,10 @@ export const MainChatInput = ({
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current++;
-    if (e.dataTransfer.types.includes("Files")) {
+    if (
+      e.dataTransfer.types.includes("Files") ||
+      e.dataTransfer.types.includes("application/agent-one-chat")
+    ) {
       logger.verbose("Drag enter detected, showing drop zone");
       setIsDragging(true);
     }
@@ -243,6 +248,52 @@ export const MainChatInput = ({
     e.stopPropagation();
   }, []);
 
+  const handleChatDrop = useCallback(
+    (chatId: string, title: string) => {
+      if (!listChatIds().includes(chatId)) {
+        logger.error("Dropped chat does not exist", { chatId });
+        return;
+      }
+
+      const messages = loadChat(chatId);
+      if (!messages || messages.length === 0) {
+        logger.error("Dropped chat has no messages", { chatId });
+        return;
+      }
+
+      const chatData = {
+        id: chatId,
+        title,
+        info: "This chat was attached as a file by the user",
+        messages,
+        exportedAt: new Date().toISOString(),
+      };
+
+      const blob = new Blob([JSON.stringify(chatData, null, 2)], {
+        type: "application/json",
+      });
+      const file = new File(
+        [blob],
+        `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_agent-one_chat.txt`,
+        {
+          type: "text/plain",
+        },
+      );
+
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      const fileList = dt.files;
+
+      logger.verbose("Chat exported and attached as file", {
+        chatId,
+        title,
+        fileName: file.name,
+      });
+      addFiles(fileList);
+    },
+    [loadChat, listChatIds, addFiles],
+  );
+
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -257,10 +308,22 @@ export const MainChatInput = ({
         addFiles(e.dataTransfer.files);
         e.dataTransfer.clearData();
       } else {
-        logger.verbose("Drop event with no files");
+        const chatData = e.dataTransfer.getData("application/agent-one-chat");
+        if (chatData) {
+          try {
+            const { chatId, title } = JSON.parse(chatData);
+            logger.verbose("AgentOne chat dropped", { chatId, title });
+            handleChatDrop(chatId, title);
+            e.dataTransfer.clearData();
+          } catch (error) {
+            logger.error("Failed to parse chat drop data", error);
+          }
+        } else {
+          logger.verbose("Drop event with no files or chat data");
+        }
       }
     },
-    [addFiles],
+    [addFiles, handleChatDrop],
   );
 
   return (
@@ -278,7 +341,7 @@ export const MainChatInput = ({
         {isDragging && (
           <div className="border-primary bg-background/80 absolute inset-0 z-20 flex items-center justify-center rounded-md rounded-b-none border-2 border-dashed backdrop-blur-sm">
             <p className="text-primary text-lg font-semibold">
-              Drop files to attach
+              Drop files or chats to attach
             </p>
           </div>
         )}
