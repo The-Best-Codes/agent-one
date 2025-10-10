@@ -267,13 +267,13 @@ export const MainChatInput = ({
       };
 
       const blob = new Blob([JSON.stringify(chatData, null, 2)], {
-        type: "application/json",
+        type: "text/plain",
       });
       const file = new File(
         [blob],
-        `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_chat.json`,
+        `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_chat.txt`,
         {
-          type: "application/json",
+          type: "text/plain",
         },
       );
 
@@ -305,7 +305,7 @@ export const MainChatInput = ({
         addFiles(e.dataTransfer.files);
         e.dataTransfer.clearData();
       } else {
-        const chatData = e.dataTransfer.getData("application/json");
+        const chatData = e.dataTransfer.getData("text/plain");
         if (chatData) {
           try {
             const { chatId, title } = JSON.parse(chatData);
