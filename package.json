@@ -61,7 +61,7 @@
     "@tauri-apps/plugin-sql": "^2.3.0",
     "@uiw/react-codemirror": "^4.25.2",
     "ai": "^5.0.65",
-    "babel-plugin-react-compiler": "^19.1.0-rc.3",
+    "babel-plugin-react-compiler": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
