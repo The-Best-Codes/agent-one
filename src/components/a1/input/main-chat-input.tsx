@@ -223,7 +223,10 @@ export const MainChatInput = ({
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current++;
-    if (e.dataTransfer.types.includes("Files")) {
+    if (
+      e.dataTransfer.types.includes("Files") ||
+      e.dataTransfer.types.includes("application/json")
+    ) {
       logger.verbose("Drag enter detected, showing drop zone");
       setIsDragging(true);
     }
