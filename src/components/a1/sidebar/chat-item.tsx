@@ -53,7 +53,7 @@ export const ChatItem = memo(
           draggable={true}
           onDragStart={(e) => {
             e.dataTransfer.setData(
-              "text/plain",
+              "application/json",
               JSON.stringify({ chatId: id, title }),
             );
             e.dataTransfer.effectAllowed = "copy";

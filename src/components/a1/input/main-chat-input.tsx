@@ -267,7 +267,7 @@ export const MainChatInput = ({
       };
 
       const blob = new Blob([JSON.stringify(chatData, null, 2)], {
-        type: "text/plain",
+        type: "application/json",
       });
       const file = new File(
         [blob],
@@ -305,7 +305,7 @@ export const MainChatInput = ({
         addFiles(e.dataTransfer.files);
         e.dataTransfer.clearData();
       } else {
-        const chatData = e.dataTransfer.getData("text/plain");
+        const chatData = e.dataTransfer.getData("application/json");
         if (chatData) {
           try {
             const { chatId, title } = JSON.parse(chatData);
