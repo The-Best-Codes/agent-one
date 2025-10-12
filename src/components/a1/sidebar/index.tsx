@@ -4,7 +4,7 @@ import { Activity, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useNavigate, useParams } from "react-router";
 
-import { ModelSelector } from "@/components/a1/model-selector";
+import { ModelSelector } from "@/components/a1/chat-model-selector";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
