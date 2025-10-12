@@ -14,6 +14,6 @@
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Changing settings rerenders like the whole UI, fix this
 - URGENT: Fix tooltips conflicting with clicks on buttons on touchscreens. Also in the action row, unless we remove asChild (which we should NOT have to do because it causes issues), clicking the buttons doesnt work.
-- Chats sometimes dissappear from chat-ids but the data stays in localStorage. What is causig this?
+- Chats sometimes dissappear from chat-ids but the data stays in localStorage. What is causing this?
 - Possibly bundle bunx instead of fnm to install node?
 - Sidecar uv/uvx
