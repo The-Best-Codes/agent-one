@@ -23,7 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { AVAILABLE_MODELS } from "@/lib/ai/models";
+import { AVAILABLE_CHAT_MODELS } from "@/lib/ai/models";
 import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
@@ -43,11 +43,11 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
-      return AVAILABLE_MODELS;
+      return AVAILABLE_CHAT_MODELS;
     }
 
     const query = searchQuery.toLowerCase();
-    const scoredModels = AVAILABLE_MODELS.map((model) => {
+    const scoredModels = AVAILABLE_CHAT_MODELS.map((model) => {
       const targetString = `${model.provider}/${model.name}`;
       const score = commandScore(targetString, query, [model?.id || ""]);
       return { model, score };

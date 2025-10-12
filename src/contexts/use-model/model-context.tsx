@@ -2,7 +2,7 @@ import React, { type ReactNode, useCallback, useState } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import {
-  getDefaultModel,
+  getDefaultChatModel,
   getModelById,
   type ModelConfig,
 } from "@/lib/ai/models";
@@ -29,7 +29,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
         return savedModel;
       }
     }
-    return getDefaultModel();
+    return getDefaultChatModel();
   });
 
   const setModel = useCallback(

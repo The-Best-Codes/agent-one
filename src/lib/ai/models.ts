@@ -61,18 +61,99 @@ function mapOpenRouterModels(): ModelConfig[] {
   }));
 }
 
+function mapGoogleChatModels(): ModelConfig[] {
+  return googleModelsData.models
+    .filter((model) =>
+      model.supportedGenerationMethods.includes("generateContent"),
+    )
+    .map((model) => ({
+      id: `google-${model.name}`,
+      name: model.displayName,
+      provider: "Google",
+      model: google(model.name),
+      supportsToolUse: true,
+    }));
+}
+
+function mapGoogleImageModels(): ModelConfig[] {
+  return googleModelsData.models
+    .filter((model) => model.supportedGenerationMethods.includes("predict"))
+    .map((model) => ({
+      id: `google-${model.name}`,
+      name: model.displayName,
+      provider: "Google",
+      model: google(model.name),
+      supportsToolUse: false,
+    }));
+}
+
+function mapGroqChatModels(): ModelConfig[] {
+  return groqModelsData.data
+    .filter(
+      (model) => !model.id.includes("whisper") && !model.id.includes("tts"),
+    )
+    .map((model) => ({
+      id: `groq-${model.id}`,
+      name: getPartAfterSlash(model.id),
+      provider: "Groq",
+      model: groq(model.id),
+      supportsToolUse: true,
+    }));
+}
+
+function mapOpenRouterChatModels(): ModelConfig[] {
+  return openRouterModelsData.data
+    .filter(
+      (model) =>
+        model.architecture.output_modalities.includes("text") &&
+        !model.architecture.modality.endsWith("image"),
+    )
+    .map((model) => ({
+      id: `openrouter-${model.id}`,
+      name: model.name,
+      provider: "OpenRouter",
+      model: openRouter(model.id),
+      supportsToolUse: (model.supported_parameters as string[]).includes(
+        "tools",
+      ),
+    }));
+}
+
+function mapOpenRouterImageModels(): ModelConfig[] {
+  return openRouterModelsData.data
+    .filter((model) => model.architecture.output_modalities.includes("image"))
+    .map((model) => ({
+      id: `openrouter-${model.id}`,
+      name: model.name,
+      provider: "OpenRouter",
+      model: openRouter(model.id),
+      supportsToolUse: false,
+    }));
+}
+
 export const AVAILABLE_MODELS: ModelConfig[] = [
   ...mapGoogleModels(),
   ...mapGroqModels(),
   ...mapOpenRouterModels(),
 ];
 
-export const DEFAULT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
+export const AVAILABLE_CHAT_MODELS: ModelConfig[] = [
+  ...mapGoogleChatModels(),
+  ...mapGroqChatModels(),
+  ...mapOpenRouterChatModels(),
+];
+
+export const AVAILABLE_IMAGE_MODELS: ModelConfig[] = [
+  ...mapGoogleImageModels(),
+  ...mapOpenRouterImageModels(),
+];
+
+export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
 export function getModelById(id: string): ModelConfig | undefined {
   return AVAILABLE_MODELS.find((model) => model.id === id);
 }
 
-export function getDefaultModel(): ModelConfig {
-  return getModelById(DEFAULT_MODEL_ID) || AVAILABLE_MODELS[0];
+export function getDefaultChatModel(): ModelConfig {
+  return getModelById(DEFAULT_CHAT_MODEL_ID) || AVAILABLE_CHAT_MODELS[0];
 }
