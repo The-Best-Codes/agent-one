@@ -2,7 +2,7 @@
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
 - Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
 - Use AI to summarize chat attachments?
-- Scroll to active chat and scroll to active model
+- Scroll to active model
 - Bulk actions in sidebar
 - Persist model used to generate message per message?
 - Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
