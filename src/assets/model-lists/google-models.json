@@ -675,6 +675,20 @@
       "thinking": true
     },
     {
+      "name": "models/gemini-2.5-computer-use-preview-10-2025",
+      "version": "Gemini 2.5 Computer Use Preview 10-2025",
+      "displayName": "Gemini 2.5 Computer Use Preview 10-2025",
+      "description": "Gemini 2.5 Computer Use Preview 10-2025",
+      "inputTokenLimit": 131072,
+      "outputTokenLimit": 65536,
+      "supportedGenerationMethods": ["generateContent", "countTokens"],
+      "temperature": 1,
+      "topP": 0.95,
+      "topK": 64,
+      "maxTemperature": 2,
+      "thinking": true
+    },
+    {
       "name": "models/embedding-001",
       "version": "001",
       "displayName": "Embedding 001",
@@ -761,16 +775,7 @@
       "inputTokenLimit": 480,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["predict"]
-    },
-    {
-      "name": "models/imagen-4.0-ultra-generate-preview-06-06",
-      "version": "01",
-      "displayName": "Imagen 4 Ultra (Preview)",
-      "description": "Vertex served Imagen 4.0 ultra model",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": ["predict"]
     }
   ],
-  "nextPageToken": "Ci5tb2RlbHMvaW1hZ2VuLTQuMC11bHRyYS1nZW5lcmF0ZS1wcmV2aWV3LTA2LTA2"
+  "nextPageToken": "Cihtb2RlbHMvaW1hZ2VuLTQuMC1nZW5lcmF0ZS1wcmV2aWV3LTA2LTA2"
 }
