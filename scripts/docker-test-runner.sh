@@ -3,7 +3,10 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DOCKER_COMPOSE_FILE="${SCRIPT_DIR}/../docker/docker-compose.yml"
+PACKAGE_JSON_FILE="${SCRIPT_DIR}/../package.json"
 SERVICE_NAME="agent-one-playwright-test-runner"
+
+PLAYWRIGHT_VERSION=$(grep '"@playwright/test":' "${PACKAGE_JSON_FILE}" | sed -E 's/.*"(\^?)([0-9]+\.[0-9]+\.[0-9]+)".*/\2/')
 
 echo "--- Syncing repo to docker cache ---"
 bash "${SCRIPT_DIR}/sync-to-cache.sh"
@@ -38,7 +41,10 @@ fi
 echo "---Setting up Node.js environment---"
 docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npm ci
 docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npm run build
-docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npx -y playwright@1.56.0 install --with-deps
+
+echo "---Installing Playwright dependencies---"
+echo "Using Playwright version ${PLAYWRIGHT_VERSION}"
+docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" npx -y playwright@"${PLAYWRIGHT_VERSION}" install --with-deps
 
 echo "--- Executing command in container: '$@' ---"
 docker compose -f "${DOCKER_COMPOSE_FILE}" exec "${SERVICE_NAME}" "$@"
