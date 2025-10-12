@@ -32,6 +32,7 @@ interface VirtualizedChatListProps {
   showNewChatButton?: boolean;
   className?: string;
   additionalOnChatClickCallback?: (id: string) => void;
+  scrollToActiveChat?: boolean;
 }
 
 export const VirtualizedChatList = ({
@@ -40,6 +41,7 @@ export const VirtualizedChatList = ({
   showNewChatButton = true,
   className = "w-full",
   additionalOnChatClickCallback,
+  scrollToActiveChat = true,
 }: VirtualizedChatListProps) => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,6 +122,26 @@ export const VirtualizedChatList = ({
       resizeObserver.disconnect();
     };
   }, [filteredChats.length]);
+
+  useEffect(() => {
+    // TODO: Maybe only scroll to it on initial mount? In that case, remove filteredChats and searchQuery from deps
+    if (scrollToActiveChat && activeChatId && virtualizer && !searchQuery) {
+      const activeIndex = filteredChats.findIndex(
+        (chat) => chat.id === activeChatId,
+      );
+      if (activeIndex !== -1) {
+        virtualizer.scrollToIndex(activeIndex, {
+          align: "center",
+        });
+      }
+    }
+  }, [
+    activeChatId,
+    filteredChats,
+    virtualizer,
+    scrollToActiveChat,
+    searchQuery,
+  ]);
 
   // This causes an infinite rerender bug
   // useEffect(() => {
