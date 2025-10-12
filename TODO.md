@@ -16,3 +16,4 @@
 - URGENT: Fix tooltips conflicting with clicks on buttons on touchscreens. Also in the action row, unless we remove asChild (which we should NOT have to do because it causes issues), clicking the buttons doesnt work.
 - Chats sometimes dissappear from chat-ids but the data stays in localStorage. What is causig this?
 - Possibly bundle bunx instead of fnm to install node?
+- Sidecar uv/uvx
