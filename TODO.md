@@ -9,6 +9,5 @@
 - Allow changing stop behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc. But:
 - Possibly bundle bunx instead of fnm to install node?
-- Changing settings rerenders like the whole UI, fix this
 - Migrate to Base UI when it's stable. That will fix a lot of issues.
 - Sidecar uv/uvx
