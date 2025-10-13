@@ -1,20 +1,15 @@
 - Maybe later: Human-in-the-loop / tool confirmation
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
-- Make scripts/ compatible with Windows and add notes about rsync and docker prerequisites.
-- Use AI to summarize chat attachments?
 - Scroll to active model
 - Bulk actions in sidebar
-- Persist model used to generate message per message?
-- Save what you typed in the main chat input per chat (in localstorage or something, of course put limitations on size and frequency)
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Instead of just the default MCP server, allow managing multiple MCP servers in settings
+- Make settings be like chrome settings with sections in a sidebar and stuff
 - Allow changing stop behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point
-- Persist useChat values (status, etc.) not just messages?
-- During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
-- Changing settings rerenders like the whole UI, fix this
-- URGENT: Fix tooltips conflicting with clicks on buttons on touchscreens. Also in the action row, unless we remove asChild (which we should NOT have to do because it causes issues), clicking the buttons doesnt work.
-- Chats sometimes dissappear from chat-ids but the data stays in localStorage. What is causing this?
+- During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc. But:
 - Possibly bundle bunx instead of fnm to install node?
+- Changing settings rerenders like the whole UI, fix this
+- Migrate to Base UI when it's stable. That will fix a lot of issues.
 - Sidecar uv/uvx
 - Allow attaching files in the editor flow (e.g. "See this image: (codemirror widget to show attachment inline)")
