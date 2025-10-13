@@ -10,7 +10,6 @@ import {
 } from "ai";
 
 import { getLogger } from "@/lib/logger";
-import type { SettingsType } from "@/lib/settings/types";
 
 import { SYSTEM_PROMPT } from "./system-prompt";
 import { getToolsObject } from "./tools";
@@ -19,11 +18,11 @@ const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel;
-  private settings: SettingsType;
+  private smoothStreamEnabled: boolean;
 
-  constructor(model: LanguageModel, settings: SettingsType) {
+  constructor(model: LanguageModel, smoothStreamEnabled: boolean) {
     this.model = model;
-    this.settings = settings;
+    this.smoothStreamEnabled = smoothStreamEnabled;
   }
 
   updateModel(model: LanguageModel) {
@@ -31,9 +30,12 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     logger.verbose("CustomChatTransport model updated to:", model);
   }
 
-  updateSettings(settings: SettingsType) {
-    this.settings = settings;
-    logger.verbose("CustomChatTransport settings updated");
+  updateSmoothStreamEnabled(smoothStreamEnabled: boolean) {
+    this.smoothStreamEnabled = smoothStreamEnabled;
+    logger.verbose(
+      "CustomChatTransport smoothStreamEnabled updated to:",
+      smoothStreamEnabled,
+    );
   }
 
   async sendMessages(
@@ -56,7 +58,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: "auto",
       // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: SYSTEM_PROMPT,
-      ...(this.settings.SMOOTH_STREAM_ENABLED.value && {
+      ...(this.smoothStreamEnabled && {
         experimental_transform: smoothStream(),
       }),
       onError: (error) => {

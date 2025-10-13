@@ -1,9 +1,10 @@
 import type { UIMessage } from "ai";
+import { useAtomValue } from "jotai";
 import { PlayIcon, SquareIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { Button } from "@/components/ui/button";
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
+import { maxCodeblockCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 import { usePreview } from "./preview";
@@ -36,7 +37,7 @@ const BestHighlighter = ({
 };
 
 export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
-  const { settings } = useSettings();
+  const maxCodeblockChars = useAtomValue(maxCodeblockCharsAtom);
   const {
     isPreviewMode,
     togglePreview,
@@ -82,7 +83,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
           <BestHighlighter
             lang={lang || "text"}
             content={content}
-            maxChars={settings.MAX_CODEBLOCK_CHARS.value}
+            maxChars={maxCodeblockChars}
           />
         )}
       </div>

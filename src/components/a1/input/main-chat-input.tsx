@@ -3,6 +3,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
+import { useAtomValue } from "jotai";
 import {
   ArrowUpIcon,
   Loader2Icon,
@@ -25,8 +26,11 @@ import {
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
+import {
+  markdownHighlightingAtom,
+  submitKeyAtom,
+} from "@/lib/jotai/settings-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 
@@ -68,7 +72,8 @@ export const MainChatInput = ({
   const { status } = useChatStatus();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
-  const { settings } = useSettings();
+  const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
+  const submitKey = useAtomValue(submitKeyAtom);
   const { loadChat, listChatIds } = usePersistence();
   const isMobile = useMobileDetection({
     anyHover: true,
@@ -366,7 +371,7 @@ export const MainChatInput = ({
             placeholder="Ask anything..."
             className="bg-transparent text-sm"
             extensions={[
-              ...(settings.MARKDOWN_HIGHLIGHTING.value
+              ...(markdownHighlighting
                 ? [markdown({ base: markdownLanguage })]
                 : []),
               editorTheme,
@@ -396,15 +401,12 @@ export const MainChatInput = ({
                 // eslint-disable-next-line react-hooks/refs
                 keymap.of([
                   {
-                    key:
-                      settings.SUBMIT_KEY.value === "enter"
-                        ? "Enter"
-                        : "Ctrl-Enter",
+                    key: submitKey === "enter" ? "Enter" : "Ctrl-Enter",
                     run: (view) => {
                       if (view.composing) {
                         return false;
                       }
-                      if (isMobile && settings.SUBMIT_KEY.value === "enter") {
+                      if (isMobile && submitKey === "enter") {
                         return false;
                       }
                       submitMessage();

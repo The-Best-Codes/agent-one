@@ -1,9 +1,13 @@
 import type { TextUIPart, UIMessage } from "ai";
+import { useAtomValue } from "jotai";
 
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
+import {
+  markdownRenderingAtom,
+  maxMessageLengthAtom,
+} from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 export const MessagePartText = ({
@@ -15,14 +19,14 @@ export const MessagePartText = ({
   text: TextUIPart["text"];
   messageRole: UIMessage["role"];
 }) => {
-  const { settings } = useSettings();
-  const shouldUsePerformantRenderer =
-    text.length > settings.MAX_MESSAGE_LENGTH.value;
+  const maxMessageLength = useAtomValue(maxMessageLengthAtom);
+  const markdownRendering = useAtomValue(markdownRenderingAtom);
+  const shouldUsePerformantRenderer = text.length > maxMessageLength;
 
   if (!text) return null;
 
   const shouldRenderMarkdown = (() => {
-    const renderingOption = settings.MARKDOWN_RENDERING.value;
+    const renderingOption = markdownRendering;
     if (renderingOption === "both") return true;
     if (renderingOption === "neither") return false;
     if (renderingOption === "user") return messageRole === "user";
@@ -44,8 +48,8 @@ export const MessagePartText = ({
             <AlertTitle>Performance Alert</AlertTitle>
             <AlertDescription>
               This message is longer than{" "}
-              {settings.MAX_MESSAGE_LENGTH.value.toLocaleString()} characters.
-              Syntax highlighting and markdown rendering are disabled.
+              {maxMessageLength.toLocaleString()} characters. Syntax
+              highlighting and markdown rendering are disabled.
             </AlertDescription>
           </Alert>
           <PerformantMarkdown content={text} />

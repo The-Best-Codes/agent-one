@@ -1,14 +1,15 @@
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
+import { useAtomValue } from "jotai";
 import { useTheme } from "next-themes";
 import { memo } from "react";
 
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
+import { markdownHighlightingAtom } from "@/lib/jotai/settings-atoms";
 
 export const PerformantMarkdown = memo(({ content }: { content: string }) => {
   const { resolvedTheme } = useTheme();
-  const { settings } = useSettings();
+  const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
   const editorTheme = EditorView.theme({
     "&": {
       border: "none",
@@ -36,9 +37,7 @@ export const PerformantMarkdown = memo(({ content }: { content: string }) => {
         maxHeight="384px"
         className="w-full bg-transparent text-sm"
         extensions={[
-          ...(settings.MARKDOWN_HIGHLIGHTING.value
-            ? [markdown({ base: markdownLanguage })]
-            : []),
+          ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
           editorTheme,
           EditorView.lineWrapping,
           EditorView.editable.of(false),
