@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { ArrowLeftIcon, HomeIcon } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import {
 
 export default function SettingsRoute() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [markdownHighlighting, setMarkdownHighlighting] = useAtom(
     markdownHighlightingAtom,
@@ -54,6 +55,15 @@ export default function SettingsRoute() {
     experimentalThrottleValueAtom,
   );
 
+  const handleNavigateBack = () => {
+    const chatId = searchParams.get("chatId");
+    if (chatId) {
+      navigate(`/chat/${chatId}`);
+    } else {
+      navigate("/chat");
+    }
+  };
+
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-2xl p-6">
@@ -62,7 +72,7 @@ export default function SettingsRoute() {
             variant="outline"
             size="sm"
             className="absolute top-0 left-0"
-            onClick={() => navigate(-1)}
+            onClick={handleNavigateBack}
           >
             <ArrowLeftIcon className="h-4 w-4" />
             <span className="sr-only md:not-sr-only">Back to Chat</span>
