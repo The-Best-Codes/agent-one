@@ -1,5 +1,7 @@
 import { useAtom } from "jotai";
+import { RotateCcwIcon } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -13,6 +15,7 @@ import {
   markdownHighlightingAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
+import { resetSetting } from "@/lib/settings/reset-settings";
 import { type SubmitKeyOption } from "@/lib/settings/types";
 
 export default function EditorSection() {
@@ -21,6 +24,14 @@ export default function EditorSection() {
   );
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
 
+  const handleResetMarkdownHighlighting = () => {
+    resetSetting("MARKDOWN_HIGHLIGHTING");
+  };
+
+  const handleResetSubmitKey = () => {
+    resetSetting("SUBMIT_KEY");
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -28,7 +39,7 @@ export default function EditorSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-row items-center justify-between gap-2">
-          <div className="flex flex-col items-start">
+          <div className="flex flex-1 flex-col items-start">
             <label className="text-sm font-medium">Markdown Highlighting</label>
             <p className="text-muted-foreground mt-1 text-sm">
               When enabled, text formatting like **bold**, *italic*, and `code`
@@ -36,32 +47,54 @@ export default function EditorSection() {
               see plain text without any special formatting colors or styles.
             </p>
           </div>
-          <Switch
-            checked={markdownHighlighting}
-            onCheckedChange={setMarkdownHighlighting}
-            aria-label="Toggle markdown highlighting"
-          />
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={markdownHighlighting}
+              onCheckedChange={setMarkdownHighlighting}
+              aria-label="Toggle markdown highlighting"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetMarkdownHighlighting}
+              className="size-8 p-0"
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-col items-start">
+          <div className="flex flex-1 flex-col items-start">
             <label className="text-sm font-medium">Submit Key</label>
             <p className="text-muted-foreground mt-1 text-sm">
               Choose which key combination submits your message.
             </p>
           </div>
-          <Select
-            value={submitKey}
-            onValueChange={(value) => setSubmitKey(value as SubmitKeyOption)}
-          >
-            <SelectTrigger size="sm" className="w-full md:w-fit md:max-w-96">
-              <SelectValue placeholder="Select option" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="enter">Enter</SelectItem>
-              <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Select
+              value={submitKey}
+              onValueChange={(value) => setSubmitKey(value as SubmitKeyOption)}
+            >
+              <SelectTrigger size="sm" className="w-full md:w-fit md:max-w-96">
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="enter">Enter</SelectItem>
+                <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetSubmitKey}
+              className="size-8 p-0"
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
