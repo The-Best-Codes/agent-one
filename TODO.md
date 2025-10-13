@@ -12,4 +12,3 @@
 - Changing settings rerenders like the whole UI, fix this
 - Migrate to Base UI when it's stable. That will fix a lot of issues.
 - Sidecar uv/uvx
-- Allow attaching files in the editor flow (e.g. "See this image: (codemirror widget to show attachment inline)")
