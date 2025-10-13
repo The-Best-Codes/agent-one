@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 
 import ChatRoute from "@/routes/chat";
-import CreditsRoute from "@/routes/credits";
 import IndexRoute from "@/routes/index";
 import SettingsRoute from "@/routes/settings";
 import TestsRoute from "@/routes/tests";
@@ -19,7 +18,6 @@ function App() {
         <Route path="/chat" element={<ChatRoute />} />
         <Route path="/chat/:id" element={<ChatRoute />} />
         <Route path="/settings" element={<SettingsRoute />} />
-        <Route path="/credits" element={<CreditsRoute />} />
         <Route path="/tests" element={<TestsRoute />} />
         <Route path="/tests/fnm" element={<FnmTestRoute />} />
         <Route path="*" element={<NotFoundRoute />} />
