@@ -17,3 +17,4 @@
 - Chats sometimes dissappear from chat-ids but the data stays in localStorage. What is causing this?
 - Possibly bundle bunx instead of fnm to install node?
 - Sidecar uv/uvx
+- Allow attaching files in the editor flow (e.g. "See this image: (codemirror widget to show attachment inline)")
