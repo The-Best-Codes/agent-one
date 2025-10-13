@@ -47,9 +47,9 @@ export const MessagePartText = ({
           <Alert variant="destructive" className="mb-2">
             <AlertTitle>Performance Alert</AlertTitle>
             <AlertDescription>
-              This message is longer than{" "}
-              {maxMessageLength.toLocaleString()} characters. Syntax
-              highlighting and markdown rendering are disabled.
+              This message is longer than {maxMessageLength.toLocaleString()}{" "}
+              characters. Syntax highlighting and markdown rendering are
+              disabled.
             </AlertDescription>
           </Alert>
           <PerformantMarkdown content={text} />
