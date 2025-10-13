@@ -58,26 +58,24 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div className="container mx-auto p-4 md:p-6">
+      <div className="mx-auto max-w-3xl p-4 md:p-6">
         <div className="flex flex-col gap-6 md:flex-row">
           <div className="hidden w-64 flex-shrink-0 md:block">
-            <div className="sticky top-6">
-              <div className="mb-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNavigateBack}
-                  className="w-full"
-                >
-                  <ArrowLeftIcon className="size-4" />
-                  Back to Chat
-                </Button>
-              </div>
-              <SettingsSidebar
-                activeSection={activeSection}
-                onSectionChange={setActiveSection}
-              />
+            <div className="mb-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNavigateBack}
+                className="w-full"
+              >
+                <ArrowLeftIcon className="size-4" />
+                Back to Chat
+              </Button>
             </div>
+            <SettingsSidebar
+              activeSection={activeSection}
+              onSectionChange={setActiveSection}
+            />
           </div>
 
           <div className="flex-1">
