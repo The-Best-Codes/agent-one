@@ -4,12 +4,16 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
 } from "ai";
+import { useAtomValue } from "jotai";
 import { memo, useEffect, useMemo } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { generateChatTitle } from "@/lib/ai/title-generator";
+import {
+  experimentalThrottleEnabledAtom,
+  experimentalThrottleValueAtom,
+} from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -29,7 +33,12 @@ export const ChatInstance = memo(
       status: UseChatHelpers<UIMessage>["status"],
     ) => void;
   }) => {
-    const { settings } = useSettings();
+    const experimentalThrottleEnabled = useAtomValue(
+      experimentalThrottleEnabledAtom,
+    );
+    const experimentalThrottleValue = useAtomValue(
+      experimentalThrottleValueAtom,
+    );
     const {
       listChatIds,
       loadChat,
@@ -41,8 +50,8 @@ export const ChatInstance = memo(
     const initialMessages = useMemo(() => loadChat(chatId), [chatId, loadChat]);
 
     const chat = useChat(model, {
-      experimental_throttle: settings.EXPERIMENTAL_THROTTLE_ENABLED.value
-        ? settings.EXPERIMENTAL_THROTTLE_VALUE.value
+      experimental_throttle: experimentalThrottleEnabled
+        ? experimentalThrottleValue
         : undefined,
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
       id: chatId,

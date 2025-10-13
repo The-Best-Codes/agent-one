@@ -3,10 +3,14 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
+import { useAtomValue } from "jotai";
 import { useTheme } from "next-themes";
 import { memo, useRef } from "react";
 
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
+import {
+  markdownHighlightingAtom,
+  submitKeyAtom,
+} from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const editorTheme = EditorView.theme({
@@ -51,7 +55,8 @@ const InlineTextEditorImpl = ({
   onCancel,
 }: InlineTextEditorProps) => {
   const { resolvedTheme } = useTheme();
-  const { settings } = useSettings();
+  const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
+  const submitKey = useAtomValue(submitKeyAtom);
   const editorViewRef = useRef<EditorView | null>(null);
 
   return (
@@ -63,17 +68,14 @@ const InlineTextEditorImpl = ({
       maxHeight="384px"
       className={cn("bg-transparent text-sm", className)}
       extensions={[
-        ...(settings.MARKDOWN_HIGHLIGHTING.value
-          ? [markdown({ base: markdownLanguage })]
-          : []),
+        ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
         editorTheme,
         EditorView.lineWrapping,
         EditorView.contentAttributes.of({ spellcheck: "true" }),
         Prec.highest(
           keymap.of([
             {
-              key:
-                settings.SUBMIT_KEY.value === "enter" ? "Enter" : "Ctrl-Enter",
+              key: submitKey === "enter" ? "Enter" : "Ctrl-Enter",
               run: (view) => {
                 if (view.composing) {
                   return false;

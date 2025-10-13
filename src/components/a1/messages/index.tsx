@@ -1,4 +1,5 @@
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
+import { useAtom } from "jotai";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import { memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -12,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
+import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -48,15 +49,15 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
   const { id: activeChatId } = useParams<{ id: string }>();
   const { branchChat } = usePersistence();
 
-  const { settings } = useSettings();
+  const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
 
   const handleEnterKey = useCallback(() => {
     if (message.role === "user") {
-      handleSave(settings.REGENERATE_ON_SAVE.value);
+      handleSave(regenerateOnSave);
     } else {
       handleSave(false);
     }
-  }, [handleSave, message.role, settings.REGENERATE_ON_SAVE.value]);
+  }, [handleSave, message.role, regenerateOnSave]);
 
   const handleBranch = useCallback(() => {
     if (!activeChatId) {
@@ -212,7 +213,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
                 size="sm"
                 variant="default"
                 className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
-                onClick={() => handleSave(settings.REGENERATE_ON_SAVE.value)}
+                onClick={() => handleSave(regenerateOnSave)}
               >
                 <CheckIcon className="size-4" />
                 Save
@@ -231,9 +232,9 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
                   <div className="flex items-center space-x-2 p-2">
                     <Checkbox
                       id="regenerate-on-save"
-                      checked={settings.REGENERATE_ON_SAVE.value}
+                      checked={regenerateOnSave}
                       onCheckedChange={(checked) =>
-                        settings.REGENERATE_ON_SAVE.set(checked as boolean)
+                        setRegenerateOnSave(checked as boolean)
                       }
                     />
                     <label

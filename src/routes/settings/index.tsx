@@ -1,3 +1,4 @@
+import { useAtom } from "jotai";
 import { ArrowLeftIcon, HomeIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 
@@ -14,11 +15,44 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
+import {
+  experimentalThrottleEnabledAtom,
+  experimentalThrottleValueAtom,
+  markdownHighlightingAtom,
+  markdownRenderingAtom,
+  maxCodeblockCharsAtom,
+  maxMessageLengthAtom,
+  smoothStreamEnabledAtom,
+  submitKeyAtom,
+} from "@/lib/jotai/settings-atoms";
+import {
+  type MarkdownRenderingOption,
+  type SubmitKeyOption,
+} from "@/lib/settings/types";
 
 export default function SettingsRoute() {
-  const { settings } = useSettings();
   const navigate = useNavigate();
+
+  const [markdownHighlighting, setMarkdownHighlighting] = useAtom(
+    markdownHighlightingAtom,
+  );
+  const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
+  const [markdownRendering, setMarkdownRendering] = useAtom(
+    markdownRenderingAtom,
+  );
+  const [maxMessageLength, setMaxMessageLength] = useAtom(maxMessageLengthAtom);
+  const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(
+    maxCodeblockCharsAtom,
+  );
+  const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(
+    smoothStreamEnabledAtom,
+  );
+  const [experimentalThrottleEnabled, setExperimentalThrottleEnabled] = useAtom(
+    experimentalThrottleEnabledAtom,
+  );
+  const [experimentalThrottleValue, setExperimentalThrottleValue] = useAtom(
+    experimentalThrottleValueAtom,
+  );
 
   return (
     <div className="bg-background min-h-screen">
@@ -81,8 +115,8 @@ export default function SettingsRoute() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.MARKDOWN_HIGHLIGHTING.value}
-                  onCheckedChange={settings.MARKDOWN_HIGHLIGHTING.set}
+                  checked={markdownHighlighting}
+                  onCheckedChange={setMarkdownHighlighting}
                   aria-label="Toggle markdown highlighting"
                 />
               </div>
@@ -95,8 +129,10 @@ export default function SettingsRoute() {
                   </p>
                 </div>
                 <Select
-                  value={settings.SUBMIT_KEY.value}
-                  onValueChange={settings.SUBMIT_KEY.set}
+                  value={submitKey}
+                  onValueChange={(value) =>
+                    setSubmitKey(value as SubmitKeyOption)
+                  }
                 >
                   <SelectTrigger
                     size="sm"
@@ -128,8 +164,10 @@ export default function SettingsRoute() {
                   </p>
                 </div>
                 <Select
-                  value={settings.MARKDOWN_RENDERING.value}
-                  onValueChange={settings.MARKDOWN_RENDERING.set}
+                  value={markdownRendering}
+                  onValueChange={(value) =>
+                    setMarkdownRendering(value as MarkdownRenderingOption)
+                  }
                 >
                   <SelectTrigger
                     size="sm"
@@ -162,11 +200,9 @@ export default function SettingsRoute() {
                   type="number"
                   min="1000"
                   max="1000000"
-                  value={settings.MAX_MESSAGE_LENGTH.value}
+                  value={maxMessageLength}
                   onChange={(e) =>
-                    settings.MAX_MESSAGE_LENGTH.set(
-                      parseInt(e.target.value) || 50000,
-                    )
+                    setMaxMessageLength(parseInt(e.target.value) || 50000)
                   }
                   className="w-full md:w-32"
                 />
@@ -186,11 +222,9 @@ export default function SettingsRoute() {
                   type="number"
                   min="1000"
                   max="1000000"
-                  value={settings.MAX_CODEBLOCK_CHARS.value}
+                  value={maxCodeblockChars}
                   onChange={(e) =>
-                    settings.MAX_CODEBLOCK_CHARS.set(
-                      parseInt(e.target.value) || 10000,
-                    )
+                    setMaxCodeblockChars(parseInt(e.target.value) || 10000)
                   }
                   className="w-full md:w-32"
                 />
@@ -211,8 +245,8 @@ export default function SettingsRoute() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.SMOOTH_STREAM_ENABLED.value}
-                  onCheckedChange={settings.SMOOTH_STREAM_ENABLED.set}
+                  checked={smoothStreamEnabled}
+                  onCheckedChange={setSmoothStreamEnabled}
                   aria-label="Toggle smooth stream"
                 />
               </div>
@@ -227,27 +261,26 @@ export default function SettingsRoute() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.EXPERIMENTAL_THROTTLE_ENABLED.value}
-                  onCheckedChange={settings.EXPERIMENTAL_THROTTLE_ENABLED.set}
+                  checked={experimentalThrottleEnabled}
+                  onCheckedChange={setExperimentalThrottleEnabled}
                   aria-label="Toggle experimental throttle"
                 />
               </div>
 
-              {settings.EXPERIMENTAL_THROTTLE_ENABLED.value && (
+              {experimentalThrottleEnabled && (
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-col items-start">
                     <label className="text-sm font-medium tabular-nums">
-                      Throttle Value:{" "}
-                      {settings.EXPERIMENTAL_THROTTLE_VALUE.value}ms
+                      Throttle Value: {experimentalThrottleValue}ms
                     </label>
                     <p className="text-muted-foreground mt-1 text-sm">
                       Adjust the throttle delay from 0ms to 10,000ms.
                     </p>
                   </div>
                   <Slider
-                    value={[settings.EXPERIMENTAL_THROTTLE_VALUE.value]}
+                    value={[experimentalThrottleValue]}
                     onValueChange={(value) =>
-                      settings.EXPERIMENTAL_THROTTLE_VALUE.set(value[0])
+                      setExperimentalThrottleValue(value[0])
                     }
                     min={0}
                     max={10000}

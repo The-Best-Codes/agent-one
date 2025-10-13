@@ -4,10 +4,11 @@ import {
   type UseChatOptions,
 } from "@ai-sdk/react";
 import { type ChatInit, type LanguageModel } from "ai";
+import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 
-import { useSettings } from "@/contexts/use-settings/settings-hooks";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
+import { smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -16,8 +17,10 @@ type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
   Pick<UseChatOptions<UIMessage>, "experimental_throttle" | "resume">;
 
 export function useChat(model: LanguageModel, options?: CustomChatOptions) {
-  const { settings } = useSettings();
-  const [transport] = useState(() => new CustomChatTransport(model, settings));
+  const smoothStreamEnabled = useAtomValue(smoothStreamEnabledAtom);
+  const [transport] = useState(
+    () => new CustomChatTransport(model, smoothStreamEnabled),
+  );
 
   useEffect(() => {
     transport.updateModel(model);
@@ -25,9 +28,9 @@ export function useChat(model: LanguageModel, options?: CustomChatOptions) {
   }, [model, transport]);
 
   useEffect(() => {
-    transport.updateSettings(settings);
+    transport.updateSmoothStreamEnabled(smoothStreamEnabled);
     logger.verbose("Updated chat transport with new settings");
-  }, [settings, transport]);
+  }, [smoothStreamEnabled, transport]);
 
   const chatResult = useChatSDK({
     transport: transport,
