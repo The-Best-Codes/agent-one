@@ -6,13 +6,16 @@ import {
   type SubmitKeyOption,
 } from "@/lib/settings/types";
 
+import { lsStringOrUndefined } from "./load-from-localstorage";
+
 const SETTING_PREFIX = "agent-one-setting-";
 
 const createSettingAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
   defaultValue: T,
 ) => {
-  return atomWithStorage<T>(`${SETTING_PREFIX}${key}`, defaultValue);
+  const lsKey = `${SETTING_PREFIX}${key}`;
+  return atomWithStorage<T>(lsKey, lsStringOrUndefined(lsKey) ?? defaultValue);
 };
 
 export const markdownHighlightingAtom = createSettingAtom(
