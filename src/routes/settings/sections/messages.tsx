@@ -74,9 +74,8 @@ export default function MessagesSection() {
             </Select>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={handleResetMarkdownRendering}
-              className="size-8 p-0"
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -105,9 +104,8 @@ export default function MessagesSection() {
             />
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={handleResetMaxMessageLength}
-              className="size-8 p-0"
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -138,9 +136,8 @@ export default function MessagesSection() {
             />
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={handleResetMaxCodeblockChars}
-              className="size-8 p-0"
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />

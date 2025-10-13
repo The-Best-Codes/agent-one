@@ -55,9 +55,8 @@ export default function EditorSection() {
             />
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={handleResetMarkdownHighlighting}
-              className="size-8 p-0"
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -87,9 +86,8 @@ export default function EditorSection() {
             </Select>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={handleResetSubmitKey}
-              className="size-8 p-0"
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />

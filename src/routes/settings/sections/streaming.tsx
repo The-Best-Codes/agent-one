@@ -56,9 +56,8 @@ export default function StreamingSection() {
             />
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={handleResetSmoothStream}
-              className="size-8 p-0"
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -81,9 +80,8 @@ export default function StreamingSection() {
             />
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={handleResetExperimentalThrottle}
-              className="size-8 p-0"
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -114,9 +112,8 @@ export default function StreamingSection() {
               />
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={handleResetThrottleValue}
-                className="size-8 p-0"
                 aria-label="Reset to default"
               >
                 <RotateCcwIcon className="size-4" />
