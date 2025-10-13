@@ -8,7 +8,7 @@ export default function AppearanceSection() {
         <CardTitle>Appearance</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row">
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
             <label className="text-sm font-medium">Theme</label>
             <p className="text-muted-foreground mt-1 text-sm">

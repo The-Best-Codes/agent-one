@@ -31,7 +31,7 @@ export default function MessagesSection() {
         <CardTitle>Messages</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row">
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
             <label className="text-sm font-medium">Markdown Rendering</label>
             <p className="text-muted-foreground mt-1 text-sm">
@@ -56,7 +56,7 @@ export default function MessagesSection() {
           </Select>
         </div>
 
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row">
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
             <label className="text-sm font-medium">Max Message Length</label>
             <p className="text-muted-foreground mt-1 text-sm">
@@ -76,7 +76,7 @@ export default function MessagesSection() {
           />
         </div>
 
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row">
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
             <label className="text-sm font-medium">
               Max Codeblock Characters
