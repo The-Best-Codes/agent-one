@@ -111,6 +111,22 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.theme-radius-none {
+  --radius: 0;
+}
+
+.theme-radius-sm {
+  --radius: 0.3125rem;
+}
+
+.theme-radius-md {
+  --radius: 0.625rem;
+}
+
+.theme-radius-lg {
+  --radius: 1.25rem;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
