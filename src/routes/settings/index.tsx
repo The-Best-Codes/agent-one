@@ -31,18 +31,34 @@ export default function SettingsRoute() {
   return (
     <div className="bg-background min-h-screen">
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNavigateBack}
-          className="w-full"
-        >
-          <ArrowLeftIcon className="size-4" />
-          Back to Chat
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button variant="outline" size="sm" onClick={handleNavigateBack}>
+            <ArrowLeftIcon className="size-4" />
+            Back
+          </Button>
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+            <DrawerTrigger asChild>
+              {/* TODO: Make it more obvious that more settings are here */}
+              <Button variant="outline" size="sm">
+                <MenuIcon className="size-4" />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <SettingsSidebar
+                  activeSection={activeSection}
+                  onSectionChange={(section) => {
+                    setActiveSection(section);
+                    setIsDrawerOpen(false);
+                  }}
+                />
+              </DrawerHeader>
+            </DrawerContent>
+          </Drawer>
+        </div>
       </div>
 
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 md:p-6">
         <div className="flex flex-col gap-6 md:flex-row">
           <div className="hidden w-64 flex-shrink-0 md:block">
             <div className="sticky top-6">
@@ -62,28 +78,6 @@ export default function SettingsRoute() {
                 onSectionChange={setActiveSection}
               />
             </div>
-          </div>
-
-          <div className="md:hidden">
-            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-              <DrawerTrigger asChild>
-                <Button variant="outline" size="sm" className="mb-4 w-full">
-                  <MenuIcon className="size-4" />
-                  Settings Menu
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <SettingsSidebar
-                    activeSection={activeSection}
-                    onSectionChange={(section) => {
-                      setActiveSection(section);
-                      setIsDrawerOpen(false);
-                    }}
-                  />
-                </DrawerHeader>
-              </DrawerContent>
-            </Drawer>
           </div>
 
           <div className="flex-1">
