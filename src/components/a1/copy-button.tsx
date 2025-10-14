@@ -1,3 +1,4 @@
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { CopyCheckIcon, CopyIcon, CopyXIcon } from "lucide-react";
 import { type ComponentProps, useState } from "react";
 
@@ -43,8 +44,8 @@ export const CopyButton = ({
 
   const handleCopy = async () => {
     try {
-      // setCopyState("copying"); // Enable only if we migrate to the Tauri copy plugin
-      await navigator.clipboard.writeText(text);
+      setCopyState("copying");
+      await writeText(text);
       setCopyState("success");
       setTimeout(() => setCopyState("idle"), disabledDuration || 2000);
     } catch (error) {
