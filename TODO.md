@@ -5,10 +5,10 @@
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Make persistence happen more often (like after tool calls etc too) to save progress better
 - Instead of just the default MCP server, allow managing multiple MCP servers in settings
-- Make settings be like chrome settings with sections in a sidebar and stuff
 - Allow changing stop behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc. But:
 - Possibly bundle bunx instead of fnm to install node?
 - Migrate to Base UI when it's stable. That will fix a lot of issues.
 - Sidecar uv/uvx
 - Improve settings UX by adding previews of settings. For example, instead of "smooth stream" with a toggle, put two large components under a header "Stream Type". One will be choppy, the other smooth. Then the user can see in practice what the difference is!
+- Ensure cross-instance sync (e.g. creating a new chat in one window should make it appear in all windows)
