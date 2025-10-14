@@ -12,17 +12,6 @@ import { lsStringOrUndefined } from "./load-from-localstorage";
 
 const SETTING_PREFIX = "agent-one-setting-";
 
-const parseValue = <T>(value: string | undefined, defaultValue: T): T => {
-  if (value === undefined) return defaultValue;
-  if (typeof defaultValue === "boolean") {
-    return (value === "true") as T;
-  } else if (typeof defaultValue === "number") {
-    return (Number(value) || defaultValue) as T;
-  } else {
-    return value as T;
-  }
-};
-
 const createSettingAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
   defaultValue: T,
@@ -30,7 +19,7 @@ const createSettingAtom = <T>(
   const lsKey = `${SETTING_PREFIX}${key}`;
   return atomWithStorage<T>(
     lsKey,
-    parseValue(lsStringOrUndefined(lsKey), defaultValue),
+    (lsStringOrUndefined(lsKey) as T) ?? defaultValue,
   );
 };
 
