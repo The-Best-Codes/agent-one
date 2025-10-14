@@ -4,9 +4,9 @@ import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
-import { useTheme } from "next-themes";
 import { memo, useRef } from "react";
 
+import { useTheme } from "@/hooks/use-theme";
 import {
   markdownHighlightingAtom,
   submitKeyAtom,

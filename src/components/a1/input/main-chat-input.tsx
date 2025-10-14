@@ -10,7 +10,6 @@ import {
   PaperclipIcon,
   SquareIcon,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useCallback, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -27,6 +26,7 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
+import { useTheme } from "@/hooks/use-theme";
 import {
   markdownHighlightingAtom,
   submitKeyAtom,

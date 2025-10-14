@@ -1,8 +1,8 @@
 "use client";
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTheme } from "@/hooks/use-theme";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
