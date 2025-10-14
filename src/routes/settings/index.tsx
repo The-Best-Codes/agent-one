@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, MenuIcon } from "lucide-react";
+import { ArrowLeftIcon, SettingsIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
@@ -38,13 +40,16 @@ export default function SettingsRoute() {
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
-              {/* TODO: Make it more obvious that more settings are here */}
-              <Button variant="outline" size="sm">
-                <MenuIcon className="size-4" />
+              <Button variant="outline" size="icon">
+                <SettingsIcon className="size-4" />
               </Button>
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
+                <DrawerTitle className="mb-2">Settings</DrawerTitle>
+                <DrawerDescription className="sr-only">
+                  List of setting sections
+                </DrawerDescription>
                 <SettingsSidebar
                   activeSection={activeSection}
                   onSectionChange={(section) => {
