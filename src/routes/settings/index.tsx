@@ -58,7 +58,7 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-3xl p-4 md:p-6">
+      <div className="mx-auto max-w-5xl p-4 md:p-6">
         <div className="flex flex-col gap-6 md:flex-row">
           <div className="hidden w-64 flex-shrink-0 md:block">
             <div className="mb-2">
