@@ -81,7 +81,7 @@ export default function EditorSection() {
               value={submitKey}
               onValueChange={(value) => setSubmitKey(value as SubmitKeyOption)}
             >
-              <SelectTrigger size="sm" className="w-full md:w-fit md:max-w-96">
+              <SelectTrigger className="w-full md:w-fit md:max-w-96">
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>

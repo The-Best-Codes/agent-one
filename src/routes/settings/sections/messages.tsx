@@ -70,7 +70,7 @@ export default function MessagesSection() {
                 setMarkdownRendering(value as MarkdownRenderingOption)
               }
             >
-              <SelectTrigger size="sm" className="w-full md:w-fit md:max-w-96">
+              <SelectTrigger className="w-full md:w-fit md:max-w-96">
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
