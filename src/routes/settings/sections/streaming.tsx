@@ -3,6 +3,7 @@ import { RotateCcwIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -52,7 +53,7 @@ export default function StreamingSection() {
       <CardContent className="space-y-4">
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
-            <label className="text-sm font-medium">Smooth Stream</label>
+            <Label className="text-sm font-medium">Smooth Stream</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Enable smooth streaming for a more fluid typing experience.
             </p>
@@ -77,7 +78,7 @@ export default function StreamingSection() {
 
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
-            <label className="text-sm font-medium">Experimental Throttle</label>
+            <Label className="text-sm font-medium">Experimental Throttle</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Enable throttling to control streaming speed.
             </p>
@@ -103,9 +104,9 @@ export default function StreamingSection() {
         {experimentalThrottleEnabled && (
           <div className="flex flex-col gap-2">
             <div className="flex flex-col items-start">
-              <label className="text-sm font-medium tabular-nums">
+              <Label className="text-sm font-medium tabular-nums">
                 Throttle Value: {experimentalThrottleValue}ms
-              </label>
+              </Label>
               <p className="text-muted-foreground mt-1 text-sm">
                 Adjust the throttle delay from 0ms to 10,000ms.
               </p>

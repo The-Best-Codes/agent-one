@@ -4,6 +4,7 @@ import { RotateCcwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -58,7 +59,7 @@ export default function MessagesSection() {
       <CardContent className="space-y-4">
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <label className="text-sm font-medium">Markdown Rendering</label>
+            <Label className="text-sm font-medium">Markdown Rendering</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Choose which messages should render markdown formatting.
             </p>
@@ -96,7 +97,7 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <label className="text-sm font-medium">Max Message Length</label>
+            <Label className="text-sm font-medium">Max Message Length</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Maximum characters before activating performance mode for that
               message.
@@ -127,9 +128,9 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <label className="text-sm font-medium">
+            <Label className="text-sm font-medium">
               Max Codeblock Characters
-            </label>
+            </Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Maximum characters in code blocks before switching to plain text
               rendering.

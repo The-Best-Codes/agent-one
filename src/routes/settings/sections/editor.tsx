@@ -3,6 +3,7 @@ import { RotateCcwIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -44,7 +45,7 @@ export default function EditorSection() {
       <CardContent className="space-y-4">
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
-            <label className="text-sm font-medium">Markdown Highlighting</label>
+            <Label className="text-sm font-medium">Markdown Highlighting</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               When enabled, text formatting like **bold**, *italic*, and `code`
               will be visually highlighted as you type. When disabled, you'll
@@ -71,7 +72,7 @@ export default function EditorSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <label className="text-sm font-medium">Submit Key</label>
+            <Label className="text-sm font-medium">Submit Key</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Choose which key combination submits your message.
             </p>

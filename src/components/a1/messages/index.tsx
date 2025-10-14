@@ -12,6 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
@@ -237,12 +238,12 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
                         setRegenerateOnSave(checked as boolean)
                       }
                     />
-                    <label
+                    <Label
                       htmlFor="regenerate-on-save"
                       className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       Regenerate when Saved
-                    </label>
+                    </Label>
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
