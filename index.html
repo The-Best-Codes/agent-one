@@ -13,16 +13,29 @@
     <link rel="stylesheet" href="src/index.css" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <script>
-      let theme = "light";
-      let themeFromStorage = localStorage.getItem("theme");
-      if (!themeFromStorage) {
-        localStorage.setItem("theme", "system");
-        themeFromStorage = "system";
+      function jsonParseCatch(value) {
+        if (!value) return value;
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
       }
 
-      if (themeFromStorage && themeFromStorage !== "system") {
-        theme = themeFromStorage;
-      } else if (themeFromStorage === "system") {
+      let theme = "light";
+      let themeFromStorage = localStorage.getItem("agent-one-setting-THEME");
+      if (!themeFromStorage) {
+        localStorage.setItem(
+          "agent-one-setting-THEME",
+          JSON.stringify("system"),
+        );
+        themeFromStorage = JSON.stringify("system");
+      }
+
+      let parsedTheme = jsonParseCatch(themeFromStorage) || "system";
+      if (parsedTheme !== "system") {
+        theme = parsedTheme;
+      } else {
         theme = window.matchMedia("(prefers-color-scheme: dark)").matches
           ? "dark"
           : "light";

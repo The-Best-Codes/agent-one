@@ -2,9 +2,9 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
-import { useTheme } from "next-themes";
 import { memo } from "react";
 
+import { useTheme } from "@/hooks/use-theme";
 import { markdownHighlightingAtom } from "@/lib/jotai/settings-atoms";
 
 export const PerformantMarkdown = memo(({ content }: { content: string }) => {

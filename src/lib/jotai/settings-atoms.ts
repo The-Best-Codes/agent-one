@@ -3,23 +3,14 @@ import { atomWithStorage } from "jotai/utils";
 import {
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
+  type RoundnessOption,
   type SubmitKeyOption,
+  type ThemeOption,
 } from "@/lib/settings/types";
 
 import { lsStringOrUndefined } from "./load-from-localstorage";
 
 const SETTING_PREFIX = "agent-one-setting-";
-
-const parseValue = <T>(value: string | undefined, defaultValue: T): T => {
-  if (value === undefined) return defaultValue;
-  if (typeof defaultValue === "boolean") {
-    return (value === "true") as T;
-  } else if (typeof defaultValue === "number") {
-    return (Number(value) || defaultValue) as T;
-  } else {
-    return value as T;
-  }
-};
 
 const createSettingAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
@@ -28,7 +19,7 @@ const createSettingAtom = <T>(
   const lsKey = `${SETTING_PREFIX}${key}`;
   return atomWithStorage<T>(
     lsKey,
-    parseValue(lsStringOrUndefined(lsKey), defaultValue),
+    (lsStringOrUndefined(lsKey) as T) ?? defaultValue,
   );
 };
 
@@ -75,4 +66,14 @@ export const smoothStreamEnabledAtom = createSettingAtom(
 export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
+);
+
+export const themeAtom = createSettingAtom<ThemeOption>(
+  "THEME",
+  DEFAULT_SETTINGS.THEME,
+);
+
+export const roundnessAtom = createSettingAtom<RoundnessOption>(
+  "ROUNDNESS",
+  DEFAULT_SETTINGS.ROUNDNESS,
 );
