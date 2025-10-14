@@ -2,6 +2,7 @@ import { useAtom } from "jotai";
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { roundnessAtom, themeAtom } from "@/lib/jotai/settings-atoms";
@@ -17,9 +18,16 @@ export default function AppearanceSection() {
   const [theme, setTheme] = useAtom(themeAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
 
-  const roundnessIndex = roundnessOptions.findIndex(
-    (option) => option.value === roundness,
-  );
+  const getRoundnessIndex = (value: string) => {
+    const index = roundnessOptions.findIndex(
+      (option) => option.value === value,
+    );
+    return index >= 0
+      ? index
+      : roundnessOptions.findIndex((option) => option.value === "md");
+  };
+
+  const roundnessIndex = getRoundnessIndex(roundness);
 
   return (
     <Card>
@@ -29,7 +37,7 @@ export default function AppearanceSection() {
       <CardContent className="space-y-4">
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
-            <label className="text-sm font-medium">Theme</label>
+            <Label className="text-sm font-medium">Theme</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Choose your preferred theme for the application.
             </p>
@@ -67,7 +75,7 @@ export default function AppearanceSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
-            <label className="text-sm font-medium">Roundness</label>
+            <Label className="text-sm font-medium">Roundness</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Adjust the corner radius of UI elements.
             </p>
