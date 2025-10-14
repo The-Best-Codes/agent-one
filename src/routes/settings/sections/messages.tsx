@@ -17,7 +17,10 @@ import {
   maxMessageLengthAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
-import { type MarkdownRenderingOption } from "@/lib/settings/types";
+import {
+  DEFAULT_SETTINGS,
+  type MarkdownRenderingOption,
+} from "@/lib/settings/types";
 
 export default function MessagesSection() {
   const [markdownRendering, setMarkdownRendering] = useAtom(
@@ -27,6 +30,13 @@ export default function MessagesSection() {
   const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(
     maxCodeblockCharsAtom,
   );
+
+  const isMarkdownRenderingDefault =
+    markdownRendering === DEFAULT_SETTINGS.MARKDOWN_RENDERING;
+  const isMaxMessageLengthDefault =
+    maxMessageLength === DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH;
+  const isMaxCodeblockCharsDefault =
+    maxCodeblockChars === DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS;
 
   const handleResetMarkdownRendering = () => {
     resetSetting("MARKDOWN_RENDERING");
@@ -76,6 +86,7 @@ export default function MessagesSection() {
               variant="ghost"
               size="icon"
               onClick={handleResetMarkdownRendering}
+              disabled={isMarkdownRenderingDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -106,6 +117,7 @@ export default function MessagesSection() {
               variant="ghost"
               size="icon"
               onClick={handleResetMaxMessageLength}
+              disabled={isMaxMessageLengthDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -138,6 +150,7 @@ export default function MessagesSection() {
               variant="ghost"
               size="icon"
               onClick={handleResetMaxCodeblockChars}
+              disabled={isMaxCodeblockCharsDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />

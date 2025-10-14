@@ -11,6 +11,7 @@ import {
   smoothStreamEnabledAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
+import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 
 export default function StreamingSection() {
   const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(
@@ -22,6 +23,14 @@ export default function StreamingSection() {
   const [experimentalThrottleValue, setExperimentalThrottleValue] = useAtom(
     experimentalThrottleValueAtom,
   );
+
+  const isSmoothStreamDefault =
+    smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
+  const isExperimentalThrottleEnabledDefault =
+    experimentalThrottleEnabled ===
+    DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED;
+  const isExperimentalThrottleValueDefault =
+    experimentalThrottleValue === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE;
 
   const handleResetSmoothStream = () => {
     resetSetting("SMOOTH_STREAM_ENABLED");
@@ -58,6 +67,7 @@ export default function StreamingSection() {
               variant="ghost"
               size="icon"
               onClick={handleResetSmoothStream}
+              disabled={isSmoothStreamDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -82,6 +92,7 @@ export default function StreamingSection() {
               variant="ghost"
               size="icon"
               onClick={handleResetExperimentalThrottle}
+              disabled={isExperimentalThrottleEnabledDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -114,6 +125,7 @@ export default function StreamingSection() {
                 variant="ghost"
                 size="icon"
                 onClick={handleResetThrottleValue}
+                disabled={isExperimentalThrottleValueDefault}
                 aria-label="Reset to default"
               >
                 <RotateCcwIcon className="size-4" />

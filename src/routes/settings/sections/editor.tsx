@@ -16,13 +16,17 @@ import {
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
-import { type SubmitKeyOption } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS, type SubmitKeyOption } from "@/lib/settings/types";
 
 export default function EditorSection() {
   const [markdownHighlighting, setMarkdownHighlighting] = useAtom(
     markdownHighlightingAtom,
   );
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
+
+  const isMarkdownHighlightingDefault =
+    markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
+  const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
 
   const handleResetMarkdownHighlighting = () => {
     resetSetting("MARKDOWN_HIGHLIGHTING");
@@ -57,6 +61,7 @@ export default function EditorSection() {
               variant="ghost"
               size="icon"
               onClick={handleResetMarkdownHighlighting}
+              disabled={isMarkdownHighlightingDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
@@ -88,6 +93,7 @@ export default function EditorSection() {
               variant="ghost"
               size="icon"
               onClick={handleResetSubmitKey}
+              disabled={isSubmitKeyDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
