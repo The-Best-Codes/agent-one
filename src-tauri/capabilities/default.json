@@ -32,6 +32,7 @@
       ]
     },
     "fs:default",
-    "dialog:default"
+    "dialog:default",
+    "clipboard-manager:default"
   ]
 }
