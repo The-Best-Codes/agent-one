@@ -1,21 +1,21 @@
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
+import { getResolvedTheme } from "@/lib/get-resolved-theme";
 import { roundnessAtom, themeAtom } from "@/lib/jotai/settings-atoms";
+import { jsonParseCatch } from "@/lib/json-parse-catch";
 
 export function ThemeRegistry() {
-  const [theme] = useAtom(themeAtom);
-  const [roundness] = useAtom(roundnessAtom);
+  const [rawTheme] = useAtom(themeAtom);
+  const [rawRoundness] = useAtom(roundnessAtom);
+
+  const theme = jsonParseCatch(rawTheme);
+  const roundness = jsonParseCatch(rawRoundness);
 
   useEffect(() => {
     // Handle theme
     const root = document.documentElement;
-    const resolvedTheme =
-      theme === "system"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : theme;
+    const resolvedTheme = getResolvedTheme(theme);
 
     root.classList.remove("light", "dark");
     root.classList.add(resolvedTheme);
@@ -28,8 +28,8 @@ export function ThemeRegistry() {
       "theme-radius-md",
       "theme-radius-lg",
     );
-    root.classList.add(`theme-radius-${roundness}`);
-    root.setAttribute("data-roundness", roundness);
+    root.classList.add(`theme-radius-${roundness || "md"}`);
+    root.setAttribute("data-roundness", roundness || "md");
   }, [theme, roundness]);
 
   return null;

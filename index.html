@@ -13,46 +13,37 @@
     <link rel="stylesheet" href="src/index.css" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <script>
+      function jsonParseCatch(value) {
+        if (!value) return value;
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      }
+
       let theme = "light";
       let themeFromStorage = localStorage.getItem("agent-one-setting-THEME");
       if (!themeFromStorage) {
-        localStorage.setItem("agent-one-setting-THEME", "system");
-        themeFromStorage = "system";
+        localStorage.setItem(
+          "agent-one-setting-THEME",
+          JSON.stringify("system"),
+        );
+        themeFromStorage = JSON.stringify("system");
       }
 
-      if (themeFromStorage && themeFromStorage !== "system") {
-        theme = themeFromStorage;
-      } else if (themeFromStorage === "system") {
+      let parsedTheme = jsonParseCatch(themeFromStorage) || "system";
+      if (parsedTheme !== "system") {
+        theme = parsedTheme;
+      } else {
         theme = window.matchMedia("(prefers-color-scheme: dark)").matches
           ? "dark"
           : "light";
       }
 
-      let roundness = "md";
-      let roundnessFromStorage = localStorage.getItem(
-        "agent-one-setting-ROUNDNESS",
-      );
-      if (!roundnessFromStorage) {
-        localStorage.setItem("agent-one-setting-ROUNDNESS", "md");
-        roundnessFromStorage = "md";
-      }
-
-      if (roundnessFromStorage) {
-        roundness = roundnessFromStorage;
-      }
-
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(theme);
       document.documentElement.setAttribute("data-theme", theme);
-
-      document.documentElement.classList.remove(
-        "theme-radius-none",
-        "theme-radius-sm",
-        "theme-radius-md",
-        "theme-radius-lg",
-      );
-      document.documentElement.classList.add(`theme-radius-${roundness}`);
-      document.documentElement.setAttribute("data-roundness", roundness);
     </script>
     <title>AgentOne</title>
   </head>
