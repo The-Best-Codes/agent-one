@@ -1,5 +1,7 @@
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
+export type ThemeOption = "light" | "dark" | "system";
+export type RoundnessOption = "none" | "sm" | "md" | "lg";
 
 export interface DefaultSettings {
   MARKDOWN_HIGHLIGHTING: boolean;
@@ -11,6 +13,8 @@ export interface DefaultSettings {
   EXPERIMENTAL_THROTTLE_VALUE: number;
   SMOOTH_STREAM_ENABLED: boolean;
   REGENERATE_ON_SAVE: boolean;
+  THEME: ThemeOption;
+  ROUNDNESS: RoundnessOption;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -23,4 +27,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   EXPERIMENTAL_THROTTLE_VALUE: 250,
   SMOOTH_STREAM_ENABLED: false,
   REGENERATE_ON_SAVE: false,
+  THEME: "system",
+  ROUNDNESS: "md",
 };

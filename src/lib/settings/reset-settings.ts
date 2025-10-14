@@ -8,14 +8,18 @@ import {
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
   regenerateOnSaveAtom,
+  roundnessAtom,
   smoothStreamEnabledAtom,
   submitKeyAtom,
+  themeAtom,
 } from "../jotai/settings-atoms";
 import {
   DEFAULT_SETTINGS,
   type DefaultSettings,
   type MarkdownRenderingOption,
+  type RoundnessOption,
   type SubmitKeyOption,
+  type ThemeOption,
 } from "./types";
 
 /**
@@ -43,6 +47,8 @@ export function resetAllSettings(): void {
   );
   store.set(smoothStreamEnabledAtom, DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED);
   store.set(regenerateOnSaveAtom, DEFAULT_SETTINGS.REGENERATE_ON_SAVE);
+  store.set(themeAtom, DEFAULT_SETTINGS.THEME as ThemeOption);
+  store.set(roundnessAtom, DEFAULT_SETTINGS.ROUNDNESS as RoundnessOption);
 }
 
 /**
@@ -80,6 +86,12 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "REGENERATE_ON_SAVE":
       store.set(regenerateOnSaveAtom, defaultValue as boolean);
+      break;
+    case "THEME":
+      store.set(themeAtom, defaultValue as ThemeOption);
+      break;
+    case "ROUNDNESS":
+      store.set(roundnessAtom, defaultValue as RoundnessOption);
       break;
   }
 }

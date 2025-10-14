@@ -14,9 +14,9 @@
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <script>
       let theme = "light";
-      let themeFromStorage = localStorage.getItem("theme");
+      let themeFromStorage = localStorage.getItem("agent-one-setting-THEME");
       if (!themeFromStorage) {
-        localStorage.setItem("theme", "system");
+        localStorage.setItem("agent-one-setting-THEME", "system");
         themeFromStorage = "system";
       }
 
@@ -28,9 +28,31 @@
           : "light";
       }
 
+      let roundness = "md";
+      let roundnessFromStorage = localStorage.getItem(
+        "agent-one-setting-ROUNDNESS",
+      );
+      if (!roundnessFromStorage) {
+        localStorage.setItem("agent-one-setting-ROUNDNESS", "md");
+        roundnessFromStorage = "md";
+      }
+
+      if (roundnessFromStorage) {
+        roundness = roundnessFromStorage;
+      }
+
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(theme);
       document.documentElement.setAttribute("data-theme", theme);
+
+      document.documentElement.classList.remove(
+        "theme-radius-none",
+        "theme-radius-sm",
+        "theme-radius-md",
+        "theme-radius-lg",
+      );
+      document.documentElement.classList.add(`theme-radius-${roundness}`);
+      document.documentElement.setAttribute("data-roundness", roundness);
     </script>
     <title>AgentOne</title>
   </head>

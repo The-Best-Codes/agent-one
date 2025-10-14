@@ -3,7 +3,9 @@ import { atomWithStorage } from "jotai/utils";
 import {
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
+  type RoundnessOption,
   type SubmitKeyOption,
+  type ThemeOption,
 } from "@/lib/settings/types";
 
 import { lsStringOrUndefined } from "./load-from-localstorage";
@@ -75,4 +77,14 @@ export const smoothStreamEnabledAtom = createSettingAtom(
 export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
+);
+
+export const themeAtom = createSettingAtom<ThemeOption>(
+  "THEME",
+  DEFAULT_SETTINGS.THEME,
+);
+
+export const roundnessAtom = createSettingAtom<RoundnessOption>(
+  "ROUNDNESS",
+  DEFAULT_SETTINGS.ROUNDNESS,
 );
