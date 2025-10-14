@@ -49,7 +49,20 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- When @src/routes/suspense-fallback.tsx is updated, this should be updated as well! -->
+      <main
+        class="flex h-screen flex-col items-center justify-center"
+        role="main"
+        data-testid="main"
+      >
+        <span
+          class="text-shimmer from-foreground via-muted-foreground to-foreground bg-gradient-to-r p-4 text-5xl"
+        >
+          AgentOne
+        </span>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

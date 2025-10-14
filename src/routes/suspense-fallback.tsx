@@ -1,3 +1,7 @@
+/*
+  When @/index.html's loader is updated, this should be updated as well!
+*/
+
 export default function SuspenseFallback() {
   return (
     <main
