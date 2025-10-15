@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: tenki-standard-large-plus-16c-32g
+    runs-on: tenki-standard-autoscale
     timeout-minutes: 30
     strategy:
       fail-fast: true
