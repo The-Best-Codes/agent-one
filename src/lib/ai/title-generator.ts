@@ -5,9 +5,22 @@ import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
+function calculateMaxOutputTokens(
+  maxTokens?: number | "none",
+): number | undefined {
+  if (maxTokens === "none") {
+    return undefined;
+  }
+  if (typeof maxTokens === "number") {
+    return maxTokens;
+  }
+  return 20;
+}
+
 export async function generateChatTitle(
   model: LanguageModel,
   messages: UIMessage[],
+  maxTokens?: number | "none",
 ): Promise<string> {
   logger.verbose(`Generating title for chat with ${messages.length} messages`);
   try {
@@ -35,7 +48,7 @@ export async function generateChatTitle(
 ${conversationText}
 
 Title:`,
-      maxOutputTokens: 20,
+      maxOutputTokens: calculateMaxOutputTokens(maxTokens),
     });
 
     const title = result.text.trim().replace(/^["']|["']$/g, "");

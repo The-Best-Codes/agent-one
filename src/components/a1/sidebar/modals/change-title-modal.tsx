@@ -1,3 +1,4 @@
+import { Loader2Icon, SparklesIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { getModelById } from "@/lib/ai/models";
+import { generateChatTitle } from "@/lib/ai/title-generator";
 
 interface ChangeTitleModalProps {
   isOpen: boolean;
@@ -29,7 +38,8 @@ const ChangeTitleForm = ({
   onClose: () => void;
 }) => {
   const [title, setTitle] = useState(currentTitle);
-  const { saveChatTitle } = usePersistence();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { saveChatTitle, loadChatData } = usePersistence();
 
   const handleSave = () => {
     if (title.trim() && title.trim() !== currentTitle) {
@@ -44,15 +54,59 @@ const ChangeTitleForm = ({
     }
   };
 
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    try {
+      const chatData = loadChatData(chatId);
+      const modelConfig = getModelById(chatData.modelId || "");
+      if (modelConfig) {
+        const generatedTitle = await generateChatTitle(
+          modelConfig.model,
+          chatData.messages,
+          "none",
+        );
+        setTitle(generatedTitle);
+      }
+    } catch (error) {
+      console.error("Failed to generate title:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <>
-      <Input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Enter chat title..."
-        autoFocus
-      />
+      <div className="flex gap-2">
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Enter chat title..."
+          autoFocus
+          className="flex-1"
+        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                variant="outline"
+                size="icon"
+              >
+                {isGenerating ? (
+                  <Loader2Icon className="size-4 animate-spin" />
+                ) : (
+                  <SparklesIcon className="size-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Generate title using AI</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
           Cancel
