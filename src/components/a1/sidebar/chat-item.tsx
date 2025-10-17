@@ -69,8 +69,8 @@ export const ChatItem = memo(
             </span>
             <div
               className={cn(
-                "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100",
-                isDropdownOpen ? "opacity-100" : "",
+                "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-100 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 md:opacity-0",
+                isDropdownOpen ? "md:opacity-100" : "",
               )}
             >
               <DropdownMenu onOpenChange={setIsDropdownOpen}>
