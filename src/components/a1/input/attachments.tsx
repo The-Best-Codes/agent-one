@@ -54,7 +54,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
             className="bg-background relative flex min-w-0 shrink-0 items-center gap-2 rounded-md border p-2"
           >
             {previews[index]?.type === "image" ? (
-              <div className="relative h-12 w-12 overflow-hidden rounded-md border">
+              <div className="relative size-12 overflow-hidden rounded-md border">
                 <img
                   src={previews[index].url}
                   alt={file.name}
@@ -62,12 +62,12 @@ export const Attachments: React.FC<AttachmentsProps> = ({
                 />
               </div>
             ) : file.name.includes("_agent-one_chat") ? (
-              <div className="bg-muted/70 relative flex h-12 w-12 items-center justify-center rounded-md border">
-                <MessageCircle className="text-muted-foreground h-6 w-6" />
+              <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
+                <MessageCircle className="text-muted-foreground size-6" />
               </div>
             ) : (
-              <div className="bg-muted/70 relative flex h-12 w-12 items-center justify-center rounded-md border">
-                <FileIcon className="text-muted-foreground h-6 w-6" />
+              <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
+                <FileIcon className="text-muted-foreground size-6" />
               </div>
             )}
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -96,10 +96,10 @@ export const Attachments: React.FC<AttachmentsProps> = ({
               size="icon"
               variant="ghost"
               onClick={() => handleRemove(index)}
-              className="h-6 w-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
+              className="size-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
               title="Remove file"
             >
-              <X className="h-3 w-3" />
+              <X className="size-3" />
             </Button>
           </div>
         ))}

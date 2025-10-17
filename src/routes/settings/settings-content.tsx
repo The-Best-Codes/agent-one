@@ -28,5 +28,5 @@ export default function SettingsContent({
     }
   };
 
-  return <div className="space-y-2">{renderSection()}</div>;
+  return <div className="flex flex-col gap-2">{renderSection()}</div>;
 }

@@ -230,7 +230,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <div className="flex items-center space-x-2 p-2">
+                  <div className="flex items-center gap-2 p-2">
                     <Checkbox
                       id="regenerate-on-save"
                       checked={regenerateOnSave}

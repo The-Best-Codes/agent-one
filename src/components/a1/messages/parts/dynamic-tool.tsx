@@ -118,7 +118,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               <ScrollArea type="always" viewportClassName="max-h-96">
                 <ScrollBar orientation="horizontal"></ScrollBar>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   {part?.input !== null && (
                     <div>
                       <span className="font-medium">Parameters:</span>

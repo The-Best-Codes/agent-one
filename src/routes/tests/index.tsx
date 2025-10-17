@@ -28,7 +28,7 @@ export default function TestsRoute() {
             <CardHeader>
               <CardTitle>Available Tests</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="flex flex-col gap-4">
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
                   <h3 className="font-medium">FNM Node Installation</h3>

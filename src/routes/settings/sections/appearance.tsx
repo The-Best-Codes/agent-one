@@ -34,7 +34,7 @@ export default function AppearanceSection() {
       <CardHeader>
         <CardTitle>Appearance</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
             <Label className="text-sm font-medium">Theme</Label>

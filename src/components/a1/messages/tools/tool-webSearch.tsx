@@ -131,7 +131,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               <ScrollArea type="always" viewportClassName="max-h-96">
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   <div>
                     {result.search_url && (
                       <a
@@ -148,7 +148,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                   </div>
                   {result.results?.map((searchResult, index) => (
                     <div key={index} className="rounded-md border p-2">
-                      <div className="space-y-1">
+                      <div className="flex flex-col gap-1">
                         <a
                           href={searchResult.url}
                           target="_blank"

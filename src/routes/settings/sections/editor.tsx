@@ -42,7 +42,7 @@ export default function EditorSection() {
       <CardHeader>
         <CardTitle>Editor</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
             <Label className="text-sm font-medium">Markdown Highlighting</Label>

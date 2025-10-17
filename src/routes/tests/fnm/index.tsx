@@ -127,11 +127,11 @@ export default function FnmTestRoute() {
   const getStatusIcon = () => {
     switch (testResult.status) {
       case "running":
-        return <LoaderIcon className="h-5 w-5 animate-spin text-blue-500" />;
+        return <LoaderIcon className="size-5 animate-spin text-blue-500" />;
       case "success":
-        return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
+        return <CheckCircleIcon className="size-5 text-green-500" />;
       case "error":
-        return <XCircleIcon className="h-5 w-5 text-red-500" />;
+        return <XCircleIcon className="size-5 text-red-500" />;
       default:
         return null;
     }
@@ -180,7 +180,7 @@ export default function FnmTestRoute() {
                 {getStatusBadge()}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="flex flex-col gap-4">
               <p className="text-muted-foreground text-sm">
                 This test will attempt to install Node.js version 22 using fnm
                 (Fast Node Manager). It will show progress updates and verify
@@ -194,7 +194,7 @@ export default function FnmTestRoute() {
                   className="gap-2"
                 >
                   {testResult.status === "running" && (
-                    <LoaderIcon className="h-4 w-4 animate-spin" />
+                    <LoaderIcon className="size-4 animate-spin" />
                   )}
                   {testResult.status === "running"
                     ? "Installing..."
@@ -217,7 +217,7 @@ export default function FnmTestRoute() {
               {/* Progress Display */}
               {testResult.status === "running" &&
                 testResult.progress !== undefined && (
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <div className="flex justify-between text-sm">
                       <span>Download Progress</span>
                       <span>{testResult.progress.toFixed(1)}%</span>

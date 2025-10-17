@@ -21,7 +21,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <FileImageIcon className="h-3 w-3" />
+              <FileImageIcon className="size-3" />
               <span className="truncate">{file.filename}</span>
             </div>
           </div>
@@ -42,7 +42,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <FileIcon className="h-3 w-3" />
+              <FileIcon className="size-3" />
               <span className="truncate">{file.filename} &middot; PDF</span>
             </div>
           </div>
@@ -52,8 +52,8 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
   }
 
   const getFileIcon = () => {
-    if (isText) return <FileTextIcon className="h-5 w-5" />;
-    return <FileIcon className="text-muted-foreground h-5 w-5" />;
+    if (isText) return <FileTextIcon className="size-5" />;
+    return <FileIcon className="text-muted-foreground size-5" />;
   };
 
   const getFileTypeLabel = () => {
@@ -64,7 +64,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
 
   return (
     <div className="bg-background flex max-w-48 items-center gap-2 rounded-md border p-2">
-      <div className="bg-background flex h-12 w-12 items-center justify-center rounded-md border">
+      <div className="bg-background flex size-12 items-center justify-center rounded-md border">
         {getFileIcon()}
       </div>
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">

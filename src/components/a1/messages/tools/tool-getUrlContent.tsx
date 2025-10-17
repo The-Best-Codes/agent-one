@@ -232,7 +232,7 @@ export const MessagePartToolGetUrlContent = ({
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 {results.map((result, index) => (
                   <UrlResultDisplay key={index} result={result} input={input} />
                 ))}

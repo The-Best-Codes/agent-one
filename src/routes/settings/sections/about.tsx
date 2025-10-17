@@ -39,7 +39,7 @@ const credits = [
 
 export default function AboutSection() {
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <Card>
         <CardHeader>
           <CardTitle>About</CardTitle>

@@ -119,7 +119,7 @@ class ErrorBoundary extends React.Component<
               <Accordion
                 type="single"
                 collapsible
-                className="border-border w-full space-y-2 rounded-md border px-3"
+                className="border-border flex w-full flex-col gap-2 rounded-md border px-3"
               >
                 <AccordionItem className="p-0" value="details">
                   <AccordionTrigger

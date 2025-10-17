@@ -62,7 +62,7 @@ const SidebarContent = ({
           <Link
             to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
           >
-            <SettingsIcon className="h-4 w-4" />
+            <SettingsIcon className="size-4" />
             Settings
           </Link>
         </Button>

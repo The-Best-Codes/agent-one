@@ -157,13 +157,13 @@ export const VirtualizedChatList = ({
   return (
     <div className={cn("flex h-full flex-col", className)}>
       {showNewChatButton && (
-        <div className="space-y-2 pb-2">
+        <div className="flex flex-col gap-2 pb-2">
           <Button
             onClick={() => handleNewChat && handleNewChat()}
             className="w-full justify-start"
             variant="outline"
           >
-            <PlusIcon className="h-4 w-4" />
+            <PlusIcon className="size-4" />
             New Chat
           </Button>
           <div className="group/sidebar-search-input relative">
