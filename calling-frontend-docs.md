@@ -39,12 +39,13 @@ Tauri provides APIs to listen to events on both the webview and the Rust interfa
 
 The `@tauri-apps/api` NPM package offers APIs to listen to both global and webview-specific events.
 
-*   Listening to global events
+- Listening to global events
 
-`import { listen } from '@tauri-apps/api/event';type DownloadStarted = {  url: string;  downloadId: number;  contentLength: number;};listen<DownloadStarted>('download-started', (event) => {  console.log(    `downloading ${event.payload.contentLength} bytes from ${event.payload.url}`  );});` 
-*   Listening to webview-specific events
+`import { listen } from '@tauri-apps/api/event';type DownloadStarted = {  url: string;  downloadId: number;  contentLength: number;};listen<DownloadStarted>('download-started', (event) => {  console.log(    `downloading ${event.payload.contentLength} bytes from ${event.payload.url}`  );});`
 
-`import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';const appWebview = getCurrentWebviewWindow();appWebview.listen<string>('logged-in', (event) => {  localStorage.setItem('session-token', event.payload);});` 
+- Listening to webview-specific events
+
+`import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';const appWebview = getCurrentWebviewWindow();appWebview.listen<string>('logged-in', (event) => {  localStorage.setItem('session-token', event.payload);});`
 
 The `listen` function keeps the event listener registered for the entire lifetime of the application. To stop listening on an event you can use the `unlisten` function which is returned by the `listen` function:
 
@@ -56,12 +57,13 @@ Additionally Tauri provides a utility function for listening to an event exactly
 
 Global and webview-specific events are also delivered to listeners registered in Rust.
 
-*   Listening to global events
+- Listening to global events
 
-`use tauri::Listener;#[cfg_attr(mobile, tauri::mobile_entry_point)]pub fn run() {  tauri::Builder::default()    .setup(|app| {      app.listen("download-started", |event| {        if let Ok(payload) = serde_json::from_str::<DownloadStarted>(&event.payload()) {          println!("downloading {}", payload.url);        }      });      Ok(())    })    .run(tauri::generate_context!())    .expect("error while running tauri application");}` 
-*   Listening to webview-specific events
+`use tauri::Listener;#[cfg_attr(mobile, tauri::mobile_entry_point)]pub fn run() {  tauri::Builder::default()    .setup(|app| {      app.listen("download-started", |event| {        if let Ok(payload) = serde_json::from_str::<DownloadStarted>(&event.payload()) {          println!("downloading {}", payload.url);        }      });      Ok(())    })    .run(tauri::generate_context!())    .expect("error while running tauri application");}`
 
-`use tauri::{Listener, Manager};#[cfg_attr(mobile, tauri::mobile_entry_point)]pub fn run() {  tauri::Builder::default()    .setup(|app| {      let webview = app.get_webview_window("main").unwrap();      webview.listen("logged-in", |event| {        let session_token = event.data;        // save token..      });      Ok(())    })    .run(tauri::generate_context!())    .expect("error while running tauri application");}` 
+- Listening to webview-specific events
+
+`use tauri::{Listener, Manager};#[cfg_attr(mobile, tauri::mobile_entry_point)]pub fn run() {  tauri::Builder::default()    .setup(|app| {      let webview = app.get_webview_window("main").unwrap();      webview.listen("logged-in", |event| {        let session_token = event.data;        // save token..      });      Ok(())    })    .run(tauri::generate_context!())    .expect("error while running tauri application");}`
 
 The `listen` function keeps the event listener registered for the entire lifetime of the application. To stop listening on an event you can use the `unlisten` function:
 
