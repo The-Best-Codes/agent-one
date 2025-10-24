@@ -4,23 +4,22 @@ URL Source: https://www.gethopp.app/blog/tauri-window-state-sync
 
 Markdown Content:
 Contents[#](https://www.gethopp.app/blog/tauri-window-state-sync#contents)
---------------------------------------------------------------------------
 
-*   [Multi-window state management in Tauri and React](https://www.gethopp.app/blog/tauri-window-state-sync#multi-window-state-management-in-tauri-and-react)
-*   [The problem](https://www.gethopp.app/blog/tauri-window-state-sync#the-problem)
-*   [The solution, a loosely synced state](https://www.gethopp.app/blog/tauri-window-state-sync#the-solution-a-loosely-synced-state)
-*   [How to implement it](https://www.gethopp.app/blog/tauri-window-state-sync#how-to-implement-it)
-*   [Things to be improved](https://www.gethopp.app/blog/tauri-window-state-sync#things-to-be-improved)
-*   [Example codebase](https://www.gethopp.app/blog/tauri-window-state-sync#example-codebase)
-*   [Conclusion](https://www.gethopp.app/blog/tauri-window-state-sync#conclusion)
+---
 
-Multi-window state management in Tauri and React[#](https://www.gethopp.app/blog/tauri-window-state-sync#multi-window-state-management-in-tauri-and-react)
-----------------------------------------------------------------------------------------------------------------------------------------------------------
+- [Multi-window state management in Tauri and React](https://www.gethopp.app/blog/tauri-window-state-sync#multi-window-state-management-in-tauri-and-react)
+- [The problem](https://www.gethopp.app/blog/tauri-window-state-sync#the-problem)
+- [The solution, a loosely synced state](https://www.gethopp.app/blog/tauri-window-state-sync#the-solution-a-loosely-synced-state)
+- [How to implement it](https://www.gethopp.app/blog/tauri-window-state-sync#how-to-implement-it)
+- [Things to be improved](https://www.gethopp.app/blog/tauri-window-state-sync#things-to-be-improved)
+- [Example codebase](https://www.gethopp.app/blog/tauri-window-state-sync#example-codebase)
+- [Conclusion](https://www.gethopp.app/blog/tauri-window-state-sync#conclusion)
+
+## Multi-window state management in Tauri and React[#](https://www.gethopp.app/blog/tauri-window-state-sync#multi-window-state-management-in-tauri-and-react)
 
 Below I will explain how you can easily synchronize your React store, that is Zustand (used in the examples), Redux or any store you use, in multiple Tauri processes (windows). If you faced this problem before and want a relatively simple solution, this post is for you.
 
-The problem[#](https://www.gethopp.app/blog/tauri-window-state-sync#the-problem)
---------------------------------------------------------------------------------
+## The problem[#](https://www.gethopp.app/blog/tauri-window-state-sync#the-problem)
 
 Early in the development of Hopp, we decided to use [Zustand](https://zustand.docs.pmnd.rs/?ref=hopp) for state management. Zustand is a lightweight state management library that is easy to use and has a small bundle size. Also its API is really nice and easy to understand. But there was one problem.
 
@@ -40,8 +39,7 @@ Literally how I felt when deciding what to do with multi-window state management
 
 While holding the state on the backend sounded solid, I really wanted to avoid losing all the reactivity that comes out of the box with Zustand (or Redux or any other state management library). Besides that, every component would be polluted with `async` calls for fetching and setting the state.
 
-The solution, a loosely synced state[#](https://www.gethopp.app/blog/tauri-window-state-sync#the-solution-a-loosely-synced-state)
----------------------------------------------------------------------------------------------------------------------------------
+## The solution, a loosely synced state[#](https://www.gethopp.app/blog/tauri-window-state-sync#the-solution-a-loosely-synced-state)
 
 Before we dive into the solution, let's take into consideration one crucial decision we made.
 
@@ -55,8 +53,7 @@ But what does it mean to be loosely sync state? In simple terms, it means that t
 
 This trade-off is acceptable, and the limitation is mainly because state in React is meant to work in a sync way, and to delegate the state so it's not loosely synced, we would need to orchestrate the state with a common back-end and this means async calls (or blocking the main thread 🙃).
 
-How to implement it[#](https://www.gethopp.app/blog/tauri-window-state-sync#how-to-implement-it)
-------------------------------------------------------------------------------------------------
+## How to implement it[#](https://www.gethopp.app/blog/tauri-window-state-sync#how-to-implement-it)
 
 The mechanism is really simple, so we decided not to ship it as a package, but rather as a simple example.
 
@@ -170,8 +167,7 @@ To understand how it works, you can simply check the following sequence diagram.
 
 Sequence diagram
 
-Things to be improved[#](https://www.gethopp.app/blog/tauri-window-state-sync#things-to-be-improved)
-----------------------------------------------------------------------------------------------------
+## Things to be improved[#](https://www.gethopp.app/blog/tauri-window-state-sync#things-to-be-improved)
 
 We talked about loosely syncing, but technically speaking, we may drop events while syncing state across windows.
 
@@ -179,8 +175,7 @@ There are some cases that may result in a race condition, but so far we have not
 
 An ideal solution would probably involve the state being kept in the backend (Rust), as a JSON blob, and then a lock process to update state per window. This way we would avoid any race condition, but the problem then is the async calls, and how they will pollute the code with async/await calls. If there is any easy way to do this, please let me know at my Twitter/X account [@costasAlexoglou](https://twitter.com/costasAlexoglou/?ref=hopp).
 
-Example codebase[#](https://www.gethopp.app/blog/tauri-window-state-sync#example-codebase)
-------------------------------------------------------------------------------------------
+## Example codebase[#](https://www.gethopp.app/blog/tauri-window-state-sync#example-codebase)
 
 If you are interested in the codebase of this example, you can find it [here](https://github.com/konsalex/tauri-multi-window-state?ref=hopp).
 
@@ -194,7 +189,6 @@ Code side-by-side, remotely.
 
 Get started
 
-Conclusion[#](https://www.gethopp.app/blog/tauri-window-state-sync#conclusion)
-------------------------------------------------------------------------------
+## Conclusion[#](https://www.gethopp.app/blog/tauri-window-state-sync#conclusion)
 
 You reached the end of the post! Hopefully you found it useful, and I am sure you are building amazing apps with Tauri! If you want feedback about your app feel free to reach me at my Twitter/X account [@costasAlexoglou](https://twitter.com/costasAlexoglou/?ref=hopp) or email me directly at [costa@gethopp.app](mailto:costa@gethopp.app?ref=hopp).
