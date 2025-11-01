@@ -1,11 +1,11 @@
-import { type Child, Command } from "@tauri-apps/plugin-shell";
 import {
   experimental_createMCPClient as createMCPClient,
   type experimental_MCPClient as MCPClient,
   type JSONRPCMessage,
   type MCPTransport,
-  type ToolSet,
-} from "ai";
+} from "@ai-sdk/mcp";
+import { type Child, Command } from "@tauri-apps/plugin-shell";
+import type { ToolSet } from "ai";
 
 import { getLogger } from "@/lib/logger";
 
@@ -141,5 +141,20 @@ export async function getMcpTools(): Promise<ToolSet> {
   } catch (error) {
     logger.error("Failed to initialize MCP client or fetch tools:", error);
     return {};
+  }
+}
+
+// TODO: Ensure this is invoked where it should be!
+export async function closeMcpClient(): Promise<void> {
+  if (mcpClient) {
+    try {
+      await mcpClient.close();
+      logger.verbose("MCP client closed successfully");
+    } catch (error) {
+      logger.error("Error closing MCP client:", error);
+    } finally {
+      mcpClient = null;
+      mcpToolsCache = null;
+    }
   }
 }

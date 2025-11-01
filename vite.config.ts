@@ -14,6 +14,7 @@ const vendorManualChunks = {
     "@ai-sdk/react",
     "@ai-sdk/google",
     "@ai-sdk/groq",
+    "@ai-sdk/mcp",
     "@openrouter/ai-sdk-provider",
   ],
   codemirror: [
@@ -83,10 +84,10 @@ export default defineConfig(
         host: host || false,
         hmr: host
           ? {
-              protocol: "ws",
-              host,
-              port: 1421,
-            }
+            protocol: "ws",
+            host,
+            port: 1421,
+          }
           : undefined,
         watch: {
           ignored: ["**/src-tauri/**", "**/docker/**", "**/tests/**"],
