@@ -144,7 +144,7 @@ export async function getMcpTools(): Promise<ToolSet> {
   }
 }
 
-// TODO: Ensure this is invoked where it should be!
+// TODO: Ensure this is invoked where it should be (e.g., when disabling MCP servers in settings, etc.)
 export async function closeMcpClient(): Promise<void> {
   if (mcpClient) {
     try {
