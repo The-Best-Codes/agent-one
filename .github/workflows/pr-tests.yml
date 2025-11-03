@@ -48,6 +48,7 @@ jobs:
         with:
           packages: ${{ steps.playwright-version.outputs.deps }}
           version: 1.0
+          execute_install_scripts: true
         if: matrix.test == 'e2e'
 
       - name: Install Playwright browsers
