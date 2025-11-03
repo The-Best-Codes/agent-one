@@ -28,9 +28,11 @@ jobs:
         run: npm ci --prefer-offline --no-audit
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
-      - name: Get Playwright version
+      - name: Get Playwright version and dependencies
         id: playwright-version
-        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+        run: |
+          echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+          echo "deps=$(npx playwright install-deps --dry-run 2>&1 | grep -oP 'apt-get install.*' | sed 's/apt-get install -y --no-install-recommends //' | tr -d '"')" >> $GITHUB_OUTPUT
         if: matrix.test == 'e2e'
 
       - name: Cache Playwright browsers
@@ -41,13 +43,16 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
         if: matrix.test == 'e2e'
 
-      - name: Install Playwright browsers and deps
-        run: npx playwright install --with-deps
-        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Cache Playwright system dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: ${{ steps.playwright-version.outputs.deps }}
+          version: 1.0
+        if: matrix.test == 'e2e'
 
-      - name: Install Playwright system deps only
-        run: npx playwright install-deps
-        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit == 'true'
+      - name: Install Playwright browsers
+        run: npx playwright install
+        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Cache and install Tauri system dependencies
         uses: awalsh128/cache-apt-pkgs-action@latest
