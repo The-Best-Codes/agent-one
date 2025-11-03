@@ -18,13 +18,6 @@ I just thought of a good idea:
 
 - Load MCP servers in the background on app startup. Fire-and-forget so it doesn't block the UI or startup.
 - When a chat is started, if the MCP servers aren't loaded yet, wait for them to finish loading. Otherwise, they are instantly available.
-- Create a `use-mcp` context + hook and use it in src/lib/ai/tools/index.ts to get the MCP servers.
-- No custom cache strategy should be needed in src/lib/ai/tools/mcp.ts or src/lib/ai/tools/index.ts anymore because the use-mcp context should be stable and handle that.
-- Keep in mind while building: Support for multiple MCP servers, enabling/disabling them in settings, MCP server init timeout per-server, and updating the context and cleaning up resources when necessary. All later though, not implemented yet.
-
-Details:
-
-- View AGENTS.md and all files it references.
-- View all relevant files and files they mention to comprehensively understand the project.
-- Create a `use-mcp` context and integrate it into the app (main.tsx and tools/index.ts)
-- When getting tools (static + MCP), await the MCP servers loaded promise to ensure they are ready before proceeding
+- We will do this using a `use-tools` context + hook and use it to get the all tools (mcp servers + static tools). src/lib/ai/tools/index.ts will just serve to export all the static tools, not to register them etc. anymore since that goes to the hook.
+- No custom cache strategy should be needed in src/lib/ai/tools/mcp.ts or src/lib/ai/tools/index.ts anymore because the use-tools context should be stable and handle that.
+- Keep in mind while building: Support for multiple MCP servers, enabling/disabling tools/servers in settings, MCP server init timeout per-server, and updating the context and cleaning up resources when necessary. All later though, not implemented yet.
