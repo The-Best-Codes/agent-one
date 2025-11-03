@@ -8,6 +8,7 @@ import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { ToolSet } from "ai";
 
 import { getLogger } from "@/lib/logger";
+import { type McpServerConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
@@ -19,13 +20,19 @@ class TauriStdioMCPTransport implements MCPTransport {
   private childProcess: Child | null = null;
   private commandInstance: Command<string> | null = null;
   private readBuffer = "";
+  private command: string;
+
+  constructor(command: string) {
+    this.command = command;
+  }
 
   async start(): Promise<void> {
     try {
-      this.commandInstance = Command.create("npx", [
-        "-y",
-        "@modelcontextprotocol/server-everything",
-      ]);
+      const parts = this.command.split(" ");
+      const cmd = parts[0];
+      const args = parts.slice(1);
+
+      this.commandInstance = Command.create(cmd, args);
 
       this.commandInstance.stdout.on("data", (line: string) => {
         this.readBuffer += line;
@@ -100,20 +107,25 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 }
 
-async function getMcpClient(): Promise<MCPClient> {
-  const transport = new TauriStdioMCPTransport();
+async function getMcpClient(command: string): Promise<MCPClient> {
+  const transport = new TauriStdioMCPTransport(command);
   const client = await createMCPClient({ transport });
   return client;
 }
 
-export async function getMcpTools(): Promise<ToolSet> {
+export async function getMcpToolsForServer(
+  server: McpServerConfig,
+): Promise<ToolSet> {
   try {
-    const client = await getMcpClient();
+    const client = await getMcpClient(server.command);
     const tools = await client.tools();
-    logger.verbose("Successfully fetched MCP tools:", Object.keys(tools));
+    logger.verbose(
+      `Successfully fetched MCP tools for ${server.name}:`,
+      Object.keys(tools),
+    );
     return tools;
   } catch (error) {
-    logger.warn("Failed to initialize MCP client or fetch tools:", error);
+    logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
     return {};
   }
 }

@@ -1,12 +1,15 @@
 import { getDefaultStore } from "jotai";
 
 import {
+  enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
+  mcpParallelLoadLimitAtom,
+  mcpServersAtom,
   regenerateOnSaveAtom,
   roundnessAtom,
   smoothStreamEnabledAtom,
@@ -17,9 +20,11 @@ import {
   DEFAULT_SETTINGS,
   type DefaultSettings,
   type MarkdownRenderingOption,
+  type McpServerConfig,
   type RoundnessOption,
   type SubmitKeyOption,
   type ThemeOption,
+  type ToolId,
 } from "./types";
 
 /**
@@ -92,6 +97,15 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "ROUNDNESS":
       store.set(roundnessAtom, defaultValue as RoundnessOption);
+      break;
+    case "ENABLED_TOOLS":
+      store.set(enabledToolsAtom, defaultValue as Record<ToolId, boolean>);
+      break;
+    case "MCP_SERVERS":
+      store.set(mcpServersAtom, defaultValue as McpServerConfig[]);
+      break;
+    case "MCP_PARALLEL_LOAD_LIMIT":
+      store.set(mcpParallelLoadLimitAtom, defaultValue as number);
       break;
   }
 }

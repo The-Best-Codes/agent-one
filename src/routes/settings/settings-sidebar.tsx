@@ -17,6 +17,7 @@ const sections: SettingsSection[] = [
   { id: "appearance", label: "Appearance" },
   { id: "editor", label: "Editor" },
   { id: "messages", label: "Messages" },
+  { id: "tools", label: "Tools" },
   { id: "streaming", label: "Streaming" },
   { id: "about", label: "About" },
 ];

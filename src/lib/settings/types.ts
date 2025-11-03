@@ -3,6 +3,20 @@ export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
 
+export interface McpServerConfig {
+  id: string;
+  name: string;
+  command: string;
+  enabled: boolean;
+  timeoutMs: number;
+}
+
+export type ToolId =
+  | "dateTime"
+  | "waitNumberMilliseconds"
+  | "getUrlContent"
+  | "webSearch";
+
 export interface DefaultSettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
@@ -15,6 +29,9 @@ export interface DefaultSettings {
   REGENERATE_ON_SAVE: boolean;
   THEME: ThemeOption;
   ROUNDNESS: RoundnessOption;
+  ENABLED_TOOLS: Record<ToolId, boolean>;
+  MCP_SERVERS: McpServerConfig[];
+  MCP_PARALLEL_LOAD_LIMIT: number;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -29,4 +46,20 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   REGENERATE_ON_SAVE: false,
   THEME: "system",
   ROUNDNESS: "md",
+  ENABLED_TOOLS: {
+    dateTime: true,
+    waitNumberMilliseconds: true,
+    getUrlContent: true,
+    webSearch: true,
+  },
+  MCP_SERVERS: [
+    {
+      id: "everything",
+      name: "Everything Server",
+      command: "npx -y @modelcontextprotocol/server-everything",
+      enabled: true,
+      timeoutMs: 30000,
+    },
+  ],
+  MCP_PARALLEL_LOAD_LIMIT: 8,
 };

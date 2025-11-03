@@ -3,9 +3,11 @@ import { atomWithStorage } from "jotai/utils";
 import {
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
+  type McpServerConfig,
   type RoundnessOption,
   type SubmitKeyOption,
   type ThemeOption,
+  type ToolId,
 } from "@/lib/settings/types";
 
 import { lsStringOrUndefined } from "./load-from-localstorage";
@@ -76,4 +78,19 @@ export const themeAtom = createSettingAtom<ThemeOption>(
 export const roundnessAtom = createSettingAtom<RoundnessOption>(
   "ROUNDNESS",
   DEFAULT_SETTINGS.ROUNDNESS,
+);
+
+export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(
+  "ENABLED_TOOLS",
+  DEFAULT_SETTINGS.ENABLED_TOOLS,
+);
+
+export const mcpServersAtom = createSettingAtom<McpServerConfig[]>(
+  "MCP_SERVERS",
+  DEFAULT_SETTINGS.MCP_SERVERS,
+);
+
+export const mcpParallelLoadLimitAtom = createSettingAtom(
+  "MCP_PARALLEL_LOAD_LIMIT",
+  DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT,
 );
