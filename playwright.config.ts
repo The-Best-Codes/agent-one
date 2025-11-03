@@ -11,6 +11,7 @@ export default defineConfig({
   fullyParallel: true,
   retries: 1,
   reporter: [["list"], ["html", { open: "never" }]],
+  workers: 8,
   use: {
     baseURL: BASE_URL,
     trace: CI ? "off" : "on-first-retry",
