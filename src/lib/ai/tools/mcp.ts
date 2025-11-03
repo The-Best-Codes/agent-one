@@ -100,61 +100,20 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 }
 
-let mcpClient: MCPClient | null = null;
-let mcpToolsCache: ToolSet | null = null;
-let clientPromise: Promise<MCPClient> | null = null;
-
 async function getMcpClient(): Promise<MCPClient> {
-  if (mcpClient) {
-    return mcpClient;
-  }
-
-  if (clientPromise) {
-    return clientPromise;
-  }
-
-  clientPromise = (async () => {
-    try {
-      const transport = new TauriStdioMCPTransport();
-      const client = await createMCPClient({ transport });
-      mcpClient = client;
-      return client;
-    } finally {
-      clientPromise = null;
-    }
-  })();
-
-  return clientPromise;
+  const transport = new TauriStdioMCPTransport();
+  const client = await createMCPClient({ transport });
+  return client;
 }
 
 export async function getMcpTools(): Promise<ToolSet> {
-  if (mcpToolsCache) {
-    return mcpToolsCache;
-  }
-
   try {
     const client = await getMcpClient();
     const tools = await client.tools();
-    mcpToolsCache = tools;
     logger.verbose("Successfully fetched MCP tools:", Object.keys(tools));
     return tools;
   } catch (error) {
     logger.error("Failed to initialize MCP client or fetch tools:", error);
     return {};
-  }
-}
-
-// TODO: Ensure this is invoked where it should be (e.g., when disabling MCP servers in settings, etc.)
-export async function closeMcpClient(): Promise<void> {
-  if (mcpClient) {
-    try {
-      await mcpClient.close();
-      logger.verbose("MCP client closed successfully");
-    } catch (error) {
-      logger.error("Error closing MCP client:", error);
-    } finally {
-      mcpClient = null;
-      mcpToolsCache = null;
-    }
   }
 }
