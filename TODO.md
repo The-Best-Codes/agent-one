@@ -12,3 +12,5 @@
 - Sidecar uv/uvx
 - Improve settings UX by adding previews of settings. For example, instead of "smooth stream" with a toggle, put two large components under a header "Stream Type". One will be choppy, the other smooth. Then the user can see in practice what the difference is!
 - Ensure cross-instance sync (e.g. creating a new chat in one window should make it appear in all windows)
+- Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
+- CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored.
