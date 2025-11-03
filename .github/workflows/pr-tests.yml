@@ -28,11 +28,9 @@ jobs:
         run: npm ci --prefer-offline --no-audit
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
-      - name: Get Playwright version and dependencies
+      - name: Get Playwright version
         id: playwright-version
-        run: |
-          echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
-          echo "deps=$(npx playwright install-deps --dry-run 2>&1 | grep -oP 'apt-get install.*' | sed 's/apt-get install -y --no-install-recommends //' | tr -d '"')" >> $GITHUB_OUTPUT
+        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
         if: matrix.test == 'e2e'
 
       - name: Cache Playwright browsers
@@ -43,12 +41,8 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
         if: matrix.test == 'e2e'
 
-      - name: Cache Playwright system dependencies
-        uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: ${{ steps.playwright-version.outputs.deps }}
-          version: 1.1
-          execute_install_scripts: true
+      - name: Install Playwright system dependencies
+        run: npx playwright install-deps
         if: matrix.test == 'e2e'
 
       - name: Install Playwright browsers
