@@ -25,12 +25,20 @@ jobs:
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
       - name: Install JS dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+        if: matrix.test == 'e2e'
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
-        if: matrix.test == 'e2e'
+        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Install Tauri Linux System Dependencies
         run: |
@@ -49,11 +57,7 @@ jobs:
         if: matrix.test == 'rust-check'
 
       - name: Setup Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        uses: dtolnay/rust-toolchain@stable
         if: matrix.test == 'rust-check'
 
       - name: Run Type Checking
@@ -73,6 +77,18 @@ jobs:
         env:
           CI: true
         if: matrix.test == 'e2e'
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        if: matrix.test == 'rust-check'
 
       - name: Run Rust Cargo Check
         run: cd src-tauri && cargo check
