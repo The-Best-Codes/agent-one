@@ -55,7 +55,7 @@ class TauriStdioMCPTransport implements MCPTransport {
       this.childProcess = await this.commandInstance.spawn();
       logger.verbose(`[MCP Server] Spawned with PID: ${this.childProcess.pid}`);
     } catch (error) {
-      logger.error("Failed to start MCP server:", error);
+      logger.warn("Failed to start MCP server:", error);
       this.onerror?.(error as Error);
       throw error;
     }
@@ -76,7 +76,7 @@ class TauriStdioMCPTransport implements MCPTransport {
         const message = JSON.parse(line) as JSONRPCMessage;
         this.onmessage?.(message);
       } catch (error) {
-        logger.error("Failed to parse MCP message:", line, error);
+        logger.warn("Failed to parse MCP message:", line, error);
         this.onerror?.(error as Error);
       }
     }
@@ -113,7 +113,7 @@ export async function getMcpTools(): Promise<ToolSet> {
     logger.verbose("Successfully fetched MCP tools:", Object.keys(tools));
     return tools;
   } catch (error) {
-    logger.error("Failed to initialize MCP client or fetch tools:", error);
+    logger.warn("Failed to initialize MCP client or fetch tools:", error);
     return {};
   }
 }
