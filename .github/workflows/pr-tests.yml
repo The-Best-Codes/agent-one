@@ -49,20 +49,11 @@ jobs:
         run: npx playwright install-deps
         if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit == 'true'
 
-      - name: Install Tauri Linux System Dependencies
-        run: |
-          # Update package lists
-          sudo apt update
-          # Install required Tauri system dependencies for Ubuntu/Debian
-          sudo apt install -y libwebkit2gtk-4.1-dev \
-            build-essential \
-            curl \
-            wget \
-            file \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev
+      - name: Cache and install Tauri system dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          version: 1.0
         if: matrix.test == 'rust-check'
 
       - name: Setup Rust toolchain
