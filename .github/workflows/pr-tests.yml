@@ -28,17 +28,26 @@ jobs:
         run: npm ci --prefer-offline --no-audit
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+        if: matrix.test == 'e2e'
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
         if: matrix.test == 'e2e'
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browsers and deps
         run: npx playwright install --with-deps
         if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Install Playwright system deps only
+        run: npx playwright install-deps
+        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Install Tauri Linux System Dependencies
         run: |
@@ -60,6 +69,12 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         if: matrix.test == 'rust-check'
 
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+        if: matrix.test == 'rust-check'
+
       - name: Run Type Checking
         run: npm run typecheck
         if: matrix.test == 'typecheck'
@@ -77,18 +92,6 @@ jobs:
         env:
           CI: true
         if: matrix.test == 'e2e'
-
-      - name: Cache Rust dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        if: matrix.test == 'rust-check'
 
       - name: Run Rust Cargo Check
         run: cd src-tauri && cargo check
