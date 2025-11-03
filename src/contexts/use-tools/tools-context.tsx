@@ -1,5 +1,11 @@
 import type { ToolSet } from "ai";
-import React, { type ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { staticTools } from "@/lib/ai/tools";
 import { getMcpTools } from "@/lib/ai/tools/mcp";
@@ -23,6 +29,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpTools, setMcpTools] = useState<ToolSet | null>(null);
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
+  const [loadingPromise, setLoadingPromise] = useState<Promise<void> | null>(
+    null,
+  );
+
+  const mcpToolsRef = useRef<ToolSet | null>(null);
+  const mcpLoadedRef = useRef(false);
+  const loadingPromiseRef = useRef<Promise<void> | null>(null);
+
+  useEffect(() => {
+    mcpToolsRef.current = mcpTools;
+    mcpLoadedRef.current = mcpLoaded;
+    loadingPromiseRef.current = loadingPromise;
+  }, [mcpTools, mcpLoaded, loadingPromise]);
 
   useEffect(() => {
     const loadMcpTools = async () => {
@@ -42,28 +61,28 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
     };
 
-    loadMcpTools();
+    const promise = loadMcpTools();
+    setLoadingPromise(promise);
   }, []);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
-    if (mcpLoaded) {
+    if (mcpLoadedRef.current) {
       return {
         ...staticTools,
-        ...(mcpTools || {}),
-      };
-    } else {
-      logger.verbose("MCP tools not loaded yet, waiting...");
-      // Since loading is async, we need to poll or use a promise
-      // For simplicity, since it's background, but to wait, we can do:
-      while (!mcpLoaded) {
-        await new Promise((resolve) => setTimeout(resolve, 100)); // Poll every 100ms
-      }
-      return {
-        ...staticTools,
-        ...(mcpTools || {}),
+        ...(mcpToolsRef.current || {}),
       };
     }
-  }, [mcpLoaded, mcpTools]);
+
+    if (loadingPromiseRef.current) {
+      logger.verbose("MCP tools not loaded yet, waiting for promise...");
+      await loadingPromiseRef.current;
+    }
+
+    return {
+      ...staticTools,
+      ...(mcpToolsRef.current || {}),
+    };
+  }, []);
 
   return (
     <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>
