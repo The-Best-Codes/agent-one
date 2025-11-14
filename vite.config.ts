@@ -14,6 +14,7 @@ const vendorManualChunks = {
     "@ai-sdk/react",
     "@ai-sdk/google",
     "@ai-sdk/groq",
+    "@ai-sdk/mcp",
     "@openrouter/ai-sdk-provider",
   ],
   codemirror: [
