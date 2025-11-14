@@ -72,6 +72,8 @@ export default function ToolsSection() {
   };
 
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [serverToDelete, setServerToDelete] = useState<number | null>(null);
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
   const [newServerTimeout, setNewServerTimeout] = useState(30000);
@@ -89,7 +91,7 @@ export default function ToolsSection() {
       enabled: true,
       timeoutMs: newServerTimeout,
     };
-    setMcpServers((prev) => [...prev, newServer]);
+    setMcpServers((prev) => [newServer, ...prev]);
 
     setNewServerName("");
     setNewServerCommand("");
@@ -104,8 +106,22 @@ export default function ToolsSection() {
     setShowAddDialog(false);
   };
 
-  const removeMcpServer = (index: number) => {
-    setMcpServers((prev) => prev.filter((_, i) => i !== index));
+  const handleDeleteClick = (index: number) => {
+    setServerToDelete(index);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    if (serverToDelete !== null) {
+      setMcpServers((prev) => prev.filter((_, i) => i !== serverToDelete));
+    }
+    setServerToDelete(null);
+    setShowDeleteDialog(false);
+  };
+
+  const cancelDelete = () => {
+    setServerToDelete(null);
+    setShowDeleteDialog(false);
   };
 
   return (
@@ -194,69 +210,75 @@ export default function ToolsSection() {
             </Button>
           </div>
 
-          <div className="space-y-3">
-            {mcpServers.map((server, index) => (
-              <Card key={server.id} className="border">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="flex flex-1 flex-col gap-3 md:flex-row md:items-center">
-                    <div className="flex-1 space-y-1">
-                      <Input
-                        value={server.name}
-                        onChange={(e) =>
-                          updateMcpServer(index, { name: e.target.value })
-                        }
-                        placeholder="Server name"
-                        className="font-medium"
-                      />
+          {mcpServers.length === 0 ? (
+            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
+              No MCP servers configured. Click &quot;Add Server&quot; to get started.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {mcpServers.map((server, index) => (
+                <Card key={server.id} className="border py-0">
+                  <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4">
+                    <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+                      <div className="flex-1">
+                        <Input
+                          value={server.name}
+                          onChange={(e) =>
+                            updateMcpServer(index, { name: e.target.value })
+                          }
+                          placeholder="Server name"
+                          className="font-medium"
+                        />
+                      </div>
+
+                      <div className="flex-1">
+                        <Input
+                          value={server.command}
+                          onChange={(e) =>
+                            updateMcpServer(index, { command: e.target.value })
+                          }
+                          placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
+                        />
+                      </div>
+
+                      <div className="w-full sm:w-24">
+                        <Input
+                          type="number"
+                          min="1000"
+                          max="300000"
+                          value={server.timeoutMs}
+                          onChange={(e) =>
+                            updateMcpServer(index, {
+                              timeoutMs: parseInt(e.target.value) || 30000,
+                            })
+                          }
+                          placeholder="Timeout (ms)"
+                        />
+                      </div>
                     </div>
 
-                    <div className="flex-1 space-y-1">
-                      <Input
-                        value={server.command}
-                        onChange={(e) =>
-                          updateMcpServer(index, { command: e.target.value })
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`enabled-${server.id}`}
+                        checked={server.enabled}
+                        onCheckedChange={(checked) =>
+                          updateMcpServer(index, { enabled: checked })
                         }
-                        placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
                       />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => handleDeleteClick(index)}
+                        aria-label="Remove server"
+                      >
+                        <TrashIcon className="size-4" />
+                      </Button>
                     </div>
-
-                    <div className="w-32 space-y-1">
-                      <Input
-                        type="number"
-                        min="1000"
-                        max="300000"
-                        value={server.timeoutMs}
-                        onChange={(e) =>
-                          updateMcpServer(index, {
-                            timeoutMs: parseInt(e.target.value) || 30000,
-                          })
-                        }
-                        placeholder="Timeout"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id={`enabled-${server.id}`}
-                      checked={server.enabled}
-                      onCheckedChange={(checked) =>
-                        updateMcpServer(index, { enabled: checked })
-                      }
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeMcpServer(index)}
-                      aria-label="Remove server"
-                    >
-                      <TrashIcon className="size-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -311,6 +333,27 @@ export default function ToolsSection() {
             </Button>
             <Button onClick={handleAddServer} disabled={!isAddFormValid}>
               Add Server
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete MCP Server</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this server? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={cancelDelete}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>
