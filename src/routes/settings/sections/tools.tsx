@@ -296,7 +296,7 @@ export default function ToolsSection() {
                         >
                           Enabled
                         </Label>
-                        <div className="h-9 flex items-center justify-end">
+                        <div className="flex h-9 items-center justify-end">
                           <Switch
                             id={`enabled-${server.id}`}
                             checked={server.enabled}
