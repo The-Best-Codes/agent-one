@@ -56,7 +56,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
   // Load MCP tools when servers change
   useEffect(() => {
-    const enabledServers = mcpServers.filter((server) => server.enabled);
+    const enabledServers = Array.isArray(mcpServers)
+      ? mcpServers.filter((server) => server.enabled)
+      : [];
     if (enabledServers.length === 0) {
       setMcpTools({});
       setMcpLoaded(true);

@@ -31,3 +31,22 @@ export const lsStringOrUndefined = (key: string): string | undefined => {
     return undefined;
   }
 };
+
+/**
+ * If localStorage is available, parses the value of a given key as JSON and returns it
+ * @param key The localStorage key to evaluate
+ * @returns Parsed JSON value or undefined
+ */
+export const lsJSONOrUndefined = <T>(key: string): T | undefined => {
+  try {
+    if (typeof window !== "undefined") {
+      const value = localStorage.getItem(key);
+      if (value === null) return undefined;
+      return JSON.parse(value) as T;
+    } else {
+      return undefined;
+    }
+  } catch {
+    return undefined;
+  }
+};
