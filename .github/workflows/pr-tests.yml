@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        test: [typecheck, lint, e2e, rust-check]
+        test: [typecheck, lint, format-check, e2e, rust-check]
 
     steps:
       - name: Checkout code
@@ -22,11 +22,11 @@ jobs:
         with:
           node-version: "23"
           cache: "npm"
-        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
 
       - name: Install JS dependencies
         run: npm ci --prefer-offline --no-audit
-        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'e2e'
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
 
       - name: Get Playwright version
         id: playwright-version
@@ -73,6 +73,10 @@ jobs:
       - name: Run Linting
         run: npm run lint
         if: matrix.test == 'lint'
+
+      - name: Run Format Check
+        run: npm run format:check
+        if: matrix.test == 'format-check'
 
       - name: Build Project for E2E
         run: npm run build
