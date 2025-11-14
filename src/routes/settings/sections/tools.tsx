@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { RotateCcwIcon, TrashIcon } from "lucide-react";
+import { RotateCcwIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -89,20 +89,20 @@ export default function ToolsSection() {
       name: newServerName.trim(),
       command: newServerCommand.trim(),
       enabled: true,
-      timeoutMs: newServerTimeout,
+      timeoutMs: newServerTimeout * 1000,
     };
     setMcpServers((prev) => [newServer, ...prev]);
 
     setNewServerName("");
     setNewServerCommand("");
-    setNewServerTimeout(30000);
+    setNewServerTimeout(30);
     setShowAddDialog(false);
   };
 
   const handleCancelAdd = () => {
     setNewServerName("");
     setNewServerCommand("");
-    setNewServerTimeout(30000);
+    setNewServerTimeout(30);
     setShowAddDialog(false);
   };
 
@@ -212,27 +212,75 @@ export default function ToolsSection() {
 
           {mcpServers.length === 0 ? (
             <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-              No MCP servers configured. Click &quot;Add Server&quot; to get started.
+              No MCP servers configured. Click &quot;Add Server&quot; to get
+              started.
             </div>
           ) : (
             <div className="space-y-2">
               {mcpServers.map((server, index) => (
-                <Card key={server.id} className="border py-0">
-                  <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4">
-                    <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-                      <div className="flex-1">
+                <Card key={server.id} className="relative border py-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteClick(index)}
+                    aria-label="Remove server"
+                    className="absolute top-2 right-2 size-6"
+                  >
+                    <XIcon className="size-4" />
+                  </Button>
+                  <CardContent className="grid gap-3 p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <div className="grid flex-1 gap-1.5">
+                        <Label
+                          htmlFor={`name-${server.id}`}
+                          className="text-xs"
+                        >
+                          Name
+                        </Label>
                         <Input
+                          id={`name-${server.id}`}
                           value={server.name}
                           onChange={(e) =>
                             updateMcpServer(index, { name: e.target.value })
                           }
                           placeholder="Server name"
-                          className="font-medium"
                         />
                       </div>
 
-                      <div className="flex-1">
+                      <div className="grid gap-1.5 sm:w-32">
+                        <Label
+                          htmlFor={`timeout-${server.id}`}
+                          className="text-xs"
+                        >
+                          Timeout (sec)
+                        </Label>
                         <Input
+                          id={`timeout-${server.id}`}
+                          type="number"
+                          min="1"
+                          max="300"
+                          value={Math.round(server.timeoutMs / 1000)}
+                          onChange={(e) =>
+                            updateMcpServer(index, {
+                              timeoutMs:
+                                (parseInt(e.target.value) || 30) * 1000,
+                            })
+                          }
+                          placeholder="30"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-end gap-3">
+                      <div className="grid flex-1 gap-1.5">
+                        <Label
+                          htmlFor={`command-${server.id}`}
+                          className="text-xs"
+                        >
+                          Command
+                        </Label>
+                        <Input
+                          id={`command-${server.id}`}
                           value={server.command}
                           onChange={(e) =>
                             updateMcpServer(index, { command: e.target.value })
@@ -241,38 +289,23 @@ export default function ToolsSection() {
                         />
                       </div>
 
-                      <div className="w-full sm:w-24">
-                        <Input
-                          type="number"
-                          min="1000"
-                          max="300000"
-                          value={server.timeoutMs}
-                          onChange={(e) =>
-                            updateMcpServer(index, {
-                              timeoutMs: parseInt(e.target.value) || 30000,
-                            })
-                          }
-                          placeholder="Timeout (ms)"
-                        />
+                      <div className="grid gap-1.5">
+                        <Label
+                          htmlFor={`enabled-${server.id}`}
+                          className="text-xs"
+                        >
+                          Enabled
+                        </Label>
+                        <div className="h-9 flex items-center justify-end">
+                          <Switch
+                            id={`enabled-${server.id}`}
+                            checked={server.enabled}
+                            onCheckedChange={(checked) =>
+                              updateMcpServer(index, { enabled: checked })
+                            }
+                          />
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id={`enabled-${server.id}`}
-                        checked={server.enabled}
-                        onCheckedChange={(checked) =>
-                          updateMcpServer(index, { enabled: checked })
-                        }
-                      />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleDeleteClick(index)}
-                        aria-label="Remove server"
-                      >
-                        <TrashIcon className="size-4" />
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -313,15 +346,15 @@ export default function ToolsSection() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="server-timeout">Timeout (ms)</Label>
+              <Label htmlFor="server-timeout">Timeout (seconds)</Label>
               <Input
                 id="server-timeout"
                 type="number"
-                min="1000"
-                max="300000"
+                min="1"
+                max="300"
                 value={newServerTimeout}
                 onChange={(e) =>
-                  setNewServerTimeout(parseInt(e.target.value) || 30000)
+                  setNewServerTimeout(parseInt(e.target.value) || 30)
                 }
               />
             </div>
