@@ -11,7 +11,7 @@ pub fn run() {
     tauri::Builder::default()
         // .plugin(tauri_plugin_log::Builder::new().build()) // Disabled for now
         .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
-            println!("Second instance started, args: {:?}, cwd: {:?}", args, cwd);
+            println!("New instance started, args: {:?}, cwd: {:?}", args, cwd);
 
             // Generate a unique window ID using atomic counter
             let window_id = WINDOW_COUNTER.fetch_add(1, Ordering::SeqCst);
