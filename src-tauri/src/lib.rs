@@ -1,5 +1,10 @@
+use std::sync::atomic::{AtomicU64, Ordering};
+
 mod tools;
 mod utils;
+
+// Global counter for unique window IDs
+static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -8,14 +13,9 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
             println!("Second instance started, args: {:?}, cwd: {:?}", args, cwd);
 
-            // Create a new window for the additional instance
-            let window_label = format!(
-                "instance-{}",
-                std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs()
-            );
+            // Generate a unique window ID using atomic counter
+            let window_id = WINDOW_COUNTER.fetch_add(1, Ordering::SeqCst);
+            let window_label = format!("a1-instance-{}", window_id);
 
             match tauri::WebviewWindowBuilder::new(
                 app,
