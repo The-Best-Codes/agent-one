@@ -5,7 +5,31 @@ mod utils;
 pub fn run() {
     tauri::Builder::default()
         // .plugin(tauri_plugin_log::Builder::new().build()) // Disabled for now
-        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
+        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
+            println!("Second instance started, args: {:?}, cwd: {:?}", args, cwd);
+
+            // Create a new window for the additional instance
+            let window_label = format!(
+                "instance-{}",
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs()
+            );
+
+            match tauri::WebviewWindowBuilder::new(
+                app,
+                &window_label,
+                tauri::WebviewUrl::App("index.html".into()),
+            )
+            .title("AgentOne")
+            .inner_size(800.0, 600.0)
+            .build()
+            {
+                Ok(_) => println!("Created new window: {}", window_label),
+                Err(e) => eprintln!("Failed to create new window: {}", e),
+            }
+        }))
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())

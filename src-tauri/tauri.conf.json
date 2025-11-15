@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "agent-one",
+        "title": "AgentOne",
         "width": 800,
         "height": 600
       }
