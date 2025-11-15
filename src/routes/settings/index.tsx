@@ -1,3 +1,4 @@
+import { useAtom } from "jotai";
 import { ArrowLeftIcon, SettingsIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -11,6 +12,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { activeSettingsSectionAtom } from "@/lib/jotai/atoms";
 
 import SettingsContent from "./settings-content";
 import SettingsSidebar from "./settings-sidebar";
@@ -18,7 +20,7 @@ import SettingsSidebar from "./settings-sidebar";
 export default function SettingsRoute() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeSection, setActiveSection] = useState("appearance");
+  const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleNavigateBack = () => {
@@ -69,7 +71,6 @@ export default function SettingsRoute() {
             <div className="mb-2">
               <Button
                 variant="outline"
-                size="sm"
                 onClick={handleNavigateBack}
                 className="w-full"
               >
