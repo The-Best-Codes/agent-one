@@ -129,3 +129,18 @@ export async function getMcpToolsForServer(
     return {};
   }
 }
+
+// TODO: Ensure this is invoked where it should be!
+// export async function closeMcpClient(): Promise<void> {
+//   if (mcpClient) {
+//     try {
+//       await mcpClient.close();
+//       logger.verbose("MCP client closed successfully");
+//     } catch (error) {
+//       logger.error("Error closing MCP client:", error);
+//     } finally {
+//       mcpClient = null;
+//       mcpToolsCache = null;
+//     }
+//   }
+// }
