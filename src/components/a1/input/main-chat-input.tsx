@@ -341,7 +341,7 @@ export const MainChatInput = ({
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="bg-secondary border-input focus-within:border-ring focus-within:ring-ring/50 relative flex w-full flex-col rounded-none border-0 border-t-1 pt-2 pr-2 md:rounded-md md:rounded-b-none md:border md:border-b-0 md:focus-within:ring-[3px]"
+        className="bg-secondary border-input focus-within:border-ring focus-within:ring-ring/50 relative flex w-full flex-col rounded-none border-0 border-t pt-2 pr-2 md:rounded-md md:rounded-b-none md:border md:border-b-0 md:focus-within:ring-[3px]"
       >
         {isDragging && (
           <div className="border-primary bg-background/80 absolute inset-0 z-20 flex items-center justify-center rounded-md rounded-b-none border-2 border-dashed backdrop-blur-sm">
@@ -361,7 +361,7 @@ export const MainChatInput = ({
         {files && files.length > 0 && (
           <Attachments files={files} onRemove={handleRemoveFile} />
         )}
-        <div className="flex-grow overflow-hidden">
+        <div className="grow overflow-hidden">
           <CodeMirror
             autoFocus
             theme={resolvedTheme === "dark" ? "dark" : "light"}

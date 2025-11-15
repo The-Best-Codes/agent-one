@@ -140,7 +140,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       </TooltipRoot>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
-        className="bg-sidebar border-sidebar-border h-full !max-w-64 border-r p-2"
+        className="bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
       >
         <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
         <DrawerDescription className="sr-only">
@@ -160,7 +160,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <div className="animate-in fade-in-0 fixed top-0 left-0 z-50 duration-300 md:top-2 md:left-2">
         <div
           className={cn(
-            "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r-1 border-b-1 p-1 transition-[border,padding,background-color] duration-200 md:rounded-md md:border-1",
+            "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r border-b p-1 transition-[border,padding,background-color] duration-200 md:rounded-md md:border",
             !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
           )}
         >

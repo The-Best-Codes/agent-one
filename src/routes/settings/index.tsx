@@ -65,7 +65,7 @@ export default function SettingsRoute() {
 
       <div className="mx-auto max-w-5xl p-4 md:p-6">
         <div className="flex flex-col gap-6 md:flex-row">
-          <div className="hidden w-64 flex-shrink-0 md:block">
+          <div className="hidden w-64 shrink-0 md:block">
             <div className="mb-2">
               <Button
                 variant="outline"

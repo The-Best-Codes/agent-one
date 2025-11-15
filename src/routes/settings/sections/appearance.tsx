@@ -97,7 +97,7 @@ export default function AppearanceSection() {
               step={1}
               className="flex-1"
             />
-            <span className="text-muted-foreground min-w-[3rem] text-sm">
+            <span className="text-muted-foreground min-w-12 text-sm">
               {roundnessOptions[roundnessIndex].label}
             </span>
           </div>

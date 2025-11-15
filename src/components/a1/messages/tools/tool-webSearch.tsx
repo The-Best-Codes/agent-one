@@ -101,7 +101,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             value={callId}
             className={cn(
               "group/web-search-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
-              isMainAccordionOpen && "border-1 !border-b-1 p-2",
+              isMainAccordionOpen && "border border-b! p-2",
             )}
           >
             <AccordionTrigger
