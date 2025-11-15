@@ -5,6 +5,7 @@ mod utils;
 pub fn run() {
     tauri::Builder::default()
         // .plugin(tauri_plugin_log::Builder::new().build()) // Disabled for now
+        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
