@@ -7,6 +7,7 @@ import { type ChatInit, type LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 
+import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -18,8 +19,9 @@ type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
 
 export function useChat(model: LanguageModel, options?: CustomChatOptions) {
   const smoothStreamEnabled = useAtomValue(smoothStreamEnabledAtom);
+  const { getTools } = useTools();
   const [transport] = useState(
-    () => new CustomChatTransport(model, smoothStreamEnabled),
+    () => new CustomChatTransport(model, smoothStreamEnabled, getTools),
   );
 
   useEffect(() => {

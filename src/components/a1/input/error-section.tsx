@@ -25,7 +25,7 @@ export const MainInputErrorSection = () => {
     getAiErrorMessageUx(error.message);
 
   return (
-    <div className="bg-destructive/20 border-destructive text-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none border-1 p-2 md:mb-2 md:rounded-md">
+    <div className="bg-destructive/20 border-destructive text-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none border p-2 md:mb-2 md:rounded-md">
       <div className="flex max-h-24 w-full flex-col items-start overflow-auto">
         {displayMessage && (
           <h3 className="text-lg font-bold">{displayMessage}</h3>

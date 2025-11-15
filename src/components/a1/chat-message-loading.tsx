@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useTools } from "@/contexts/use-tools/tools-hooks";
 
 export const ChatMessageLoading = ({
   mode = "inLayout",
@@ -13,6 +14,7 @@ export const ChatMessageLoading = ({
 }) => {
   const { status } = useChatStatus();
   const messages = useChatMessages();
+  const { isMcpLoading } = useTools();
 
   const lastOverallMessage = messages[messages.length - 1];
   const isLatestMessageOverall = lastOverallMessage?.id === messageId;
@@ -34,7 +36,7 @@ export const ChatMessageLoading = ({
       return (
         <div className="justify-end">
           <span className="text-muted-foreground animate-pulse">
-            Thinking...
+            {isMcpLoading ? "Starting MCP servers..." : "Thinking..."}
           </span>
         </div>
       );
@@ -53,7 +55,7 @@ export const ChatMessageLoading = ({
         return (
           <div className="justify-end p-2">
             <span className="text-muted-foreground animate-pulse">
-              Thinking...
+              {isMcpLoading ? "Starting MCP servers..." : "Thinking..."}
             </span>
           </div>
         );

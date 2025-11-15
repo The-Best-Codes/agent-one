@@ -6,23 +6,29 @@ import {
   type LanguageModel,
   smoothStream,
   streamText,
+  type ToolSet,
   type UIMessageChunk,
 } from "ai";
 
 import { getLogger } from "@/lib/logger";
 
 import { SYSTEM_PROMPT } from "./system-prompt";
-import { getToolsObject } from "./tools";
 
 const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel;
   private smoothStreamEnabled: boolean;
+  private getTools: () => Promise<ToolSet>;
 
-  constructor(model: LanguageModel, smoothStreamEnabled: boolean) {
+  constructor(
+    model: LanguageModel,
+    smoothStreamEnabled: boolean,
+    getTools: () => Promise<ToolSet>,
+  ) {
     this.model = model;
     this.smoothStreamEnabled = smoothStreamEnabled;
+    this.getTools = getTools;
   }
 
   updateModel(model: LanguageModel) {
@@ -48,7 +54,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messageId: string | undefined;
     } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
-    const tools = await getToolsObject();
+    const tools = await this.getTools();
 
     const result = streamText({
       model: this.model,
