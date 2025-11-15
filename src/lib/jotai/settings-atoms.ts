@@ -3,12 +3,14 @@ import { atomWithStorage } from "jotai/utils";
 import {
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
+  type McpServerConfig,
   type RoundnessOption,
   type SubmitKeyOption,
   type ThemeOption,
+  type ToolId,
 } from "@/lib/settings/types";
 
-import { lsStringOrUndefined } from "./load-from-localstorage";
+import { lsJSONOrUndefined } from "./load-from-localstorage";
 
 const SETTING_PREFIX = "agent-one-setting-";
 
@@ -17,10 +19,7 @@ const createSettingAtom = <T>(
   defaultValue: T,
 ) => {
   const lsKey = `${SETTING_PREFIX}${key}`;
-  return atomWithStorage<T>(
-    lsKey,
-    (lsStringOrUndefined(lsKey) as T) ?? defaultValue,
-  );
+  return atomWithStorage<T>(lsKey, lsJSONOrUndefined<T>(lsKey) ?? defaultValue);
 };
 
 export const markdownHighlightingAtom = createSettingAtom(
@@ -76,4 +75,19 @@ export const themeAtom = createSettingAtom<ThemeOption>(
 export const roundnessAtom = createSettingAtom<RoundnessOption>(
   "ROUNDNESS",
   DEFAULT_SETTINGS.ROUNDNESS,
+);
+
+export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(
+  "ENABLED_TOOLS",
+  DEFAULT_SETTINGS.ENABLED_TOOLS,
+);
+
+export const mcpServersAtom = createSettingAtom<McpServerConfig[]>(
+  "MCP_SERVERS",
+  DEFAULT_SETTINGS.MCP_SERVERS,
+);
+
+export const mcpParallelLoadLimitAtom = createSettingAtom(
+  "MCP_PARALLEL_LOAD_LIMIT",
+  DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT,
 );

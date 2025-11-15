@@ -8,6 +8,7 @@ import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { ToolSet } from "ai";
 
 import { getLogger } from "@/lib/logger";
+import { type McpServerConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
@@ -19,13 +20,19 @@ class TauriStdioMCPTransport implements MCPTransport {
   private childProcess: Child | null = null;
   private commandInstance: Command<string> | null = null;
   private readBuffer = "";
+  private command: string;
+
+  constructor(command: string) {
+    this.command = command;
+  }
 
   async start(): Promise<void> {
     try {
-      this.commandInstance = Command.create("npx", [
-        "-y",
-        "@modelcontextprotocol/server-everything",
-      ]);
+      const parts = this.command.split(" ");
+      const cmd = parts[0];
+      const args = parts.slice(1);
+
+      this.commandInstance = Command.create(cmd, args);
 
       this.commandInstance.stdout.on("data", (line: string) => {
         this.readBuffer += line;
@@ -55,7 +62,7 @@ class TauriStdioMCPTransport implements MCPTransport {
       this.childProcess = await this.commandInstance.spawn();
       logger.verbose(`[MCP Server] Spawned with PID: ${this.childProcess.pid}`);
     } catch (error) {
-      logger.error("Failed to start MCP server:", error);
+      logger.warn("Failed to start MCP server:", error);
       this.onerror?.(error as Error);
       throw error;
     }
@@ -76,7 +83,7 @@ class TauriStdioMCPTransport implements MCPTransport {
         const message = JSON.parse(line) as JSONRPCMessage;
         this.onmessage?.(message);
       } catch (error) {
-        logger.error("Failed to parse MCP message:", line, error);
+        logger.warn("Failed to parse MCP message:", line, error);
         this.onerror?.(error as Error);
       }
     }
@@ -100,61 +107,40 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 }
 
-let mcpClient: MCPClient | null = null;
-let mcpToolsCache: ToolSet | null = null;
-let clientPromise: Promise<MCPClient> | null = null;
-
-async function getMcpClient(): Promise<MCPClient> {
-  if (mcpClient) {
-    return mcpClient;
-  }
-
-  if (clientPromise) {
-    return clientPromise;
-  }
-
-  clientPromise = (async () => {
-    try {
-      const transport = new TauriStdioMCPTransport();
-      const client = await createMCPClient({ transport });
-      mcpClient = client;
-      return client;
-    } finally {
-      clientPromise = null;
-    }
-  })();
-
-  return clientPromise;
+async function getMcpClient(command: string): Promise<MCPClient> {
+  const transport = new TauriStdioMCPTransport(command);
+  const client = await createMCPClient({ transport });
+  return client;
 }
 
-export async function getMcpTools(): Promise<ToolSet> {
-  if (mcpToolsCache) {
-    return mcpToolsCache;
-  }
-
+export async function getMcpToolsForServer(
+  server: McpServerConfig,
+): Promise<ToolSet> {
   try {
-    const client = await getMcpClient();
+    const client = await getMcpClient(server.command);
     const tools = await client.tools();
-    mcpToolsCache = tools;
-    logger.verbose("Successfully fetched MCP tools:", Object.keys(tools));
+    logger.verbose(
+      `Successfully fetched MCP tools for ${server.name}:`,
+      Object.keys(tools),
+    );
     return tools;
   } catch (error) {
-    logger.error("Failed to initialize MCP client or fetch tools:", error);
+    logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
     return {};
   }
 }
 
 // TODO: Ensure this is invoked where it should be!
-export async function closeMcpClient(): Promise<void> {
-  if (mcpClient) {
-    try {
-      await mcpClient.close();
-      logger.verbose("MCP client closed successfully");
-    } catch (error) {
-      logger.error("Error closing MCP client:", error);
-    } finally {
-      mcpClient = null;
-      mcpToolsCache = null;
-    }
-  }
-}
+// export async function closeMcpClient(): Promise<void> {
+//   if (mcpClient) {
+//     try {
+//       await mcpClient.close();
+//       logger.verbose("MCP client closed successfully");
+//     } catch (error) {
+//       logger.error("Error closing MCP client:", error);
+//     } finally {
+//       mcpClient = null;
+//       mcpToolsCache = null;
+//     }
+//   }
+// }
