@@ -16,11 +16,13 @@ import {
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
+  notificationSettingAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
+  type NotificationOption,
 } from "@/lib/settings/types";
 
 export default function MessagesSection() {
@@ -31,6 +33,9 @@ export default function MessagesSection() {
   const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(
     maxCodeblockCharsAtom,
   );
+  const [notificationSetting, setNotificationSetting] = useAtom(
+    notificationSettingAtom,
+  );
 
   const isMarkdownRenderingDefault =
     markdownRendering === DEFAULT_SETTINGS.MARKDOWN_RENDERING;
@@ -38,6 +43,8 @@ export default function MessagesSection() {
     maxMessageLength === DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH;
   const isMaxCodeblockCharsDefault =
     maxCodeblockChars === DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS;
+  const isNotificationSettingDefault =
+    notificationSetting === DEFAULT_SETTINGS.NOTIFICATION_SETTING;
 
   const handleResetMarkdownRendering = () => {
     resetSetting("MARKDOWN_RENDERING");
@@ -49,6 +56,10 @@ export default function MessagesSection() {
 
   const handleResetMaxCodeblockChars = () => {
     resetSetting("MAX_CODEBLOCK_CHARS");
+  };
+
+  const handleResetNotificationSetting = () => {
+    resetSetting("NOTIFICATION_SETTING");
   };
 
   return (
@@ -152,6 +163,45 @@ export default function MessagesSection() {
               size="icon"
               onClick={handleResetMaxCodeblockChars}
               disabled={isMaxCodeblockCharsDefault}
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">
+              Completion Notification
+            </Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Show notification when AgentOne finishes responding.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={notificationSetting}
+              onValueChange={(value) =>
+                setNotificationSetting(value as NotificationOption)
+              }
+            >
+              <SelectTrigger className="w-full md:w-fit md:max-w-96">
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="always">Always</SelectItem>
+                <SelectItem value="when-unfocused">
+                  When window unfocused
+                </SelectItem>
+                <SelectItem value="never">Never</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleResetNotificationSetting}
+              disabled={isNotificationSettingDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />

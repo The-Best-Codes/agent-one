@@ -17,7 +17,9 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { getModelById, type ModelConfig } from "@/lib/ai/models";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
+import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 import {
   ChatFunctionsContext,
@@ -47,6 +49,7 @@ export const MultiChatProvider = ({
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const [chatIds] = useAtom(chatIdsAtom);
+  const [notificationSetting] = useAtom(notificationSettingAtom);
 
   const chatInstancesRef = useRef<ChatInstanceCollection>(new Map());
 
@@ -257,9 +260,16 @@ export const MultiChatProvider = ({
             setMessages(newMessages);
           }
         }
+
+        if (
+          notificationSetting === "always" ||
+          (notificationSetting === "when-unfocused" && !document.hasFocus())
+        ) {
+          sendNotificationIfAllowed("AgentOne Finished Responding", "You can disable this notification in settings.");
+        }
       }
     }
-  }, [statusValue.status, messages, setMessages]);
+  }, [statusValue.status, messages, setMessages, notificationSetting]);
 
   useEffect(() => {
     if (currentChatId && !chatIds.includes(currentChatId)) {

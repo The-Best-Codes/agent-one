@@ -4,6 +4,7 @@ import {
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
   type McpServerConfig,
+  type NotificationOption,
   type RoundnessOption,
   type SubmitKeyOption,
   type ThemeOption,
@@ -75,6 +76,11 @@ export const themeAtom = createSettingAtom<ThemeOption>(
 export const roundnessAtom = createSettingAtom<RoundnessOption>(
   "ROUNDNESS",
   DEFAULT_SETTINGS.ROUNDNESS,
+);
+
+export const notificationSettingAtom = createSettingAtom<NotificationOption>(
+  "NOTIFICATION_SETTING",
+  DEFAULT_SETTINGS.NOTIFICATION_SETTING,
 );
 
 export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(

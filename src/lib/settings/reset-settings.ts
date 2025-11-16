@@ -10,6 +10,7 @@ import {
   maxMessageLengthAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
+  notificationSettingAtom,
   regenerateOnSaveAtom,
   roundnessAtom,
   smoothStreamEnabledAtom,
@@ -21,6 +22,7 @@ import {
   type DefaultSettings,
   type MarkdownRenderingOption,
   type McpServerConfig,
+  type NotificationOption,
   type RoundnessOption,
   type SubmitKeyOption,
   type ThemeOption,
@@ -54,6 +56,10 @@ export function resetAllSettings(): void {
   store.set(regenerateOnSaveAtom, DEFAULT_SETTINGS.REGENERATE_ON_SAVE);
   store.set(themeAtom, DEFAULT_SETTINGS.THEME as ThemeOption);
   store.set(roundnessAtom, DEFAULT_SETTINGS.ROUNDNESS as RoundnessOption);
+  store.set(
+    notificationSettingAtom,
+    DEFAULT_SETTINGS.NOTIFICATION_SETTING as NotificationOption,
+  );
 }
 
 /**
@@ -97,6 +103,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "ROUNDNESS":
       store.set(roundnessAtom, defaultValue as RoundnessOption);
+      break;
+    case "NOTIFICATION_SETTING":
+      store.set(notificationSettingAtom, defaultValue as NotificationOption);
       break;
     case "ENABLED_TOOLS":
       store.set(enabledToolsAtom, defaultValue as Record<ToolId, boolean>);

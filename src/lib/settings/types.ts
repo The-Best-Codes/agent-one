@@ -2,6 +2,7 @@ export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
+export type NotificationOption = "always" | "when-unfocused" | "never";
 
 export interface McpServerConfig {
   id: string;
@@ -29,6 +30,7 @@ export interface DefaultSettings {
   REGENERATE_ON_SAVE: boolean;
   THEME: ThemeOption;
   ROUNDNESS: RoundnessOption;
+  NOTIFICATION_SETTING: NotificationOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
   MCP_SERVERS: McpServerConfig[];
   MCP_PARALLEL_LOAD_LIMIT: number;
@@ -46,6 +48,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   REGENERATE_ON_SAVE: false,
   THEME: "system",
   ROUNDNESS: "md",
+  NOTIFICATION_SETTING: "when-unfocused",
   ENABLED_TOOLS: {
     dateTime: true,
     waitNumberMilliseconds: true,
