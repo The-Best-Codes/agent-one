@@ -7,6 +7,8 @@ on:
 jobs:
   test:
     runs-on: tenki-standard-autoscale
+    container:
+      image: ghcr.io/the-best-codes/agent-one-base-ci:latest
     timeout-minutes: 30
     strategy:
       fail-fast: true
@@ -17,48 +19,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "23"
-          cache: "npm"
-        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
-
       - name: Install JS dependencies
         run: npm ci --prefer-offline --no-audit
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
-
-      - name: Get Playwright version
-        id: playwright-version
-        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
-        if: matrix.test == 'e2e'
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-        if: matrix.test == 'e2e'
-
-      - name: Install Playwright system dependencies
-        run: npx playwright install-deps
-        if: matrix.test == 'e2e'
-
-      - name: Install Playwright browsers
-        run: npx playwright install
-        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
-
-      - name: Cache and install Tauri system dependencies
-        uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-          version: 1.1
-        if: matrix.test == 'rust-check'
-
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        if: matrix.test == 'rust-check'
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
