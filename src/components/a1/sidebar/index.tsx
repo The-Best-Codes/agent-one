@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { PlusIcon, SearchIcon, SettingsIcon, SidebarIcon } from "lucide-react";
-import { Activity, useState } from "react";
+import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useNavigate, useParams } from "react-router";
 
@@ -223,12 +223,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
               isSidebarSmall ? "scale-95 opacity-0" : "scale-100 opacity-100",
             )}
           >
-            <Activity mode={isSidebarSmall ? "hidden" : "visible"}>
-              <SidebarContent
-                activeChatId={activeChatId}
-                handleNewChat={handleNewChat}
-              />
-            </Activity>
+            <SidebarContent
+              activeChatId={activeChatId}
+              handleNewChat={handleNewChat}
+            />
           </div>
         </aside>
       )}
