@@ -63,3 +63,5 @@ docker run -it --rm \
 2. Build and test locally
 3. Push with a new version tag
 4. Update workflow files to use the new tag
+
+If Playwright is updated in the `package.json` of this repository, update the version in the Dockerfile and rebuild the image.
