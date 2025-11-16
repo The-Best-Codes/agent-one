@@ -43,6 +43,20 @@ export default function TestsRoute() {
                   Run Test
                 </Button>
               </div>
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <h3 className="font-medium">Notifications</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Test notification permissions and sending notifications
+                  </p>
+                </div>
+                <Button
+                  onClick={() => navigate("/tests/notifications")}
+                  variant="outline"
+                >
+                  Run Test
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
