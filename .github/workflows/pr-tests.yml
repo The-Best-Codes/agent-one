@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: tenki-standard-autoscale
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/the-best-codes/agent-one-base-ci:latest
     timeout-minutes: 30
