@@ -12,54 +12,34 @@
       "max_completion_tokens": 65536
     },
     {
-      "id": "moonshotai/kimi-k2-instruct",
+      "id": "meta-llama/llama-4-scout-17b-16e-instruct",
       "object": "model",
-      "created": 1752435491,
-      "owned_by": "Moonshot AI",
-      "active": true,
-      "context_window": 131072,
-      "public_apps": null,
-      "max_completion_tokens": 16384
-    },
-    {
-      "id": "qwen/qwen3-32b",
-      "object": "model",
-      "created": 1748396646,
-      "owned_by": "Alibaba Cloud",
-      "active": true,
-      "context_window": 131072,
-      "public_apps": null,
-      "max_completion_tokens": 40960
-    },
-    {
-      "id": "groq/compound",
-      "object": "model",
-      "created": 1756949530,
-      "owned_by": "Groq",
+      "created": 1743874824,
+      "owned_by": "Meta",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
       "max_completion_tokens": 8192
     },
     {
-      "id": "meta-llama/llama-prompt-guard-2-22m",
+      "id": "playai-tts-arabic",
       "object": "model",
-      "created": 1748632101,
-      "owned_by": "Meta",
+      "created": 1740682783,
+      "owned_by": "PlayAI",
       "active": true,
-      "context_window": 512,
+      "context_window": 8192,
       "public_apps": null,
-      "max_completion_tokens": 512
+      "max_completion_tokens": 8192
     },
     {
-      "id": "whisper-large-v3-turbo",
+      "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
       "object": "model",
-      "created": 1728413088,
-      "owned_by": "OpenAI",
+      "created": 1743877158,
+      "owned_by": "Meta",
       "active": true,
-      "context_window": 448,
+      "context_window": 131072,
       "public_apps": null,
-      "max_completion_tokens": 448
+      "max_completion_tokens": 8192
     },
     {
       "id": "openai/gpt-oss-safeguard-20b",
@@ -72,6 +52,26 @@
       "max_completion_tokens": 65536
     },
     {
+      "id": "meta-llama/llama-prompt-guard-2-22m",
+      "object": "model",
+      "created": 1748632101,
+      "owned_by": "Meta",
+      "active": true,
+      "context_window": 512,
+      "public_apps": null,
+      "max_completion_tokens": 512
+    },
+    {
+      "id": "moonshotai/kimi-k2-instruct",
+      "object": "model",
+      "created": 1752435491,
+      "owned_by": "Moonshot AI",
+      "active": true,
+      "context_window": 131072,
+      "public_apps": null,
+      "max_completion_tokens": 16384
+    },
+    {
       "id": "playai-tts",
       "object": "model",
       "created": 1740682771,
@@ -80,16 +80,6 @@
       "context_window": 8192,
       "public_apps": null,
       "max_completion_tokens": 8192
-    },
-    {
-      "id": "llama-3.1-8b-instant",
-      "object": "model",
-      "created": 1693721698,
-      "owned_by": "Meta",
-      "active": true,
-      "context_window": 131072,
-      "public_apps": null,
-      "max_completion_tokens": 131072
     },
     {
       "id": "allam-2-7b",
@@ -102,29 +92,29 @@
       "max_completion_tokens": 4096
     },
     {
-      "id": "llama-3.3-70b-versatile",
+      "id": "meta-llama/llama-prompt-guard-2-86m",
       "object": "model",
-      "created": 1733447754,
+      "created": 1748632165,
       "owned_by": "Meta",
       "active": true,
-      "context_window": 131072,
+      "context_window": 512,
       "public_apps": null,
-      "max_completion_tokens": 32768
+      "max_completion_tokens": 512
     },
     {
-      "id": "groq/compound-mini",
+      "id": "qwen/qwen3-32b",
       "object": "model",
-      "created": 1756949707,
-      "owned_by": "Groq",
+      "created": 1748396646,
+      "owned_by": "Alibaba Cloud",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
-      "max_completion_tokens": 8192
+      "max_completion_tokens": 40960
     },
     {
-      "id": "whisper-large-v3",
+      "id": "whisper-large-v3-turbo",
       "object": "model",
-      "created": 1693721698,
+      "created": 1728413088,
       "owned_by": "OpenAI",
       "active": true,
       "context_window": 448,
@@ -142,24 +132,54 @@
       "max_completion_tokens": 65536
     },
     {
-      "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "id": "whisper-large-v3",
       "object": "model",
-      "created": 1743874824,
-      "owned_by": "Meta",
+      "created": 1693721698,
+      "owned_by": "OpenAI",
+      "active": true,
+      "context_window": 448,
+      "public_apps": null,
+      "max_completion_tokens": 448
+    },
+    {
+      "id": "groq/compound-mini",
+      "object": "model",
+      "created": 1756949707,
+      "owned_by": "Groq",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
       "max_completion_tokens": 8192
     },
     {
-      "id": "meta-llama/llama-guard-4-12b",
+      "id": "llama-3.3-70b-versatile",
       "object": "model",
-      "created": 1746743847,
+      "created": 1733447754,
       "owned_by": "Meta",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
-      "max_completion_tokens": 1024
+      "max_completion_tokens": 32768
+    },
+    {
+      "id": "groq/compound",
+      "object": "model",
+      "created": 1756949530,
+      "owned_by": "Groq",
+      "active": true,
+      "context_window": 131072,
+      "public_apps": null,
+      "max_completion_tokens": 8192
+    },
+    {
+      "id": "llama-3.1-8b-instant",
+      "object": "model",
+      "created": 1693721698,
+      "owned_by": "Meta",
+      "active": true,
+      "context_window": 131072,
+      "public_apps": null,
+      "max_completion_tokens": 131072
     },
     {
       "id": "moonshotai/kimi-k2-instruct-0905",
@@ -172,34 +192,14 @@
       "max_completion_tokens": 16384
     },
     {
-      "id": "meta-llama/llama-prompt-guard-2-86m",
+      "id": "meta-llama/llama-guard-4-12b",
       "object": "model",
-      "created": 1748632165,
-      "owned_by": "Meta",
-      "active": true,
-      "context_window": 512,
-      "public_apps": null,
-      "max_completion_tokens": 512
-    },
-    {
-      "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
-      "object": "model",
-      "created": 1743877158,
+      "created": 1746743847,
       "owned_by": "Meta",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
-      "max_completion_tokens": 8192
-    },
-    {
-      "id": "playai-tts-arabic",
-      "object": "model",
-      "created": 1740682783,
-      "owned_by": "PlayAI",
-      "active": true,
-      "context_window": 8192,
-      "public_apps": null,
-      "max_completion_tokens": 8192
+      "max_completion_tokens": 1024
     }
   ]
 }

@@ -249,23 +249,6 @@
       "maxTemperature": 2
     },
     {
-      "name": "models/gemini-2.0-flash-preview-image-generation",
-      "version": "2.0",
-      "displayName": "Gemini 2.0 Flash Preview Image Generation",
-      "description": "Gemini 2.0 Flash Preview Image Generation",
-      "inputTokenLimit": 32768,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2
-    },
-    {
       "name": "models/gemini-2.0-flash-lite-preview-02-05",
       "version": "preview-02-05",
       "displayName": "Gemini 2.0 Flash-Lite Preview 02-05",
@@ -602,7 +585,7 @@
       "displayName": "Nano Banana",
       "description": "Gemini 2.5 Flash Preview Image",
       "inputTokenLimit": 32768,
-      "outputTokenLimit": 8192,
+      "outputTokenLimit": 32768,
       "supportedGenerationMethods": [
         "generateContent",
         "countTokens",
@@ -619,7 +602,7 @@
       "displayName": "Nano Banana",
       "description": "Gemini 2.5 Flash Preview Image",
       "inputTokenLimit": 32768,
-      "outputTokenLimit": 8192,
+      "outputTokenLimit": 32768,
       "supportedGenerationMethods": [
         "generateContent",
         "countTokens",
@@ -767,15 +750,6 @@
       "topK": 40
     },
     {
-      "name": "models/imagen-3.0-generate-002",
-      "version": "002",
-      "displayName": "Imagen 3.0",
-      "description": "Vertex served Imagen 3.0 002 model",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": ["predict"]
-    },
-    {
       "name": "models/imagen-4.0-generate-preview-06-06",
       "version": "01",
       "displayName": "Imagen 4 (Preview)",
@@ -783,7 +757,25 @@
       "inputTokenLimit": 480,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["predict"]
+    },
+    {
+      "name": "models/imagen-4.0-ultra-generate-preview-06-06",
+      "version": "01",
+      "displayName": "Imagen 4 Ultra (Preview)",
+      "description": "Vertex served Imagen 4.0 ultra model",
+      "inputTokenLimit": 480,
+      "outputTokenLimit": 8192,
+      "supportedGenerationMethods": ["predict"]
+    },
+    {
+      "name": "models/imagen-4.0-generate-001",
+      "version": "001",
+      "displayName": "Imagen 4",
+      "description": "Vertex served Imagen 4.0 model",
+      "inputTokenLimit": 480,
+      "outputTokenLimit": 8192,
+      "supportedGenerationMethods": ["predict"]
     }
   ],
-  "nextPageToken": "Cihtb2RlbHMvaW1hZ2VuLTQuMC1nZW5lcmF0ZS1wcmV2aWV3LTA2LTA2"
+  "nextPageToken": "Ch5tb2RlbHMvaW1hZ2VuLTQuMC1nZW5lcmF0ZS0wMDE="
 }
