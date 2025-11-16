@@ -12,6 +12,9 @@ jobs:
     runs-on: tenki-standard-autoscale
     container:
       image: ghcr.io/the-best-codes/agent-one-base-ci:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.CR_PAT }}
     timeout-minutes: 30
     strategy:
       fail-fast: true
