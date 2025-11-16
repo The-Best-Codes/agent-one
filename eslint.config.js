@@ -48,7 +48,6 @@ export default [
               "shikijs",
               "GROQ",
               "OPENROUTER",
-              "unlisten",
             ],
           },
         },
