@@ -30,3 +30,7 @@ if [ "${PUSH}" = "true" ]; then
 else
   echo "Loaded to local Docker"
 fi
+
+echo ""
+echo "Image size:"
+docker images "${FULL_IMAGE}" --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}"
