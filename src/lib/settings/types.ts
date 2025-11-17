@@ -48,7 +48,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   REGENERATE_ON_SAVE: false,
   THEME: "system",
   ROUNDNESS: "md",
-  NOTIFICATION_SETTING: "when-unfocused",
+  NOTIFICATION_SETTING: "never",
   ENABLED_TOOLS: {
     dateTime: true,
     waitNumberMilliseconds: true,
