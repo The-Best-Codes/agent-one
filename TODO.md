@@ -12,4 +12,4 @@
 - Ensure cross-instance sync (e.g. creating a new chat in one window should make it appear in all windows)
 - Implement a loosely synced state strategy, similar to the one mentioned here: https://www.gethopp.app/blog/tauri-window-state-sync, when we migrate the chat storage to async instead of localStorage
 - Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
-- CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored.
+- CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored. (Try to reproduce this before debugging)

@@ -265,7 +265,10 @@ export const MultiChatProvider = ({
           notificationSetting === "always" ||
           (notificationSetting === "when-unfocused" && !document.hasFocus())
         ) {
-          sendNotificationIfAllowed("AgentOne Finished Responding", "You can disable this notification in settings.");
+          sendNotificationIfAllowed(
+            "AgentOne Finished Responding",
+            "You can disable this notification in settings.",
+          );
         }
       }
     }
