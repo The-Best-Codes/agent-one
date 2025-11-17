@@ -9,6 +9,7 @@ static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_stronghold::Builder::new(|pass| todo!()).build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
             println!("New instance started, args: {:?}, cwd: {:?}", args, cwd);

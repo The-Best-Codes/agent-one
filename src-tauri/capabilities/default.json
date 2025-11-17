@@ -37,6 +37,7 @@
     "clipboard-manager:allow-write-text",
     "clipboard-manager:allow-write-html",
     "log:default",
-    "notification:default"
+    "notification:default",
+    "stronghold:default"
   ]
 }
