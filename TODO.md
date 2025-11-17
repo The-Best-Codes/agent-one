@@ -4,7 +4,6 @@
 - Bulk actions in sidebar
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Make persistence happen more often to save progress better
-- Instead of just the default MCP server, allow managing multiple MCP servers in settings
 - Allow changing stop button behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point (current behavior)
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Migrate to Base UI when it's stable. That will fix a lot of issues.
