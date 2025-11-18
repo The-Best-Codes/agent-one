@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 function easeInOutExpo(t: number): number {
@@ -9,16 +10,23 @@ function easeInOutExpo(t: number): number {
   return (2 - Math.pow(2, -20 * t + 10)) / 2;
 }
 
+// Keep this in sync with the CSS @keyframes cursor-morph duration
+const CURSOR_MORPH_DURATION = 500; // ms
+
 export default function SplashTestRoute() {
   const textRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [isMorphing, setIsMorphing] = useState(false);
+  const [showButton, setShowButton] = useState(false);
 
   const CONFIG = {
     appName: "AgentOne",
     revealDelay: 600,
     revealDuration: 2000,
-    pauseDuration: 1000, // how long to pause after reveal (ms)
-    hideDuration: 2000, // how long the reverse animation takes (ms)
+    pauseDuration: 1000, // pause fully revealed (ms)
+    hideDuration: 2000, // collapse duration (ms)
+    cursorToButtonDelay: 800, // delay after collapse before morph (ms)
   };
 
   const animateWidth = useCallback(
@@ -62,10 +70,24 @@ export default function SplashTestRoute() {
         const revealTimeout = window.setTimeout(() => {
           // Entrance animation
           animateWidth(0, width, CONFIG.revealDuration, () => {
-            // Pause with blinking cursor, no fade-out
+            // Pause with blinking cursor
             const pauseTimeout = window.setTimeout(() => {
               // Reverse animation (shrink back to only cursor)
-              animateWidth(width, 0, CONFIG.hideDuration);
+              animateWidth(width, 0, CONFIG.hideDuration, () => {
+                // After collapsed and only cursor remains, wait, then morph
+                const toButtonDelayTimeout = window.setTimeout(() => {
+                  setIsMorphing(true);
+
+                  const morphTimeout = window.setTimeout(() => {
+                    setShowButton(true);
+                    setIsMorphing(false);
+                  }, CURSOR_MORPH_DURATION);
+
+                  timeouts.push(morphTimeout);
+                }, CONFIG.cursorToButtonDelay);
+
+                timeouts.push(toButtonDelayTimeout);
+              });
             }, CONFIG.pauseDuration);
 
             timeouts.push(pauseTimeout);
@@ -80,13 +102,14 @@ export default function SplashTestRoute() {
     timeouts.push(initialTimeout);
 
     return () => {
-      timeouts.forEach((id) => clearTimeout(id));
+      timeouts.forEach((id) => window.clearTimeout(id));
     };
   }, [
     CONFIG.pauseDuration,
     CONFIG.hideDuration,
     CONFIG.revealDelay,
     CONFIG.revealDuration,
+    CONFIG.cursorToButtonDelay,
     animateWidth,
   ]);
 
@@ -111,7 +134,19 @@ export default function SplashTestRoute() {
             {CONFIG.appName}
           </span>
         </div>
-        <div className={cn("bg-white w-[3px] h-20 animate-blink")} />
+
+        {showButton ? (
+          <Button variant="default" size="lg">
+            Get Started
+          </Button>
+        ) : (
+          <div
+            className={cn(
+              "bg-white w-[3px] h-20",
+              isMorphing ? "animate-cursor-morph" : "animate-blink",
+            )}
+          />
+        )}
       </div>
 
       <style>{`
@@ -126,6 +161,28 @@ export default function SplashTestRoute() {
 
         .animate-blink {
           animation: blink 0.5s ease-in-out infinite;
+        }
+
+        @keyframes cursor-morph {
+          0% {
+            width: 3px;
+            height: 80px;
+            border-radius: 8px;
+          }
+          40% {
+            width: 3px;
+            height: 40px;
+            border-radius: 8px;
+          }
+          100% {
+            width: 124px;
+            height: 40px;
+            border-radius: 8px;
+          }
+        }
+
+        .animate-cursor-morph {
+          animation: cursor-morph ${CURSOR_MORPH_DURATION}ms ease-in-out forwards;
         }
       `}</style>
     </div>
