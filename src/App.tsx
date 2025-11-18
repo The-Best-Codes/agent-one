@@ -6,6 +6,7 @@ import SettingsRoute from "@/routes/settings";
 import TestsRoute from "@/routes/tests";
 import FnmTestRoute from "@/routes/tests/fnm";
 import NotificationsTestRoute from "@/routes/tests/notifications";
+import SplashTestRoute from "@/routes/tests/splash";
 
 import { KbdRegistry } from "./kbd-shortcuts";
 import NotFoundRoute from "./routes/not-found";
@@ -25,6 +26,7 @@ function App() {
           path="/tests/notifications"
           element={<NotificationsTestRoute />}
         />
+        <Route path="/tests/splash" element={<SplashTestRoute />} />
         <Route path="*" element={<NotFoundRoute />} />
       </Routes>
     </BrowserRouter>

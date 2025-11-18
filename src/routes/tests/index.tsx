@@ -57,6 +57,20 @@ export default function TestsRoute() {
                   Run Test
                 </Button>
               </div>
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <h3 className="font-medium">Splash Animation</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Test the app splash screen animation
+                  </p>
+                </div>
+                <Button
+                  onClick={() => navigate("/tests/splash")}
+                  variant="outline"
+                >
+                  Run Test
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
