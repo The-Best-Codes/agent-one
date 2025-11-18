@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { cn } from "@/lib/utils";
+
+function easeInOutExpo(t: number): number {
+  if (t === 0) return 0;
+  if (t === 1) return 1;
+  if (t < 0.5) return Math.pow(2, 20 * t - 10) / 2;
+  return (2 - Math.pow(2, -20 * t + 10)) / 2;
+}
 
 export default function SplashTestRoute() {
   const [cursorFadeOut, setCursorFadeOut] = useState(false);
@@ -9,28 +18,16 @@ export default function SplashTestRoute() {
     appName: "AgentOne",
     revealDelay: 600,
     revealDuration: 2000,
-    easing: "easeInOutCubic" as const,
   };
-
-  const EASING = useMemo(
-    () => ({
-      linear: (t: number) => t,
-      easeOutCubic: (t: number) => 1 - Math.pow(1 - t, 3),
-      easeInOutCubic: (t: number) =>
-        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
-    }),
-    [],
-  );
 
   const revealText = useCallback(
     (fullWidth: number) => {
       const startTime = performance.now();
-      const easingFn = EASING[CONFIG.easing] || EASING.linear;
 
       function frame(now: number) {
         const elapsed = now - startTime;
         const t = Math.min(elapsed / CONFIG.revealDuration, 1);
-        const easedT = easingFn(t);
+        const easedT = easeInOutExpo(t);
 
         const currentWidth = fullWidth * easedT;
 
@@ -50,7 +47,7 @@ export default function SplashTestRoute() {
 
       requestAnimationFrame(frame);
     },
-    [CONFIG.easing, CONFIG.revealDuration, EASING],
+    [CONFIG.revealDuration],
   );
 
   useEffect(() => {
@@ -58,14 +55,12 @@ export default function SplashTestRoute() {
       if (textRef.current) {
         const width = textRef.current.getBoundingClientRect().width;
 
-        // Start revealing after delay
         setTimeout(() => {
           revealText(width);
         }, CONFIG.revealDelay);
       }
     };
 
-    // Measure after a brief delay to ensure font is loaded
     const timer = setTimeout(measureWidth, 100);
     return () => clearTimeout(timer);
   }, [CONFIG.revealDelay, revealText]);
@@ -92,11 +87,7 @@ export default function SplashTestRoute() {
           </span>
         </div>
         <div
-          className={`bg-white ${cursorFadeOut ? "animate-fade-out" : "animate-blink"}`}
-          style={{
-            width: "3px",
-            height: "80px",
-          }}
+          className={cn("bg-white w-[3px] h-20", cursorFadeOut ? "animate-fade-out" : "animate-blink")}
         />
       </div>
 
