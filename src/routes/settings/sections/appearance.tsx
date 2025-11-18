@@ -1,11 +1,10 @@
 import { useAtom } from "jotai";
-import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
 
+import ThemeToggle from "@/components/theme/toggle-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { roundnessAtom, themeAtom } from "@/lib/jotai/settings-atoms";
+import { roundnessAtom } from "@/lib/jotai/settings-atoms";
 
 const roundnessOptions = [
   { value: "none", label: "None" },
@@ -15,7 +14,6 @@ const roundnessOptions = [
 ] as const;
 
 export default function AppearanceSection() {
-  const [theme, setTheme] = useAtom(themeAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
 
   const getRoundnessIndex = (value: string) => {
@@ -38,39 +36,8 @@ export default function AppearanceSection() {
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
             <Label className="text-sm font-medium">Theme</Label>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Choose your preferred theme for the application.
-            </p>
           </div>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            value={theme}
-            onValueChange={(value) => {
-              if (value) setTheme(value as "light" | "dark" | "system");
-            }}
-            className="w-full md:max-w-64"
-            aria-label="Select a theme"
-          >
-            <ToggleGroupItem value="system" aria-label="System theme">
-              <span className="flex items-center gap-1 text-sm">
-                <LaptopIcon className="size-4" />
-                System
-              </span>
-            </ToggleGroupItem>
-            <ToggleGroupItem value="light" aria-label="Light theme">
-              <span className="flex items-center gap-1 text-sm">
-                <SunIcon className="size-4" />
-                Light
-              </span>
-            </ToggleGroupItem>
-            <ToggleGroupItem value="dark" aria-label="Dark theme">
-              <span className="flex items-center gap-1 text-sm">
-                <MoonIcon className="size-4" />
-                Dark
-              </span>
-            </ToggleGroupItem>
-          </ToggleGroup>
+          <ThemeToggle className="md:max-w-64" />
         </div>
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
