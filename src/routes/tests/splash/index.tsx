@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,6 @@ function easeInOutExpo(t: number): number {
 }
 
 export default function SplashTestRoute() {
-  const [cursorFadeOut, setCursorFadeOut] = useState(false);
   const textRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -18,18 +17,19 @@ export default function SplashTestRoute() {
     appName: "AgentOne",
     revealDelay: 600,
     revealDuration: 2000,
+    pauseDuration: 1000, // how long to pause after reveal (ms)
+    hideDuration: 2000, // how long the reverse animation takes (ms)
   };
 
-  const revealText = useCallback(
-    (fullWidth: number) => {
+  const animateWidth = useCallback(
+    (from: number, to: number, duration: number, onComplete?: () => void) => {
       const startTime = performance.now();
 
       function frame(now: number) {
         const elapsed = now - startTime;
-        const t = Math.min(elapsed / CONFIG.revealDuration, 1);
+        const t = Math.min(elapsed / duration, 1);
         const easedT = easeInOutExpo(t);
-
-        const currentWidth = fullWidth * easedT;
+        const currentWidth = from + (to - from) * easedT;
 
         if (containerRef.current) {
           containerRef.current.style.width = currentWidth + "px";
@@ -39,31 +39,56 @@ export default function SplashTestRoute() {
           requestAnimationFrame(frame);
         } else {
           if (containerRef.current) {
-            containerRef.current.style.width = fullWidth + "px";
+            containerRef.current.style.width = to + "px";
           }
-          setCursorFadeOut(true);
+          if (onComplete) {
+            onComplete();
+          }
         }
       }
 
       requestAnimationFrame(frame);
     },
-    [CONFIG.revealDuration],
+    [],
   );
 
   useEffect(() => {
+    const timeouts: number[] = [];
+
     const measureWidth = () => {
       if (textRef.current) {
         const width = textRef.current.getBoundingClientRect().width;
 
-        setTimeout(() => {
-          revealText(width);
+        const revealTimeout = window.setTimeout(() => {
+          // Entrance animation
+          animateWidth(0, width, CONFIG.revealDuration, () => {
+            // Pause with blinking cursor, no fade-out
+            const pauseTimeout = window.setTimeout(() => {
+              // Reverse animation (shrink back to only cursor)
+              animateWidth(width, 0, CONFIG.hideDuration);
+            }, CONFIG.pauseDuration);
+
+            timeouts.push(pauseTimeout);
+          });
         }, CONFIG.revealDelay);
+
+        timeouts.push(revealTimeout);
       }
     };
 
-    const timer = setTimeout(measureWidth, 100);
-    return () => clearTimeout(timer);
-  }, [CONFIG.revealDelay, revealText]);
+    const initialTimeout = window.setTimeout(measureWidth, 100);
+    timeouts.push(initialTimeout);
+
+    return () => {
+      timeouts.forEach((id) => clearTimeout(id));
+    };
+  }, [
+    CONFIG.pauseDuration,
+    CONFIG.hideDuration,
+    CONFIG.revealDelay,
+    CONFIG.revealDuration,
+    animateWidth,
+  ]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#1a1a1a]">
@@ -86,9 +111,7 @@ export default function SplashTestRoute() {
             {CONFIG.appName}
           </span>
         </div>
-        <div
-          className={cn("bg-white w-[3px] h-20", cursorFadeOut ? "animate-fade-out" : "animate-blink")}
-        />
+        <div className={cn("bg-white w-[3px] h-20 animate-blink")} />
       </div>
 
       <style>{`
@@ -101,21 +124,8 @@ export default function SplashTestRoute() {
           }
         }
 
-        @keyframes fade-out {
-          from {
-            opacity: 1;
-          }
-          to {
-            opacity: 0;
-          }
-        }
-
         .animate-blink {
           animation: blink 0.5s ease-in-out infinite;
-        }
-
-        .animate-fade-out {
-          animation: fade-out 0.25s forwards;
         }
       `}</style>
     </div>
