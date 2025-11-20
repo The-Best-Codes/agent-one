@@ -64,6 +64,11 @@ export const ChatInstance = memo(
           return;
         }
 
+        const activeChatIds = listChatIds();
+        if (!activeChatIds.includes(chatId)) {
+          return;
+        }
+
         saveChat({ chatId, messages: chat.messages });
         const chatData = loadChatData(chatId);
         const hasUserMessage = chat.messages.some((m) => m.role === "user");
@@ -74,12 +79,16 @@ export const ChatInstance = memo(
           // TODO: We need to make this state in-memory if we migrate to an async DB, otherwise rerenders, new messages, etc. will trigger title generation again
           saveChatTitleState({ chatId, titleState: "generating" });
           generateChatTitle(model, chat.messages)
-            .then((generatedTitle) =>
-              saveChatTitle({ chatId, title: generatedTitle }),
-            )
+            .then((generatedTitle) => {
+              if (listChatIds().includes(chatId)) {
+                saveChatTitle({ chatId, title: generatedTitle });
+              }
+            })
             .catch((error) => {
               logger.error("Failed to generate title for chat:", chatId, error);
-              saveChatTitleState({ chatId, titleState: "error" });
+              if (listChatIds().includes(chatId)) {
+                saveChatTitleState({ chatId, titleState: "error" });
+              }
             });
         }
       }
