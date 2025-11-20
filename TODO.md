@@ -16,5 +16,4 @@
 - Set API keys in settings and during onboarding (once we have onboarding) and store them in localStorage using an atomWithStorage
 - In tool UI, collapse the error into an accordion by default because it can get SUPER long. Just a title, then the details inside.
 - Ensure virtualization of super long tool result content (in the accordion), maybe using codemirror
-- Fix chat titles in sidebar not truncating (maybe add scrollbar like model selector?)
 - After deleting chats, they appear in the sidebar as "New Chat" and are empty when starting a new chat. Fix.

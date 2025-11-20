@@ -63,9 +63,9 @@ export const ChatItem = memo(
           }
         >
           <Link to={`/chat/${id}`} className="relative block overflow-hidden">
-            <span className="flex items-center gap-1 truncate text-sm font-normal">
+            <span className="flex min-w-0 items-center gap-1 text-sm font-normal">
               {branchOf && <GitBranch className="text-foreground size-3" />}
-              {title}
+              <span className="min-w-0 truncate">{title}</span>
             </span>
             <div
               className={cn(
