@@ -15,3 +15,4 @@
 - CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored. (Try to reproduce this before debugging)
 - Set API keys in settings and during onboarding (once we have onboarding) and store them in a stronghold. Will require a password or you can choose "No password" which will actually just use a default password.
 - In tool UI, collapse the error into an accordion by default because it can get SUPER long. Just a title, then the details inside.
+- Timeout in MCP server defaults to 30000 in UI even though it should be seconds, not milliseconds.
