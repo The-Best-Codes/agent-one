@@ -1,5 +1,11 @@
 import { useAtom } from "jotai";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import {
+  CheckIcon,
+  EyeIcon,
+  EyeOffIcon,
+  RotateCcwIcon,
+  XIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -58,10 +64,37 @@ export default function AccountSection() {
     setUserName(nameInput);
   };
 
-  const handleSaveApiKeys = () => {
-    setGoogleKey(googleInput);
-    setGroqKey(groqInput);
-    setOpenrouterKey(openrouterInput);
+  const handleCancelName = () => {
+    setNameInput(userName);
+  };
+
+  const handleSaveApiKey = (provider: string) => {
+    switch (provider) {
+      case "google":
+        setGoogleKey(googleInput);
+        break;
+      case "groq":
+        setGroqKey(groqInput);
+        break;
+      case "openrouter":
+        setOpenrouterKey(openrouterInput);
+        break;
+    }
+    window.location.reload();
+  };
+
+  const handleCancelApiKey = (provider: string) => {
+    switch (provider) {
+      case "google":
+        setGoogleInput(googleKey);
+        break;
+      case "groq":
+        setGroqInput(groqKey);
+        break;
+      case "openrouter":
+        setOpenrouterInput(openrouterKey);
+        break;
+    }
   };
 
   const toggleKeyVisibility = (key: string) => {
@@ -71,16 +104,24 @@ export default function AccountSection() {
     }));
   };
 
-  const getKeyAtom = (key: string) => {
-    switch (key) {
+  const getKeyState = (provider: string) => {
+    switch (provider) {
       case "google":
-        return { value: googleInput, set: setGoogleInput };
+        return {
+          value: googleInput,
+          set: setGoogleInput,
+          original: googleKey,
+        };
       case "groq":
-        return { value: groqInput, set: setGroqInput };
+        return { value: groqInput, set: setGroqInput, original: groqKey };
       case "openrouter":
-        return { value: openrouterInput, set: setOpenrouterInput };
+        return {
+          value: openrouterInput,
+          set: setOpenrouterInput,
+          original: openrouterKey,
+        };
       default:
-        return { value: "", set: () => { } };
+        return { value: "", set: () => {}, original: "" };
     }
   };
 
@@ -95,20 +136,34 @@ export default function AccountSection() {
             <Label htmlFor="user-name" className="text-sm font-medium">
               Your Name
             </Label>
-            <Input
-              id="user-name"
-              type="text"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              placeholder="Enter your name"
-            />
-            <Button
-              onClick={handleSaveName}
-              disabled={nameInput === userName}
-              className="mt-2 w-full"
-            >
-              Save Name
-            </Button>
+            <div className="flex gap-2">
+              <Input
+                id="user-name"
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="Enter your name"
+                className="flex-1"
+              />
+              <Button
+                onClick={handleSaveName}
+                disabled={nameInput === userName}
+                variant="outline"
+                size="icon"
+                title="Save name"
+              >
+                <CheckIcon className="size-4" />
+              </Button>
+              <Button
+                onClick={handleCancelName}
+                disabled={nameInput === userName}
+                variant="outline"
+                size="icon"
+                title="Cancel changes"
+              >
+                <XIcon className="size-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -125,8 +180,9 @@ export default function AccountSection() {
           </p>
 
           {apiKeyFields.map((field) => {
-            const keyState = getKeyAtom(field.atomId);
+            const keyState = getKeyState(field.atomId);
             const isVisible = showKeys[field.atomId];
+            const hasChanges = keyState.value !== keyState.original;
 
             return (
               <div key={field.atomId} className="flex flex-col gap-2">
@@ -146,6 +202,7 @@ export default function AccountSection() {
                     onClick={() => toggleKeyVisibility(field.atomId)}
                     variant="outline"
                     size="icon"
+                    title={isVisible ? "Hide key" : "Show key"}
                   >
                     {isVisible ? (
                       <EyeOffIcon className="size-4" />
@@ -153,22 +210,28 @@ export default function AccountSection() {
                       <EyeIcon className="size-4" />
                     )}
                   </Button>
+                  <Button
+                    onClick={() => handleSaveApiKey(field.atomId)}
+                    disabled={!hasChanges}
+                    variant="outline"
+                    size="icon"
+                    title="Save key and reload"
+                  >
+                    <CheckIcon className="size-4" />
+                  </Button>
+                  <Button
+                    onClick={() => handleCancelApiKey(field.atomId)}
+                    disabled={!hasChanges}
+                    variant="outline"
+                    size="icon"
+                    title="Cancel changes"
+                  >
+                    <RotateCcwIcon className="size-4" />
+                  </Button>
                 </div>
               </div>
             );
           })}
-
-          <Button
-            onClick={handleSaveApiKeys}
-            disabled={
-              googleInput === googleKey &&
-              groqInput === groqKey &&
-              openrouterInput === openrouterKey
-            }
-            className="mt-2 w-full"
-          >
-            Save API Keys
-          </Button>
         </CardContent>
       </Card>
     </div>
