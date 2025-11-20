@@ -1,6 +1,5 @@
 import { useAtom } from "jotai";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 
 import {
   googleGenerativeAiApiKeyAtom,
@@ -12,13 +11,13 @@ import {
 import { ApiKeysStep } from "./steps/api-keys";
 import { NameStep } from "./steps/name";
 import { SplashStep } from "./steps/splash";
+import { WelcomeStep } from "./steps/welcome";
 
-type OnboardingStep = "splash" | "name" | "api-keys";
+type OnboardingStep = "splash" | "name" | "api-keys" | "welcome";
 
 export default function OnboardingRoute() {
-  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
-  const [, setUserName] = useAtom(userNameAtom);
+  const [userName, setUserName] = useAtom(userNameAtom);
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
@@ -37,7 +36,11 @@ export default function OnboardingRoute() {
     if (keys.groq) setGroqKey(keys.groq);
     if (keys.openrouter) setOpenrouterKey(keys.openrouter);
 
-    navigate("/chat");
+    setCurrentStep("welcome");
+  };
+
+  const handleWelcomeComplete = () => {
+    window.location.href = "/";
   };
 
   const initialApiKeys = {
@@ -59,6 +62,10 @@ export default function OnboardingRoute() {
           onSubmit={handleApiKeysComplete}
           initialKeys={initialApiKeys}
         />
+      )}
+
+      {currentStep === "welcome" && (
+        <WelcomeStep name={userName} onComplete={handleWelcomeComplete} />
       )}
     </div>
   );

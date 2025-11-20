@@ -25,7 +25,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
   };
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 w-full max-w-md px-4 duration-500">
+    <div className="animate-in slide-in-from-bottom-5 fade-in-0 w-full max-w-md px-4 duration-500">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h2 className="text-foreground text-2xl font-bold">
