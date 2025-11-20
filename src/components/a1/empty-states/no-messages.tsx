@@ -1,29 +1,41 @@
+import { useAtomValue } from "jotai";
 import { useState } from "react";
 
-// TODO: Personalize these with user name from settings
-const phrases = [
-  "What's on your mind?",
-  "Where should we begin?",
-  "How can I help you today?",
-  "I'm all ears!",
-  "What can I help with?",
-  "Where should we start?",
+import { userNameAtom } from "@/lib/jotai/settings-atoms";
+
+const getPhrases = (userName: string) => [
+  userName ? `What's on your mind, ${userName}?` : "What's on your mind?",
+  userName ? `Where should we begin, ${userName}?` : "Where should we begin?",
+  userName
+    ? `How can I help you today, ${userName}?`
+    : "How can I help you today?",
+  userName ? `I'm all ears, ${userName}!` : "I'm all ears!",
+  userName ? `What can I help with, ${userName}?` : "What can I help with?",
+  userName ? `Where should we start, ${userName}?` : "Where should we start?",
   "Ask me anything.",
   "Ready when you are.",
-  "What's on your mind today?",
-  "What are you working on?",
-  "What's on the agenda today?",
-  "How can I help?",
-  "What can I do for you?",
+  userName
+    ? `What's on your mind today, ${userName}?`
+    : "What's on your mind today?",
+  userName
+    ? `What are you working on, ${userName}?`
+    : "What are you working on?",
+  userName
+    ? `What's on the agenda today, ${userName}?`
+    : "What's on the agenda today?",
+  userName ? `How can I help, ${userName}?` : "How can I help?",
+  userName ? `What can I do for you, ${userName}?` : "What can I do for you?",
 ];
 
-const getRandomPhrase = () => {
+const getRandomPhrase = (phrases: string[]) => {
   const randomIndex = Math.floor(Math.random() * phrases.length);
   return phrases[randomIndex];
 };
 
 export const NoMessagesGreeting = () => {
-  const [currentPhrase] = useState(getRandomPhrase);
+  const userName = useAtomValue(userNameAtom);
+  const phrases = getPhrases(userName);
+  const [currentPhrase] = useState(() => getRandomPhrase(phrases));
 
   return (
     <div className="flex h-full items-center justify-center">
