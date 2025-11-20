@@ -18,3 +18,4 @@
 - Timeout in MCP server defaults to 30000 in UI even though it should be seconds, not milliseconds. Logic or conversions might be messed up too.
 - Ensure virtualization of super long tool result content (in the accordion), maybe using codemirror
 - Fix chat titles in sidebar not truncating (maybe add scrollbar like model selector?)
+- After deleting chats, they appear in the sidebar as "New Chat" and are empty when starting a new chat. Fix.
