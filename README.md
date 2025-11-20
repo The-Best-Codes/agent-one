@@ -35,7 +35,11 @@ To build the application for production, run the following command:
 npm run tauri build
 ```
 
-You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) to build the application. On Windows, in addition to the prerequisites, you will need to install CMake and NASM as well.
+You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) to build the application. On Windows, in addition to the prerequisites, you will need to install CMake, LLVM, and NASM as well.
+
+- https://cmake.org/download/
+- `winget install LLVM.LLVM`
+- `winget install NASM.NASM`
 
 ## Third-Party Licenses
 
