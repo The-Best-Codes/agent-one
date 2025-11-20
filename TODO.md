@@ -14,5 +14,5 @@
 - Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
 - CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored. (Try to reproduce this before debugging)
 - Set API keys in settings and during onboarding (once we have onboarding) and store them in localStorage using an atomWithStorage
-- Ensure virtualization of super long tool result content (in the accordion), maybe using codemirror
+- Use Codemirror to render excessively long tool result content (in the tool accordion) to prevent lag.
 - After deleting chats, they appear in the sidebar as "New Chat" and are empty when starting a new chat. Fix.
