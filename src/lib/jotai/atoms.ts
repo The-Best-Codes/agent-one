@@ -19,5 +19,5 @@ export const sidebarCollapsedAtom = atomWithStorage(
 
 export const activeSettingsSectionAtom = atomWithStorage(
   "agent-one-active-settings-section",
-  lsStringOrUndefined("agent-one-active-settings-section") ?? "appearance",
+  lsStringOrUndefined("agent-one-active-settings-section") ?? "account",
 );

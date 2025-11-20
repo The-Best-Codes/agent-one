@@ -14,6 +14,7 @@ interface SettingsSidebarProps {
 }
 
 const sections: SettingsSection[] = [
+  { id: "account", label: "Account" },
   { id: "appearance", label: "Appearance" },
   { id: "editor", label: "Editor" },
   { id: "messages", label: "Messages" },

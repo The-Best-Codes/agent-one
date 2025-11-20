@@ -97,3 +97,23 @@ export const mcpParallelLoadLimitAtom = createSettingAtom(
   "MCP_PARALLEL_LOAD_LIMIT",
   DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT,
 );
+
+export const userNameAtom = createSettingAtom(
+  "USER_NAME",
+  DEFAULT_SETTINGS.USER_NAME,
+);
+
+export const googleGenerativeAiApiKeyAtom = createSettingAtom(
+  "GOOGLE_GENERATIVE_AI_API_KEY",
+  DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
+);
+
+export const groqApiKeyAtom = createSettingAtom(
+  "GROQ_API_KEY",
+  DEFAULT_SETTINGS.GROQ_API_KEY,
+);
+
+export const openrouterApiKeyAtom = createSettingAtom(
+  "OPENROUTER_API_KEY",
+  DEFAULT_SETTINGS.OPENROUTER_API_KEY,
+);
