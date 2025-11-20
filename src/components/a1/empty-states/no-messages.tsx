@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// TODO: Personalize these with user name from settings
 const phrases = [
   "What's on your mind?",
   "Where should we begin?",
