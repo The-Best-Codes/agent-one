@@ -21,3 +21,8 @@ export const activeSettingsSectionAtom = atomWithStorage(
   "agent-one-active-settings-section",
   lsStringOrUndefined("agent-one-active-settings-section") ?? "account",
 );
+
+export const onboardingCompletedAtom = atomWithStorage(
+  "agent-one-onboarding-completed",
+  lsBooleanOrUndefined("agent-one-onboarding-completed") ?? false,
+);

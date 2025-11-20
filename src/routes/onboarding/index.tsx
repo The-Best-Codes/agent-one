@@ -1,6 +1,8 @@
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
+import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
 import {
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
@@ -16,11 +18,21 @@ import { WelcomeStep } from "./steps/welcome";
 type OnboardingStep = "splash" | "name" | "api-keys" | "welcome";
 
 export default function OnboardingRoute() {
+  const navigate = useNavigate();
+  const [onboardingCompleted, setOnboardingCompleted] = useAtom(
+    onboardingCompletedAtom,
+  );
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
   const [userName, setUserName] = useAtom(userNameAtom);
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
+
+  useEffect(() => {
+    if (onboardingCompleted) {
+      navigate("/");
+    }
+  }, [onboardingCompleted, navigate]);
 
   const handleGetStarted = () => {
     setCurrentStep("name");
@@ -40,6 +52,7 @@ export default function OnboardingRoute() {
   };
 
   const handleWelcomeComplete = () => {
+    setOnboardingCompleted(true);
     window.location.href = "/";
   };
 
