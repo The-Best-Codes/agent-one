@@ -4,6 +4,8 @@ import {
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
+  googleGenerativeAiApiKeyAtom,
+  groqApiKeyAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -11,11 +13,13 @@ import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
   notificationSettingAtom,
+  openrouterApiKeyAtom,
   regenerateOnSaveAtom,
   roundnessAtom,
   smoothStreamEnabledAtom,
   submitKeyAtom,
   themeAtom,
+  userNameAtom,
 } from "../jotai/settings-atoms";
 import {
   DEFAULT_SETTINGS,
@@ -60,6 +64,13 @@ export function resetAllSettings(): void {
     notificationSettingAtom,
     DEFAULT_SETTINGS.NOTIFICATION_SETTING as NotificationOption,
   );
+  store.set(userNameAtom, DEFAULT_SETTINGS.USER_NAME);
+  store.set(
+    googleGenerativeAiApiKeyAtom,
+    DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
+  );
+  store.set(groqApiKeyAtom, DEFAULT_SETTINGS.GROQ_API_KEY);
+  store.set(openrouterApiKeyAtom, DEFAULT_SETTINGS.OPENROUTER_API_KEY);
 }
 
 /**
@@ -115,6 +126,18 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "MCP_PARALLEL_LOAD_LIMIT":
       store.set(mcpParallelLoadLimitAtom, defaultValue as number);
+      break;
+    case "USER_NAME":
+      store.set(userNameAtom, defaultValue as string);
+      break;
+    case "GOOGLE_GENERATIVE_AI_API_KEY":
+      store.set(googleGenerativeAiApiKeyAtom, defaultValue as string);
+      break;
+    case "GROQ_API_KEY":
+      store.set(groqApiKeyAtom, defaultValue as string);
+      break;
+    case "OPENROUTER_API_KEY":
+      store.set(openrouterApiKeyAtom, defaultValue as string);
       break;
   }
 }

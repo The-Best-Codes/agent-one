@@ -34,6 +34,10 @@ export interface DefaultSettings {
   ENABLED_TOOLS: Record<ToolId, boolean>;
   MCP_SERVERS: McpServerConfig[];
   MCP_PARALLEL_LOAD_LIMIT: number;
+  USER_NAME: string;
+  GOOGLE_GENERATIVE_AI_API_KEY: string;
+  GROQ_API_KEY: string;
+  OPENROUTER_API_KEY: string;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -65,4 +69,8 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     },
   ],
   MCP_PARALLEL_LOAD_LIMIT: 8,
+  USER_NAME: "",
+  GOOGLE_GENERATIVE_AI_API_KEY: "",
+  GROQ_API_KEY: "",
+  OPENROUTER_API_KEY: "",
 };

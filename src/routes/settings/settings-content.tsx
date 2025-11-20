@@ -1,4 +1,5 @@
 import AboutSection from "./sections/about";
+import AccountSection from "./sections/account";
 import AppearanceSection from "./sections/appearance";
 import EditorSection from "./sections/editor";
 import MessagesSection from "./sections/messages";
@@ -14,6 +15,8 @@ export default function SettingsContent({
 }: SettingsContentProps) {
   const renderSection = () => {
     switch (activeSection) {
+      case "account":
+        return <AccountSection />;
       case "appearance":
         return <AppearanceSection />;
       case "editor":
