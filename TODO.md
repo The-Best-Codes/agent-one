@@ -16,3 +16,4 @@
 - Set API keys in settings and during onboarding (once we have onboarding) and store them in localStorage using an atomWithStorage
 - Use Codemirror to render excessively long tool result content (in the tool accordion) to prevent lag.
 - Find a way to not abort ongoing streams when navigating to other routes (e.g. going to /settings should allow chats to run in the background)
+- Fix setting API keys to not require a full app reload
