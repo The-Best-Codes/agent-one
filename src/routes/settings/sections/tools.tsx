@@ -79,7 +79,9 @@ export default function ToolsSection() {
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
 
   const isAddFormValid =
-    newServerName.trim() !== "" && newServerCommand.trim() !== "" && newServerTimeoutSec >= 0.1;
+    newServerName.trim() !== "" &&
+    newServerCommand.trim() !== "" &&
+    newServerTimeoutSec >= 0.1;
 
   const handleAddServer = () => {
     if (!isAddFormValid) return;
