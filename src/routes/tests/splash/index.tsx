@@ -142,7 +142,7 @@ export default function SplashTestRoute() {
         ) : (
           <div
             className={cn(
-              "bg-white w-[3px] h-20",
+              "h-20 w-[3px] bg-white",
               isMorphing ? "animate-cursor-morph" : "animate-blink",
             )}
           />

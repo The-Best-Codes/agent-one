@@ -2,59 +2,19 @@
   "object": "list",
   "data": [
     {
-      "id": "openai/gpt-oss-20b",
+      "id": "meta-llama/llama-guard-4-12b",
       "object": "model",
-      "created": 1754407957,
-      "owned_by": "OpenAI",
-      "active": true,
-      "context_window": 131072,
-      "public_apps": null,
-      "max_completion_tokens": 65536
-    },
-    {
-      "id": "meta-llama/llama-4-scout-17b-16e-instruct",
-      "object": "model",
-      "created": 1743874824,
+      "created": 1746743847,
       "owned_by": "Meta",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
-      "max_completion_tokens": 8192
+      "max_completion_tokens": 1024
     },
     {
-      "id": "playai-tts-arabic",
+      "id": "meta-llama/llama-prompt-guard-2-86m",
       "object": "model",
-      "created": 1740682783,
-      "owned_by": "PlayAI",
-      "active": true,
-      "context_window": 8192,
-      "public_apps": null,
-      "max_completion_tokens": 8192
-    },
-    {
-      "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
-      "object": "model",
-      "created": 1743877158,
-      "owned_by": "Meta",
-      "active": true,
-      "context_window": 131072,
-      "public_apps": null,
-      "max_completion_tokens": 8192
-    },
-    {
-      "id": "openai/gpt-oss-safeguard-20b",
-      "object": "model",
-      "created": 1761708789,
-      "owned_by": "OpenAI",
-      "active": true,
-      "context_window": 131072,
-      "public_apps": null,
-      "max_completion_tokens": 65536
-    },
-    {
-      "id": "meta-llama/llama-prompt-guard-2-22m",
-      "object": "model",
-      "created": 1748632101,
+      "created": 1748632165,
       "owned_by": "Meta",
       "active": true,
       "context_window": 512,
@@ -72,9 +32,49 @@
       "max_completion_tokens": 16384
     },
     {
+      "id": "openai/gpt-oss-120b",
+      "object": "model",
+      "created": 1754408224,
+      "owned_by": "OpenAI",
+      "active": true,
+      "context_window": 131072,
+      "public_apps": null,
+      "max_completion_tokens": 65536
+    },
+    {
+      "id": "moonshotai/kimi-k2-instruct-0905",
+      "object": "model",
+      "created": 1757046093,
+      "owned_by": "Moonshot AI",
+      "active": true,
+      "context_window": 262144,
+      "public_apps": null,
+      "max_completion_tokens": 16384
+    },
+    {
+      "id": "whisper-large-v3",
+      "object": "model",
+      "created": 1693721698,
+      "owned_by": "OpenAI",
+      "active": true,
+      "context_window": 448,
+      "public_apps": null,
+      "max_completion_tokens": 448
+    },
+    {
       "id": "playai-tts",
       "object": "model",
       "created": 1740682771,
+      "owned_by": "PlayAI",
+      "active": true,
+      "context_window": 8192,
+      "public_apps": null,
+      "max_completion_tokens": 8192
+    },
+    {
+      "id": "playai-tts-arabic",
+      "object": "model",
+      "created": 1740682783,
       "owned_by": "PlayAI",
       "active": true,
       "context_window": 8192,
@@ -92,26 +92,6 @@
       "max_completion_tokens": 4096
     },
     {
-      "id": "meta-llama/llama-prompt-guard-2-86m",
-      "object": "model",
-      "created": 1748632165,
-      "owned_by": "Meta",
-      "active": true,
-      "context_window": 512,
-      "public_apps": null,
-      "max_completion_tokens": 512
-    },
-    {
-      "id": "qwen/qwen3-32b",
-      "object": "model",
-      "created": 1748396646,
-      "owned_by": "Alibaba Cloud",
-      "active": true,
-      "context_window": 131072,
-      "public_apps": null,
-      "max_completion_tokens": 40960
-    },
-    {
       "id": "whisper-large-v3-turbo",
       "object": "model",
       "created": 1728413088,
@@ -122,9 +102,9 @@
       "max_completion_tokens": 448
     },
     {
-      "id": "openai/gpt-oss-120b",
+      "id": "openai/gpt-oss-20b",
       "object": "model",
-      "created": 1754408224,
+      "created": 1754407957,
       "owned_by": "OpenAI",
       "active": true,
       "context_window": 131072,
@@ -132,14 +112,14 @@
       "max_completion_tokens": 65536
     },
     {
-      "id": "whisper-large-v3",
+      "id": "meta-llama/llama-prompt-guard-2-22m",
       "object": "model",
-      "created": 1693721698,
-      "owned_by": "OpenAI",
+      "created": 1748632101,
+      "owned_by": "Meta",
       "active": true,
-      "context_window": 448,
+      "context_window": 512,
       "public_apps": null,
-      "max_completion_tokens": 448
+      "max_completion_tokens": 512
     },
     {
       "id": "groq/compound-mini",
@@ -152,6 +132,26 @@
       "max_completion_tokens": 8192
     },
     {
+      "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+      "object": "model",
+      "created": 1743874824,
+      "owned_by": "Meta",
+      "active": true,
+      "context_window": 131072,
+      "public_apps": null,
+      "max_completion_tokens": 8192
+    },
+    {
+      "id": "qwen/qwen3-32b",
+      "object": "model",
+      "created": 1748396646,
+      "owned_by": "Alibaba Cloud",
+      "active": true,
+      "context_window": 131072,
+      "public_apps": null,
+      "max_completion_tokens": 40960
+    },
+    {
       "id": "llama-3.3-70b-versatile",
       "object": "model",
       "created": 1733447754,
@@ -162,10 +162,10 @@
       "max_completion_tokens": 32768
     },
     {
-      "id": "groq/compound",
+      "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
       "object": "model",
-      "created": 1756949530,
-      "owned_by": "Groq",
+      "created": 1743877158,
+      "owned_by": "Meta",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
@@ -182,24 +182,24 @@
       "max_completion_tokens": 131072
     },
     {
-      "id": "moonshotai/kimi-k2-instruct-0905",
+      "id": "openai/gpt-oss-safeguard-20b",
       "object": "model",
-      "created": 1757046093,
-      "owned_by": "Moonshot AI",
-      "active": true,
-      "context_window": 262144,
-      "public_apps": null,
-      "max_completion_tokens": 16384
-    },
-    {
-      "id": "meta-llama/llama-guard-4-12b",
-      "object": "model",
-      "created": 1746743847,
-      "owned_by": "Meta",
+      "created": 1761708789,
+      "owned_by": "OpenAI",
       "active": true,
       "context_window": 131072,
       "public_apps": null,
-      "max_completion_tokens": 1024
+      "max_completion_tokens": 65536
+    },
+    {
+      "id": "groq/compound",
+      "object": "model",
+      "created": 1756949530,
+      "owned_by": "Groq",
+      "active": true,
+      "context_window": 131072,
+      "public_apps": null,
+      "max_completion_tokens": 8192
     }
   ]
 }
