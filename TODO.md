@@ -18,3 +18,4 @@
 - Find a way to not abort ongoing streams when navigating to other routes (e.g. going to /settings should allow chats to run in the background)
 - Fix setting API keys to not require a full app reload
 - Fix chat model selector not being full width of trigger on Windows
+- Fix file drag and drop not working, even worse on Windows
