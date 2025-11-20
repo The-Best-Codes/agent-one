@@ -19,3 +19,4 @@
 - Fix setting API keys to not require a full app reload
 - Fix chat model selector not being full width of trigger on Windows
 - Fix file drag and drop not working, even worse on Windows
+- Improve contrast of selected chat (make it more obviously selected) in light mode especially
