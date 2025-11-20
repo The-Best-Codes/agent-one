@@ -27,6 +27,16 @@ Run the application:
 npm run tauri dev
 ```
 
+## Build
+
+To build the application for production, run the following command:
+
+```bash
+npm run tauri build
+```
+
+You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) to build the application. On Windows, in addition to the prerequisites, you will need to install CMake and NASM as well.
+
 ## Third-Party Licenses
 
 This application bundles fnm (Fast Node Manager) for Node.js version management during onboarding. fnm is licensed under the GNU General Public License v3.0. For license details and source code, see the licenses directory or visit https://github.com/Schniz/fnm.
