@@ -15,4 +15,4 @@
 - CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored. (Try to reproduce this before debugging)
 - Set API keys in settings and during onboarding (once we have onboarding) and store them in localStorage using an atomWithStorage
 - Use Codemirror to render excessively long tool result content (in the tool accordion) to prevent lag.
-- After deleting chats, they appear in the sidebar as "New Chat" and are empty when starting a new chat. Fix.
+- Find a way to not abort ongoing streams when navigating to other routes (e.g. going to /settings should allow chats to run in the background)
