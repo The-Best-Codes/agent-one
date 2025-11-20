@@ -76,10 +76,10 @@ export default function ToolsSection() {
   const [serverToDelete, setServerToDelete] = useState<number | null>(null);
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
-  const [newServerTimeout, setNewServerTimeout] = useState(30000);
+  const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
 
   const isAddFormValid =
-    newServerName.trim() !== "" && newServerCommand.trim() !== "";
+    newServerName.trim() !== "" && newServerCommand.trim() !== "" && newServerTimeoutSec >= 0.1;
 
   const handleAddServer = () => {
     if (!isAddFormValid) return;
@@ -89,20 +89,20 @@ export default function ToolsSection() {
       name: newServerName.trim(),
       command: newServerCommand.trim(),
       enabled: true,
-      timeoutMs: newServerTimeout * 1000,
+      timeoutMs: newServerTimeoutSec * 1000,
     };
     setMcpServers((prev) => [newServer, ...prev]);
 
     setNewServerName("");
     setNewServerCommand("");
-    setNewServerTimeout(30);
+    setNewServerTimeoutSec(30);
     setShowAddDialog(false);
   };
 
   const handleCancelAdd = () => {
     setNewServerName("");
     setNewServerCommand("");
-    setNewServerTimeout(30);
+    setNewServerTimeoutSec(30);
     setShowAddDialog(false);
   };
 
@@ -350,11 +350,12 @@ export default function ToolsSection() {
               <Input
                 id="server-timeout"
                 type="number"
-                min="1"
+                min="0.1"
                 max="300"
-                value={newServerTimeout}
+                step="0.1"
+                value={newServerTimeoutSec}
                 onChange={(e) =>
-                  setNewServerTimeout(parseInt(e.target.value) || 30)
+                  setNewServerTimeoutSec(parseFloat(e.target.value))
                 }
               />
             </div>
