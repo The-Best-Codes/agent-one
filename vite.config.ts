@@ -102,18 +102,24 @@ export default defineConfig(
         rollupOptions: {
           output: {
             manualChunks(id: string) {
-              if (
-                id.includes(path.join(__dirname, "src/assets/model-lists/"))
-              ) {
+              // Normalize to POSIX-style paths so checks work on Windows too
+              const normalizedId = id.replace(/\\/g, "/");
+              const modelListsDir = path
+                .resolve(__dirname, "src/assets/model-lists")
+                .replace(/\\/g, "/");
+
+              if (normalizedId.includes(`${modelListsDir}/`)) {
                 return path.parse(id).name;
               }
 
-              if (id.includes("node_modules")) {
+              if (normalizedId.includes("/node_modules/")) {
                 for (const [chunkName, packages] of Object.entries(
                   vendorManualChunks,
                 )) {
                   if (
-                    packages.some((pkg) => id.includes(`/node_modules/${pkg}/`))
+                    packages.some((pkg) =>
+                      normalizedId.includes(`/node_modules/${pkg}/`),
+                    )
                   ) {
                     return chunkName;
                   }
