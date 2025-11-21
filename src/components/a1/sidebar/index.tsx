@@ -216,6 +216,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               : "w-64 translate-x-0 opacity-100",
             className,
           )}
+          inert={isSidebarSmall}
         >
           <div
             className={cn(
