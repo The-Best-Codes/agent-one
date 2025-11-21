@@ -20,3 +20,4 @@
 - Fix chat model selector not being full width of trigger on Windows
 - Fix file drag and drop not working, even worse on Windows
 - Improve contrast of selected chat (make it more obviously selected) in light mode especially
+- Add app zoom in settings. See also (private link): https://github.com/The-Best-Codes/erasr/blob/main/src/components/global/text-scale-changer.tsx
