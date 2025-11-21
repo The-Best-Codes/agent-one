@@ -24,3 +24,5 @@
   - Only show models that you've configured an API key for
   - Detect when a model doesn't support tool use and disable tools (show an info message about the model's limitation), same for if it supports uploading files etc.
   - Later: Allow users to customize the model parameters (e.g. temperature, max tokens, etc.)
+- Allow keyboard navigation of chat model selector
+- When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
