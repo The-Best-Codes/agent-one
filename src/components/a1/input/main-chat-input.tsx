@@ -36,6 +36,7 @@ import { getLogger } from "@/lib/logger";
 
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
+import { MainInputIncompleteSection } from "./incomplete-section";
 
 const logger = getLogger(import.meta.url);
 
@@ -335,6 +336,7 @@ export const MainChatInput = ({
   return (
     <div className="px-0 md:px-2">
       <MainInputErrorSection />
+      <MainInputIncompleteSection />
       <form
         data-testid="chat-form"
         onSubmit={handleSubmit}
