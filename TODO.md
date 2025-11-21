@@ -13,16 +13,15 @@
 - Implement a loosely synced state strategy, similar to the one mentioned here: https://www.gethopp.app/blog/tauri-window-state-sync, when we migrate the chat storage to async instead of localStorage
 - Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
 - CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored. (Try to reproduce this before debugging)
-- Set API keys in settings and during onboarding (once we have onboarding) and store them in localStorage using an atomWithStorage
+- Clean up provider settings and screen in onboarding (use goose for inspiration there perhaps)
 - Use Codemirror to render excessively long tool result content (in the tool accordion) to prevent lag.
 - Find a way to not abort ongoing streams when navigating to other routes (e.g. going to /settings should allow chats to run in the background)
-- Fix setting API keys to not require a full app reload
+- Fix setting API keys, it should not require a full app reload
 - Fix chat model selector not being full width of trigger on Windows
-- Fix file drag and drop not working, even worse on Windows
+- Fix file drag and drop not working, even worse on Windows. Use Tauri events DRAG_DROP etc. for drag and drop to be more reliable? (https://v2.tauri.app/reference/javascript/api/namespaceevent/)
 - Improve contrast of selected chat (make it more obviously selected) in light mode especially
 - Add app zoom in settings. See also (private link): https://github.com/The-Best-Codes/erasr/blob/main/src/components/global/text-scale-changer.tsx
 - Some obvious stuff with the model selector:
     - Only show models that you've configured an API key for
     - Detect when a model doesn't support tool use and disable tools (show an info message about the model's limitation), same for if it supports uploading files etc.
     - Later: Allow users to customize the model parameters (e.g. temperature, max tokens, etc.)
-- Use Tauri events DRAG_DROP etc. for drag and drop to be more reliable (https://v2.tauri.app/reference/javascript/api/namespaceevent/)
