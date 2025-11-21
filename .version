@@ -1,0 +1,9 @@
+0.0.0-alpha.0
+
+# Update:
+# package.json
+# src-tauri/tauri.conf.json
+# src-tauri/Cargo.toml
+# Run:
+# npm install
+# cd src-tauri && cargo generate-lockfile
