@@ -25,3 +25,4 @@
     - Only show models that you've configured an API key for
     - Detect when a model doesn't support tool use and disable tools (show an info message about the model's limitation), same for if it supports uploading files etc.
     - Later: Allow users to customize the model parameters (e.g. temperature, max tokens, etc.)
+- Use Tauri events DRAG_DROP etc. for drag and drop to be more reliable (https://v2.tauri.app/reference/javascript/api/namespaceevent/)
