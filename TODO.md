@@ -21,3 +21,7 @@
 - Fix file drag and drop not working, even worse on Windows
 - Improve contrast of selected chat (make it more obviously selected) in light mode especially
 - Add app zoom in settings. See also (private link): https://github.com/The-Best-Codes/erasr/blob/main/src/components/global/text-scale-changer.tsx
+- Some obvious stuff with the model selector:
+    - Only show models that you've configured an API key for
+    - Detect when a model doesn't support tool use and disable tools (show an info message about the model's limitation), same for if it supports uploading files etc.
+    - Later: Allow users to customize the model parameters (e.g. temperature, max tokens, etc.)
