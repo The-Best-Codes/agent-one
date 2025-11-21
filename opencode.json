@@ -2,9 +2,6 @@
   "lsp": {
     "typescript": {
       "disabled": true
-    },
-    "clangd": {
-      "disabled": true
     }
   },
   "$schema": "https://opencode.ai/config.json"
