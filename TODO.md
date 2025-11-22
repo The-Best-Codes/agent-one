@@ -27,3 +27,4 @@
 - Allow keyboard navigation of chat model selector
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it
+- Investigate MCP server logs repeating 3 times (MCP servers should only start once!)
