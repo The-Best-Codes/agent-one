@@ -154,6 +154,7 @@ export default function AboutSection() {
                 {updateStatus === "checking" && (
                   <Button variant="outline" disabled>
                     <Loader2 className="size-4 animate-spin" />
+                    Checking...
                   </Button>
                 )}
                 {updateStatus === "error" && (
