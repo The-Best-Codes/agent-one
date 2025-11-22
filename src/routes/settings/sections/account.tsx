@@ -1,10 +1,9 @@
 import { useAtom } from "jotai";
 import {
-  CheckIcon,
   EyeIcon,
   EyeOffIcon,
   RotateCcwIcon,
-  XIcon,
+  SaveIcon
 } from "lucide-react";
 import { useState } from "react";
 
@@ -121,7 +120,7 @@ export default function AccountSection() {
           original: openrouterKey,
         };
       default:
-        return { value: "", set: () => {}, original: "" };
+        return { value: "", set: () => { }, original: "" };
     }
   };
 
@@ -136,6 +135,9 @@ export default function AccountSection() {
             <Label htmlFor="user-name" className="text-sm font-medium">
               Your Name
             </Label>
+            <p className="text-muted-foreground text-sm">
+              AgentOne will use this name to address you.
+            </p>
             <div className="flex gap-2">
               <Input
                 id="user-name"
@@ -152,7 +154,7 @@ export default function AccountSection() {
                 size="icon"
                 title="Save name"
               >
-                <CheckIcon className="size-4" />
+                <SaveIcon className="size-4" />
               </Button>
               <Button
                 onClick={handleCancelName}
@@ -161,7 +163,7 @@ export default function AccountSection() {
                 size="icon"
                 title="Cancel changes"
               >
-                <XIcon className="size-4" />
+                <RotateCcwIcon className="size-4" />
               </Button>
             </div>
           </div>
@@ -174,7 +176,7 @@ export default function AccountSection() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p className="text-muted-foreground text-sm">
-            Your API keys are stored securely in your browser's local storage.
+            Your API keys are stored securely on your device.
             They are used to authenticate requests to the respective AI service
             providers.
           </p>
@@ -217,7 +219,7 @@ export default function AccountSection() {
                     size="icon"
                     title="Save key and reload"
                   >
-                    <CheckIcon className="size-4" />
+                    <SaveIcon className="size-4" />
                   </Button>
                   <Button
                     onClick={() => handleCancelApiKey(field.atomId)}
