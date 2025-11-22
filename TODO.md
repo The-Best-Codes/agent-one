@@ -7,7 +7,6 @@
 - Allow changing stop button behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point (current behavior)
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Migrate to Base UI when it's stable. That will fix a lot of issues.
-- Sidecar uv/uvx
 - Improve settings UX by adding previews of settings. For example, instead of "smooth stream" with a toggle, put two large components under a header "Stream Type". One will be choppy, the other smooth. Then the user can see in practice what the difference is!
 - Ensure cross-instance sync (e.g. creating a new chat in one window should make it appear in all windows)
 - Implement a loosely synced state strategy, similar to the one mentioned here: https://www.gethopp.app/blog/tauri-window-state-sync, when we migrate the chat storage to async instead of localStorage
