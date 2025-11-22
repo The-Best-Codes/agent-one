@@ -633,6 +633,42 @@
       "thinking": true
     },
     {
+      "name": "models/gemini-3-pro-image-preview",
+      "version": "3.0",
+      "displayName": "Nano Banana Pro",
+      "description": "Gemini 3 Pro Image Preview",
+      "inputTokenLimit": 131072,
+      "outputTokenLimit": 32768,
+      "supportedGenerationMethods": [
+        "generateContent",
+        "countTokens",
+        "batchGenerateContent"
+      ],
+      "temperature": 1,
+      "topP": 0.95,
+      "topK": 64,
+      "maxTemperature": 1,
+      "thinking": true
+    },
+    {
+      "name": "models/nano-banana-pro-preview",
+      "version": "3.0",
+      "displayName": "Nano Banana Pro",
+      "description": "Gemini 3 Pro Image Preview",
+      "inputTokenLimit": 131072,
+      "outputTokenLimit": 32768,
+      "supportedGenerationMethods": [
+        "generateContent",
+        "countTokens",
+        "batchGenerateContent"
+      ],
+      "temperature": 1,
+      "topP": 0.95,
+      "topK": 64,
+      "maxTemperature": 1,
+      "thinking": true
+    },
+    {
       "name": "models/gemini-robotics-er-1.5-preview",
       "version": "1.5-preview",
       "displayName": "Gemini Robotics-ER 1.5 Preview",
@@ -747,25 +783,7 @@
       "inputTokenLimit": 480,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["predict"]
-    },
-    {
-      "name": "models/imagen-4.0-generate-001",
-      "version": "001",
-      "displayName": "Imagen 4",
-      "description": "Vertex served Imagen 4.0 model",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": ["predict"]
-    },
-    {
-      "name": "models/imagen-4.0-ultra-generate-001",
-      "version": "001",
-      "displayName": "Imagen 4 Ultra",
-      "description": "Vertex served Imagen 4.0 ultra model",
-      "inputTokenLimit": 480,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": ["predict"]
     }
   ],
-  "nextPageToken": "CiRtb2RlbHMvaW1hZ2VuLTQuMC11bHRyYS1nZW5lcmF0ZS0wMDE="
+  "nextPageToken": "Ci5tb2RlbHMvaW1hZ2VuLTQuMC11bHRyYS1nZW5lcmF0ZS1wcmV2aWV3LTA2LTA2"
 }

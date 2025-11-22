@@ -193,26 +193,26 @@ export default function AboutSection() {
 
               {(updateStatus === "downloading" ||
                 updateStatus === "installing") && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">
-                          {updateStatus === "downloading"
-                            ? "Downloading update..."
-                            : "Installing update..."}
-                        </p>
-                        <p className="text-muted-foreground text-sm">
-                          {updateStatus === "downloading"
-                            ? `Version ${updateVersion} - ${Math.round(updateProgress)}% complete`
-                            : "Please wait while we install the update"}
-                        </p>
-                      </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {updateStatus === "downloading"
+                          ? "Downloading update..."
+                          : "Installing update..."}
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        {updateStatus === "downloading"
+                          ? `Version ${updateVersion} - ${Math.round(updateProgress)}% complete`
+                          : "Please wait while we install the update"}
+                      </p>
                     </div>
-                    {updateStatus === "downloading" && (
-                      <Progress value={updateProgress} className="w-full" />
-                    )}
                   </div>
-                )}
+                  {updateStatus === "downloading" && (
+                    <Progress value={updateProgress} className="w-full" />
+                  )}
+                </div>
+              )}
 
               {updateStatus === "error" && (
                 <div className="space-y-4">
