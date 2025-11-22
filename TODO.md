@@ -28,3 +28,4 @@
 - Allow adding and removing attachments from a message when editing it
 - Investigate MCP server logs repeating 3 times (MCP servers should only start once!)
 - Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove the tools, don't re-run all the commands etc.
+- Consider moving MCP servers to Rust side for better performance and stability?
