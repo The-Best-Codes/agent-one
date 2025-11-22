@@ -48,3 +48,11 @@ See https://tauri.app/plugin/updater/.
 ## Third-Party Licenses
 
 This application bundles fnm (Fast Node Manager) for Node.js version management during onboarding. fnm is licensed under the GNU General Public License v3.0. For license details and source code, see the licenses directory or visit https://github.com/Schniz/fnm.
+
+----
+
+Copyright © 2025 bestcodes.dev
+
+All rights reserved.
+
+This code is proprietary and confidential. No license is granted to use, copy, modify, distribute, or create derivative works of this software except with explicit written permission from the copyright holder.
