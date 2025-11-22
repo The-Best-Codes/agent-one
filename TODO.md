@@ -16,7 +16,6 @@
 - Use Codemirror to render excessively long tool result content (in the tool accordion) to prevent lag.
 - Find a way to not abort ongoing streams when navigating to other routes (e.g. going to /settings should allow chats to run in the background). Best option is to move MultiChatProvider out of the /chat route and somewhere above the <Router>
 - Fix setting API keys, it should not require a full app reload
-- Fix chat model selector not being full width of trigger on Windows
 - Improve contrast of selected chat (make it more obviously selected) in light mode especially
 - Add app zoom in settings. See also (private link): https://github.com/The-Best-Codes/erasr/blob/main/src/components/global/text-scale-changer.tsx
 - Some obvious stuff with the model selector:

@@ -57,7 +57,7 @@ const SidebarContent = ({
       </div>
 
       <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
-        <ModelSelector className="w-full" popoverClassName="w-full max-w-60" />
+        <ModelSelector className="w-full" popoverClassName="w-[var(--radix-popover-trigger-width)] max-w-60" />
         <Button variant="outline" className="w-full justify-start" asChild>
           <Link
             to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
@@ -170,7 +170,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               className={cn(
                 "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
                 !isSidebarSmall &&
-                  "pointer-events-none -translate-x-2 scale-95 opacity-0",
+                "pointer-events-none -translate-x-2 scale-95 opacity-0",
               )}
               inert={!isCollapsed}
             >
