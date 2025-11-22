@@ -60,9 +60,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: app-v__VERSION__
-          releaseName: "App v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
+          tagName: agent-one-v__VERSION__
+          releaseName: "AgentOne v__VERSION__"
+          releaseBody: "See the assets below this release to download and install this version."
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
