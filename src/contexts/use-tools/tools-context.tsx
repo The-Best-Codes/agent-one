@@ -189,7 +189,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   close: connection.close,
                 });
               } catch (error) {
-                logger.error(
+                logger.warn(
                   `Failed to connect to MCP server ${server.name}:`,
                   error,
                 );
