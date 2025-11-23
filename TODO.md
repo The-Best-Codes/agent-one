@@ -27,9 +27,9 @@
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it
 
-- Investigate MCP server logs repeating 3 times on startup (MCP servers should only start once on startup!)
-- Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove its tools, don't re-run all the other MCP server commands etc.. And again, same for enable/disable. So basically an incremental MCP system that only runs the command(s) when necessary and is performant. 
+- Fix MCP server logs repeating 3 times on startup (MCP servers should only start once on startup!)
+- Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove its tools, no commands need to run. When enabling, just run the commands for that server, when disabling, just stop the server. So basically an incremental MCP system that only runs the command(s) when necessary and is performant. 
 - More reliable MCP server IDs
-- Proper cleanup of MCP servers when they time out, are removed, or are disabled.
-- Removing an MCP server should perform the same cleanup as disabling it. It should kill the process as well.
+- Proper cleanup of MCP servers when they time out, are removed, or are disabled. This includes closing the client and killing the process.
 - Ensure that we still properly wait for MCP servers to all be ready before starting the AI response ("Starting MCP servers..." should still work and wait until they're started)
+- Good handling of race conditions, also only the most recent "version" of a server should run (e.g. if you change the command of the server with ID server-1 [example id only] three times, only the latest command should run, kill the processes of the older commands that were spawned or are running, same with other updates we just need the latest and to discard outdated processes you get the point.)
