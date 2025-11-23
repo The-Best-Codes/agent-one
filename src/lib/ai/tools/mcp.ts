@@ -12,7 +12,7 @@ import { type McpServerConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-class TauriStdioMCPTransport implements MCPTransport {
+export class TauriStdioMCPTransport implements MCPTransport {
   public onclose?: () => void;
   public onerror?: (error: Error) => void;
   public onmessage?: (message: JSONRPCMessage) => void;
@@ -107,40 +107,29 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 }
 
-async function getMcpClient(command: string): Promise<MCPClient> {
-  const transport = new TauriStdioMCPTransport(command);
-  const client = await createMCPClient({ transport });
-  return client;
+export interface McpConnection {
+  client: MCPClient;
+  tools: ToolSet;
+  close: () => Promise<void>;
 }
 
-export async function getMcpToolsForServer(
+export async function connectToMcpServer(
   server: McpServerConfig,
-): Promise<ToolSet> {
-  try {
-    const client = await getMcpClient(server.command);
-    const tools = await client.tools();
-    logger.verbose(
-      `Successfully fetched MCP tools for ${server.name}:`,
-      Object.keys(tools),
-    );
-    return tools;
-  } catch (error) {
-    logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
-    return {};
-  }
-}
+): Promise<McpConnection> {
+  const transport = new TauriStdioMCPTransport(server.command);
+  const client = await createMCPClient({ transport });
+  const tools = await client.tools();
 
-// TODO: Ensure this is invoked where it should be!
-// export async function closeMcpClient(): Promise<void> {
-//   if (mcpClient) {
-//     try {
-//       await mcpClient.close();
-//       logger.verbose("MCP client closed successfully");
-//     } catch (error) {
-//       logger.error("Error closing MCP client:", error);
-//     } finally {
-//       mcpClient = null;
-//       mcpToolsCache = null;
-//     }
-//   }
-// }
+  logger.verbose(
+    `Successfully fetched MCP tools for ${server.name}:`,
+    Object.keys(tools),
+  );
+
+  return {
+    client,
+    tools,
+    close: async () => {
+      await transport.close();
+    },
+  };
+}
