@@ -27,10 +27,9 @@
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it
 
-These appear mostly resolved by the recent changes, but test the things below them:
-
-- Investigate MCP server logs repeating 3 times (MCP servers should only start once!)
-- Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove the tools, don't re-run all the commands etc.
-  To test:
-- Everything manually
-- Specifically: Does deleting an MCP server perform the same cleanup as disabling it? It should kill the process as well.
+- Investigate MCP server logs repeating 3 times on startup (MCP servers should only start once on startup!)
+- Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove its tools, don't re-run all the other MCP server commands etc.. So basically an incremental MCP system.
+- More reliable MCP server IDs
+- Proper cleanup of MCP servers when they time out, are removed, or are disabled.
+- Removing an MCP server should perform the same cleanup as disabling it. It should kill the process as well.
+- Ensure that we still properly wait for MCP servers to all be ready before starting the AI response ("Starting MCP servers..." should still work and wait until they're started)
