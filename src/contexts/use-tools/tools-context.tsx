@@ -9,14 +9,14 @@ import React, {
 } from "react";
 
 import { staticTools } from "@/lib/ai/tools";
-import { connectToMcpServer, type McpConnection } from "@/lib/ai/tools/mcp";
+import { getMcpToolsForServer } from "@/lib/ai/tools/mcp";
 import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { type McpServerConfig, type ToolId } from "@/lib/settings/types";
+import { type ToolId } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
 
@@ -32,191 +32,105 @@ interface ToolsProviderProps {
   children: ReactNode;
 }
 
-interface ActiveServer {
-  config: McpServerConfig;
-  tools: ToolSet;
-  close: () => Promise<void>;
-}
-
-const isSameConfig = (a: McpServerConfig, b: McpServerConfig) => {
-  return (
-    a.command === b.command &&
-    a.timeoutMs === b.timeoutMs &&
-    a.enabled === b.enabled
-  );
-};
-
 export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [enabledTools] = useAtom(enabledToolsAtom);
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
 
-  const [mcpTools, setMcpTools] = useState<ToolSet>({});
+  const [mcpTools, setMcpTools] = useState<ToolSet | null>(null);
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
-  const [initialLoadPromise, setInitialLoadPromise] =
-    useState<Promise<void> | null>(null);
+  const [loadingPromise, setLoadingPromise] = useState<Promise<void> | null>(
+    null,
+  );
 
-  const activeServersRef = useRef<Map<string, ActiveServer>>(new Map());
-  const processingRef = useRef<Map<string, McpServerConfig>>(new Map());
-  const latestMcpServersRef = useRef(mcpServers);
-
-  const mcpToolsRef = useRef<ToolSet>({});
+  const mcpToolsRef = useRef<ToolSet | null>(null);
   const mcpLoadedRef = useRef(false);
-  const initialLoadPromiseRef = useRef<Promise<void> | null>(null);
+  const loadingPromiseRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     mcpToolsRef.current = mcpTools;
     mcpLoadedRef.current = mcpLoaded;
-    initialLoadPromiseRef.current = initialLoadPromise;
-  }, [mcpTools, mcpLoaded, initialLoadPromise]);
+    loadingPromiseRef.current = loadingPromise;
+  }, [mcpTools, mcpLoaded, loadingPromise]);
 
+  // Load MCP tools when servers change
   useEffect(() => {
-    latestMcpServersRef.current = mcpServers;
-  }, [mcpServers]);
-
-  useEffect(() => {
-    const reconcileServers = async () => {
-      const enabledServers = mcpServers.filter((s) => s.enabled);
-
-      const toAdd: McpServerConfig[] = [];
-      const toRemove: string[] = [];
-
-      for (const [id, active] of activeServersRef.current.entries()) {
-        const currentConfig = enabledServers.find((s) => s.id === id);
-
-        if (!currentConfig) {
-          // Server was removed or disabled
-          toRemove.push(id);
-        } else if (!isSameConfig(active.config, currentConfig)) {
-          // Config changed, need to restart
-          toRemove.push(id);
-        }
-      }
-
-      for (const server of enabledServers) {
-        const active = activeServersRef.current.get(server.id);
-        const isMarkedForRemoval = toRemove.includes(server.id);
-
-        if (!active || isMarkedForRemoval) {
-          const pendingConfig = processingRef.current.get(server.id);
-          if (pendingConfig && isSameConfig(pendingConfig, server)) {
-            continue;
-          }
-          toAdd.push(server);
-        }
-      }
-
-      if (toAdd.length === 0 && toRemove.length === 0) {
-        if (!mcpLoaded) setMcpLoaded(true);
-        return;
-      }
-
-      setIsMcpLoading(true);
-
-      for (const id of toRemove) {
-        const active = activeServersRef.current.get(id);
-        if (active) {
-          logger.verbose(`Stopping MCP server: ${active.config.name}`);
-          try {
-            await active.close();
-          } catch (err) {
-            logger.error(
-              `Error closing MCP server ${active.config.name}:`,
-              err,
-            );
-          }
-          activeServersRef.current.delete(id);
-        }
-      }
-
-      if (toAdd.length > 0) {
-        logger.verbose(`Starting ${toAdd.length} MCP servers...`);
-
-        toAdd.forEach((s) => processingRef.current.set(s.id, s));
-
-        const chunks = [];
-        for (let i = 0; i < toAdd.length; i += parallelLoadLimit) {
-          chunks.push(toAdd.slice(i, i + parallelLoadLimit));
-        }
-
-        for (const chunk of chunks) {
-          await Promise.all(
-            chunk.map(async (server) => {
-              try {
-                const connection = (await Promise.race([
-                  connectToMcpServer(server),
-                  new Promise<never>((_, reject) =>
-                    setTimeout(
-                      () => reject(new Error("Timeout")),
-                      server.timeoutMs,
-                    ),
-                  ),
-                ])) as McpConnection;
-
-                // Check if the server is still valid according to the latest state
-                // This handles race conditions where the user might have disabled/changed the server while it was loading
-                const latestConfig = latestMcpServersRef.current.find(
-                  (s) => s.id === server.id && s.enabled,
-                );
-
-                if (!latestConfig || !isSameConfig(latestConfig, server)) {
-                  logger.verbose(
-                    `Server ${server.name} config changed or disabled during load, closing...`,
-                  );
-                  await connection.close();
-                  return;
-                }
-
-                activeServersRef.current.set(server.id, {
-                  config: server,
-                  tools: connection.tools,
-                  close: connection.close,
-                });
-              } catch (error) {
-                logger.warn(
-                  `Failed to connect to MCP server ${server.name}:`,
-                  error,
-                );
-              } finally {
-                processingRef.current.delete(server.id);
-              }
-            }),
-          );
-        }
-      }
-
-      const allTools: ToolSet = {};
-      for (const active of activeServersRef.current.values()) {
-        Object.assign(allTools, active.tools);
-      }
-
-      setMcpTools(allTools);
+    const enabledServers = Array.isArray(mcpServers)
+      ? mcpServers.filter((server) => server.enabled)
+      : [];
+    if (enabledServers.length === 0) {
+      setMcpTools({});
       setMcpLoaded(true);
       setIsMcpLoading(false);
-    };
-
-    const promise = reconcileServers();
-    if (!mcpLoaded) {
-      setInitialLoadPromise(promise);
+      setLoadingPromise(null);
+      return;
     }
-  }, [mcpServers, parallelLoadLimit, mcpLoaded]);
 
-  useEffect(() => {
-    const activeServers = activeServersRef.current;
-    return () => {
-      activeServers.forEach(async (active) => {
-        try {
-          await active.close();
-        } catch {
-          // no-op
+    const loadMcpTools = async () => {
+      setIsMcpLoading(true);
+      setMcpLoaded(false);
+
+      try {
+        logger.verbose(
+          `Starting background MCP tools loading for ${enabledServers.length} servers...`,
+        );
+
+        // Load servers in parallel with limit
+        const chunks = [];
+        for (let i = 0; i < enabledServers.length; i += parallelLoadLimit) {
+          chunks.push(enabledServers.slice(i, i + parallelLoadLimit));
         }
-      });
-      activeServers.clear();
+
+        const allTools: ToolSet = {};
+
+        for (const chunk of chunks) {
+          const promises = chunk.map(async (server) => {
+            try {
+              const tools = await Promise.race([
+                getMcpToolsForServer(server),
+                new Promise<ToolSet>((_, reject) =>
+                  setTimeout(
+                    () =>
+                      reject(new Error(`Timeout after ${server.timeoutMs}ms`)),
+                    server.timeoutMs,
+                  ),
+                ),
+              ]);
+              return { serverId: server.id, tools };
+            } catch (error) {
+              logger.error(
+                `Failed to load MCP tools for server ${server.name}:`,
+                error,
+              );
+              return { serverId: server.id, tools: {} };
+            }
+          });
+
+          const results = await Promise.all(promises);
+          for (const result of results) {
+            Object.assign(allTools, result.tools);
+          }
+        }
+
+        setMcpTools(allTools);
+        setMcpLoaded(true);
+        logger.verbose("MCP tools loaded in background.");
+      } catch (error) {
+        logger.error("Failed to load MCP tools in background:", error);
+        setMcpTools({});
+        setMcpLoaded(true);
+      } finally {
+        setIsMcpLoading(false);
+      }
     };
-  }, []);
+
+    const promise = loadMcpTools();
+    setLoadingPromise(promise);
+  }, [mcpServers, parallelLoadLimit]);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
+    // Filter static tools based on enabled settings
     const filteredStaticTools: ToolSet = {};
     for (const [toolId, tool] of Object.entries(staticTools)) {
       if (enabledTools[toolId as ToolId]) {
@@ -224,9 +138,16 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
     }
 
-    if (!mcpLoadedRef.current && initialLoadPromiseRef.current) {
-      logger.verbose("Waiting for initial MCP load...");
-      await initialLoadPromiseRef.current;
+    if (mcpLoadedRef.current) {
+      return {
+        ...filteredStaticTools,
+        ...(mcpToolsRef.current || {}),
+      };
+    }
+
+    if (loadingPromiseRef.current) {
+      logger.verbose("MCP tools not loaded yet, waiting for promise...");
+      await loadingPromiseRef.current;
     }
 
     return {
