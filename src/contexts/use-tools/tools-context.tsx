@@ -98,9 +98,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         } else if (!isSameConfig(active.config, currentConfig)) {
           // Config changed, need to restart
           toRemove.push(id);
-          // It will be picked up by the "toAdd" logic below because it won't be in activeServersRef after removal?
-          // Actually, we process removals first, but we calculate lists first.
-          // If it's in toRemove, it's effectively gone. We need to ensure it gets added back with new config.
         }
       }
 
@@ -223,18 +220,16 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
   // Cleanup on unmount
   useEffect(() => {
-    const activeServersValue = activeServersRef.current;
-
+    const activeServers = activeServersRef.current;
     return () => {
-      activeServersValue.forEach(async (active) => {
+      activeServers.forEach(async (active) => {
         try {
           await active.close();
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (e) {
+        } catch {
           // no-op
         }
       });
-      activeServersValue.clear();
+      activeServers.clear();
     };
   }, []);
 

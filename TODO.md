@@ -28,8 +28,9 @@
 - Allow adding and removing attachments from a message when editing it
 
 These appear mostly resolved by the recent changes, but test the things below them:
+
 - Investigate MCP server logs repeating 3 times (MCP servers should only start once!)
 - Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove the tools, don't re-run all the commands etc.
-To test:
+  To test:
 - Everything manually
 - Specifically: Does deleting an MCP server perform the same cleanup as disabling it? It should kill the process as well.
