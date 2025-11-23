@@ -322,7 +322,7 @@ export default function ToolsSection() {
           <DialogHeader>
             <DialogTitle>Add MCP Server</DialogTitle>
             <DialogDescription>
-              Configure a new MCP server to extend the AI's capabilities.
+              Configure a new MCP server to extend the AI&apos;s capabilities.
             </DialogDescription>
           </DialogHeader>
 
