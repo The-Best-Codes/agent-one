@@ -3,6 +3,7 @@
 - Scroll to active model
 - Bulk actions in sidebar
 - Continue chat on tool call validation errors (let the model know it made a mistake?)
+- Consider moving MCP servers to Rust side for better performance and stability?
 - Make persistence happen more often to save progress better
 - Allow changing stop button behavior in settings: Stop at next stopping point (via `sendAutomaticallyWhen`), abort immediately, or only show stop option when at a stopping point (current behavior)
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
@@ -27,4 +28,3 @@
 - Allow adding and removing attachments from a message when editing it
 - Investigate MCP server logs repeating 3 times (MCP servers should only start once!)
 - Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove the tools, don't re-run all the commands etc.
-- Consider moving MCP servers to Rust side for better performance and stability?
