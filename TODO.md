@@ -28,7 +28,7 @@
 - Allow adding and removing attachments from a message when editing it
 
 - Fix MCP server logs repeating 3 times on startup (MCP servers should only start once on startup!)
-- Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove its tools, no commands need to run. When enabling, just run the commands for that server, when disabling, just stop the server. So basically an incremental MCP system that only runs the command(s) when necessary and is performant. 
+- Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for removing MCP servers, when one is removed, remove its tools, no commands need to run. When enabling, just run the commands for that server, when disabling, just stop the server. So basically an incremental MCP system that only runs the command(s) when necessary and is performant.
 - More reliable MCP server IDs
 - Proper cleanup of MCP servers when they time out, are removed, or are disabled. This includes closing the client and killing the process.
 - Ensure that we still properly wait for MCP servers to all be ready before starting the AI response ("Starting MCP servers..." should still work and wait until they're started)
