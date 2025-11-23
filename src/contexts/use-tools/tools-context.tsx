@@ -57,14 +57,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [initialLoadPromise, setInitialLoadPromise] =
     useState<Promise<void> | null>(null);
 
-  // Store active connections: ServerID -> ActiveServer
   const activeServersRef = useRef<Map<string, ActiveServer>>(new Map());
-  // Track in-progress operations to prevent duplicate processing: ServerID -> Config
   const processingRef = useRef<Map<string, McpServerConfig>>(new Map());
-  // Keep track of latest servers to handle race conditions
   const latestMcpServersRef = useRef(mcpServers);
 
-  // Refs for sync access in getTools
   const mcpToolsRef = useRef<ToolSet>({});
   const mcpLoadedRef = useRef(false);
   const initialLoadPromiseRef = useRef<Promise<void> | null>(null);
@@ -79,16 +75,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     latestMcpServersRef.current = mcpServers;
   }, [mcpServers]);
 
-  // Main effect to reconcile servers
   useEffect(() => {
     const reconcileServers = async () => {
       const enabledServers = mcpServers.filter((s) => s.enabled);
 
-      // Determine what needs to change
       const toAdd: McpServerConfig[] = [];
       const toRemove: string[] = [];
 
-      // 1. Find servers to remove or update (config changed)
       for (const [id, active] of activeServersRef.current.entries()) {
         const currentConfig = enabledServers.find((s) => s.id === id);
 
@@ -101,17 +94,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         }
       }
 
-      // 2. Find servers to add
       for (const server of enabledServers) {
         const active = activeServersRef.current.get(server.id);
         const isMarkedForRemoval = toRemove.includes(server.id);
 
-        // If it's not active, OR it's marked for removal (update), we might need to add it.
         if (!active || isMarkedForRemoval) {
-          // Check if we are already loading this exact config
           const pendingConfig = processingRef.current.get(server.id);
           if (pendingConfig && isSameConfig(pendingConfig, server)) {
-            // Already loading this config, skip to prevent duplicates
             continue;
           }
           toAdd.push(server);
@@ -125,7 +114,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
       setIsMcpLoading(true);
 
-      // Process removals first
       for (const id of toRemove) {
         const active = activeServersRef.current.get(id);
         if (active) {
@@ -142,14 +130,11 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         }
       }
 
-      // Process additions
       if (toAdd.length > 0) {
         logger.verbose(`Starting ${toAdd.length} MCP servers...`);
 
-        // Mark as processing
         toAdd.forEach((s) => processingRef.current.set(s.id, s));
 
-        // Chunking logic
         const chunks = [];
         for (let i = 0; i < toAdd.length; i += parallelLoadLimit) {
           chunks.push(toAdd.slice(i, i + parallelLoadLimit));
@@ -201,7 +186,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         }
       }
 
-      // Rebuild aggregated tools
       const allTools: ToolSet = {};
       for (const active of activeServersRef.current.values()) {
         Object.assign(allTools, active.tools);
@@ -218,7 +202,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     }
   }, [mcpServers, parallelLoadLimit, mcpLoaded]);
 
-  // Cleanup on unmount
   useEffect(() => {
     const activeServers = activeServersRef.current;
     return () => {
@@ -234,7 +217,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   }, []);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
-    // Filter static tools based on enabled settings
     const filteredStaticTools: ToolSet = {};
     for (const [toolId, tool] of Object.entries(staticTools)) {
       if (enabledTools[toolId as ToolId]) {
@@ -242,7 +224,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
     }
 
-    // If initial load is not complete, wait for it
     if (!mcpLoadedRef.current && initialLoadPromiseRef.current) {
       logger.verbose("Waiting for initial MCP load...");
       await initialLoadPromiseRef.current;
