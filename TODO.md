@@ -24,3 +24,4 @@
 - Allow keyboard navigation of chat model selector
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it
+- When tool results are too long and are virtualized, don't render anything in the accordion content unless the accordion is expanded.
