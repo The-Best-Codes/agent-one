@@ -2,6 +2,7 @@ import { useAtom } from "jotai";
 import { RotateCcwIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
+import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -213,10 +214,7 @@ export default function ToolsSection() {
           </div>
 
           {mcpServers.length === 0 ? (
-            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-              No MCP servers configured. Click &quot;Add Server&quot; to get
-              started.
-            </div>
+            <NoMcpServers />
           ) : (
             <div className="space-y-2">
               {mcpServers.map((server, index) => (
