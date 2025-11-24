@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "lint": "eslint src --cache",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "tsc -b --incremental --noEmit",
     "format": "npm run format:main && npm run format:rust",
     "format:check": "npm run format:check:main && npm run format:check:rust",
     "format:main": "prettier --write --cache .",
