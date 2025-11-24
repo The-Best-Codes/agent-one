@@ -12,7 +12,6 @@
 - Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
 - CRITICAL: Sending a message immediately as soon as input is enabled will start a new chat and cause all other chats to be removed from `chat-ids` in localStorage, but the chats themselves are still stored. (Try to reproduce this before debugging)
 - Clean up provider settings and screen in onboarding (use goose for inspiration there perhaps)
-- Find a way to not abort ongoing streams when navigating to other routes (e.g. going to /settings should allow chats to run in the background). Best option is to move MultiChatProvider out of the /chat route and somewhere above the <Router>
 - Fix setting API keys, it should not require a full app reload
 - Improve contrast of selected chat (make it more obviously selected) in light mode especially. Just improve light mode contrast in general.
 - Add app zoom in settings. See also (private link): https://github.com/The-Best-Codes/erasr/blob/main/src/components/global/text-scale-changer.tsx

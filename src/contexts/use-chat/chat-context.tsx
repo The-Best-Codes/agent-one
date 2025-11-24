@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 
 import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
@@ -32,13 +32,7 @@ const logger = getLogger(import.meta.url);
 
 type ChatInstanceCollection = Map<string, UseChatHelpers<UIMessage>>;
 
-export const MultiChatProvider = ({
-  children,
-  currentChatId,
-}: {
-  children: ReactNode;
-  currentChatId: string | undefined;
-}) => {
+export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const {
     currentModel: defaultModelForNewChats,
     setModel: setDefaultModelForNewChats,
@@ -46,10 +40,18 @@ export const MultiChatProvider = ({
   const { createChat, loadChatData, saveChatModel } = usePersistence();
   const navigate = useNavigate();
   const location = useLocation();
+  const params = useParams<{ id: string }>();
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const [chatIds] = useAtom(chatIdsAtom);
   const [notificationSetting] = useAtom(notificationSettingAtom);
+
+  const currentChatId = useMemo(() => {
+    if (location.pathname.startsWith("/chat/")) {
+      return params.id;
+    }
+    return undefined;
+  }, [location.pathname, params.id]);
 
   const chatInstancesRef = useRef<ChatInstanceCollection>(new Map());
 

@@ -10,7 +10,6 @@ import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
-import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
@@ -65,11 +64,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
 function ChatRoute() {
   const { id } = useParams<{ id: string }>();
 
-  return (
-    <MultiChatProvider currentChatId={id}>
-      <ChatInterface chatId={id} />
-    </MultiChatProvider>
-  );
+  return <ChatInterface chatId={id} />;
 }
 
 export default ChatRoute;
