@@ -15,6 +15,7 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
+  CommandItem,
   CommandList,
 } from "@/components/ui/command";
 import {
@@ -48,7 +49,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
     const query = searchQuery.toLowerCase();
     const scoredModels = AVAILABLE_CHAT_MODELS.map((model) => {
-      const targetString = `${model.provider}/${model.name}`;
+      const targetString = model.name;
       const score = commandScore(targetString, query, [model?.id || ""]);
       return { model, score };
     }).filter(({ score }) => score > 0);
@@ -138,12 +139,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                   {virtualizer.getVirtualItems().map((virtualItem) => {
                     const model = filteredModels[virtualItem.index];
                     return (
-                      <div
+                      <CommandItem
                         key={virtualItem.key}
-                        data-slot="command-item"
-                        className={cn(
-                          "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground hover:bg-accent hover:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-                        )}
+                        value={model.id}
+                        onSelect={() => handleSelect(model.id)}
                         style={{
                           position: "absolute",
                           top: 0,
@@ -152,17 +151,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                           height: `${virtualItem.size}px`,
                           transform: `translateY(${virtualItem.start}px)`,
                         }}
-                        onClick={() => handleSelect(model.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            handleSelect(model.id);
-                          }
-                        }}
-                        role="option"
-                        aria-selected={currentModel.id === model.id}
-                        data-selected={currentModel.id === model.id}
-                        tabIndex={0}
                       >
                         <div className="min-w-0 flex-1">
                           <div className="scrollbar-size-xs w-full overflow-x-auto">
@@ -174,7 +162,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </CommandItem>
                     );
                   })}
                 </div>
