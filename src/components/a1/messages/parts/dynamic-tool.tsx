@@ -120,7 +120,10 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                 "{toolName}" tool finished
               </span>
             </AccordionTrigger>
-            <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
+            <AccordionContent
+              renderWhenCollapsed={!isLongOutput}
+              className="text-muted-foreground p-0 pt-2 text-xs"
+            >
               <ScrollArea type="always" viewportClassName="max-h-96">
                 <ScrollBar orientation="horizontal"></ScrollBar>
                 <div className="flex flex-col gap-2">
@@ -136,7 +139,10 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                     <span className="font-medium">Result:</span>
                     <div className="mt-1 rounded bg-transparent p-2">
                       {isLongOutput ? (
-                        <PerformantMarkdown content={outputText} />
+                        <PerformantMarkdown
+                          maxHeight="200px"
+                          content={outputText}
+                        />
                       ) : (
                         <div className="whitespace-pre-wrap">{outputText}</div>
                       )}

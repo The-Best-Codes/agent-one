@@ -217,15 +217,21 @@ function AccordionTrigger({
 
 interface AccordionContentProps extends React.HTMLAttributes<HTMLDivElement> {
   wrapperClassName?: string;
+  renderWhenCollapsed?: boolean;
 }
 
 function AccordionContent({
   wrapperClassName,
   className,
   children,
+  renderWhenCollapsed = true,
   ...props
 }: AccordionContentProps) {
   const { isOpen } = useAccordionItemContext();
+
+  if (!renderWhenCollapsed && !isOpen) {
+    return null;
+  }
 
   return (
     <div
