@@ -9,7 +9,6 @@
 - Ensure cross-instance sync (e.g. creating a new chat in one window should make it appear in all windows)
 - Implement a loosely synced state strategy, similar to the one mentioned here: https://www.gethopp.app/blog/tauri-window-state-sync, when we migrate the chat storage to async instead of localStorage
 - Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
-- CRITICAL: Sending a message immediately on page load will start a new chat (as it should), but causes all other chats to be removed from `chat-ids` in localStorage. It overwrites the `chat-ids` array with only itself, but the old chats themselves are still stored in the chat keys.
 - Clean up provider settings and screen in onboarding (use goose for inspiration there perhaps)
 - Fix setting API keys, it should not require a full app reload
 - Improve contrast of selected chat (make it more obviously selected) in light mode especially. Just improve light mode contrast in general.
@@ -21,4 +20,4 @@
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it?
 - Redirect to `/chat` when the chat ID is invalid, but make sure that this doesn't redirect to `/chat` each time you delete a chat.
-- Chat title should begin generating ASAP (once first message is sent, don't wait for conversation to finish or AI to respond)
+- Chat title should begin generating ASAP (once first message is sent, don't wait for conversation to finish or AI to respond). I think it does this, but need to manually check.
