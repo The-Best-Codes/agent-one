@@ -20,3 +20,4 @@
   - Later: Allow users to customize the model parameters (e.g. temperature, max tokens, etc.)
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it?
+- Redirect to `/chat` when the chat ID is invalid, but make sure that this doesn't redirect to `/chat` each time you delete a chat.
