@@ -14,6 +14,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import {
   markdownHighlightingAtom,
+  regenerateOnSaveAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
@@ -24,10 +25,13 @@ export default function EditorSection() {
     markdownHighlightingAtom,
   );
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
+  const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
 
   const isMarkdownHighlightingDefault =
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
+  const isRegenerateOnSaveDefault =
+    regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
 
   const handleResetMarkdownHighlighting = () => {
     resetSetting("MARKDOWN_HIGHLIGHTING");
@@ -35,6 +39,10 @@ export default function EditorSection() {
 
   const handleResetSubmitKey = () => {
     resetSetting("SUBMIT_KEY");
+  };
+
+  const handleResetRegenerateOnSave = () => {
+    resetSetting("REGENERATE_ON_SAVE");
   };
 
   return (
@@ -63,6 +71,31 @@ export default function EditorSection() {
               size="icon"
               onClick={handleResetMarkdownHighlighting}
               disabled={isMarkdownHighlightingDefault}
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-row items-center justify-between gap-2">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">Regenerate on Save</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              If enabled, saving an edit to your message will automatically regenerate the AI response.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={regenerateOnSave}
+              onCheckedChange={setRegenerateOnSave}
+              aria-label="Toggle regenerate on save"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleResetRegenerateOnSave}
+              disabled={isRegenerateOnSaveDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
