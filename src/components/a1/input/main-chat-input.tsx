@@ -92,15 +92,11 @@ export const MainChatInput = ({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounter = useRef(0);
 
-  const shouldShowStopButton = () => {
-    switch (stopButtonBehavior) {
-      case "immediate":
-        return status === "streaming" || status === "submitted";
-      case "at-stopping-point":
-      default:
-        return status === "streaming";
-    }
-  };
+  // TODO: Is a function acceptable to use here, e.g. a switch-case? Will be cleaner when we add more options
+  const showStopButton =
+    stopButtonBehavior === "immediate"
+      ? status === "streaming" || status === "submitted"
+      : status === "streaming";
 
   useHotkeys(kbdRegistry.focusMainChatInput, () => {
     editorViewRef.current?.focus();
@@ -481,7 +477,7 @@ export const MainChatInput = ({
             </Tooltip>
           </div>
           <div>
-            {shouldShowStopButton() ? (
+            {showStopButton ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
