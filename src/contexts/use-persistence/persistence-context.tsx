@@ -1,12 +1,7 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
 import { useAtom } from "jotai";
-import React, {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useEffectEvent,
-} from "react";
+import React, { type ReactNode, useCallback } from "react";
 
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
@@ -45,7 +40,6 @@ export interface PersistenceContextType {
   chatUpdateTrigger: number;
 }
 
-const CHAT_IDS_KEY = "chat-ids";
 const NEW_CHAT_MODEL_ID_KEY = "new-chat-model-id";
 
 function getChatKey(id: string): string {
@@ -59,22 +53,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(
     chatUpdateTriggerAtom,
   );
-
-  // Read https://react.dev/learn/separating-events-from-effects#extracting-non-reactive-logic-out-of-effects for more info about useEffectEvent
-  const loadInitialChatIds = useEffectEvent(() => {
-    try {
-      const idsJson = localStorage.getItem(CHAT_IDS_KEY);
-      if (idsJson) {
-        setChatIds(JSON.parse(idsJson));
-      }
-    } catch (error) {
-      logger.error("Failed to load chat IDs from localStorage", error);
-    }
-  });
-
-  useEffect(() => {
-    loadInitialChatIds();
-  }, []);
 
   const getNewChatModelId = useCallback(() => {
     try {
@@ -99,16 +77,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
 
   const saveChatIds = useCallback(
     (ids: string[]) => {
-      try {
-        logger.verbose("Saving chat IDs to localStorage", {
-          ids,
-          previousIds: chatIds,
-        });
-        localStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
-        setChatIds(ids);
-      } catch (error) {
-        logger.error("Failed to save chat IDs to localStorage", error);
-      }
+      logger.verbose("Saving chat IDs", {
+        ids,
+        previousIds: chatIds,
+      });
+      setChatIds(ids);
     },
     [setChatIds, chatIds],
   );

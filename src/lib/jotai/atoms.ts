@@ -3,14 +3,16 @@ import { atomWithStorage } from "jotai/utils";
 
 import {
   lsBooleanOrUndefined,
+  lsJSONOrUndefined,
   lsStringOrUndefined,
 } from "./load-from-localstorage";
 
-export const chatIdsAtom = atom<string[]>([]);
+export const chatIdsAtom = atomWithStorage(
+  "chat-ids",
+  lsJSONOrUndefined<string[]>("chat-ids") ?? [],
+);
 
 export const chatUpdateTriggerAtom = atom(0);
-
-export const chatDataAtom = atom<Record<string, unknown>>({});
 
 export const sidebarCollapsedAtom = atomWithStorage(
   "agent-one-sidebar-collapsed",
