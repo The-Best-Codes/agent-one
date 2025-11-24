@@ -2,7 +2,6 @@
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
 - Scroll to active model
 - Bulk actions in sidebar
-- Continue chat on tool call validation errors (let the model know it made a mistake?)
 - Make persistence happen more often to save progress better
 - During app onboarding, detect if npx is available, if not, offer to install it via fnm sidecar. Test if the app needs restarted after installing, test on Windows and macOS as well as Linux, etc.
 - Migrate to Base UI when it's stable. That will fix a lot of issues.
