@@ -1,10 +1,5 @@
 import { useAtom } from "jotai";
-import {
-  EyeIcon,
-  EyeOffIcon,
-  RotateCcwIcon,
-  SaveIcon
-} from "lucide-react";
+import { EyeIcon, EyeOffIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -120,7 +115,7 @@ export default function AccountSection() {
           original: openrouterKey,
         };
       default:
-        return { value: "", set: () => { }, original: "" };
+        return { value: "", set: () => {}, original: "" };
     }
   };
 
@@ -176,9 +171,8 @@ export default function AccountSection() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p className="text-muted-foreground text-sm">
-            Your API keys are stored securely on your device.
-            They are used to authenticate requests to the respective AI service
-            providers.
+            Your API keys are stored securely on your device. They are used to
+            authenticate requests to the respective AI service providers.
           </p>
 
           {apiKeyFields.map((field) => {
