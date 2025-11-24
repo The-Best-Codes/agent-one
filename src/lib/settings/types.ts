@@ -3,6 +3,7 @@ export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
 export type NotificationOption = "always" | "when-unfocused" | "never";
+export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 
 export interface McpServerConfig {
   id: string;
@@ -29,6 +30,7 @@ export interface DefaultSettings {
   EXPERIMENTAL_THROTTLE_VALUE: number;
   SMOOTH_STREAM_ENABLED: boolean;
   REGENERATE_ON_SAVE: boolean;
+  STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   THEME: ThemeOption;
   ROUNDNESS: RoundnessOption;
   NOTIFICATION_SETTING: NotificationOption;
@@ -52,6 +54,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   EXPERIMENTAL_THROTTLE_VALUE: 250,
   SMOOTH_STREAM_ENABLED: false,
   REGENERATE_ON_SAVE: false,
+  STOP_BUTTON_BEHAVIOR: "immediate",
   THEME: "system",
   ROUNDNESS: "md",
   NOTIFICATION_SETTING: "never",

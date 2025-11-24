@@ -6,6 +6,7 @@ import {
   type McpServerConfig,
   type NotificationOption,
   type RoundnessOption,
+  type StopButtonBehaviorOption,
   type SubmitKeyOption,
   type ThemeOption,
   type ToolId,
@@ -72,6 +73,12 @@ export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
 );
+
+export const stopButtonBehaviorAtom =
+  createSettingAtom<StopButtonBehaviorOption>(
+    "STOP_BUTTON_BEHAVIOR",
+    DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR,
+  );
 
 export const themeAtom = createSettingAtom<ThemeOption>(
   "THEME",

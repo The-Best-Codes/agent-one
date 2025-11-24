@@ -18,6 +18,7 @@ import {
   regenerateOnSaveAtom,
   roundnessAtom,
   smoothStreamEnabledAtom,
+  stopButtonBehaviorAtom,
   submitKeyAtom,
   themeAtom,
   userNameAtom,
@@ -29,6 +30,7 @@ import {
   type McpServerConfig,
   type NotificationOption,
   type RoundnessOption,
+  type StopButtonBehaviorOption,
   type SubmitKeyOption,
   type ThemeOption,
   type ToolId,
@@ -60,6 +62,10 @@ export function resetAllSettings(): void {
   );
   store.set(smoothStreamEnabledAtom, DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED);
   store.set(regenerateOnSaveAtom, DEFAULT_SETTINGS.REGENERATE_ON_SAVE);
+  store.set(
+    stopButtonBehaviorAtom,
+    DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR as StopButtonBehaviorOption,
+  );
   store.set(themeAtom, DEFAULT_SETTINGS.THEME as ThemeOption);
   store.set(roundnessAtom, DEFAULT_SETTINGS.ROUNDNESS as RoundnessOption);
   store.set(
@@ -113,6 +119,12 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "REGENERATE_ON_SAVE":
       store.set(regenerateOnSaveAtom, defaultValue as boolean);
+      break;
+    case "STOP_BUTTON_BEHAVIOR":
+      store.set(
+        stopButtonBehaviorAtom,
+        defaultValue as StopButtonBehaviorOption,
+      );
       break;
     case "THEME":
       store.set(themeAtom, defaultValue as ThemeOption);

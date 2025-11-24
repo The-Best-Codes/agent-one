@@ -29,6 +29,7 @@ import useMobileDetection from "@/hooks/use-mobile-detection";
 import { useTheme } from "@/hooks/use-theme";
 import {
   markdownHighlightingAtom,
+  stopButtonBehaviorAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
@@ -74,6 +75,7 @@ export const MainChatInput = ({
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
+  const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
   const { loadChat, listChatIds } = usePersistence();
   const isMobile = useMobileDetection({
@@ -89,6 +91,16 @@ export const MainChatInput = ({
   const editorViewRef = useRef<EditorView | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounter = useRef(0);
+
+  const shouldShowStopButton = () => {
+    switch (stopButtonBehavior) {
+      case "immediate":
+        return status === "streaming" || status === "submitted";
+      case "at-stopping-point":
+      default:
+        return status === "streaming";
+    }
+  };
 
   useHotkeys(kbdRegistry.focusMainChatInput, () => {
     editorViewRef.current?.focus();
@@ -469,7 +481,7 @@ export const MainChatInput = ({
             </Tooltip>
           </div>
           <div>
-            {status === "streaming" ? (
+            {shouldShowStopButton() ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

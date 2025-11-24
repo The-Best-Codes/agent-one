@@ -10,6 +10,7 @@ import {
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   smoothStreamEnabledAtom,
+  stopButtonBehaviorAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import { DEFAULT_SETTINGS } from "@/lib/settings/types";
@@ -24,6 +25,9 @@ export default function StreamingSection() {
   const [experimentalThrottleValue, setExperimentalThrottleValue] = useAtom(
     experimentalThrottleValueAtom,
   );
+  const [alwaysShowStopButton, setAlwaysShowStopButton] = useAtom(
+    stopButtonBehaviorAtom,
+  );
 
   const isSmoothStreamDefault =
     smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
@@ -32,6 +36,8 @@ export default function StreamingSection() {
     DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED;
   const isExperimentalThrottleValueDefault =
     experimentalThrottleValue === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE;
+  const isAlwaysShowStopButtonDefault =
+    alwaysShowStopButton === DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR;
 
   const handleResetSmoothStream = () => {
     resetSetting("SMOOTH_STREAM_ENABLED");
@@ -43,6 +49,10 @@ export default function StreamingSection() {
 
   const handleResetThrottleValue = () => {
     resetSetting("EXPERIMENTAL_THROTTLE_VALUE");
+  };
+
+  const handleResetAlwaysShowStopButton = () => {
+    resetSetting("STOP_BUTTON_BEHAVIOR");
   };
 
   return (
@@ -134,6 +144,37 @@ export default function StreamingSection() {
             </div>
           </div>
         )}
+
+        <div className="flex flex-row items-center justify-between gap-2">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">
+              Always Show Stop Button
+            </Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Show the stop button immediately after submitting a message.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={alwaysShowStopButton === "immediate"}
+              onCheckedChange={(checked) =>
+                setAlwaysShowStopButton(
+                  checked ? "immediate" : "at-stopping-point",
+                )
+              }
+              aria-label="Toggle always show stop button"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleResetAlwaysShowStopButton}
+              disabled={isAlwaysShowStopButtonDefault}
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
