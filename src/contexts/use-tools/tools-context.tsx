@@ -58,7 +58,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     mcpLoadedRef.current = mcpLoaded;
   }, [mcpTools, mcpLoaded]);
 
-  // Load MCP tools when servers change
   useEffect(() => {
     const enabledServers = Array.isArray(mcpServers)
       ? mcpServers.filter((server) => server.enabled)
@@ -81,7 +80,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     const newEnabledServerIds = new Set(enabledServers.map((s) => s.id));
     const previousEnabledServerIds = previousEnabledServerIdsRef.current;
 
-    // Cleanup servers that are no longer enabled
     for (const serverId of previousEnabledServerIds) {
       if (!newEnabledServerIds.has(serverId)) {
         logger.verbose(`Cleaning up disabled server: ${serverId}`);
