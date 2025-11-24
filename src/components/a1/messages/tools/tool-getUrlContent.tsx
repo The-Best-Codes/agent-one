@@ -77,7 +77,15 @@ const UrlResultDisplay = memo(
         <div className="flex items-center gap-1">
           <XCircleIcon className="text-destructive size-4 shrink-0" />
           <span className="text-destructive max-w-2xl truncate text-sm font-bold">
-            Failed to browse {formatUrl(result.url)}
+            Failed to browse{" "}
+            <a
+              href={result.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+            >
+              {formatUrl(result.url)}
+            </a>
           </span>
         </div>
       );
@@ -89,7 +97,15 @@ const UrlResultDisplay = memo(
       <div className="flex items-center gap-1">
         <GlobeIcon className="text-foreground size-4 shrink-0" />
         <span className="text-foreground max-w-2xl truncate text-sm font-bold">
-          Browsed {formatUrl(result.url)}
+          Browsed{" "}
+          <a
+            href={result.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+          >
+            {formatUrl(result.url)}
+          </a>
         </span>
         <div className="flex items-center gap-1">
           <TooltipProvider>
@@ -161,9 +177,26 @@ export const MessagePartToolGetUrlContent = ({
         >
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
-            {urlCount === 1
-              ? `Browsing ${formatUrl(input?.urls?.[0] || "a website")}...`
-              : `Browsing ${urlCount === 0 ? " " : `${urlCount} `}URLs...`}
+            {urlCount === 1 ? (
+              <>
+                Browsing{" "}
+                {input?.urls?.[0] ? (
+                  <a
+                    href={input.urls[0]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+                  >
+                    {formatUrl(input.urls[0])}
+                  </a>
+                ) : (
+                  "a website"
+                )}
+                ...
+              </>
+            ) : (
+              `Browsing ${urlCount === 0 ? " " : `${urlCount} `}URLs...`
+            )}
           </span>
         </div>
       );
@@ -250,9 +283,22 @@ export const MessagePartToolGetUrlContent = ({
       if (part.errorText === "agent-one::cancelled-by-user") {
         const singleUrl = input?.urls?.[0];
 
-        let message = "Browsing cancelled";
+        let message: string | React.ReactNode = "Browsing cancelled";
         if (urlCount === 1 && singleUrl) {
-          message = `Browsing ${formatUrl(singleUrl)} cancelled`;
+          message = (
+            <>
+              Browsing{" "}
+              <a
+                href={singleUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+              >
+                {formatUrl(singleUrl)}
+              </a>{" "}
+              cancelled
+            </>
+          );
         } else if (urlCount > 1) {
           message = `Browsing ${urlCount} URLs cancelled`;
         }
