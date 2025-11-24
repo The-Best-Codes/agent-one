@@ -16,6 +16,7 @@ import {
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
+  maxToolResultCharsAtom,
   notificationSettingAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
@@ -33,6 +34,9 @@ export default function MessagesSection() {
   const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(
     maxCodeblockCharsAtom,
   );
+  const [maxToolResultChars, setMaxToolResultChars] = useAtom(
+    maxToolResultCharsAtom,
+  );
   const [notificationSetting, setNotificationSetting] = useAtom(
     notificationSettingAtom,
   );
@@ -43,6 +47,8 @@ export default function MessagesSection() {
     maxMessageLength === DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH;
   const isMaxCodeblockCharsDefault =
     maxCodeblockChars === DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS;
+  const isMaxToolResultCharsDefault =
+    maxToolResultChars === DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS;
   const isNotificationSettingDefault =
     notificationSetting === DEFAULT_SETTINGS.NOTIFICATION_SETTING;
 
@@ -56,6 +62,10 @@ export default function MessagesSection() {
 
   const handleResetMaxCodeblockChars = () => {
     resetSetting("MAX_CODEBLOCK_CHARS");
+  };
+
+  const handleResetMaxToolResultChars = () => {
+    resetSetting("MAX_TOOL_RESULT_CHARS");
   };
 
   const handleResetNotificationSetting = () => {
@@ -163,6 +173,39 @@ export default function MessagesSection() {
               size="icon"
               onClick={handleResetMaxCodeblockChars}
               disabled={isMaxCodeblockCharsDefault}
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">
+              Max Tool Result Characters
+            </Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Maximum characters in tool results before switching to performant
+              rendering.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="1000"
+              max="1000000"
+              value={maxToolResultChars}
+              onChange={(e) =>
+                setMaxToolResultChars(parseInt(e.target.value) || 15000)
+              }
+              className="w-full md:w-32"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleResetMaxToolResultChars}
+              disabled={isMaxToolResultCharsDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />

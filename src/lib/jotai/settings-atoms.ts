@@ -48,6 +48,11 @@ export const maxMessageLengthAtom = createSettingAtom(
   DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH,
 );
 
+export const maxToolResultCharsAtom = createSettingAtom(
+  "MAX_TOOL_RESULT_CHARS",
+  DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS,
+);
+
 export const experimentalThrottleEnabledAtom = createSettingAtom(
   "EXPERIMENTAL_THROTTLE_ENABLED",
   DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED,

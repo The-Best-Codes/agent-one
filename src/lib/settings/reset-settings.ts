@@ -10,6 +10,7 @@ import {
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
+  maxToolResultCharsAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
   notificationSettingAtom,
@@ -48,6 +49,7 @@ export function resetAllSettings(): void {
   store.set(submitKeyAtom, DEFAULT_SETTINGS.SUBMIT_KEY as SubmitKeyOption);
   store.set(maxCodeblockCharsAtom, DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS);
   store.set(maxMessageLengthAtom, DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH);
+  store.set(maxToolResultCharsAtom, DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS);
   store.set(
     experimentalThrottleEnabledAtom,
     DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED,
@@ -96,6 +98,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "MAX_MESSAGE_LENGTH":
       store.set(maxMessageLengthAtom, defaultValue as number);
+      break;
+    case "MAX_TOOL_RESULT_CHARS":
+      store.set(maxToolResultCharsAtom, defaultValue as number);
       break;
     case "EXPERIMENTAL_THROTTLE_ENABLED":
       store.set(experimentalThrottleEnabledAtom, defaultValue as boolean);

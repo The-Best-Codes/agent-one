@@ -1,4 +1,5 @@
 import type { DynamicToolUIPart } from "ai";
+import { useAtomValue } from "jotai";
 import {
   ChevronDownIcon,
   Loader2Icon,
@@ -7,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
 import {
   Accordion,
   AccordionContent,
@@ -14,6 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 type DynamicToolOutputContentItem = {
@@ -34,6 +37,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
   >();
   const callId = part.toolCallId;
   const toolName = part.toolName;
+  const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
 
   switch (part.state) {
     case "input-streaming": {
@@ -64,6 +68,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
       const output = part.output as DynamicToolOutput;
       const hasError = output?.isError;
       const outputText = output ? JSON.stringify(output.content) : "No output";
+      const isLongOutput = outputText.length > maxToolResultChars;
 
       if (hasError) {
         return (
@@ -129,8 +134,12 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                   )}
                   <div>
                     <span className="font-medium">Result:</span>
-                    <div className="mt-1 rounded bg-transparent p-2 whitespace-pre-wrap">
-                      {outputText}
+                    <div className="mt-1 rounded bg-transparent p-2">
+                      {isLongOutput ? (
+                        <PerformantMarkdown content={outputText} />
+                      ) : (
+                        <div className="whitespace-pre-wrap">{outputText}</div>
+                      )}
                     </div>
                   </div>
                 </div>
