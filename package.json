@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "lint": "eslint src",
+    "lint": "eslint src --cache",
     "typecheck": "tsc -b --noEmit",
     "format": "npm run format:main && npm run format:rust",
     "format:check": "npm run format:check:main && npm run format:check:rust",
