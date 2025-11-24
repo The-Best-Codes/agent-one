@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
         with:
           node-version: "23"
           cache: "npm"
@@ -34,7 +34,7 @@ jobs:
         if: matrix.test == 'e2e'
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -50,7 +50,7 @@ jobs:
         if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Cache and install Tauri system dependencies
-        uses: awalsh128/cache-apt-pkgs-action@latest
+        uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # v1.6.0
         with:
           packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
           version: 1.1
@@ -61,7 +61,7 @@ jobs:
         if: matrix.test == 'rust-check'
 
       - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
         with:
           workspaces: "src-tauri -> target"
         if: matrix.test == 'rust-check'
@@ -93,7 +93,7 @@ jobs:
         if: matrix.test == 'rust-check'
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always() && matrix.test == 'e2e'
         with:
           name: playwright-report-${{ matrix.test }}
@@ -101,7 +101,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Test Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always() && matrix.test == 'e2e'
         with:
           name: test-results-${{ matrix.test }}
