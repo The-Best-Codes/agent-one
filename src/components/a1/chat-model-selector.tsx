@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ChevronsUpDown } from "lucide-react";
+import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import {
   type FC,
   useEffect,
@@ -152,7 +152,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                           transform: `translateY(${virtualItem.start}px)`,
                         }}
                       >
-                        <div className="min-w-0 flex-1">
+                        <div className="flex min-w-0 flex-1 items-center gap-1">
+                          {currentModel.id === model.id && (
+                            <CheckIcon className="size-4 shrink-0" />
+                          )}
                           <div className="scrollbar-size-xs w-full overflow-x-auto">
                             <div className="whitespace-nowrap">
                               <span className="text-muted-foreground text-xs">
