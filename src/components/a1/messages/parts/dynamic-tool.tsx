@@ -16,6 +16,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -114,11 +120,23 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               }
               iconPosition="left"
               shouldRotateIcon={true}
-              className="justify-start gap-1 p-0 font-bold hover:no-underline"
+              className="items-center justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
                 "{toolName}" tool finished
               </span>
+              {isLongOutput && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="size-2 shrink-0 rounded-full bg-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Tool result is over {maxToolResultChars} characters
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </AccordionTrigger>
             <AccordionContent
               renderWhenCollapsed={!isLongOutput}
