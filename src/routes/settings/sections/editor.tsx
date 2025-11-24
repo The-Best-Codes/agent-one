@@ -82,7 +82,8 @@ export default function EditorSection() {
           <div className="flex flex-1 flex-col items-start">
             <Label className="text-sm font-medium">Regenerate on Save</Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              If enabled, saving an edit to your message will automatically regenerate the AI response.
+              If enabled, saving an edit to your message will automatically
+              regenerate the AI response.
             </p>
           </div>
           <div className="flex items-center gap-2">
