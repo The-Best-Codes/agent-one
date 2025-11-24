@@ -26,8 +26,3 @@
 - Allow keyboard navigation of chat model selector
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it
-
-- Fix MCP server logs repeating 3 times on startup (MCP servers should only start once on startup!)
-- Make sure that if a new MCP server is added, only its command runs (don't refresh the WHOLE list). Same for enabling servers. For removing and disabling MCP servers, when one is removed or disabled, remove its tools, no commands need to run (but run cleanup ofc). So basically an incremental MCP system that only runs the command(s) when necessary and is performant.
-- Proper cleanup of MCP servers when they time out, are removed, or are disabled. This includes closing the client and killing the process.
-- Good handling of race conditions, particularly only the most recent "version" of a server should run (e.g. if you change the command, timeout, etc. of the server with ID server-1 three times, only the latest command should run. Kill the processes of the older commands that were spawned or are running, we just need the latest "version" of each server; discard outdated processes)
