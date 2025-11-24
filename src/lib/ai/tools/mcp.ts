@@ -12,6 +12,21 @@ import { type McpServerConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
+interface ManagedMCPServer {
+  client: MCPClient;
+  transport: TauriStdioMCPTransport;
+  tools: ToolSet;
+}
+
+interface LoadingOperation {
+  controller: AbortController;
+  promise: Promise<void>;
+}
+
+const serverCache = new Map<string, ManagedMCPServer>();
+const loadingOperations = new Map<string, LoadingOperation>();
+let cacheVersion = 0;
+
 class TauriStdioMCPTransport implements MCPTransport {
   public onclose?: () => void;
   public onerror?: (error: Error) => void;
@@ -69,9 +84,6 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 
   private processReadBuffer() {
-    // In most cases I've seen, MCP messages are newline-delimited JSON
-    // This could be a potential cause of MCP-related bugs in the future,
-    // so play around with the code below if any issues arise
     let newlineIndex;
     while ((newlineIndex = this.readBuffer.indexOf("\n")) >= 0) {
       const line = this.readBuffer.slice(0, newlineIndex);
@@ -93,8 +105,6 @@ class TauriStdioMCPTransport implements MCPTransport {
     if (!this.childProcess) {
       throw new Error("MCP server process is not running.");
     }
-    // See comments in the `processReadBuffer` method
-    // MCP expects newline-delimited JSON
     const messageString = JSON.stringify(message) + "\n";
     await this.childProcess.write(messageString);
   }
@@ -107,40 +117,116 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 }
 
-async function getMcpClient(command: string): Promise<MCPClient> {
-  const transport = new TauriStdioMCPTransport(command);
-  const client = await createMCPClient({ transport });
-  return client;
+async function getMcpClientAndTools(
+  server: McpServerConfig,
+  signal: AbortSignal,
+): Promise<{
+  client: MCPClient;
+  tools: ToolSet;
+  transport: TauriStdioMCPTransport;
+}> {
+  if (signal.aborted) {
+    throw new Error("Operation aborted");
+  }
+
+  const transport = new TauriStdioMCPTransport(server.command);
+
+  const onAbort = () => {
+    transport.close().catch((error) => {
+      logger.error(`Error closing aborted MCP server ${server.id}:`, error);
+    });
+  };
+
+  signal.addEventListener("abort", onAbort, { once: true });
+
+  try {
+    const client = await createMCPClient({ transport });
+
+    if (signal.aborted) {
+      await transport.close();
+      throw new Error("Operation aborted");
+    }
+
+    const tools = await client.tools();
+
+    if (signal.aborted) {
+      await transport.close();
+      throw new Error("Operation aborted");
+    }
+
+    logger.verbose(
+      `Successfully fetched MCP tools for ${server.name}:`,
+      Object.keys(tools),
+    );
+
+    signal.removeEventListener("abort", onAbort);
+    return { client, tools, transport };
+  } catch (error) {
+    signal.removeEventListener("abort", onAbort);
+    throw error;
+  }
 }
 
 export async function getMcpToolsForServer(
   server: McpServerConfig,
 ): Promise<ToolSet> {
   try {
-    const client = await getMcpClient(server.command);
-    const tools = await client.tools();
-    logger.verbose(
-      `Successfully fetched MCP tools for ${server.name}:`,
-      Object.keys(tools),
-    );
-    return tools;
+    const cached = serverCache.get(server.id);
+    if (cached) {
+      return cached.tools;
+    }
+
+    const controller = new AbortController();
+
+    const promise = (async () => {
+      try {
+        const result = await getMcpClientAndTools(server, controller.signal);
+        serverCache.set(server.id, result);
+      } finally {
+        loadingOperations.delete(server.id);
+      }
+    })();
+
+    loadingOperations.set(server.id, { controller, promise });
+
+    await promise;
+    return serverCache.get(server.id)?.tools || {};
   } catch (error) {
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
     return {};
   }
 }
 
-// TODO: Ensure this is invoked where it should be!
-// export async function closeMcpClient(): Promise<void> {
-//   if (mcpClient) {
-//     try {
-//       await mcpClient.close();
-//       logger.verbose("MCP client closed successfully");
-//     } catch (error) {
-//       logger.error("Error closing MCP client:", error);
-//     } finally {
-//       mcpClient = null;
-//       mcpToolsCache = null;
-//     }
-//   }
-// }
+export function closeServerCache(serverId: string): void {
+  const loading = loadingOperations.get(serverId);
+  if (loading) {
+    loading.controller.abort();
+    loadingOperations.delete(serverId);
+  }
+
+  const cached = serverCache.get(serverId);
+  if (cached) {
+    cached.transport.close().catch((error) => {
+      logger.error(`Error closing MCP server ${serverId}:`, error);
+    });
+    serverCache.delete(serverId);
+  }
+}
+
+export function invalidateServerCache(): void {
+  cacheVersion++;
+  for (const [, loading] of loadingOperations) {
+    loading.controller.abort();
+  }
+  loadingOperations.clear();
+  for (const [, cached] of serverCache) {
+    cached.transport.close().catch((error) => {
+      logger.error("Error closing MCP server:", error);
+    });
+  }
+  serverCache.clear();
+}
+
+export function getCacheVersion(): number {
+  return cacheVersion;
+}

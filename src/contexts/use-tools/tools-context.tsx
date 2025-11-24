@@ -9,14 +9,19 @@ import React, {
 } from "react";
 
 import { staticTools } from "@/lib/ai/tools";
-import { getMcpToolsForServer } from "@/lib/ai/tools/mcp";
+import {
+  closeServerCache,
+  getCacheVersion,
+  getMcpToolsForServer,
+  invalidateServerCache,
+} from "@/lib/ai/tools/mcp";
 import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { type ToolId } from "@/lib/settings/types";
+import { type McpServerConfig, type ToolId } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
 
@@ -37,46 +42,72 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
 
-  const [mcpTools, setMcpTools] = useState<ToolSet | null>(null);
+  const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
-  const [loadingPromise, setLoadingPromise] = useState<Promise<void> | null>(
-    null,
-  );
 
-  const mcpToolsRef = useRef<ToolSet | null>(null);
+  const mcpToolsRef = useRef<ToolSet>({});
   const mcpLoadedRef = useRef(false);
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
+  const previousEnabledServerIdsRef = useRef<Set<string>>(new Set());
+  const previousServersHashRef = useRef<string>("");
+  const currentVersionRef = useRef(0);
 
   useEffect(() => {
     mcpToolsRef.current = mcpTools;
     mcpLoadedRef.current = mcpLoaded;
-    loadingPromiseRef.current = loadingPromise;
-  }, [mcpTools, mcpLoaded, loadingPromise]);
+  }, [mcpTools, mcpLoaded]);
 
   // Load MCP tools when servers change
   useEffect(() => {
     const enabledServers = Array.isArray(mcpServers)
       ? mcpServers.filter((server) => server.enabled)
       : [];
+
+    const serversHash = JSON.stringify(
+      enabledServers.map((s) => ({
+        id: s.id,
+        command: s.command,
+        timeout: s.timeoutMs,
+      })),
+    );
+
+    if (serversHash === previousServersHashRef.current) {
+      return;
+    }
+
+    previousServersHashRef.current = serversHash;
+
+    const newEnabledServerIds = new Set(enabledServers.map((s) => s.id));
+    const previousEnabledServerIds = previousEnabledServerIdsRef.current;
+
+    // Cleanup servers that are no longer enabled
+    for (const serverId of previousEnabledServerIds) {
+      if (!newEnabledServerIds.has(serverId)) {
+        logger.verbose(`Cleaning up disabled server: ${serverId}`);
+        closeServerCache(serverId);
+      }
+    }
+
+    previousEnabledServerIdsRef.current = newEnabledServerIds;
+    const version = getCacheVersion();
+    currentVersionRef.current = version;
+
     if (enabledServers.length === 0) {
+      invalidateServerCache();
       setMcpTools({});
       setMcpLoaded(true);
       setIsMcpLoading(false);
-      setLoadingPromise(null);
       return;
     }
 
     const loadMcpTools = async () => {
+      if (currentVersionRef.current !== version) return;
+
       setIsMcpLoading(true);
       setMcpLoaded(false);
 
       try {
-        logger.verbose(
-          `Starting background MCP tools loading for ${enabledServers.length} servers...`,
-        );
-
-        // Load servers in parallel with limit
         const chunks = [];
         for (let i = 0; i < enabledServers.length; i += parallelLoadLimit) {
           chunks.push(enabledServers.slice(i, i + parallelLoadLimit));
@@ -85,7 +116,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         const allTools: ToolSet = {};
 
         for (const chunk of chunks) {
-          const promises = chunk.map(async (server) => {
+          if (currentVersionRef.current !== version) return;
+
+          const promises = chunk.map(async (server: McpServerConfig) => {
             try {
               const tools = await Promise.race([
                 getMcpToolsForServer(server),
@@ -103,6 +136,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                 `Failed to load MCP tools for server ${server.name}:`,
                 error,
               );
+              closeServerCache(server.id);
               return { serverId: server.id, tools: {} };
             }
           });
@@ -113,9 +147,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           }
         }
 
+        if (currentVersionRef.current !== version) return;
+
         setMcpTools(allTools);
         setMcpLoaded(true);
-        logger.verbose("MCP tools loaded in background.");
       } catch (error) {
         logger.error("Failed to load MCP tools in background:", error);
         setMcpTools({});
@@ -126,11 +161,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     };
 
     const promise = loadMcpTools();
-    setLoadingPromise(promise);
+    loadingPromiseRef.current = promise;
   }, [mcpServers, parallelLoadLimit]);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
-    // Filter static tools based on enabled settings
     const filteredStaticTools: ToolSet = {};
     for (const [toolId, tool] of Object.entries(staticTools)) {
       if (enabledTools[toolId as ToolId]) {
@@ -141,18 +175,17 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     if (mcpLoadedRef.current) {
       return {
         ...filteredStaticTools,
-        ...(mcpToolsRef.current || {}),
+        ...mcpToolsRef.current,
       };
     }
 
     if (loadingPromiseRef.current) {
-      logger.verbose("MCP tools not loaded yet, waiting for promise...");
       await loadingPromiseRef.current;
     }
 
     return {
       ...filteredStaticTools,
-      ...(mcpToolsRef.current || {}),
+      ...mcpToolsRef.current,
     };
   }, [enabledTools]);
 
