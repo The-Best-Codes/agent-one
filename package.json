@@ -12,7 +12,7 @@
     "typecheck": "tsc -b --incremental --noEmit",
     "format": "npm run format:main && npm run format:rust",
     "format:check": "npm run format:check:main && npm run format:check:rust",
-    "format:main": "prettier --write --cache .",
+    "format:main": "prettier --write --cache --cache-location .prettier-cache --cache-strategy metadata .",
     "format:check:main": "prettier --check .",
     "format:rust": "cd src-tauri && cargo fmt && cd ..",
     "format:check:rust": "cd src-tauri && cargo fmt --check && cd ..",
