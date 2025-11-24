@@ -15,9 +15,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import {
-  Tooltip,
   TooltipContent,
   TooltipProvider,
+  TooltipRoot,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -92,16 +92,16 @@ const UrlResultDisplay = memo(
           Browsed {formatUrl(result.url)}
         </span>
         <div className="flex items-center gap-1">
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider>
             {isRawContent && (
-              <Tooltip>
+              <TooltipRoot>
                 <TooltipTrigger asChild>
                   <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
                 </TooltipTrigger>
                 <TooltipContent>Fetched raw content</TooltipContent>
-              </Tooltip>
+              </TooltipRoot>
             )}
-            <Tooltip>
+            <TooltipRoot>
               <TooltipTrigger asChild>
                 <div
                   className={cn(
@@ -115,7 +115,7 @@ const UrlResultDisplay = memo(
                   ? `Truncated to ${input.maxLength || "unknown"} characters`
                   : `${result.length || "All"} characters processed`}
               </TooltipContent>
-            </Tooltip>
+            </TooltipRoot>
           </TooltipProvider>
         </div>
       </div>
