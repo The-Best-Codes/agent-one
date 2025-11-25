@@ -10,6 +10,7 @@ import { memo, useEffect, useMemo } from "react";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { generateChatTitle } from "@/lib/ai/title-generator";
+import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
@@ -40,13 +41,13 @@ export const ChatInstance = memo(
       experimentalThrottleValueAtom,
     );
     const {
-      listChatIds,
       loadChat,
       loadChatData,
       saveChat,
       saveChatTitleState,
       saveChatTitle,
     } = usePersistence();
+    const chatIds = useAtomValue(chatIdsAtom);
     const initialMessages = useMemo(() => loadChat(chatId), [chatId, loadChat]);
 
     const chat = useChat(model, {
@@ -60,12 +61,11 @@ export const ChatInstance = memo(
 
     useEffect(() => {
       if (chat.status !== "streaming" && chat.messages.length > 0) {
-        if (!listChatIds().includes(chatId)) {
+        if (!chatIds.includes(chatId)) {
           return;
         }
 
-        const activeChatIds = listChatIds();
-        if (!activeChatIds.includes(chatId)) {
+        if (!chatIds.includes(chatId)) {
           return;
         }
 
@@ -80,13 +80,13 @@ export const ChatInstance = memo(
           saveChatTitleState({ chatId, titleState: "generating" });
           generateChatTitle(model, chat.messages)
             .then((generatedTitle) => {
-              if (listChatIds().includes(chatId)) {
+              if (chatIds.includes(chatId)) {
                 saveChatTitle({ chatId, title: generatedTitle });
               }
             })
             .catch((error) => {
               logger.error("Failed to generate title for chat:", chatId, error);
-              if (listChatIds().includes(chatId)) {
+              if (chatIds.includes(chatId)) {
                 saveChatTitleState({ chatId, titleState: "error" });
               }
             });
@@ -97,7 +97,7 @@ export const ChatInstance = memo(
       chat.status,
       chatId,
       model,
-      listChatIds,
+      chatIds,
       loadChatData,
       saveChat,
       saveChatTitle,

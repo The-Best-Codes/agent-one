@@ -27,6 +27,7 @@ import {
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { useTheme } from "@/hooks/use-theme";
+import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   markdownHighlightingAtom,
   stopButtonBehaviorAtom,
@@ -77,7 +78,8 @@ export const MainChatInput = ({
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
   const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
-  const { loadChat, listChatIds } = usePersistence();
+  const { loadChat } = usePersistence();
+  const chatIds = useAtomValue(chatIdsAtom);
   const isMobile = useMobileDetection({
     anyHover: true,
     pointerCoarse: true,
@@ -264,7 +266,7 @@ export const MainChatInput = ({
 
   const handleChatDrop = useCallback(
     (chatId: string, title: string) => {
-      if (!listChatIds().includes(chatId)) {
+      if (!chatIds.includes(chatId)) {
         logger.error("Dropped chat does not exist", { chatId });
         return;
       }
@@ -305,7 +307,7 @@ export const MainChatInput = ({
       });
       addFiles(fileList);
     },
-    [loadChat, listChatIds, addFiles],
+    [loadChat, chatIds, addFiles],
   );
 
   // Note: In src-tauri/tauri.conf.json, set app.windows[0].dragDropEnabled to false to allow the native processing of events
