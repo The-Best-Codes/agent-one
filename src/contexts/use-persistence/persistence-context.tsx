@@ -82,7 +82,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
           modelId,
         };
         localStorage.setItem(chatKey, JSON.stringify(chatData));
-        setChatIds([id, ...chatIds]);
+        setChatIds((currentChatIds) => [id, ...currentChatIds]);
         setChatUpdateTrigger((prev) => prev + 1);
         return id;
       } catch (error) {
@@ -90,7 +90,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         throw new Error("Failed to create new chat in localStorage.");
       }
     },
-    [chatIds, setChatIds, setChatUpdateTrigger],
+    [setChatIds, setChatUpdateTrigger],
   );
 
   const loadChatData = useCallback((id: string) => {
@@ -267,7 +267,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         const chatKey = getChatKey(newId);
         localStorage.setItem(chatKey, JSON.stringify(newChatData));
 
-        setChatIds([newId, ...chatIds]);
+        setChatIds((currentChatIds) => [newId, ...currentChatIds]);
         setChatUpdateTrigger((prev) => prev + 1);
 
         logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
@@ -277,7 +277,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         throw new Error("Failed to branch chat.");
       }
     },
-    [loadChatData, chatIds, setChatIds, setChatUpdateTrigger],
+    [loadChatData, setChatIds, setChatUpdateTrigger],
   );
 
   const contextValue: PersistenceContextType = {
