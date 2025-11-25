@@ -22,3 +22,4 @@
 - Redirect to `/chat` when the chat ID is invalid, but make sure that this doesn't redirect to `/chat` each time you delete a chat.
 - Chat title should begin generating ASAP (once first message is sent, don't wait for conversation to finish or AI to respond). I think it does this, but need to manually check.
 - Create some chats, then click new chat, delete the chats, and send a new message. The deleted chats will appear in the sidebar as "New Chat". Fix this.
+- Remove `listChatIds` and `saveChatIds` in favor of direct atom usage to prevent race conditions.
