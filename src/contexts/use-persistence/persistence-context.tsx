@@ -48,7 +48,8 @@ function getChatKey(id: string): string {
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [chatIds, setChatIds] = useAtom(chatIdsAtom);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_chatIds, setChatIds] = useAtom(chatIdsAtom);
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(
     chatUpdateTriggerAtom,
   );
@@ -212,8 +213,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       try {
         const chatKey = getChatKey(chatId);
         localStorage.removeItem(chatKey);
-        const newIds = chatIds.filter((id: string) => id !== chatId);
-        setChatIds(newIds);
+        setChatIds((currentChatIds) =>
+          currentChatIds.filter((id: string) => id !== chatId),
+        );
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(
@@ -222,7 +224,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         );
       }
     },
-    [chatIds, setChatIds, setChatUpdateTrigger],
+    [setChatIds, setChatUpdateTrigger],
   );
 
   const branchChat = useCallback(
