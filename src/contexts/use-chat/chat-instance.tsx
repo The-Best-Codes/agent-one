@@ -60,16 +60,15 @@ export const ChatInstance = memo(
     });
 
     useEffect(() => {
-      if (chat.status !== "streaming" && chat.messages.length > 0) {
+      if (chat.messages.length > 0) {
         if (!chatIds.includes(chatId)) {
           return;
         }
 
-        if (!chatIds.includes(chatId)) {
-          return;
+        if (chat.status !== "streaming") {
+          saveChat({ chatId, messages: chat.messages });
         }
 
-        saveChat({ chatId, messages: chat.messages });
         const chatData = loadChatData(chatId);
         const hasUserMessage = chat.messages.some((m) => m.role === "user");
         if (hasUserMessage && !chatData.titleState) {
