@@ -12,6 +12,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { activeSettingsSectionAtom } from "@/lib/jotai/atoms";
 
 import SettingsContent from "./settings-content";
@@ -67,26 +68,28 @@ export default function SettingsRoute() {
 
       <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
         <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
-          <div className="hidden w-64 shrink-0 md:flex md:flex-col md:overflow-y-auto">
-            <div className="mb-2">
-              <Button
-                variant="outline"
-                onClick={handleNavigateBack}
-                className="w-full"
-              >
-                <ArrowLeftIcon className="size-4" />
-                Back to Chat
-              </Button>
+          <ScrollArea className="hidden w-64 shrink-0 md:flex md:flex-col">
+            <div className="flex flex-col gap-2">
+              <div className="mb-2">
+                <Button
+                  variant="outline"
+                  onClick={handleNavigateBack}
+                  className="w-full"
+                >
+                  <ArrowLeftIcon className="size-4" />
+                  Back to Chat
+                </Button>
+              </div>
+              <SettingsSidebar
+                activeSection={activeSection}
+                onSectionChange={setActiveSection}
+              />
             </div>
-            <SettingsSidebar
-              activeSection={activeSection}
-              onSectionChange={setActiveSection}
-            />
-          </div>
+          </ScrollArea>
 
-          <div className="flex-1 md:min-h-0 md:overflow-y-auto">
+          <ScrollArea className="flex-1 md:min-h-0">
             <SettingsContent activeSection={activeSection} />
-          </div>
+          </ScrollArea>
         </div>
       </div>
     </div>
