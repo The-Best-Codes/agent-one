@@ -19,3 +19,4 @@
 - When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it?
 - Redirect to `/chat` when the chat ID is invalid, but make sure that this doesn't redirect to `/chat` each time you delete a chat.
+- Fix installer looking for MSI file on Windows instead of EXE file (issue with generated latest.json file, maybe only publish the EXE file)
