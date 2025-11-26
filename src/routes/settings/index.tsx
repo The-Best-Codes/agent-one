@@ -65,9 +65,9 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl p-4 md:p-6">
-        <div className="flex flex-col gap-6 md:flex-row">
-          <div className="hidden w-64 shrink-0 md:block">
+      <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
+        <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
+          <div className="hidden w-64 shrink-0 md:flex md:flex-col md:overflow-y-auto">
             <div className="mb-2">
               <Button
                 variant="outline"
@@ -84,7 +84,7 @@ export default function SettingsRoute() {
             />
           </div>
 
-          <div className="flex-1">
+          <div className="flex-1 md:min-h-0 md:overflow-y-auto">
             <SettingsContent activeSection={activeSection} />
           </div>
         </div>
