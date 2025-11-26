@@ -1,6 +1,7 @@
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
+export type ColorThemeOption = "default" | "red" | "blue" | "yellow";
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
 export type NotificationOption = "always" | "when-unfocused" | "never";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
@@ -32,6 +33,7 @@ export interface DefaultSettings {
   REGENERATE_ON_SAVE: boolean;
   STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   THEME: ThemeOption;
+  COLOR_THEME: ColorThemeOption;
   ROUNDNESS: RoundnessOption;
   NOTIFICATION_SETTING: NotificationOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
@@ -56,6 +58,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   REGENERATE_ON_SAVE: false,
   STOP_BUTTON_BEHAVIOR: "immediate",
   THEME: "system",
+  COLOR_THEME: "default",
   ROUNDNESS: "md",
   NOTIFICATION_SETTING: "never",
   ENABLED_TOOLS: {

@@ -1,6 +1,7 @@
 import { atomWithStorage } from "jotai/utils";
 
 import {
+  type ColorThemeOption,
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
   type McpServerConfig,
@@ -83,6 +84,11 @@ export const stopButtonBehaviorAtom =
 export const themeAtom = createSettingAtom<ThemeOption>(
   "THEME",
   DEFAULT_SETTINGS.THEME,
+);
+
+export const colorThemeAtom = createSettingAtom<ColorThemeOption>(
+  "COLOR_THEME",
+  DEFAULT_SETTINGS.COLOR_THEME,
 );
 
 export const roundnessAtom = createSettingAtom<RoundnessOption>(
