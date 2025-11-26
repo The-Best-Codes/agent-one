@@ -60,7 +60,7 @@ export default function StreamingSection() {
       <CardHeader>
         <CardTitle>Streaming</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-6">
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
             <Label className="text-sm font-medium">Smooth Stream</Label>

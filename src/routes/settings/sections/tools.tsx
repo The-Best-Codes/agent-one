@@ -128,12 +128,12 @@ export default function ToolsSection() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Static Tools</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
               <Label className="text-sm font-medium">Enabled Tools</Label>
@@ -175,7 +175,7 @@ export default function ToolsSection() {
         <CardHeader>
           <CardTitle>MCP Servers</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
               <Label className="text-sm font-medium">Parallel Load Limit</Label>

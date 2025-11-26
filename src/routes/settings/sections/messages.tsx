@@ -77,7 +77,7 @@ export default function MessagesSection() {
       <CardHeader>
         <CardTitle>Messages</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
             <Label className="text-sm font-medium">Markdown Rendering</Label>

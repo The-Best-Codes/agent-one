@@ -160,112 +160,110 @@ export default function AboutSection() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>About AgentOne</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Current Version</p>
+              <p className="text-2xl font-bold">{currentVersion}</p>
+            </div>
+          </div>
+
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-medium">Current Version</p>
-                <p className="text-2xl font-bold">{currentVersion}</p>
+                <p className="text-sm font-medium">Check for updates</p>
+                <p className="text-muted-foreground text-sm">
+                  Stay up to date with the latest features and bug fixes
+                </p>
               </div>
+              {updateStatus === "idle" && (
+                <Button onClick={checkForUpdates} variant="outline">
+                  Check Now
+                </Button>
+              )}
+              {updateStatus === "checking" && (
+                <Button variant="outline" disabled>
+                  <Loader2 className="size-4 animate-spin" />
+                  Checking...
+                </Button>
+              )}
+              {updateStatus === "error" && (
+                <Button onClick={checkForUpdates} variant="outline">
+                  Try Again
+                </Button>
+              )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2">
+            {updateStatus === "up-to-date" && (
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">Check for updates</p>
+                  <p className="text-sm font-medium">You're up to date!</p>
                   <p className="text-muted-foreground text-sm">
-                    Stay up to date with the latest features and bug fixes
+                    AgentOne {currentVersion} is the latest version
                   </p>
                 </div>
-                {updateStatus === "idle" && (
-                  <Button onClick={checkForUpdates} variant="outline">
-                    Check Now
-                  </Button>
-                )}
-                {updateStatus === "checking" && (
-                  <Button variant="outline" disabled>
-                    <Loader2 className="size-4 animate-spin" />
-                    Checking...
-                  </Button>
-                )}
-                {updateStatus === "error" && (
-                  <Button onClick={checkForUpdates} variant="outline">
-                    Try Again
-                  </Button>
-                )}
               </div>
+            )}
 
-              {updateStatus === "up-to-date" && (
+            {updateStatus === "available" && (
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">You're up to date!</p>
+                    <p className="text-sm font-medium">Update available</p>
                     <p className="text-muted-foreground text-sm">
-                      AgentOne {currentVersion} is the latest version
+                      Version {updateVersion} is ready to install
                     </p>
                   </div>
                 </div>
-              )}
+                <Button onClick={downloadAndInstallUpdate} className="w-full">
+                  Download and Install
+                </Button>
+              </div>
+            )}
 
-              {updateStatus === "available" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Update available</p>
-                      <p className="text-muted-foreground text-sm">
-                        Version {updateVersion} is ready to install
-                      </p>
-                    </div>
-                  </div>
-                  <Button onClick={downloadAndInstallUpdate} className="w-full">
-                    Download and Install
-                  </Button>
-                </div>
-              )}
-
-              {(updateStatus === "downloading" ||
-                updateStatus === "installing") && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">
-                        {updateStatus === "downloading"
-                          ? "Downloading update..."
-                          : "Installing update..."}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {updateStatus === "downloading"
-                          ? `Version ${updateVersion} - ${Math.round(updateProgress)}% complete`
-                          : "Please wait while we install the update"}
-                      </p>
-                    </div>
-                  </div>
-                  {updateStatus === "downloading" && (
-                    <Progress value={updateProgress} className="w-full" />
-                  )}
-                </div>
-              )}
-
-              {updateStatus === "error" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-destructive text-sm font-medium">
-                        Update failed
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {errorMessage ||
-                          "An error occurred while checking for updates"}
-                      </p>
-                    </div>
+            {(updateStatus === "downloading" ||
+              updateStatus === "installing") && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {updateStatus === "downloading"
+                        ? "Downloading update..."
+                        : "Installing update..."}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {updateStatus === "downloading"
+                        ? `Version ${updateVersion} - ${Math.round(updateProgress)}% complete`
+                        : "Please wait while we install the update"}
+                    </p>
                   </div>
                 </div>
-              )}
-            </div>
+                {updateStatus === "downloading" && (
+                  <Progress value={updateProgress} className="w-full" />
+                )}
+              </div>
+            )}
+
+            {updateStatus === "error" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-destructive text-sm font-medium">
+                      Update failed
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {errorMessage ||
+                        "An error occurred while checking for updates"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

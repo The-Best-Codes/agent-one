@@ -120,12 +120,12 @@ export default function AccountSection() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <Label htmlFor="user-name" className="text-sm font-medium">
               Your Name
@@ -169,7 +169,7 @@ export default function AccountSection() {
         <CardHeader>
           <CardTitle>API Keys</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-6">
           <p className="text-muted-foreground text-sm">
             Your API keys are stored securely on your device. They are used to
             authenticate requests to the respective AI service providers.
