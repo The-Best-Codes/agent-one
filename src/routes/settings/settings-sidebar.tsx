@@ -34,7 +34,7 @@ export default function SettingsSidebar({
         <Button
           key={section.id}
           variant={activeSection === section.id ? "secondary" : "ghost"}
-          className="justify-start text-left"
+          className="justify-start text-left transition-none"
           onClick={() => onSectionChange(section.id)}
         >
           {section.label}
