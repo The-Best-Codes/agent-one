@@ -214,7 +214,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   const instanceForFunctions = focusedChatInstance || defaultChat;
   const {
-    addToolResult,
+    addToolOutput,
     regenerate,
     resumeStream,
     stop,
@@ -292,7 +292,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const functionsValue = useMemo(
     () => ({
       sendMessage: isNewChat ? handleNewChatSubmit : sendMessage,
-      addToolResult,
+      addToolOutput,
       regenerate,
       resumeStream,
       stop,
@@ -302,7 +302,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       isNewChat,
       handleNewChatSubmit,
       sendMessage,
-      addToolResult,
+      addToolOutput,
       regenerate,
       resumeStream,
       stop,

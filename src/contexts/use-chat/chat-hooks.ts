@@ -16,7 +16,7 @@ export type ChatStatusContextType = Pick<
 export type ChatFunctionsContextType = Pick<
   UseChatHelpers<UIMessage>,
   | "sendMessage"
-  | "addToolResult"
+  | "addToolOutput"
   | "regenerate"
   | "resumeStream"
   | "stop"
