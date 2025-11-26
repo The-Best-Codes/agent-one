@@ -73,6 +73,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           error,
         );
       },
+      onAbort: () => {
+        logger.verbose("Stream aborted");
+      },
     });
 
     return result.toUIMessageStream({
