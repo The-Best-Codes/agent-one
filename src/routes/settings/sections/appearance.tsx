@@ -5,15 +5,15 @@ import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { colorThemeAtom, roundnessAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const roundnessOptions = [
-  { value: "none", label: "None" },
-  { value: "sm", label: "Small" },
-  { value: "md", label: "Medium" },
-  { value: "lg", label: "Large" },
+  { value: "none", label: "Not Round", radius: "rounded-[0px]" },
+  { value: "sm", label: "Slightly Round", radius: "rounded-[0.3125rem]" },
+  { value: "md", label: "Round", radius: "rounded-[0.625rem]" },
+  { value: "lg", label: "Very Round", radius: "rounded-[1.25rem]" },
 ] as const;
 
 const colorThemeOptions = [
@@ -47,17 +47,6 @@ export default function AppearanceSection() {
   const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
 
-  const getRoundnessIndex = (value: string) => {
-    const index = roundnessOptions.findIndex(
-      (option) => option.value === value,
-    );
-    return index >= 0
-      ? index
-      : roundnessOptions.findIndex((option) => option.value === "md");
-  };
-
-  const roundnessIndex = getRoundnessIndex(roundness);
-
   return (
     <Card>
       <CardHeader>
@@ -82,7 +71,7 @@ export default function AppearanceSection() {
                 onClick={() => setColorTheme(option.value as typeof colorTheme)}
                 size="icon"
                 className={cn(
-                  "border-foreground rounded-full border-2",
+                  "border-foreground rounded-md border-2",
                   option.className,
                 )}
                 title={option.label}
@@ -100,27 +89,32 @@ export default function AppearanceSection() {
               Adjust the corner radius of UI elements.
             </p>
           </div>
-          <div className="flex w-full items-center gap-4 md:max-w-64">
-            <Slider
-              value={[roundnessIndex]}
-              onValueChange={(value) => {
-                setRoundness(
-                  roundnessOptions[value[0]].value as
-                    | "none"
-                    | "sm"
-                    | "md"
-                    | "lg",
-                );
-              }}
-              max={3}
-              min={0}
-              step={1}
-              className="flex-1"
-            />
-            <span className="text-muted-foreground min-w-12 text-sm">
-              {roundnessOptions[roundnessIndex].label}
-            </span>
-          </div>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            value={roundness}
+            onValueChange={(value) => {
+              if (value) {
+                setRoundness(value as typeof roundness);
+              }
+            }}
+            aria-label="Select roundness"
+            className="w-full md:w-fit"
+            size="lg"
+          >
+            {roundnessOptions.map((option) => (
+              <ToggleGroupItem
+                key={option.value}
+                value={option.value}
+                aria-label={option.label}
+                title={option.label}
+                size="lg"
+                className="size-16"
+              >
+                <div className={cn("bg-primary size-10", option.radius)} />
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
       </CardContent>
     </Card>
