@@ -65,6 +65,9 @@ const editorTheme = EditorView.theme({
   ".cm-line": {
     padding: "0 0.125rem 0 0.625rem",
   },
+  ".cm-cursor": {
+    borderLeftColor: "var(--primary) !important",
+  },
 });
 
 export const MainChatInput = ({

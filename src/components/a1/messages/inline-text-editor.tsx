@@ -33,6 +33,9 @@ const editorTheme = EditorView.theme({
   ".cm-line": {
     padding: "0 0.125rem 0 0.125rem",
   },
+  ".cm-cursor": {
+    borderLeftColor: "var(--primary) !important",
+  },
 });
 
 interface InlineTextEditorProps {
