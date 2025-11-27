@@ -1,9 +1,9 @@
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
-import { useDeepLink } from "@/hooks/use-deep-link";
 import ChatRoute from "@/routes/chat";
 import IndexRoute from "@/routes/index";
+import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
 import SettingsRoute from "@/routes/settings";
 import TestsRoute from "@/routes/tests";
@@ -11,12 +11,10 @@ import FnmTestRoute from "@/routes/tests/fnm";
 import NotificationsTestRoute from "@/routes/tests/notifications";
 import SplashTestRoute from "@/routes/tests/splash";
 
+import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
-import NotFoundRoute from "./routes/not-found";
 
 function AppLayout() {
-  useDeepLink();
-
   return (
     <MultiChatProvider>
       {/* This essentially lets MultiChatProvider wrap all the <Route> components while being a child of <Routes> */}
@@ -29,6 +27,7 @@ function App() {
   return (
     <BrowserRouter>
       <KbdRegistry />
+      <DeepLinkHandler />
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<IndexRoute />} />
