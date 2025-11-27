@@ -105,6 +105,7 @@ export const MainChatInput = ({
         selection: { anchor: editorViewRef.current?.state.doc.length },
       });
       setIsEmpty(initialValue.trim().length === 0);
+      editorViewRef.current?.focus();
     }
   }, [initialValue]);
 
