@@ -1,16 +1,22 @@
 import { listen } from "@tauri-apps/api/event";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
 export function DeepLinkHandler() {
   const navigate = useNavigate();
+  const initialDeepLinkHandledRef = useRef(false);
 
   useEffect(() => {
     const setupDeepLink = async () => {
       try {
         const currentUrls = await getCurrent();
-        if (currentUrls && currentUrls.length > 0) {
+        if (
+          currentUrls &&
+          currentUrls.length > 0 &&
+          !initialDeepLinkHandledRef.current
+        ) {
+          initialDeepLinkHandledRef.current = true;
           handleDeepLink(currentUrls[0]);
         }
 
