@@ -72,8 +72,10 @@ const editorTheme = EditorView.theme({
 
 export const MainChatInput = ({
   onAfterSend,
+  initialValue,
 }: {
   onAfterSend?: () => void;
+  initialValue?: string;
 }) => {
   const { status } = useChatStatus();
   const { resolvedTheme } = useTheme();

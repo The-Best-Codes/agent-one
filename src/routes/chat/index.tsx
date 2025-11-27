@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 
 import {
   AutoScrollContainer,
@@ -16,7 +16,10 @@ import { cn } from "@/lib/utils";
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
   const { status } = useChatStatus();
+  const [searchParams] = useSearchParams();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
+
+  const initialInputValue = searchParams.get("initialMessage") || undefined;
 
   return (
     <main className="flex h-svh" role="main" data-testid="main">
@@ -51,6 +54,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
           </AutoScrollContainer>
           <MainChatInput
             key={chatId || "new-chat"}
+            initialValue={initialInputValue}
             onAfterSend={() => {
               scrollRef.current?.scrollToBottom();
             }}

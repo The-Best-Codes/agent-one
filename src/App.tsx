@@ -1,6 +1,7 @@
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
+import { useDeepLink } from "@/hooks/use-deep-link";
 import ChatRoute from "@/routes/chat";
 import IndexRoute from "@/routes/index";
 import OnboardingRoute from "@/routes/onboarding";
@@ -14,6 +15,8 @@ import { KbdRegistry } from "./kbd-shortcuts";
 import NotFoundRoute from "./routes/not-found";
 
 function AppLayout() {
+  useDeepLink();
+
   return (
     <MultiChatProvider>
       {/* This essentially lets MultiChatProvider wrap all the <Route> components while being a child of <Routes> */}
