@@ -71,7 +71,7 @@ export default function AppearanceSection() {
                 onClick={() => setColorTheme(option.value as typeof colorTheme)}
                 size="icon"
                 className={cn(
-                  "border-foreground rounded-md border-2",
+                  "border-foreground rounded-md border-0",
                   option.className,
                 )}
                 title={option.label}
