@@ -10,7 +10,7 @@ import {
   PaperclipIcon,
   SquareIcon,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +98,14 @@ export const MainChatInput = ({
   const editorViewRef = useRef<EditorView | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounter = useRef(0);
+
+  useEffect(() => {
+    if (initialValue) {
+      editorViewRef.current?.dispatch({
+        selection: { anchor: editorViewRef.current?.state.doc.length },
+      });
+    }
+  }, [initialValue]);
 
   // TODO: Is a function acceptable to use here, e.g. a switch-case? Will be cleaner when we add more options
   const showStopButton =
