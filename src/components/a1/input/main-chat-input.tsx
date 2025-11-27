@@ -104,6 +104,7 @@ export const MainChatInput = ({
       editorViewRef.current?.dispatch({
         selection: { anchor: editorViewRef.current?.state.doc.length },
       });
+      setIsEmpty(initialValue.trim().length === 0);
     }
   }, [initialValue]);
 
