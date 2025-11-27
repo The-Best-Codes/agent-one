@@ -383,7 +383,8 @@ export const MainChatInput = ({
           <CodeMirror
             autoFocus
             theme={resolvedTheme === "dark" ? "dark" : "light"}
-            defaultValue=""
+            // Note: Explicitly setting the value like this might prevent edits or input. It seems to be working fine, but if there are issues in the future, inspect this.
+            value={initialValue || ""}
             minHeight="40px"
             maxHeight="160px"
             placeholder="Ask anything..."
@@ -437,6 +438,11 @@ export const MainChatInput = ({
             onChange={handleEditorChange}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
+              if (initialValue) {
+                view.dispatch({
+                  selection: { anchor: view.state.doc.length },
+                });
+              }
               setIsEmpty(!view.state.doc.toString().trim());
             }}
             indentWithTab={false}
