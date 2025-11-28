@@ -24,7 +24,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { AVAILABLE_CHAT_MODELS } from "@/lib/ai/models";
 import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
@@ -37,27 +36,29 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   className,
   popoverClassName,
 }) => {
-  const { currentModel, setModel } = useModel();
+  const { currentModel, setModel, availableChatModels } = useModel();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
-      return AVAILABLE_CHAT_MODELS;
+      return availableChatModels;
     }
 
     const query = searchQuery.toLowerCase();
-    const scoredModels = AVAILABLE_CHAT_MODELS.map((model) => {
-      const targetString = model.name;
-      const score = commandScore(targetString, query, [model?.id || ""]);
-      return { model, score };
-    }).filter(({ score }) => score > 0);
+    const scoredModels = availableChatModels
+      .map((model) => {
+        const targetString = model.name;
+        const score = commandScore(targetString, query, [model?.id || ""]);
+        return { model, score };
+      })
+      .filter(({ score }) => score > 0);
 
     return scoredModels
       .sort((a, b) => b.score - a.score)
       .map(({ model }) => model);
-  }, [searchQuery]);
+  }, [searchQuery, availableChatModels]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({

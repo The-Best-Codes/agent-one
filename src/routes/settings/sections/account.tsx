@@ -74,7 +74,6 @@ export default function AccountSection() {
         setOpenrouterKey(openrouterInput);
         break;
     }
-    window.location.reload();
   };
 
   const handleCancelApiKey = (provider: string) => {

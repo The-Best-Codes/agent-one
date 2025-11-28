@@ -11,11 +11,11 @@ import {
 } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 
+import { type ModelConfig } from "@/contexts/use-model/model-context";
 import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import { getModelById, type ModelConfig } from "@/lib/ai/models";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -36,6 +36,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const {
     currentModel: defaultModelForNewChats,
     setModel: setDefaultModelForNewChats,
+    getModelById,
   } = useModel();
   const { createChat, loadChatData, saveChatModel } = usePersistence();
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return defaultModelForNewChats;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [defaultModelForNewChats, updateKey],
+    [defaultModelForNewChats, updateKey, getModelById],
   );
 
   const focusedModel = useMemo(
@@ -102,8 +103,10 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       currentModel: focusedModel,
       setModel: setModelForContext,
+      availableChatModels: [],
+      getModelById,
     }),
-    [focusedModel, setModelForContext],
+    [focusedModel, setModelForContext, getModelById],
   );
 
   const handleInstanceUpdate = useCallback(
