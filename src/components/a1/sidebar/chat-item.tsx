@@ -43,14 +43,21 @@ export const ChatItem = memo(
     const [showExportModal, setShowExportModal] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    const isSelectedChat = activeChatId === id;
+
     return (
       <>
         <Button
-          variant={activeChatId === id ? "secondary" : "ghost"}
+          variant={isSelectedChat ? "secondary" : "ghost"}
           size="sm"
-          className="group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none"
+          className={cn(
+            "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
+            isSelectedChat && "border pl-[calc(0.5rem-1px)]",
+          )}
           asChild
           draggable={true}
+          aria-selected={isSelectedChat}
+          data-selected={isSelectedChat}
           onDragStart={(e) => {
             e.dataTransfer.setData(
               "application/agent-one-chat",
