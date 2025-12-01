@@ -30,16 +30,24 @@ export default function SettingsSidebar({
 }: SettingsSidebarProps) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      {sections.map((section) => (
-        <Button
-          key={section.id}
-          variant={activeSection === section.id ? "secondary" : "ghost"}
-          className="justify-start text-left transition-none"
-          onClick={() => onSectionChange(section.id)}
-        >
-          {section.label}
-        </Button>
-      ))}
+      {sections.map((section) => {
+        const isSelected = activeSection === section.id;
+
+        return (
+          <Button
+            key={section.id}
+            variant={isSelected ? "secondary" : "ghost"}
+            className={cn(
+              "justify-start text-left transition-none",
+              isSelected && "border pl-[calc(1rem-1px)]",
+            )}
+            aria-selected={isSelected}
+            onClick={() => onSectionChange(section.id)}
+          >
+            {section.label}
+          </Button>
+        );
+      })}
     </div>
   );
 }

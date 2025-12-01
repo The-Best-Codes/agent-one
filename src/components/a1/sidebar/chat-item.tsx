@@ -57,7 +57,6 @@ export const ChatItem = memo(
           asChild
           draggable={true}
           aria-selected={isSelectedChat}
-          data-selected={isSelectedChat}
           onDragStart={(e) => {
             e.dataTransfer.setData(
               "application/agent-one-chat",
