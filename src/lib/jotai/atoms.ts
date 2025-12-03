@@ -36,7 +36,7 @@ export const systemPromptAtom = atom((get) => {
   const appendix = get(systemPromptAppendixAtom);
 
   const basePrompt = dedent`You are AgentOne. You are a helpful assistant.${
-    userName ? ` The user's name is ${userName}.` : ""
+    userName ? ` The user prefers to be called "${userName}".` : ""
   }`;
 
   if (appendix.trim()) {

@@ -196,7 +196,7 @@ export default function AccountSection() {
                 setAppendixInput(e.target.value.slice(0, MAX_APPENDIX_CHARS))
               }
               placeholder="e.g., Always use British English. Be concise and technical."
-              className="flex-1"
+              className="max-h-96 min-h-15 resize-y"
             />
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground text-xs">
