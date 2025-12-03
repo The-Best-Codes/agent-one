@@ -20,6 +20,7 @@ import {
   smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
+  systemPromptAppendixAtom,
   themeAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
@@ -73,6 +74,7 @@ export function resetAllSettings(): void {
     DEFAULT_SETTINGS.NOTIFICATION_SETTING as NotificationOption,
   );
   store.set(userNameAtom, DEFAULT_SETTINGS.USER_NAME);
+  store.set(systemPromptAppendixAtom, DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX);
   store.set(
     googleGenerativeAiApiKeyAtom,
     DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
@@ -146,6 +148,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "USER_NAME":
       store.set(userNameAtom, defaultValue as string);
+      break;
+    case "SYSTEM_PROMPT_APPENDIX":
+      store.set(systemPromptAppendixAtom, defaultValue as string);
       break;
     case "GOOGLE_GENERATIVE_AI_API_KEY":
       store.set(googleGenerativeAiApiKeyAtom, defaultValue as string);

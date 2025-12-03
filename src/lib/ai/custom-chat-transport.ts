@@ -12,23 +12,24 @@ import {
 
 import { getLogger } from "@/lib/logger";
 
-import { SYSTEM_PROMPT } from "./system-prompt";
-
 const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel;
   private smoothStreamEnabled: boolean;
   private getTools: () => Promise<ToolSet>;
+  private getSystemPrompt: () => string;
 
   constructor(
     model: LanguageModel,
     smoothStreamEnabled: boolean,
     getTools: () => Promise<ToolSet>,
+    getSystemPrompt: () => string,
   ) {
     this.model = model;
     this.smoothStreamEnabled = smoothStreamEnabled;
     this.getTools = getTools;
+    this.getSystemPrompt = getSystemPrompt;
   }
 
   updateModel(model: LanguageModel) {
@@ -42,6 +43,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       "CustomChatTransport smoothStreamEnabled updated to:",
       smoothStreamEnabled,
     );
+  }
+
+  updateSystemPrompt(getSystemPrompt: () => string) {
+    this.getSystemPrompt = getSystemPrompt;
+    logger.verbose("CustomChatTransport system prompt updated");
   }
 
   async sendMessages(
@@ -63,7 +69,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       tools,
       toolChoice: "auto",
       // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
-      system: SYSTEM_PROMPT,
+      system: this.getSystemPrompt(),
       ...(this.smoothStreamEnabled && {
         experimental_transform: smoothStream(),
       }),

@@ -1,3 +1,4 @@
+import dedent from "dedent";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
@@ -6,6 +7,7 @@ import {
   lsJSONOrUndefined,
   lsStringOrUndefined,
 } from "./load-from-localstorage";
+import { systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
 
 export const chatIdsAtom = atomWithStorage(
   "chat-ids",
@@ -28,3 +30,18 @@ export const onboardingCompletedAtom = atomWithStorage(
   "agent-one-onboarding-completed",
   lsBooleanOrUndefined("agent-one-onboarding-completed") ?? false,
 );
+
+export const systemPromptAtom = atom((get) => {
+  const userName = get(userNameAtom);
+  const appendix = get(systemPromptAppendixAtom);
+
+  const basePrompt = dedent`You are AgentOne. You are a helpful assistant.${
+    userName ? ` The user's name is ${userName}.` : ""
+  }`;
+
+  if (appendix.trim()) {
+    return `${basePrompt}\n\nAdditional instructions from the user:\n${appendix}`;
+  }
+
+  return basePrompt;
+});

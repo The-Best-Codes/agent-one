@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   openrouterApiKeyAtom,
+  systemPromptAppendixAtom,
   userNameAtom,
 } from "@/lib/jotai/settings-atoms";
 
@@ -37,13 +39,19 @@ const apiKeyFields: ApiKeyField[] = [
   },
 ];
 
+const MAX_APPENDIX_CHARS = 2000;
+
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
+  const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
+    systemPromptAppendixAtom,
+  );
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
 
   const [nameInput, setNameInput] = useState(userName);
+  const [appendixInput, setAppendixInput] = useState(systemPromptAppendix);
   const [googleInput, setGoogleInput] = useState(googleKey);
   const [groqInput, setGroqInput] = useState(groqKey);
   const [openrouterInput, setOpenrouterInput] = useState(openrouterKey);
@@ -60,6 +68,14 @@ export default function AccountSection() {
 
   const handleCancelName = () => {
     setNameInput(userName);
+  };
+
+  const handleSaveAppendix = () => {
+    setSystemPromptAppendix(appendixInput);
+  };
+
+  const handleCancelAppendix = () => {
+    setAppendixInput(systemPromptAppendix);
   };
 
   const handleSaveApiKey = (provider: string) => {
@@ -160,6 +176,52 @@ export default function AccountSection() {
               >
                 <RotateCcwIcon className="size-4" />
               </Button>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="system-prompt-appendix"
+              className="text-sm font-medium"
+            >
+              AI Instructions
+            </Label>
+            <p className="text-muted-foreground text-sm">
+              Add custom instructions that will be appended to the system
+              prompt. These will guide how AgentOne responds to you.
+            </p>
+            <Textarea
+              id="system-prompt-appendix"
+              value={appendixInput}
+              onChange={(e) =>
+                setAppendixInput(e.target.value.slice(0, MAX_APPENDIX_CHARS))
+              }
+              placeholder="e.g., Always use British English. Be concise and technical."
+              className="flex-1"
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground text-xs">
+                {appendixInput.length} / {MAX_APPENDIX_CHARS} characters
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSaveAppendix}
+                  disabled={appendixInput === systemPromptAppendix}
+                  variant="outline"
+                  size="icon"
+                  title="Save instructions"
+                >
+                  <SaveIcon className="size-4" />
+                </Button>
+                <Button
+                  onClick={handleCancelAppendix}
+                  disabled={appendixInput === systemPromptAppendix}
+                  variant="outline"
+                  size="icon"
+                  title="Cancel changes"
+                >
+                  <RotateCcwIcon className="size-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

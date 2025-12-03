@@ -5,10 +5,11 @@ import {
 } from "@ai-sdk/react";
 import { type ChatInit, type LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
+import { systemPromptAtom } from "@/lib/jotai/atoms";
 import { smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
@@ -19,9 +20,17 @@ type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
 
 export function useChat(model: LanguageModel, options?: CustomChatOptions) {
   const smoothStreamEnabled = useAtomValue(smoothStreamEnabledAtom);
+  const systemPrompt = useAtomValue(systemPromptAtom);
   const { getTools } = useTools();
+  const getSystemPrompt = useCallback(() => systemPrompt, [systemPrompt]);
   const [transport] = useState(
-    () => new CustomChatTransport(model, smoothStreamEnabled, getTools),
+    () =>
+      new CustomChatTransport(
+        model,
+        smoothStreamEnabled,
+        getTools,
+        getSystemPrompt,
+      ),
   );
 
   useEffect(() => {
@@ -33,6 +42,11 @@ export function useChat(model: LanguageModel, options?: CustomChatOptions) {
     transport.updateSmoothStreamEnabled(smoothStreamEnabled);
     logger.verbose("Updated chat transport with new settings");
   }, [smoothStreamEnabled, transport]);
+
+  useEffect(() => {
+    transport.updateSystemPrompt(getSystemPrompt);
+    logger.verbose("Updated chat transport with new system prompt");
+  }, [getSystemPrompt, transport]);
 
   const chatResult = useChatSDK({
     transport: transport,
