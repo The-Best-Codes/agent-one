@@ -1,15 +1,17 @@
 import { useAtom } from "jotai";
 import { EyeIcon, EyeOffIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   openrouterApiKeyAtom,
+  systemPromptAppendixAtom,
   userNameAtom,
 } from "@/lib/jotai/settings-atoms";
 
@@ -37,13 +39,19 @@ const apiKeyFields: ApiKeyField[] = [
   },
 ];
 
+const MAX_APPENDIX_CHARS = 2000;
+
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
+  const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
+    systemPromptAppendixAtom,
+  );
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
 
   const [nameInput, setNameInput] = useState(userName);
+  const [appendixInput, setAppendixInput] = useState(systemPromptAppendix);
   const [googleInput, setGoogleInput] = useState(googleKey);
   const [groqInput, setGroqInput] = useState(groqKey);
   const [openrouterInput, setOpenrouterInput] = useState(openrouterKey);
@@ -54,13 +62,13 @@ export default function AccountSection() {
     openrouter: false,
   });
 
-  const handleSaveName = () => {
+  useEffect(() => {
     setUserName(nameInput);
-  };
+  }, [nameInput, setUserName]);
 
-  const handleCancelName = () => {
-    setNameInput(userName);
-  };
+  useEffect(() => {
+    setSystemPromptAppendix(appendixInput);
+  }, [appendixInput, setSystemPromptAppendix]);
 
   const handleSaveApiKey = (provider: string) => {
     switch (provider) {
@@ -133,33 +141,38 @@ export default function AccountSection() {
             <p className="text-muted-foreground text-sm">
               AgentOne will use this name to address you.
             </p>
-            <div className="flex gap-2">
-              <Input
-                id="user-name"
-                type="text"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                placeholder="Enter your name"
-                className="flex-1"
+            <Input
+              id="user-name"
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder="Enter your name"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label
+              htmlFor="system-prompt-appendix"
+              className="text-sm font-medium"
+            >
+              AI Instructions
+            </Label>
+            <p className="text-muted-foreground text-sm">
+              Add custom instructions that will be appended to the system
+              prompt. These will guide how AgentOne responds to you.
+            </p>
+            <div className="relative">
+              <Textarea
+                id="system-prompt-appendix"
+                value={appendixInput}
+                onChange={(e) =>
+                  setAppendixInput(e.target.value.slice(0, MAX_APPENDIX_CHARS))
+                }
+                placeholder="e.g., Always use British English. Be concise and technical."
+                className="field-sizing-fixed max-h-96 min-h-15 resize-y"
               />
-              <Button
-                onClick={handleSaveName}
-                disabled={nameInput === userName}
-                variant="outline"
-                size="icon"
-                title="Save name"
-              >
-                <SaveIcon className="size-4" />
-              </Button>
-              <Button
-                onClick={handleCancelName}
-                disabled={nameInput === userName}
-                variant="outline"
-                size="icon"
-                title="Cancel changes"
-              >
-                <RotateCcwIcon className="size-4" />
-              </Button>
+              <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
+                {appendixInput.length} / {MAX_APPENDIX_CHARS}
+              </span>
             </div>
           </div>
         </CardContent>

@@ -121,6 +121,11 @@ export const userNameAtom = createSettingAtom(
   DEFAULT_SETTINGS.USER_NAME,
 );
 
+export const systemPromptAppendixAtom = createSettingAtom(
+  "SYSTEM_PROMPT_APPENDIX",
+  DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
+);
+
 export const googleGenerativeAiApiKeyAtom = createSettingAtom(
   "GOOGLE_GENERATIVE_AI_API_KEY",
   DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,

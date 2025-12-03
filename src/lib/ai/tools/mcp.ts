@@ -147,7 +147,7 @@ async function getMcpClientAndTools(
       throw new Error("Operation aborted");
     }
 
-    const tools = await client.tools();
+    const tools = (await client.tools()) as ToolSet;
 
     if (signal.aborted) {
       await transport.close();

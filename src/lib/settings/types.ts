@@ -40,6 +40,7 @@ export interface DefaultSettings {
   MCP_SERVERS: McpServerConfig[];
   MCP_PARALLEL_LOAD_LIMIT: number;
   USER_NAME: string;
+  SYSTEM_PROMPT_APPENDIX: string;
   GOOGLE_GENERATIVE_AI_API_KEY: string;
   GROQ_API_KEY: string;
   OPENROUTER_API_KEY: string;
@@ -78,6 +79,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   ],
   MCP_PARALLEL_LOAD_LIMIT: 8,
   USER_NAME: "",
+  SYSTEM_PROMPT_APPENDIX: "",
   GOOGLE_GENERATIVE_AI_API_KEY: "",
   GROQ_API_KEY: "",
   OPENROUTER_API_KEY: "",

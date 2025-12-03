@@ -21,3 +21,4 @@
 - Redirect to `/chat` when the chat ID is invalid, but make sure that this doesn't redirect to `/chat` each time you delete a chat.
 - Fix installer looking for MSI file on Windows instead of EXE file (issue with generated latest.json file, maybe only publish the EXE file)
 - Allow changing settings for each default tool. For example, change the max number of searches the model can do at once with the web search tool, or how long it can wait with the wait milliseconds tool.
+- Add a note in the AI Instructions settings that updates to the system prompt may not be reflected until your next message.
