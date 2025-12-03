@@ -123,7 +123,7 @@ export default function AccountSection() {
           original: openrouterKey,
         };
       default:
-        return { value: "", set: () => { }, original: "" };
+        return { value: "", set: () => {}, original: "" };
     }
   };
 
@@ -168,7 +168,7 @@ export default function AccountSection() {
                   setAppendixInput(e.target.value.slice(0, MAX_APPENDIX_CHARS))
                 }
                 placeholder="e.g., Always use British English. Be concise and technical."
-                className="max-h-96 min-h-15 resize-y field-sizing-fixed"
+                className="field-sizing-fixed max-h-96 min-h-15 resize-y"
               />
               <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
                 {appendixInput.length} / {MAX_APPENDIX_CHARS}
