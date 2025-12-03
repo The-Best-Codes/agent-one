@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { EyeIcon, EyeOffIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,21 +62,13 @@ export default function AccountSection() {
     openrouter: false,
   });
 
-  const handleSaveName = () => {
+  useEffect(() => {
     setUserName(nameInput);
-  };
+  }, [nameInput, setUserName]);
 
-  const handleCancelName = () => {
-    setNameInput(userName);
-  };
-
-  const handleSaveAppendix = () => {
+  useEffect(() => {
     setSystemPromptAppendix(appendixInput);
-  };
-
-  const handleCancelAppendix = () => {
-    setAppendixInput(systemPromptAppendix);
-  };
+  }, [appendixInput, setSystemPromptAppendix]);
 
   const handleSaveApiKey = (provider: string) => {
     switch (provider) {
@@ -149,34 +141,13 @@ export default function AccountSection() {
             <p className="text-muted-foreground text-sm">
               AgentOne will use this name to address you.
             </p>
-            <div className="flex gap-2">
-              <Input
-                id="user-name"
-                type="text"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                placeholder="Enter your name"
-                className="flex-1"
-              />
-              <Button
-                onClick={handleSaveName}
-                disabled={nameInput === userName}
-                variant="outline"
-                size="icon"
-                title="Save name"
-              >
-                <SaveIcon className="size-4" />
-              </Button>
-              <Button
-                onClick={handleCancelName}
-                disabled={nameInput === userName}
-                variant="outline"
-                size="icon"
-                title="Cancel changes"
-              >
-                <RotateCcwIcon className="size-4" />
-              </Button>
-            </div>
+            <Input
+              id="user-name"
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              placeholder="Enter your name"
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label
@@ -189,39 +160,19 @@ export default function AccountSection() {
               Add custom instructions that will be appended to the system
               prompt. These will guide how AgentOne responds to you.
             </p>
-            <Textarea
-              id="system-prompt-appendix"
-              value={appendixInput}
-              onChange={(e) =>
-                setAppendixInput(e.target.value.slice(0, MAX_APPENDIX_CHARS))
-              }
-              placeholder="e.g., Always use British English. Be concise and technical."
-              className="max-h-96 min-h-15 resize-y"
-            />
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs">
-                {appendixInput.length} / {MAX_APPENDIX_CHARS} characters
+            <div className="relative">
+              <Textarea
+                id="system-prompt-appendix"
+                value={appendixInput}
+                onChange={(e) =>
+                  setAppendixInput(e.target.value.slice(0, MAX_APPENDIX_CHARS))
+                }
+                placeholder="e.g., Always use British English. Be concise and technical."
+                className="max-h-96 min-h-15 resize-y"
+              />
+              <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
+                {appendixInput.length} / {MAX_APPENDIX_CHARS}
               </span>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSaveAppendix}
-                  disabled={appendixInput === systemPromptAppendix}
-                  variant="outline"
-                  size="icon"
-                  title="Save instructions"
-                >
-                  <SaveIcon className="size-4" />
-                </Button>
-                <Button
-                  onClick={handleCancelAppendix}
-                  disabled={appendixInput === systemPromptAppendix}
-                  variant="outline"
-                  size="icon"
-                  title="Cancel changes"
-                >
-                  <RotateCcwIcon className="size-4" />
-                </Button>
-              </div>
             </div>
           </div>
         </CardContent>
