@@ -30,7 +30,7 @@ export function DeepLinkHandler() {
           handleDeepLink(event.payload);
         });
       } catch (error) {
-        console.error("Failed to setup deep link handler:", error);
+        console.warn("Failed to setup deep link handler:", error);
       }
     };
 
