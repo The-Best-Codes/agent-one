@@ -15,8 +15,7 @@ import { cn } from "@/lib/utils";
 
 const AT_BOTTOM_THRESHOLD = 10;
 
-export interface AutoScrollContainerProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   scrollableClassName?: string;
   scrollButtonClassName?: string;
