@@ -10,7 +10,6 @@
 - Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
 - Clean up provider settings and screen in onboarding (use goose for inspiration there perhaps)
 - Fix setting API keys, it should not require a full app reload
-- Improve contrast of selected chat (make it more obviously selected) in light mode especially. Just improve light mode contrast in general.
 - Add app zoom in settings. See also (private link): https://github.com/The-Best-Codes/erasr/blob/main/src/components/global/text-scale-changer.tsx
 - Some obvious stuff with the model selector:
   - Only show models that you've configured an API key for
