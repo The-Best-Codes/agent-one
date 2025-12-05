@@ -97,7 +97,7 @@ export default function AppearanceSection() {
           <div className="flex flex-col items-start">
             <Label className="text-sm font-medium">Font</Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              Choose the font family for the application.
+              Choose the font for the application.
             </p>
           </div>
           <ToggleGroup
