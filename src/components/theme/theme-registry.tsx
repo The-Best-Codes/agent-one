@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { getResolvedTheme } from "@/lib/get-resolved-theme";
 import {
   colorThemeAtom,
+  fontAtom,
   roundnessAtom,
   themeAtom,
 } from "@/lib/jotai/settings-atoms";
@@ -13,10 +14,12 @@ export function ThemeRegistry() {
   const [rawTheme] = useAtom(themeAtom);
   const [rawColorTheme] = useAtom(colorThemeAtom);
   const [rawRoundness] = useAtom(roundnessAtom);
+  const [rawFont] = useAtom(fontAtom);
 
   const theme = jsonParseCatch(rawTheme);
   const colorTheme = jsonParseCatch(rawColorTheme);
   const roundness = jsonParseCatch(rawRoundness);
+  const font = jsonParseCatch(rawFont);
 
   useEffect(() => {
     // Handle theme
@@ -43,7 +46,18 @@ export function ThemeRegistry() {
     );
     root.classList.add(`theme-radius-${roundness || "md"}`);
     root.setAttribute("data-roundness", roundness || "md");
-  }, [theme, colorTheme, roundness]);
+
+    // Handle font
+    root.classList.remove("font-space-grotesk", "font-sans", "font-mono");
+    if (font === "default") {
+      root.classList.add("font-space-grotesk");
+    } else if (font === "system") {
+      root.classList.add("font-sans");
+    } else if (font === "mono") {
+      root.classList.add("font-mono");
+    }
+    root.setAttribute("data-font", font || "default");
+  }, [theme, colorTheme, roundness, font]);
 
   return null;
 }

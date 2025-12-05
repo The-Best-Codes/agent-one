@@ -3,6 +3,7 @@ export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
 export type ColorThemeOption = "default" | "red" | "blue" | "yellow";
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
+export type FontOption = "default" | "system" | "mono";
 export type NotificationOption = "always" | "when-unfocused" | "never";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 
@@ -35,6 +36,7 @@ export interface DefaultSettings {
   THEME: ThemeOption;
   COLOR_THEME: ColorThemeOption;
   ROUNDNESS: RoundnessOption;
+  FONT: FontOption;
   NOTIFICATION_SETTING: NotificationOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
   MCP_SERVERS: McpServerConfig[];
@@ -61,6 +63,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   THEME: "system",
   COLOR_THEME: "default",
   ROUNDNESS: "md",
+  FONT: "default",
   NOTIFICATION_SETTING: "never",
   ENABLED_TOOLS: {
     dateTime: true,

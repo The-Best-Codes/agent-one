@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { colorThemeAtom, roundnessAtom } from "@/lib/jotai/settings-atoms";
+import {
+  colorThemeAtom,
+  fontAtom,
+  roundnessAtom,
+} from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const roundnessOptions = [
@@ -14,6 +18,12 @@ const roundnessOptions = [
   { value: "sm", label: "Slightly Round", radius: "rounded-[0.3125rem]" },
   { value: "md", label: "Round", radius: "rounded-[0.625rem]" },
   { value: "lg", label: "Very Round", radius: "rounded-[1.25rem]" },
+] as const;
+
+const fontOptions = [
+  { value: "default", label: "Default", className: "font-space-grotesk" },
+  { value: "system", label: "System", className: "font-sans" },
+  { value: "mono", label: "Mono", className: "font-mono" },
 ] as const;
 
 const colorThemeOptions = [
@@ -45,6 +55,7 @@ const colorThemeOptions = [
 
 export default function AppearanceSection() {
   const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
+  const [font, setFont] = useAtom(fontAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
 
   return (
@@ -80,6 +91,38 @@ export default function AppearanceSection() {
               </Button>
             ))}
           </div>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+          <div className="flex flex-col items-start">
+            <Label className="text-sm font-medium">Font</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Choose the font family for the application.
+            </p>
+          </div>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            value={font}
+            onValueChange={(value) => {
+              if (value) {
+                setFont(value as typeof font);
+              }
+            }}
+            aria-label="Select font"
+            className="w-full md:w-fit"
+          >
+            {fontOptions.map((option) => (
+              <ToggleGroupItem
+                key={option.value}
+                value={option.value}
+                aria-label={option.label}
+                className={option.className}
+              >
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">

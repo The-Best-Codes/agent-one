@@ -4,6 +4,7 @@ import {
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
+  fontAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   markdownHighlightingAtom,
@@ -27,6 +28,7 @@ import {
 import {
   DEFAULT_SETTINGS,
   type DefaultSettings,
+  type FontOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type NotificationOption,
@@ -69,6 +71,7 @@ export function resetAllSettings(): void {
   );
   store.set(themeAtom, DEFAULT_SETTINGS.THEME as ThemeOption);
   store.set(roundnessAtom, DEFAULT_SETTINGS.ROUNDNESS as RoundnessOption);
+  store.set(fontAtom, DEFAULT_SETTINGS.FONT as FontOption);
   store.set(
     notificationSettingAtom,
     DEFAULT_SETTINGS.NOTIFICATION_SETTING as NotificationOption,
@@ -133,6 +136,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "ROUNDNESS":
       store.set(roundnessAtom, defaultValue as RoundnessOption);
+      break;
+    case "FONT":
+      store.set(fontAtom, defaultValue as FontOption);
       break;
     case "NOTIFICATION_SETTING":
       store.set(notificationSettingAtom, defaultValue as NotificationOption);

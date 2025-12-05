@@ -3,6 +3,7 @@ import { atomWithStorage } from "jotai/utils";
 import {
   type ColorThemeOption,
   DEFAULT_SETTINGS,
+  type FontOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type NotificationOption,
@@ -94,6 +95,11 @@ export const colorThemeAtom = createSettingAtom<ColorThemeOption>(
 export const roundnessAtom = createSettingAtom<RoundnessOption>(
   "ROUNDNESS",
   DEFAULT_SETTINGS.ROUNDNESS,
+);
+
+export const fontAtom = createSettingAtom<FontOption>(
+  "FONT",
+  DEFAULT_SETTINGS.FONT,
 );
 
 export const notificationSettingAtom = createSettingAtom<NotificationOption>(
