@@ -4,6 +4,7 @@ import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
+import remend from "remend";
 
 import { CodeBlock } from "./codeblock";
 
@@ -14,7 +15,8 @@ type MarkdownBlock = {
 };
 
 function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
-  const tokens = marked.lexer(markdown);
+  const completedMarkdown = remend(markdown);
+  const tokens = marked.lexer(completedMarkdown);
   const blocks: MarkdownBlock[] = [];
 
   for (const token of tokens) {
@@ -49,6 +51,8 @@ const MemoizedMarkdownBlock = memo(
         <CodeBlock content={content} lang={lang} messageRole={messageRole} />
       );
     } else {
+      // TODO: Allow enabling and disabling remend in settings
+      const completedContent = remend(content);
       return (
         <ReactMarkdown
           remarkPlugins={[remarkBreaks, remarkGfm]}
@@ -59,7 +63,7 @@ const MemoizedMarkdownBlock = memo(
             },
           }}
         >
-          {content}
+          {completedContent}
         </ReactMarkdown>
       );
     }
