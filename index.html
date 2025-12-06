@@ -22,6 +22,7 @@
         }
       }
 
+      // Handle theme
       let theme = "light";
       let themeFromStorage = localStorage.getItem("agent-one-setting-THEME");
       if (!themeFromStorage) {
@@ -44,6 +45,24 @@
       document.documentElement.classList.remove("light", "dark");
       document.documentElement.classList.add(theme);
       document.documentElement.setAttribute("data-theme", theme);
+
+      // Handle font
+      let fontFromStorage = localStorage.getItem("agent-one-setting-FONT");
+      let parsedFont = jsonParseCatch(fontFromStorage) || "default";
+
+      document.documentElement.classList.remove(
+        "font-space-grotesk",
+        "font-sans",
+        "font-mono",
+      );
+      if (parsedFont === "default") {
+        document.documentElement.classList.add("font-space-grotesk");
+      } else if (parsedFont === "system") {
+        document.documentElement.classList.add("font-sans");
+      } else if (parsedFont === "mono") {
+        document.documentElement.classList.add("font-mono");
+      }
+      document.documentElement.setAttribute("data-font", parsedFont);
     </script>
     <title>AgentOne</title>
   </head>
