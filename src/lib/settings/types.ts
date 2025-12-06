@@ -1,3 +1,5 @@
+// If you update this file, check if you also need to update reset-settings.ts in this directory
+
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
@@ -46,6 +48,7 @@ export interface DefaultSettings {
   GOOGLE_GENERATIVE_AI_API_KEY: string;
   GROQ_API_KEY: string;
   OPENROUTER_API_KEY: string;
+  CEREBRAS_API_KEY: string;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -86,4 +89,5 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   GOOGLE_GENERATIVE_AI_API_KEY: "",
   GROQ_API_KEY: "",
   OPENROUTER_API_KEY: "",
+  CEREBRAS_API_KEY: "",
 };

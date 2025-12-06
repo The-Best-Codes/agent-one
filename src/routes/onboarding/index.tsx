@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
 import {
+  cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   openrouterApiKeyAtom,
@@ -24,6 +25,7 @@ export default function OnboardingRoute() {
   );
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
   const [userName, setUserName] = useAtom(userNameAtom);
+  const [cerebrasKey, setCerebrasKey] = useAtom(cerebrasApiKeyAtom);
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
@@ -44,6 +46,7 @@ export default function OnboardingRoute() {
   };
 
   const handleApiKeysComplete = (keys: Record<string, string>) => {
+    if (keys.cerebras) setCerebrasKey(keys.cerebras);
     if (keys.google) setGoogleKey(keys.google);
     if (keys.groq) setGroqKey(keys.groq);
     if (keys.openrouter) setOpenrouterKey(keys.openrouter);
@@ -57,6 +60,7 @@ export default function OnboardingRoute() {
   };
 
   const initialApiKeys = {
+    cerebras: cerebrasKey,
     google: googleKey,
     groq: groqKey,
     openrouter: openrouterKey,

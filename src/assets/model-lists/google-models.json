@@ -273,19 +273,6 @@
       "maxTemperature": 2
     },
     {
-      "name": "models/learnlm-2.0-flash-experimental",
-      "version": "2.0",
-      "displayName": "LearnLM 2.0 Flash Experimental",
-      "description": "LearnLM 2.0 Flash Experimental",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 32768,
-      "supportedGenerationMethods": ["generateContent", "countTokens"],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2
-    },
-    {
       "name": "models/gemma-3-1b-it",
       "version": "001",
       "displayName": "Gemma 3 1B",
@@ -723,7 +710,16 @@
       "inputTokenLimit": 480,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["predictLongRunning"]
+    },
+    {
+      "name": "models/veo-3.1-generate-preview",
+      "version": "3.1",
+      "displayName": "Veo 3.1",
+      "description": "Veo 3.1",
+      "inputTokenLimit": 480,
+      "outputTokenLimit": 8192,
+      "supportedGenerationMethods": ["predictLongRunning"]
     }
   ],
-  "nextPageToken": "CiBtb2RlbHMvdmVvLTMuMC1mYXN0LWdlbmVyYXRlLTAwMQ=="
+  "nextPageToken": "Ch9tb2RlbHMvdmVvLTMuMS1nZW5lcmF0ZS1wcmV2aWV3"
 }

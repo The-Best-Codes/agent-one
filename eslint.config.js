@@ -48,6 +48,8 @@ export default [
               "shikijs",
               "GROQ",
               "OPENROUTER",
+              "cerebras",
+              "Cerebras",
             ],
           },
         },

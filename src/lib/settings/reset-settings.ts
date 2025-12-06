@@ -1,6 +1,7 @@
 import { getDefaultStore } from "jotai";
 
 import {
+  cerebrasApiKeyAtom,
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
@@ -84,6 +85,7 @@ export function resetAllSettings(): void {
   );
   store.set(groqApiKeyAtom, DEFAULT_SETTINGS.GROQ_API_KEY);
   store.set(openrouterApiKeyAtom, DEFAULT_SETTINGS.OPENROUTER_API_KEY);
+  store.set(cerebrasApiKeyAtom, DEFAULT_SETTINGS.CEREBRAS_API_KEY);
 }
 
 /**
@@ -166,6 +168,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "OPENROUTER_API_KEY":
       store.set(openrouterApiKeyAtom, defaultValue as string);
+      break;
+    case "CEREBRAS_API_KEY":
+      store.set(cerebrasApiKeyAtom, defaultValue as string);
       break;
   }
 }

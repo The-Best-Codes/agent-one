@@ -16,6 +16,11 @@ interface ApiKeysStepProps {
 
 const API_KEY_CONFIG: ApiKeyConfig[] = [
   {
+    provider: "cerebras",
+    key: "CEREBRAS_API_KEY",
+    label: "Cerebras",
+  },
+  {
     provider: "google",
     key: "GOOGLE_GENERATIVE_AI_API_KEY",
     label: "Google Generative AI",
@@ -36,7 +41,10 @@ export function ApiKeysStep({ onSubmit, initialKeys = {} }: ApiKeysStepProps) {
   };
 
   const hasAtLeastOneKey =
-    apiKeyInputs.google || apiKeyInputs.groq || apiKeyInputs.openrouter;
+    apiKeyInputs.cerebras ||
+    apiKeyInputs.google ||
+    apiKeyInputs.groq ||
+    apiKeyInputs.openrouter;
 
   return (
     <div className="animate-in slide-in-from-bottom-5 fade-in-0 w-full max-w-md px-4 duration-500">

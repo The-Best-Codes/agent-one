@@ -13,7 +13,7 @@ if [ -f "$ENV_FILE" ]; then
 fi
 
 # Check required environment variables
-if [ -z "$AGENT_ONE_GROQ_API_KEY" ] || [ -z "$AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY" ]; then
+if [ -z "$AGENT_ONE_GROQ_API_KEY" ] || [ -z "$AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY" ] || [ -z "$AGENT_ONE_CEREBRAS_API_KEY" ]; then
     echo "Error: Missing required API keys in environment or .env file"
     exit 1
 fi
@@ -32,5 +32,9 @@ curl -s -H "Authorization: Bearer $AGENT_ONE_GROQ_API_KEY" "https://api.groq.com
 # Download Google models
 echo "Downloading Google models..."
 curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY" -o ./src/assets/model-lists/google-models.json
+
+# Download Cerebras models
+echo "Downloading Cerebras models..."
+curl -s -H "Authorization: Bearer $AGENT_ONE_CEREBRAS_API_KEY" "https://api.cerebras.ai/v1/models" -o ./src/assets/model-lists/cerebras-models.json
 
 echo "Model lists updated successfully!"

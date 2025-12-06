@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   openrouterApiKeyAtom,
@@ -22,6 +23,11 @@ interface ApiKeyField {
 }
 
 const apiKeyFields: ApiKeyField[] = [
+  {
+    atomId: "cerebras",
+    label: "Cerebras",
+    placeholder: "Your Cerebras API key",
+  },
   {
     atomId: "google",
     label: "Google Generative AI",
@@ -46,17 +52,20 @@ export default function AccountSection() {
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
     systemPromptAppendixAtom,
   );
+  const [cerebrasKey, setCerebrasKey] = useAtom(cerebrasApiKeyAtom);
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
 
   const [nameInput, setNameInput] = useState(userName);
   const [appendixInput, setAppendixInput] = useState(systemPromptAppendix);
+  const [cerebrasInput, setCerebrasInput] = useState(cerebrasKey);
   const [googleInput, setGoogleInput] = useState(googleKey);
   const [groqInput, setGroqInput] = useState(groqKey);
   const [openrouterInput, setOpenrouterInput] = useState(openrouterKey);
 
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({
+    cerebras: false,
     google: false,
     groq: false,
     openrouter: false,
@@ -72,6 +81,9 @@ export default function AccountSection() {
 
   const handleSaveApiKey = (provider: string) => {
     switch (provider) {
+      case "cerebras":
+        setCerebrasKey(cerebrasInput);
+        break;
       case "google":
         setGoogleKey(googleInput);
         break;
@@ -87,6 +99,9 @@ export default function AccountSection() {
 
   const handleCancelApiKey = (provider: string) => {
     switch (provider) {
+      case "cerebras":
+        setCerebrasInput(cerebrasKey);
+        break;
       case "google":
         setGoogleInput(googleKey);
         break;
@@ -108,6 +123,12 @@ export default function AccountSection() {
 
   const getKeyState = (provider: string) => {
     switch (provider) {
+      case "cerebras":
+        return {
+          value: cerebrasInput,
+          set: setCerebrasInput,
+          original: cerebrasKey,
+        };
       case "google":
         return {
           value: googleInput,

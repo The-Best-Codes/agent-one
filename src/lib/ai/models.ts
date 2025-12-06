@@ -1,9 +1,11 @@
 import type { LanguageModel } from "ai";
 
+import { cerebrasModelsData } from "@/assets/model-lists/cerebras-models";
 import { googleModelsData } from "@/assets/model-lists/google-models";
 import { groqModelsData } from "@/assets/model-lists/groq-models";
 import { openRouterModelsData } from "@/assets/model-lists/openrouter-models";
 
+import { cerebras } from "./providers/cerebras";
 import { google } from "./providers/google";
 import { groq } from "./providers/groq";
 import { openRouter } from "./providers/openrouter";
@@ -47,6 +49,16 @@ function mapGroqModels(): ModelConfig[] {
     name: getPartAfterSlash(model.id),
     provider: "Groq",
     model: groq(model.id),
+    supportsToolUse: true,
+  }));
+}
+
+function mapCerebrasModels(): ModelConfig[] {
+  return cerebrasModelsData.data.map((model) => ({
+    id: `cerebras-${model.id}`,
+    name: model.id,
+    provider: "Cerebras",
+    model: cerebras(model.id),
     supportsToolUse: true,
   }));
 }
@@ -101,6 +113,16 @@ function mapGroqChatModels(): ModelConfig[] {
     }));
 }
 
+function mapCerebrasChatModels(): ModelConfig[] {
+  return cerebrasModelsData.data.map((model) => ({
+    id: `cerebras-${model.id}`,
+    name: model.id,
+    provider: "Cerebras",
+    model: cerebras(model.id),
+    supportsToolUse: true,
+  }));
+}
+
 function mapOpenRouterChatModels(): ModelConfig[] {
   return openRouterModelsData.data
     .filter(
@@ -132,12 +154,14 @@ function mapOpenRouterImageModels(): ModelConfig[] {
 }
 
 export const AVAILABLE_MODELS: ModelConfig[] = [
+  ...mapCerebrasModels(),
   ...mapGoogleModels(),
   ...mapGroqModels(),
   ...mapOpenRouterModels(),
 ];
 
 export const AVAILABLE_CHAT_MODELS: ModelConfig[] = [
+  ...mapCerebrasChatModels(),
   ...mapGoogleChatModels(),
   ...mapGroqChatModels(),
   ...mapOpenRouterChatModels(),

@@ -146,3 +146,8 @@ export const openrouterApiKeyAtom = createSettingAtom(
   "OPENROUTER_API_KEY",
   DEFAULT_SETTINGS.OPENROUTER_API_KEY,
 );
+
+export const cerebrasApiKeyAtom = createSettingAtom(
+  "CEREBRAS_API_KEY",
+  DEFAULT_SETTINGS.CEREBRAS_API_KEY,
+);
