@@ -224,12 +224,24 @@ function AccordionContent({
   wrapperClassName,
   className,
   children,
-  renderWhenCollapsed = true,
+  renderWhenCollapsed = false,
   ...props
 }: AccordionContentProps) {
   const { isOpen } = useAccordionItemContext();
+  const [shouldRender, setShouldRender] = React.useState(isOpen);
 
-  if (!renderWhenCollapsed && !isOpen) {
+  React.useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+    } else if (!renderWhenCollapsed) {
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, renderWhenCollapsed]);
+
+  if (!shouldRender) {
     return null;
   }
 
