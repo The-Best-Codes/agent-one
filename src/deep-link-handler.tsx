@@ -3,6 +3,8 @@ import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 
+// TODO: Implement version checking here to ignore outdated deep links
+// Use assets/deep-links/schema.json
 export function DeepLinkHandler() {
   const navigate = useNavigate();
   const initialDeepLinkHandledRef = useRef(false);
