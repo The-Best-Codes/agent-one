@@ -51,6 +51,30 @@ const colorThemeOptions = [
     className:
       "bg-[oklch(0.852_0.199_91.936)] dark:bg-[oklch(0.795_0.184_86.047)] hover:bg-[oklch(0.852_0.199_91.936)] dark:hover:bg-[oklch(0.795_0.184_86.047)] text-black",
   },
+  {
+    value: "green",
+    label: "Green",
+    className:
+      "bg-[oklch(0.648_0.2_131.684)] dark:bg-[oklch(0.648_0.2_131.684)] hover:bg-[oklch(0.648_0.2_131.684)] dark:hover:bg-[oklch(0.648_0.2_131.684)] text-white",
+  },
+  {
+    value: "orange",
+    label: "Orange",
+    className:
+      "bg-[oklch(0.646_0.222_41.116)] dark:bg-[oklch(0.705_0.213_47.604)] hover:bg-[oklch(0.646_0.222_41.116)] dark:hover:bg-[oklch(0.705_0.213_47.604)] text-white",
+  },
+  {
+    value: "rose",
+    label: "Rose",
+    className:
+      "bg-[oklch(0.586_0.253_17.585)] dark:bg-[oklch(0.645_0.246_16.439)] hover:bg-[oklch(0.586_0.253_17.585)] dark:hover:bg-[oklch(0.645_0.246_16.439)] text-white",
+  },
+  {
+    value: "violet",
+    label: "Violet",
+    className:
+      "bg-[oklch(0.541_0.281_293.009)] dark:bg-[oklch(0.606_0.25_292.717)] hover:bg-[oklch(0.541_0.281_293.009)] dark:hover:bg-[oklch(0.606_0.25_292.717)] text-white",
+  },
 ] as const;
 
 export default function AppearanceSection() {
@@ -75,7 +99,7 @@ export default function AppearanceSection() {
           <div className="flex flex-col items-start">
             <Label className="text-sm font-medium">Color Theme</Label>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             {colorThemeOptions.map((option) => (
               <Button
                 key={option.value}

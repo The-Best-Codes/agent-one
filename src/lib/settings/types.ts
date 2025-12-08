@@ -3,7 +3,15 @@
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
-export type ColorThemeOption = "default" | "red" | "blue" | "yellow";
+export type ColorThemeOption =
+  | "default"
+  | "red"
+  | "blue"
+  | "yellow"
+  | "green"
+  | "orange"
+  | "rose"
+  | "violet";
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
 export type FontOption = "default" | "system" | "mono";
 export type NotificationOption = "always" | "when-unfocused" | "never";

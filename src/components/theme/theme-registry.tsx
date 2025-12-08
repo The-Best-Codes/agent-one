@@ -31,7 +31,15 @@ export function ThemeRegistry() {
     root.setAttribute("data-theme", resolvedTheme);
 
     // Handle color theme
-    root.classList.remove("red", "blue", "yellow");
+    root.classList.remove(
+      "red",
+      "blue",
+      "yellow",
+      "green",
+      "orange",
+      "rose",
+      "violet",
+    );
     if (colorTheme && colorTheme !== "default") {
       root.classList.add(colorTheme);
     }
