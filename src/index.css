@@ -583,6 +583,10 @@
     @apply bg-transparent;
   }
 
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+
   .text-shimmer {
     font-optical-sizing: auto;
     /* background: linear-gradient(135deg, #ffffff, #5e5e5e, #ffffff); */
