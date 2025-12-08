@@ -39,7 +39,7 @@ export const MessagePartText = ({
       className={cn(
         "max-w-full rounded-md text-base",
         shouldRenderMarkdown &&
-          "prose dark:prose-invert prose-sm prose-neutral prose-code:select-all",
+          "prose dark:prose-invert prose-sm prose-neutral",
       )}
     >
       {shouldUsePerformantRenderer ? (
