@@ -171,7 +171,7 @@ export const VirtualizedChatList = ({
             <Input
               ref={searchInputRef}
               placeholder="Search chats..."
-              className="pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
+              className="pl-9 transition-[padding] bg-background duration-200 group-focus-within/sidebar-search-input:pl-3"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -186,7 +186,7 @@ export const VirtualizedChatList = ({
             <Input
               ref={searchInputRef}
               placeholder="Search chats..."
-              className="pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
+              className="pl-9 transition-[padding] bg-background duration-200 group-focus-within/sidebar-search-input:pl-3"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
