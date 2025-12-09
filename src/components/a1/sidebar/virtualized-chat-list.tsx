@@ -156,8 +156,8 @@ export const VirtualizedChatList = ({
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
-      {showNewChatButton && (
-        <div className="flex flex-col gap-2 pb-2">
+      <div className={cn("pb-2", showNewChatButton && "flex flex-col gap-2")}>
+        {showNewChatButton && (
           <Button
             onClick={() => handleNewChat && handleNewChat()}
             className="w-full justify-start"
@@ -166,33 +166,18 @@ export const VirtualizedChatList = ({
             <PlusIcon className="size-4" />
             New Chat
           </Button>
-          <div className="group/sidebar-search-input relative">
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search chats..."
-              className="pl-9 transition-[padding] bg-background duration-200 group-focus-within/sidebar-search-input:pl-3"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+        )}
+        <div className="group/sidebar-search-input relative">
+          <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search chats..."
+            className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-      )}
-
-      {!showNewChatButton && (
-        <div className="pb-2">
-          <div className="group/sidebar-search-input relative">
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search chats..."
-              className="pl-9 transition-[padding] bg-background duration-200 group-focus-within/sidebar-search-input:pl-3"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-      )}
+      </div>
 
       <div
         ref={parentRef}
