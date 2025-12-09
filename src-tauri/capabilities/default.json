@@ -40,6 +40,7 @@
     "log:default",
     "notification:default",
     "process:default",
-    "deep-link:default"
+    "deep-link:default",
+    "os:default"
   ]
 }
