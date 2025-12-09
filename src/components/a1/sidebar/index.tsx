@@ -25,6 +25,7 @@ import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
+import { ChatModelConfig } from "../chat-model-config";
 import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 
@@ -57,10 +58,13 @@ const SidebarContent = ({
       </div>
 
       <div className="border-sidebar-border flex flex-col items-center justify-center gap-2 pt-2">
-        <ModelSelector
-          className="w-full"
-          popoverClassName="w-[var(--radix-popover-trigger-width)] max-w-60"
-        />
+        <div className="flex flex-row gap-2">
+          <ModelSelector
+            className="w-full max-w-49"
+            popoverClassName="w-[var(--radix-popover-trigger-width)] max-w-60"
+          />
+          <ChatModelConfig />
+        </div>
         <Button variant="outline" className="w-full justify-start" asChild>
           <Link
             to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
