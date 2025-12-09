@@ -325,7 +325,7 @@ export const MainChatInput = ({
     [loadChat, chatIds, addFiles],
   );
 
-  // Note: In src-tauri/tauri.conf.json, set app.windows[0].dragDropEnabled to false to allow the native processing of events
+  // Note: In src-tauri/tauri.conf.json, I set app.windows[0].dragDropEnabled to false to allow processing events in the JS here.
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
