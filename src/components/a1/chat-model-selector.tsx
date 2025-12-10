@@ -104,7 +104,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-label={`Model: ${currentModel.name}`}
         >
           <div className="min-w-0 flex-1">
-            <div className="scrollbar-size-xs w-full overflow-x-auto">
+            <div
+              className="scrollbar-size-xs w-full overflow-x-auto"
+              tabIndex={0}
+            >
               <div className="w-full text-left whitespace-nowrap">
                 <span className="text-muted-foreground text-xs">
                   {currentModel.provider}/
@@ -156,7 +159,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                           {currentModel.id === model.id && (
                             <CheckIcon className="size-4 shrink-0" />
                           )}
-                          <div className="scrollbar-size-xs w-full overflow-x-auto">
+                          <div
+                            className="scrollbar-size-xs w-full overflow-x-auto"
+                            tabIndex={0}
+                          >
                             <div className="whitespace-nowrap">
                               <span className="text-muted-foreground text-xs">
                                 {model.provider}/
