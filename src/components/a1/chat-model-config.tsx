@@ -11,7 +11,7 @@ export const ChatModelConfig = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" aria-label="Model configuration">
           <Settings2Icon className="size-4" />
         </Button>
       </PopoverTrigger>
