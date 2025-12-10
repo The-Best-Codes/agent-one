@@ -159,10 +159,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                           {currentModel.id === model.id && (
                             <CheckIcon className="size-4 shrink-0" />
                           )}
-                          <div
-                            className="scrollbar-size-xs w-full overflow-x-auto"
-                            tabIndex={0}
-                          >
+                          <div className="scrollbar-size-xs w-full overflow-x-auto">
                             <div className="whitespace-nowrap">
                               <span className="text-muted-foreground text-xs">
                                 {model.provider}/
