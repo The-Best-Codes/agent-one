@@ -9,6 +9,7 @@ Assume that these bash commands are allowed and no others unless specified:
 - Format project (Prettier & cargo fmt): `npm run format`
 - Run Rust check: `cd src-tauri && cargo check`
 - Run Rust clippy: `cd src-tauri && cargo clippy`
+- Install dependencies: `npm install *` or `cargo add *`
 
 ## Tailwind Guidelines
 
@@ -22,3 +23,8 @@ Assume that these bash commands are allowed and no others unless specified:
 
 - As an AI, you should only add comments to the code when absolutely necessary, which is VERY rare. You should confirm before removing TODOs, TODO comments, or other important comments. The developer's job is to touch up your code, including writing comments, not your job.
 - Follow the app [PHILOSOPHY.md](PHILOSOPHY.md).
+
+## Installing Dependencies
+
+- Don't manually edit the `package.json` file. Instead, use `npm install` to install dependencies.
+- Don't manually edit the `Cargo.toml` file. Instead, use `cargo add` to install dependencies.
