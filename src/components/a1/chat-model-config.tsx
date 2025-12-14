@@ -15,7 +15,9 @@ export const ChatModelConfig = () => {
           <Settings2Icon className="size-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">Stuff will go here.</PopoverContent>
+      <PopoverContent className="w-80">
+        Max tokens, temperature, and other settings will go here.
+      </PopoverContent>
     </Popover>
   );
 };
