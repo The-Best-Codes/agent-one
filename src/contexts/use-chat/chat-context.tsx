@@ -15,7 +15,7 @@ import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import { getModelById, type ModelConfig } from "@/lib/ai/models";
+import { getModelById, type ModelData } from "@/lib/ai/models";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -65,7 +65,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const getModelForChat = useCallback(
-    (chatId: string | undefined): ModelConfig => {
+    (chatId: string | undefined): ModelData => {
       if (chatId) {
         const chatData = loadChatData(chatId);
         if (chatData.modelId) {

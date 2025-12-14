@@ -4,13 +4,13 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import {
   getDefaultChatModel,
   getModelById,
-  type ModelConfig,
+  type ModelData,
 } from "@/lib/ai/models";
 
 import { ModelContext } from "./model-contexts";
 
 export interface ModelContextType {
-  currentModel: ModelConfig;
+  currentModel: ModelData;
   setModel: (modelId: string) => void;
 }
 
@@ -21,7 +21,7 @@ interface ModelProviderProps {
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   const { getNewChatModelId, saveNewChatModelId } = usePersistence();
 
-  const [currentModel, setCurrentModel] = useState<ModelConfig>(() => {
+  const [currentModel, setCurrentModel] = useState<ModelData>(() => {
     const savedModelId = getNewChatModelId();
     if (savedModelId) {
       const savedModel = getModelById(savedModelId);
