@@ -9,6 +9,7 @@ import { memo, useEffect, useMemo } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
+import { type ModelConfig } from "@/lib/ai/models";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
@@ -23,11 +24,13 @@ export const ChatInstance = memo(
   ({
     chatId,
     model,
+    modelConfig,
     onInstanceUpdate,
     onStatusChange,
   }: {
     chatId: string;
     model: LanguageModel;
+    modelConfig: ModelConfig;
     onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
     onStatusChange: (
       id: string,
@@ -50,7 +53,7 @@ export const ChatInstance = memo(
     const chatIds = useAtomValue(chatIdsAtom);
     const initialMessages = useMemo(() => loadChat(chatId), [chatId, loadChat]);
 
-    const chat = useChat(model, {
+    const chat = useChat(model, modelConfig, {
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
@@ -112,6 +115,19 @@ export const ChatInstance = memo(
     });
 
     return null;
+  },
+  (prevProps, nextProps) => {
+    // TODO: This may be inefficient with future architecture changes, keep an eye on it
+    // Custom comparison to prevent re-renders when modelConfig object reference changes
+    // but the content is the same (which happens because of JSON.parse in persistence).
+    return (
+      prevProps.chatId === nextProps.chatId &&
+      prevProps.model === nextProps.model &&
+      prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
+      prevProps.onStatusChange === nextProps.onStatusChange &&
+      JSON.stringify(prevProps.modelConfig) ===
+        JSON.stringify(nextProps.modelConfig)
+    );
   },
 );
 ChatInstance.displayName = "ChatInstance";

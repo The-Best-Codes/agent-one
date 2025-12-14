@@ -23,3 +23,4 @@
 - Add a note in the AI Instructions settings that updates to the system prompt may not be reflected until your next message.
 - Potential bug: If app is "Starting MCP Servers..." when a message is sent, then sends the message when they are ready, MCP servers that were just added seem to be missing from the list of tools the AI gets.
 - Make key storage secure lol (in the system keychain perhaps, in the Rust side of the code maybe?)
+- Use a drawer for the model selector and model config popup on narrow screens

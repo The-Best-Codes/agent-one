@@ -10,23 +10,27 @@ import {
   type UIMessageChunk,
 } from "ai";
 
+import { type ModelConfig } from "@/lib/ai/models";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel;
+  private modelConfig: ModelConfig;
   private smoothStreamEnabled: boolean;
   private getTools: () => Promise<ToolSet>;
   private getSystemPrompt: () => string;
 
   constructor(
     model: LanguageModel,
+    modelConfig: ModelConfig,
     smoothStreamEnabled: boolean,
     getTools: () => Promise<ToolSet>,
     getSystemPrompt: () => string,
   ) {
     this.model = model;
+    this.modelConfig = modelConfig;
     this.smoothStreamEnabled = smoothStreamEnabled;
     this.getTools = getTools;
     this.getSystemPrompt = getSystemPrompt;
@@ -35,6 +39,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   updateModel(model: LanguageModel) {
     this.model = model;
     logger.verbose("CustomChatTransport model updated to:", model);
+  }
+
+  updateModelConfig(config: ModelConfig) {
+    this.modelConfig = config;
+    logger.verbose("CustomChatTransport config updated");
   }
 
   updateSmoothStreamEnabled(smoothStreamEnabled: boolean) {
@@ -64,6 +73,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     const result = streamText({
       model: this.model,
+      temperature: this.modelConfig.temperature,
+      maxOutputTokens: this.modelConfig.maxTokens,
+      topP: this.modelConfig.topP,
+      frequencyPenalty: this.modelConfig.frequencyPenalty,
+      presencePenalty: this.modelConfig.presencePenalty,
       messages: convertToModelMessages(options.messages),
       abortSignal: options.abortSignal,
       tools,

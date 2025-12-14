@@ -5,13 +5,16 @@ import {
   getDefaultChatModel,
   getModelById,
   type ModelConfig,
+  type ModelData,
 } from "@/lib/ai/models";
 
 import { ModelContext } from "./model-contexts";
 
 export interface ModelContextType {
-  currentModel: ModelConfig;
+  currentModel: ModelData;
   setModel: (modelId: string) => void;
+  currentModelConfig: ModelConfig;
+  setModelConfig: (config: ModelConfig) => void;
 }
 
 interface ModelProviderProps {
@@ -19,9 +22,14 @@ interface ModelProviderProps {
 }
 
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
-  const { getNewChatModelId, saveNewChatModelId } = usePersistence();
+  const {
+    getNewChatModelId,
+    saveNewChatModelId,
+    getNewChatModelConfig,
+    saveNewChatModelConfig,
+  } = usePersistence();
 
-  const [currentModel, setCurrentModel] = useState<ModelConfig>(() => {
+  const [currentModel, setCurrentModel] = useState<ModelData>(() => {
     const savedModelId = getNewChatModelId();
     if (savedModelId) {
       const savedModel = getModelById(savedModelId);
@@ -31,6 +39,12 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     }
     return getDefaultChatModel();
   });
+
+  const [currentModelConfig, setCurrentModelConfig] = useState<ModelConfig>(
+    () => {
+      return getNewChatModelConfig();
+    },
+  );
 
   const setModel = useCallback(
     (modelId: string) => {
@@ -43,8 +57,18 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     [saveNewChatModelId],
   );
 
+  const setModelConfig = useCallback(
+    (config: ModelConfig) => {
+      setCurrentModelConfig(config);
+      saveNewChatModelConfig(config);
+    },
+    [saveNewChatModelConfig],
+  );
+
   return (
-    <ModelContext.Provider value={{ currentModel, setModel }}>
+    <ModelContext.Provider
+      value={{ currentModel, setModel, currentModelConfig, setModelConfig }}
+    >
       {children}
     </ModelContext.Provider>
   );

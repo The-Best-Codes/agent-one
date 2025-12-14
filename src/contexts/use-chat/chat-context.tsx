@@ -15,7 +15,11 @@ import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import { getModelById, type ModelConfig } from "@/lib/ai/models";
+import {
+  getModelById,
+  type ModelConfig,
+  type ModelData,
+} from "@/lib/ai/models";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -36,8 +40,11 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const {
     currentModel: defaultModelForNewChats,
     setModel: setDefaultModelForNewChats,
+    currentModelConfig: defaultModelConfigForNewChats,
+    setModelConfig: setDefaultModelConfigForNewChats,
   } = useModel();
-  const { createChat, loadChatData, saveChatModel } = usePersistence();
+  const { createChat, loadChatData, saveChatModel, saveChatModelConfig } =
+    usePersistence();
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams<{ id: string }>();
@@ -65,7 +72,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const getModelForChat = useCallback(
-    (chatId: string | undefined): ModelConfig => {
+    (chatId: string | undefined): ModelData => {
       if (chatId) {
         const chatData = loadChatData(chatId);
         if (chatData.modelId) {
@@ -81,9 +88,31 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [defaultModelForNewChats, updateKey],
   );
 
+  const getConfigForChat = useCallback(
+    (chatId: string | undefined): ModelConfig => {
+      if (chatId) {
+        const chatData = loadChatData(chatId);
+        if (chatData.modelConfig) {
+          return chatData.modelConfig;
+        }
+      }
+      return defaultModelConfigForNewChats;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [defaultModelConfigForNewChats, updateKey],
+  );
+
   const focusedModel = useMemo(
     () => getModelForChat(currentChatId),
     [currentChatId, getModelForChat],
+  );
+
+  const rawFocusedModelConfig = getConfigForChat(currentChatId);
+  // Stabilize the config object to prevent context updates when content hasn't changed
+  const focusedModelConfig = useMemo(
+    () => rawFocusedModelConfig,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(rawFocusedModelConfig)],
   );
 
   const setModelForContext = useCallback(
@@ -98,12 +127,36 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [currentChatId, setDefaultModelForNewChats, forceUpdate, saveChatModel],
   );
 
+  const setModelConfigForContext = useCallback(
+    (config: ModelConfig) => {
+      if (currentChatId) {
+        saveChatModelConfig({ chatId: currentChatId, modelConfig: config });
+        forceUpdate();
+      } else {
+        setDefaultModelConfigForNewChats(config);
+      }
+    },
+    [
+      currentChatId,
+      setDefaultModelConfigForNewChats,
+      forceUpdate,
+      saveChatModelConfig,
+    ],
+  );
+
   const modelContextValue = useMemo(
     () => ({
       currentModel: focusedModel,
       setModel: setModelForContext,
+      currentModelConfig: focusedModelConfig,
+      setModelConfig: setModelConfigForContext,
     }),
-    [focusedModel, setModelForContext],
+    [
+      focusedModel,
+      setModelForContext,
+      focusedModelConfig,
+      setModelConfigForContext,
+    ],
   );
 
   const handleInstanceUpdate = useCallback(
@@ -152,14 +205,17 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [currentChatId, lastStatusChange]);
 
-  const defaultChat = useChat(defaultModelForNewChats.model);
+  const defaultChat = useChat(
+    defaultModelForNewChats.model,
+    defaultModelConfigForNewChats,
+  );
 
   const handleNewChatSubmit = useCallback(
     (
       message: Parameters<typeof defaultChat.sendMessage>[0],
       options?: Parameters<typeof defaultChat.sendMessage>[1],
     ) => {
-      const newChatId = createChat(focusedModel.id);
+      const newChatId = createChat(focusedModel.id, focusedModelConfig);
       navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
@@ -167,7 +223,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return Promise.resolve();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigate, defaultChat.sendMessage, focusedModel.id],
+    [navigate, defaultChat.sendMessage, focusedModel.id, focusedModelConfig],
   );
 
   const isNewChat = !currentChatId;
@@ -314,11 +370,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     <ModelContext.Provider value={modelContextValue}>
       {Array.from(activeChatIds).map((id) => {
         const chatModel = getModelForChat(id);
+        const chatConfig = getConfigForChat(id);
         return (
           <ChatInstance
             key={id}
             chatId={id}
             model={chatModel.model}
+            modelConfig={chatConfig}
             onInstanceUpdate={handleInstanceUpdate}
             onStatusChange={handleStatusChange}
           />
