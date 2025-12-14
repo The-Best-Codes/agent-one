@@ -223,13 +223,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return Promise.resolve();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      navigate,
-      defaultChat.sendMessage,
-      focusedModel.id,
-      focusedModelConfig,
-      createChat,
-    ],
+    [navigate, defaultChat.sendMessage, focusedModel.id, focusedModelConfig],
   );
 
   const isNewChat = !currentChatId;
