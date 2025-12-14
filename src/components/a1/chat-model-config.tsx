@@ -18,6 +18,7 @@ import {
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { DEFAULT_MODEL_CONFIG } from "@/lib/ai/models";
 
+// TODO: Support topP, topK, frequencyPenalty, etc. that AI SDK supports
 export const ChatModelConfig = () => {
   const { currentModelConfig, setModelConfig } = useModel();
 
