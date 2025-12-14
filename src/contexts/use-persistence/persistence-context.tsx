@@ -3,6 +3,7 @@ import { generateId } from "ai";
 import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback } from "react";
 
+import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/lib/ai/models";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 
@@ -15,17 +16,24 @@ export interface ChatData {
   title: string;
   titleState?: "generating" | "generated" | "error";
   modelId?: string;
+  modelConfig?: ModelConfig;
   branchOf?: string;
 }
 
 export interface PersistenceContextType {
   getNewChatModelId: () => string | null;
   saveNewChatModelId: (modelId: string) => void;
-  createChat: (modelId: string) => string;
+  getNewChatModelConfig: () => ModelConfig;
+  saveNewChatModelConfig: (config: ModelConfig) => void;
+  createChat: (modelId: string, modelConfig?: ModelConfig) => string;
   loadChat: (id: string) => UIMessage[];
   loadChatData: (id: string) => ChatData;
   saveChat: (params: { chatId: string; messages: UIMessage[] }) => void;
   saveChatModel: (params: { chatId: string; modelId: string }) => void;
+  saveChatModelConfig: (params: {
+    chatId: string;
+    modelConfig: ModelConfig;
+  }) => void;
   saveChatTitleState: (params: {
     chatId: string;
     titleState: "generating" | "generated" | "error";
@@ -40,6 +48,7 @@ export interface PersistenceContextType {
 }
 
 const NEW_CHAT_MODEL_ID_KEY = "new-chat-model-id";
+const NEW_CHAT_MODEL_CONFIG_KEY = "new-chat-model-config";
 
 function getChatKey(id: string): string {
   return `chat-${id}`;
@@ -71,8 +80,35 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
+  const getNewChatModelConfig = useCallback((): ModelConfig => {
+    try {
+      const saved = localStorage.getItem(NEW_CHAT_MODEL_CONFIG_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      return DEFAULT_MODEL_CONFIG;
+    } catch (error) {
+      logger.error(
+        "Failed to get new chat model config from localStorage",
+        error,
+      );
+      return DEFAULT_MODEL_CONFIG;
+    }
+  }, []);
+
+  const saveNewChatModelConfig = useCallback((config: ModelConfig) => {
+    try {
+      localStorage.setItem(NEW_CHAT_MODEL_CONFIG_KEY, JSON.stringify(config));
+    } catch (error) {
+      logger.error(
+        "Failed to save new chat model config to localStorage",
+        error,
+      );
+    }
+  }, []);
+
   const createChat = useCallback(
-    (modelId: string) => {
+    (modelId: string, modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG) => {
       const id = generateId();
       try {
         const chatKey = getChatKey(id);
@@ -81,6 +117,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
           title: "New chat",
           titleState: undefined,
           modelId,
+          modelConfig,
         };
         localStorage.setItem(chatKey, JSON.stringify(chatData));
         setChatIds((currentChatIds) => [id, ...currentChatIds]);
@@ -150,6 +187,27 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       } catch (error) {
         logger.error(
           `Failed to save chat model ${chatId} to localStorage`,
+          error,
+        );
+      }
+    },
+    [loadChatData],
+  );
+
+  const saveChatModelConfig = useCallback(
+    ({ chatId, modelConfig }: { chatId: string; modelConfig: ModelConfig }) => {
+      try {
+        const chatKey = getChatKey(chatId);
+        const existingData = loadChatData(chatId);
+        const chatData: ChatData = {
+          ...existingData,
+          modelConfig,
+        };
+        const content = JSON.stringify(chatData);
+        localStorage.setItem(chatKey, content);
+      } catch (error) {
+        logger.error(
+          `Failed to save chat model config ${chatId} to localStorage`,
           error,
         );
       }
@@ -263,6 +321,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
           title: originalChatData.title,
           titleState: "generated",
           modelId: originalChatData.modelId,
+          modelConfig: originalChatData.modelConfig || DEFAULT_MODEL_CONFIG,
           branchOf: originalChatId,
         };
 
@@ -285,11 +344,14 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const contextValue: PersistenceContextType = {
     getNewChatModelId,
     saveNewChatModelId,
+    getNewChatModelConfig,
+    saveNewChatModelConfig,
     createChat,
     loadChat,
     loadChatData,
     saveChat,
     saveChatModel,
+    saveChatModelConfig,
     saveChatTitleState,
     saveChatTitle,
     deleteChat,

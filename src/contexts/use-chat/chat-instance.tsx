@@ -9,6 +9,7 @@ import { memo, useEffect, useMemo } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
+import { type ModelConfig } from "@/lib/ai/models";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
@@ -23,11 +24,13 @@ export const ChatInstance = memo(
   ({
     chatId,
     model,
+    modelConfig,
     onInstanceUpdate,
     onStatusChange,
   }: {
     chatId: string;
     model: LanguageModel;
+    modelConfig: ModelConfig;
     onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
     onStatusChange: (
       id: string,
@@ -50,11 +53,11 @@ export const ChatInstance = memo(
     const chatIds = useAtomValue(chatIdsAtom);
     const initialMessages = useMemo(() => loadChat(chatId), [chatId, loadChat]);
 
-    const chat = useChat(model, {
+    const chat = useChat(model, modelConfig, {
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
+      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
       id: chatId,
       messages: initialMessages,
     });
@@ -75,7 +78,6 @@ export const ChatInstance = memo(
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
-          // TODO: We need to make this state in-memory if we migrate to an async DB, otherwise rerenders, new messages, etc. will trigger title generation again
           saveChatTitleState({ chatId, titleState: "generating" });
           generateChatTitle(model, chat.messages)
             .then((generatedTitle) => {
@@ -109,9 +111,21 @@ export const ChatInstance = memo(
 
     useEffect(() => {
       onInstanceUpdate(chatId, chat);
-    });
+    }, [chatId, chat, onInstanceUpdate]);
 
     return null;
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison to prevent re-renders when modelConfig object reference changes
+    // but the content is the same (which happens because of JSON.parse in persistence).
+    return (
+      prevProps.chatId === nextProps.chatId &&
+      prevProps.model === nextProps.model &&
+      prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
+      prevProps.onStatusChange === nextProps.onStatusChange &&
+      JSON.stringify(prevProps.modelConfig) ===
+        JSON.stringify(nextProps.modelConfig)
+    );
   },
 );
 ChatInstance.displayName = "ChatInstance";
