@@ -57,7 +57,7 @@ export const ChatInstance = memo(
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
       id: chatId,
       messages: initialMessages,
     });
@@ -78,6 +78,7 @@ export const ChatInstance = memo(
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
+          // TODO: We need to make this state in-memory if we migrate to an async DB, otherwise rerenders, new messages, etc. will trigger title generation again
           saveChatTitleState({ chatId, titleState: "generating" });
           generateChatTitle(model, chat.messages)
             .then((generatedTitle) => {
@@ -111,11 +112,12 @@ export const ChatInstance = memo(
 
     useEffect(() => {
       onInstanceUpdate(chatId, chat);
-    }, [chatId, chat, onInstanceUpdate]);
+    });
 
     return null;
   },
   (prevProps, nextProps) => {
+    // TODO: This may be inefficient with future architecture changes, keep an eye on it
     // Custom comparison to prevent re-renders when modelConfig object reference changes
     // but the content is the same (which happens because of JSON.parse in persistence).
     return (
