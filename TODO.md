@@ -24,3 +24,4 @@
 - Potential bug: If app is "Starting MCP Servers..." when a message is sent, then sends the message when they are ready, MCP servers that were just added seem to be missing from the list of tools the AI gets.
 - Make key storage secure lol (in the system keychain perhaps, in the Rust side of the code maybe?)
 - Use a drawer for the model selector and model config popup on narrow screens
+- Fix lag when changing model config in chats (check rerenders, prevent reading from localStorage so many times at once, etc.)
