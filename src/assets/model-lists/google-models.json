@@ -190,44 +190,6 @@
       "maxTemperature": 2
     },
     {
-      "name": "models/gemini-2.0-pro-exp",
-      "version": "2.5-exp-03-25",
-      "displayName": "Gemini 2.0 Pro Experimental",
-      "description": "Experimental release (March 25th, 2025) of Gemini 2.5 Pro",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
-      "name": "models/gemini-2.0-pro-exp-02-05",
-      "version": "2.5-exp-03-25",
-      "displayName": "Gemini 2.0 Pro Experimental 02-05",
-      "description": "Experimental release (March 25th, 2025) of Gemini 2.5 Pro",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 65536,
-      "supportedGenerationMethods": [
-        "generateContent",
-        "countTokens",
-        "createCachedContent",
-        "batchGenerateContent"
-      ],
-      "temperature": 1,
-      "topP": 0.95,
-      "topK": 64,
-      "maxTemperature": 2,
-      "thinking": true
-    },
-    {
       "name": "models/gemini-exp-1206",
       "version": "2.5-exp-03-25",
       "displayName": "Gemini Experimental 1206",
@@ -570,6 +532,20 @@
       "thinking": true
     },
     {
+      "name": "models/deep-research-pro-preview-12-2025",
+      "version": "deepthink-exp-05-20",
+      "displayName": "Deep Research Pro Preview (Dec-12-2025)",
+      "description": "Preview release (December 12th, 2025) of Deep Research Pro",
+      "inputTokenLimit": 131072,
+      "outputTokenLimit": 65536,
+      "supportedGenerationMethods": ["generateContent", "countTokens"],
+      "temperature": 1,
+      "topP": 0.95,
+      "topK": 64,
+      "maxTemperature": 2,
+      "thinking": true
+    },
+    {
       "name": "models/embedding-001",
       "version": "001",
       "displayName": "Embedding 001",
@@ -719,7 +695,16 @@
       "inputTokenLimit": 480,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["predictLongRunning"]
+    },
+    {
+      "name": "models/veo-3.1-fast-generate-preview",
+      "version": "3.1",
+      "displayName": "Veo 3.1 fast",
+      "description": "Veo 3.1 fast",
+      "inputTokenLimit": 480,
+      "outputTokenLimit": 8192,
+      "supportedGenerationMethods": ["predictLongRunning"]
     }
   ],
-  "nextPageToken": "Ch9tb2RlbHMvdmVvLTMuMS1nZW5lcmF0ZS1wcmV2aWV3"
+  "nextPageToken": "CiRtb2RlbHMvdmVvLTMuMS1mYXN0LWdlbmVyYXRlLXByZXZpZXc="
 }
