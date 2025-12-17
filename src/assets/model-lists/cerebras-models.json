@@ -8,13 +8,13 @@
       "owned_by": "Cerebras"
     },
     {
-      "id": "llama3.1-8b",
+      "id": "qwen-3-32b",
       "object": "model",
       "created": 0,
       "owned_by": "Cerebras"
     },
     {
-      "id": "zai-glm-4.6",
+      "id": "llama3.1-8b",
       "object": "model",
       "created": 0,
       "owned_by": "Cerebras"
@@ -26,13 +26,13 @@
       "owned_by": "Cerebras"
     },
     {
-      "id": "gpt-oss-120b",
+      "id": "zai-glm-4.6",
       "object": "model",
       "created": 0,
       "owned_by": "Cerebras"
     },
     {
-      "id": "qwen-3-32b",
+      "id": "gpt-oss-120b",
       "object": "model",
       "created": 0,
       "owned_by": "Cerebras"
