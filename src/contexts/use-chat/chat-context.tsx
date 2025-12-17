@@ -1,5 +1,6 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useAtom } from "jotai";
 import {
   type ReactNode,
@@ -20,7 +21,7 @@ import {
   type ModelConfig,
   type ModelData,
 } from "@/lib/ai/models";
-import { chatIdsAtom } from "@/lib/jotai/atoms";
+import { type ChatRecord, db } from "@/lib/db";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
@@ -43,14 +44,15 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     currentModelConfig: defaultModelConfigForNewChats,
     setModelConfig: setDefaultModelConfigForNewChats,
   } = useModel();
-  const { createChat, loadChatData, saveChatModel, saveChatModelConfig } =
-    usePersistence();
+  const { createChat, saveChatModel, saveChatModelConfig } = usePersistence();
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams<{ id: string }>();
-  const [updateKey, setUpdateKey] = useState(0);
-  const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
-  const [chatIds] = useAtom(chatIdsAtom);
+
+  // FIX: Real forceUpdate to trigger re-render when instances register
+  const [, setTick] = useState(0);
+  const forceUpdate = useCallback(() => setTick((t) => t + 1), []);
+
   const [notificationSetting] = useAtom(notificationSettingAtom);
 
   const currentChatId = useMemo(() => {
@@ -72,43 +74,48 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const getModelForChat = useCallback(
-    (chatId: string | undefined): ModelData => {
-      if (chatId) {
-        const chatData = loadChatData(chatId);
-        if (chatData.modelId) {
-          const chatModel = getModelById(chatData.modelId);
-          if (chatModel) {
-            return chatModel;
-          }
+    (chatRecord: ChatRecord | undefined): ModelData => {
+      if (chatRecord?.modelId) {
+        const chatModel = getModelById(chatRecord.modelId);
+        if (chatModel) {
+          return chatModel;
         }
       }
       return defaultModelForNewChats;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [defaultModelForNewChats, updateKey],
+    [defaultModelForNewChats],
   );
 
   const getConfigForChat = useCallback(
-    (chatId: string | undefined): ModelConfig => {
-      if (chatId) {
-        const chatData = loadChatData(chatId);
-        if (chatData.modelConfig) {
-          return chatData.modelConfig;
-        }
+    (chatRecord: ChatRecord | undefined): ModelConfig => {
+      if (chatRecord?.modelConfig) {
+        return chatRecord.modelConfig;
       }
       return defaultModelConfigForNewChats;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [defaultModelConfigForNewChats, updateKey],
+    [defaultModelConfigForNewChats],
   );
+
+  // Get current chat record from DB
+  const currentChatRecord = useLiveQuery(
+    () => (currentChatId ? db.chats.get(currentChatId) : undefined),
+    [currentChatId],
+  );
+
+  // Get all active chat records
+  const activeChatRecords =
+    useLiveQuery(
+      () => db.chats.where("id").anyOf(Array.from(activeChatIds)).toArray(),
+      [activeChatIds],
+    ) || [];
 
   const focusedModel = useMemo(
-    () => getModelForChat(currentChatId),
-    [currentChatId, getModelForChat],
+    () => getModelForChat(currentChatRecord),
+    [currentChatRecord, getModelForChat],
   );
 
-  const rawFocusedModelConfig = getConfigForChat(currentChatId);
-  // Stabilize the config object to prevent context updates when content hasn't changed
+  const rawFocusedModelConfig = getConfigForChat(currentChatRecord);
+  // Stabilize config object to prevent context updates when content hasn't changed
   const focusedModelConfig = useMemo(
     () => rawFocusedModelConfig,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -211,16 +218,18 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleNewChatSubmit = useCallback(
-    (
+    async (
       message: Parameters<typeof defaultChat.sendMessage>[0],
       options?: Parameters<typeof defaultChat.sendMessage>[1],
     ) => {
-      const newChatId = createChat(focusedModel.id, focusedModelConfig);
+      // 1. Create in DB and AWAIT it
+      const newChatId = await createChat(focusedModel.id, focusedModelConfig);
+
+      // 2. Navigate
       navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
       });
-      return Promise.resolve();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [navigate, defaultChat.sendMessage, focusedModel.id, focusedModelConfig],
@@ -333,7 +342,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [statusValue.status, messages, setMessages, notificationSetting]);
 
   useEffect(() => {
-    if (currentChatId && !chatIds.includes(currentChatId)) {
+    if (currentChatId && !currentChatRecord) {
       const instance = chatInstancesRef.current.get(currentChatId);
       if (instance) {
         const { status, stop } = instance;
@@ -343,7 +352,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     }
-  }, [currentChatId, chatIds]);
+  }, [currentChatId, currentChatRecord]);
 
   const functionsValue = useMemo(
     () => ({
@@ -368,13 +377,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ModelContext.Provider value={modelContextValue}>
-      {Array.from(activeChatIds).map((id) => {
-        const chatModel = getModelForChat(id);
-        const chatConfig = getConfigForChat(id);
+      {activeChatRecords.map((chatRecord) => {
+        const chatModel = getModelForChat(chatRecord);
+        const chatConfig = getConfigForChat(chatRecord);
         return (
           <ChatInstance
-            key={id}
-            chatId={id}
+            key={chatRecord.id}
+            chatId={chatRecord.id}
             model={chatModel.model}
             modelConfig={chatConfig}
             onInstanceUpdate={handleInstanceUpdate}

@@ -1,20 +1,18 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useLiveQuery } from "dexie-react-hooks";
 import { useAtom } from "jotai";
 import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
+import { db } from "@/lib/db";
+import { chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
-import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
 import { ChatItem } from "./chat-item";
-
-const logger = getLogger(import.meta.url);
 
 interface ChatListItem {
   id: string;
@@ -48,43 +46,31 @@ export const VirtualizedChatList = ({
   const [isOverflowing, setIsOverflowing] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [chatIds] = useAtom(chatIdsAtom);
-
   useHotkeys(kbdRegistry.focusChatSearch, () => {
     searchInputRef.current?.focus();
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
-  const { loadChatData } = usePersistence();
 
-  const loadChats = useCallback(() => {
-    try {
-      const loadedChats = chatIds.map((id: string) => {
-        try {
-          const chatData = loadChatData(id);
-          return {
-            id,
-            title: getChatTitle(chatData?.title || `Chat ${id.slice(0, 8)}`),
-            branchOf: chatData?.branchOf,
-          };
-        } catch (error) {
-          logger.error(`Error loading chat ${id}:`, error);
-          return {
-            id,
-            title: `Chat ${id.slice(0, 8)}`,
-            branchOf: undefined,
-          };
-        }
-      });
+  // Dexie hook automatically updates component when DB changes
+  const dbChats =
+    useLiveQuery(
+      () => db.chats.orderBy("updatedAt").reverse().toArray(),
+      [chatUpdateTrigger],
+    ) || [];
 
-      setChats(loadedChats);
-    } catch (error) {
-      logger.error("Error loading chats:", error);
-    }
-  }, [chatIds, loadChatData]);
+  const loadedChats = useMemo(
+    () =>
+      dbChats.map((chat) => ({
+        id: chat.id,
+        title: getChatTitle(chat.title || `Chat ${chat.id.slice(0, 8)}`),
+        branchOf: chat.branchOf,
+      })),
+    [dbChats],
+  );
 
   useEffect(() => {
-    loadChats();
-  }, [loadChats, chatIds, chatUpdateTrigger]);
+    setChats(loadedChats);
+  }, [loadedChats]);
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;

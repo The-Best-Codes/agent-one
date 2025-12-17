@@ -4,15 +4,9 @@ import { atomWithStorage } from "jotai/utils";
 
 import {
   lsBooleanOrUndefined,
-  lsJSONOrUndefined,
   lsStringOrUndefined,
 } from "./load-from-localstorage";
 import { systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
-
-export const chatIdsAtom = atomWithStorage(
-  "chat-ids",
-  lsJSONOrUndefined<string[]>("chat-ids") ?? [],
-);
 
 export const chatUpdateTriggerAtom = atom(0);
 

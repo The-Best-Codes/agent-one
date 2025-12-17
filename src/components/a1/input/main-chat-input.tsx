@@ -27,7 +27,6 @@ import {
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { useTheme } from "@/hooks/use-theme";
-import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   markdownHighlightingAtom,
   stopButtonBehaviorAtom,
@@ -83,8 +82,7 @@ export const MainChatInput = ({
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
   const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
-  const { loadChat } = usePersistence();
-  const chatIds = useAtomValue(chatIdsAtom);
+  const { getChat } = usePersistence();
   const isMobile = useMobileDetection({
     anyHover: true,
     pointerCoarse: true,
@@ -280,13 +278,14 @@ export const MainChatInput = ({
   }, []);
 
   const handleChatDrop = useCallback(
-    (chatId: string, title: string) => {
-      if (!chatIds.includes(chatId)) {
+    async (chatId: string, title: string) => {
+      const chatRecord = await getChat(chatId);
+      if (!chatRecord) {
         logger.error("Dropped chat does not exist", { chatId });
         return;
       }
 
-      const messages = loadChat(chatId);
+      const messages = chatRecord.messages;
       if (!messages || messages.length === 0) {
         logger.error("Dropped chat has no messages", { chatId });
         return;
@@ -295,7 +294,7 @@ export const MainChatInput = ({
       const chatData = {
         id: chatId,
         title,
-        info: "This chat was attached as a file by the user",
+        info: "This chat was attached as a file by user",
         messages,
         exportedAt: new Date().toISOString(),
       };
@@ -322,7 +321,7 @@ export const MainChatInput = ({
       });
       addFiles(fileList);
     },
-    [loadChat, chatIds, addFiles],
+    [getChat, addFiles],
   );
 
   // Note: In src-tauri/tauri.conf.json, I set app.windows[0].dragDropEnabled to false to allow processing events in the JS here.

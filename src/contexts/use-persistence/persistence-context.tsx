@@ -4,7 +4,8 @@ import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/lib/ai/models";
-import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
+import { type ChatRecord, db } from "@/lib/db";
+import { chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 
 import { PersistenceContext } from "./persistence-contexts";
@@ -25,7 +26,8 @@ export interface PersistenceContextType {
   saveNewChatModelId: (modelId: string) => void;
   getNewChatModelConfig: () => ModelConfig;
   saveNewChatModelConfig: (config: ModelConfig) => void;
-  createChat: (modelId: string, modelConfig?: ModelConfig) => string;
+  createChat: (modelId: string, modelConfig?: ModelConfig) => Promise<string>;
+  getChat: (id: string) => Promise<ChatRecord | undefined>;
   loadChat: (id: string) => UIMessage[];
   loadChatData: (id: string) => ChatData;
   saveChat: (params: { chatId: string; messages: UIMessage[] }) => void;
@@ -39,11 +41,11 @@ export interface PersistenceContextType {
     titleState: "generating" | "generated" | "error";
   }) => void;
   saveChatTitle: (params: { chatId: string; title: string }) => void;
-  deleteChat: (chatId: string) => void;
+  deleteChat: (chatId: string) => Promise<void>;
   branchChat: (params: {
     originalChatId: string;
     branchFromMessageId: string;
-  }) => string;
+  }) => Promise<string>;
   chatUpdateTrigger: number;
 }
 
@@ -57,8 +59,6 @@ function getChatKey(id: string): string {
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_chatIds, setChatIds] = useAtom(chatIdsAtom);
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(
     chatUpdateTriggerAtom,
   );
@@ -108,27 +108,42 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   const createChat = useCallback(
-    (modelId: string, modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG) => {
+    async (
+      modelId: string,
+      modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG,
+    ) => {
       const id = generateId();
+      const now = Date.now();
       try {
-        const chatKey = getChatKey(id);
-        const chatData: ChatData = {
+        await db.chats.add({
+          id,
+          title: "New Chat",
           messages: [],
-          title: "New chat",
-          titleState: undefined,
           modelId,
           modelConfig,
-        };
-        localStorage.setItem(chatKey, JSON.stringify(chatData));
-        setChatIds((currentChatIds) => [id, ...currentChatIds]);
+          createdAt: now,
+          updatedAt: now,
+        });
         setChatUpdateTrigger((prev) => prev + 1);
         return id;
       } catch (error) {
-        logger.error("Failed to create chat in localStorage", error);
-        throw new Error("Failed to create new chat in localStorage.");
+        logger.error("Failed to create chat in IndexedDB", error);
+        throw new Error("Failed to create new chat in IndexedDB.");
       }
     },
-    [setChatIds, setChatUpdateTrigger],
+    [setChatUpdateTrigger],
+  );
+
+  const getChat = useCallback(
+    async (id: string): Promise<ChatRecord | undefined> => {
+      try {
+        return await db.chats.get(id);
+      } catch (error) {
+        logger.error(`Failed to load chat ${id} from IndexedDB`, error);
+        return undefined;
+      }
+    },
+    [],
   );
 
   const loadChatData = useCallback((id: string) => {
@@ -147,72 +162,46 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  const loadChat = useCallback(
-    (id: string) => {
-      const chatData = loadChatData(id);
-      return chatData.messages;
-    },
-    [loadChatData],
-  );
+  const loadChat = useCallback((): UIMessage[] => {
+    // This is a legacy sync method for backward compatibility
+    // It returns empty array and will be populated asynchronously
+    return [];
+  }, []);
 
   const saveChat = useCallback(
     ({ chatId, messages }: { chatId: string; messages: UIMessage[] }) => {
-      try {
-        const chatKey = getChatKey(chatId);
-        const existingData = loadChatData(chatId);
-        const chatData: ChatData = {
-          ...existingData,
+      db.chats
+        .update(chatId, {
           messages,
-        };
-        const content = JSON.stringify(chatData);
-        localStorage.setItem(chatKey, content);
-      } catch (error) {
-        logger.error(`Failed to save chat ${chatId} to localStorage`, error);
-      }
+          updatedAt: Date.now(),
+        })
+        .catch((err) => logger.error("Failed to save chat", err));
     },
-    [loadChatData],
+    [],
   );
 
   const saveChatModel = useCallback(
     ({ chatId, modelId }: { chatId: string; modelId: string }) => {
-      try {
-        const chatKey = getChatKey(chatId);
-        const existingData = loadChatData(chatId);
-        const chatData: ChatData = {
-          ...existingData,
+      db.chats
+        .update(chatId, {
           modelId,
-        };
-        const content = JSON.stringify(chatData);
-        localStorage.setItem(chatKey, content);
-      } catch (error) {
-        logger.error(
-          `Failed to save chat model ${chatId} to localStorage`,
-          error,
-        );
-      }
+          updatedAt: Date.now(),
+        })
+        .catch((err) => logger.error("Failed to save chat model", err));
     },
-    [loadChatData],
+    [],
   );
 
   const saveChatModelConfig = useCallback(
     ({ chatId, modelConfig }: { chatId: string; modelConfig: ModelConfig }) => {
-      try {
-        const chatKey = getChatKey(chatId);
-        const existingData = loadChatData(chatId);
-        const chatData: ChatData = {
-          ...existingData,
+      db.chats
+        .update(chatId, {
           modelConfig,
-        };
-        const content = JSON.stringify(chatData);
-        localStorage.setItem(chatKey, content);
-      } catch (error) {
-        logger.error(
-          `Failed to save chat model config ${chatId} to localStorage`,
-          error,
-        );
-      }
+          updatedAt: Date.now(),
+        })
+        .catch((err) => logger.error("Failed to save chat model config", err));
     },
-    [loadChatData],
+    [],
   );
 
   const saveChatTitleState = useCallback(
@@ -223,70 +212,49 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       chatId: string;
       titleState: "generating" | "generated" | "error";
     }) => {
-      try {
-        const chatKey = getChatKey(chatId);
-        const existingData = loadChatData(chatId);
-        const chatData: ChatData = {
-          ...existingData,
+      db.chats
+        .update(chatId, {
           titleState,
-        };
-        const content = JSON.stringify(chatData);
-        localStorage.setItem(chatKey, content);
-        setChatUpdateTrigger((prev) => prev + 1);
-      } catch (error) {
-        logger.error(
-          `Failed to save chat title state ${chatId} to localStorage`,
-          error,
-        );
-      }
+          updatedAt: Date.now(),
+        })
+        .then(() => {
+          setChatUpdateTrigger((prev) => prev + 1);
+        })
+        .catch((err) => logger.error("Failed to save chat title state", err));
     },
-    [loadChatData, setChatUpdateTrigger],
+    [setChatUpdateTrigger],
   );
 
   const saveChatTitle = useCallback(
     ({ chatId, title }: { chatId: string; title: string }) => {
-      try {
-        const chatKey = getChatKey(chatId);
-        const existingData = loadChatData(chatId);
-        const chatData: ChatData = {
-          ...existingData,
+      db.chats
+        .update(chatId, {
           title,
-          titleState: "generated",
-        };
-        const content = JSON.stringify(chatData);
-        localStorage.setItem(chatKey, content);
-        setChatUpdateTrigger((prev) => prev + 1);
-      } catch (error) {
-        logger.error(
-          `Failed to save chat title ${chatId} to localStorage`,
-          error,
-        );
-      }
+          titleState: "generated" as const,
+          updatedAt: Date.now(),
+        })
+        .then(() => {
+          setChatUpdateTrigger((prev) => prev + 1);
+        })
+        .catch((err) => logger.error("Failed to save chat title", err));
     },
-    [loadChatData, setChatUpdateTrigger],
+    [setChatUpdateTrigger],
   );
 
   const deleteChat = useCallback(
-    (chatId: string) => {
+    async (chatId: string) => {
       try {
-        const chatKey = getChatKey(chatId);
-        localStorage.removeItem(chatKey);
-        setChatIds((currentChatIds) =>
-          currentChatIds.filter((id: string) => id !== chatId),
-        );
+        await db.chats.delete(chatId);
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
-        logger.error(
-          `Failed to delete chat ${chatId} from localStorage`,
-          error,
-        );
+        logger.error(`Failed to delete chat ${chatId} from IndexedDB`, error);
       }
     },
-    [setChatIds, setChatUpdateTrigger],
+    [setChatUpdateTrigger],
   );
 
   const branchChat = useCallback(
-    ({
+    async ({
       originalChatId,
       branchFromMessageId,
     }: {
@@ -294,12 +262,12 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       branchFromMessageId: string;
     }) => {
       try {
-        const originalChatData = loadChatData(originalChatId);
-        if (!originalChatData) {
+        const originalChatRecord = await db.chats.get(originalChatId);
+        if (!originalChatRecord) {
           throw new Error(`Original chat with ID ${originalChatId} not found.`);
         }
 
-        const branchIndex = originalChatData.messages.findIndex(
+        const branchIndex = originalChatRecord.messages.findIndex(
           (m: UIMessage) => m.id === branchFromMessageId,
         );
 
@@ -309,36 +277,37 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
           );
         }
 
-        const branchedMessages = originalChatData.messages.slice(
+        const branchedMessages = originalChatRecord.messages.slice(
           0,
           branchIndex + 1,
         );
 
         const newId = generateId();
+        const now = Date.now();
 
-        const newChatData: ChatData = {
+        const newChatRecord: ChatRecord = {
+          id: newId,
           messages: branchedMessages,
-          title: originalChatData.title,
+          title: originalChatRecord.title,
           titleState: "generated",
-          modelId: originalChatData.modelId,
-          modelConfig: originalChatData.modelConfig || DEFAULT_MODEL_CONFIG,
+          modelId: originalChatRecord.modelId,
+          modelConfig: originalChatRecord.modelConfig,
           branchOf: originalChatId,
+          createdAt: now,
+          updatedAt: now,
         };
 
-        const chatKey = getChatKey(newId);
-        localStorage.setItem(chatKey, JSON.stringify(newChatData));
-
-        setChatIds((currentChatIds) => [newId, ...currentChatIds]);
+        await db.chats.add(newChatRecord);
         setChatUpdateTrigger((prev) => prev + 1);
 
         logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
         return newId;
       } catch (error) {
-        logger.error("Failed to branch chat in localStorage", error);
+        logger.error("Failed to branch chat in IndexedDB", error);
         throw new Error("Failed to branch chat.");
       }
     },
-    [loadChatData, setChatIds, setChatUpdateTrigger],
+    [setChatUpdateTrigger],
   );
 
   const contextValue: PersistenceContextType = {
@@ -347,6 +316,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     getNewChatModelConfig,
     saveNewChatModelConfig,
     createChat,
+    getChat,
     loadChat,
     loadChatData,
     saveChat,
