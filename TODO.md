@@ -25,3 +25,4 @@
 - Make key storage secure lol (in the system keychain perhaps, in the Rust side of the code maybe?)
 - Use a drawer for the model selector and model config popup on narrow screens
 - Fix lag when changing model config in chats (check rerenders, prevent reading from localStorage so many times at once, etc.). Example: Try dragging temperature slider in a very large chat v.s. an empty chat or new chat. See how much lag there is. Fix the root of the lag, but also maybe don't update the slider value until it's released?
+- Use lite.duckduckgo.com instead of html.duckduckgo.com? Is it more reliable to scrape? (Example: https://lite.duckduckgo.com/lite?q=bestcodes&k1=-1)
