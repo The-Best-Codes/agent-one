@@ -4,12 +4,12 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
 } from "ai";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useAtomValue } from "jotai";
 import { memo, useEffect } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
+import { useSqliteQuery } from "@/hooks/use-sqlite-query";
 import { type ModelConfig } from "@/lib/ai/models";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { type ChatRecord, db } from "@/lib/db";
@@ -124,7 +124,7 @@ export const ChatInstance = memo(
     ) => void;
   }) => {
     // Reactive read from DB
-    const chatRecord = useLiveQuery(() => db.chats.get(chatId), [chatId]);
+    const chatRecord = useSqliteQuery(() => db.getChat(chatId), [chatId]);
 
     // Don't render inner logic until we have the data.
     // This prevents useChat from initializing with empty messages.

@@ -1,6 +1,7 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use tauri::{Emitter, Manager};
+use tauri_plugin_sql::{Migration, MigrationKind};
 
 mod tools;
 mod utils;
@@ -10,6 +11,23 @@ static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Define the migration
+    let migrations = vec![Migration {
+        version: 1,
+        description: "create_chats_table",
+        sql: "CREATE TABLE IF NOT EXISTS chats (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                messages TEXT NOT NULL,
+                model_id TEXT NOT NULL,
+                model_config TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL,
+                branch_of TEXT,
+                title_state TEXT
+            );",
+        kind: MigrationKind::Up,
+    }];
     tauri::Builder::default()
         // Single instance plugin should be the first plugin registered
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
@@ -55,7 +73,11 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_sql::Builder::new().build())
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:agent_one.db", migrations)
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         // .plugin(tauri_plugin_log::Builder::new().build()) // Disabled for now
         .setup(|app| {

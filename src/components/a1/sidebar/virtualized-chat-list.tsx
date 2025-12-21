@@ -1,14 +1,12 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useLiveQuery } from "dexie-react-hooks";
-import { useAtom } from "jotai";
 import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useSqliteQuery } from "@/hooks/use-sqlite-query";
 import { db } from "@/lib/db";
-import { chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { cn } from "@/lib/utils";
 
@@ -49,18 +47,12 @@ export const VirtualizedChatList = ({
   useHotkeys(kbdRegistry.focusChatSearch, () => {
     searchInputRef.current?.focus();
   });
-  const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
-
-  // Dexie hook automatically updates component when DB changes
-  const dbChats =
-    useLiveQuery(
-      () => db.chats.orderBy("updatedAt").reverse().toArray(),
-      [chatUpdateTrigger],
-    ) || [];
+  // SQLite query with useSqliteQuery hook
+  const dbChats = useSqliteQuery(() => db.getAllChats(), []);
 
   const loadedChats = useMemo(
     () =>
-      dbChats.map((chat) => ({
+      (dbChats || []).map((chat) => ({
         id: chat.id,
         title: getChatTitle(chat.title || `Chat ${chat.id.slice(0, 8)}`),
         branchOf: chat.branchOf,

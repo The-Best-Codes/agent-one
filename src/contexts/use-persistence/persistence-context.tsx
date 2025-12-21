@@ -115,7 +115,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       const id = generateId();
       const now = Date.now();
       try {
-        await db.chats.add({
+        await db.createChat({
           id,
           title: "New Chat",
           messages: [],
@@ -127,8 +127,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         setChatUpdateTrigger((prev) => prev + 1);
         return id;
       } catch (error) {
-        logger.error("Failed to create chat in IndexedDB", error);
-        throw new Error("Failed to create new chat in IndexedDB.");
+        logger.error("Failed to create chat in SQLite", error);
+        throw new Error("Failed to create new chat.");
       }
     },
     [setChatUpdateTrigger],
@@ -137,9 +137,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const getChat = useCallback(
     async (id: string): Promise<ChatRecord | undefined> => {
       try {
-        return await db.chats.get(id);
+        return await db.getChat(id);
       } catch (error) {
-        logger.error(`Failed to load chat ${id} from IndexedDB`, error);
+        logger.error(`Failed to load chat ${id} from SQLite`, error);
         return undefined;
       }
     },
@@ -170,38 +170,46 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
 
   const saveChat = useCallback(
     ({ chatId, messages }: { chatId: string; messages: UIMessage[] }) => {
-      db.chats
-        .update(chatId, {
-          messages,
-          updatedAt: Date.now(),
+      db.updateChat(chatId, {
+        messages,
+        updatedAt: Date.now(),
+      })
+        .then(() => {
+          // Optional: Trigger update here if you want sidebar to show preview immediately
+          // But usually unnecessary for just message content updates unless sidebar shows snippets
+          setChatUpdateTrigger((prev) => prev + 1);
         })
         .catch((err) => logger.error("Failed to save chat", err));
     },
-    [],
+    [setChatUpdateTrigger],
   );
 
   const saveChatModel = useCallback(
     ({ chatId, modelId }: { chatId: string; modelId: string }) => {
-      db.chats
-        .update(chatId, {
-          modelId,
-          updatedAt: Date.now(),
+      db.updateChat(chatId, {
+        modelId,
+        updatedAt: Date.now(),
+      })
+        .then(() => {
+          setChatUpdateTrigger((prev) => prev + 1);
         })
         .catch((err) => logger.error("Failed to save chat model", err));
     },
-    [],
+    [setChatUpdateTrigger],
   );
 
   const saveChatModelConfig = useCallback(
     ({ chatId, modelConfig }: { chatId: string; modelConfig: ModelConfig }) => {
-      db.chats
-        .update(chatId, {
-          modelConfig,
-          updatedAt: Date.now(),
+      db.updateChat(chatId, {
+        modelConfig,
+        updatedAt: Date.now(),
+      })
+        .then(() => {
+          setChatUpdateTrigger((prev) => prev + 1);
         })
         .catch((err) => logger.error("Failed to save chat model config", err));
     },
-    [],
+    [setChatUpdateTrigger],
   );
 
   const saveChatTitleState = useCallback(
@@ -212,11 +220,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       chatId: string;
       titleState: "generating" | "generated" | "error";
     }) => {
-      db.chats
-        .update(chatId, {
-          titleState,
-          updatedAt: Date.now(),
-        })
+      db.updateChat(chatId, {
+        titleState,
+      })
         .then(() => {
           setChatUpdateTrigger((prev) => prev + 1);
         })
@@ -227,12 +233,10 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
 
   const saveChatTitle = useCallback(
     ({ chatId, title }: { chatId: string; title: string }) => {
-      db.chats
-        .update(chatId, {
-          title,
-          titleState: "generated" as const,
-          updatedAt: Date.now(),
-        })
+      db.updateChat(chatId, {
+        title,
+        titleState: "generated" as const,
+      })
         .then(() => {
           setChatUpdateTrigger((prev) => prev + 1);
         })
@@ -244,10 +248,10 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const deleteChat = useCallback(
     async (chatId: string) => {
       try {
-        await db.chats.delete(chatId);
+        await db.deleteChat(chatId);
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
-        logger.error(`Failed to delete chat ${chatId} from IndexedDB`, error);
+        logger.error(`Failed to delete chat ${chatId} from SQLite`, error);
       }
     },
     [setChatUpdateTrigger],
@@ -262,7 +266,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       branchFromMessageId: string;
     }) => {
       try {
-        const originalChatRecord = await db.chats.get(originalChatId);
+        const originalChatRecord = await db.getChat(originalChatId);
         if (!originalChatRecord) {
           throw new Error(`Original chat with ID ${originalChatId} not found.`);
         }
@@ -297,13 +301,13 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
           updatedAt: now,
         };
 
-        await db.chats.add(newChatRecord);
+        await db.createChat(newChatRecord);
         setChatUpdateTrigger((prev) => prev + 1);
 
         logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
         return newId;
       } catch (error) {
-        logger.error("Failed to branch chat in IndexedDB", error);
+        logger.error("Failed to branch chat in SQLite", error);
         throw new Error("Failed to branch chat.");
       }
     },

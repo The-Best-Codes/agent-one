@@ -8,6 +8,8 @@
     "core:webview:allow-create-webview",
     "opener:default",
     "sql:default",
+    "sql:allow-execute",
+    "sql:allow-select",
     "shell:default",
     "shell:allow-execute",
     "shell:allow-stdin-write",

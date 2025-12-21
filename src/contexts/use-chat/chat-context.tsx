@@ -1,6 +1,5 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useAtom } from "jotai";
 import {
   type ReactNode,
@@ -16,6 +15,7 @@ import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
+import { useSqliteQuery } from "@/hooks/use-sqlite-query";
 import {
   getModelById,
   type ModelConfig,
@@ -97,17 +97,25 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // Get current chat record from DB
-  const currentChatRecord = useLiveQuery(
-    () => (currentChatId ? db.chats.get(currentChatId) : undefined),
+  const currentChatRecord = useSqliteQuery(
+    () =>
+      currentChatId ? db.getChat(currentChatId) : Promise.resolve(undefined),
     [currentChatId],
   );
 
   // Get all active chat records
+  // Note: We need to implement a bulk get or just map over IDs.
+  // For SQL, a "WHERE id IN (...)" is better, but let's keep it simple for now or add a method to db.ts
   const activeChatRecords =
-    useLiveQuery(
-      () => db.chats.where("id").anyOf(Array.from(activeChatIds)).toArray(),
-      [activeChatIds],
-    ) || [];
+    useSqliteQuery(async () => {
+      const ids = Array.from(activeChatIds);
+      if (ids.length === 0) return [];
+
+      // We can add a bulk fetch to db.ts later, for now let's fetch all and filter
+      // (Optimization: Add getChatsByIds(ids) to AgentOneSqlite class)
+      const all = await db.getAllChats();
+      return all.filter((c) => ids.includes(c.id));
+    }, [activeChatIds]) || [];
 
   const focusedModel = useMemo(
     () => getModelForChat(currentChatRecord),
