@@ -22,7 +22,6 @@ interface WebSearchResponse {
 }
 
 export const WebSearchTool = tool({
-  name: "webSearch",
   description:
     "Search the web for current information, news, and answers to questions using DuckDuckGo. Returns real-time search results with titles, URLs, and snippets.",
   inputSchema: z.object({

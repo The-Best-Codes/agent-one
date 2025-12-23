@@ -2,7 +2,6 @@ import { tool } from "ai";
 import { z } from "zod";
 
 export const DateTimeTool = tool({
-  name: "dateTime",
   description: "Get the current date and time",
   inputSchema: z.object({}),
   execute: async (input, { abortSignal }) => {
