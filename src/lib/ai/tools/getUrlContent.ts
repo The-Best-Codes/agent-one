@@ -36,7 +36,6 @@ type ErrorResult = {
 type FetchResult = SuccessResult | ErrorResult;
 
 export const GetUrlContentTool = tool({
-  name: "getUrlContent",
   description:
     "Fetch and extract content from URLs (up to 5 at once). Can return content as markdown or raw text.",
   inputSchema: z.object({

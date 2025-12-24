@@ -2,7 +2,6 @@ import { tool } from "ai";
 import { z } from "zod";
 
 export const WaitNumberMillisecondsTool = tool({
-  name: "waitNumberMilliseconds",
   description:
     "Wait for a specified number of milliseconds (min 0 milliseconds, max 60,000 milliseconds)",
   inputSchema: z.object({

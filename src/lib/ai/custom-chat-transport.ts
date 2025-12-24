@@ -78,7 +78,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       topP: this.modelConfig.topP,
       frequencyPenalty: this.modelConfig.frequencyPenalty,
       presencePenalty: this.modelConfig.presencePenalty,
-      messages: convertToModelMessages(options.messages),
+      messages: await convertToModelMessages(options.messages),
       abortSignal: options.abortSignal,
       tools,
       toolChoice: "auto",
