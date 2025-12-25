@@ -14,8 +14,6 @@ import {
   type ToolId,
 } from "@/lib/settings/types";
 
-import { lsJSONOrUndefined } from "./load-from-localstorage";
-
 const SETTING_PREFIX = "agent-one-setting-";
 
 const createSettingAtom = <T>(
@@ -23,7 +21,9 @@ const createSettingAtom = <T>(
   defaultValue: T,
 ) => {
   const lsKey = `${SETTING_PREFIX}${key}`;
-  return atomWithStorage<T>(lsKey, lsJSONOrUndefined<T>(lsKey) ?? defaultValue);
+  return atomWithStorage<T>(lsKey, defaultValue, undefined, {
+    getOnInit: true,
+  });
 };
 
 export const markdownHighlightingAtom = createSettingAtom(

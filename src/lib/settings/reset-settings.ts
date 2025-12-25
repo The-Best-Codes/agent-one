@@ -1,4 +1,5 @@
 import { getDefaultStore } from "jotai";
+import { RESET } from "jotai/utils";
 
 import {
   cerebrasApiKeyAtom,
@@ -26,19 +27,7 @@ import {
   themeAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
-import {
-  DEFAULT_SETTINGS,
-  type DefaultSettings,
-  type FontOption,
-  type MarkdownRenderingOption,
-  type McpServerConfig,
-  type NotificationOption,
-  type RoundnessOption,
-  type StopButtonBehaviorOption,
-  type SubmitKeyOption,
-  type ThemeOption,
-  type ToolId,
-} from "./types";
+import { type DefaultSettings } from "./types";
 
 /**
  * Resets all settings to their default values.
@@ -47,45 +36,30 @@ import {
 export function resetAllSettings(): void {
   const store = getDefaultStore();
 
-  store.set(markdownHighlightingAtom, DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING);
-  store.set(
-    markdownRenderingAtom,
-    DEFAULT_SETTINGS.MARKDOWN_RENDERING as MarkdownRenderingOption,
-  );
-  store.set(submitKeyAtom, DEFAULT_SETTINGS.SUBMIT_KEY as SubmitKeyOption);
-  store.set(maxCodeblockCharsAtom, DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS);
-  store.set(maxMessageLengthAtom, DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH);
-  store.set(maxToolResultCharsAtom, DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS);
-  store.set(
-    experimentalThrottleEnabledAtom,
-    DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED,
-  );
-  store.set(
-    experimentalThrottleValueAtom,
-    DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE,
-  );
-  store.set(smoothStreamEnabledAtom, DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED);
-  store.set(regenerateOnSaveAtom, DEFAULT_SETTINGS.REGENERATE_ON_SAVE);
-  store.set(
-    stopButtonBehaviorAtom,
-    DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR as StopButtonBehaviorOption,
-  );
-  store.set(themeAtom, DEFAULT_SETTINGS.THEME as ThemeOption);
-  store.set(roundnessAtom, DEFAULT_SETTINGS.ROUNDNESS as RoundnessOption);
-  store.set(fontAtom, DEFAULT_SETTINGS.FONT as FontOption);
-  store.set(
-    notificationSettingAtom,
-    DEFAULT_SETTINGS.NOTIFICATION_SETTING as NotificationOption,
-  );
-  store.set(userNameAtom, DEFAULT_SETTINGS.USER_NAME);
-  store.set(systemPromptAppendixAtom, DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX);
-  store.set(
-    googleGenerativeAiApiKeyAtom,
-    DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
-  );
-  store.set(groqApiKeyAtom, DEFAULT_SETTINGS.GROQ_API_KEY);
-  store.set(openrouterApiKeyAtom, DEFAULT_SETTINGS.OPENROUTER_API_KEY);
-  store.set(cerebrasApiKeyAtom, DEFAULT_SETTINGS.CEREBRAS_API_KEY);
+  store.set(markdownHighlightingAtom, RESET);
+  store.set(markdownRenderingAtom, RESET);
+  store.set(submitKeyAtom, RESET);
+  store.set(maxCodeblockCharsAtom, RESET);
+  store.set(maxMessageLengthAtom, RESET);
+  store.set(maxToolResultCharsAtom, RESET);
+  store.set(experimentalThrottleEnabledAtom, RESET);
+  store.set(experimentalThrottleValueAtom, RESET);
+  store.set(smoothStreamEnabledAtom, RESET);
+  store.set(regenerateOnSaveAtom, RESET);
+  store.set(stopButtonBehaviorAtom, RESET);
+  store.set(themeAtom, RESET);
+  store.set(roundnessAtom, RESET);
+  store.set(fontAtom, RESET);
+  store.set(notificationSettingAtom, RESET);
+  store.set(userNameAtom, RESET);
+  store.set(systemPromptAppendixAtom, RESET);
+  store.set(googleGenerativeAiApiKeyAtom, RESET);
+  store.set(groqApiKeyAtom, RESET);
+  store.set(openrouterApiKeyAtom, RESET);
+  store.set(cerebrasApiKeyAtom, RESET);
+  store.set(enabledToolsAtom, RESET);
+  store.set(mcpServersAtom, RESET);
+  store.set(mcpParallelLoadLimitAtom, RESET);
 }
 
 /**
@@ -94,83 +68,79 @@ export function resetAllSettings(): void {
  */
 export function resetSetting(key: keyof DefaultSettings): void {
   const store = getDefaultStore();
-  const defaultValue = DEFAULT_SETTINGS[key];
 
   switch (key) {
     case "MARKDOWN_HIGHLIGHTING":
-      store.set(markdownHighlightingAtom, defaultValue as boolean);
+      store.set(markdownHighlightingAtom, RESET);
       break;
     case "MARKDOWN_RENDERING":
-      store.set(markdownRenderingAtom, defaultValue as MarkdownRenderingOption);
+      store.set(markdownRenderingAtom, RESET);
       break;
     case "SUBMIT_KEY":
-      store.set(submitKeyAtom, defaultValue as SubmitKeyOption);
+      store.set(submitKeyAtom, RESET);
       break;
     case "MAX_CODEBLOCK_CHARS":
-      store.set(maxCodeblockCharsAtom, defaultValue as number);
+      store.set(maxCodeblockCharsAtom, RESET);
       break;
     case "MAX_MESSAGE_LENGTH":
-      store.set(maxMessageLengthAtom, defaultValue as number);
+      store.set(maxMessageLengthAtom, RESET);
       break;
     case "MAX_TOOL_RESULT_CHARS":
-      store.set(maxToolResultCharsAtom, defaultValue as number);
+      store.set(maxToolResultCharsAtom, RESET);
       break;
     case "EXPERIMENTAL_THROTTLE_ENABLED":
-      store.set(experimentalThrottleEnabledAtom, defaultValue as boolean);
+      store.set(experimentalThrottleEnabledAtom, RESET);
       break;
     case "EXPERIMENTAL_THROTTLE_VALUE":
-      store.set(experimentalThrottleValueAtom, defaultValue as number);
+      store.set(experimentalThrottleValueAtom, RESET);
       break;
     case "SMOOTH_STREAM_ENABLED":
-      store.set(smoothStreamEnabledAtom, defaultValue as boolean);
+      store.set(smoothStreamEnabledAtom, RESET);
       break;
     case "REGENERATE_ON_SAVE":
-      store.set(regenerateOnSaveAtom, defaultValue as boolean);
+      store.set(regenerateOnSaveAtom, RESET);
       break;
     case "STOP_BUTTON_BEHAVIOR":
-      store.set(
-        stopButtonBehaviorAtom,
-        defaultValue as StopButtonBehaviorOption,
-      );
+      store.set(stopButtonBehaviorAtom, RESET);
       break;
     case "THEME":
-      store.set(themeAtom, defaultValue as ThemeOption);
+      store.set(themeAtom, RESET);
       break;
     case "ROUNDNESS":
-      store.set(roundnessAtom, defaultValue as RoundnessOption);
+      store.set(roundnessAtom, RESET);
       break;
     case "FONT":
-      store.set(fontAtom, defaultValue as FontOption);
+      store.set(fontAtom, RESET);
       break;
     case "NOTIFICATION_SETTING":
-      store.set(notificationSettingAtom, defaultValue as NotificationOption);
+      store.set(notificationSettingAtom, RESET);
       break;
     case "ENABLED_TOOLS":
-      store.set(enabledToolsAtom, defaultValue as Record<ToolId, boolean>);
+      store.set(enabledToolsAtom, RESET);
       break;
     case "MCP_SERVERS":
-      store.set(mcpServersAtom, defaultValue as McpServerConfig[]);
+      store.set(mcpServersAtom, RESET);
       break;
     case "MCP_PARALLEL_LOAD_LIMIT":
-      store.set(mcpParallelLoadLimitAtom, defaultValue as number);
+      store.set(mcpParallelLoadLimitAtom, RESET);
       break;
     case "USER_NAME":
-      store.set(userNameAtom, defaultValue as string);
+      store.set(userNameAtom, RESET);
       break;
     case "SYSTEM_PROMPT_APPENDIX":
-      store.set(systemPromptAppendixAtom, defaultValue as string);
+      store.set(systemPromptAppendixAtom, RESET);
       break;
     case "GOOGLE_GENERATIVE_AI_API_KEY":
-      store.set(googleGenerativeAiApiKeyAtom, defaultValue as string);
+      store.set(googleGenerativeAiApiKeyAtom, RESET);
       break;
     case "GROQ_API_KEY":
-      store.set(groqApiKeyAtom, defaultValue as string);
+      store.set(groqApiKeyAtom, RESET);
       break;
     case "OPENROUTER_API_KEY":
-      store.set(openrouterApiKeyAtom, defaultValue as string);
+      store.set(openrouterApiKeyAtom, RESET);
       break;
     case "CEREBRAS_API_KEY":
-      store.set(cerebrasApiKeyAtom, defaultValue as string);
+      store.set(cerebrasApiKeyAtom, RESET);
       break;
   }
 }

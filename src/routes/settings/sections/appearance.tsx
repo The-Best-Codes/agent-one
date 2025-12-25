@@ -75,7 +75,7 @@ const colorThemeOptions = [
     className:
       "bg-[oklch(0.541_0.281_293.009)] dark:bg-[oklch(0.606_0.25_292.717)] hover:bg-[oklch(0.541_0.281_293.009)] dark:hover:bg-[oklch(0.606_0.25_292.717)] text-white",
   },
-] as const;
+];
 
 export default function AppearanceSection() {
   const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
