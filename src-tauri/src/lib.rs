@@ -10,9 +10,12 @@ static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        // Single instance plugin should be the first plugin registered
-        .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+    let mut builder = tauri::Builder::default();
+
+    // Single instance plugin should be the first plugin registered
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             println!("New instance started, args: {:?}", args);
 
             // Check if this was triggered by a deep link on Linux/Windows
@@ -45,11 +48,20 @@ pub fn run() {
                 Ok(_) => println!("Created new window: {}", window_label),
                 Err(e) => eprintln!("Failed to create new window: {}", e),
             }
-        }))
+        }));
+    }
+
+    let mut builder = builder
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init());
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+    }
+
+    builder
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
@@ -76,13 +88,22 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            tools::get_url_content,
-            tools::web_search,
-            utils::webview_html_callback,
-            utils::list_webviews,
-            utils::force_close_webview,
-        ])
+        .invoke_handler({
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            {
+                tauri::generate_handler![
+                    tools::get_url_content,
+                    tools::web_search,
+                    utils::webview_html_callback,
+                    utils::list_webviews,
+                    utils::force_close_webview,
+                ]
+            }
+            #[cfg(any(target_os = "android", target_os = "ios"))]
+            {
+                tauri::generate_handler![tools::get_url_content, tools::web_search,]
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
