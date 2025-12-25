@@ -28,3 +28,4 @@
 - Use lite.duckduckgo.com instead of html.duckduckgo.com? Is it more reliable to scrape? (Example: https://lite.duckduckgo.com/lite?q=bestcodes&k1=-1)
 - Virtualize the chat messages with Tanstack Virtual or React Virtuoso?
 - In `atomWithStorage` usages, use options.getOnInit: true instead of the lsJsonOrUndefined and similar custom functions.
+- For resetting atomWithStorage instances, see the docs about the `RESET` symbol: https://jotai.org/docs/utilities/storage
