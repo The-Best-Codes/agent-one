@@ -23,7 +23,6 @@
     }
   },
   "bundle": {
-    "externalBin": ["binaries/fnm"],
     "active": true,
     "targets": "all",
     "createUpdaterArtifacts": true,

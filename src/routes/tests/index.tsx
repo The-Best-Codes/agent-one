@@ -31,20 +31,6 @@ export default function TestsRoute() {
             <CardContent className="flex flex-col gap-4">
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
-                  <h3 className="font-medium">FNM Node Installation</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Test installing Node.js versions using fnm
-                  </p>
-                </div>
-                <Button
-                  onClick={() => navigate("/tests/fnm")}
-                  variant="outline"
-                >
-                  Run Test
-                </Button>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div>
                   <h3 className="font-medium">Notifications</h3>
                   <p className="text-muted-foreground text-sm">
                     Test notification permissions and sending notifications

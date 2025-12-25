@@ -51,11 +51,6 @@ See https://tauri.app/plugin/updater/.
 - `cargo upgrade` to upgrade dependencies to the latest version (unsafe, test for breaking changes)
 - `npx npm-check-updates -u` to update dependencies to the latest version (unsafe, test for breaking changes)
 - `npx actions-up` to update actions in workflows (test manually in a PR)
-- Periodically check for new `fnm` releases and update the `fnm` sidecar binary
-
-## Third-Party Licenses
-
-This application bundles fnm (Fast Node Manager) for Node.js version management during onboarding. fnm is licensed under the GNU General Public License v3.0. For license details and source code, see the licenses directory or visit https://github.com/Schniz/fnm.
 
 ---
 
