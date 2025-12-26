@@ -26,3 +26,4 @@
 - Fix lag when changing model config in chats (check rerenders, prevent reading from localStorage so many times at once, etc.). Example: Try dragging temperature slider in a very large chat v.s. an empty chat or new chat. See how much lag there is. Fix the root of the lag, but also maybe don't update the slider value until it's released?
 - Use lite.duckduckgo.com instead of html.duckduckgo.com? Is it more reliable to scrape? (Example: https://lite.duckduckgo.com/lite?q=bestcodes&k1=-1)
 - Virtualize the chat messages with Tanstack Virtual or React Virtuoso?
+- Add setting to always show action row, not just on hover or on small screens
