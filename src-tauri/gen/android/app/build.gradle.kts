@@ -20,7 +20,7 @@ android {
         manifestPlaceholders["usesCleartextTraffic"] = "false"
         applicationId = "com.agent_one"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34 // NOTE: Tauri uses 36 by default, so upgrade if there are issues. I downgraded this so it respects when `edgeToEdge` is disabled.
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()
         versionName = tauriProperties.getProperty("tauri.android.versionName", "1.0")
     }
