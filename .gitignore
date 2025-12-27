@@ -45,6 +45,7 @@ playwright-report/
 # Tauri
 /src-tauri/target/
 /src-tauri/gen/schemas
+/target/
 
 # Local Uncommitable
 .local-uncommitable

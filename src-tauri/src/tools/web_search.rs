@@ -1,5 +1,8 @@
 use super::constants::{DEFAULT_TIMEOUT_SECONDS, MAX_TIMEOUT_SECONDS};
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::utils::headless_webview::fetch_url_with_webview;
+
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
@@ -43,53 +46,65 @@ pub async fn web_search(
         urlencoding::encode(&query)
     );
 
-    let html = if use_webview {
-        let webview_result = fetch_url_with_webview(app, search_url.clone(), timeout_seconds)
-            .await
-            .map_err(|e| format!("Failed to fetch search results with webview: {}", e))?;
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        if use_webview {
+            let webview_result = fetch_url_with_webview(app, search_url.clone(), timeout_seconds)
+                .await
+                .map_err(|e| format!("Failed to fetch search results with webview: {}", e))?;
 
-        if !webview_result.success {
-            return Err(format!(
-                "Webview reported failure for search URL: {}",
-                webview_result.url
-            ));
+            if !webview_result.success {
+                return Err(format!(
+                    "Webview reported failure for search URL: {}",
+                    webview_result.url
+                ));
+            }
+
+            let html = webview_result.content.ok_or_else(|| {
+                format!(
+                    "Webview reported success but returned no content for search URL: {}",
+                    webview_result.url
+                )
+            })?;
+
+            let results = parse_search_results(&html, max_results)?;
+
+            return Ok(WebSearchResponse {
+                query,
+                total_results: results.len(),
+                results,
+                search_url,
+            });
         }
+    }
 
-        webview_result.content.ok_or_else(|| {
-            format!(
-                "Webview reported success but returned no content for search URL: {}",
-                webview_result.url
-            )
-        })?
-    } else {
-        let emulation = Emulation::Chrome137;
+    let emulation = Emulation::Chrome137;
 
-        let client = Client::builder()
-            .emulation(emulation)
-            .cookie_store(true)
-            .redirect(wreq::redirect::Policy::limited(10))
-            .timeout(Duration::from_secs(timeout_seconds))
-            .connect_timeout(Duration::from_secs(10))
-            .build()
-            .map_err(|e| format!("Failed to build wreq client: {}", e))?;
+    let client = Client::builder()
+        .emulation(emulation)
+        .cookie_store(true)
+        .redirect(wreq::redirect::Policy::limited(10))
+        .timeout(Duration::from_secs(timeout_seconds))
+        .connect_timeout(Duration::from_secs(10))
+        .build()
+        .map_err(|e| format!("Failed to build wreq client: {}", e))?;
 
-        let response = timeout(
-            Duration::from_secs(timeout_seconds + 5),
-            client.get(&search_url).send(),
-        )
+    let response = timeout(
+        Duration::from_secs(timeout_seconds + 5),
+        client.get(&search_url).send(),
+    )
+    .await
+    .map_err(|_| "Request timed out".to_string())?
+    .map_err(|e| format!("Request failed: {}", e))?;
+
+    if !response.status().is_success() {
+        return Err(format!("HTTP error: {}", response.status()));
+    }
+
+    let html = response
+        .text()
         .await
-        .map_err(|_| "Request timed out".to_string())?
-        .map_err(|e| format!("Request failed: {}", e))?;
-
-        if !response.status().is_success() {
-            return Err(format!("HTTP error: {}", response.status()));
-        }
-
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read response body: {}", e))?
-    };
+        .map_err(|e| format!("Failed to read response body: {}", e))?;
 
     let results = parse_search_results(&html, max_results)?;
 
