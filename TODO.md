@@ -26,3 +26,5 @@
 - Use lite.duckduckgo.com instead of html.duckduckgo.com? Is it more reliable to scrape? (Example: https://lite.duckduckgo.com/lite?q=bestcodes&k1=-1)
 - Virtualize the chat messages with Tanstack Virtual or React Virtuoso?
 - Add setting to always show action row, not just on hover or on small screens
+- Support downloading and running local AI models via llama.cpp (using this Rust lib? https://github.com/ShelbyJenkins/llm_client)
+- Add LOTS of new settings and rework the settings categories so settings have subcategories, allow searching, resetting categories, and more.
