@@ -99,7 +99,7 @@ export default function AppearanceSection() {
           <div className="flex flex-col items-start">
             <Label className="text-sm font-medium">Color Theme</Label>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {colorThemeOptions.map((option) => (
               <Button
                 key={option.value}
