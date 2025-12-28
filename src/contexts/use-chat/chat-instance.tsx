@@ -58,9 +58,9 @@ export const ChatInstance = memo(
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
-      sendAutomaticallyWhen:
-        lastAssistantMessageIsCompleteWithToolCalls ||
-        lastAssistantMessageIsCompleteWithApprovalResponses, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
+      sendAutomaticallyWhen: (messages) =>
+        lastAssistantMessageIsCompleteWithToolCalls(messages) ||
+        lastAssistantMessageIsCompleteWithApprovalResponses(messages),
       id: chatId,
       messages: initialMessages,
     });
@@ -120,7 +120,7 @@ export const ChatInstance = memo(
     return null;
   },
   (prevProps, nextProps) => {
-    // TODO: This may be inefficient with future architecture changes, keep an eye on it
+    // TODO: This (the JSON.stringify calls at the end) may be inefficient with future architecture changes, keep an eye on it
     // Custom comparison to prevent re-renders when modelConfig object reference changes
     // but the content is the same (which happens because of JSON.parse in persistence).
     return (
