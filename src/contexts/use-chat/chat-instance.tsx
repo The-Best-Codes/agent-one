@@ -1,6 +1,7 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import {
   type LanguageModel,
+  lastAssistantMessageIsCompleteWithApprovalResponses,
   lastAssistantMessageIsCompleteWithToolCalls,
   type UIMessage,
 } from "ai";
@@ -57,7 +58,9 @@ export const ChatInstance = memo(
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
+      sendAutomaticallyWhen:
+        lastAssistantMessageIsCompleteWithToolCalls ||
+        lastAssistantMessageIsCompleteWithApprovalResponses, // TODO: Investigate this more as a "stop when done with tool" option. You can set this to true or false.
       id: chatId,
       messages: initialMessages,
     });
