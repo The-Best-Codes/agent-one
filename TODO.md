@@ -1,4 +1,3 @@
-- AI SDK v6: Human-in-the-loop / tool confirmation
 - Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
 - Scroll to active model
 - Bulk actions in sidebar
