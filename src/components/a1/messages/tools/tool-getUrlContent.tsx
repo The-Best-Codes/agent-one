@@ -162,54 +162,41 @@ export const MessagePartToolGetUrlContent = ({
   const urlCount = input?.urls?.length || 0;
 
   switch (part.state) {
-    //
-    // New UI
-    //
     case "approval-requested":
       return (
-        <div key={callId} className="flex flex-col gap-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1">
             <GlobeIcon className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
+              AgentOne wants to browse
               {urlCount === 1 ? (
                 <>
-                  Browse{" "}
+                  {" "}
                   {input?.urls?.[0] ? (
                     <a
                       href={input.urls[0]}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+                      className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
                     >
                       {formatUrl(input.urls[0])}
                     </a>
                   ) : (
                     "a website"
                   )}
-                  ?
                 </>
               ) : (
-                `Browse ${urlCount} URLs?`
+                ` ${urlCount} URLs`
               )}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             <Button
               size="sm"
-              variant="ghost"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
-            >
-              <CheckCircle2Icon className="mr-1.5 size-3.5" />
-              Approve
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={() =>
                 addToolApprovalResponse({
                   id: part.approval.id,
@@ -217,39 +204,23 @@ export const MessagePartToolGetUrlContent = ({
                 })
               }
             >
-              <XIcon className="mr-1.5 size-3.5" />
+              <XIcon />
               Deny
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: true,
+                })
+              }
+            >
+              <CheckCircle2Icon />
+              Approve
+            </Button>
           </div>
-        </div>
-      );
-
-    case "approval-responded":
-      return (
-        <div key={callId} className="flex items-center gap-1">
-          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
-          <span className="text-foreground text-sm font-bold">
-            {urlCount === 1 ? (
-              <>
-                Browsing{" "}
-                {input?.urls?.[0] ? (
-                  <a
-                    href={input.urls[0]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
-                  >
-                    {formatUrl(input.urls[0])}
-                  </a>
-                ) : (
-                  "a website"
-                )}
-                ...
-              </>
-            ) : (
-              `Browsing ${urlCount} URLs...`
-            )}
-          </span>
         </div>
       );
 
@@ -281,9 +252,6 @@ export const MessagePartToolGetUrlContent = ({
           </span>
         </div>
       );
-    //
-    // End New UI
-    //
 
     case "input-streaming":
       return (
@@ -297,6 +265,8 @@ export const MessagePartToolGetUrlContent = ({
         </div>
       );
 
+    // TODO: Determine if a dedicated UI for approval-responded is needed. For now, it's not.
+    case "approval-responded":
     case "input-available":
       return (
         <div
