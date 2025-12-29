@@ -12,12 +12,10 @@
 - Some obvious stuff with the model selector:
   - Only show models that you've configured an API key for
   - Detect when a model doesn't support tool use and disable tools (show an info message about the model's limitation), same for if it supports uploading files etc.
-  - Later: Allow users to customize the model parameters (e.g. temperature, max tokens, etc.)
-- When there are two consecutive user messages, there needs to be a gap between them. But if just user message, then assistant message, no gap (same as now)
 - Allow adding and removing attachments from a message when editing it?
 - Redirect to `/chat` when the chat ID is invalid, but make sure that this doesn't redirect to `/chat` each time you delete a chat.
 - Fix installer looking for MSI file on Windows instead of EXE file (issue with generated latest.json file, maybe only publish the EXE file)
-- Allow changing settings for each default tool. For example, change the max number of searches the model can do at once with the web search tool, or how long it can wait with the wait milliseconds tool.
+- Allow changing settings for each default tool. For example, change the max number of searches the model can do at once with the web search tool, or how long it can wait with the wait milliseconds tool. Also allow changing if it requires approval.
 - Add a note in the AI Instructions settings that updates to the system prompt may not be reflected until your next message.
 - Potential bug: If app is "Starting MCP Servers..." when a message is sent, then sends the message when they are ready, MCP servers that were just added seem to be missing from the list of tools the AI gets.
 - Make key storage secure lol (in the system keychain perhaps, in the Rust side of the code maybe?)
