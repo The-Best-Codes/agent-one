@@ -271,6 +271,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const instanceForFunctions = focusedChatInstance || defaultChat;
   const {
     addToolOutput,
+    addToolApprovalResponse,
     regenerate,
     resumeStream,
     stop,
@@ -349,6 +350,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       sendMessage: isNewChat ? handleNewChatSubmit : sendMessage,
       addToolOutput,
+      addToolApprovalResponse,
       regenerate,
       resumeStream,
       stop,
@@ -359,6 +361,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       handleNewChatSubmit,
       sendMessage,
       addToolOutput,
+      addToolApprovalResponse,
       regenerate,
       resumeStream,
       stop,

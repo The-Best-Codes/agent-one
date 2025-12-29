@@ -38,6 +38,7 @@ type FetchResult = SuccessResult | ErrorResult;
 export const GetUrlContentTool = tool({
   description:
     "Fetch and extract content from URLs (up to 5 at once). Can return content as markdown or raw text.",
+  needsApproval: true, // NOTE: This can also be a function!
   inputSchema: z.object({
     urls: z
       .array(z.string())

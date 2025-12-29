@@ -1,13 +1,16 @@
 import type { ToolUIPart } from "ai";
 import {
+  CheckCircle2Icon,
   ChevronDownIcon,
   FileTextIcon,
   GlobeIcon,
   Loader2Icon,
   XCircleIcon,
+  XIcon,
 } from "lucide-react";
 import { memo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -20,6 +23,7 @@ import {
   TooltipRoot,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
 interface GetUrlContentInput {
@@ -147,6 +151,7 @@ export const MessagePartToolGetUrlContent = ({
   const callId = part.toolCallId;
   const input = part.input as GetUrlContentInput;
   const output = part.output as GetUrlContentOutput;
+  const { addToolApprovalResponse } = useChatFunctions();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
     boolean | undefined
   >();
@@ -157,6 +162,97 @@ export const MessagePartToolGetUrlContent = ({
   const urlCount = input?.urls?.length || 0;
 
   switch (part.state) {
+    case "approval-requested":
+      return (
+        <div
+          key={callId}
+          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
+        >
+          <div className="flex items-center gap-1">
+            <GlobeIcon className="text-foreground size-4 shrink-0" />
+            <span className="text-foreground text-sm font-bold">
+              AgentOne wants to browse
+              {urlCount === 1 ? (
+                <>
+                  {" "}
+                  {input?.urls?.[0] ? (
+                    <a
+                      href={input.urls[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
+                    >
+                      {formatUrl(input.urls[0])}
+                    </a>
+                  ) : (
+                    "a website"
+                  )}
+                </>
+              ) : (
+                ` ${urlCount} URLs`
+              )}
+            </span>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: false,
+                })
+              }
+            >
+              <XIcon />
+              Deny
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: true,
+                })
+              }
+            >
+              <CheckCircle2Icon />
+              Approve
+            </Button>
+          </div>
+        </div>
+      );
+
+    case "output-denied":
+      return (
+        <div key={callId} className="flex items-center gap-1">
+          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-muted-foreground text-sm font-bold">
+            {urlCount === 1 ? (
+              <>
+                Browsing{" "}
+                {input?.urls?.[0] ? (
+                  <a
+                    href={input.urls[0]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+                  >
+                    {formatUrl(input.urls[0])}
+                  </a>
+                ) : (
+                  "a website"
+                )}{" "}
+                denied
+              </>
+            ) : (
+              `Browsing ${urlCount} URLs denied`
+            )}
+          </span>
+        </div>
+      );
+
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
@@ -169,6 +265,8 @@ export const MessagePartToolGetUrlContent = ({
         </div>
       );
 
+    // TODO: Determine if a dedicated UI for approval-responded is needed. For now, it's not.
+    case "approval-responded":
     case "input-available":
       return (
         <div
