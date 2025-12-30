@@ -56,7 +56,6 @@ export default function OnboardingRoute() {
 
   const handleWelcomeComplete = () => {
     setOnboardingCompleted(true);
-    window.location.href = "/";
   };
 
   const initialApiKeys = {

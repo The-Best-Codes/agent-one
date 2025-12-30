@@ -25,8 +25,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useModel } from "@/contexts/use-model/model-hooks";
+import { useModels } from "@/hooks/ai/use-models";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { AVAILABLE_CHAT_MODELS, type ModelData } from "@/lib/ai/models";
+import { type ModelData } from "@/lib/ai/models";
 import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
@@ -121,6 +122,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 640px)");
+  const { AVAILABLE_CHAT_MODELS } = useModels();
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -137,7 +139,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     return scoredModels
       .sort((a, b) => b.score - a.score)
       .map(({ model }) => model);
-  }, [searchQuery]);
+  }, [searchQuery, AVAILABLE_CHAT_MODELS]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
