@@ -17,8 +17,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useModel } from "@/contexts/use-model/model-hooks";
+import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { DEFAULT_MODEL_CONFIG } from "@/lib/ai/models";
 
 // TODO: Support topP, topK, frequencyPenalty, etc. that AI SDK supports
 export const ChatModelConfig = () => {

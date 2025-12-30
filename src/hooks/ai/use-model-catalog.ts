@@ -1,3 +1,4 @@
+import type { LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 
@@ -5,12 +6,6 @@ import { cerebrasModelsData } from "@/assets/model-lists/cerebras-models";
 import { googleModelsData } from "@/assets/model-lists/google-models";
 import { groqModelsData } from "@/assets/model-lists/groq-models";
 import { openRouterModelsData } from "@/assets/model-lists/openrouter-models";
-import {
-  DEFAULT_CHAT_MODEL_ID,
-  DEFAULT_MODEL_CONFIG,
-  type ModelConfig,
-  type ModelData,
-} from "@/lib/ai/models";
 import { getCerebras } from "@/lib/ai/providers/cerebras";
 import { getGoogle } from "@/lib/ai/providers/google";
 import { getGroq } from "@/lib/ai/providers/groq";
@@ -21,6 +16,32 @@ import {
   groqApiKeyAtom,
   openrouterApiKeyAtom,
 } from "@/lib/jotai/settings-atoms";
+
+export interface ModelData {
+  id: string;
+  name: string;
+  provider: string;
+  model: LanguageModel;
+  supportsToolUse: boolean;
+}
+
+export interface ModelConfig {
+  temperature: number;
+  maxTokens?: number;
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+}
+
+export const DEFAULT_MODEL_CONFIG: ModelConfig = {
+  temperature: 0.7,
+  maxTokens: undefined, // undefined means let the provider decide
+  topP: 1,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+};
+
+export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
 const getPartAfterSlash = (str: string) => {
   try {
@@ -253,5 +274,3 @@ export function useModelCatalog() {
     DEFAULT_CHAT_MODEL_ID,
   };
 }
-
-export type { ModelConfig, ModelData };

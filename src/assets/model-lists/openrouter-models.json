@@ -727,7 +727,10 @@
         "tokenizer": "Router",
         "instruct_type": null
       },
-      "pricing": { "prompt": "-1", "completion": "-1" },
+      "pricing": {
+        "prompt": "-1",
+        "completion": "-1"
+      },
       "top_provider": {
         "context_length": null,
         "max_completion_tokens": null,
@@ -2806,7 +2809,10 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 1, "top_p": 0.95 }
+      "default_parameters": {
+        "temperature": 1,
+        "top_p": 0.95
+      }
     },
     {
       "id": "qwen/qwen3-vl-8b-instruct",
@@ -3209,7 +3215,10 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.8, "top_p": 0.95 }
+      "default_parameters": {
+        "temperature": 0.8,
+        "top_p": 0.95
+      }
     },
     {
       "id": "qwen/qwen3-vl-30b-a3b-instruct",
@@ -5239,7 +5248,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "baidu/ernie-4.5-21b-a3b",
@@ -5991,7 +6002,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "qwen/qwen3-coder-30b-a3b-instruct",
@@ -6831,7 +6844,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/devstral-small",
@@ -6878,7 +6893,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
@@ -7396,7 +7413,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "minimax/minimax-m1",
@@ -8047,7 +8066,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "google/gemma-3n-e4b-it:free",
@@ -8265,7 +8286,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "google/gemini-2.5-pro-preview-05-06",
@@ -9941,7 +9964,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/mistral-small-3.1-24b-instruct",
@@ -9987,7 +10012,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "allenai/olmo-2-0325-32b-instruct",
@@ -10837,7 +10864,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "meta-llama/llama-guard-3-8b",
@@ -12342,7 +12371,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/mistral-large-2407",
@@ -12386,7 +12417,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/pixtral-large-2411",
@@ -12430,7 +12463,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "qwen/qwen-2.5-coder-32b-instruct",
@@ -12783,7 +12818,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/ministral-3b",
@@ -12827,7 +12864,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "qwen/qwen-2.5-7b-instruct",
@@ -13395,7 +13434,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "cohere/command-r-08-2024",
@@ -14194,7 +14235,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "openai/gpt-4o-mini-2024-07-18",
@@ -14507,7 +14550,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/mistral-7b-instruct",
@@ -14554,7 +14599,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/mistral-7b-instruct-v0.3",
@@ -14597,7 +14644,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "microsoft/phi-3-mini-128k-instruct",
@@ -15000,7 +15049,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "microsoft/wizardlm-2-8x22b",
@@ -15219,7 +15270,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "openai/gpt-3.5-turbo-0613",
@@ -15357,7 +15410,9 @@
         "tools",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/mistral-7b-instruct-v0.2",
@@ -15400,7 +15455,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "mistralai/mixtral-8x7b-instruct",
@@ -15447,7 +15504,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "neversleep/noromaid-20b",
@@ -15561,7 +15620,10 @@
         "tokenizer": "Router",
         "instruct_type": null
       },
-      "pricing": { "prompt": "-1", "completion": "-1" },
+      "pricing": {
+        "prompt": "-1",
+        "completion": "-1"
+      },
       "top_provider": {
         "context_length": null,
         "max_completion_tokens": null,
@@ -15702,7 +15764,9 @@
         "top_k",
         "top_p"
       ],
-      "default_parameters": { "temperature": 0.3 }
+      "default_parameters": {
+        "temperature": 0.3
+      }
     },
     {
       "id": "openai/gpt-3.5-turbo-16k",

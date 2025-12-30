@@ -10,7 +10,7 @@ import {
   type UIMessageChunk,
 } from "ai";
 
-import { type ModelConfig } from "@/lib/ai/models";
+import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);

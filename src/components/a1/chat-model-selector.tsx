@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/popover";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
+import { type ModelData } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { type ModelData } from "@/lib/ai/models";
 import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 

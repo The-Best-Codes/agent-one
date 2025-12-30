@@ -2,7 +2,7 @@ import React, { type ReactNode, useCallback, useState } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
-import { type ModelConfig, type ModelData } from "@/lib/ai/models";
+import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
 
 import { ModelContext } from "./model-contexts";
 
