@@ -228,7 +228,11 @@
       "description": "Gemini 2.5 Pro Preview TTS",
       "inputTokenLimit": 8192,
       "outputTokenLimit": 16384,
-      "supportedGenerationMethods": ["countTokens", "generateContent"],
+      "supportedGenerationMethods": [
+        "countTokens",
+        "generateContent",
+        "batchGenerateContent"
+      ],
       "temperature": 1,
       "topP": 0.95,
       "topK": 64,
