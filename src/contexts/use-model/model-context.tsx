@@ -1,7 +1,7 @@
 import React, { type ReactNode, useCallback, useState } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { useModels } from "@/hooks/ai/use-models";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/lib/ai/models";
 
 import { ModelContext } from "./model-contexts";
@@ -24,7 +24,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     getNewChatModelConfig,
     saveNewChatModelConfig,
   } = usePersistence();
-  const { getModelById, getDefaultChatModel } = useModels();
+  const { getModelById, getDefaultChatModel } = useModelCatalog();
 
   const [currentModel, setCurrentModel] = useState<ModelData>(() => {
     const savedModelId = getNewChatModelId();

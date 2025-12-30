@@ -25,7 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { useModels } from "@/hooks/ai/use-models";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { type ModelData } from "@/lib/ai/models";
 import { commandScore } from "@/lib/command-score";
@@ -122,7 +122,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 640px)");
-  const { AVAILABLE_CHAT_MODELS } = useModels();
+  const { AVAILABLE_CHAT_MODELS } = useModelCatalog();
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {

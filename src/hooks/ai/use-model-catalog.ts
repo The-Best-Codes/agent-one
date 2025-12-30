@@ -174,7 +174,7 @@ function mapOpenRouterImageModels(
     }));
 }
 
-export function useModels() {
+export function useModelCatalog() {
   const googleApiKey = useAtomValue(googleGenerativeAiApiKeyAtom);
   const groqApiKey = useAtomValue(groqApiKeyAtom);
   const cerebrasApiKey = useAtomValue(cerebrasApiKeyAtom);
