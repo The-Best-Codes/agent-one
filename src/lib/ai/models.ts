@@ -18,7 +18,7 @@ export interface ModelConfig {
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   temperature: 0.7,
-  maxTokens: undefined,
+  maxTokens: undefined, // undefined means let the provider decide
   topP: 1,
   frequencyPenalty: 0,
   presencePenalty: 0,
