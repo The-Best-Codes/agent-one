@@ -3,7 +3,10 @@ import { generateId } from "ai";
 import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback } from "react";
 
-import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/lib/ai/models";
+import {
+  DEFAULT_MODEL_CONFIG,
+  type ModelConfig,
+} from "@/hooks/ai/use-model-catalog";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 

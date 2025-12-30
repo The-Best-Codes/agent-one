@@ -10,7 +10,7 @@ import { memo, useEffect, useMemo } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import { type ModelConfig } from "@/lib/ai/models";
+import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {

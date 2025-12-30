@@ -94,7 +94,6 @@ export default function AccountSection() {
         setOpenrouterKey(openrouterInput);
         break;
     }
-    window.location.reload();
   };
 
   const handleCancelApiKey = (provider: string) => {
@@ -245,7 +244,7 @@ export default function AccountSection() {
                     disabled={!hasChanges}
                     variant="outline"
                     size="icon"
-                    title="Save key and reload"
+                    title="Save key"
                   >
                     <SaveIcon className="size-4" />
                   </Button>

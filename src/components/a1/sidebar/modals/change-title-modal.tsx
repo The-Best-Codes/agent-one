@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
-import { getModelById } from "@/lib/ai/models";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitle } from "@/lib/ai/title-generator";
 
 interface ChangeTitleModalProps {
@@ -40,6 +40,7 @@ const ChangeTitleForm = ({
   const [title, setTitle] = useState(currentTitle);
   const [isGenerating, setIsGenerating] = useState(false);
   const { saveChatTitle, loadChatData } = usePersistence();
+  const { getModelById } = useModelCatalog();
 
   const handleSave = () => {
     if (title.trim() && title.trim() !== currentTitle) {

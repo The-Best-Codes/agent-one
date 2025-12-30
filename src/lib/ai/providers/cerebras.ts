@@ -1,13 +1,6 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { getDefaultStore } from "jotai";
 
-import { cerebrasApiKeyAtom } from "@/lib/jotai/settings-atoms";
-
-export function getCerebras() {
-  const store = getDefaultStore();
-  const settingKey = store.get(cerebrasApiKeyAtom);
-  const apiKey = settingKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY;
-
+export function getCerebras(apiKey: string) {
   return createOpenAICompatible({
     name: "cerebras",
     apiKey,
@@ -17,5 +10,3 @@ export function getCerebras() {
     },
   });
 }
-
-export const cerebras = getCerebras();

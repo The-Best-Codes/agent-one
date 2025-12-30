@@ -8,8 +8,8 @@ import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useState } from "react";
 
 import { useTools } from "@/contexts/use-tools/tools-hooks";
+import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
-import { type ModelConfig } from "@/lib/ai/models";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
 import { smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";

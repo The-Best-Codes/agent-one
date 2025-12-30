@@ -15,11 +15,8 @@ import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
-import {
-  getModelById,
-  type ModelConfig,
-  type ModelData,
-} from "@/lib/ai/models";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
+import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -52,6 +49,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const [chatIds] = useAtom(chatIdsAtom);
   const [notificationSetting] = useAtom(notificationSettingAtom);
+  const { getModelById } = useModelCatalog();
 
   const currentChatId = useMemo(() => {
     if (location.pathname.startsWith("/chat/")) {
@@ -85,7 +83,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return defaultModelForNewChats;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [defaultModelForNewChats, updateKey],
+    [defaultModelForNewChats, updateKey, getModelById],
   );
 
   const getConfigForChat = useCallback(
