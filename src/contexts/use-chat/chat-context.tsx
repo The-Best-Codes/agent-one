@@ -83,7 +83,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return defaultModelForNewChats;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [defaultModelForNewChats, updateKey],
+    [defaultModelForNewChats, updateKey, getModelById],
   );
 
   const getConfigForChat = useCallback(
