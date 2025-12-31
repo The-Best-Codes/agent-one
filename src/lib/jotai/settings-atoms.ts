@@ -13,6 +13,7 @@ import {
   type ThemeOption,
   type ToolId,
 } from "@/lib/settings/types";
+import { dexieStorage } from "@/lib/storage/dexie-storage";
 
 const SETTING_PREFIX = "agent-one-setting-";
 
@@ -22,6 +23,15 @@ const createSettingAtom = <T>(
 ) => {
   const lsKey = `${SETTING_PREFIX}${key}`;
   return atomWithStorage<T>(lsKey, defaultValue, undefined, {
+    getOnInit: true,
+  });
+};
+
+const createApiKeyAtom = <T>(
+  key: keyof typeof DEFAULT_SETTINGS,
+  defaultValue: T,
+) => {
+  return atomWithStorage<T>(key, defaultValue, dexieStorage, {
     getOnInit: true,
   });
 };
@@ -132,22 +142,22 @@ export const systemPromptAppendixAtom = createSettingAtom(
   DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
 );
 
-export const googleGenerativeAiApiKeyAtom = createSettingAtom(
+export const googleGenerativeAiApiKeyAtom = createApiKeyAtom(
   "GOOGLE_GENERATIVE_AI_API_KEY",
   DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
 );
 
-export const groqApiKeyAtom = createSettingAtom(
+export const groqApiKeyAtom = createApiKeyAtom(
   "GROQ_API_KEY",
   DEFAULT_SETTINGS.GROQ_API_KEY,
 );
 
-export const openrouterApiKeyAtom = createSettingAtom(
+export const openrouterApiKeyAtom = createApiKeyAtom(
   "OPENROUTER_API_KEY",
   DEFAULT_SETTINGS.OPENROUTER_API_KEY,
 );
 
-export const cerebrasApiKeyAtom = createSettingAtom(
+export const cerebrasApiKeyAtom = createApiKeyAtom(
   "CEREBRAS_API_KEY",
   DEFAULT_SETTINGS.CEREBRAS_API_KEY,
 );
