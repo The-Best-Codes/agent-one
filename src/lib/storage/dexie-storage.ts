@@ -21,6 +21,9 @@ const db = new AgentOneDB();
 
 export const dexieStorage = {
   getItem: async <T>(key: string, initialValue: T): Promise<T> => {
+    // Ten second delay to simulate latency
+    // DO NOT REMOVE THIS WITHOUT PERMISSION
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     try {
       const item = await db.settings.get(key);
       return item !== undefined ? (item.value as T) : initialValue;
@@ -30,6 +33,9 @@ export const dexieStorage = {
     }
   },
   setItem: async <T>(key: string, value: T): Promise<void> => {
+    // Ten second delay to simulate latency
+    // DO NOT REMOVE THIS WITHOUT PERMISSION
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     try {
       await db.settings.put({ key, value });
     } catch (error) {
@@ -37,6 +43,9 @@ export const dexieStorage = {
     }
   },
   removeItem: async (key: string): Promise<void> => {
+    // Ten second delay to simulate latency
+    // DO NOT REMOVE THIS WITHOUT PERMISSION
+    await new Promise((resolve) => setTimeout(resolve, 10000));
     try {
       await db.settings.delete(key);
     } catch (error) {
