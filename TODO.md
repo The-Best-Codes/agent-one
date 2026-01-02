@@ -26,3 +26,4 @@
 - Add LOTS of new settings and rework the settings categories so settings have subcategories, allow searching, resetting categories, and more.
 - Fix bug where going to "Account" settings and reloading the page will not show any loading API key UI and once keys do load shows an empty input but reset and save buttons are enabled for some reason.
 - Don't submit to API until API keys load, show loader in chat-message-loader and update custom-chat-transport (and use-chat.ts hook if needed) similar to useTools
+- Select Groq model with short name; UI seems to be too narrow and push part off the sidebar?
