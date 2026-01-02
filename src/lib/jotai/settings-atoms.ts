@@ -13,7 +13,7 @@ import {
   type ThemeOption,
   type ToolId,
 } from "@/lib/settings/types";
-import { dexieStorage } from "@/lib/storage/dexie-storage";
+import { keyringStorage } from "@/lib/storage/keyring-storage";
 
 const SETTING_PREFIX = "agent-one-setting-";
 
@@ -31,7 +31,7 @@ const createApiKeyAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
   defaultValue: T,
 ) => {
-  return atomWithStorage<T>(key, defaultValue, dexieStorage, {
+  return atomWithStorage<T>(key, defaultValue, keyringStorage, {
     getOnInit: true,
   });
 };
