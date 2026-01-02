@@ -1,4 +1,4 @@
-import { atomWithStorage } from "jotai/utils";
+import { atomWithStorage, unwrap } from "jotai/utils";
 
 import {
   type ColorThemeOption,
@@ -31,9 +31,12 @@ const createApiKeyAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
   defaultValue: T,
 ) => {
-  return atomWithStorage<T>(key, defaultValue, keyringStorage, {
-    getOnInit: true,
-  });
+  return unwrap(
+    atomWithStorage<T>(key, defaultValue, keyringStorage, {
+      getOnInit: true,
+    }),
+    (prev) => (prev as T | undefined) ?? defaultValue,
+  );
 };
 
 export const markdownHighlightingAtom = createSettingAtom(

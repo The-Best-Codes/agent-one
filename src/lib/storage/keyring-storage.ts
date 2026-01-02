@@ -12,6 +12,10 @@ interface StorageResponse {
 export const keyringStorage = {
   getItem: async <T>(key: string, initialValue: T): Promise<T> => {
     try {
+      // Wait 5 seconds for testing
+      // DO NOT remove
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
       const defaultJson = JSON.stringify(initialValue);
       const response: StorageResponse = await invoke("storage_get_item", {
         key,
