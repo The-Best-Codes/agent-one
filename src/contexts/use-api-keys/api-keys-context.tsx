@@ -35,7 +35,6 @@ export const ApiKeysProvider: React.FC<ApiKeysProviderProps> = ({
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
   const resolvePromiseRef = useRef<(() => void) | null>(null);
 
-  // Call hooks at component level, not inside useMemo
   const googleLoadable = useAtomValue(
     loadable(googleGenerativeAiApiKeyLoadableAtom),
   );
@@ -59,7 +58,6 @@ export const ApiKeysProvider: React.FC<ApiKeysProviderProps> = ({
         loadable.state === "hasData" || loadable.state === "hasError",
     );
 
-    // Defer state updates to avoid setState-in-effect
     const updateStates = () => {
       if (currentlyLoading && !isApiKeysLoading) {
         setIsApiKeysLoading(true);

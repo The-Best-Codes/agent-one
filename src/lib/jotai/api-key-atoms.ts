@@ -15,7 +15,6 @@ const createApiKeyAtom = <T>(
   );
 };
 
-// Create loadable atoms for loading state detection
 const createLoadableApiKeyAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
   defaultValue: T,
@@ -45,7 +44,6 @@ export const cerebrasApiKeyAtom = createApiKeyAtom(
   DEFAULT_SETTINGS.CEREBRAS_API_KEY,
 );
 
-// Loadable atoms for loading detection
 export const googleGenerativeAiApiKeyLoadableAtom = createLoadableApiKeyAtom(
   "GOOGLE_GENERATIVE_AI_API_KEY",
   DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
