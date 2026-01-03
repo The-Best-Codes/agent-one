@@ -21,6 +21,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private smoothStreamEnabled: boolean;
   private getTools: () => Promise<ToolSet>;
   private getSystemPrompt: () => string;
+  private getApiKeysLoadedPromise: () => Promise<void>;
 
   constructor(
     model: LanguageModel,
@@ -28,12 +29,14 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     smoothStreamEnabled: boolean,
     getTools: () => Promise<ToolSet>,
     getSystemPrompt: () => string,
+    getApiKeysLoadedPromise: () => Promise<void>,
   ) {
     this.model = model;
     this.modelConfig = modelConfig;
     this.smoothStreamEnabled = smoothStreamEnabled;
     this.getTools = getTools;
     this.getSystemPrompt = getSystemPrompt;
+    this.getApiKeysLoadedPromise = getApiKeysLoadedPromise;
   }
 
   updateModel(model: LanguageModel) {
@@ -59,6 +62,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     logger.verbose("CustomChatTransport system prompt updated");
   }
 
+  updateGetApiKeysLoadedPromise(getApiKeysLoadedPromise: () => Promise<void>) {
+    this.getApiKeysLoadedPromise = getApiKeysLoadedPromise;
+    logger.verbose("CustomChatTransport API keys loaded promise updated");
+  }
+
   async sendMessages(
     options: {
       chatId: string;
@@ -69,6 +77,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messageId: string | undefined;
     } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
+    await this.getApiKeysLoadedPromise();
     const tools = await this.getTools();
 
     const result = streamText({

@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 
@@ -14,6 +15,7 @@ export const ChatMessageLoading = ({
 }) => {
   const { status } = useChatStatus();
   const messages = useChatMessages();
+  const { isApiKeysLoading } = useApiKeys();
   const { isMcpLoading } = useTools();
 
   const lastOverallMessage = messages[messages.length - 1];
@@ -36,7 +38,11 @@ export const ChatMessageLoading = ({
       return (
         <div className="justify-end">
           <span className="text-muted-foreground animate-pulse">
-            {isMcpLoading ? "Starting MCP servers..." : "Thinking..."}
+            {isApiKeysLoading
+              ? "Loading API keys..."
+              : isMcpLoading
+                ? "Starting MCP servers..."
+                : "Thinking..."}
           </span>
         </div>
       );
@@ -55,7 +61,11 @@ export const ChatMessageLoading = ({
         return (
           <div className="justify-end p-2">
             <span className="text-muted-foreground animate-pulse">
-              {isMcpLoading ? "Starting MCP servers..." : "Thinking..."}
+              {isApiKeysLoading
+                ? "Loading API keys..."
+                : isMcpLoading
+                  ? "Starting MCP servers..."
+                  : "Thinking..."}
             </span>
           </div>
         );
