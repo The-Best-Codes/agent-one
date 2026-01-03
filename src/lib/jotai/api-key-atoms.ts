@@ -12,6 +12,7 @@ const createApiKeyAtom = <T>(
     atomWithStorage<T>(key, defaultValue, keyringStorage, {
       getOnInit: true,
     }),
+    (prev) => (prev as T | undefined) ?? defaultValue,
   );
 };
 
