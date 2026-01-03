@@ -19,16 +19,13 @@ export const keyringStorage = {
       });
 
       if (response.error) {
-        logger.error(
-          `Error getting key "${key}" from keyring:`,
-          response.error,
-        );
+        logger.warn(`Error getting key "${key}" from keyring:`, response.error);
         return initialValue;
       }
 
       return response.value ? JSON.parse(response.value) : initialValue;
     } catch (error) {
-      logger.error(`Error getting key "${key}" from keyring:`, error);
+      logger.warn(`Error getting key "${key}" from keyring:`, error);
       return initialValue;
     }
   },
