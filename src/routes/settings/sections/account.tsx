@@ -81,6 +81,22 @@ export default function AccountSection() {
     setSystemPromptAppendix(appendixInput);
   }, [appendixInput, setSystemPromptAppendix]);
 
+  useEffect(() => {
+    setCerebrasInput(cerebrasKey);
+  }, [cerebrasKey]);
+
+  useEffect(() => {
+    setGoogleInput(googleKey);
+  }, [googleKey]);
+
+  useEffect(() => {
+    setGroqInput(groqKey);
+  }, [groqKey]);
+
+  useEffect(() => {
+    setOpenrouterInput(openrouterKey);
+  }, [openrouterKey]);
+
   const handleSaveApiKey = (provider: string) => {
     switch (provider) {
       case "cerebras":
