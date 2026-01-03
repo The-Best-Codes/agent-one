@@ -1,5 +1,4 @@
 import { useAtomValue } from "jotai";
-import { loadable } from "jotai/utils";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -35,14 +34,10 @@ export const ApiKeysProvider: React.FC<ApiKeysProviderProps> = ({
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
   const resolvePromiseRef = useRef<(() => void) | null>(null);
 
-  const googleLoadable = useAtomValue(
-    loadable(googleGenerativeAiApiKeyLoadableAtom),
-  );
-  const groqLoadable = useAtomValue(loadable(groqApiKeyLoadableAtom));
-  const openrouterLoadable = useAtomValue(
-    loadable(openrouterApiKeyLoadableAtom),
-  );
-  const cerebrasLoadable = useAtomValue(loadable(cerebrasApiKeyLoadableAtom));
+  const googleLoadable = useAtomValue(googleGenerativeAiApiKeyLoadableAtom);
+  const groqLoadable = useAtomValue(groqApiKeyLoadableAtom);
+  const openrouterLoadable = useAtomValue(openrouterApiKeyLoadableAtom);
+  const cerebrasLoadable = useAtomValue(cerebrasApiKeyLoadableAtom);
 
   const apiKeyLoadables = useMemo(
     () => [googleLoadable, groqLoadable, openrouterLoadable, cerebrasLoadable],

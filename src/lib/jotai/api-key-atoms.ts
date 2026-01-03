@@ -1,8 +1,9 @@
-import { atomWithStorage, unwrap } from "jotai/utils";
+import { atomWithStorage, loadable, unwrap } from "jotai/utils";
 
 import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 
+// Unwrapped atoms, so they don't suspend or hang the UI
 const createApiKeyAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
   defaultValue: T,
@@ -11,17 +12,7 @@ const createApiKeyAtom = <T>(
     atomWithStorage<T>(key, defaultValue, keyringStorage, {
       getOnInit: true,
     }),
-    (prev) => (prev as T | undefined) ?? defaultValue,
   );
-};
-
-const createLoadableApiKeyAtom = <T>(
-  key: keyof typeof DEFAULT_SETTINGS,
-  defaultValue: T,
-) => {
-  return atomWithStorage<T>(key, defaultValue, keyringStorage, {
-    getOnInit: true,
-  });
 };
 
 export const googleGenerativeAiApiKeyAtom = createApiKeyAtom(
@@ -44,22 +35,37 @@ export const cerebrasApiKeyAtom = createApiKeyAtom(
   DEFAULT_SETTINGS.CEREBRAS_API_KEY,
 );
 
-export const googleGenerativeAiApiKeyLoadableAtom = createLoadableApiKeyAtom(
-  "GOOGLE_GENERATIVE_AI_API_KEY",
-  DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
+// Loadable atoms, for the API key context to see the loading state
+const createLoadableApiKeyAtom = <T>(
+  key: keyof typeof DEFAULT_SETTINGS,
+  defaultValue: T,
+) => {
+  return atomWithStorage<T>(key, defaultValue, keyringStorage, {
+    getOnInit: true,
+  });
+};
+
+export const googleGenerativeAiApiKeyLoadableAtom = loadable(
+  createLoadableApiKeyAtom(
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+    DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
+  ),
 );
 
-export const groqApiKeyLoadableAtom = createLoadableApiKeyAtom(
-  "GROQ_API_KEY",
-  DEFAULT_SETTINGS.GROQ_API_KEY,
+export const groqApiKeyLoadableAtom = loadable(
+  createLoadableApiKeyAtom("GROQ_API_KEY", DEFAULT_SETTINGS.GROQ_API_KEY),
 );
 
-export const openrouterApiKeyLoadableAtom = createLoadableApiKeyAtom(
-  "OPENROUTER_API_KEY",
-  DEFAULT_SETTINGS.OPENROUTER_API_KEY,
+export const openrouterApiKeyLoadableAtom = loadable(
+  createLoadableApiKeyAtom(
+    "OPENROUTER_API_KEY",
+    DEFAULT_SETTINGS.OPENROUTER_API_KEY,
+  ),
 );
 
-export const cerebrasApiKeyLoadableAtom = createLoadableApiKeyAtom(
-  "CEREBRAS_API_KEY",
-  DEFAULT_SETTINGS.CEREBRAS_API_KEY,
+export const cerebrasApiKeyLoadableAtom = loadable(
+  createLoadableApiKeyAtom(
+    "CEREBRAS_API_KEY",
+    DEFAULT_SETTINGS.CEREBRAS_API_KEY,
+  ),
 );

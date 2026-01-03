@@ -50,6 +50,7 @@ export default [
               "OPENROUTER",
               "cerebras",
               "Cerebras",
+              "Loadables",
             ],
           },
         },
