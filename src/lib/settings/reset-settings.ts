@@ -3,12 +3,15 @@ import { RESET } from "jotai/utils";
 
 import {
   cerebrasApiKeyAtom,
+  googleGenerativeAiApiKeyAtom,
+  groqApiKeyAtom,
+  openrouterApiKeyAtom,
+} from "../jotai/api-key-atoms";
+import {
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   fontAtom,
-  googleGenerativeAiApiKeyAtom,
-  groqApiKeyAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -17,7 +20,6 @@ import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
   notificationSettingAtom,
-  openrouterApiKeyAtom,
   regenerateOnSaveAtom,
   roundnessAtom,
   smoothStreamEnabledAtom,

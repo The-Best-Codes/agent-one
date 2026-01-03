@@ -2,14 +2,14 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
 import {
   cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   openrouterApiKeyAtom,
-  userNameAtom,
-} from "@/lib/jotai/settings-atoms";
+} from "@/lib/jotai/api-key-atoms";
+import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
+import { userNameAtom } from "@/lib/jotai/settings-atoms";
 
 import { ApiKeysStep } from "./steps/api-keys";
 import { NameStep } from "./steps/name";

@@ -12,6 +12,8 @@ import {
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   openrouterApiKeyAtom,
+} from "@/lib/jotai/api-key-atoms";
+import {
   systemPromptAppendixAtom,
   userNameAtom,
 } from "@/lib/jotai/settings-atoms";

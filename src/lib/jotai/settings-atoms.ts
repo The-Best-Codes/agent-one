@@ -1,4 +1,4 @@
-import { atomWithStorage, unwrap } from "jotai/utils";
+import { atomWithStorage } from "jotai/utils";
 
 import {
   type ColorThemeOption,
@@ -13,7 +13,6 @@ import {
   type ThemeOption,
   type ToolId,
 } from "@/lib/settings/types";
-import { keyringStorage } from "@/lib/storage/keyring-storage";
 
 const SETTING_PREFIX = "agent-one-setting-";
 
@@ -25,18 +24,6 @@ const createSettingAtom = <T>(
   return atomWithStorage<T>(lsKey, defaultValue, undefined, {
     getOnInit: true,
   });
-};
-
-const createApiKeyAtom = <T>(
-  key: keyof typeof DEFAULT_SETTINGS,
-  defaultValue: T,
-) => {
-  return unwrap(
-    atomWithStorage<T>(key, defaultValue, keyringStorage, {
-      getOnInit: true,
-    }),
-    (prev) => (prev as T | undefined) ?? defaultValue,
-  );
 };
 
 export const markdownHighlightingAtom = createSettingAtom(
@@ -143,24 +130,4 @@ export const userNameAtom = createSettingAtom(
 export const systemPromptAppendixAtom = createSettingAtom(
   "SYSTEM_PROMPT_APPENDIX",
   DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
-);
-
-export const googleGenerativeAiApiKeyAtom = createApiKeyAtom(
-  "GOOGLE_GENERATIVE_AI_API_KEY",
-  DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
-);
-
-export const groqApiKeyAtom = createApiKeyAtom(
-  "GROQ_API_KEY",
-  DEFAULT_SETTINGS.GROQ_API_KEY,
-);
-
-export const openrouterApiKeyAtom = createApiKeyAtom(
-  "OPENROUTER_API_KEY",
-  DEFAULT_SETTINGS.OPENROUTER_API_KEY,
-);
-
-export const cerebrasApiKeyAtom = createApiKeyAtom(
-  "CEREBRAS_API_KEY",
-  DEFAULT_SETTINGS.CEREBRAS_API_KEY,
 );

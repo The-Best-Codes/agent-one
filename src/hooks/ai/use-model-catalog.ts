@@ -15,7 +15,7 @@ import {
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
   openrouterApiKeyAtom,
-} from "@/lib/jotai/settings-atoms";
+} from "@/lib/jotai/api-key-atoms";
 
 export interface ModelData {
   id: string;
