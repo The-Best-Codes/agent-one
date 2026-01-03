@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import {
   cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
@@ -50,6 +52,7 @@ const apiKeyFields: ApiKeyField[] = [
 const MAX_APPENDIX_CHARS = 2000;
 
 export default function AccountSection() {
+  const { isApiKeysLoading } = useApiKeys();
   const [userName, setUserName] = useAtom(userNameAtom);
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
     systemPromptAppendixAtom,
@@ -227,6 +230,20 @@ export default function AccountSection() {
           </p>
 
           {apiKeyFields.map((field) => {
+            if (isApiKeysLoading) {
+              return (
+                <div key={field.atomId} className="flex flex-col gap-2">
+                  <Skeleton className="h-5 w-32" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 flex-1" />
+                    <Skeleton className="size-9" />
+                    <Skeleton className="size-9" />
+                    <Skeleton className="size-9" />
+                  </div>
+                </div>
+              );
+            }
+
             const keyState = getKeyState(field.atomId);
             const isVisible = showKeys[field.atomId];
             const hasChanges = keyState.value !== keyState.original;
