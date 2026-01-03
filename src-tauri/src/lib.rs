@@ -2,6 +2,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use tauri::{Emitter, Manager};
 
+mod keyring;
 mod tools;
 mod utils;
 
@@ -97,11 +98,22 @@ pub fn run() {
                     utils::webview_html_callback,
                     utils::list_webviews,
                     utils::force_close_webview,
+                    keyring::storage_get_item,
+                    keyring::storage_set_item,
+                    keyring::storage_remove_item,
+                    keyring::storage_has_item,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
             {
-                tauri::generate_handler![tools::get_url_content, tools::web_search,]
+                tauri::generate_handler![
+                    tools::get_url_content,
+                    tools::web_search,
+                    keyring::storage_get_item,
+                    keyring::storage_set_item,
+                    keyring::storage_remove_item,
+                    keyring::storage_has_item,
+                ]
             }
         })
         .run(tauri::generate_context!())

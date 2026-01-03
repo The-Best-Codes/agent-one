@@ -7,6 +7,7 @@ import { type ChatInit, type LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useState } from "react";
 
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
@@ -26,6 +27,7 @@ export function useChat(
 ) {
   const smoothStreamEnabled = useAtomValue(smoothStreamEnabledAtom);
   const systemPrompt = useAtomValue(systemPromptAtom);
+  const { getApiKeysLoadedPromise } = useApiKeys();
   const { getTools } = useTools();
   const getSystemPrompt = useCallback(() => systemPrompt, [systemPrompt]);
   const [transport] = useState(
@@ -36,6 +38,7 @@ export function useChat(
         smoothStreamEnabled,
         getTools,
         getSystemPrompt,
+        getApiKeysLoadedPromise,
       ),
   );
 
@@ -58,6 +61,11 @@ export function useChat(
     transport.updateSystemPrompt(getSystemPrompt);
     logger.verbose("Updated chat transport with new system prompt");
   }, [getSystemPrompt, transport]);
+
+  useEffect(() => {
+    transport.updateGetApiKeysLoadedPromise(getApiKeysLoadedPromise);
+    logger.verbose("Updated chat transport with new API keys loaded promise");
+  }, [getApiKeysLoadedPromise, transport]);
 
   const chatResult = useChatSDK({
     transport: transport,
