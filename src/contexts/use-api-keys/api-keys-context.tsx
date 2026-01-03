@@ -1,6 +1,5 @@
 import { useAtomValue } from "jotai";
-import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 
 import {
   cerebrasApiKeyLoadableAtom,
@@ -20,84 +19,48 @@ export interface ApiKeysContextType {
   getApiKeysLoadedPromise: () => Promise<void>;
 }
 
-interface ApiKeysProviderProps {
-  children: ReactNode;
-}
+export const ApiKeysProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const google = useAtomValue(googleGenerativeAiApiKeyLoadableAtom);
+  const groq = useAtomValue(groqApiKeyLoadableAtom);
+  const openrouter = useAtomValue(openrouterApiKeyLoadableAtom);
+  const cerebras = useAtomValue(cerebrasApiKeyLoadableAtom);
 
-export const ApiKeysProvider: React.FC<ApiKeysProviderProps> = ({
-  children,
-}) => {
-  const [isApiKeysLoading, setIsApiKeysLoading] = useState(true);
-  const [apiKeysLoaded, setApiKeysLoaded] = useState(false);
+  const loadables = useMemo(() => [google, groq, openrouter, cerebras], [google, groq, openrouter, cerebras]);
+  const isApiKeysLoading = loadables.some((l) => l.state === "loading");
+  const apiKeysLoaded = loadables.every((l) => l.state !== "loading");
 
-  const apiKeysLoadedRef = useRef(false);
-  const loadingPromiseRef = useRef<Promise<void> | null>(null);
-  const resolvePromiseRef = useRef<(() => void) | null>(null);
-
-  const googleLoadable = useAtomValue(googleGenerativeAiApiKeyLoadableAtom);
-  const groqLoadable = useAtomValue(groqApiKeyLoadableAtom);
-  const openrouterLoadable = useAtomValue(openrouterApiKeyLoadableAtom);
-  const cerebrasLoadable = useAtomValue(cerebrasApiKeyLoadableAtom);
-
-  const apiKeyLoadables = useMemo(
-    () => [googleLoadable, groqLoadable, openrouterLoadable, cerebrasLoadable],
-    [googleLoadable, groqLoadable, openrouterLoadable, cerebrasLoadable],
-  );
-
-  useEffect(() => {
-    const currentlyLoading = apiKeyLoadables.some(
-      (loadable) => loadable.state === "loading",
-    );
-    const currentlyLoaded = apiKeyLoadables.every(
-      (loadable) =>
-        loadable.state === "hasData" || loadable.state === "hasError",
-    );
-
-    const updateStates = () => {
-      if (currentlyLoading && !isApiKeysLoading) {
-        setIsApiKeysLoading(true);
-        setApiKeysLoaded(false);
-      }
-
-      if (currentlyLoaded && !apiKeysLoadedRef.current) {
-        setIsApiKeysLoading(false);
-        setApiKeysLoaded(true);
-        apiKeysLoadedRef.current = true;
-
-        if (resolvePromiseRef.current) {
-          resolvePromiseRef.current();
-          resolvePromiseRef.current = null;
-        }
-
-        logger.verbose("All API keys have finished loading");
-      }
-    };
-
-    const timeoutId = setTimeout(updateStates, 0);
-    return () => clearTimeout(timeoutId);
-  }, [apiKeyLoadables, isApiKeysLoading]);
+  const deferredRef = useRef<{ promise: Promise<void>; resolve: () => void } | null>(null);
 
   const getApiKeysLoadedPromise = useCallback(() => {
-    if (apiKeysLoadedRef.current) {
-      return Promise.resolve();
+    if (apiKeysLoaded) return Promise.resolve();
+
+    if (!deferredRef.current) {
+      let resolveRef: () => void;
+      const promise = new Promise<void>((resolve) => {
+        resolveRef = resolve;
+      });
+      deferredRef.current = { promise, resolve: resolveRef! };
     }
 
-    if (loadingPromiseRef.current && !resolvePromiseRef.current) {
-      return loadingPromiseRef.current;
+    return deferredRef.current.promise;
+  }, [apiKeysLoaded]);
+
+  useEffect(() => {
+    if (apiKeysLoaded && deferredRef.current) {
+      logger.verbose("All API keys have finished loading, resolving pending promises");
+      deferredRef.current.resolve();
+      deferredRef.current = null;
     }
+  }, [apiKeysLoaded]);
 
-    loadingPromiseRef.current = new Promise<void>((resolve) => {
-      resolvePromiseRef.current = resolve;
-    });
-
-    return loadingPromiseRef.current;
-  }, []);
-
-  return (
-    <ApiKeysContext.Provider
-      value={{ isApiKeysLoading, apiKeysLoaded, getApiKeysLoadedPromise }}
-    >
-      {children}
-    </ApiKeysContext.Provider>
+  const value = useMemo(
+    () => ({
+      isApiKeysLoading,
+      apiKeysLoaded,
+      getApiKeysLoadedPromise,
+    }),
+    [isApiKeysLoading, apiKeysLoaded, getApiKeysLoadedPromise]
   );
+
+  return <ApiKeysContext.Provider value={value}>{children}</ApiKeysContext.Provider>;
 };
