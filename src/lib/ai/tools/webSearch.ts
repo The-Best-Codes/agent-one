@@ -28,14 +28,14 @@ export const WebSearchTool = tool({
     query: z
       .string()
       .min(1)
-      .max(200)
+      .max(512)
       .describe("Search query to find information on the web"),
     maxResults: z
       .number()
       .min(1)
-      .max(20)
-      .default(10)
-      .describe("Maximum number of search results to return (1-20)"),
+      .max(200)
+      .default(100)
+      .describe("Maximum number of search results to return"),
     timeoutSeconds: z
       .number()
       .min(1)
