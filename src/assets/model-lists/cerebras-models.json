@@ -2,19 +2,13 @@
   "object": "list",
   "data": [
     {
-      "id": "llama-3.3-70b",
-      "object": "model",
-      "created": 0,
-      "owned_by": "Cerebras"
-    },
-    {
       "id": "qwen-3-32b",
       "object": "model",
       "created": 0,
       "owned_by": "Cerebras"
     },
     {
-      "id": "qwen-3-235b-a22b-instruct-2507",
+      "id": "llama-3.3-70b",
       "object": "model",
       "created": 0,
       "owned_by": "Cerebras"
@@ -27,6 +21,12 @@
     },
     {
       "id": "llama3.1-8b",
+      "object": "model",
+      "created": 0,
+      "owned_by": "Cerebras"
+    },
+    {
+      "id": "qwen-3-235b-a22b-instruct-2507",
       "object": "model",
       "created": 0,
       "owned_by": "Cerebras"

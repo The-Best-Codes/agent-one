@@ -101,7 +101,7 @@
       "name": "MiniMax: MiniMax M2.1",
       "created": 1766454997,
       "description": "MiniMax-M2.1 is a lightweight, state-of-the-art large language model optimized for coding, agentic workflows, and modern application development. With only 10 billion activated parameters, it delivers a major jump in real-world capability while maintaining exceptional latency, scalability, and cost efficiency.\n\nCompared to its predecessor, M2.1 delivers cleaner, more concise outputs and faster perceived response times. It shows leading multilingual coding performance across major systems and application languages, achieving 49.4% on Multi-SWE-Bench and 72.5% on SWE-Bench Multilingual, and serves as a versatile agent “brain” for IDEs, coding tools, and general-purpose assistance.\n\nTo avoid degrading this model's performance, MiniMax highly recommends preserving reasoning between turns. Learn more about using reasoning_details to pass back reasoning in our [docs](https://openrouter.ai/docs/use-cases/reasoning-tokens#preserving-reasoning-blocks).",
-      "context_length": 204800,
+      "context_length": 196608,
       "architecture": {
         "modality": "text->text",
         "input_modalities": ["text"],
@@ -110,18 +110,16 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.0000003",
-        "completion": "0.0000012",
+        "prompt": "0.00000012",
+        "completion": "0.00000048",
         "request": "0",
         "image": "0",
         "web_search": "0",
-        "internal_reasoning": "0",
-        "input_cache_read": "0.00000003",
-        "input_cache_write": "0.000000375"
+        "internal_reasoning": "0"
       },
       "top_provider": {
-        "context_length": 204800,
-        "max_completion_tokens": 131072,
+        "context_length": 196608,
+        "max_completion_tokens": null,
         "is_moderated": false
       },
       "per_request_limits": null,
@@ -1843,6 +1841,7 @@
         "reasoning",
         "response_format",
         "seed",
+        "stop",
         "structured_outputs",
         "temperature",
         "top_p"
@@ -3028,8 +3027,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000064",
-        "completion": "0.0000004",
+        "prompt": "0.00000008",
+        "completion": "0.0000005",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -3291,8 +3290,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000056",
-        "completion": "0.000000224",
+        "prompt": "0.00000007",
+        "completion": "0.00000028",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -3382,8 +3381,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.00000016",
-        "completion": "0.0000008",
+        "prompt": "0.0000002",
+        "completion": "0.000001",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -4516,7 +4515,7 @@
       "name": "Qwen: Qwen3 Next 80B A3B Thinking",
       "created": 1757612284,
       "description": "Qwen3-Next-80B-A3B-Thinking is a reasoning-first chat model in the Qwen3-Next line that outputs structured “thinking” traces by default. It’s designed for hard multi-step problems; math proofs, code synthesis/debugging, logic, and agentic planning, and reports strong results across knowledge, reasoning, coding, alignment, and multilingual evaluations. Compared with prior Qwen3 variants, it emphasizes stability under long chains of thought and efficient scaling during inference, and it is tuned to follow complex instructions while reducing repetitive or off-task behavior.\n\nThe model is suitable for agent frameworks and tool use (function calling), retrieval-heavy workflows, and standardized benchmarking where step-by-step solutions are required. It supports long, detailed completions and leverages throughput-oriented techniques (e.g., multi-token prediction) for faster generation. Note that it operates in thinking-only mode.",
-      "context_length": 131072,
+      "context_length": 262144,
       "architecture": {
         "modality": "text->text",
         "input_modalities": ["text"],
@@ -4525,7 +4524,7 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.00000012",
+        "prompt": "0.00000015",
         "completion": "0.0000012",
         "request": "0",
         "image": "0",
@@ -4533,8 +4532,8 @@
         "internal_reasoning": "0"
       },
       "top_provider": {
-        "context_length": 131072,
-        "max_completion_tokens": 32768,
+        "context_length": 262144,
+        "max_completion_tokens": 262144,
         "is_moderated": false
       },
       "per_request_limits": null,
@@ -4581,8 +4580,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.00000009",
-        "completion": "0.0000011",
+        "prompt": "0.00000006",
+        "completion": "0.0000006",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -5461,8 +5460,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000056",
-        "completion": "0.000000224",
+        "prompt": "0.00000007",
+        "completion": "0.00000028",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -5509,8 +5508,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000112",
-        "completion": "0.000000448",
+        "prompt": "0.00000014",
+        "completion": "0.00000056",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -5555,13 +5554,13 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.00000048",
-        "completion": "0.00000144",
+        "prompt": "0.0000006",
+        "completion": "0.0000018",
         "request": "0",
         "image": "0",
         "web_search": "0",
         "internal_reasoning": "0",
-        "input_cache_read": "0.000000088",
+        "input_cache_read": "0.00000011",
         "input_cache_write": "0"
       },
       "top_provider": {
@@ -5902,8 +5901,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000039",
-        "completion": "0.00000019",
+        "prompt": "0.00000002",
+        "completion": "0.0000001",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -6064,8 +6063,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.00000003",
-        "completion": "0.00000014",
+        "prompt": "0.000000016",
+        "completion": "0.00000006",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -6410,8 +6409,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000104",
-        "completion": "0.00000068",
+        "prompt": "0.00000013",
+        "completion": "0.00000085",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -6966,8 +6965,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000028",
-        "completion": "0.0000001104",
+        "prompt": "0.000000035",
+        "completion": "0.000000138",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -7435,8 +7434,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000336",
-        "completion": "0.000001",
+        "prompt": "0.00000042",
+        "completion": "0.00000125",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -7479,8 +7478,8 @@
         "instruct_type": null
       },
       "pricing": {
-        "prompt": "0.000000224",
-        "completion": "0.00000088",
+        "prompt": "0.00000028",
+        "completion": "0.0000011",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -7988,8 +7987,8 @@
         "instruct_type": "deepseek-r1"
       },
       "pricing": {
-        "prompt": "0.000000048",
-        "completion": "0.000000072",
+        "prompt": "0.00000006",
+        "completion": "0.00000009",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -8085,7 +8084,7 @@
       },
       "top_provider": {
         "context_length": 163840,
-        "max_completion_tokens": 163840,
+        "max_completion_tokens": 65536,
         "is_moderated": false
       },
       "per_request_limits": null,
@@ -8988,8 +8987,8 @@
         "instruct_type": "qwen3"
       },
       "pricing": {
-        "prompt": "0.000000028",
-        "completion": "0.0000001104",
+        "prompt": "0.000000035",
+        "completion": "0.000000138",
         "request": "0",
         "image": "0",
         "web_search": "0",
@@ -9468,8 +9467,10 @@
         "response_format",
         "seed",
         "structured_outputs",
+        "temperature",
         "tool_choice",
-        "tools"
+        "tools",
+        "top_p"
       ],
       "default_parameters": {}
     },
@@ -9508,8 +9509,10 @@
         "response_format",
         "seed",
         "structured_outputs",
+        "temperature",
         "tool_choice",
-        "tools"
+        "tools",
+        "top_p"
       ],
       "default_parameters": {}
     },
@@ -9548,8 +9551,10 @@
         "response_format",
         "seed",
         "structured_outputs",
+        "temperature",
         "tool_choice",
-        "tools"
+        "tools",
+        "top_p"
       ],
       "default_parameters": {}
     },
@@ -10508,7 +10513,7 @@
       "name": "Google: Gemma 3 27B",
       "created": 1741756359,
       "description": "Gemma 3 introduces multimodality, supporting vision-language input and text outputs. It handles context windows up to 128k tokens, understands over 140 languages, and offers improved math, reasoning, and chat capabilities, including structured outputs and function calling. Gemma 3 27B is Google's latest open source model, successor to [Gemma 2](google/gemma-2-27b-it)",
-      "context_length": 96000,
+      "context_length": 131072,
       "architecture": {
         "modality": "text+image->text",
         "input_modalities": ["text", "image"],
@@ -10517,16 +10522,16 @@
         "instruct_type": "gemma"
       },
       "pricing": {
-        "prompt": "0.00000004",
-        "completion": "0.00000015",
+        "prompt": "0.000000036",
+        "completion": "0.000000064",
         "request": "0",
         "image": "0",
         "web_search": "0",
         "internal_reasoning": "0"
       },
       "top_provider": {
-        "context_length": 96000,
-        "max_completion_tokens": 96000,
+        "context_length": 131072,
+        "max_completion_tokens": null,
         "is_moderated": false
       },
       "per_request_limits": null,
@@ -11592,7 +11597,7 @@
       "name": "DeepSeek: R1 Distill Qwen 32B",
       "created": 1738194830,
       "description": "DeepSeek R1 Distill Qwen 32B is a distilled large language model based on [Qwen 2.5 32B](https://huggingface.co/Qwen/Qwen2.5-32B), using outputs from [DeepSeek R1](/deepseek/deepseek-r1). It outperforms OpenAI's o1-mini across various benchmarks, achieving new state-of-the-art results for dense models.\\n\\nOther benchmark results include:\\n\\n- AIME 2024 pass@1: 72.6\\n- MATH-500 pass@1: 94.3\\n- CodeForces Rating: 1691\\n\\nThe model leverages fine-tuning from DeepSeek R1's outputs, enabling competitive performance comparable to larger frontier models.",
-      "context_length": 64000,
+      "context_length": 131072,
       "architecture": {
         "modality": "text->text",
         "input_modalities": ["text"],
@@ -11601,16 +11606,16 @@
         "instruct_type": "deepseek-r1"
       },
       "pricing": {
-        "prompt": "0.00000024",
-        "completion": "0.00000024",
+        "prompt": "0.00000027",
+        "completion": "0.00000027",
         "request": "0",
         "image": "0",
         "web_search": "0",
         "internal_reasoning": "0"
       },
       "top_provider": {
-        "context_length": 64000,
-        "max_completion_tokens": 32000,
+        "context_length": 131072,
+        "max_completion_tokens": null,
         "is_moderated": false
       },
       "per_request_limits": null,
@@ -11648,8 +11653,8 @@
         "instruct_type": "deepseek-r1"
       },
       "pricing": {
-        "prompt": "0.00000012",
-        "completion": "0.00000012",
+        "prompt": "0.00000015",
+        "completion": "0.00000015",
         "request": "0",
         "image": "0",
         "web_search": "0",
