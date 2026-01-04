@@ -34,8 +34,16 @@ export const WebSearchTool = tool({
       .number()
       .min(1)
       .max(200)
-      .default(100)
+      .default(20)
       .describe("Maximum number of search results to return"),
+    maxPages: z
+      .number()
+      .min(1)
+      .max(20)
+      .default(1)
+      .describe(
+        "Maximum number of search result pages to view (more than 1 may take longer)",
+      ),
     timeoutSeconds: z
       .number()
       .min(1)
@@ -85,6 +93,7 @@ export const WebSearchTool = tool({
       const searchPromise = invoke<WebSearchResponse>("web_search", {
         query: input.query,
         maxResults: input.maxResults,
+        maxPages: input.maxPages,
         timeoutSeconds: input.timeoutSeconds,
         useWebview: input.useWebview,
       });
