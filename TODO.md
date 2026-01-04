@@ -24,4 +24,4 @@
 - Add setting to always show action row, not just on hover or on small screens
 - Support downloading and running local AI models via llama.cpp (using this Rust lib? https://github.com/ShelbyJenkins/llm_client)
 - Add LOTS of new settings and rework the settings categories so settings have subcategories, allow searching, resetting categories, and more.
-- Select Groq model with short name; UI seems to be too narrow and push part off the sidebar?
+- Test new API keys (keychain) on Windows and macOS
