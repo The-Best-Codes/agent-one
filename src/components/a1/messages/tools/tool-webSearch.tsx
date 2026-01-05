@@ -133,7 +133,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
-              <ScrollArea viewportClassName="max-h-96">
+              <ScrollArea type="always" viewportClassName="max-h-96">
                 <div className="flex flex-col gap-2">
                   <div>
                     {result.search_url && (
