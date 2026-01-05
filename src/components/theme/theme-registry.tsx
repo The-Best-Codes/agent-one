@@ -6,6 +6,7 @@ import {
   colorThemeAtom,
   fontAtom,
   roundnessAtom,
+  textScaleAtom,
   themeAtom,
 } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
@@ -15,11 +16,13 @@ export function ThemeRegistry() {
   const [rawColorTheme] = useAtom(colorThemeAtom);
   const [rawRoundness] = useAtom(roundnessAtom);
   const [rawFont] = useAtom(fontAtom);
+  const [rawTextScale] = useAtom(textScaleAtom);
 
   const theme = jsonParseCatch(rawTheme);
   const colorTheme = jsonParseCatch(rawColorTheme);
   const roundness = jsonParseCatch(rawRoundness);
   const font = jsonParseCatch(rawFont);
+  const textScale = jsonParseCatch(rawTextScale);
 
   useEffect(() => {
     // Handle theme
@@ -65,7 +68,18 @@ export function ThemeRegistry() {
       root.classList.add("font-mono");
     }
     root.setAttribute("data-font", font || "default");
-  }, [theme, colorTheme, roundness, font]);
+
+    root.classList.remove(
+      "text-xs",
+      "text-sm",
+      "text-md",
+      "text-lg",
+      "text-xl",
+      "text-2xl",
+    );
+    root.classList.add(`text-${textScale || "md"}`);
+    root.setAttribute("data-text-scale", textScale || "md");
+  }, [theme, colorTheme, roundness, font, textScale]);
 
   return null;
 }

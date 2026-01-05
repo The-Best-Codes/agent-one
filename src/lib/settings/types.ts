@@ -14,6 +14,7 @@ export type ColorThemeOption =
   | "violet";
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
 export type FontOption = "default" | "system" | "mono";
+export type TextScaleOption = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type NotificationOption = "always" | "when-unfocused" | "never";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 
@@ -47,6 +48,7 @@ export interface DefaultSettings {
   COLOR_THEME: ColorThemeOption;
   ROUNDNESS: RoundnessOption;
   FONT: FontOption;
+  TEXT_SCALE: TextScaleOption;
   NOTIFICATION_SETTING: NotificationOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
   MCP_SERVERS: McpServerConfig[];
@@ -75,6 +77,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   COLOR_THEME: "default",
   ROUNDNESS: "md",
   FONT: "default",
+  TEXT_SCALE: "md",
   NOTIFICATION_SETTING: "never",
   ENABLED_TOOLS: {
     dateTime: true,

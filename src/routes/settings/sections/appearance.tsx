@@ -5,11 +5,19 @@ import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   colorThemeAtom,
   fontAtom,
   roundnessAtom,
+  textScaleAtom,
 } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +32,15 @@ const fontOptions = [
   { value: "default", label: "Default", className: "font-space-grotesk" },
   { value: "system", label: "System", className: "font-sans" },
   { value: "mono", label: "Mono", className: "font-mono" },
+] as const;
+
+const textScaleOptions = [
+  { value: "xs", label: "Tiny" },
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Default" },
+  { value: "lg", label: "Large" },
+  { value: "xl", label: "Huge" },
+  { value: "2xl", label: "Gigantic" },
 ] as const;
 
 const colorThemeOptions = [
@@ -81,6 +98,7 @@ export default function AppearanceSection() {
   const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
   const [font, setFont] = useAtom(fontAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
+  const [textScale, setTextScale] = useAtom(textScaleAtom);
 
   return (
     <Card>
@@ -182,6 +200,33 @@ export default function AppearanceSection() {
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+          <div className="flex flex-col items-start">
+            <Label className="text-sm font-medium">Text Scale</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Adjust the text size throughout the application.
+            </p>
+          </div>
+          <div className="w-full md:max-w-64">
+            <Select
+              value={textScale}
+              onValueChange={(value) => setTextScale(value as typeof textScale)}
+              aria-label="Select text scale"
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {textScaleOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardContent>
     </Card>

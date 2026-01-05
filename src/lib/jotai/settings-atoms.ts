@@ -10,6 +10,7 @@ import {
   type RoundnessOption,
   type StopButtonBehaviorOption,
   type SubmitKeyOption,
+  type TextScaleOption,
   type ThemeOption,
   type ToolId,
 } from "@/lib/settings/types";
@@ -100,6 +101,11 @@ export const roundnessAtom = createSettingAtom<RoundnessOption>(
 export const fontAtom = createSettingAtom<FontOption>(
   "FONT",
   DEFAULT_SETTINGS.FONT,
+);
+
+export const textScaleAtom = createSettingAtom<TextScaleOption>(
+  "TEXT_SCALE",
+  DEFAULT_SETTINGS.TEXT_SCALE,
 );
 
 export const notificationSettingAtom = createSettingAtom<NotificationOption>(

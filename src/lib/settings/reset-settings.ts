@@ -26,6 +26,7 @@ import {
   stopButtonBehaviorAtom,
   submitKeyAtom,
   systemPromptAppendixAtom,
+  textScaleAtom,
   themeAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
@@ -113,6 +114,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "FONT":
       store.set(fontAtom, RESET);
+      break;
+    case "TEXT_SCALE":
+      store.set(textScaleAtom, RESET);
       break;
     case "NOTIFICATION_SETTING":
       store.set(notificationSettingAtom, RESET);
