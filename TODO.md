@@ -1,4 +1,3 @@
-- Allow sending message after error as long as it won't cause an API error (there should be a tool result, etc.)
 - Scroll to active model
 - Bulk actions in sidebar
 - Migrate to Base UI when it's stable. That will fix a lot of issues.

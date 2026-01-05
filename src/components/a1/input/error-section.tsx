@@ -1,4 +1,4 @@
-import { RefreshCcwIcon } from "lucide-react";
+import { RefreshCcwIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
 
 export const MainInputErrorSection = () => {
   const { error } = useChatStatus();
-  const { regenerate } = useChatFunctions();
+  const { regenerate, clearError } = useChatFunctions();
 
   if (!error) {
     return null;
@@ -48,6 +48,14 @@ export const MainInputErrorSection = () => {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        <Button
+          title="Ignore error"
+          size="icon"
+          onClick={() => clearError()}
+          variant="outline"
+        >
+          <XIcon />
+        </Button>
       </div>
     </div>
   );

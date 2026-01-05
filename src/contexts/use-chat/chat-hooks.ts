@@ -19,6 +19,7 @@ export type ChatFunctionsContextType = Pick<
   | "addToolOutput"
   | "addToolApprovalResponse"
   | "regenerate"
+  | "clearError"
   | "resumeStream"
   | "stop"
   | "setMessages"
