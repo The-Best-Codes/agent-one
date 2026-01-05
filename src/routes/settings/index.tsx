@@ -68,10 +68,7 @@ export default function SettingsRoute() {
 
       <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
         <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
-          <ScrollArea
-            type="always"
-            className="hidden w-64 shrink-0 md:flex md:flex-col"
-          >
+          <ScrollArea className="hidden w-64 shrink-0 md:flex md:flex-col">
             <div className="flex flex-col gap-2">
               <div className="mb-2">
                 <Button
@@ -90,7 +87,7 @@ export default function SettingsRoute() {
             </div>
           </ScrollArea>
 
-          <ScrollArea type="always" className="flex-1 md:min-h-0">
+          <ScrollArea className="flex-1 md:min-h-0">
             <SettingsContent activeSection={activeSection} />
           </ScrollArea>
         </div>
