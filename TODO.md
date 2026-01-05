@@ -1,4 +1,3 @@
-- Scroll to active model
 - Bulk actions in sidebar
 - Migrate to Base UI when it's stable. That will fix a lot of issues.
 - Improve settings UX by adding previews of settings. For example, instead of "smooth stream" with a toggle, put two large components under a header "Stream Type". One will be choppy, the other smooth. Then the user can see in practice what the difference is!
