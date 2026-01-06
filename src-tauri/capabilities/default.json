@@ -57,6 +57,9 @@
     "process:default",
     "deep-link:default",
     "os:default",
-    "http:default"
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "https://opencode.ai/**" }]
+    }
   ]
 }
