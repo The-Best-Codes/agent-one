@@ -5,6 +5,7 @@ import {
   cerebrasApiKeyLoadableAtom,
   googleGenerativeAiApiKeyLoadableAtom,
   groqApiKeyLoadableAtom,
+  opencodeApiKeyLoadableAtom,
   openrouterApiKeyLoadableAtom,
 } from "@/lib/jotai/api-key-atoms";
 import { getLogger } from "@/lib/logger";
@@ -20,11 +21,13 @@ export const ApiKeysProvider: React.FC<{ children: ReactNode }> = ({
   const groq = useAtomValue(groqApiKeyLoadableAtom);
   const openrouter = useAtomValue(openrouterApiKeyLoadableAtom);
   const cerebras = useAtomValue(cerebrasApiKeyLoadableAtom);
+  const opencode = useAtomValue(opencodeApiKeyLoadableAtom);
 
   const loadables = useMemo(
-    () => [google, groq, openrouter, cerebras],
-    [google, groq, openrouter, cerebras],
+    () => [google, groq, openrouter, cerebras, opencode],
+    [google, groq, openrouter, cerebras, opencode],
   );
+
   const isApiKeysLoading = loadables.some((l) => l.state === "loading");
 
   const deferredRef = useRef<{

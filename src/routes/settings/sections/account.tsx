@@ -13,6 +13,7 @@ import {
   cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
+  opencodeApiKeyAtom,
   openrouterApiKeyAtom,
 } from "@/lib/jotai/api-key-atoms";
 import {
@@ -47,6 +48,11 @@ const apiKeyFields: ApiKeyField[] = [
     label: "OpenRouter",
     placeholder: "Your OpenRouter API key",
   },
+  {
+    atomId: "opencode",
+    label: "OpenCode",
+    placeholder: "Your OpenCode API key",
+  },
 ];
 
 const MAX_APPENDIX_CHARS = 2000;
@@ -61,6 +67,7 @@ export default function AccountSection() {
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
+  const [opencodeKey, setOpencodeKey] = useAtom(opencodeApiKeyAtom);
 
   const [nameInput, setNameInput] = useState(userName);
   const [appendixInput, setAppendixInput] = useState(systemPromptAppendix);
@@ -68,12 +75,14 @@ export default function AccountSection() {
   const [googleInput, setGoogleInput] = useState(googleKey);
   const [groqInput, setGroqInput] = useState(groqKey);
   const [openrouterInput, setOpenrouterInput] = useState(openrouterKey);
+  const [opencodeInput, setOpencodeInput] = useState(opencodeKey);
 
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({
     cerebras: false,
     google: false,
     groq: false,
     openrouter: false,
+    opencode: false,
   });
 
   useEffect(() => {
@@ -100,6 +109,10 @@ export default function AccountSection() {
     setOpenrouterInput(openrouterKey);
   }, [openrouterKey]);
 
+  useEffect(() => {
+    setOpencodeInput(opencodeKey);
+  }, [opencodeKey]);
+
   const handleSaveApiKey = (provider: string) => {
     switch (provider) {
       case "cerebras":
@@ -113,6 +126,9 @@ export default function AccountSection() {
         break;
       case "openrouter":
         setOpenrouterKey(openrouterInput);
+        break;
+      case "opencode":
+        setOpencodeKey(opencodeInput);
         break;
     }
   };
@@ -130,6 +146,9 @@ export default function AccountSection() {
         break;
       case "openrouter":
         setOpenrouterInput(openrouterKey);
+        break;
+      case "opencode":
+        setOpencodeInput(opencodeKey);
         break;
     }
   };
@@ -162,6 +181,12 @@ export default function AccountSection() {
           value: openrouterInput,
           set: setOpenrouterInput,
           original: openrouterKey,
+        };
+      case "opencode":
+        return {
+          value: opencodeInput,
+          set: setOpencodeInput,
+          original: opencodeKey,
         };
       default:
         return { value: "", set: () => {}, original: "" };

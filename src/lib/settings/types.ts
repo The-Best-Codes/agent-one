@@ -59,6 +59,7 @@ export interface DefaultSettings {
   GROQ_API_KEY: string;
   OPENROUTER_API_KEY: string;
   CEREBRAS_API_KEY: string;
+  OPENCODE_API_KEY: string;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -101,4 +102,5 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   GROQ_API_KEY: "",
   OPENROUTER_API_KEY: "",
   CEREBRAS_API_KEY: "",
+  OPENCODE_API_KEY: "",
 };

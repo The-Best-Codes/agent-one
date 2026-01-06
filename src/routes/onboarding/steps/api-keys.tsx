@@ -27,6 +27,7 @@ const API_KEY_CONFIG: ApiKeyConfig[] = [
   },
   { provider: "groq", key: "GROQ_API_KEY", label: "Groq" },
   { provider: "openrouter", key: "OPENROUTER_API_KEY", label: "OpenRouter" },
+  { provider: "opencode", key: "OPENCODE_API_KEY", label: "OpenCode" },
 ];
 
 export function ApiKeysStep({ onSubmit, initialKeys = {} }: ApiKeysStepProps) {
@@ -44,7 +45,8 @@ export function ApiKeysStep({ onSubmit, initialKeys = {} }: ApiKeysStepProps) {
     apiKeyInputs.cerebras ||
     apiKeyInputs.google ||
     apiKeyInputs.groq ||
-    apiKeyInputs.openrouter;
+    apiKeyInputs.openrouter ||
+    apiKeyInputs.opencode;
 
   return (
     <div className="animate-in slide-in-from-bottom-5 fade-in-0 w-full max-w-md px-4 duration-500">

@@ -5,15 +5,18 @@ import { useMemo } from "react";
 import { cerebrasModelsData } from "@/assets/model-lists/cerebras-models";
 import { googleModelsData } from "@/assets/model-lists/google-models";
 import { groqModelsData } from "@/assets/model-lists/groq-models";
+import { opencodeModelsData } from "@/assets/model-lists/opencode-models";
 import { openRouterModelsData } from "@/assets/model-lists/openrouter-models";
 import { getCerebras } from "@/lib/ai/providers/cerebras";
 import { getGoogle } from "@/lib/ai/providers/google";
 import { getGroq } from "@/lib/ai/providers/groq";
+import { getOpenCode } from "@/lib/ai/providers/opencode";
 import { getOpenRouter } from "@/lib/ai/providers/openrouter";
 import {
   cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
+  opencodeApiKeyAtom,
   openrouterApiKeyAtom,
 } from "@/lib/jotai/api-key-atoms";
 
@@ -195,11 +198,24 @@ function mapOpenRouterImageModels(
     }));
 }
 
+function mapOpenCodeModels(
+  openCodeProvider: ReturnType<typeof getOpenCode>,
+): ModelData[] {
+  return opencodeModelsData.data.map((model) => ({
+    id: `opencode-${model.id}`,
+    name: model.id,
+    provider: "OpenCode",
+    model: openCodeProvider(model.id),
+    supportsToolUse: true,
+  }));
+}
+
 export function useModelCatalog() {
   const googleApiKey = useAtomValue(googleGenerativeAiApiKeyAtom);
   const groqApiKey = useAtomValue(groqApiKeyAtom);
   const cerebrasApiKey = useAtomValue(cerebrasApiKeyAtom);
   const openrouterApiKey = useAtomValue(openrouterApiKeyAtom);
+  const opencodeApiKey = useAtomValue(opencodeApiKeyAtom);
 
   const googleProvider = useMemo(
     () =>
@@ -228,14 +244,27 @@ export function useModelCatalog() {
     [openrouterApiKey],
   );
 
+  const openCodeProvider = useMemo(
+    () =>
+      getOpenCode(opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY),
+    [opencodeApiKey],
+  );
+
   const AVAILABLE_MODELS = useMemo(() => {
     return [
       ...mapCerebrasModels(cerebrasProvider),
       ...mapGoogleModels(googleProvider),
       ...mapGroqModels(groqProvider),
       ...mapOpenRouterModels(openRouterProvider),
+      ...mapOpenCodeModels(openCodeProvider),
     ];
-  }, [googleProvider, groqProvider, cerebrasProvider, openRouterProvider]);
+  }, [
+    googleProvider,
+    groqProvider,
+    cerebrasProvider,
+    openRouterProvider,
+    openCodeProvider,
+  ]);
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
     return [
@@ -243,8 +272,15 @@ export function useModelCatalog() {
       ...mapGoogleChatModels(googleProvider),
       ...mapGroqChatModels(groqProvider),
       ...mapOpenRouterChatModels(openRouterProvider),
+      ...mapOpenCodeModels(openCodeProvider),
     ];
-  }, [googleProvider, groqProvider, cerebrasProvider, openRouterProvider]);
+  }, [
+    googleProvider,
+    groqProvider,
+    cerebrasProvider,
+    openRouterProvider,
+    openCodeProvider,
+  ]);
 
   const AVAILABLE_IMAGE_MODELS = useMemo(() => {
     return [

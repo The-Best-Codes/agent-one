@@ -36,7 +36,12 @@ export const cerebrasApiKeyAtom = createApiKeyAtom(
   DEFAULT_SETTINGS.CEREBRAS_API_KEY,
 );
 
-// Loadable atoms, for the API key context to see the loading state
+export const opencodeApiKeyAtom = createApiKeyAtom(
+  "OPENCODE_API_KEY",
+  DEFAULT_SETTINGS.OPENCODE_API_KEY,
+);
+
+// Loadable atoms, for API key context to see. loading state
 const createLoadableApiKeyAtom = <T>(
   key: keyof typeof DEFAULT_SETTINGS,
   defaultValue: T,
@@ -68,5 +73,12 @@ export const cerebrasApiKeyLoadableAtom = loadable(
   createLoadableApiKeyAtom(
     "CEREBRAS_API_KEY",
     DEFAULT_SETTINGS.CEREBRAS_API_KEY,
+  ),
+);
+
+export const opencodeApiKeyLoadableAtom = loadable(
+  createLoadableApiKeyAtom(
+    "OPENCODE_API_KEY",
+    DEFAULT_SETTINGS.OPENCODE_API_KEY,
   ),
 );
