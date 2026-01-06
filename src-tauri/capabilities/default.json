@@ -56,6 +56,7 @@
     "notification:default",
     "process:default",
     "deep-link:default",
-    "os:default"
+    "os:default",
+    "http:default"
   ]
 }
