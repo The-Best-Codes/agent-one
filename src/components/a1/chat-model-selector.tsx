@@ -1,4 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useAtomValue } from "jotai";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import {
   type FC,
@@ -25,10 +26,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
-import { type ModelData } from "@/hooks/ai/use-model-catalog";
+import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { commandScore } from "@/lib/command-score";
+import {
+  cerebrasApiKeyAtom,
+  googleGenerativeAiApiKeyAtom,
+  groqApiKeyAtom,
+  opencodeApiKeyAtom,
+  openrouterApiKeyAtom,
+} from "@/lib/jotai/api-key-atoms";
 import { cn } from "@/lib/utils";
 
 interface ModelSelectorProps {
@@ -124,22 +131,62 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_CHAT_MODELS } = useModelCatalog();
 
+  const googleApiKey = useAtomValue(googleGenerativeAiApiKeyAtom);
+  const groqApiKey = useAtomValue(groqApiKeyAtom);
+  const cerebrasApiKey = useAtomValue(cerebrasApiKeyAtom);
+  const openrouterApiKey = useAtomValue(openrouterApiKeyAtom);
+  const opencodeApiKey = useAtomValue(opencodeApiKeyAtom);
+
+  const providerHasApiKey = useMemo(
+    () => ({
+      Google: Boolean(
+        googleApiKey || import.meta.env.AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY,
+      ),
+      Groq: Boolean(groqApiKey || import.meta.env.AGENT_ONE_GROQ_API_KEY),
+      Cerebras: Boolean(
+        cerebrasApiKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY,
+      ),
+      OpenRouter: Boolean(
+        openrouterApiKey || import.meta.env.AGENT_ONE_OPENROUTER_API_KEY,
+      ),
+      OpenCode: Boolean(
+        opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY,
+      ),
+    }),
+    [
+      googleApiKey,
+      groqApiKey,
+      cerebrasApiKey,
+      openrouterApiKey,
+      opencodeApiKey,
+    ],
+  );
+
+  const modelsWithApiKey = useMemo(() => {
+    return AVAILABLE_CHAT_MODELS.filter(
+      (model) =>
+        providerHasApiKey[model.provider as keyof typeof providerHasApiKey],
+    );
+  }, [AVAILABLE_CHAT_MODELS, providerHasApiKey]);
+
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
-      return AVAILABLE_CHAT_MODELS;
+      return modelsWithApiKey;
     }
 
     const query = searchQuery.toLowerCase();
-    const scoredModels = AVAILABLE_CHAT_MODELS.map((model) => {
-      const targetString = model.name;
-      const score = commandScore(targetString, query, [model?.id || ""]);
-      return { model, score };
-    }).filter(({ score }) => score > 0);
+    const scoredModels = modelsWithApiKey
+      .map((model) => {
+        const targetString = model.name;
+        const score = commandScore(targetString, query, [model?.id || ""]);
+        return { model, score };
+      })
+      .filter(({ score }) => score > 0);
 
     return scoredModels
       .sort((a, b) => b.score - a.score)
       .map(({ model }) => model);
-  }, [searchQuery, AVAILABLE_CHAT_MODELS]);
+  }, [searchQuery, modelsWithApiKey]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
