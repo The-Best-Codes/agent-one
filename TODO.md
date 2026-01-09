@@ -5,9 +5,6 @@
 - Implement a loosely synced state strategy, similar to the one mentioned here: https://www.gethopp.app/blog/tauri-window-state-sync, when we migrate the chat storage to async instead of localStorage
 - Add a setting that controls app terminology (advanced or basic, e.g. "Extension" vs. "MCP server") and UI complexity (e.g. choose Fast, Smart, or Deep Research vs. Pick a model and configure it) to help both developers and users understand the app better.
 - Clean up provider settings and screen in onboarding (use goose for inspiration there perhaps)
-- Some obvious stuff with the model selector:
-  - Only show models that you've configured an API key for
-  - Detect when a model doesn't support tool use and disable tools (show an info message about the model's limitation), same for if it supports uploading files etc.
 - Allow adding and removing attachments from a message when editing it?
 - Redirect to `/chat` when the chat ID is invalid, but make sure that this doesn't redirect to `/chat` each time you delete a chat.
 - Fix installer looking for MSI file on Windows instead of EXE file (issue with generated latest.json file, maybe only publish the EXE file)
@@ -22,3 +19,4 @@
 - Test new API keys (keychain) on Windows and macOS
 - IMPORTANT: See if we can migrate from our current custom-chat-transport logic to using AI SDK 6 ToolLoopAgent + DirectChatTransport (both built-in to AI SDK!): https://github.com/vercel/ai/pull/11528
 - Allow changing how titles are generated and whether it uses AI
+- Add setting (enabled by default) to show chat status indicator in its name (e.g. loading spinner, error icon, etc.)
