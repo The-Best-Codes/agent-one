@@ -60,8 +60,8 @@ const SidebarContent = ({
       <div className="border-sidebar-border flex flex-col gap-2 pt-2">
         <div className="flex w-full items-center gap-2">
           <ModelSelector
-            className="max-w-49 min-w-0 flex-1"
-            popoverClassName="w-[var(--radix-popover-trigger-width)] max-w-60"
+            className="max-w-60 min-w-0 flex-1"
+            popoverClassName="w-60 max-w-60"
           />
           <ChatModelConfig />
         </div>

@@ -251,7 +251,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           {triggerContent}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn("w-full p-0", popoverClassName)}>
+      <PopoverContent
+        align="start"
+        className={cn("w-full p-0", popoverClassName)}
+      >
         <ModelList
           filteredModels={filteredModels}
           currentModel={currentModel}
