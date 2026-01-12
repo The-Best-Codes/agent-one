@@ -20,3 +20,4 @@
 - IMPORTANT: See if we can migrate from our current custom-chat-transport logic to using AI SDK 6 ToolLoopAgent + DirectChatTransport (both built-in to AI SDK!): https://github.com/vercel/ai/pull/11528
 - Allow changing how titles are generated and whether it uses AI
 - Add setting (enabled by default) to show chat status indicator in its name (e.g. loading spinner, error icon, etc.)
+- When clicking "Retry" in the error-section or incomplete chat section, scroll to bottom of chat
