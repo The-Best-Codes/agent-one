@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtomValue } from "jotai";
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import {
   type FC,
   useEffect,
@@ -96,11 +96,17 @@ const ModelList: FC<ModelListProps> = ({
                     height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
+                  title={
+                    currentModel.id === model.id
+                      ? `This model is currently selected`
+                      : undefined
+                  }
+                  className={cn(
+                    currentModel.id === model.id &&
+                      "border-border bg-accent border",
+                  )}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-1">
-                    {currentModel.id === model.id && (
-                      <CheckIcon className="size-4 shrink-0" />
-                    )}
                     <div className="scrollbar-size-xs w-full overflow-x-auto">
                       <div className="whitespace-nowrap">
                         <span className="text-muted-foreground text-xs">
