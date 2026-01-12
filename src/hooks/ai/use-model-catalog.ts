@@ -2,11 +2,11 @@ import type { LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 
-import { cerebrasModelsData } from "@/assets/model-lists/cerebras-models";
-import { googleModelsData } from "@/assets/model-lists/google-models";
-import { groqModelsData } from "@/assets/model-lists/groq-models";
-import { opencodeModelsData } from "@/assets/model-lists/opencode-models";
-import { openRouterModelsData } from "@/assets/model-lists/openrouter-models";
+import {
+  type ModelsDevData,
+  modelsDevData,
+  type ModelsDevModel,
+} from "@/assets/model-lists/models-dev";
 import { getCerebras } from "@/lib/ai/providers/cerebras";
 import { getGoogle } from "@/lib/ai/providers/google";
 import { getGroq } from "@/lib/ai/providers/groq";
@@ -46,168 +46,40 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
-const getPartAfterSlash = (str: string) => {
-  try {
-    if (!str) return str;
-    if (str.includes("/")) {
-      const partAfterSlash = str.slice(str.indexOf("/") + 1);
-      return partAfterSlash;
-    }
-    return str;
-  } catch {
-    return str;
-  }
-};
+const typedModelsDevData = modelsDevData as unknown as ModelsDevData;
 
-function mapGoogleModels(
-  googleProvider: ReturnType<typeof getGoogle>,
-): ModelData[] {
-  return googleModelsData.models.map((model) => ({
-    id: `google-${model.name}`,
-    name: model.displayName,
-    provider: "Google",
-    model: googleProvider(model.name),
-    supportsToolUse:
-      model.supportedGenerationMethods.includes("generateContent"),
-  }));
+function getProviderModels(providerId: string): ModelsDevModel[] {
+  const provider = typedModelsDevData[providerId];
+  if (!provider) return [];
+  return Object.values(provider.models);
 }
 
-function mapGroqModels(groqProvider: ReturnType<typeof getGroq>): ModelData[] {
-  return groqModelsData.data.map((model) => ({
-    id: `groq-${model.id}`,
-    name: getPartAfterSlash(model.id),
-    provider: "Groq",
-    model: groqProvider(model.id),
-    supportsToolUse: true,
-  }));
-}
-
-function mapCerebrasModels(
-  cerebrasProvider: ReturnType<typeof getCerebras>,
+function mapModelsDevModels(
+  providerId: string,
+  providerName: string,
+  createModel: (modelId: string) => LanguageModel,
+  filter?: (model: ModelsDevModel) => boolean,
 ): ModelData[] {
-  return cerebrasModelsData.data.map((model) => ({
-    id: `cerebras-${model.id}`,
-    name: model.id,
-    provider: "Cerebras",
-    model: cerebrasProvider(model.id),
-    supportsToolUse: true,
-  }));
-}
+  const models = getProviderModels(providerId);
+  const filteredModels = filter ? models.filter(filter) : models;
 
-function mapOpenRouterModels(
-  openRouterProvider: ReturnType<typeof getOpenRouter>,
-): ModelData[] {
-  return openRouterModelsData.data.map((model) => ({
-    id: `openrouter-${model.id}`,
+  return filteredModels.map((model) => ({
+    id: `${providerId}-${model.id}`,
     name: model.name,
-    provider: "OpenRouter",
-    model: openRouterProvider(model.id),
-    supportsToolUse: (model.supported_parameters as string[]).includes("tools"),
+    provider: providerName,
+    model: createModel(model.id),
+    supportsToolUse: model.tool_call ?? false,
   }));
 }
 
-function mapGoogleChatModels(
-  googleProvider: ReturnType<typeof getGoogle>,
-): ModelData[] {
-  return googleModelsData.models
-    .filter((model) =>
-      model.supportedGenerationMethods.includes("generateContent"),
-    )
-    .map((model) => ({
-      id: `google-${model.name}`,
-      name: model.displayName,
-      provider: "Google",
-      model: googleProvider(model.name),
-      supportsToolUse: true,
-    }));
+function isChatModel(model: ModelsDevModel): boolean {
+  const outputModalities = model.modalities?.output ?? [];
+  return outputModalities.includes("text");
 }
 
-function mapGoogleImageModels(
-  googleProvider: ReturnType<typeof getGoogle>,
-): ModelData[] {
-  return googleModelsData.models
-    .filter((model) => model.supportedGenerationMethods.includes("predict"))
-    .map((model) => ({
-      id: `google-${model.name}`,
-      name: model.displayName,
-      provider: "Google",
-      model: googleProvider(model.name),
-      supportsToolUse: false,
-    }));
-}
-
-function mapGroqChatModels(
-  groqProvider: ReturnType<typeof getGroq>,
-): ModelData[] {
-  return groqModelsData.data
-    .filter(
-      (model) => !model.id.includes("whisper") && !model.id.includes("tts"),
-    )
-    .map((model) => ({
-      id: `groq-${model.id}`,
-      name: getPartAfterSlash(model.id),
-      provider: "Groq",
-      model: groqProvider(model.id),
-      supportsToolUse: true,
-    }));
-}
-
-function mapCerebrasChatModels(
-  cerebrasProvider: ReturnType<typeof getCerebras>,
-): ModelData[] {
-  return cerebrasModelsData.data.map((model) => ({
-    id: `cerebras-${model.id}`,
-    name: model.id,
-    provider: "Cerebras",
-    model: cerebrasProvider(model.id),
-    supportsToolUse: true,
-  }));
-}
-
-function mapOpenRouterChatModels(
-  openRouterProvider: ReturnType<typeof getOpenRouter>,
-): ModelData[] {
-  return openRouterModelsData.data
-    .filter(
-      (model) =>
-        model.architecture.output_modalities.includes("text") &&
-        !model.architecture.modality.endsWith("image"),
-    )
-    .map((model) => ({
-      id: `openrouter-${model.id}`,
-      name: model.name,
-      provider: "OpenRouter",
-      model: openRouterProvider(model.id),
-      supportsToolUse: (model.supported_parameters as string[]).includes(
-        "tools",
-      ),
-    }));
-}
-
-function mapOpenRouterImageModels(
-  openRouterProvider: ReturnType<typeof getOpenRouter>,
-): ModelData[] {
-  return openRouterModelsData.data
-    .filter((model) => model.architecture.output_modalities.includes("image"))
-    .map((model) => ({
-      id: `openrouter-${model.id}`,
-      name: model.name,
-      provider: "OpenRouter",
-      model: openRouterProvider(model.id),
-      supportsToolUse: false,
-    }));
-}
-
-function mapOpenCodeModels(
-  openCodeProvider: ReturnType<typeof getOpenCode>,
-): ModelData[] {
-  return opencodeModelsData.data.map((model) => ({
-    id: `opencode-${model.id}`,
-    name: model.id,
-    provider: "OpenCode",
-    model: openCodeProvider(model.id),
-    supportsToolUse: true,
-  }));
+function isImageModel(model: ModelsDevModel): boolean {
+  const outputModalities = model.modalities?.output ?? [];
+  return outputModalities.includes("image");
 }
 
 export function useModelCatalog() {
@@ -252,27 +124,35 @@ export function useModelCatalog() {
 
   const AVAILABLE_MODELS = useMemo(() => {
     return [
-      ...mapCerebrasModels(cerebrasProvider),
-      ...mapGoogleModels(googleProvider),
-      ...mapGroqModels(groqProvider),
-      ...mapOpenRouterModels(openRouterProvider),
-      ...mapOpenCodeModels(openCodeProvider),
+      ...mapModelsDevModels("cerebras", "Cerebras", cerebrasProvider),
+      ...mapModelsDevModels("google", "Google", googleProvider),
+      ...mapModelsDevModels("groq", "Groq", groqProvider),
+      ...mapModelsDevModels("openrouter", "OpenRouter", openRouterProvider),
     ];
-  }, [
-    googleProvider,
-    groqProvider,
-    cerebrasProvider,
-    openRouterProvider,
-    openCodeProvider,
-  ]);
+  }, [googleProvider, groqProvider, cerebrasProvider, openRouterProvider]);
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
     return [
-      ...mapCerebrasChatModels(cerebrasProvider),
-      ...mapGoogleChatModels(googleProvider),
-      ...mapGroqChatModels(groqProvider),
-      ...mapOpenRouterChatModels(openRouterProvider),
-      ...mapOpenCodeModels(openCodeProvider),
+      ...mapModelsDevModels(
+        "cerebras",
+        "Cerebras",
+        cerebrasProvider,
+        isChatModel,
+      ),
+      ...mapModelsDevModels("google", "Google", googleProvider, isChatModel),
+      ...mapModelsDevModels("groq", "Groq", groqProvider, isChatModel),
+      ...mapModelsDevModels(
+        "openrouter",
+        "OpenRouter",
+        openRouterProvider,
+        isChatModel,
+      ),
+      ...mapModelsDevModels(
+        "opencode",
+        "OpenCode",
+        openCodeProvider,
+        isChatModel,
+      ),
     ];
   }, [
     googleProvider,
@@ -284,8 +164,13 @@ export function useModelCatalog() {
 
   const AVAILABLE_IMAGE_MODELS = useMemo(() => {
     return [
-      ...mapGoogleImageModels(googleProvider),
-      ...mapOpenRouterImageModels(openRouterProvider),
+      ...mapModelsDevModels("google", "Google", googleProvider, isImageModel),
+      ...mapModelsDevModels(
+        "openrouter",
+        "OpenRouter",
+        openRouterProvider,
+        isImageModel,
+      ),
     ];
   }, [googleProvider, openRouterProvider]);
 
