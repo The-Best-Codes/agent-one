@@ -21,3 +21,4 @@
 - Allow changing how titles are generated and whether it uses AI
 - Add setting (enabled by default) to show chat status indicator in its name (e.g. loading spinner, error icon, etc.)
 - When clicking "Retry" in the error-section or incomplete chat section, scroll to bottom of chat
+- Migrate this TODO file to individual issues in the GitHub repo!
