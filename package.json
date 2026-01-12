@@ -1,7 +1,7 @@
 {
   "name": "agent-one",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -27,11 +27,11 @@
     "test:e2e:report": "playwright show-report ./docker/cached/playwright-report"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.6",
-    "@ai-sdk/groq": "^3.0.4",
-    "@ai-sdk/mcp": "^1.0.5",
-    "@ai-sdk/openai-compatible": "^2.0.5",
-    "@ai-sdk/react": "^3.0.31",
+    "@ai-sdk/google": "^3.0.7",
+    "@ai-sdk/groq": "^3.0.5",
+    "@ai-sdk/mcp": "^1.0.6",
+    "@ai-sdk/openai-compatible": "^2.0.6",
+    "@ai-sdk/react": "^3.0.32",
     "@axe-core/playwright": "^4.11.0",
     "@codemirror/lang-markdown": "^6.5.0",
     "@codemirror/state": "^6.5.3",
@@ -74,7 +74,7 @@
     "@tauri-apps/plugin-sql": "^2.3.1",
     "@tauri-apps/plugin-updater": "^2.9.0",
     "@uiw/react-codemirror": "^4.25.4",
-    "ai": "^6.0.29",
+    "ai": "^6.0.30",
     "babel-plugin-react-compiler": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
