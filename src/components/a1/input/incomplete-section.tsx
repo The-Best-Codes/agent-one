@@ -7,7 +7,11 @@ import {
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
 
-export const MainInputIncompleteSection = () => {
+export const MainInputIncompleteSection = ({
+  onRetry,
+}: {
+  onRetry?: () => void;
+}) => {
   const { error, status } = useChatStatus();
   const { regenerate } = useChatFunctions();
   const messages = useChatMessages();
@@ -34,7 +38,13 @@ export const MainInputIncompleteSection = () => {
         </span>
       </div>
       <div className="flex flex-row items-center gap-2">
-        <Button onClick={() => regenerate()} variant="default">
+        <Button
+          onClick={() => {
+            regenerate();
+            onRetry?.();
+          }}
+          variant="default"
+        >
           <RefreshCcwIcon />
           Retry
         </Button>

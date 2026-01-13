@@ -57,7 +57,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
           <MainChatInput
             key={chatId || "new-chat"}
             initialValue={initialInputValue}
-            onAfterSend={() => {
+            onScrollNeededAction={() => {
               scrollRef.current?.scrollToBottom();
             }}
           />

@@ -13,7 +13,11 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
 
-export const MainInputErrorSection = () => {
+export const MainInputErrorSection = ({
+  onRetry,
+}: {
+  onRetry?: () => void;
+}) => {
   const { error } = useChatStatus();
   const { regenerate, clearError } = useChatFunctions();
 
@@ -38,7 +42,13 @@ export const MainInputErrorSection = () => {
         <TooltipProvider>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
-              <Button onClick={() => regenerate()} variant="destructive">
+              <Button
+                onClick={() => {
+                  regenerate();
+                  onRetry?.();
+                }}
+                variant="destructive"
+              >
                 <RefreshCcwIcon />
                 Retry
               </Button>

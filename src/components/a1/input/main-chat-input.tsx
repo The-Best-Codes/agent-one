@@ -71,10 +71,10 @@ const editorTheme = EditorView.theme({
 });
 
 export const MainChatInput = ({
-  onAfterSend,
+  onScrollNeededAction,
   initialValue,
 }: {
-  onAfterSend?: () => void;
+  onScrollNeededAction?: () => void;
   initialValue?: string;
 }) => {
   const { status } = useChatStatus();
@@ -154,7 +154,7 @@ export const MainChatInput = ({
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      onAfterSend?.();
+      onScrollNeededAction?.();
       logger.verbose("Message submitted successfully");
     } else {
       logger.verbose("Message submission blocked", {
@@ -360,8 +360,8 @@ export const MainChatInput = ({
 
   return (
     <div className="px-0 md:px-2">
-      <MainInputErrorSection />
-      <MainInputIncompleteSection />
+      <MainInputErrorSection onRetry={onScrollNeededAction} />
+      <MainInputIncompleteSection onRetry={onScrollNeededAction} />
       <form
         data-testid="chat-form"
         onSubmit={handleSubmit}
