@@ -1,5 +1,5 @@
 import { useAtomValue } from "jotai";
-import { AlertCircleIcon, LoaderCircleIcon } from "lucide-react";
+import { AlertCircleIcon, CircleIcon, LoaderCircleIcon } from "lucide-react";
 
 import { chatStatusesAtom } from "@/lib/jotai/atoms";
 import { showChatStatusIndicatorAtom } from "@/lib/jotai/settings-atoms";
@@ -23,7 +23,7 @@ export const ChatStatusIndicator = ({ chatId }: ChatStatusIndicatorProps) => {
     return null;
   }
 
-  const { status, error } = statusInfo;
+  const { status, error, unread } = statusInfo;
 
   if (error) {
     return (
@@ -39,6 +39,15 @@ export const ChatStatusIndicator = ({ chatId }: ChatStatusIndicatorProps) => {
       <LoaderCircleIcon
         className={cn("text-primary size-3.5 shrink-0 animate-spin")}
         aria-label="Loading"
+      />
+    );
+  }
+
+  if (unread) {
+    return (
+      <CircleIcon
+        className={cn("text-primary size-2 shrink-0 fill-current")}
+        aria-label="Unread"
       />
     );
   }

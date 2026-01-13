@@ -20,6 +20,7 @@ export type ChatStatus = "ready" | "streaming" | "submitted" | "";
 export interface ChatStatusInfo {
   status: ChatStatus;
   error?: Error;
+  unread?: boolean;
 }
 
 export const chatStatusesAtom = atom<Map<string, ChatStatusInfo>>(new Map());

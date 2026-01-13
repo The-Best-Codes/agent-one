@@ -182,14 +182,25 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       setChatStatuses((prev) => {
         const next = new Map(prev);
         const instance = chatInstancesRef.current.get(id);
+        const prevStatus = prev.get(id);
+        const wasStreaming =
+          prevStatus?.status === "streaming" ||
+          prevStatus?.status === "submitted";
+        const isNowReady = status === "ready";
+        const isUnread =
+          wasStreaming && isNowReady && currentChatId !== id
+            ? true
+            : prevStatus?.unread;
+
         next.set(id, {
           status: status as ChatStatus,
-          error: instance?.error,
+          error: instance?.error ?? prevStatus?.error,
+          unread: isUnread,
         });
         return next;
       });
     },
-    [setChatStatuses],
+    [setChatStatuses, currentChatId],
   );
 
   useEffect(() => {
@@ -219,6 +230,23 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return newActiveIds;
     });
   }, [currentChatId, lastStatusChange]);
+
+  useEffect(() => {
+    if (currentChatId) {
+      setChatStatuses((prev) => {
+        const statusInfo = prev.get(currentChatId);
+        if (statusInfo?.unread) {
+          const next = new Map(prev);
+          next.set(currentChatId, {
+            ...statusInfo,
+            unread: false,
+          });
+          return next;
+        }
+        return prev;
+      });
+    }
+  }, [currentChatId, setChatStatuses]);
 
   const defaultChat = useChat(
     defaultModelForNewChats.model,
