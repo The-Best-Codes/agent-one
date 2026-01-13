@@ -93,6 +93,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
     if (enabledServers.length === 0) {
       invalidateServerCache();
+      mcpToolsRef.current = {};
+      mcpLoadedRef.current = true;
       setMcpTools({});
       setMcpLoaded(true);
       setIsMcpLoading(false);
@@ -102,6 +104,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     const loadMcpTools = async () => {
       if (currentVersionRef.current !== version) return;
 
+      mcpLoadedRef.current = false;
       setIsMcpLoading(true);
       setMcpLoaded(false);
 
@@ -147,10 +150,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
         if (currentVersionRef.current !== version) return;
 
+        mcpToolsRef.current = allTools;
+        mcpLoadedRef.current = true;
         setMcpTools(allTools);
         setMcpLoaded(true);
       } catch (error) {
         logger.error("Failed to load MCP tools in background:", error);
+        mcpToolsRef.current = {};
+        mcpLoadedRef.current = true;
         setMcpTools({});
         setMcpLoaded(true);
       } finally {
