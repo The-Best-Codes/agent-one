@@ -12,11 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   colorThemeAtom,
   fontAtom,
   roundnessAtom,
+  showChatStatusIndicatorAtom,
   textScaleAtom,
 } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
@@ -99,6 +101,9 @@ export default function AppearanceSection() {
   const [font, setFont] = useAtom(fontAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
   const [textScale, setTextScale] = useAtom(textScaleAtom);
+  const [showChatStatusIndicator, setShowChatStatusIndicator] = useAtom(
+    showChatStatusIndicatorAtom,
+  );
 
   return (
     <Card>
@@ -133,6 +138,22 @@ export default function AppearanceSection() {
               </Button>
             ))}
           </div>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+          <div className="flex flex-col items-start">
+            <Label htmlFor="chat-status-indicator" className="text-sm font-medium">
+              Chat Status Indicator
+            </Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Show loading and error indicators in the sidebar chat list.
+            </p>
+          </div>
+          <Switch
+            id="chat-status-indicator"
+            checked={showChatStatusIndicator}
+            onCheckedChange={setShowChatStatusIndicator}
+          />
         </div>
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">

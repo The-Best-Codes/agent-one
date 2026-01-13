@@ -15,6 +15,13 @@ export const chatIdsAtom = atomWithStorage(
 
 export const chatUpdateTriggerAtom = atom(0);
 
+export interface ChatStatusInfo {
+  status: "ready" | "streaming" | "submitted" | "";
+  error?: Error;
+}
+
+export const chatStatusesAtom = atom<Map<string, ChatStatusInfo>>(new Map());
+
 export const sidebarCollapsedAtom = atomWithStorage(
   "agent-one-sidebar-collapsed",
   false,

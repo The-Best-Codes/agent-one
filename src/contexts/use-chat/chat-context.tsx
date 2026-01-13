@@ -17,7 +17,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
-import { chatIdsAtom } from "@/lib/jotai/atoms";
+import { chatIdsAtom, chatStatusesAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
@@ -48,6 +48,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const [chatIds] = useAtom(chatIdsAtom);
+  const [, setChatStatuses] = useAtom(chatStatusesAtom);
   const [notificationSetting] = useAtom(notificationSettingAtom);
   const { getModelById } = useModelCatalog();
 
@@ -171,9 +172,21 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [currentChatId, forceUpdate],
   );
 
-  const handleStatusChange = useCallback((id: string, status: string) => {
-    setLastStatusChange({ id, status });
-  }, []);
+  const handleStatusChange = useCallback(
+    (id: string, status: string) => {
+      setLastStatusChange({ id, status });
+      setChatStatuses((prev) => {
+        const next = new Map(prev);
+        const instance = chatInstancesRef.current.get(id);
+        next.set(id, {
+          status: status as "ready" | "streaming" | "submitted" | "",
+          error: instance?.error,
+        });
+        return next;
+      });
+    },
+    [setChatStatuses],
+  );
 
   useEffect(() => {
     const newActiveIds = new Set<string>();

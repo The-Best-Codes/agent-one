@@ -18,6 +18,7 @@ import {
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
+import { ChatStatusIndicator } from "./chat-status-indicator";
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
 
 const logger = getLogger(import.meta.url);
@@ -70,6 +71,7 @@ export const ChatItem = memo(
         >
           <Link to={`/chat/${id}`} className="relative block overflow-hidden">
             <span className="flex min-w-0 items-center gap-1 text-sm font-normal">
+              <ChatStatusIndicator chatId={id} />
               {branchOf && <GitBranch className="text-foreground size-3" />}
               <span className="min-w-0 truncate">{title}</span>
             </span>
