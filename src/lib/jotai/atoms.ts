@@ -15,8 +15,10 @@ export const chatIdsAtom = atomWithStorage(
 
 export const chatUpdateTriggerAtom = atom(0);
 
+export type ChatStatus = "ready" | "streaming" | "submitted" | "";
+
 export interface ChatStatusInfo {
-  status: "ready" | "streaming" | "submitted" | "";
+  status: ChatStatus;
   error?: Error;
 }
 
