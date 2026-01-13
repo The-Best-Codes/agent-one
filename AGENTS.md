@@ -10,6 +10,7 @@ Assume that these bash commands are allowed and no others unless specified:
 - Run Rust check: `cd src-tauri && cargo check`
 - Run Rust clippy: `cd src-tauri && cargo clippy`
 - Install dependencies: `npm install *` or `cargo add *`
+- Search GitHub issues for this repo: Any read-only `gh` commands. Repo is The-Best-Codes/agent-one.
 
 ## Tailwind Guidelines
 
@@ -22,8 +23,8 @@ Assume that these bash commands are allowed and no others unless specified:
 ## Code Style
 
 - As an AI, you should only add comments to the code when absolutely necessary, which is VERY rare. You should confirm before removing TODOs, TODO comments, or other important comments. The developer's job is to touch up your code, including writing comments, not your job.
-- This is an alpha app! Right now, disregard backward compat and migrations completely.
-- Follow the app [PHILOSOPHY.md](PHILOSOPHY.md).
+- This is an alpha project! Right now, disregard backward compat and migrations completely.
+- Follow the project [PHILOSOPHY.md](PHILOSOPHY.md).
 
 ## Installing Dependencies
 
