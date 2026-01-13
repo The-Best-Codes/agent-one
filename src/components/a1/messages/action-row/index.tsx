@@ -1,13 +1,17 @@
 import type { UIMessage } from "ai";
 
 import { CopyButton } from "@/components/a1/copy-button";
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 import { BranchButton } from "./branch-button";
 import { EditButton } from "./edit-button";
 import { RetryButton } from "./retry-button";
-
-// Action row will have tooltips once we migrate to Base UI (when it goes stable)
 
 export const MessageActionRow = ({
   contentToCopy,
@@ -29,24 +33,56 @@ export const MessageActionRow = ({
         messageRole !== "user" && "ml-2",
       )}
     >
-      <CopyButton
-        className="size-6"
-        variants={{
-          idle: "secondary",
-          copying: "secondary",
-          success: "secondary",
-          error: "secondary",
-        }}
-        text={contentToCopy}
-      />
+      <TooltipProvider>
+        <TooltipRoot>
+          <TooltipTrigger asChild>
+            <div>
+              <CopyButton
+                className="size-6"
+                variants={{
+                  idle: "secondary",
+                  copying: "secondary",
+                  success: "secondary",
+                  error: "secondary",
+                }}
+                text={contentToCopy}
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>Copy message</TooltipContent>
+        </TooltipRoot>
 
-      {onBranch && messageRole === "assistant" && (
-        <BranchButton onBranch={onBranch} className="size-6" />
-      )}
-      {messageRole === "assistant" && (
-        <RetryButton messageId={messageId} className="size-6" />
-      )}
-      {onEdit && <EditButton onEdit={onEdit} className="size-6" />}
+        {onBranch && messageRole === "assistant" && (
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <div>
+                <BranchButton onBranch={onBranch} className="size-6" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Branch conversation</TooltipContent>
+          </TooltipRoot>
+        )}
+        {messageRole === "assistant" && (
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <div>
+                <RetryButton messageId={messageId} className="size-6" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Regenerate response</TooltipContent>
+          </TooltipRoot>
+        )}
+        {onEdit && (
+          <TooltipRoot>
+            <TooltipTrigger asChild>
+              <div>
+                <EditButton onEdit={onEdit} className="size-6" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Edit message</TooltipContent>
+          </TooltipRoot>
+        )}
+      </TooltipProvider>
     </div>
   );
 };
