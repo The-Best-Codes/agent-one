@@ -17,7 +17,11 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
-import { chatIdsAtom, type ChatStatus, chatStatusesAtom } from "@/lib/jotai/atoms";
+import {
+  chatIdsAtom,
+  type ChatStatus,
+  chatStatusesAtom,
+} from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";

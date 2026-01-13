@@ -142,7 +142,10 @@ export default function AppearanceSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-col items-start">
-            <Label htmlFor="chat-status-indicator" className="text-sm font-medium">
+            <Label
+              htmlFor="chat-status-indicator"
+              className="text-sm font-medium"
+            >
               Chat Status Indicator
             </Label>
             <p className="text-muted-foreground mt-1 text-sm">
