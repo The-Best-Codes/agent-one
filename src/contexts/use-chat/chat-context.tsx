@@ -342,8 +342,12 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           stop();
         }
       }
+      logger.verbose(
+        `Invalid chat ID detected: ${currentChatId}. Redirecting to /chat`,
+      );
+      navigate("/chat", { replace: true });
     }
-  }, [currentChatId, chatIds]);
+  }, [currentChatId, chatIds, navigate]);
 
   const functionsValue = useMemo(
     () => ({
