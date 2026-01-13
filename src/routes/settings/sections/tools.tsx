@@ -3,6 +3,12 @@ import { RotateCcwIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,11 +22,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import {
+  dateTimeToolConfigAtom,
   enabledToolsAtom,
+  getUrlContentToolConfigAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
+  waitToolConfigAtom,
+  webSearchToolConfigAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
@@ -36,11 +47,27 @@ const TOOL_NAMES: Record<ToolId, string> = {
   webSearch: "Web Search",
 };
 
+const TOOL_DESCRIPTIONS: Record<ToolId, string> = {
+  dateTime: "Get the current date and time",
+  waitNumberMilliseconds: "Wait for a specified duration",
+  getUrlContent: "Fetch and extract content from URLs",
+  webSearch: "Search the web using DuckDuckGo",
+};
+
 export default function ToolsSection() {
   const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit, setParallelLoadLimit] = useAtom(
     mcpParallelLoadLimitAtom,
+  );
+
+  const [dateTimeConfig, setDateTimeConfig] = useAtom(dateTimeToolConfigAtom);
+  const [waitConfig, setWaitConfig] = useAtom(waitToolConfigAtom);
+  const [webSearchConfig, setWebSearchConfig] = useAtom(
+    webSearchToolConfigAtom,
+  );
+  const [getUrlContentConfig, setGetUrlContentConfig] = useAtom(
+    getUrlContentToolConfigAtom,
   );
 
   const isEnabledToolsDefault =
@@ -49,15 +76,34 @@ export default function ToolsSection() {
   const isParallelLoadLimitDefault =
     parallelLoadLimit === DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT;
 
-  const handleResetEnabledTools = () => {
+  const isToolConfigsDefault =
+    JSON.stringify(dateTimeConfig) ===
+      JSON.stringify(DEFAULT_SETTINGS.DATE_TIME_TOOL_CONFIG) &&
+    JSON.stringify(waitConfig) ===
+      JSON.stringify(DEFAULT_SETTINGS.WAIT_TOOL_CONFIG) &&
+    JSON.stringify(webSearchConfig) ===
+      JSON.stringify(DEFAULT_SETTINGS.WEB_SEARCH_TOOL_CONFIG) &&
+    JSON.stringify(getUrlContentConfig) ===
+      JSON.stringify(DEFAULT_SETTINGS.GET_URL_CONTENT_TOOL_CONFIG);
+
+  const handleResetToolConfigs = () => {
     resetSetting("ENABLED_TOOLS");
+    resetSetting("DATE_TIME_TOOL_CONFIG");
+    resetSetting("WAIT_TOOL_CONFIG");
+    resetSetting("WEB_SEARCH_TOOL_CONFIG");
+    resetSetting("GET_URL_CONTENT_TOOL_CONFIG");
   };
 
   const handleResetParallelLoadLimit = () => {
     resetSetting("MCP_PARALLEL_LOAD_LIMIT");
   };
 
-  const updateToolEnabled = (toolId: ToolId, enabled: boolean) => {
+  const updateToolEnabled = (
+    toolId: ToolId,
+    enabled: boolean,
+    e?: React.MouseEvent,
+  ) => {
+    e?.stopPropagation();
     setEnabledTools((prev) => ({ ...prev, [toolId]: enabled }));
   };
 
@@ -136,38 +182,312 @@ export default function ToolsSection() {
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Enabled Tools</Label>
+              <Label className="text-sm font-medium">Tool Configuration</Label>
               <p className="text-muted-foreground mt-1 text-sm">
-                Choose which built-in tools are available to the AI.
+                Enable tools and configure their behavior.
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleResetEnabledTools}
-              disabled={isEnabledToolsDefault}
-              aria-label="Reset to default"
-            >
-              <RotateCcwIcon className="size-4" />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleResetToolConfigs}
+                disabled={isToolConfigsDefault && isEnabledToolsDefault}
+                aria-label="Reset all tool settings"
+              >
+                <RotateCcwIcon className="size-4" />
+              </Button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {(Object.keys(TOOL_NAMES) as ToolId[]).map((toolId) => (
-              <div key={toolId} className="flex items-center space-x-2">
-                <Checkbox
-                  id={toolId}
-                  checked={enabledTools[toolId]}
-                  onCheckedChange={(checked) =>
-                    updateToolEnabled(toolId, checked as boolean)
-                  }
-                />
-                <Label htmlFor={toolId} className="text-sm">
-                  {TOOL_NAMES[toolId]}
-                </Label>
-              </div>
-            ))}
-          </div>
+          <Accordion type="multiple" className="w-full">
+            <AccordionItem value="dateTime">
+              <AccordionTrigger className="py-3 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="dateTime-enabled"
+                    checked={enabledTools.dateTime}
+                    onCheckedChange={(checked) =>
+                      updateToolEnabled("dateTime", checked as boolean)
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">
+                      {TOOL_NAMES.dateTime}
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {TOOL_DESCRIPTIONS.dateTime}
+                    </span>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col">
+                      <Label htmlFor="dateTime-utc" className="text-sm">
+                        Use UTC timezone
+                      </Label>
+                      <span className="text-muted-foreground text-xs">
+                        Return times in UTC instead of local timezone
+                      </span>
+                    </div>
+                    <Switch
+                      id="dateTime-utc"
+                      checked={dateTimeConfig.useUtc}
+                      onCheckedChange={(checked) =>
+                        setDateTimeConfig((prev) => ({
+                          ...prev,
+                          useUtc: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="waitNumberMilliseconds">
+              <AccordionTrigger className="py-3 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="wait-enabled"
+                    checked={enabledTools.waitNumberMilliseconds}
+                    onCheckedChange={(checked) =>
+                      updateToolEnabled(
+                        "waitNumberMilliseconds",
+                        checked as boolean,
+                      )
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">
+                      {TOOL_NAMES.waitNumberMilliseconds}
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {TOOL_DESCRIPTIONS.waitNumberMilliseconds}
+                    </span>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm">
+                      Minimum wait (ms): {waitConfig.minMs}
+                    </Label>
+                    <Slider
+                      value={[waitConfig.minMs]}
+                      min={0}
+                      max={waitConfig.maxMs}
+                      step={100}
+                      onValueChange={([value]) =>
+                        setWaitConfig((prev) => ({ ...prev, minMs: value }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm">
+                      Maximum wait (ms): {waitConfig.maxMs}
+                    </Label>
+                    <Slider
+                      value={[waitConfig.maxMs]}
+                      min={waitConfig.minMs}
+                      max={120000}
+                      step={1000}
+                      onValueChange={([value]) =>
+                        setWaitConfig((prev) => ({ ...prev, maxMs: value }))
+                      }
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="webSearch">
+              <AccordionTrigger className="py-3 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="webSearch-enabled"
+                    checked={enabledTools.webSearch}
+                    onCheckedChange={(checked) =>
+                      updateToolEnabled("webSearch", checked as boolean)
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">
+                      {TOOL_NAMES.webSearch}
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {TOOL_DESCRIPTIONS.webSearch}
+                    </span>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col">
+                      <Label htmlFor="webSearch-approval" className="text-sm">
+                        Require approval
+                      </Label>
+                      <span className="text-muted-foreground text-xs">
+                        Ask for confirmation before executing
+                      </span>
+                    </div>
+                    <Switch
+                      id="webSearch-approval"
+                      checked={webSearchConfig.requiresApproval}
+                      onCheckedChange={(checked) =>
+                        setWebSearchConfig((prev) => ({
+                          ...prev,
+                          requiresApproval: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm">
+                      Max concurrent searches: {webSearchConfig.maxConcurrent}
+                    </Label>
+                    <Slider
+                      value={[webSearchConfig.maxConcurrent]}
+                      min={1}
+                      max={10}
+                      step={1}
+                      onValueChange={([value]) =>
+                        setWebSearchConfig((prev) => ({
+                          ...prev,
+                          maxConcurrent: value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm">
+                      Default max results: {webSearchConfig.defaultMaxResults}
+                    </Label>
+                    <Slider
+                      value={[webSearchConfig.defaultMaxResults]}
+                      min={1}
+                      max={100}
+                      step={1}
+                      onValueChange={([value]) =>
+                        setWebSearchConfig((prev) => ({
+                          ...prev,
+                          defaultMaxResults: value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm">
+                      Default max pages: {webSearchConfig.defaultMaxPages}
+                    </Label>
+                    <Slider
+                      value={[webSearchConfig.defaultMaxPages]}
+                      min={1}
+                      max={10}
+                      step={1}
+                      onValueChange={([value]) =>
+                        setWebSearchConfig((prev) => ({
+                          ...prev,
+                          defaultMaxPages: value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="getUrlContent">
+              <AccordionTrigger className="py-3 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    id="getUrlContent-enabled"
+                    checked={enabledTools.getUrlContent}
+                    onCheckedChange={(checked) =>
+                      updateToolEnabled("getUrlContent", checked as boolean)
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">
+                      {TOOL_NAMES.getUrlContent}
+                    </span>
+                    <span className="text-muted-foreground text-xs">
+                      {TOOL_DESCRIPTIONS.getUrlContent}
+                    </span>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col">
+                      <Label
+                        htmlFor="getUrlContent-approval"
+                        className="text-sm"
+                      >
+                        Require approval
+                      </Label>
+                      <span className="text-muted-foreground text-xs">
+                        Ask for confirmation before executing
+                      </span>
+                    </div>
+                    <Switch
+                      id="getUrlContent-approval"
+                      checked={getUrlContentConfig.requiresApproval}
+                      onCheckedChange={(checked) =>
+                        setGetUrlContentConfig((prev) => ({
+                          ...prev,
+                          requiresApproval: checked,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm">
+                      Minimum URLs: {getUrlContentConfig.minUrls}
+                    </Label>
+                    <Slider
+                      value={[getUrlContentConfig.minUrls]}
+                      min={1}
+                      max={getUrlContentConfig.maxUrls}
+                      step={1}
+                      onValueChange={([value]) =>
+                        setGetUrlContentConfig((prev) => ({
+                          ...prev,
+                          minUrls: value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm">
+                      Maximum URLs: {getUrlContentConfig.maxUrls}
+                    </Label>
+                    <Slider
+                      value={[getUrlContentConfig.maxUrls]}
+                      min={getUrlContentConfig.minUrls}
+                      max={20}
+                      step={1}
+                      onValueChange={([value]) =>
+                        setGetUrlContentConfig((prev) => ({
+                          ...prev,
+                          maxUrls: value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </CardContent>
       </Card>
 

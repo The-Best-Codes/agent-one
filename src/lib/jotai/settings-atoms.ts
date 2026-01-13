@@ -2,8 +2,10 @@ import { atomWithStorage } from "jotai/utils";
 
 import {
   type ColorThemeOption,
+  type DateTimeToolConfig,
   DEFAULT_SETTINGS,
   type FontOption,
+  type GetUrlContentToolConfig,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type NotificationOption,
@@ -13,6 +15,8 @@ import {
   type TextScaleOption,
   type ThemeOption,
   type ToolId,
+  type WaitToolConfig,
+  type WebSearchToolConfig,
 } from "@/lib/settings/types";
 
 const SETTING_PREFIX = "agent-one-setting-";
@@ -137,3 +141,24 @@ export const systemPromptAppendixAtom = createSettingAtom(
   "SYSTEM_PROMPT_APPENDIX",
   DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
 );
+
+export const dateTimeToolConfigAtom = createSettingAtom<DateTimeToolConfig>(
+  "DATE_TIME_TOOL_CONFIG",
+  DEFAULT_SETTINGS.DATE_TIME_TOOL_CONFIG,
+);
+
+export const waitToolConfigAtom = createSettingAtom<WaitToolConfig>(
+  "WAIT_TOOL_CONFIG",
+  DEFAULT_SETTINGS.WAIT_TOOL_CONFIG,
+);
+
+export const webSearchToolConfigAtom = createSettingAtom<WebSearchToolConfig>(
+  "WEB_SEARCH_TOOL_CONFIG",
+  DEFAULT_SETTINGS.WEB_SEARCH_TOOL_CONFIG,
+);
+
+export const getUrlContentToolConfigAtom =
+  createSettingAtom<GetUrlContentToolConfig>(
+    "GET_URL_CONTENT_TOOL_CONFIG",
+    DEFAULT_SETTINGS.GET_URL_CONTENT_TOOL_CONFIG,
+  );

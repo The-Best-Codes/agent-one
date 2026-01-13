@@ -32,6 +32,28 @@ export type ToolId =
   | "getUrlContent"
   | "webSearch";
 
+export interface DateTimeToolConfig {
+  useUtc: boolean;
+}
+
+export interface WaitToolConfig {
+  maxMs: number;
+  minMs: number;
+}
+
+export interface WebSearchToolConfig {
+  maxConcurrent: number;
+  defaultMaxResults: number;
+  defaultMaxPages: number;
+  requiresApproval: boolean;
+}
+
+export interface GetUrlContentToolConfig {
+  maxUrls: number;
+  minUrls: number;
+  requiresApproval: boolean;
+}
+
 export interface DefaultSettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
@@ -55,6 +77,10 @@ export interface DefaultSettings {
   MCP_PARALLEL_LOAD_LIMIT: number;
   USER_NAME: string;
   SYSTEM_PROMPT_APPENDIX: string;
+  DATE_TIME_TOOL_CONFIG: DateTimeToolConfig;
+  WAIT_TOOL_CONFIG: WaitToolConfig;
+  WEB_SEARCH_TOOL_CONFIG: WebSearchToolConfig;
+  GET_URL_CONTENT_TOOL_CONFIG: GetUrlContentToolConfig;
   GOOGLE_GENERATIVE_AI_API_KEY: string;
   GROQ_API_KEY: string;
   OPENROUTER_API_KEY: string;
@@ -98,6 +124,24 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MCP_PARALLEL_LOAD_LIMIT: 8,
   USER_NAME: "",
   SYSTEM_PROMPT_APPENDIX: "",
+  DATE_TIME_TOOL_CONFIG: {
+    useUtc: false,
+  },
+  WAIT_TOOL_CONFIG: {
+    maxMs: 60000,
+    minMs: 0,
+  },
+  WEB_SEARCH_TOOL_CONFIG: {
+    maxConcurrent: 5,
+    defaultMaxResults: 20,
+    defaultMaxPages: 1,
+    requiresApproval: false,
+  },
+  GET_URL_CONTENT_TOOL_CONFIG: {
+    maxUrls: 5,
+    minUrls: 1,
+    requiresApproval: false,
+  },
   GOOGLE_GENERATIVE_AI_API_KEY: "",
   GROQ_API_KEY: "",
   OPENROUTER_API_KEY: "",

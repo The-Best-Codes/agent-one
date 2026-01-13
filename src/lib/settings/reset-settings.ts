@@ -8,10 +8,12 @@ import {
   openrouterApiKeyAtom,
 } from "../jotai/api-key-atoms";
 import {
+  dateTimeToolConfigAtom,
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   fontAtom,
+  getUrlContentToolConfigAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -29,6 +31,8 @@ import {
   textScaleAtom,
   themeAtom,
   userNameAtom,
+  waitToolConfigAtom,
+  webSearchToolConfigAtom,
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
 
@@ -63,6 +67,10 @@ export function resetAllSettings(): void {
   store.set(enabledToolsAtom, RESET);
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
+  store.set(dateTimeToolConfigAtom, RESET);
+  store.set(waitToolConfigAtom, RESET);
+  store.set(webSearchToolConfigAtom, RESET);
+  store.set(getUrlContentToolConfigAtom, RESET);
 }
 
 /**
@@ -147,6 +155,18 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "CEREBRAS_API_KEY":
       store.set(cerebrasApiKeyAtom, RESET);
+      break;
+    case "DATE_TIME_TOOL_CONFIG":
+      store.set(dateTimeToolConfigAtom, RESET);
+      break;
+    case "WAIT_TOOL_CONFIG":
+      store.set(waitToolConfigAtom, RESET);
+      break;
+    case "WEB_SEARCH_TOOL_CONFIG":
+      store.set(webSearchToolConfigAtom, RESET);
+      break;
+    case "GET_URL_CONTENT_TOOL_CONFIG":
+      store.set(getUrlContentToolConfigAtom, RESET);
       break;
   }
 }

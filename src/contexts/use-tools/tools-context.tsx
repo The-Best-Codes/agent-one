@@ -4,11 +4,12 @@ import React, {
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 
-import { staticTools } from "@/lib/ai/tools";
+import { createStaticTools } from "@/lib/ai/tools";
 import {
   closeServerCache,
   getCacheVersion,
@@ -16,9 +17,13 @@ import {
   invalidateServerCache,
 } from "@/lib/ai/tools/mcp";
 import {
+  dateTimeToolConfigAtom,
   enabledToolsAtom,
+  getUrlContentToolConfigAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
+  waitToolConfigAtom,
+  webSearchToolConfigAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { type McpServerConfig, type ToolId } from "@/lib/settings/types";
@@ -42,6 +47,11 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
 
+  const [dateTimeConfig] = useAtom(dateTimeToolConfigAtom);
+  const [waitConfig] = useAtom(waitToolConfigAtom);
+  const [webSearchConfig] = useAtom(webSearchToolConfigAtom);
+  const [getUrlContentConfig] = useAtom(getUrlContentToolConfigAtom);
+
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
@@ -52,6 +62,17 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const previousEnabledServerIdsRef = useRef<Set<string>>(new Set());
   const previousServersHashRef = useRef<string>("");
   const currentVersionRef = useRef(0);
+
+  const staticTools = useMemo(
+    () =>
+      createStaticTools({
+        dateTime: dateTimeConfig,
+        wait: waitConfig,
+        webSearch: webSearchConfig,
+        getUrlContent: getUrlContentConfig,
+      }),
+    [dateTimeConfig, waitConfig, webSearchConfig, getUrlContentConfig],
+  );
 
   useEffect(() => {
     mcpToolsRef.current = mcpTools;
@@ -192,7 +213,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       ...filteredStaticTools,
       ...mcpToolsRef.current,
     };
-  }, [enabledTools]);
+  }, [enabledTools, staticTools]);
 
   return (
     <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>
