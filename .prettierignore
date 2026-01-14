@@ -1,38 +1,5 @@
-# from ./docker/cached/.gitignore
-docker/cached/**/logs
-docker/cached/**/*.log
-docker/cached/**/npm-debug.log*
-docker/cached/**/yarn-debug.log*
-docker/cached/**/yarn-error.log*
-docker/cached/**/pnpm-debug.log*
-docker/cached/**/lerna-debug.log*
-docker/cached/**/node_modules
-docker/cached/**/dist
-docker/cached/**/dist-ssr
-docker/cached/**/*.local
-docker/cached/**/.vscode/*
-!docker/cached/**/.vscode/extensions.json
-docker/cached/**/.idea
-docker/cached/**/.DS_Store
-docker/cached/**/*.suo
-docker/cached/**/*.ntvs*
-docker/cached/**/*.njsproj
-docker/cached/**/*.sln
-docker/cached/**/*.sw?
-docker/cached/**/.env*
-!docker/cached/**/.env.example
-docker/cached/**/.eslintcache
-docker/cached/**/.prettier-cache
-docker/cached/**/playwright/.auth/
-docker/cached/**/test-results/
-docker/cached/**/playwright-report/
-docker/cached/.docker-cache
-docker/cached/docker/cached
-docker/cached/src-tauri/target/
-docker/cached/src-tauri/gen/schemas
-docker/cached/**/.local-uncommitable
-docker/cached/**/tsconfig.tsbuildinfo
-docker/cached/**/tsconfig.node.tsbuildinfo
+# from ./src/assets/model-lists/.prettierignore
+src/assets/model-lists/**/*.json
 
 # from ./src-tauri/gen/android/app/.gitignore
 src-tauri/gen/android/app/src/main/java/com/agent_one/generated
