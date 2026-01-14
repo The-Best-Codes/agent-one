@@ -8,6 +8,7 @@ import {
   openrouterApiKeyAtom,
 } from "../jotai/api-key-atoms";
 import {
+  colorThemeAtom,
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
@@ -23,6 +24,7 @@ import {
   regenerateOnSaveAtom,
   roundnessAtom,
   showChatStatusIndicatorAtom,
+  showMessageActionRowAtom,
   smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
@@ -52,7 +54,9 @@ export function resetAllSettings(): void {
   store.set(regenerateOnSaveAtom, RESET);
   store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
+  store.set(showMessageActionRowAtom, RESET);
   store.set(themeAtom, RESET);
+  store.set(colorThemeAtom, RESET);
   store.set(roundnessAtom, RESET);
   store.set(fontAtom, RESET);
   store.set(notificationSettingAtom, RESET);
@@ -111,8 +115,14 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "SHOW_CHAT_STATUS_INDICATOR":
       store.set(showChatStatusIndicatorAtom, RESET);
       break;
+    case "SHOW_MESSAGE_ACTION_ROW":
+      store.set(showMessageActionRowAtom, RESET);
+      break;
     case "THEME":
       store.set(themeAtom, RESET);
+      break;
+    case "COLOR_THEME":
+      store.set(colorThemeAtom, RESET);
       break;
     case "ROUNDNESS":
       store.set(roundnessAtom, RESET);

@@ -18,11 +18,13 @@ import {
   maxMessageLengthAtom,
   maxToolResultCharsAtom,
   notificationSettingAtom,
+  showMessageActionRowAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
+  type MessageActionRowOption,
   type NotificationOption,
 } from "@/lib/settings/types";
 
@@ -40,6 +42,9 @@ export default function MessagesSection() {
   const [notificationSetting, setNotificationSetting] = useAtom(
     notificationSettingAtom,
   );
+  const [showMessageActionRow, setShowMessageActionRow] = useAtom(
+    showMessageActionRowAtom,
+  );
 
   const isMarkdownRenderingDefault =
     markdownRendering === DEFAULT_SETTINGS.MARKDOWN_RENDERING;
@@ -51,6 +56,8 @@ export default function MessagesSection() {
     maxToolResultChars === DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS;
   const isNotificationSettingDefault =
     notificationSetting === DEFAULT_SETTINGS.NOTIFICATION_SETTING;
+  const isShowMessageActionRowDefault =
+    showMessageActionRow === DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW;
 
   const handleResetMarkdownRendering = () => {
     resetSetting("MARKDOWN_RENDERING");
@@ -70,6 +77,10 @@ export default function MessagesSection() {
 
   const handleResetNotificationSetting = () => {
     resetSetting("NOTIFICATION_SETTING");
+  };
+
+  const handleResetShowMessageActionRow = () => {
+    resetSetting("SHOW_MESSAGE_ACTION_ROW");
   };
 
   return (
@@ -245,6 +256,41 @@ export default function MessagesSection() {
               size="icon"
               onClick={handleResetNotificationSetting}
               disabled={isNotificationSettingDefault}
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">Message Action Row</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Control when message actions (copy, edit, etc.) are visible.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={showMessageActionRow}
+              onValueChange={(value) =>
+                setShowMessageActionRow(value as MessageActionRowOption)
+              }
+            >
+              <SelectTrigger className="w-full md:w-fit md:max-w-96">
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hover">Show on hover</SelectItem>
+                <SelectItem value="always">Always show</SelectItem>
+                <SelectItem value="never">Never show</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleResetShowMessageActionRow}
+              disabled={isShowMessageActionRowDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />

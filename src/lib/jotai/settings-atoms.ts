@@ -6,6 +6,7 @@ import {
   type FontOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
+  type MessageActionRowOption,
   type NotificationOption,
   type RoundnessOption,
   type StopButtonBehaviorOption,
@@ -142,3 +143,9 @@ export const systemPromptAppendixAtom = createSettingAtom(
   "SYSTEM_PROMPT_APPENDIX",
   DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
 );
+
+export const showMessageActionRowAtom =
+  createSettingAtom<MessageActionRowOption>(
+    "SHOW_MESSAGE_ACTION_ROW",
+    DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW,
+  );

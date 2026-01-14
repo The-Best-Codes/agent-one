@@ -17,6 +17,7 @@ export type FontOption = "default" | "system" | "mono";
 export type TextScaleOption = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type NotificationOption = "always" | "when-unfocused" | "never";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
+export type MessageActionRowOption = "hover" | "always" | "never";
 
 export interface McpServerConfig {
   id: string;
@@ -45,6 +46,7 @@ export interface DefaultSettings {
   REGENERATE_ON_SAVE: boolean;
   STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   SHOW_CHAT_STATUS_INDICATOR: boolean;
+  SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
   THEME: ThemeOption;
   COLOR_THEME: ColorThemeOption;
   ROUNDNESS: RoundnessOption;
@@ -76,6 +78,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   REGENERATE_ON_SAVE: false,
   STOP_BUTTON_BEHAVIOR: "immediate",
   SHOW_CHAT_STATUS_INDICATOR: true,
+  SHOW_MESSAGE_ACTION_ROW: "always",
   THEME: "system",
   COLOR_THEME: "default",
   ROUNDNESS: "md",

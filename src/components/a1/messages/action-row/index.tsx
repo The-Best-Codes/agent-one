@@ -1,4 +1,5 @@
 import type { UIMessage } from "ai";
+import { useAtom } from "jotai";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import {
@@ -7,6 +8,7 @@ import {
   TooltipRoot,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { showMessageActionRowAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 import { BranchButton } from "./branch-button";
@@ -26,11 +28,19 @@ export const MessageActionRow = ({
   onEdit?: () => void;
   onBranch?: () => void;
 }) => {
+  const [showMessageActionRow] = useAtom(showMessageActionRowAtom);
+
   return (
     <div
       className={cn(
-        "ease mt-1 flex gap-1 opacity-0 transition-opacity duration-200 group-hover/message:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+        "ease mt-1 flex gap-1 transition-opacity duration-200",
         messageRole !== "user" && "ml-2",
+        {
+          "opacity-0 group-hover/message:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100":
+            showMessageActionRow === "hover",
+          "opacity-100": showMessageActionRow === "always",
+          hidden: showMessageActionRow === "never",
+        },
       )}
     >
       <TooltipProvider>
