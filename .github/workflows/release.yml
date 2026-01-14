@@ -14,9 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: "macos-latest" # for Arm based macs (M1 and above). You can also use "macos-latest" GitHub Actions runner.
+          - platform: "tenki-macos-latest-mini" # for Arm based macs (M1 and above). You can also use "macos-latest" GitHub Actions runner.
             args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs. You can also use "macos-latest" GitHub Actions runner.
+          - platform: "tenki-macos-latest-mini" # for Intel based macs. You can also use "macos-latest" GitHub Actions runner.
             args: "--target x86_64-apple-darwin"
           - platform: "tenki-standard-autoscale" # You can also use "ubuntu-22.04" GitHub Actions runner.
             args: ""
