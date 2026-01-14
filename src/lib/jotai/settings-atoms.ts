@@ -83,6 +83,11 @@ export const stopButtonBehaviorAtom =
     DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR,
   );
 
+export const showChatStatusIndicatorAtom = createSettingAtom(
+  "SHOW_CHAT_STATUS_INDICATOR",
+  DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR,
+);
+
 export const themeAtom = createSettingAtom<ThemeOption>(
   "THEME",
   DEFAULT_SETTINGS.THEME,

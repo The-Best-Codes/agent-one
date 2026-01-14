@@ -4,6 +4,12 @@ import { atomWithStorage } from "jotai/utils";
 
 import { systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
 
+export type ChatStatusIndicator = "loading" | "error" | "unread" | null;
+
+export const chatStatusIndicatorsAtom = atom<
+  Record<string, ChatStatusIndicator>
+>({});
+
 export const chatIdsAtom = atomWithStorage(
   "chat-ids",
   [] as string[],

@@ -1,6 +1,10 @@
+import { useAtomValue } from "jotai";
 import {
+  AlertCircleIcon,
+  CircleDotDashedIcon,
   DownloadIcon,
   GitBranch,
+  Loader2Icon,
   MoreHorizontalIcon,
   PencilIcon,
   TrashIcon,
@@ -15,12 +19,36 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  type ChatStatusIndicator,
+  chatStatusIndicatorsAtom,
+} from "@/lib/jotai/atoms";
+import { showChatStatusIndicatorAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
 
 const logger = getLogger(import.meta.url);
+
+const StatusIndicator = ({ status }: { status: ChatStatusIndicator }) => {
+  if (!status) return null;
+
+  switch (status) {
+    case "loading":
+      return (
+        <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+      );
+    case "error":
+      return <AlertCircleIcon className="text-destructive size-4 shrink-0" />;
+    case "unread":
+      return (
+        <CircleDotDashedIcon className="text-foreground size-4 shrink-0" />
+      );
+    default:
+      return null;
+  }
+};
 
 interface ChatItemProps {
   activeChatId?: string;
@@ -42,8 +70,13 @@ export const ChatItem = memo(
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const showStatusIndicator = useAtomValue(showChatStatusIndicatorAtom);
+    const chatStatusIndicators = useAtomValue(chatStatusIndicatorsAtom);
 
     const isSelectedChat = activeChatId === id;
+    const statusIndicator = showStatusIndicator
+      ? chatStatusIndicators[id]
+      : null;
 
     return (
       <>
@@ -69,7 +102,8 @@ export const ChatItem = memo(
           }
         >
           <Link to={`/chat/${id}`} className="relative block overflow-hidden">
-            <span className="flex min-w-0 items-center gap-1 text-sm font-normal">
+            <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
+              <StatusIndicator status={statusIndicator} />
               {branchOf && <GitBranch className="text-foreground size-3" />}
               <span className="min-w-0 truncate">{title}</span>
             </span>

@@ -1,6 +1,6 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import {
   type ReactNode,
   useCallback,
@@ -17,7 +17,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
-import { chatIdsAtom } from "@/lib/jotai/atoms";
+import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
@@ -49,6 +49,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const [chatIds] = useAtom(chatIdsAtom);
   const [notificationSetting] = useAtom(notificationSettingAtom);
+  const setChatStatusIndicators = useSetAtom(chatStatusIndicatorsAtom);
   const { getModelById } = useModelCatalog();
 
   const currentChatId = useMemo(() => {
@@ -171,9 +172,46 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [currentChatId, forceUpdate],
   );
 
-  const handleStatusChange = useCallback((id: string, status: string) => {
-    setLastStatusChange({ id, status });
-  }, []);
+  const handleStatusChange = useCallback(
+    (id: string, status: string, hasError?: boolean) => {
+      setLastStatusChange({ id, status });
+
+      if (status === "streaming" || status === "submitted") {
+        setChatStatusIndicators((prev) => ({ ...prev, [id]: "loading" }));
+      } else if (status === "ready" || status === "error") {
+        setChatStatusIndicators((prev) => {
+          const currentIndicator = prev[id];
+          if (hasError) {
+            return { ...prev, [id]: "error" };
+          }
+          if (currentIndicator === "loading") {
+            if (id === currentChatId) {
+              const { [id]: _removed, ...rest } = prev;
+              void _removed;
+              return rest;
+            }
+            return { ...prev, [id]: "unread" };
+          }
+          return prev;
+        });
+      }
+    },
+    [setChatStatusIndicators, currentChatId],
+  );
+
+  useEffect(() => {
+    if (currentChatId) {
+      setChatStatusIndicators((prev) => {
+        const currentIndicator = prev[currentChatId];
+        if (currentIndicator === "unread" || currentIndicator === "error") {
+          const { [currentChatId]: _removed, ...rest } = prev;
+          void _removed;
+          return rest;
+        }
+        return prev;
+      });
+    }
+  }, [currentChatId, setChatStatusIndicators]);
 
   useEffect(() => {
     const newActiveIds = new Set<string>();

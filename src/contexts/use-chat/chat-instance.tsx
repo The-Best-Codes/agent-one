@@ -36,6 +36,7 @@ export const ChatInstance = memo(
     onStatusChange: (
       id: string,
       status: UseChatHelpers<UIMessage>["status"],
+      hasError?: boolean,
     ) => void;
   }) => {
     const experimentalThrottleEnabled = useAtomValue(
@@ -110,8 +111,8 @@ export const ChatInstance = memo(
     ]);
 
     useEffect(() => {
-      onStatusChange(chatId, chat.status);
-    }, [chatId, chat.status, onStatusChange]);
+      onStatusChange(chatId, chat.status, !!chat.error);
+    }, [chatId, chat.status, chat.error, onStatusChange]);
 
     useEffect(() => {
       onInstanceUpdate(chatId, chat);

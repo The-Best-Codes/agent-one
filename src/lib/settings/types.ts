@@ -44,6 +44,7 @@ export interface DefaultSettings {
   SMOOTH_STREAM_ENABLED: boolean;
   REGENERATE_ON_SAVE: boolean;
   STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
+  SHOW_CHAT_STATUS_INDICATOR: boolean;
   THEME: ThemeOption;
   COLOR_THEME: ColorThemeOption;
   ROUNDNESS: RoundnessOption;
@@ -74,6 +75,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   SMOOTH_STREAM_ENABLED: false,
   REGENERATE_ON_SAVE: false,
   STOP_BUTTON_BEHAVIOR: "immediate",
+  SHOW_CHAT_STATUS_INDICATOR: true,
   THEME: "system",
   COLOR_THEME: "default",
   ROUNDNESS: "md",

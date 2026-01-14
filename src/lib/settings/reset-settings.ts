@@ -22,6 +22,7 @@ import {
   notificationSettingAtom,
   regenerateOnSaveAtom,
   roundnessAtom,
+  showChatStatusIndicatorAtom,
   smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
@@ -50,6 +51,7 @@ export function resetAllSettings(): void {
   store.set(smoothStreamEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
   store.set(stopButtonBehaviorAtom, RESET);
+  store.set(showChatStatusIndicatorAtom, RESET);
   store.set(themeAtom, RESET);
   store.set(roundnessAtom, RESET);
   store.set(fontAtom, RESET);
@@ -105,6 +107,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "STOP_BUTTON_BEHAVIOR":
       store.set(stopButtonBehaviorAtom, RESET);
+      break;
+    case "SHOW_CHAT_STATUS_INDICATOR":
+      store.set(showChatStatusIndicatorAtom, RESET);
       break;
     case "THEME":
       store.set(themeAtom, RESET);
