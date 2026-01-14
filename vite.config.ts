@@ -9,8 +9,8 @@ const host = process.env.TAURI_DEV_HOST;
 const vendorManualChunks = {
   react: ["react", "react-dom", "react-dom/client"],
   reactRouter: ["react-router"],
+  aiMain: ["ai"],
   aiSdk: [
-    "ai",
     "@ai-sdk/react",
     "@ai-sdk/google",
     "@ai-sdk/groq",
