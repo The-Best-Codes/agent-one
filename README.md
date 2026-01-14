@@ -54,7 +54,7 @@ See https://tauri.app/plugin/updater/.
 
 ---
 
-Copyright © 2025 bestcodes.dev
+Copyright © 2026 bestcodes.dev
 
 All rights reserved.
 
