@@ -221,7 +221,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
     chatInstancesRef.current.forEach((instance, id) => {
       const isBusy =
-        instance.status === "streaming" || instance.status === "submitted";
+        instance.status === "streaming" ||
+        instance.status === "submitted" ||
+        instance.status === "error";
       if (isBusy) {
         newActiveIds.add(id);
       }
