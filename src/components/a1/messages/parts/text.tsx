@@ -41,7 +41,7 @@ export const MessagePartText = ({
   return (
     <div
       className={cn(
-        "max-w-full rounded-md text-base [&>*:last-child]:inline [&>*:last-child]:after:content-['']",
+        "max-w-full rounded-md text-base [&>*:last-child]:inline",
         shouldRenderMarkdown &&
           "prose dark:prose-invert prose-sm prose-neutral",
         isLastPart && inlineSuffix && "[&>*:last-child]:mr-1",
