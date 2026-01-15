@@ -28,23 +28,19 @@ export const ChatMessageLoading = ({
 
     if (status === "streaming") {
       return (
-        <div className="justify-end">
-          <span className="animate-caret-blink text-muted-foreground">|</span>
-        </div>
+        <span className="animate-caret-blink text-muted-foreground">|</span>
       );
     }
 
     if (status === "submitted" && lastOverallMessage.role === "assistant") {
       return (
-        <div className="justify-end">
-          <span className="text-muted-foreground animate-pulse">
-            {isApiKeysLoading
-              ? "Loading API keys..."
-              : isMcpLoading
-                ? "Starting MCP servers..."
-                : "Thinking..."}
-          </span>
-        </div>
+        <span className="text-muted-foreground animate-pulse">
+          {isApiKeysLoading
+            ? "Loading API keys..."
+            : isMcpLoading
+              ? "Starting MCP servers..."
+              : "Thinking..."}
+        </span>
       );
     }
 
