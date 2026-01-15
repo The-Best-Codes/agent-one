@@ -121,13 +121,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     let textIndex = 0;
     
     // Find the index of the last text part
-    let lastTextPartIndex = -1;
-    for (let i = message.parts.length - 1; i >= 0; i--) {
-      if (message.parts[i].type === "text") {
-        lastTextPartIndex = i;
-        break;
-      }
-    }
+    const lastTextPartIndex = message.parts.findLastIndex(part => part.type === "text");
 
     return message.parts.map((part, i) => {
       const key =
