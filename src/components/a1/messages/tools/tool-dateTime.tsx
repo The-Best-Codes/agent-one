@@ -1,18 +1,22 @@
 import type { ToolUIPart } from "ai";
 import {
   CalendarDaysIcon,
+  CheckCircle2Icon,
   ChevronDownIcon,
   Loader2Icon,
   XCircleIcon,
+  XIcon,
 } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
 interface DateTimeOutput {
@@ -27,11 +31,65 @@ interface DateTimeToolPartProps {
 export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
   const callId = part.toolCallId;
   const output = part.output as DateTimeOutput;
+  const { addToolApprovalResponse } = useChatFunctions();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
     boolean | undefined
   >();
 
   switch (part.state) {
+    case "approval-requested":
+      return (
+        <div
+          key={callId}
+          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
+        >
+          <div className="flex items-center gap-1">
+            <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
+            <span className="text-foreground text-sm font-bold">
+              AgentOne wants to check the date and time
+            </span>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: false,
+                })
+              }
+            >
+              <XIcon />
+              Deny
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: true,
+                })
+              }
+            >
+              <CheckCircle2Icon />
+              Approve
+            </Button>
+          </div>
+        </div>
+      );
+
+    case "output-denied":
+      return (
+        <div key={callId} className="flex items-center gap-1">
+          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-muted-foreground text-sm font-bold">
+            Date and time check denied
+          </span>
+        </div>
+      );
+
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
@@ -44,6 +102,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
         </div>
       );
 
+    case "approval-responded":
     case "input-available":
       return (
         <div

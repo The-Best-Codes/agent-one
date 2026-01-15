@@ -1,13 +1,21 @@
 import type { ToolUIPart } from "ai";
-import { ChevronDownIcon, XCircleIcon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  ChevronDownIcon,
+  WrenchIcon,
+  XCircleIcon,
+  XIcon,
+} from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
 interface ToolCallPartProps {
@@ -17,11 +25,65 @@ interface ToolCallPartProps {
 export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
   const callId = part.toolCallId;
   const toolName = part.type.replace("tool-", "");
+  const { addToolApprovalResponse } = useChatFunctions();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
     boolean | undefined
   >();
 
   switch (part.state) {
+    case "approval-requested":
+      return (
+        <div
+          key={callId}
+          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
+        >
+          <div className="flex items-center gap-1">
+            <WrenchIcon className="text-foreground size-4 shrink-0" />
+            <span className="text-foreground text-sm font-bold">
+              AgentOne wants to run tool "{toolName}"
+            </span>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: false,
+                })
+              }
+            >
+              <XIcon />
+              Deny
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: true,
+                })
+              }
+            >
+              <CheckCircle2Icon />
+              Approve
+            </Button>
+          </div>
+        </div>
+      );
+
+    case "output-denied":
+      return (
+        <div key={callId} className="flex items-center gap-1">
+          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-muted-foreground text-sm font-bold">
+            Tool "{toolName}" denied
+          </span>
+        </div>
+      );
+
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-2">
@@ -32,6 +94,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         </div>
       );
 
+    case "approval-responded":
     case "input-available":
       return (
         <Accordion

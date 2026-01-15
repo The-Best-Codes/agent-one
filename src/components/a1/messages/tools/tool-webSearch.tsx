@@ -1,13 +1,16 @@
 import type { ToolUIPart } from "ai";
 import {
+  CheckCircle2Icon,
   ChevronDownIcon,
   ExternalLinkIcon,
   Loader2Icon,
   SearchIcon,
   XCircleIcon,
+  XIcon,
 } from "lucide-react";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -15,6 +18,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
 interface WebSearchInput {
@@ -44,6 +48,8 @@ interface WebSearchResult {
 
 export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
   const callId = part.toolCallId;
+  const input = part.input as WebSearchInput;
+  const { addToolApprovalResponse } = useChatFunctions();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
     boolean | undefined
   >();
@@ -51,7 +57,62 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     boolean | undefined
   >();
 
+  const query = input?.query || "Unknown query";
+
   switch (part.state) {
+    case "approval-requested":
+      return (
+        <div
+          key={callId}
+          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
+        >
+          <div className="flex items-center gap-1">
+            <SearchIcon className="text-foreground size-4 shrink-0" />
+            <span className="text-foreground text-sm font-bold">
+              AgentOne wants to search for "{query}"
+            </span>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: false,
+                })
+              }
+            >
+              <XIcon />
+              Deny
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: true,
+                })
+              }
+            >
+              <CheckCircle2Icon />
+              Approve
+            </Button>
+          </div>
+        </div>
+      );
+
+    case "output-denied":
+      return (
+        <div key={callId} className="flex items-center gap-1">
+          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-muted-foreground text-sm font-bold">
+            Web search for "{query}" denied
+          </span>
+        </div>
+      );
+
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
@@ -62,10 +123,8 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         </div>
       );
 
+    case "approval-responded":
     case "input-available": {
-      const input = part.input as WebSearchInput;
-      const query = input?.query || "Unknown query";
-
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
