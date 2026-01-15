@@ -149,7 +149,15 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
           );
         }
         case "reasoning":
-          return <MessagePartReasoning key={key} text={part.text} />;
+          return (
+            <MessagePartReasoning
+              key={key}
+              text={part.text}
+              isStreaming={
+                i === message.parts.length - 1 && message.role === "assistant"
+              }
+            />
+          );
         case "step-start":
           return <MessagePartStepStart key={key} />;
         case "file":

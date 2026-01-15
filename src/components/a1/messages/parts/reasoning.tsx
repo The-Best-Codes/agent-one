@@ -1,5 +1,5 @@
 import type { ReasoningUIPart } from "ai";
-import { BrainIcon, ChevronDownIcon } from "lucide-react";
+import { BrainIcon, ChevronDownIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -8,13 +8,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
 export const MessagePartReasoning = ({
   text,
+  isStreaming,
 }: {
   text: ReasoningUIPart["text"];
+  isStreaming?: boolean;
 }) => {
+  const { status } = useChatStatus();
+  const isLoading = isStreaming && status === "streaming";
+
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
     boolean | undefined
   >();
@@ -40,12 +46,21 @@ export const MessagePartReasoning = ({
         <AccordionTrigger
           icon={
             <div className="relative">
-              <BrainIcon
-                className={cn(
-                  "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
-                  isMainAccordionOpen && "scale-0 opacity-0",
-                )}
-              />
+              {isLoading ? (
+                <Loader2Icon
+                  className={cn(
+                    "text-foreground absolute inset-0 size-4 shrink-0 animate-spin opacity-100 transition-[opacity,scale] duration-200",
+                    isMainAccordionOpen && "scale-0 opacity-0",
+                  )}
+                />
+              ) : (
+                <BrainIcon
+                  className={cn(
+                    "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
+                    isMainAccordionOpen && "scale-0 opacity-0",
+                  )}
+                />
+              )}
               <ChevronDownIcon
                 className={cn(
                   "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-100 group-hover/reasoning-accordion:opacity-100",
