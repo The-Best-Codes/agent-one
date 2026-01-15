@@ -13,13 +13,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
+import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
-import { ChatMessageLoading } from "../chat-message-loading";
 import { MessageGroup } from "./group";
 import { InlineTextEditor } from "./inline-text-editor";
 import { MessagePartDynamicTool } from "./parts/dynamic-tool";
@@ -51,6 +53,16 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
   const { branchChat } = usePersistence();
 
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
+  
+  const { status } = useChatStatus();
+  const messages = useChatMessages();
+  const { isApiKeysLoading } = useApiKeys();
+  const { isMcpLoading } = useTools();
+  
+  const lastOverallMessage = messages[messages.length - 1];
+  const isLatestMessageOverall = lastOverallMessage?.id === message.id;
+  const shouldShowCursor = isLatestMessageOverall && message.role === "assistant" && status === "streaming";
+  const shouldShowThinking = isLatestMessageOverall && message.role === "assistant" && status === "submitted";
 
   const handleEnterKey = useCallback(() => {
     if (message.role === "user") {
@@ -107,12 +119,36 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
 
   const renderedParts = useMemo(() => {
     let textIndex = 0;
+    
+    // Find the index of the last text part
+    let lastTextPartIndex = -1;
+    for (let i = message.parts.length - 1; i >= 0; i--) {
+      if (message.parts[i].type === "text") {
+        lastTextPartIndex = i;
+        break;
+      }
+    }
 
     return message.parts.map((part, i) => {
       const key =
         "toolCallId" in part && (part as ToolUIPart).toolCallId
           ? (part as ToolUIPart).toolCallId!
           : `${message.id}-${i}`;
+      
+      const isLastTextPart = i === lastTextPartIndex;
+      const inlineSuffix = isLastTextPart && (shouldShowCursor || shouldShowThinking) ? (
+        shouldShowCursor ? (
+          <span className="animate-caret-blink text-muted-foreground">|</span>
+        ) : (
+          <span className="text-muted-foreground animate-pulse">
+            {isApiKeysLoading
+              ? "Loading API keys..."
+              : isMcpLoading
+                ? "Starting MCP servers..."
+                : "Thinking..."}
+          </span>
+        )
+      ) : undefined;
 
       switch (part.type) {
         case "text": {
@@ -145,6 +181,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
               id={message.id}
               text={part.text}
               messageRole={message.role}
+              inlineSuffix={inlineSuffix}
             />
           );
         }
@@ -176,18 +213,13 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     message.id,
     message.parts,
     message.role,
+    shouldShowCursor,
+    shouldShowThinking,
+    isApiKeysLoading,
+    isMcpLoading,
   ]);
 
-  const content = (
-    <>
-      {renderedParts}
-      <ChatMessageLoading
-        mode="inMessage"
-        messageId={message.id}
-        messageRole={message.role}
-      />
-    </>
-  );
+  const content = <>{renderedParts}</>;
 
   if (isEditing) {
     return (

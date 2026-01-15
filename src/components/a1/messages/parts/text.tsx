@@ -14,10 +14,12 @@ export const MessagePartText = ({
   id,
   text,
   messageRole,
+  inlineSuffix,
 }: {
   id: string;
   text: TextUIPart["text"];
   messageRole: UIMessage["role"];
+  inlineSuffix?: React.ReactNode;
 }) => {
   const maxMessageLength = useAtomValue(maxMessageLengthAtom);
   const markdownRendering = useAtomValue(markdownRenderingAtom);
@@ -53,9 +55,13 @@ export const MessagePartText = ({
             </AlertDescription>
           </Alert>
           <PerformantMarkdown content={text} />
+          {inlineSuffix}
         </>
       ) : shouldRenderMarkdown ? (
-        <MemoizedMarkdown id={id} content={text} messageRole={messageRole} />
+        <>
+          <MemoizedMarkdown id={id} content={text} messageRole={messageRole} />
+          {inlineSuffix}
+        </>
       ) : (
         <pre
           className="text-base break-words whitespace-pre-wrap"
@@ -64,6 +70,7 @@ export const MessagePartText = ({
           }}
         >
           {text}
+          {inlineSuffix}
         </pre>
       )}
     </div>
