@@ -1,8 +1,14 @@
 import { useAtom } from "jotai";
-import { RotateCcwIcon, XIcon } from "lucide-react";
+import { RotateCcwIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -216,63 +222,71 @@ export default function ToolsSection() {
           {mcpServers.length === 0 ? (
             <NoMcpServers />
           ) : (
-            <div className="space-y-2">
+            <Accordion
+              type="single"
+              collapsible
+              className="border-border w-full rounded-md border"
+            >
               {mcpServers.map((server, index) => (
-                <Card key={server.id} className="relative border py-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeleteClick(index)}
-                    aria-label="Remove server"
-                    className="absolute top-2 right-2 size-6"
-                  >
-                    <XIcon className="size-4" />
-                  </Button>
-                  <CardContent className="grid gap-3 p-4">
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <div className="grid flex-1 gap-1.5">
-                        <Label
-                          htmlFor={`name-${server.id}`}
-                          className="text-xs"
-                        >
-                          Name
-                        </Label>
-                        <Input
-                          id={`name-${server.id}`}
-                          value={server.name}
-                          onChange={(e) =>
-                            updateMcpServer(index, { name: e.target.value })
-                          }
-                          placeholder="Server name"
-                        />
-                      </div>
-
-                      <div className="grid gap-1.5 sm:w-32">
-                        <Label
-                          htmlFor={`timeout-${server.id}`}
-                          className="text-xs"
-                        >
-                          Timeout (sec)
-                        </Label>
-                        <Input
-                          id={`timeout-${server.id}`}
-                          type="number"
-                          min="1"
-                          max="300"
-                          value={Math.round(server.timeoutMs / 1000)}
-                          onChange={(e) =>
-                            updateMcpServer(index, {
-                              timeoutMs:
-                                (parseInt(e.target.value) || 30) * 1000,
-                            })
-                          }
-                          placeholder="30"
-                        />
-                      </div>
+                <AccordionItem key={server.id} value={server.id}>
+                  <AccordionTrigger className="px-3 hover:no-underline">
+                    <div className="flex flex-1 items-center justify-between">
+                      <span>{server.name || "Unnamed Server"}</span>
+                      <Switch
+                        id={`enabled-${server.id}`}
+                        checked={server.enabled}
+                        onCheckedChange={(checked) =>
+                          updateMcpServer(index, { enabled: checked })
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                      />
                     </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-3 pb-3">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <div className="grid flex-1 gap-1.5">
+                          <Label
+                            htmlFor={`name-${server.id}`}
+                            className="text-xs"
+                          >
+                            Name
+                          </Label>
+                          <Input
+                            id={`name-${server.id}`}
+                            value={server.name}
+                            onChange={(e) =>
+                              updateMcpServer(index, { name: e.target.value })
+                            }
+                            placeholder="Server name"
+                          />
+                        </div>
 
-                    <div className="flex items-end gap-3">
-                      <div className="grid flex-1 gap-1.5">
+                        <div className="grid gap-1.5 sm:w-32">
+                          <Label
+                            htmlFor={`timeout-${server.id}`}
+                            className="text-xs"
+                          >
+                            Timeout (sec)
+                          </Label>
+                          <Input
+                            id={`timeout-${server.id}`}
+                            type="number"
+                            min="1"
+                            max="300"
+                            value={Math.round(server.timeoutMs / 1000)}
+                            onChange={(e) =>
+                              updateMcpServer(index, {
+                                timeoutMs:
+                                  (parseInt(e.target.value) || 30) * 1000,
+                              })
+                            }
+                            placeholder="30"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-1.5">
                         <Label
                           htmlFor={`command-${server.id}`}
                           className="text-xs"
@@ -289,28 +303,20 @@ export default function ToolsSection() {
                         />
                       </div>
 
-                      <div className="grid gap-1.5">
-                        <Label
-                          htmlFor={`enabled-${server.id}`}
-                          className="text-xs"
-                        >
-                          Enabled
-                        </Label>
-                        <div className="flex h-9 items-center justify-end">
-                          <Switch
-                            id={`enabled-${server.id}`}
-                            checked={server.enabled}
-                            onCheckedChange={(checked) =>
-                              updateMcpServer(index, { enabled: checked })
-                            }
-                          />
-                        </div>
-                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteClick(index)}
+                        className="w-fit"
+                      >
+                        <Trash2Icon className="size-4" />
+                        Delete Server
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           )}
         </CardContent>
       </Card>
