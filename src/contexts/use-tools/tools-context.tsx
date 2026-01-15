@@ -8,7 +8,12 @@ import React, {
   useState,
 } from "react";
 
-import { staticTools } from "@/lib/ai/tools";
+import {
+  createDateTimeTool,
+  createGetUrlContentTool,
+  createWaitTool,
+  createWebSearchTool,
+} from "@/lib/ai/tools";
 import {
   closeServerCache,
   getCacheVersion,
@@ -19,9 +24,10 @@ import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
+  toolConfigsAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { type McpServerConfig, type ToolId } from "@/lib/settings/types";
+import { type McpServerConfig } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
 
@@ -41,6 +47,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [enabledTools] = useAtom(enabledToolsAtom);
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
+  const [toolConfigs] = useAtom(toolConfigsAtom);
 
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
@@ -171,10 +178,24 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
     const filteredStaticTools: ToolSet = {};
-    for (const [toolId, tool] of Object.entries(staticTools)) {
-      if (enabledTools[toolId as ToolId]) {
-        filteredStaticTools[toolId] = tool;
-      }
+
+    if (enabledTools.dateTime) {
+      filteredStaticTools.dateTime = createDateTimeTool(toolConfigs.dateTime);
+    }
+    if (enabledTools.waitNumberMilliseconds) {
+      filteredStaticTools.waitNumberMilliseconds = createWaitTool(
+        toolConfigs.waitNumberMilliseconds,
+      );
+    }
+    if (enabledTools.getUrlContent) {
+      filteredStaticTools.getUrlContent = createGetUrlContentTool(
+        toolConfigs.getUrlContent,
+      );
+    }
+    if (enabledTools.webSearch) {
+      filteredStaticTools.webSearch = createWebSearchTool(
+        toolConfigs.webSearch,
+      );
     }
 
     if (mcpLoadedRef.current) {
@@ -192,7 +213,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       ...filteredStaticTools,
       ...mcpToolsRef.current,
     };
-  }, [enabledTools]);
+  }, [enabledTools, toolConfigs]);
 
   return (
     <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>

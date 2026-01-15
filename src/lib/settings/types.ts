@@ -46,6 +46,38 @@ export type ToolId =
   | "getUrlContent"
   | "webSearch";
 
+export interface DateTimeToolConfig {
+  requiresApproval: boolean;
+  useUtc: boolean;
+}
+
+export interface WaitToolConfig {
+  requiresApproval: boolean;
+  maxMs: number;
+  minMs: number;
+}
+
+export interface GetUrlContentToolConfig {
+  requiresApproval: boolean;
+  maxUrls: number;
+  minUrls: number;
+  defaultMaxLength: number;
+}
+
+export interface WebSearchToolConfig {
+  requiresApproval: boolean;
+  maxConcurrent: number;
+  defaultMaxResults: number;
+  defaultMaxPages: number;
+}
+
+export interface ToolConfigs {
+  dateTime: DateTimeToolConfig;
+  waitNumberMilliseconds: WaitToolConfig;
+  getUrlContent: GetUrlContentToolConfig;
+  webSearch: WebSearchToolConfig;
+}
+
 export interface DefaultSettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
@@ -68,6 +100,7 @@ export interface DefaultSettings {
   TEXT_SCALE: TextScaleOption;
   NOTIFICATION_SETTING: NotificationOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
+  TOOL_CONFIGS: ToolConfigs;
   MCP_SERVERS: McpServerConfig[];
   MCP_PARALLEL_LOAD_LIMIT: number;
   USER_NAME: string;
@@ -110,6 +143,29 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     waitNumberMilliseconds: true,
     getUrlContent: true,
     webSearch: true,
+  },
+  TOOL_CONFIGS: {
+    dateTime: {
+      requiresApproval: false,
+      useUtc: false,
+    },
+    waitNumberMilliseconds: {
+      requiresApproval: false,
+      maxMs: 60000,
+      minMs: 0,
+    },
+    getUrlContent: {
+      requiresApproval: false,
+      maxUrls: 5,
+      minUrls: 1,
+      defaultMaxLength: 1000,
+    },
+    webSearch: {
+      requiresApproval: false,
+      maxConcurrent: 3,
+      defaultMaxResults: 20,
+      defaultMaxPages: 1,
+    },
   },
   MCP_SERVERS: [
     {
