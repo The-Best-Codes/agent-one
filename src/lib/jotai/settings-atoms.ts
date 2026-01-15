@@ -13,6 +13,7 @@ import {
   type SubmitKeyOption,
   type TextScaleOption,
   type ThemeOption,
+  type TitleGenerationSettings,
   type ToolId,
 } from "@/lib/settings/types";
 
@@ -149,3 +150,8 @@ export const showMessageActionRowAtom =
     "SHOW_MESSAGE_ACTION_ROW",
     DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW,
   );
+
+export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(
+  "TITLE_GENERATION",
+  DEFAULT_SETTINGS.TITLE_GENERATION,
+);

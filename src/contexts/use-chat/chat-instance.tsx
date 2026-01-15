@@ -11,11 +11,15 @@ import { memo, useEffect, useMemo } from "react";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
-import { generateChatTitle } from "@/lib/ai/title-generator";
+import {
+  generateChatTitle,
+  hasMessageTextContent,
+} from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
+  titleGenerationAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
@@ -45,6 +49,7 @@ export const ChatInstance = memo(
     const experimentalThrottleValue = useAtomValue(
       experimentalThrottleValueAtom,
     );
+    const titleGenerationSettings = useAtomValue(titleGenerationAtom);
     const {
       loadChat,
       loadChatData,
@@ -78,13 +83,19 @@ export const ChatInstance = memo(
 
         const chatData = loadChatData(chatId);
         const hasUserMessage = chat.messages.some((m) => m.role === "user");
-        if (hasUserMessage && !chatData.titleState) {
+        const needsAssistantMessage =
+          titleGenerationSettings.method === "first-assistant-message" &&
+          !chat.messages.some(
+            (m) => m.role === "assistant" && hasMessageTextContent(m),
+          );
+
+        if (hasUserMessage && !chatData.titleState && !needsAssistantMessage) {
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
           // TODO: We need to make this state in-memory if we migrate to an async DB, otherwise rerenders, new messages, etc. will trigger title generation again
           saveChatTitleState({ chatId, titleState: "generating" });
-          generateChatTitle(model, chat.messages)
+          generateChatTitle(model, chat.messages, titleGenerationSettings)
             .then((generatedTitle) => {
               if (chatIds.includes(chatId)) {
                 saveChatTitle({ chatId, title: generatedTitle });
@@ -108,6 +119,7 @@ export const ChatInstance = memo(
       saveChat,
       saveChatTitle,
       saveChatTitleState,
+      titleGenerationSettings,
     ]);
 
     useEffect(() => {

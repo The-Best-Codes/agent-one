@@ -1,3 +1,4 @@
+import { useAtomValue } from "jotai";
 import { Loader2Icon, SparklesIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -19,7 +20,8 @@ import {
 } from "@/components/ui/tooltip";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
-import { generateChatTitle } from "@/lib/ai/title-generator";
+import { generateChatTitleAI } from "@/lib/ai/title-generator";
+import { titleGenerationAtom } from "@/lib/jotai/settings-atoms";
 
 interface ChangeTitleModalProps {
   isOpen: boolean;
@@ -41,6 +43,7 @@ const ChangeTitleForm = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const { saveChatTitle, loadChatData } = usePersistence();
   const { getModelById } = useModelCatalog();
+  const titleGenerationSettings = useAtomValue(titleGenerationAtom);
 
   const handleSave = () => {
     if (title.trim() && title.trim() !== currentTitle) {
@@ -61,9 +64,10 @@ const ChangeTitleForm = ({
       const chatData = loadChatData(chatId);
       const modelConfig = getModelById(chatData.modelId || "");
       if (modelConfig) {
-        const generatedTitle = await generateChatTitle(
+        const generatedTitle = await generateChatTitleAI(
           modelConfig.model,
           chatData.messages,
+          titleGenerationSettings.fallbackPhrase,
           "none",
         );
         setTitle(generatedTitle);

@@ -31,6 +31,7 @@ import {
   systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
+  titleGenerationAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
@@ -69,6 +70,7 @@ export function resetAllSettings(): void {
   store.set(enabledToolsAtom, RESET);
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
+  store.set(titleGenerationAtom, RESET);
 }
 
 /**
@@ -162,6 +164,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "CEREBRAS_API_KEY":
       store.set(cerebrasApiKeyAtom, RESET);
+      break;
+    case "TITLE_GENERATION":
+      store.set(titleGenerationAtom, RESET);
       break;
   }
 }

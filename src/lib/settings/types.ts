@@ -19,6 +19,19 @@ export type NotificationOption = "always" | "when-unfocused" | "never";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 export type MessageActionRowOption = "hover" | "always" | "never";
 
+export type TitleGenerationMethodOption =
+  | "ai"
+  | "first-user-message"
+  | "first-assistant-message"
+  | "custom";
+
+export interface TitleGenerationSettings {
+  method: TitleGenerationMethodOption;
+  characterLimit: number;
+  customPhrase: string;
+  fallbackPhrase: string;
+}
+
 export interface McpServerConfig {
   id: string;
   name: string;
@@ -47,6 +60,7 @@ export interface DefaultSettings {
   STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   SHOW_CHAT_STATUS_INDICATOR: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
+  TITLE_GENERATION: TitleGenerationSettings;
   THEME: ThemeOption;
   COLOR_THEME: ColorThemeOption;
   ROUNDNESS: RoundnessOption;
@@ -79,6 +93,12 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   STOP_BUTTON_BEHAVIOR: "immediate",
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
+  TITLE_GENERATION: {
+    method: "ai",
+    characterLimit: 50,
+    customPhrase: "New chat",
+    fallbackPhrase: "New chat",
+  },
   THEME: "system",
   COLOR_THEME: "default",
   ROUNDNESS: "md",

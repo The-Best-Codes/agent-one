@@ -4,6 +4,7 @@ import AppearanceSection from "./sections/appearance";
 import EditorSection from "./sections/editor";
 import MessagesSection from "./sections/messages";
 import StreamingSection from "./sections/streaming";
+import TitlesSection from "./sections/titles";
 import ToolsSection from "./sections/tools";
 
 interface SettingsContentProps {
@@ -23,6 +24,8 @@ export default function SettingsContent({
         return <EditorSection />;
       case "messages":
         return <MessagesSection />;
+      case "titles":
+        return <TitlesSection />;
       case "tools":
         return <ToolsSection />;
       case "streaming":
