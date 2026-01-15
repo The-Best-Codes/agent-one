@@ -15,11 +15,13 @@ export const MessagePartText = ({
   text,
   messageRole,
   inlineSuffix,
+  isLastPart,
 }: {
   id: string;
   text: TextUIPart["text"];
   messageRole: UIMessage["role"];
   inlineSuffix?: React.ReactNode;
+  isLastPart?: boolean;
 }) => {
   const maxMessageLength = useAtomValue(maxMessageLengthAtom);
   const markdownRendering = useAtomValue(markdownRenderingAtom);
@@ -39,9 +41,10 @@ export const MessagePartText = ({
   return (
     <div
       className={cn(
-        "max-w-full rounded-md text-base",
+        "max-w-full rounded-md text-base [&>*:last-child]:inline [&>*:last-child]:after:content-['']",
         shouldRenderMarkdown &&
           "prose dark:prose-invert prose-sm prose-neutral",
+        isLastPart && inlineSuffix && "[&>*:last-child]:mr-1",
       )}
     >
       {shouldUsePerformantRenderer ? (
@@ -55,12 +58,12 @@ export const MessagePartText = ({
             </AlertDescription>
           </Alert>
           <PerformantMarkdown content={text} />
-          {inlineSuffix}
+          {inlineSuffix && <span className="inline">{inlineSuffix}</span>}
         </>
       ) : shouldRenderMarkdown ? (
         <>
           <MemoizedMarkdown id={id} content={text} messageRole={messageRole} />
-          {inlineSuffix}
+          {inlineSuffix && <span className="inline">{inlineSuffix}</span>}
         </>
       ) : (
         <pre

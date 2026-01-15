@@ -120,8 +120,14 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
   const renderedParts = useMemo(() => {
     let textIndex = 0;
     
-    // Find the index of the last text part
-    const lastTextPartIndex = message.parts.findLastIndex(part => part.type === "text");
+    // Find the index of the last text part using a loop (findLastIndex not available in current TS target)
+    let lastTextPartIndex = -1;
+    for (let i = message.parts.length - 1; i >= 0; i--) {
+      if (message.parts[i].type === "text") {
+        lastTextPartIndex = i;
+        break;
+      }
+    }
 
     return message.parts.map((part, i) => {
       const key =
@@ -176,6 +182,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
               text={part.text}
               messageRole={message.role}
               inlineSuffix={inlineSuffix}
+              isLastPart={isLastTextPart}
             />
           );
         }
