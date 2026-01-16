@@ -38,6 +38,7 @@ export interface McpServerConfig {
   command: string;
   enabled: boolean;
   timeoutMs: number;
+  requiresApproval: boolean;
 }
 
 export type ToolId =
@@ -174,6 +175,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       command: "npx -y @modelcontextprotocol/server-everything",
       enabled: true,
       timeoutMs: 30000,
+      requiresApproval: false,
     },
   ],
   MCP_PARALLEL_LOAD_LIMIT: 8,

@@ -1,4 +1,4 @@
-import type { ToolSet } from "ai";
+import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
 import React, {
   type ReactNode,
@@ -43,6 +43,25 @@ interface ToolsProviderProps {
   children: ReactNode;
 }
 
+// TODO: Later, allow setting approval requirements on a per-tool basis for MCP servers, rather than for all tools in that server?
+function applyNeedsApprovalToTools(
+  tools: ToolSet,
+  needsApproval: boolean,
+): ToolSet {
+  if (!needsApproval) {
+    return tools;
+  }
+
+  const wrappedTools: ToolSet = {};
+  for (const [name, tool] of Object.entries(tools)) {
+    wrappedTools[name] = {
+      ...tool,
+      needsApproval: true,
+    } as Tool<unknown, unknown>;
+  }
+  return wrappedTools;
+}
+
 export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [enabledTools] = useAtom(enabledToolsAtom);
   const [mcpServers] = useAtom(mcpServersAtom);
@@ -75,6 +94,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         id: s.id,
         command: s.command,
         timeout: s.timeoutMs,
+        requiresApproval: s.requiresApproval,
       })),
     );
 
@@ -138,7 +158,11 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   ),
                 ),
               ]);
-              return { serverId: server.id, tools };
+              const wrappedTools = applyNeedsApprovalToTools(
+                tools,
+                server.requiresApproval ?? false,
+              );
+              return { serverId: server.id, tools: wrappedTools };
             } catch (error) {
               logger.error(
                 `Failed to load MCP tools for server ${server.name}:`,

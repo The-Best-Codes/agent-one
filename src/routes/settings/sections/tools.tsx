@@ -108,6 +108,8 @@ export default function ToolsSection() {
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
+  const [newServerRequiresApproval, setNewServerRequiresApproval] =
+    useState(false);
 
   const isAddFormValid =
     newServerName.trim() !== "" &&
@@ -123,12 +125,14 @@ export default function ToolsSection() {
       command: newServerCommand.trim(),
       enabled: true,
       timeoutMs: newServerTimeoutSec * 1000,
+      requiresApproval: newServerRequiresApproval,
     };
     setMcpServers((prev) => [newServer, ...prev]);
 
     setNewServerName("");
     setNewServerCommand("");
     setNewServerTimeoutSec(30);
+    setNewServerRequiresApproval(false);
     setShowAddDialog(false);
   };
 
@@ -136,6 +140,7 @@ export default function ToolsSection() {
     setNewServerName("");
     setNewServerCommand("");
     setNewServerTimeoutSec(30);
+    setNewServerRequiresApproval(false);
     setShowAddDialog(false);
   };
 
@@ -587,6 +592,30 @@ export default function ToolsSection() {
                         />
                       </div>
 
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <Label
+                            htmlFor={`approval-${server.id}`}
+                            className="text-sm"
+                          >
+                            Require Approval
+                          </Label>
+                          <span className="text-muted-foreground text-xs">
+                            Ask for confirmation before running tools from this
+                            server
+                          </span>
+                        </div>
+                        <Switch
+                          id={`approval-${server.id}`}
+                          checked={server.requiresApproval ?? false}
+                          onCheckedChange={(checked) =>
+                            updateMcpServer(index, {
+                              requiresApproval: checked,
+                            })
+                          }
+                        />
+                      </div>
+
                       <Button
                         variant="destructive"
                         size="sm"
@@ -647,6 +676,22 @@ export default function ToolsSection() {
                 onChange={(e) =>
                   setNewServerTimeoutSec(parseFloat(e.target.value))
                 }
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <Label htmlFor="server-approval" className="text-sm">
+                  Require Approval
+                </Label>
+                <span className="text-muted-foreground text-xs">
+                  Ask for confirmation before running tools from this server
+                </span>
+              </div>
+              <Switch
+                id="server-approval"
+                checked={newServerRequiresApproval}
+                onCheckedChange={setNewServerRequiresApproval}
               />
             </div>
           </div>
