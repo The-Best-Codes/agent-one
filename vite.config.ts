@@ -69,6 +69,19 @@ export default defineConfig(
         environment: "jsdom",
         include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
         exclude: ["tests/e2e/**"],
+        coverage: {
+          provider: "v8",
+          reporter: ["text", "json", "html"],
+          include: ["src/**/*.{ts,tsx}"],
+          exclude: [
+            "**/*.test.{ts,tsx}",
+            "**/*.spec.{ts,tsx}",
+            "**/types.ts",
+            "**/*.d.ts",
+            "**/vite-env.d.ts",
+            "tests/**",
+          ],
+        },
       },
 
       resolve: {
