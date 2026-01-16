@@ -250,7 +250,8 @@ describe("Tabs Components", () => {
       );
       
       expect(screen.getByText("Content 1")).toBeInTheDocument();
-      expect(screen.queryByText("Content 2")).not.toBeVisible();
+      // Content 2 is hidden by Radix when tab 1 is active
+      expect(screen.queryByText("Content 2")).not.toBeInTheDocument();
     });
 
     it("accepts custom className", () => {

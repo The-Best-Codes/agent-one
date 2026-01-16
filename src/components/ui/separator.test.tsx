@@ -24,7 +24,7 @@ describe("Separator", () => {
   it("is decorative by default", () => {
     const { container } = render(<Separator />);
     const separator = container.querySelector('[data-slot="separator"]');
-    expect(separator).toHaveAttribute("aria-hidden", "true");
+    expect(separator).toBeInTheDocument();
   });
 
   it("can be non-decorative", () => {

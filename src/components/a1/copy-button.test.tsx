@@ -1,13 +1,13 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { CopyButton } from "./copy-button";
 
-const mockWriteText = vi.fn();
-
 vi.mock("@tauri-apps/plugin-clipboard-manager", () => ({
-  writeText: mockWriteText,
+  writeText: vi.fn(),
 }));
+
+import { writeText as mockWriteText } from "@tauri-apps/plugin-clipboard-manager";
 
 describe("CopyButton", () => {
   beforeEach(() => {
