@@ -64,8 +64,8 @@ describe("kbdRegistry - Extended Coverage", () => {
         const parts = shortcut.split("+");
         const key = parts[parts.length - 1];
         
-        // Should be alphanumeric or special keys
-        expect(key).toMatch(/^[a-z0-9,]+$/);
+        // Should be alphanumeric, comma, or other valid key names
+        expect(key).toMatch(/^[a-z0-9]+$|^comma$/);
       });
     });
 
