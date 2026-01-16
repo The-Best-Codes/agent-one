@@ -32,7 +32,13 @@ import { MessageToolHandler } from "./tool-handler";
 
 const logger = getLogger(import.meta.url);
 
-const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
+const MessagePartsInternal = ({
+  message,
+  isLastMessage,
+}: {
+  message: UIMessage;
+  isLastMessage?: boolean;
+}) => {
   const {
     isEditing,
     canEdit,
@@ -153,9 +159,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
             <MessagePartReasoning
               key={key}
               text={part.text}
-              isStreaming={
-                i === message.parts.length - 1 && message.role === "assistant"
-              }
+              isBusy={isLastMessage && i === message.parts.length - 1}
             />
           );
         case "step-start":
@@ -179,6 +183,7 @@ const MessagePartsInternal = ({ message }: { message: UIMessage }) => {
     handleEnterKey,
     handleTextChange,
     initialValues.length,
+    isLastMessage,
     isEditing,
     isMobile,
     message.id,

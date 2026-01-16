@@ -19,6 +19,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const [searchParams] = useSearchParams();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
 
+  const lastMessageId = messages[messages.length - 1]?.id;
   const initialInputValue = searchParams.get("initialMessage") || undefined;
 
   return (
@@ -49,7 +50,10 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
                     : "mb-1 justify-start last:mb-0",
                 )}
               >
-                <MessageParts message={message} />
+                <MessageParts
+                  message={message}
+                  isLastMessage={message.id === lastMessageId}
+                />
               </div>
             ))}
             {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}

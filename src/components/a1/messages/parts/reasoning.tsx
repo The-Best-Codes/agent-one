@@ -13,13 +13,13 @@ import { cn } from "@/lib/utils";
 
 export const MessagePartReasoning = ({
   text,
-  isStreaming,
+  isBusy,
 }: {
   text: ReasoningUIPart["text"];
-  isStreaming?: boolean;
+  isBusy?: boolean;
 }) => {
   const { status } = useChatStatus();
-  const isLoading = isStreaming && status === "streaming";
+  const isLoading = isBusy && status === "streaming";
 
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
     boolean | undefined
