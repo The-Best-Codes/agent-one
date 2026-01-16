@@ -53,3 +53,4 @@ playwright-report/
 # tsc -b --noEmit
 tsconfig.tsbuildinfo
 tsconfig.node.tsbuildinfo
+coverage/
