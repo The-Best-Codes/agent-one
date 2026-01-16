@@ -14,6 +14,7 @@ import {
   type TextScaleOption,
   type ThemeOption,
   type TitleGenerationSettings,
+  type ToolConfigs,
   type ToolId,
 } from "@/lib/settings/types";
 
@@ -123,6 +124,11 @@ export const notificationSettingAtom = createSettingAtom<NotificationOption>(
 export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(
   "ENABLED_TOOLS",
   DEFAULT_SETTINGS.ENABLED_TOOLS,
+);
+
+export const toolConfigsAtom = createSettingAtom<ToolConfigs>(
+  "TOOL_CONFIGS",
+  DEFAULT_SETTINGS.TOOL_CONFIGS,
 );
 
 export const mcpServersAtom = createSettingAtom<McpServerConfig[]>(

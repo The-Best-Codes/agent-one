@@ -32,6 +32,7 @@ import {
   textScaleAtom,
   themeAtom,
   titleGenerationAtom,
+  toolConfigsAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
@@ -68,6 +69,7 @@ export function resetAllSettings(): void {
   store.set(openrouterApiKeyAtom, RESET);
   store.set(cerebrasApiKeyAtom, RESET);
   store.set(enabledToolsAtom, RESET);
+  store.set(toolConfigsAtom, RESET);
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
   store.set(titleGenerationAtom, RESET);
@@ -140,6 +142,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "ENABLED_TOOLS":
       store.set(enabledToolsAtom, RESET);
+      break;
+    case "TOOL_CONFIGS":
+      store.set(toolConfigsAtom, RESET);
       break;
     case "MCP_SERVERS":
       store.set(mcpServersAtom, RESET);

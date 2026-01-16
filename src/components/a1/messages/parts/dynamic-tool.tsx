@@ -1,14 +1,23 @@
 import type { DynamicToolUIPart } from "ai";
 import { useAtomValue } from "jotai";
 import {
+  CheckCircle2Icon,
   ChevronDownIcon,
   Loader2Icon,
   WrenchIcon,
   XCircleIcon,
+  XIcon,
 } from "lucide-react";
 import { useState } from "react";
 
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
+import {
+  Accordion as ParametersAccordion,
+  AccordionContent as ParametersAccordionContent,
+  AccordionItem as ParametersAccordionItem,
+  AccordionTrigger as ParametersAccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -22,6 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -44,8 +54,85 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
   const callId = part.toolCallId;
   const toolName = part.toolName;
   const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
+  const { addToolApprovalResponse } = useChatFunctions();
 
   switch (part.state) {
+    case "approval-requested": {
+      return (
+        <div
+          key={callId}
+          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
+        >
+          <div className="flex items-center gap-1">
+            <WrenchIcon className="text-foreground size-4 shrink-0" />
+            <span className="text-foreground text-sm font-bold">
+              AgentOne wants to run "{toolName}" tool
+            </span>
+          </div>
+          {part?.input !== null && (
+            <ParametersAccordion
+              type="single"
+              collapsible
+              className="border-border w-full rounded-md border"
+            >
+              <ParametersAccordionItem value="parameters" className="border-0">
+                <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
+                  <span className="text-muted-foreground font-medium">
+                    Parameters
+                  </span>
+                </ParametersAccordionTrigger>
+                <ParametersAccordionContent className="px-2 pb-2">
+                  <pre className="text-muted-foreground overflow-x-auto text-xs">
+                    {JSON.stringify(part.input, null, 2)}
+                  </pre>
+                </ParametersAccordionContent>
+              </ParametersAccordionItem>
+            </ParametersAccordion>
+          )}
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: false,
+                })
+              }
+            >
+              <XIcon />
+              Deny
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                addToolApprovalResponse({
+                  id: part.approval.id,
+                  approved: true,
+                })
+              }
+            >
+              <CheckCircle2Icon />
+              Approve
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    case "output-denied": {
+      return (
+        <div key={callId} className="flex items-center gap-1">
+          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-muted-foreground text-sm font-bold">
+            "{toolName}" tool denied
+          </span>
+        </div>
+      );
+    }
+
+    case "approval-responded":
     case "input-streaming": {
       return (
         <div key={callId} className="flex items-center gap-1">

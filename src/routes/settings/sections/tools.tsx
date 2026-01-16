@@ -27,11 +27,13 @@ import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
+  toolConfigsAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
   type McpServerConfig,
+  type ToolConfigs,
   type ToolId,
 } from "@/lib/settings/types";
 
@@ -42,21 +44,33 @@ const TOOL_NAMES: Record<ToolId, string> = {
   webSearch: "Web Search",
 };
 
+const TOOL_DESCRIPTIONS: Record<ToolId, string> = {
+  dateTime: "Get the current date and time",
+  waitNumberMilliseconds: "Wait for a specified duration",
+  getUrlContent: "Fetch and extract content from URLs",
+  webSearch: "Search the web for information",
+};
+
 export default function ToolsSection() {
   const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
+  const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit, setParallelLoadLimit] = useAtom(
     mcpParallelLoadLimitAtom,
   );
 
-  const isEnabledToolsDefault =
-    JSON.stringify(enabledTools) ===
-    JSON.stringify(DEFAULT_SETTINGS.ENABLED_TOOLS);
+  const isToolConfigsDefault =
+    JSON.stringify({ ...enabledTools, ...toolConfigs }) ===
+    JSON.stringify({
+      ...DEFAULT_SETTINGS.ENABLED_TOOLS,
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS,
+    });
   const isParallelLoadLimitDefault =
     parallelLoadLimit === DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT;
 
-  const handleResetEnabledTools = () => {
+  const handleResetToolConfigs = () => {
     resetSetting("ENABLED_TOOLS");
+    resetSetting("TOOL_CONFIGS");
   };
 
   const handleResetParallelLoadLimit = () => {
@@ -65,6 +79,16 @@ export default function ToolsSection() {
 
   const updateToolEnabled = (toolId: ToolId, enabled: boolean) => {
     setEnabledTools((prev) => ({ ...prev, [toolId]: enabled }));
+  };
+
+  const updateToolConfig = <T extends ToolId>(
+    toolId: T,
+    updates: Partial<ToolConfigs[T]>,
+  ) => {
+    setToolConfigs((prev) => ({
+      ...prev,
+      [toolId]: { ...prev[toolId], ...updates },
+    }));
   };
 
   const updateMcpServer = (
@@ -84,6 +108,8 @@ export default function ToolsSection() {
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
+  const [newServerRequiresApproval, setNewServerRequiresApproval] =
+    useState(false);
 
   const isAddFormValid =
     newServerName.trim() !== "" &&
@@ -99,12 +125,14 @@ export default function ToolsSection() {
       command: newServerCommand.trim(),
       enabled: true,
       timeoutMs: newServerTimeoutSec * 1000,
+      requiresApproval: newServerRequiresApproval,
     };
     setMcpServers((prev) => [newServer, ...prev]);
 
     setNewServerName("");
     setNewServerCommand("");
     setNewServerTimeoutSec(30);
+    setNewServerRequiresApproval(false);
     setShowAddDialog(false);
   };
 
@@ -112,6 +140,7 @@ export default function ToolsSection() {
     setNewServerName("");
     setNewServerCommand("");
     setNewServerTimeoutSec(30);
+    setNewServerRequiresApproval(false);
     setShowAddDialog(false);
   };
 
@@ -142,38 +171,298 @@ export default function ToolsSection() {
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Enabled Tools</Label>
+              <Label className="text-sm font-medium">Tool Configuration</Label>
               <p className="text-muted-foreground mt-1 text-sm">
-                Choose which built-in tools are available to the AI.
+                Configure which built-in tools are available and their settings.
               </p>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleResetEnabledTools}
-              disabled={isEnabledToolsDefault}
+              onClick={handleResetToolConfigs}
+              disabled={isToolConfigsDefault}
               aria-label="Reset to default"
             >
               <RotateCcwIcon className="size-4" />
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <Accordion
+            type="single"
+            collapsible
+            className="border-border w-full rounded-md border"
+          >
             {(Object.keys(TOOL_NAMES) as ToolId[]).map((toolId) => (
-              <div key={toolId} className="flex items-center space-x-2">
-                <Checkbox
-                  id={toolId}
-                  checked={enabledTools[toolId]}
-                  onCheckedChange={(checked) =>
-                    updateToolEnabled(toolId, checked as boolean)
-                  }
-                />
-                <Label htmlFor={toolId} className="text-sm">
-                  {TOOL_NAMES[toolId]}
-                </Label>
-              </div>
+              <AccordionItem key={toolId} value={toolId}>
+                <AccordionTrigger className="px-3 hover:no-underline">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Checkbox
+                      id={`enabled-${toolId}`}
+                      checked={enabledTools[toolId]}
+                      onCheckedChange={(checked) =>
+                        updateToolEnabled(toolId, checked as boolean)
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="flex flex-col items-start text-left">
+                      <span className="text-sm font-medium">
+                        {TOOL_NAMES[toolId]}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        {TOOL_DESCRIPTIONS[toolId]}
+                      </span>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-3 pb-3">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <Label
+                          htmlFor={`approval-${toolId}`}
+                          className="text-sm"
+                        >
+                          Require Approval
+                        </Label>
+                        <span className="text-muted-foreground text-xs">
+                          Ask for confirmation before running this tool
+                        </span>
+                      </div>
+                      <Switch
+                        id={`approval-${toolId}`}
+                        checked={toolConfigs[toolId].requiresApproval}
+                        onCheckedChange={(checked) =>
+                          updateToolConfig(toolId, {
+                            requiresApproval: checked,
+                          })
+                        }
+                      />
+                    </div>
+
+                    {toolId === "dateTime" && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <Label htmlFor="dateTime-utc" className="text-sm">
+                            Use UTC
+                          </Label>
+                          <span className="text-muted-foreground text-xs">
+                            Return time in UTC instead of local timezone
+                          </span>
+                        </div>
+                        <Switch
+                          id="dateTime-utc"
+                          checked={toolConfigs.dateTime.useUtc}
+                          onCheckedChange={(checked) =>
+                            updateToolConfig("dateTime", { useUtc: checked })
+                          }
+                        />
+                      </div>
+                    )}
+
+                    {toolId === "waitNumberMilliseconds" && (
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <div className="grid flex-1 gap-1.5">
+                          <Label htmlFor="wait-min" className="text-xs">
+                            Min Duration (ms)
+                          </Label>
+                          <Input
+                            id="wait-min"
+                            type="number"
+                            min={0}
+                            max={toolConfigs.waitNumberMilliseconds.maxMs}
+                            value={toolConfigs.waitNumberMilliseconds.minMs}
+                            onChange={(e) =>
+                              updateToolConfig("waitNumberMilliseconds", {
+                                minMs: Math.max(
+                                  0,
+                                  Math.min(
+                                    parseInt(e.target.value) || 0,
+                                    toolConfigs.waitNumberMilliseconds.maxMs,
+                                  ),
+                                ),
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="grid flex-1 gap-1.5">
+                          <Label htmlFor="wait-max" className="text-xs">
+                            Max Duration (ms)
+                          </Label>
+                          <Input
+                            id="wait-max"
+                            type="number"
+                            min={toolConfigs.waitNumberMilliseconds.minMs}
+                            max={600000}
+                            value={toolConfigs.waitNumberMilliseconds.maxMs}
+                            onChange={(e) =>
+                              updateToolConfig("waitNumberMilliseconds", {
+                                maxMs: Math.max(
+                                  toolConfigs.waitNumberMilliseconds.minMs,
+                                  Math.min(
+                                    parseInt(e.target.value) || 60000,
+                                    600000,
+                                  ),
+                                ),
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {toolId === "getUrlContent" && (
+                      <>
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                          <div className="grid flex-1 gap-1.5">
+                            <Label htmlFor="url-min" className="text-xs">
+                              Min URLs
+                            </Label>
+                            <Input
+                              id="url-min"
+                              type="number"
+                              min={1}
+                              max={toolConfigs.getUrlContent.maxUrls}
+                              value={toolConfigs.getUrlContent.minUrls}
+                              onChange={(e) =>
+                                updateToolConfig("getUrlContent", {
+                                  minUrls: Math.max(
+                                    1,
+                                    Math.min(
+                                      parseInt(e.target.value) || 1,
+                                      toolConfigs.getUrlContent.maxUrls,
+                                    ),
+                                  ),
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="grid flex-1 gap-1.5">
+                            <Label htmlFor="url-max" className="text-xs">
+                              Max URLs
+                            </Label>
+                            <Input
+                              id="url-max"
+                              type="number"
+                              min={toolConfigs.getUrlContent.minUrls}
+                              max={200}
+                              value={toolConfigs.getUrlContent.maxUrls}
+                              onChange={(e) =>
+                                updateToolConfig("getUrlContent", {
+                                  maxUrls: Math.max(
+                                    toolConfigs.getUrlContent.minUrls,
+                                    Math.min(
+                                      parseInt(e.target.value) || 5,
+                                      200,
+                                    ),
+                                  ),
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-1.5">
+                          <Label htmlFor="url-maxlength" className="text-xs">
+                            Default Max Content Length
+                          </Label>
+                          <Input
+                            id="url-maxlength"
+                            type="number"
+                            min={100}
+                            max={50000}
+                            value={toolConfigs.getUrlContent.defaultMaxLength}
+                            onChange={(e) =>
+                              updateToolConfig("getUrlContent", {
+                                defaultMaxLength: Math.max(
+                                  100,
+                                  Math.min(
+                                    parseInt(e.target.value) || 1000,
+                                    50000,
+                                  ),
+                                ),
+                              })
+                            }
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {toolId === "webSearch" && (
+                      <>
+                        <div className="grid gap-1.5">
+                          <Label
+                            htmlFor="search-concurrent"
+                            className="text-xs"
+                          >
+                            Max Concurrent Searches
+                          </Label>
+                          <Input
+                            id="search-concurrent"
+                            type="number"
+                            min={1}
+                            max={50}
+                            value={toolConfigs.webSearch.maxConcurrent}
+                            onChange={(e) =>
+                              updateToolConfig("webSearch", {
+                                maxConcurrent: Math.max(
+                                  1,
+                                  Math.min(parseInt(e.target.value) || 3, 50),
+                                ),
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                          <div className="grid flex-1 gap-1.5">
+                            <Label htmlFor="search-results" className="text-xs">
+                              Default Max Results
+                            </Label>
+                            <Input
+                              id="search-results"
+                              type="number"
+                              min={1}
+                              max={200}
+                              value={toolConfigs.webSearch.defaultMaxResults}
+                              onChange={(e) =>
+                                updateToolConfig("webSearch", {
+                                  defaultMaxResults: Math.max(
+                                    1,
+                                    Math.min(
+                                      parseInt(e.target.value) || 20,
+                                      200,
+                                    ),
+                                  ),
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="grid flex-1 gap-1.5">
+                            <Label htmlFor="search-pages" className="text-xs">
+                              Default Max Pages
+                            </Label>
+                            <Input
+                              id="search-pages"
+                              type="number"
+                              min={1}
+                              max={20}
+                              value={toolConfigs.webSearch.defaultMaxPages}
+                              onChange={(e) =>
+                                updateToolConfig("webSearch", {
+                                  defaultMaxPages: Math.max(
+                                    1,
+                                    Math.min(parseInt(e.target.value) || 1, 20),
+                                  ),
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         </CardContent>
       </Card>
 
@@ -303,6 +592,30 @@ export default function ToolsSection() {
                         />
                       </div>
 
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <Label
+                            htmlFor={`approval-${server.id}`}
+                            className="text-sm"
+                          >
+                            Require Approval
+                          </Label>
+                          <span className="text-muted-foreground text-xs">
+                            Ask for confirmation before running tools from this
+                            server
+                          </span>
+                        </div>
+                        <Switch
+                          id={`approval-${server.id}`}
+                          checked={server.requiresApproval ?? false}
+                          onCheckedChange={(checked) =>
+                            updateMcpServer(index, {
+                              requiresApproval: checked,
+                            })
+                          }
+                        />
+                      </div>
+
                       <Button
                         variant="destructive"
                         size="sm"
@@ -363,6 +676,22 @@ export default function ToolsSection() {
                 onChange={(e) =>
                   setNewServerTimeoutSec(parseFloat(e.target.value))
                 }
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <Label htmlFor="server-approval" className="text-sm">
+                  Require Approval
+                </Label>
+                <span className="text-muted-foreground text-xs">
+                  Ask for confirmation before running tools from this server
+                </span>
+              </div>
+              <Switch
+                id="server-approval"
+                checked={newServerRequiresApproval}
+                onCheckedChange={setNewServerRequiresApproval}
               />
             </div>
           </div>
