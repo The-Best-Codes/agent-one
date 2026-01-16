@@ -1,0 +1,111 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: tenki-standard-autoscale
+    timeout-minutes: 30
+    strategy:
+      fail-fast: true
+      matrix:
+        test: [typecheck, lint, format-check, e2e, rust-check]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version: "23"
+          cache: "npm"
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
+
+      - name: Install JS dependencies
+        run: npm ci --prefer-offline --no-audit
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+        if: matrix.test == 'e2e'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+        if: matrix.test == 'e2e'
+
+      - name: Install Playwright system dependencies
+        run: npx playwright install-deps
+        if: matrix.test == 'e2e'
+
+      - name: Install Playwright browsers
+        run: npx playwright install
+        if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Cache and install Tauri system dependencies
+        uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # v1.6.0
+        with:
+          packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          version: 1.1
+        if: matrix.test == 'rust-check'
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          toolchain: stable
+        if: matrix.test == 'rust-check'
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+        with:
+          workspaces: "src-tauri -> target"
+        if: matrix.test == 'rust-check'
+
+      - name: Run Type Checking
+        run: npm run typecheck
+        if: matrix.test == 'typecheck'
+
+      - name: Run Linting
+        run: npm run lint
+        if: matrix.test == 'lint'
+
+      - name: Run Format Check
+        run: npm run format:check
+        if: matrix.test == 'format-check'
+
+      - name: Build Project for E2E
+        run: npm run build
+        if: matrix.test == 'e2e'
+
+      - name: Run E2E Playwright Tests
+        run: npm run test-local:e2e
+        env:
+          CI: true
+        if: matrix.test == 'e2e'
+
+      - name: Run Rust Cargo Check
+        run: cd src-tauri && cargo check
+        if: matrix.test == 'rust-check'
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always() && matrix.test == 'e2e'
+        with:
+          name: playwright-report-${{ matrix.test }}
+          path: playwright-report/
+          retention-days: 1
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always() && matrix.test == 'e2e'
+        with:
+          name: test-results-${{ matrix.test }}
+          path: test-results/
+          retention-days: 1
