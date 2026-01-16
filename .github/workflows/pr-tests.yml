@@ -25,7 +25,7 @@ jobs:
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
 
       - name: Install JS dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: npm ci --prefer-offline --no-audit --legacy-peer-deps
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
 
       - name: Get Playwright version
