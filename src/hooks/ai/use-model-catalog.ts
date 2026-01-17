@@ -32,16 +32,20 @@ export interface ModelConfig {
   temperature: number;
   maxTokens?: number;
   topP?: number;
+  topK?: number;
   frequencyPenalty?: number;
   presencePenalty?: number;
+  seed?: number;
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   temperature: 0.7,
   maxTokens: undefined, // undefined means let the provider decide
   topP: 1,
+  topK: undefined,
   frequencyPenalty: 0,
   presencePenalty: 0,
+  seed: undefined,
 };
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";

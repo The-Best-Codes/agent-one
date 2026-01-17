@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import {
   Tooltip,
@@ -20,7 +21,6 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
-// TODO: Support topP, topK, frequencyPenalty, etc. that AI SDK supports
 export const ChatModelConfig = () => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
@@ -35,16 +35,50 @@ export const ChatModelConfig = () => {
     setModelConfig({ ...currentModelConfig, maxTokens: val });
   };
 
+  const handleTopPChange = (value: number[]) => {
+    setModelConfig({ ...currentModelConfig, topP: value[0] });
+  };
+
+  const handleTopKChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value === "" ? undefined : parseInt(e.target.value);
+    setModelConfig({ ...currentModelConfig, topK: val });
+  };
+
+  const handleFrequencyPenaltyChange = (value: number[]) => {
+    setModelConfig({ ...currentModelConfig, frequencyPenalty: value[0] });
+  };
+
+  const handlePresencePenaltyChange = (value: number[]) => {
+    setModelConfig({ ...currentModelConfig, presencePenalty: value[0] });
+  };
+
+  const handleSeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value === "" ? undefined : parseInt(e.target.value);
+    setModelConfig({ ...currentModelConfig, seed: val });
+  };
+
   const resetToDefaults = () => {
     setModelConfig({
       temperature: DEFAULT_MODEL_CONFIG.temperature,
       maxTokens: DEFAULT_MODEL_CONFIG.maxTokens,
+      topP: DEFAULT_MODEL_CONFIG.topP,
+      topK: DEFAULT_MODEL_CONFIG.topK,
+      frequencyPenalty: DEFAULT_MODEL_CONFIG.frequencyPenalty,
+      presencePenalty: DEFAULT_MODEL_CONFIG.presencePenalty,
+      seed: DEFAULT_MODEL_CONFIG.seed,
     });
   };
 
   const isAtDefaults =
     currentModelConfig.temperature === DEFAULT_MODEL_CONFIG.temperature &&
-    currentModelConfig.maxTokens === DEFAULT_MODEL_CONFIG.maxTokens;
+    currentModelConfig.maxTokens === DEFAULT_MODEL_CONFIG.maxTokens &&
+    currentModelConfig.topP === DEFAULT_MODEL_CONFIG.topP &&
+    currentModelConfig.topK === DEFAULT_MODEL_CONFIG.topK &&
+    currentModelConfig.frequencyPenalty ===
+      DEFAULT_MODEL_CONFIG.frequencyPenalty &&
+    currentModelConfig.presencePenalty ===
+      DEFAULT_MODEL_CONFIG.presencePenalty &&
+    currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed;
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -92,6 +126,119 @@ export const ChatModelConfig = () => {
       </div>
 
       <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="topP">Top P</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                Nucleus sampling. Controls diversity by limiting token selection
+                to a cumulative probability. Lower values (e.g., 0.1) make
+                output more focused, higher values (e.g., 0.9) allow more
+                variety. It's recommended to set either temperature or topP, but
+                not both.
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <span className="text-muted-foreground text-sm">
+            {currentModelConfig.topP ?? 1}
+          </span>
+        </div>
+        <Slider
+          id="topP"
+          min={0}
+          max={1}
+          step={0.05}
+          value={[currentModelConfig.topP ?? 1]}
+          onValueChange={handleTopPChange}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="topK">Top K</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs">
+              Only sample from the top K options for each subsequent token. Used
+              to remove "long tail" low probability responses. Recommended for
+              advanced use cases only. Leave empty to use model default.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Input
+          id="topK"
+          type="number"
+          placeholder="Default"
+          min={1}
+          value={currentModelConfig.topK ?? ""}
+          onChange={handleTopKChange}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="frequencyPenalty">Frequency Penalty</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                Reduces the likelihood of the model repeatedly using the same
+                words or phrases. Higher values (up to 2.0) discourage
+                repetition more strongly.
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <span className="text-muted-foreground text-sm">
+            {currentModelConfig.frequencyPenalty ?? 0}
+          </span>
+        </div>
+        <Slider
+          id="frequencyPenalty"
+          min={0}
+          max={2}
+          step={0.1}
+          value={[currentModelConfig.frequencyPenalty ?? 0]}
+          onValueChange={handleFrequencyPenaltyChange}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="presencePenalty">Presence Penalty</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                Reduces the likelihood of the model repeating information
+                already in the prompt. Higher values (up to 2.0) encourage the
+                model to introduce new topics.
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <span className="text-muted-foreground text-sm">
+            {currentModelConfig.presencePenalty ?? 0}
+          </span>
+        </div>
+        <Slider
+          id="presencePenalty"
+          min={0}
+          max={2}
+          step={0.1}
+          value={[currentModelConfig.presencePenalty ?? 0]}
+          onValueChange={handlePresencePenaltyChange}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="maxTokens">Max Tokens</Label>
           <Tooltip>
@@ -112,6 +259,29 @@ export const ChatModelConfig = () => {
           onChange={handleMaxTokensChange}
         />
       </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="seed">Seed</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs">
+              Integer seed for random sampling. If set and supported by the
+              model, calls will generate deterministic results. Leave empty for
+              random behavior.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Input
+          id="seed"
+          type="number"
+          placeholder="Random"
+          value={currentModelConfig.seed ?? ""}
+          onChange={handleSeedChange}
+        />
+      </div>
     </div>
   );
 
@@ -126,13 +296,17 @@ export const ChatModelConfig = () => {
       {isDesktop ? (
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent className="w-80 p-4">{content}</PopoverContent>
+          <PopoverContent className="max-h-[70vh] w-80 overflow-auto p-4">
+            {content}
+          </PopoverContent>
         </Popover>
       ) : (
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent className="max-h-[70vh]" showHandle={false}>
-            <div className="p-4">{content}</div>
+            <ScrollArea className="max-h-[calc(70vh-2rem)] overflow-auto">
+              <div className="p-4">{content}</div>
+            </ScrollArea>
           </DrawerContent>
         </Drawer>
       )}
