@@ -183,7 +183,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
           }
           40% {
             width: 3px;
-            height: 44px;
+            height: 40px;
             border-radius: 8px;
           }
           100% {
