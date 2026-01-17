@@ -33,6 +33,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
   const [isMorphing, setIsMorphing] = useState(false);
   const [showButton, setShowButton] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
 
   const animateWidth = useCallback(
     (from: number, to: number, duration: number, onComplete?: () => void) => {
@@ -64,6 +65,14 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
     },
     [],
   );
+
+  const handleGetStarted = () => {
+    if (isExiting) return;
+    setIsExiting(true);
+    setTimeout(() => {
+      onGetStarted();
+    }, 500);
+  };
 
   useEffect(() => {
     const timeouts: number[] = [];
@@ -114,7 +123,13 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
   }, [animateWidth]);
 
   return (
-    <div className="flex flex-col items-center">
+    <div
+      className={cn(
+        "flex flex-col items-center",
+        isExiting &&
+          "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards duration-500",
+      )}
+    >
       <div
         className={cn(
           "grid transition-all duration-1000 ease-in-out",
@@ -148,7 +163,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
         </div>
 
         {showButton ? (
-          <Button variant="default" size="lg" onClick={onGetStarted}>
+          <Button variant="default" size="lg" onClick={handleGetStarted}>
             Get Started
           </Button>
         ) : (
