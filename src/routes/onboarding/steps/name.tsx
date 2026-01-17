@@ -40,7 +40,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
           <Input
             ref={inputRef}
             type="text"
-            placeholder="Your name"
+            placeholder="John"
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onKeyDown={(e) => {
