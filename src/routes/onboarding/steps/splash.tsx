@@ -19,6 +19,7 @@ const CONFIG = {
   pauseDuration: 1000,
   hideDuration: 1000,
   cursorToButtonDelay: 100,
+  welcomeDelay: 0,
 };
 
 interface SplashStepProps {
@@ -31,6 +32,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
 
   const [isMorphing, setIsMorphing] = useState(false);
   const [showButton, setShowButton] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const animateWidth = useCallback(
     (from: number, to: number, duration: number, onComplete?: () => void) => {
@@ -80,6 +82,12 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
                   const morphTimeout = window.setTimeout(() => {
                     setShowButton(true);
                     setIsMorphing(false);
+
+                    const welcomeTimeout = window.setTimeout(() => {
+                      setShowWelcome(true);
+                    }, CONFIG.welcomeDelay);
+
+                    timeouts.push(welcomeTimeout);
                   }, CURSOR_MORPH_DURATION);
 
                   timeouts.push(morphTimeout);
@@ -106,29 +114,52 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
   }, [animateWidth]);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col items-center">
       <div
-        ref={containerRef}
-        className="overflow-hidden py-2 text-right whitespace-nowrap"
-        style={{ width: 0 }}
+        className={cn(
+          "grid transition-all duration-1000 ease-in-out",
+          showWelcome
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0",
+        )}
+        style={{ gridTemplateRows: showWelcome ? "1fr" : "0fr" }}
       >
-        <span ref={textRef} className="text-foreground text-7xl font-bold">
-          {CONFIG.appName}
-        </span>
+        <div className="overflow-hidden">
+          <div className="flex flex-col items-center gap-2 pb-4 text-center">
+            <h1 className="text-foreground text-4xl font-bold">
+              Welcome to {CONFIG.appName}
+            </h1>
+            <p className="text-muted-foreground text-xl">
+              Let's get you set up with a few questions
+            </p>
+          </div>
+        </div>
       </div>
 
-      {showButton ? (
-        <Button variant="default" size="lg" onClick={onGetStarted}>
-          Get Started
-        </Button>
-      ) : (
+      <div className="flex items-center gap-2">
         <div
-          className={cn(
-            "bg-foreground h-20 w-0.75",
-            isMorphing ? "animate-cursor-morph" : "animate-blink",
-          )}
-        />
-      )}
+          ref={containerRef}
+          className="overflow-hidden py-2 text-right whitespace-nowrap"
+          style={{ width: 0 }}
+        >
+          <span ref={textRef} className="text-foreground text-5xl">
+            {CONFIG.appName}
+          </span>
+        </div>
+
+        {showButton ? (
+          <Button variant="default" size="lg" onClick={onGetStarted}>
+            Get Started
+          </Button>
+        ) : (
+          <div
+            className={cn(
+              "bg-foreground h-12 w-0.75",
+              isMorphing ? "animate-cursor-morph" : "animate-blink",
+            )}
+          />
+        )}
+      </div>
 
       <style>{`
         @keyframes blink {
@@ -147,12 +178,12 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
         @keyframes cursor-morph {
           0% {
             width: 3px;
-            height: 80px;
+            height: 48px;
             border-radius: 8px;
           }
           40% {
             width: 3px;
-            height: 40px;
+            height: 44px;
             border-radius: 8px;
           }
           100% {
