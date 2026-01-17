@@ -85,7 +85,8 @@ const SliderConfig = ({
               size="icon"
               className="size-5"
               onClick={handleClear}
-              aria-label={`Clear ${label}`}
+              title={`Reset ${label} config`}
+              aria-label={`Reset ${label} config`}
             >
               <XIcon className="size-3" />
             </Button>
@@ -295,8 +296,19 @@ export const ChatModelConfig = () => {
   );
 
   const trigger = (
-    <Button variant="outline" size="icon" aria-label="Model configuration">
+    <Button
+      variant="outline"
+      size="icon"
+      aria-label="Model configuration"
+      className="relative"
+    >
       <Settings2Icon className="size-4" />
+      {!isAtDefaults && (
+        <span
+          title="Model config has been modified"
+          className="bg-primary absolute -top-0.5 -right-0.5 flex size-2 rounded-full"
+        ></span>
+      )}
     </Button>
   );
 
