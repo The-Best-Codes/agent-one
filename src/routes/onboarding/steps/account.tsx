@@ -55,10 +55,19 @@ const API_KEY_CONFIG: ApiKeyConfig[] = [
 
 export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
+  const [isExiting, setIsExiting] = useState(false);
   const [apiKeyInputs, setApiKeyInputs] =
     useState<Record<string, string>>(initialKeys);
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState("");
+
+  const handleViewChange = (newView: "account" | "byok") => {
+    setIsExiting(true);
+    setTimeout(() => {
+      setView(newView);
+      setIsExiting(false);
+    }, 500);
+  };
 
   const handleApiKeyChange = (provider: string, value: string) => {
     setApiKeyInputs((prev) => ({
@@ -84,7 +93,15 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
 
   if (view === "byok") {
     return (
-      <div className="animate-in slide-in-from-right-5 fade-in-0 w-full max-w-xl px-4 duration-500">
+      <div
+        key="byok"
+        className={cn(
+          "w-full max-w-xl px-4 duration-500",
+          isExiting
+            ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
+            : "animate-in slide-in-from-bottom-5 fade-in-0",
+        )}
+      >
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <h2 className="text-foreground text-2xl font-bold">
@@ -156,7 +173,10 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
             >
               Finish Setup
             </Button>
-            <Button variant="outline" onClick={() => setView("account")}>
+            <Button
+              variant="outline"
+              onClick={() => handleViewChange("account")}
+            >
               Back to account options
             </Button>
           </div>
@@ -166,7 +186,15 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
   }
 
   return (
-    <div className="animate-in slide-in-from-bottom-5 fade-in-0 w-full max-w-md px-4 duration-500">
+    <div
+      key="account"
+      className={cn(
+        "w-full max-w-md px-4 duration-500",
+        isExiting
+          ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
+          : "animate-in slide-in-from-bottom-5 fade-in-0",
+      )}
+    >
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <h2 className="text-foreground text-center text-4xl font-bold">
@@ -220,7 +248,7 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
           <Button
             variant="outline"
             className="h-16 justify-between px-6 text-xl"
-            onClick={() => setView("byok")}
+            onClick={() => handleViewChange("byok")}
           >
             <span className="flex items-center gap-2">
               <div className="rounded-md p-2">
