@@ -11,12 +11,12 @@ import {
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
 import { userNameAtom } from "@/lib/jotai/settings-atoms";
 
-import { ApiKeysStep } from "./steps/api-keys";
+import { AccountStep } from "./steps/account";
 import { NameStep } from "./steps/name";
 import { SplashStep } from "./steps/splash";
 import { WelcomeStep } from "./steps/welcome";
 
-type OnboardingStep = "splash" | "name" | "api-keys" | "welcome";
+type OnboardingStep = "splash" | "name" | "account" | "welcome";
 
 export default function OnboardingRoute() {
   const navigate = useNavigate();
@@ -42,10 +42,10 @@ export default function OnboardingRoute() {
 
   const handleNameSubmit = (name: string) => {
     setUserName(name);
-    setCurrentStep("api-keys");
+    setCurrentStep("account");
   };
 
-  const handleApiKeysComplete = (keys: Record<string, string>) => {
+  const handleAccountComplete = (keys: Record<string, string>) => {
     if (keys.cerebras) setCerebrasKey(keys.cerebras);
     if (keys.google) setGoogleKey(keys.google);
     if (keys.groq) setGroqKey(keys.groq);
@@ -73,9 +73,9 @@ export default function OnboardingRoute() {
 
       {currentStep === "name" && <NameStep onSubmit={handleNameSubmit} />}
 
-      {currentStep === "api-keys" && (
-        <ApiKeysStep
-          onSubmit={handleApiKeysComplete}
+      {currentStep === "account" && (
+        <AccountStep
+          onSubmit={handleAccountComplete}
           initialKeys={initialApiKeys}
         />
       )}

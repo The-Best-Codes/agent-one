@@ -54,6 +54,7 @@ export default [
               "opencode",
               "OpenCode",
               "OPENCODE",
+              "byok",
             ],
           },
         },
