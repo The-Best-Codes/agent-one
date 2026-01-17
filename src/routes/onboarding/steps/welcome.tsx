@@ -1,4 +1,9 @@
-import { BookOpenIcon, GraduationCapIcon, RocketIcon } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookOpenIcon,
+  GraduationCapIcon,
+  RocketIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -49,7 +54,7 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           variant="outline"
           size="lg"
           className="h-14 justify-start px-6 text-lg"
-          disabled
+          disabled={isExiting}
         >
           <GraduationCapIcon className="size-5" />
           Take the Tutorial
@@ -57,11 +62,14 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
         <Button
           variant="outline"
           size="lg"
-          className="h-14 justify-start px-6 text-lg"
-          disabled
+          className="h-14 justify-between px-6 text-lg"
+          disabled={isExiting}
         >
-          <BookOpenIcon className="size-5" />
-          Browse Documentation
+          <div className="flex items-center gap-2">
+            <BookOpenIcon className="size-5" />
+            Browse Documentation
+          </div>
+          <ArrowUpRight className="size-5" />
         </Button>
       </div>
     </div>
