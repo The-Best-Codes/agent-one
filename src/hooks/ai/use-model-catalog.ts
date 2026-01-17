@@ -29,7 +29,7 @@ export interface ModelData {
 }
 
 export interface ModelConfig {
-  temperature: number;
+  temperature?: number;
   maxTokens?: number;
   topP?: number;
   topK?: number;
@@ -39,12 +39,12 @@ export interface ModelConfig {
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
-  temperature: 0.7,
-  maxTokens: undefined, // undefined means let the provider decide
-  topP: 1,
+  temperature: undefined,
+  maxTokens: undefined,
+  topP: undefined,
   topK: undefined,
-  frequencyPenalty: 0,
-  presencePenalty: 0,
+  frequencyPenalty: undefined,
+  presencePenalty: undefined,
   seed: undefined,
 };
 

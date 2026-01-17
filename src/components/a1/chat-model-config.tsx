@@ -1,4 +1,4 @@
-import { InfoIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
+import { InfoIcon, RotateCcwIcon, Settings2Icon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,14 +20,98 @@ import {
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn } from "@/lib/utils";
+
+interface SliderConfigProps {
+  id: string;
+  label: string;
+  tooltip: string;
+  value: number | undefined;
+  min: number;
+  max: number;
+  step: number;
+  onChange: (value: number | undefined) => void;
+}
+
+const SliderConfig = ({
+  id,
+  label,
+  tooltip,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+}: SliderConfigProps) => {
+  const isUnset = value === undefined;
+  const midpoint = (min + max) / 2;
+
+  const handleSliderChange = (values: number[]) => {
+    onChange(values[0]);
+  };
+
+  const handleClear = () => {
+    onChange(undefined);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Label htmlFor={id}>{label}</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs">
+              {tooltip}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className="flex items-center gap-1">
+          <span
+            className={cn(
+              "text-sm",
+              isUnset
+                ? "text-muted-foreground/60 italic"
+                : "text-muted-foreground",
+            )}
+          >
+            {isUnset ? "Default" : value}
+          </span>
+          {!isUnset && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-5"
+              onClick={handleClear}
+              aria-label={`Clear ${label}`}
+            >
+              <XIcon className="size-3" />
+            </Button>
+          )}
+        </div>
+      </div>
+      <Slider
+        id={id}
+        min={min}
+        max={max}
+        step={step}
+        value={[isUnset ? midpoint : value]}
+        onValueChange={handleSliderChange}
+        className={cn(isUnset && "[&_[data-slot=range]]:bg-transparent")}
+      />
+    </div>
+  );
+};
 
 export const ChatModelConfig = () => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
 
-  const handleTemperatureChange = (value: number[]) => {
-    setModelConfig({ ...currentModelConfig, temperature: value[0] });
+  const handleTemperatureChange = (value: number | undefined) => {
+    setModelConfig({ ...currentModelConfig, temperature: value });
   };
 
   const handleMaxTokensChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,8 +119,8 @@ export const ChatModelConfig = () => {
     setModelConfig({ ...currentModelConfig, maxTokens: val });
   };
 
-  const handleTopPChange = (value: number[]) => {
-    setModelConfig({ ...currentModelConfig, topP: value[0] });
+  const handleTopPChange = (value: number | undefined) => {
+    setModelConfig({ ...currentModelConfig, topP: value });
   };
 
   const handleTopKChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,12 +128,12 @@ export const ChatModelConfig = () => {
     setModelConfig({ ...currentModelConfig, topK: val });
   };
 
-  const handleFrequencyPenaltyChange = (value: number[]) => {
-    setModelConfig({ ...currentModelConfig, frequencyPenalty: value[0] });
+  const handleFrequencyPenaltyChange = (value: number | undefined) => {
+    setModelConfig({ ...currentModelConfig, frequencyPenalty: value });
   };
 
-  const handlePresencePenaltyChange = (value: number[]) => {
-    setModelConfig({ ...currentModelConfig, presencePenalty: value[0] });
+  const handlePresencePenaltyChange = (value: number | undefined) => {
+    setModelConfig({ ...currentModelConfig, presencePenalty: value });
   };
 
   const handleSeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,65 +180,27 @@ export const ChatModelConfig = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="temperature">Temperature</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs">
-                Controls randomness in responses. Higher values (1.0-2.0) make
-                output more creative and random, while lower values (0.0-1.0)
-                make it more focused and deterministic.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <span className="text-muted-foreground text-sm">
-            {currentModelConfig.temperature}
-          </span>
-        </div>
-        <Slider
-          id="temperature"
-          min={0}
-          max={2}
-          step={0.1}
-          value={[currentModelConfig.temperature]}
-          onValueChange={handleTemperatureChange}
-        />
-      </div>
+      <SliderConfig
+        id="temperature"
+        label="Temperature"
+        tooltip="Controls randomness in responses. Higher values (1.0-2.0) make output more creative and random, while lower values (0.0-1.0) make it more focused and deterministic."
+        value={currentModelConfig.temperature}
+        min={0}
+        max={2}
+        step={0.1}
+        onChange={handleTemperatureChange}
+      />
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="topP">Top P</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs">
-                Nucleus sampling. Controls diversity by limiting token selection
-                to a cumulative probability. Lower values (e.g., 0.1) make
-                output more focused, higher values (e.g., 0.9) allow more
-                variety. It's recommended to set either temperature or topP, but
-                not both.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <span className="text-muted-foreground text-sm">
-            {currentModelConfig.topP ?? 1}
-          </span>
-        </div>
-        <Slider
-          id="topP"
-          min={0}
-          max={1}
-          step={0.05}
-          value={[currentModelConfig.topP ?? 1]}
-          onValueChange={handleTopPChange}
-        />
-      </div>
+      <SliderConfig
+        id="topP"
+        label="Top P"
+        tooltip="Nucleus sampling. Controls diversity by limiting token selection to a cumulative probability. Lower values (e.g., 0.1) make output more focused, higher values (e.g., 0.9) allow more variety. It's recommended to set either temperature or topP, but not both."
+        value={currentModelConfig.topP}
+        min={0}
+        max={1}
+        step={0.05}
+        onChange={handleTopPChange}
+      />
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
@@ -180,63 +226,27 @@ export const ChatModelConfig = () => {
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="frequencyPenalty">Frequency Penalty</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs">
-                Reduces the likelihood of the model repeatedly using the same
-                words or phrases. Higher values (up to 2.0) discourage
-                repetition more strongly.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <span className="text-muted-foreground text-sm">
-            {currentModelConfig.frequencyPenalty ?? 0}
-          </span>
-        </div>
-        <Slider
-          id="frequencyPenalty"
-          min={0}
-          max={2}
-          step={0.1}
-          value={[currentModelConfig.frequencyPenalty ?? 0]}
-          onValueChange={handleFrequencyPenaltyChange}
-        />
-      </div>
+      <SliderConfig
+        id="frequencyPenalty"
+        label="Frequency Penalty"
+        tooltip="Reduces the likelihood of the model repeatedly using the same words or phrases. Higher values (up to 2.0) discourage repetition more strongly."
+        value={currentModelConfig.frequencyPenalty}
+        min={0}
+        max={2}
+        step={0.1}
+        onChange={handleFrequencyPenaltyChange}
+      />
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="presencePenalty">Presence Penalty</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs">
-                Reduces the likelihood of the model repeating information
-                already in the prompt. Higher values (up to 2.0) encourage the
-                model to introduce new topics.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <span className="text-muted-foreground text-sm">
-            {currentModelConfig.presencePenalty ?? 0}
-          </span>
-        </div>
-        <Slider
-          id="presencePenalty"
-          min={0}
-          max={2}
-          step={0.1}
-          value={[currentModelConfig.presencePenalty ?? 0]}
-          onValueChange={handlePresencePenaltyChange}
-        />
-      </div>
+      <SliderConfig
+        id="presencePenalty"
+        label="Presence Penalty"
+        tooltip="Reduces the likelihood of the model repeating information already in the prompt. Higher values (up to 2.0) encourage the model to introduce new topics."
+        value={currentModelConfig.presencePenalty}
+        min={0}
+        max={2}
+        step={0.1}
+        onChange={handlePresencePenaltyChange}
+      />
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
@@ -254,7 +264,7 @@ export const ChatModelConfig = () => {
         <Input
           id="maxTokens"
           type="number"
-          placeholder="Unlimited"
+          placeholder="Default"
           value={currentModelConfig.maxTokens ?? ""}
           onChange={handleMaxTokensChange}
         />
@@ -277,7 +287,7 @@ export const ChatModelConfig = () => {
         <Input
           id="seed"
           type="number"
-          placeholder="Random"
+          placeholder="Default"
           value={currentModelConfig.seed ?? ""}
           onChange={handleSeedChange}
         />
