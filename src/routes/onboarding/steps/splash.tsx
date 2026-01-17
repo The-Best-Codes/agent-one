@@ -14,11 +14,11 @@ const CURSOR_MORPH_DURATION = 500;
 
 const CONFIG = {
   appName: "AgentOne",
-  revealDelay: 600,
-  revealDuration: 2000,
+  revealDelay: 500,
+  revealDuration: 1000,
   pauseDuration: 1000,
-  hideDuration: 2000,
-  cursorToButtonDelay: 800,
+  hideDuration: 1000,
+  cursorToButtonDelay: 100,
 };
 
 interface SplashStepProps {
