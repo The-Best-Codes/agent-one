@@ -109,19 +109,10 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
     <div className="flex items-center gap-2">
       <div
         ref={containerRef}
-        className="overflow-hidden text-right whitespace-nowrap"
+        className="overflow-hidden py-2 text-right whitespace-nowrap"
         style={{ width: 0 }}
       >
-        <span
-          ref={textRef}
-          className="text-foreground font-bold"
-          style={{
-            fontSize: "72px",
-            fontFamily:
-              "Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-            letterSpacing: "2px",
-          }}
-        >
+        <span ref={textRef} className="text-foreground text-7xl font-bold">
           {CONFIG.appName}
         </span>
       </div>
@@ -133,7 +124,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
       ) : (
         <div
           className={cn(
-            "bg-foreground h-20 w-[3px]",
+            "bg-foreground h-20 w-0.75",
             isMorphing ? "animate-cursor-morph" : "animate-blink",
           )}
         />
