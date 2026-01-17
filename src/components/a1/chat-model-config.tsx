@@ -99,7 +99,6 @@ const SliderConfig = ({
         step={step}
         value={[isUnset ? midpoint : value]}
         onValueChange={handleSliderChange}
-        className={cn(isUnset && "[&_[data-slot=range]]:bg-transparent")}
       />
     </div>
   );
