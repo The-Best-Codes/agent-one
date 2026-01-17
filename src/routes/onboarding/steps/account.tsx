@@ -1,4 +1,5 @@
 import {
+  ArrowLeftIcon,
   ChevronRightIcon,
   EyeIcon,
   EyeOffIcon,
@@ -56,6 +57,7 @@ const API_KEY_CONFIG: ApiKeyConfig[] = [
 export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiKeyInputs, setApiKeyInputs] =
     useState<Record<string, string>>(initialKeys);
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
@@ -66,6 +68,13 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
     setTimeout(() => {
       setView(newView);
       setIsExiting(false);
+    }, 500);
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      onSubmit(apiKeyInputs);
     }, 500);
   };
 
@@ -97,9 +106,11 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
         key="byok"
         className={cn(
           "w-full max-w-xl px-4 duration-500",
-          isExiting
+          isSubmitting
             ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
-            : "animate-in slide-in-from-bottom-5 fade-in-0",
+            : isExiting
+              ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
+              : "animate-in slide-in-from-bottom-5 fade-in-0",
         )}
       >
         <div className="flex flex-col gap-6">
@@ -167,8 +178,8 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
 
           <div className="mt-2 flex flex-col gap-3">
             <Button
-              onClick={() => onSubmit(apiKeyInputs)}
-              disabled={!hasAtLeastOneKey}
+              onClick={handleSubmit}
+              disabled={!hasAtLeastOneKey || isSubmitting}
               className="w-full"
             >
               Finish Setup
@@ -177,6 +188,7 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
               variant="outline"
               onClick={() => handleViewChange("account")}
             >
+              <ArrowLeftIcon className="size-4" />
               Back to account options
             </Button>
           </div>
