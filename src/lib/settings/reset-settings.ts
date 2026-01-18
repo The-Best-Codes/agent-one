@@ -13,6 +13,7 @@ import {
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   fontAtom,
+  inputStyleAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -47,6 +48,7 @@ export function resetAllSettings(): void {
   store.set(markdownHighlightingAtom, RESET);
   store.set(markdownRenderingAtom, RESET);
   store.set(submitKeyAtom, RESET);
+  store.set(inputStyleAtom, RESET);
   store.set(maxCodeblockCharsAtom, RESET);
   store.set(maxMessageLengthAtom, RESET);
   store.set(maxToolResultCharsAtom, RESET);
@@ -91,6 +93,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SUBMIT_KEY":
       store.set(submitKeyAtom, RESET);
+      break;
+    case "INPUT_STYLE":
+      store.set(inputStyleAtom, RESET);
       break;
     case "MAX_CODEBLOCK_CHARS":
       store.set(maxCodeblockCharsAtom, RESET);
