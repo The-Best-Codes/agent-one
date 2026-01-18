@@ -1,13 +1,23 @@
 import { listen } from "@tauri-apps/api/event";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
+import { useAtom } from "jotai";
+import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+
+const handledDeepLinkAtom = atomWithStorage<string | null>(
+  "agent-one-handled-deeplink",
+  null,
+  createJSONStorage(() => sessionStorage),
+  { getOnInit: true },
+);
 
 // TODO: Implement version checking here to ignore outdated deep links
 // Use assets/deep-links/schema.json
 export function DeepLinkHandler() {
   const navigate = useNavigate();
   const initialDeepLinkHandledRef = useRef(false);
+  const [handledDeepLink, setHandledDeepLink] = useAtom(handledDeepLinkAtom);
 
   useEffect(() => {
     const setupDeepLink = async () => {
@@ -16,9 +26,11 @@ export function DeepLinkHandler() {
         if (
           currentUrls &&
           currentUrls.length > 0 &&
-          !initialDeepLinkHandledRef.current
+          !initialDeepLinkHandledRef.current &&
+          currentUrls[0] !== handledDeepLink
         ) {
           initialDeepLinkHandledRef.current = true;
+          setHandledDeepLink(currentUrls[0]);
           handleDeepLink(currentUrls[0]);
         }
 
@@ -57,7 +69,7 @@ export function DeepLinkHandler() {
     };
 
     setupDeepLink();
-  }, [navigate]);
+  }, [navigate, handledDeepLink, setHandledDeepLink]);
 
   return null;
 }

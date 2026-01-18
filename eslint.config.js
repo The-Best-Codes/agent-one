@@ -55,6 +55,7 @@ export default [
               "OpenCode",
               "OPENCODE",
               "byok",
+              "deeplink",
             ],
           },
         },
