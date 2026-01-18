@@ -18,6 +18,7 @@ export type TextScaleOption = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type NotificationOption = "always" | "when-unfocused" | "never";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 export type MessageActionRowOption = "hover" | "always" | "never";
+export type InputStyleOption = "docked" | "floating";
 
 export type TitleGenerationMethodOption =
   | "ai"
@@ -83,6 +84,7 @@ export interface DefaultSettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
   SUBMIT_KEY: SubmitKeyOption;
+  INPUT_STYLE: InputStyleOption;
   MAX_CODEBLOCK_CHARS: number;
   MAX_MESSAGE_LENGTH: number;
   MAX_TOOL_RESULT_CHARS: number;
@@ -117,6 +119,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MARKDOWN_HIGHLIGHTING: true,
   MARKDOWN_RENDERING: "both",
   SUBMIT_KEY: "enter",
+  INPUT_STYLE: "docked",
   MAX_CODEBLOCK_CHARS: 10000,
   MAX_MESSAGE_LENGTH: 50000,
   MAX_TOOL_RESULT_CHARS: 15000,

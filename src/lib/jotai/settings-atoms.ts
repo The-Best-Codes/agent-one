@@ -4,6 +4,7 @@ import {
   type ColorThemeOption,
   DEFAULT_SETTINGS,
   type FontOption,
+  type InputStyleOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type MessageActionRowOption,
@@ -43,6 +44,11 @@ export const markdownRenderingAtom = createSettingAtom<MarkdownRenderingOption>(
 export const submitKeyAtom = createSettingAtom<SubmitKeyOption>(
   "SUBMIT_KEY",
   DEFAULT_SETTINGS.SUBMIT_KEY,
+);
+
+export const inputStyleAtom = createSettingAtom<InputStyleOption>(
+  "INPUT_STYLE",
+  DEFAULT_SETTINGS.INPUT_STYLE,
 );
 
 export const maxCodeblockCharsAtom = createSettingAtom(

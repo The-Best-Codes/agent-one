@@ -29,12 +29,14 @@ import useMobileDetection from "@/hooks/use-mobile-detection";
 import { useTheme } from "@/hooks/use-theme";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
+  inputStyleAtom,
   markdownHighlightingAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
@@ -83,6 +85,7 @@ export const MainChatInput = ({
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
   const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
+  const inputStyle = useAtomValue(inputStyleAtom);
   const { loadChat } = usePersistence();
   const chatIds = useAtomValue(chatIdsAtom);
   const isMobile = useMobileDetection({
@@ -358,8 +361,10 @@ export const MainChatInput = ({
     [addFiles, handleChatDrop],
   );
 
+  const isFloating = inputStyle === "floating";
+
   return (
-    <div className="px-0 md:px-2">
+    <div className={cn(isFloating ? "px-2 pb-2" : "px-0 md:px-2")}>
       <MainInputErrorSection onRetry={onScrollNeededAction} />
       <MainInputIncompleteSection onRetry={onScrollNeededAction} />
       <form
@@ -369,10 +374,20 @@ export const MainChatInput = ({
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="bg-secondary border-input focus-within:border-ring focus-within:ring-ring/50 relative flex w-full flex-col rounded-none border-0 border-t pt-2 pr-2 md:rounded-md md:rounded-b-none md:border md:border-b-0 md:focus-within:ring-[3px]"
+        className={cn(
+          "bg-secondary border-input focus-within:border-ring focus-within:ring-ring/50 relative flex w-full flex-col pt-2 pr-2",
+          isFloating
+            ? "rounded-md border focus-within:ring-[3px]"
+            : "rounded-none border-0 border-t md:rounded-md md:rounded-b-none md:border md:border-b-0 md:focus-within:ring-[3px]",
+        )}
       >
         {isDragging && (
-          <div className="border-primary bg-background/80 absolute inset-0 z-20 flex items-center justify-center rounded-md rounded-b-none border-2 border-dashed backdrop-blur-sm">
+          <div
+            className={cn(
+              "border-primary bg-background/80 absolute inset-0 z-20 flex items-center justify-center border-2 border-dashed backdrop-blur-sm",
+              isFloating ? "rounded-md" : "rounded-md rounded-b-none",
+            )}
+          >
             <p className="text-primary text-lg font-semibold">
               Drop files or chats to attach
             </p>
@@ -469,7 +484,12 @@ export const MainChatInput = ({
             }}
           />
         </div>
-        <div className="bg-secondary dark:bg-secondary flex items-center justify-between rounded-t-none rounded-b-md p-2 pr-0">
+        <div
+          className={cn(
+            "bg-secondary dark:bg-secondary flex items-center justify-between p-2 pr-0",
+            isFloating ? "rounded-b-md" : "rounded-t-none rounded-b-md",
+          )}
+        >
           <div className="relative">
             <Tooltip>
               <TooltipTrigger asChild>
