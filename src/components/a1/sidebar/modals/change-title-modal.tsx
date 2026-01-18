@@ -22,6 +22,9 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitleAI } from "@/lib/ai/title-generator";
 import { titleGenerationAtom } from "@/lib/jotai/settings-atoms";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 interface ChangeTitleModalProps {
   isOpen: boolean;
@@ -73,7 +76,7 @@ const ChangeTitleForm = ({
         setTitle(generatedTitle);
       }
     } catch (error) {
-      console.error("Failed to generate title:", error);
+      logger.error("Failed to generate title:", error);
     } finally {
       setIsGenerating(false);
     }

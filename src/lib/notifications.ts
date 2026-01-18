@@ -4,11 +4,15 @@ import {
   sendNotification,
 } from "@tauri-apps/plugin-notification";
 
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
+
 export async function checkNotificationPermission(): Promise<boolean> {
   try {
     return await isPermissionGranted();
   } catch (error) {
-    console.error("Failed to check notification permission:", error);
+    logger.error("Failed to check notification permission:", error);
     return false;
   }
 }
@@ -18,7 +22,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     const permission = await requestPermission();
     return permission === "granted";
   } catch (error) {
-    console.error("Failed to request notification permission:", error);
+    logger.error("Failed to request notification permission:", error);
     return false;
   }
 }
@@ -44,7 +48,7 @@ export async function sendNotificationIfAllowed(
 
     return false;
   } catch (error) {
-    console.error("Failed to send notification:", error);
+    logger.error("Failed to send notification:", error);
     return false;
   }
 }
