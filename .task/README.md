@@ -8,7 +8,7 @@
 
 From the repo root, these helpful docs and example repos are available:
 
-- .task/goose
-- .task/rust-sdk
+- .task/goose: goose has a fully working implementation of STDIO, HTTP, and SSE MCP servers complete with OAuth support.
+- .task/rust-sdk: This is the source code for the rmcp crate.
 
 Be sure to view them fully in context when needed to understand the implementation details.
