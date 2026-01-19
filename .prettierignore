@@ -36,3 +36,5 @@ src-tauri/gen/android/.idea/workspace.xml
 # from ./src-tauri/.gitignore
 src-tauri/target/
 src-tauri/gen/schemas
+
+.task/
