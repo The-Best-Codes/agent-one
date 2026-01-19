@@ -2,6 +2,9 @@
   "lsp": {
     "typescript": {
       "disabled": true
+    },
+    "rust": {
+      "disabled": true
     }
   },
   "$schema": "https://opencode.ai/config.json"
