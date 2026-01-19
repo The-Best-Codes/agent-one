@@ -6,6 +6,7 @@ Assume that these bash commands are allowed and no others unless specified:
 
 - Run typecheck: `npm run typecheck`
 - Run ESLint: `npm run lint`
+- Run ESLint with fix: `npm run lint -- --fix` (run this to fix import sort issues)
 - Format project (Prettier & cargo fmt): `npm run format`
 - Run Rust check: `cd src-tauri && cargo check`
 - Run Rust clippy: `cd src-tauri && cargo clippy`
