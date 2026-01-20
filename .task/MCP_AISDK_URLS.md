@@ -1,5 +1,0 @@
-- https://vercel.com/blog/ai-sdk-6
-- https://vercel.com/blog/ai-sdk-6#oauth-authentication
-- https://ai-sdk.dev/docs/ai-sdk-core/mcp-tools
-- https://ai-sdk.dev/cookbook/node/mcp-tools
-- https://ai-sdk.dev/docs/reference/ai-sdk-core/create-mcp-client
