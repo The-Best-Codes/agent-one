@@ -1,4 +1,5 @@
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import { Toaster } from "sonner";
 
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
@@ -27,6 +28,7 @@ function App() {
     <BrowserRouter>
       <KbdRegistry />
       <DeepLinkHandler />
+      <Toaster position="top-right" richColors />
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<IndexRoute />} />
