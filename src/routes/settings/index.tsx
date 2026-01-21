@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { ArrowLeftIcon, SettingsIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { activeSettingsSectionAtom } from "@/lib/jotai/atoms";
 
+import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
 import SettingsSidebar from "./settings-sidebar";
 
@@ -23,6 +24,22 @@ export default function SettingsRoute() {
   const [searchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const tabParam = searchParams.get("tab");
+  const displayedSection = useMemo(() => {
+    try {
+      if (tabParam && isValidSection(tabParam)) {
+        return tabParam;
+      }
+      if (isValidSection(activeSection)) {
+        return activeSection;
+      }
+      return sections[0].id;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_error) {
+      return sections[0].id;
+    }
+  }, [tabParam, activeSection]);
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
@@ -54,7 +71,7 @@ export default function SettingsRoute() {
                   List of setting sections
                 </DrawerDescription>
                 <SettingsSidebar
-                  activeSection={activeSection}
+                  activeSection={displayedSection}
                   onSectionChange={(section) => {
                     setActiveSection(section);
                     setIsDrawerOpen(false);
@@ -84,14 +101,14 @@ export default function SettingsRoute() {
                 </Button>
               </div>
               <SettingsSidebar
-                activeSection={activeSection}
+                activeSection={displayedSection}
                 onSectionChange={setActiveSection}
               />
             </div>
           </ScrollArea>
 
           <ScrollArea type="always" className="flex-1 md:min-h-0">
-            <SettingsContent activeSection={activeSection} />
+            <SettingsContent activeSection={displayedSection} />
           </ScrollArea>
         </div>
       </div>

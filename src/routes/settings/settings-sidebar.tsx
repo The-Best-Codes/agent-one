@@ -1,29 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface SettingsSection {
-  id: string;
-  label: string;
-  icon?: string;
-}
+import { sections } from "./sections-config";
 
 interface SettingsSidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
   className?: string;
 }
-
-const sections: SettingsSection[] = [
-  { id: "account", label: "Account" },
-  { id: "appearance", label: "Appearance" },
-  { id: "editor", label: "Editor" },
-  { id: "messages", label: "Messages" },
-  { id: "titles", label: "Titles" },
-  { id: "tools", label: "Tools" },
-  { id: "mcp", label: "MCP Servers" },
-  { id: "streaming", label: "Streaming" },
-  { id: "about", label: "About" },
-];
 
 export default function SettingsSidebar({
   activeSection,
