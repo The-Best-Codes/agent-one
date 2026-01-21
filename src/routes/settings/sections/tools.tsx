@@ -40,10 +40,10 @@ export default function ToolsSection() {
   const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
 
   const isToolConfigsDefault =
-    JSON.stringify({ ...enabledTools, ...toolConfigs }) ===
+    JSON.stringify({ enabledTools, toolConfigs }) ===
     JSON.stringify({
-      ...DEFAULT_SETTINGS.ENABLED_TOOLS,
-      ...DEFAULT_SETTINGS.TOOL_CONFIGS,
+      enabledTools: DEFAULT_SETTINGS.ENABLED_TOOLS,
+      toolConfigs: DEFAULT_SETTINGS.TOOL_CONFIGS,
     });
 
   const handleResetToolConfigs = () => {
