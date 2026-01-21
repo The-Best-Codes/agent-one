@@ -2,6 +2,7 @@ import AboutSection from "./sections/about";
 import AccountSection from "./sections/account";
 import AppearanceSection from "./sections/appearance";
 import EditorSection from "./sections/editor";
+import McpSection from "./sections/mcp";
 import MessagesSection from "./sections/messages";
 import StreamingSection from "./sections/streaming";
 import TitlesSection from "./sections/titles";
@@ -28,6 +29,8 @@ export default function SettingsContent({
         return <TitlesSection />;
       case "tools":
         return <ToolsSection />;
+      case "mcp":
+        return <McpSection />;
       case "streaming":
         return <StreamingSection />;
       case "about":

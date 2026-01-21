@@ -20,6 +20,7 @@ const sections: SettingsSection[] = [
   { id: "messages", label: "Messages" },
   { id: "titles", label: "Titles" },
   { id: "tools", label: "Tools" },
+  { id: "mcp", label: "MCP Servers" },
   { id: "streaming", label: "Streaming" },
   { id: "about", label: "About" },
 ];
