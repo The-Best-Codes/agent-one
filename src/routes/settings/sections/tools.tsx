@@ -96,16 +96,15 @@ export default function ToolsSection() {
         >
           {(Object.keys(TOOL_NAMES) as ToolId[]).map((toolId) => (
             <AccordionItem key={toolId} value={toolId}>
-              <AccordionTrigger className="px-3 hover:no-underline">
-                <div className="flex flex-1 items-center gap-3">
-                  <Checkbox
-                    id={`enabled-${toolId}`}
-                    checked={enabledTools[toolId]}
-                    onCheckedChange={(checked) =>
-                      updateToolEnabled(toolId, checked as boolean)
-                    }
-                    onClick={(e) => e.stopPropagation()}
-                  />
+              <div className="flex items-center gap-3 px-3 [&>h3]:flex-1">
+                <Checkbox
+                  id={`enabled-${toolId}`}
+                  checked={enabledTools[toolId]}
+                  onCheckedChange={(checked) =>
+                    updateToolEnabled(toolId, checked as boolean)
+                  }
+                />
+                <AccordionTrigger className="py-4 hover:no-underline">
                   <div className="flex flex-col items-start text-left">
                     <span className="text-sm font-medium">
                       {TOOL_NAMES[toolId]}
@@ -114,8 +113,8 @@ export default function ToolsSection() {
                       {TOOL_DESCRIPTIONS[toolId]}
                     </span>
                   </div>
-                </div>
-              </AccordionTrigger>
+                </AccordionTrigger>
+              </div>
               <AccordionContent className="px-3 pb-3">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
