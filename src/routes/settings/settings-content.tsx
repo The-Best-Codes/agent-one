@@ -15,6 +15,7 @@ interface SettingsContentProps {
 export default function SettingsContent({
   activeSection,
 }: SettingsContentProps) {
+  // TODO: Extract this logic to sections-config.ts to follow the DRY principle
   const renderSection = () => {
     switch (activeSection) {
       case "account":
