@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { RotateCcwIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
@@ -21,13 +21,31 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
-import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
+import {
+  DEFAULT_SETTINGS,
+  type McpHttpServerConfig,
+  type McpServerConfig,
+  type McpServerType,
+  type McpStdioServerConfig,
+} from "@/lib/settings/types";
+
+interface HeaderEntry {
+  key: string;
+  value: string;
+}
 
 export default function McpSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
@@ -48,7 +66,7 @@ export default function McpSection() {
   ) => {
     setMcpServers((prev) =>
       prev.map((server, i) =>
-        i === index ? { ...server, ...updates } : server,
+        i === index ? ({ ...server, ...updates } as McpServerConfig) : server,
       ),
     );
   };
@@ -56,42 +74,73 @@ export default function McpSection() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [serverToDelete, setServerToDelete] = useState<number | null>(null);
+
+  const [newServerType, setNewServerType] = useState<McpServerType>("stdio");
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
+  const [newServerUrl, setNewServerUrl] = useState("");
+  const [newServerHeaders, setNewServerHeaders] = useState<HeaderEntry[]>([]);
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
   const [newServerRequiresApproval, setNewServerRequiresApproval] =
     useState(false);
 
   const isAddFormValid =
     newServerName.trim() !== "" &&
-    newServerCommand.trim() !== "" &&
-    newServerTimeoutSec >= 0.1;
+    newServerTimeoutSec >= 0.1 &&
+    (newServerType === "stdio"
+      ? newServerCommand.trim() !== ""
+      : newServerUrl.trim() !== "");
 
   const handleAddServer = () => {
     if (!isAddFormValid) return;
 
-    const newServer: McpServerConfig = {
+    const baseConfig = {
       id: `server-${Date.now()}`,
       name: newServerName.trim(),
-      command: newServerCommand.trim(),
       enabled: true,
       timeoutMs: newServerTimeoutSec * 1000,
       requiresApproval: newServerRequiresApproval,
     };
-    setMcpServers((prev) => [newServer, ...prev]);
 
-    setNewServerName("");
-    setNewServerCommand("");
-    setNewServerTimeoutSec(30);
-    setNewServerRequiresApproval(false);
+    let newServer: McpServerConfig;
+    if (newServerType === "stdio") {
+      newServer = {
+        ...baseConfig,
+        type: "stdio",
+        command: newServerCommand.trim(),
+      };
+    } else {
+      const headers: Record<string, string> = {};
+      for (const entry of newServerHeaders) {
+        if (entry.key.trim() && entry.value.trim()) {
+          headers[entry.key.trim()] = entry.value.trim();
+        }
+      }
+      newServer = {
+        ...baseConfig,
+        type: "http",
+        url: newServerUrl.trim(),
+        headers,
+      };
+    }
+
+    setMcpServers((prev) => [newServer, ...prev]);
+    resetAddForm();
     setShowAddDialog(false);
   };
 
-  const handleCancelAdd = () => {
+  const resetAddForm = () => {
+    setNewServerType("stdio");
     setNewServerName("");
     setNewServerCommand("");
+    setNewServerUrl("");
+    setNewServerHeaders([]);
     setNewServerTimeoutSec(30);
     setNewServerRequiresApproval(false);
+  };
+
+  const handleCancelAdd = () => {
+    resetAddForm();
     setShowAddDialog(false);
   };
 
@@ -111,6 +160,30 @@ export default function McpSection() {
   const cancelDelete = () => {
     setServerToDelete(null);
     setShowDeleteDialog(false);
+  };
+
+  const addHeaderEntry = () => {
+    setNewServerHeaders((prev) => [...prev, { key: "", value: "" }]);
+  };
+
+  const updateHeaderEntry = (
+    index: number,
+    field: "key" | "value",
+    value: string,
+  ) => {
+    setNewServerHeaders((prev) =>
+      prev.map((entry, i) =>
+        i === index ? { ...entry, [field]: value } : entry,
+      ),
+    );
+  };
+
+  const removeHeaderEntry = (index: number) => {
+    setNewServerHeaders((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const getServerTypeLabel = (server: McpServerConfig) => {
+    return server.type === "stdio" ? "STDIO" : "HTTP";
   };
 
   return (
@@ -168,7 +241,12 @@ export default function McpSection() {
               <AccordionItem key={server.id} value={server.id}>
                 <AccordionTrigger className="px-3 hover:no-underline">
                   <div className="flex flex-1 items-center justify-between">
-                    <span>{server.name || "Unnamed Server"}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{server.name || "Unnamed Server"}</span>
+                      <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
+                        {getServerTypeLabel(server)}
+                      </span>
+                    </div>
                     <Switch
                       id={`enabled-${server.id}`}
                       checked={server.enabled}
@@ -223,22 +301,50 @@ export default function McpSection() {
                       </div>
                     </div>
 
-                    <div className="grid gap-1.5">
-                      <Label
-                        htmlFor={`command-${server.id}`}
-                        className="text-xs"
-                      >
-                        Command
-                      </Label>
-                      <Input
-                        id={`command-${server.id}`}
-                        value={server.command}
-                        onChange={(e) =>
-                          updateMcpServer(index, { command: e.target.value })
-                        }
-                        placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
-                      />
-                    </div>
+                    {server.type === "stdio" ? (
+                      <div className="grid gap-1.5">
+                        <Label
+                          htmlFor={`command-${server.id}`}
+                          className="text-xs"
+                        >
+                          Command
+                        </Label>
+                        <Input
+                          id={`command-${server.id}`}
+                          value={server.command}
+                          onChange={(e) =>
+                            updateMcpServer(index, { command: e.target.value })
+                          }
+                          placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid gap-1.5">
+                          <Label
+                            htmlFor={`url-${server.id}`}
+                            className="text-xs"
+                          >
+                            URL
+                          </Label>
+                          <Input
+                            id={`url-${server.id}`}
+                            value={server.url}
+                            onChange={(e) =>
+                              updateMcpServer(index, { url: e.target.value })
+                            }
+                            placeholder="https://mcp.example.com/api"
+                          />
+                        </div>
+                        <HttpHeadersEditor
+                          serverId={server.id}
+                          headers={server.headers}
+                          onChange={(headers) =>
+                            updateMcpServer(index, { headers })
+                          }
+                        />
+                      </>
+                    )}
 
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
@@ -282,7 +388,7 @@ export default function McpSection() {
       </CardContent>
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add MCP Server</DialogTitle>
             <DialogDescription>
@@ -291,6 +397,29 @@ export default function McpSection() {
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="server-type">Server Type</Label>
+              <Select
+                value={newServerType}
+                onValueChange={(value: McpServerType) =>
+                  setNewServerType(value)
+                }
+              >
+                <SelectTrigger id="server-type">
+                  <SelectValue placeholder="Select server type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="stdio">STDIO (Local)</SelectItem>
+                  <SelectItem value="http">HTTP (Remote)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                {newServerType === "stdio"
+                  ? "STDIO servers run locally via command line."
+                  : "HTTP servers are remote endpoints that support the MCP protocol."}
+              </p>
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="server-name">Name</Label>
               <Input
@@ -301,15 +430,81 @@ export default function McpSection() {
               />
             </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="server-command">Command</Label>
-              <Input
-                id="server-command"
-                placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
-                value={newServerCommand}
-                onChange={(e) => setNewServerCommand(e.target.value)}
-              />
-            </div>
+            {newServerType === "stdio" ? (
+              <div className="grid gap-2">
+                <Label htmlFor="server-command">Command</Label>
+                <Input
+                  id="server-command"
+                  placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
+                  value={newServerCommand}
+                  onChange={(e) => setNewServerCommand(e.target.value)}
+                />
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="server-url">URL</Label>
+                  <Input
+                    id="server-url"
+                    placeholder="https://mcp.example.com/api"
+                    value={newServerUrl}
+                    onChange={(e) => setNewServerUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between">
+                    <Label>HTTP Headers</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addHeaderEntry}
+                    >
+                      <PlusIcon className="size-4" />
+                      Add Header
+                    </Button>
+                  </div>
+                  {newServerHeaders.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      {newServerHeaders.map((entry, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <Input
+                            placeholder="Header name"
+                            value={entry.key}
+                            onChange={(e) =>
+                              updateHeaderEntry(idx, "key", e.target.value)
+                            }
+                            className="flex-1"
+                          />
+                          <Input
+                            placeholder="Value"
+                            value={entry.value}
+                            onChange={(e) =>
+                              updateHeaderEntry(idx, "value", e.target.value)
+                            }
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeHeaderEntry(idx)}
+                          >
+                            <Trash2Icon className="size-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      No headers configured. Add headers for authentication or
+                      other purposes.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
 
             <div className="grid gap-2">
               <Label htmlFor="server-timeout">Timeout (seconds)</Label>
@@ -375,5 +570,90 @@ export default function McpSection() {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+}
+
+function HttpHeadersEditor({
+  serverId,
+  headers,
+  onChange,
+}: {
+  serverId: string;
+  headers: Record<string, string>;
+  onChange: (headers: Record<string, string>) => void;
+}) {
+  const entries = Object.entries(headers);
+
+  const addHeader = () => {
+    onChange({ ...headers, "": "" });
+  };
+
+  const updateHeader = (
+    oldKey: string,
+    newKey: string,
+    newValue: string,
+    index: number,
+  ) => {
+    const newHeaders: Record<string, string> = {};
+    let i = 0;
+    for (const [key, value] of Object.entries(headers)) {
+      if (i === index) {
+        if (newKey.trim()) {
+          newHeaders[newKey] = newValue;
+        }
+      } else {
+        newHeaders[key] = value;
+      }
+      i++;
+    }
+    onChange(newHeaders);
+  };
+
+  const removeHeader = (keyToRemove: string) => {
+    const newHeaders = { ...headers };
+    delete newHeaders[keyToRemove];
+    onChange(newHeaders);
+  };
+
+  return (
+    <div className="grid gap-1.5">
+      <div className="flex items-center justify-between">
+        <Label className="text-xs">HTTP Headers</Label>
+        <Button type="button" variant="outline" size="sm" onClick={addHeader}>
+          <PlusIcon className="size-4" />
+          Add
+        </Button>
+      </div>
+      {entries.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {entries.map(([key, value], idx) => (
+            <div key={`${serverId}-header-${idx}`} className="flex gap-2">
+              <Input
+                placeholder="Header name"
+                value={key}
+                onChange={(e) => updateHeader(key, e.target.value, value, idx)}
+                className="flex-1"
+              />
+              <Input
+                placeholder="Value"
+                value={value}
+                onChange={(e) => updateHeader(key, key, e.target.value, idx)}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeHeader(key)}
+              >
+                <Trash2Icon className="size-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-muted-foreground text-xs">No headers configured.</p>
+      )}
+    </div>
   );
 }

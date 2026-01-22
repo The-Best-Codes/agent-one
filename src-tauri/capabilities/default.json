@@ -59,7 +59,7 @@
     "os:default",
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://opencode.ai/**" }]
+      "allow": [{ "url": "https://**" }, { "url": "http://**" }]
     }
   ]
 }

@@ -42,7 +42,6 @@ interface ToolsProviderProps {
   children: ReactNode;
 }
 
-// TODO: Later, allow setting approval requirements on a per-tool basis for MCP servers, rather than for all tools in that server?
 function applyNeedsApprovalToTools(
   tools: ToolSet,
   needsApproval: boolean,
@@ -145,8 +144,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                 );
                 return { serverId: server.id, tools: wrappedTools };
               } catch (error) {
+                const serverTypeLabel =
+                  server.type === "stdio" ? "STDIO" : "HTTP";
                 logger.error(
-                  `Failed to load MCP tools for server ${server.name}:`,
+                  `Failed to load MCP tools for ${serverTypeLabel} server ${server.name}:`,
                   error,
                 );
                 closeServerCache(server.id);
