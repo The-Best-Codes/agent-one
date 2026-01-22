@@ -16,6 +16,7 @@ interface ManagedMCPServer {
   client: MCPClient;
   transport: TauriStdioMCPTransport;
   tools: ToolSet;
+  configHash: string;
 }
 
 interface LoadingOperation {
@@ -25,7 +26,6 @@ interface LoadingOperation {
 
 const serverCache = new Map<string, ManagedMCPServer>();
 const loadingOperations = new Map<string, LoadingOperation>();
-let cacheVersion = 0;
 
 class TauriStdioMCPTransport implements MCPTransport {
   public onclose?: () => void;
@@ -117,6 +117,10 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 }
 
+function getConfigHash(server: McpServerConfig): string {
+  return JSON.stringify({ command: server.command });
+}
+
 async function getMcpClientAndTools(
   server: McpServerConfig,
   signal: AbortSignal,
@@ -170,25 +174,37 @@ async function getMcpClientAndTools(
 export async function getMcpToolsForServer(
   server: McpServerConfig,
 ): Promise<ToolSet> {
-  try {
-    const cached = serverCache.get(server.id);
-    if (cached) {
-      return cached.tools;
+  const configHash = getConfigHash(server);
+  const cached = serverCache.get(server.id);
+
+  if (cached && cached.configHash === configHash) {
+    return cached.tools;
+  }
+
+  if (cached && cached.configHash !== configHash) {
+    closeServerCache(server.id);
+  }
+
+  const existingLoad = loadingOperations.get(server.id);
+  if (existingLoad) {
+    await existingLoad.promise;
+    return serverCache.get(server.id)?.tools || {};
+  }
+
+  const controller = new AbortController();
+
+  const promise = (async () => {
+    try {
+      const result = await getMcpClientAndTools(server, controller.signal);
+      serverCache.set(server.id, { ...result, configHash });
+    } finally {
+      loadingOperations.delete(server.id);
     }
+  })();
 
-    const controller = new AbortController();
+  loadingOperations.set(server.id, { controller, promise });
 
-    const promise = (async () => {
-      try {
-        const result = await getMcpClientAndTools(server, controller.signal);
-        serverCache.set(server.id, result);
-      } finally {
-        loadingOperations.delete(server.id);
-      }
-    })();
-
-    loadingOperations.set(server.id, { controller, promise });
-
+  try {
     await promise;
     return serverCache.get(server.id)?.tools || {};
   } catch (error) {
@@ -214,7 +230,6 @@ export function closeServerCache(serverId: string): void {
 }
 
 export function invalidateServerCache(): void {
-  cacheVersion++;
   for (const [, loading] of loadingOperations) {
     loading.controller.abort();
   }
@@ -225,8 +240,4 @@ export function invalidateServerCache(): void {
     });
   }
   serverCache.clear();
-}
-
-export function getCacheVersion(): number {
-  return cacheVersion;
 }
