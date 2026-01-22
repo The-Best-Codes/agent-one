@@ -9,11 +9,7 @@ import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { ToolSet } from "ai";
 
 import { getLogger } from "@/lib/logger";
-import {
-  type McpHttpServerConfig,
-  type McpServerConfig,
-  type McpStdioServerConfig,
-} from "@/lib/settings/types";
+import { type McpServerConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
@@ -261,7 +257,7 @@ class TauriHttpMCPTransport implements MCPTransport {
           logger.verbose(`[MCP HTTP] Received final message:`, message);
           this.onmessage?.(message);
         } catch {
-          // Ignore unparseable final buffer
+          // Ignore final buffer that cannot be parsed
         }
       }
     } finally {

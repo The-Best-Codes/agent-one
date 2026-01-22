@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
 import {
@@ -36,10 +36,8 @@ import {
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
-  type McpHttpServerConfig,
   type McpServerConfig,
   type McpServerType,
-  type McpStdioServerConfig,
 } from "@/lib/settings/types";
 
 interface HeaderEntry {
@@ -52,6 +50,8 @@ export default function McpSection() {
   const [parallelLoadLimit, setParallelLoadLimit] = useAtom(
     mcpParallelLoadLimitAtom,
   );
+
+  const uniqueId = useId();
 
   const isParallelLoadLimitDefault =
     parallelLoadLimit === DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT;
@@ -95,7 +95,7 @@ export default function McpSection() {
     if (!isAddFormValid) return;
 
     const baseConfig = {
-      id: `server-${Date.now()}`,
+      id: `server-${uniqueId}-${crypto.randomUUID()}`,
       name: newServerName.trim(),
       enabled: true,
       timeoutMs: newServerTimeoutSec * 1000,
@@ -588,12 +588,7 @@ function HttpHeadersEditor({
     onChange({ ...headers, "": "" });
   };
 
-  const updateHeader = (
-    oldKey: string,
-    newKey: string,
-    newValue: string,
-    index: number,
-  ) => {
+  const updateHeader = (newKey: string, newValue: string, index: number) => {
     const newHeaders: Record<string, string> = {};
     let i = 0;
     for (const [key, value] of Object.entries(headers)) {
@@ -631,13 +626,13 @@ function HttpHeadersEditor({
               <Input
                 placeholder="Header name"
                 value={key}
-                onChange={(e) => updateHeader(key, e.target.value, value, idx)}
+                onChange={(e) => updateHeader(e.target.value, value, idx)}
                 className="flex-1"
               />
               <Input
                 placeholder="Value"
                 value={value}
-                onChange={(e) => updateHeader(key, key, e.target.value, idx)}
+                onChange={(e) => updateHeader(key, e.target.value, idx)}
                 className="flex-1"
               />
               <Button
