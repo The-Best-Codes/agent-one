@@ -33,14 +33,28 @@ export interface TitleGenerationSettings {
   fallbackPhrase: string;
 }
 
-export interface McpServerConfig {
+export type McpServerType = "stdio" | "http";
+
+export interface McpServerConfigBase {
   id: string;
   name: string;
-  command: string;
   enabled: boolean;
   timeoutMs: number;
   requiresApproval: boolean;
 }
+
+export interface McpStdioServerConfig extends McpServerConfigBase {
+  type: "stdio";
+  command: string;
+}
+
+export interface McpHttpServerConfig extends McpServerConfigBase {
+  type: "http";
+  url: string;
+  headers: Record<string, string>;
+}
+
+export type McpServerConfig = McpStdioServerConfig | McpHttpServerConfig;
 
 export type ToolId =
   | "dateTime"
@@ -175,6 +189,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     {
       id: "everything",
       name: "Everything Server",
+      type: "stdio",
       command: "npx -y @modelcontextprotocol/server-everything",
       enabled: true,
       timeoutMs: 30000,

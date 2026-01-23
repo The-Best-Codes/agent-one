@@ -4,6 +4,7 @@ import {
   type JSONRPCMessage,
   type MCPTransport,
 } from "@ai-sdk/mcp";
+import { fetch } from "@tauri-apps/plugin-http";
 import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { ToolSet } from "ai";
 
@@ -14,8 +15,9 @@ const logger = getLogger(import.meta.url);
 
 interface ManagedMCPServer {
   client: MCPClient;
-  transport: TauriStdioMCPTransport;
+  transport: MCPTransport;
   tools: ToolSet;
+  configHash: string;
 }
 
 interface LoadingOperation {
@@ -25,7 +27,6 @@ interface LoadingOperation {
 
 const serverCache = new Map<string, ManagedMCPServer>();
 const loadingOperations = new Map<string, LoadingOperation>();
-let cacheVersion = 0;
 
 class TauriStdioMCPTransport implements MCPTransport {
   public onclose?: () => void;
@@ -117,19 +118,208 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 }
 
+class TauriHttpMCPTransport implements MCPTransport {
+  public onclose?: () => void;
+  public onerror?: (error: Error) => void;
+  public onmessage?: (message: JSONRPCMessage) => void;
+
+  private url: string;
+  private headers: Record<string, string>;
+  private sessionId?: string;
+  private closed = false;
+
+  constructor(url: string, headers?: Record<string, string>) {
+    this.url = url;
+    this.headers = headers || {};
+  }
+
+  async start(): Promise<void> {
+    this.closed = false;
+    logger.verbose(`[MCP HTTP] Starting transport for ${this.url}`);
+  }
+
+  async send(message: JSONRPCMessage): Promise<void> {
+    if (this.closed) {
+      throw new Error("Transport is closed");
+    }
+
+    try {
+      const requestHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+        ...this.headers,
+      };
+
+      if (this.sessionId) {
+        requestHeaders["mcp-session-id"] = this.sessionId;
+      }
+
+      logger.verbose(`[MCP HTTP] Sending message:`, message);
+
+      const response = await fetch(this.url, {
+        method: "POST",
+        headers: requestHeaders,
+        body: JSON.stringify(message),
+      });
+
+      const newSessionId = response.headers.get("mcp-session-id");
+      if (newSessionId) {
+        this.sessionId = newSessionId;
+        logger.verbose(`[MCP HTTP] Session ID set to: ${this.sessionId}`);
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `HTTP error ${response.status}: ${response.statusText} - ${errorText}`,
+        );
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+
+      if (contentType.includes("text/event-stream")) {
+        await this.handleStreamResponse(response);
+      } else if (contentType.includes("application/json")) {
+        const responseText = await response.text();
+        if (responseText.trim()) {
+          const responseMessage = JSON.parse(responseText) as JSONRPCMessage;
+          logger.verbose(`[MCP HTTP] Received response:`, responseMessage);
+          this.onmessage?.(responseMessage);
+        }
+      } else {
+        const responseText = await response.text();
+        if (responseText.trim()) {
+          try {
+            const responseMessage = JSON.parse(responseText) as JSONRPCMessage;
+            logger.verbose(`[MCP HTTP] Received response:`, responseMessage);
+            this.onmessage?.(responseMessage);
+          } catch {
+            logger.warn(
+              `[MCP HTTP] Could not parse response as JSON:`,
+              responseText,
+            );
+          }
+        }
+      }
+    } catch (error) {
+      logger.error(`[MCP HTTP] Error sending message:`, error);
+      this.onerror?.(error as Error);
+      throw error;
+    }
+  }
+
+  private async handleStreamResponse(response: Response): Promise<void> {
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error("No response body reader available");
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6).trim();
+            if (data && data !== "[DONE]") {
+              try {
+                const message = JSON.parse(data) as JSONRPCMessage;
+                logger.verbose(`[MCP HTTP] Received stream message:`, message);
+                this.onmessage?.(message);
+              } catch {
+                logger.warn(`[MCP HTTP] Failed to parse stream data:`, data);
+              }
+            }
+          } else if (line.trim() && !line.startsWith(":")) {
+            try {
+              const message = JSON.parse(line) as JSONRPCMessage;
+              logger.verbose(`[MCP HTTP] Received JSONL message:`, message);
+              this.onmessage?.(message);
+            } catch {
+              // Not JSON, might be a comment or other format
+            }
+          }
+        }
+      }
+
+      if (buffer.trim()) {
+        try {
+          const message = JSON.parse(buffer) as JSONRPCMessage;
+          logger.verbose(`[MCP HTTP] Received final message:`, message);
+          this.onmessage?.(message);
+        } catch {
+          // Ignore final buffer that cannot be parsed
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  async close(): Promise<void> {
+    this.closed = true;
+
+    if (this.sessionId) {
+      try {
+        await fetch(this.url, {
+          method: "DELETE",
+          headers: {
+            "mcp-session-id": this.sessionId,
+            ...this.headers,
+          },
+        });
+        logger.verbose(`[MCP HTTP] Session closed: ${this.sessionId}`);
+      } catch (error) {
+        logger.verbose(`[MCP HTTP] Error closing session:`, error);
+      }
+    }
+
+    this.onclose?.();
+  }
+}
+
+function getConfigHash(server: McpServerConfig): string {
+  if (server.type === "stdio") {
+    return JSON.stringify({ type: "stdio", command: server.command });
+  } else {
+    return JSON.stringify({
+      type: "http",
+      url: server.url,
+      headers: server.headers,
+    });
+  }
+}
+
+function createTransport(server: McpServerConfig): MCPTransport {
+  if (server.type === "stdio") {
+    return new TauriStdioMCPTransport(server.command);
+  } else {
+    return new TauriHttpMCPTransport(server.url, server.headers);
+  }
+}
+
 async function getMcpClientAndTools(
   server: McpServerConfig,
   signal: AbortSignal,
 ): Promise<{
   client: MCPClient;
   tools: ToolSet;
-  transport: TauriStdioMCPTransport;
+  transport: MCPTransport;
 }> {
   if (signal.aborted) {
     throw new Error("Operation aborted");
   }
 
-  const transport = new TauriStdioMCPTransport(server.command);
+  const transport = createTransport(server);
 
   const onAbort = () => {
     transport.close().catch((error) => {
@@ -154,8 +344,9 @@ async function getMcpClientAndTools(
       throw new Error("Operation aborted");
     }
 
+    const serverTypeLabel = server.type === "stdio" ? "STDIO" : "HTTP";
     logger.verbose(
-      `Successfully fetched MCP tools for ${server.name}:`,
+      `Successfully fetched MCP tools for ${server.name} (${serverTypeLabel}):`,
       Object.keys(tools),
     );
 
@@ -170,25 +361,37 @@ async function getMcpClientAndTools(
 export async function getMcpToolsForServer(
   server: McpServerConfig,
 ): Promise<ToolSet> {
-  try {
-    const cached = serverCache.get(server.id);
-    if (cached) {
-      return cached.tools;
+  const configHash = getConfigHash(server);
+  const cached = serverCache.get(server.id);
+
+  if (cached && cached.configHash === configHash) {
+    return cached.tools;
+  }
+
+  if (cached && cached.configHash !== configHash) {
+    closeServerCache(server.id);
+  }
+
+  const existingLoad = loadingOperations.get(server.id);
+  if (existingLoad) {
+    await existingLoad.promise;
+    return serverCache.get(server.id)?.tools || {};
+  }
+
+  const controller = new AbortController();
+
+  const promise = (async () => {
+    try {
+      const result = await getMcpClientAndTools(server, controller.signal);
+      serverCache.set(server.id, { ...result, configHash });
+    } finally {
+      loadingOperations.delete(server.id);
     }
+  })();
 
-    const controller = new AbortController();
+  loadingOperations.set(server.id, { controller, promise });
 
-    const promise = (async () => {
-      try {
-        const result = await getMcpClientAndTools(server, controller.signal);
-        serverCache.set(server.id, result);
-      } finally {
-        loadingOperations.delete(server.id);
-      }
-    })();
-
-    loadingOperations.set(server.id, { controller, promise });
-
+  try {
     await promise;
     return serverCache.get(server.id)?.tools || {};
   } catch (error) {
@@ -214,7 +417,6 @@ export function closeServerCache(serverId: string): void {
 }
 
 export function invalidateServerCache(): void {
-  cacheVersion++;
   for (const [, loading] of loadingOperations) {
     loading.controller.abort();
   }
@@ -225,8 +427,4 @@ export function invalidateServerCache(): void {
     });
   }
   serverCache.clear();
-}
-
-export function getCacheVersion(): number {
-  return cacheVersion;
 }

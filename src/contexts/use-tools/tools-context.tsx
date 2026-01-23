@@ -16,7 +16,6 @@ import {
 } from "@/lib/ai/tools";
 import {
   closeServerCache,
-  getCacheVersion,
   getMcpToolsForServer,
   invalidateServerCache,
 } from "@/lib/ai/tools/mcp";
@@ -43,7 +42,6 @@ interface ToolsProviderProps {
   children: ReactNode;
 }
 
-// TODO: Later, allow setting approval requirements on a per-tool basis for MCP servers, rather than for all tools in that server?
 function applyNeedsApprovalToTools(
   tools: ToolSet,
   needsApproval: boolean,
@@ -75,9 +73,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const mcpToolsRef = useRef<ToolSet>({});
   const mcpLoadedRef = useRef(false);
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
-  const previousEnabledServerIdsRef = useRef<Set<string>>(new Set());
-  const previousServersHashRef = useRef<string>("");
-  const currentVersionRef = useRef(0);
+  const enabledServerIdsRef = useRef<Set<string>>(new Set());
+  const loadIdRef = useRef(0);
 
   useEffect(() => {
     mcpToolsRef.current = mcpTools;
@@ -89,34 +86,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       ? mcpServers.filter((server) => server.enabled)
       : [];
 
-    const serversHash = JSON.stringify(
-      enabledServers.map((s) => ({
-        id: s.id,
-        command: s.command,
-        timeout: s.timeoutMs,
-        requiresApproval: s.requiresApproval,
-      })),
-    );
-
-    if (serversHash === previousServersHashRef.current) {
-      return;
-    }
-
-    previousServersHashRef.current = serversHash;
-
-    const newEnabledServerIds = new Set(enabledServers.map((s) => s.id));
-    const previousEnabledServerIds = previousEnabledServerIdsRef.current;
-
-    for (const serverId of previousEnabledServerIds) {
-      if (!newEnabledServerIds.has(serverId)) {
+    const newEnabledIds = new Set(enabledServers.map((server) => server.id));
+    for (const serverId of enabledServerIdsRef.current) {
+      if (!newEnabledIds.has(serverId)) {
         logger.verbose(`Cleaning up disabled server: ${serverId}`);
         closeServerCache(serverId);
       }
     }
-
-    previousEnabledServerIdsRef.current = newEnabledServerIds;
-    const version = getCacheVersion();
-    currentVersionRef.current = version;
+    enabledServerIdsRef.current = newEnabledIds;
 
     if (enabledServers.length === 0) {
       invalidateServerCache();
@@ -128,15 +105,15 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       return;
     }
 
-    const loadMcpTools = async () => {
-      if (currentVersionRef.current !== version) return;
+    const loadId = ++loadIdRef.current;
 
+    const loadMcpTools = async () => {
       mcpLoadedRef.current = false;
       setIsMcpLoading(true);
       setMcpLoaded(false);
 
       try {
-        const chunks = [];
+        const chunks: McpServerConfig[][] = [];
         for (let i = 0; i < enabledServers.length; i += parallelLoadLimit) {
           chunks.push(enabledServers.slice(i, i + parallelLoadLimit));
         }
@@ -144,42 +121,47 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         const allTools: ToolSet = {};
 
         for (const chunk of chunks) {
-          if (currentVersionRef.current !== version) return;
+          if (loadId !== loadIdRef.current) return;
 
-          const promises = chunk.map(async (server: McpServerConfig) => {
-            try {
-              const tools = await Promise.race([
-                getMcpToolsForServer(server),
-                new Promise<ToolSet>((_, reject) =>
-                  setTimeout(
-                    () =>
-                      reject(new Error(`Timeout after ${server.timeoutMs}ms`)),
-                    server.timeoutMs,
+          const results = await Promise.all(
+            chunk.map(async (server) => {
+              try {
+                const tools = await Promise.race([
+                  getMcpToolsForServer(server),
+                  new Promise<ToolSet>((_, reject) =>
+                    setTimeout(
+                      () =>
+                        reject(
+                          new Error(`Timeout after ${server.timeoutMs}ms`),
+                        ),
+                      server.timeoutMs,
+                    ),
                   ),
-                ),
-              ]);
-              const wrappedTools = applyNeedsApprovalToTools(
-                tools,
-                server.requiresApproval ?? false,
-              );
-              return { serverId: server.id, tools: wrappedTools };
-            } catch (error) {
-              logger.error(
-                `Failed to load MCP tools for server ${server.name}:`,
-                error,
-              );
-              closeServerCache(server.id);
-              return { serverId: server.id, tools: {} };
-            }
-          });
+                ]);
+                const wrappedTools = applyNeedsApprovalToTools(
+                  tools,
+                  server.requiresApproval ?? false,
+                );
+                return { serverId: server.id, tools: wrappedTools };
+              } catch (error) {
+                const serverTypeLabel =
+                  server.type === "stdio" ? "STDIO" : "HTTP";
+                logger.error(
+                  `Failed to load MCP tools for ${serverTypeLabel} server ${server.name}:`,
+                  error,
+                );
+                closeServerCache(server.id);
+                return { serverId: server.id, tools: {} };
+              }
+            }),
+          );
 
-          const results = await Promise.all(promises);
           for (const result of results) {
             Object.assign(allTools, result.tools);
           }
         }
 
-        if (currentVersionRef.current !== version) return;
+        if (loadId !== loadIdRef.current) return;
 
         mcpToolsRef.current = allTools;
         mcpLoadedRef.current = true;
