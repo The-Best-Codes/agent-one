@@ -239,24 +239,24 @@ export default function McpSection() {
           >
             {mcpServers.map((server, index) => (
               <AccordionItem key={server.id} value={server.id}>
-                <AccordionTrigger className="px-3 hover:no-underline">
-                  <div className="flex flex-1 items-center justify-between">
+                <div className="flex items-center gap-2 px-3 *:first:flex-1">
+                  <AccordionTrigger className="hover:no-underline">
                     <div className="flex items-center gap-2">
                       <span>{server.name || "Unnamed Server"}</span>
                       <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
                         {getServerTypeLabel(server)}
                       </span>
                     </div>
-                    <Switch
-                      id={`enabled-${server.id}`}
-                      checked={server.enabled}
-                      onCheckedChange={(checked) =>
-                        updateMcpServer(index, { enabled: checked })
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                </AccordionTrigger>
+                  </AccordionTrigger>
+                  <Switch
+                    id={`enabled-${server.id}`}
+                    checked={server.enabled}
+                    onCheckedChange={(checked) =>
+                      updateMcpServer(index, { enabled: checked })
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
                 <AccordionContent className="px-3 pb-3">
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-3 sm:flex-row">
