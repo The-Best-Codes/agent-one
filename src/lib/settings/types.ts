@@ -185,17 +185,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       defaultMaxPages: 1,
     },
   },
-  MCP_SERVERS: [
-    {
-      id: "everything",
-      name: "Everything Server",
-      type: "stdio",
-      command: "npx -y @modelcontextprotocol/server-everything",
-      enabled: true,
-      timeoutMs: 30000,
-      requiresApproval: false,
-    },
-  ],
+  MCP_SERVERS: [],
   MCP_PARALLEL_LOAD_LIMIT: 8,
   USER_NAME: "",
   SYSTEM_PROMPT_APPENDIX: "",
