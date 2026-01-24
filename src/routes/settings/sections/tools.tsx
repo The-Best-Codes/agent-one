@@ -103,6 +103,7 @@ export default function ToolsSection() {
                   onCheckedChange={(checked) =>
                     updateToolEnabled(toolId, checked as boolean)
                   }
+                  aria-label={`Enable ${TOOL_NAMES[toolId]}`}
                 />
                 <AccordionTrigger className="py-4 hover:no-underline">
                   <div className="flex flex-col items-start text-left">

@@ -194,13 +194,19 @@ export default function McpSection() {
       <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">Parallel Load Limit</Label>
+            <Label
+              htmlFor="parallel-load-limit"
+              className="text-sm font-medium"
+            >
+              Parallel Load Limit
+            </Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Maximum number of MCP servers to load concurrently.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Input
+              id="parallel-load-limit"
               type="number"
               min="1"
               max="20"
@@ -255,6 +261,7 @@ export default function McpSection() {
                       updateMcpServer(index, { enabled: checked })
                     }
                     onClick={(e) => e.stopPropagation()}
+                    aria-label={`Enable ${server.name || "server"}`}
                   />
                 </div>
                 <AccordionContent className="px-3 pb-3">

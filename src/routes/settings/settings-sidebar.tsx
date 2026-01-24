@@ -15,7 +15,11 @@ export default function SettingsSidebar({
   className,
 }: SettingsSidebarProps) {
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
+    <div
+      className={cn("flex flex-col gap-1", className)}
+      role="tablist"
+      aria-orientation="vertical"
+    >
       {sections.map((section) => {
         const isSelected = activeSection === section.id;
 
@@ -27,6 +31,7 @@ export default function SettingsSidebar({
               "justify-start text-left transition-none",
               isSelected && "border pl-[calc(1rem-1px)]",
             )}
+            role="tab"
             aria-selected={isSelected}
             onClick={() => onSectionChange(section.id)}
           >

@@ -213,9 +213,11 @@ export default function AppearanceSection() {
             <Select
               value={textScale}
               onValueChange={(value) => setTextScale(value as typeof textScale)}
-              aria-label="Select text scale"
             >
-              <SelectTrigger>
+              <SelectTrigger
+                className="w-full md:w-fit md:max-w-96"
+                aria-label="Select text scale"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

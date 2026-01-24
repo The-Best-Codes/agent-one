@@ -52,6 +52,7 @@ export default function SettingsRoute() {
 
   return (
     <main role="main" className="bg-background min-h-screen">
+      <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
           <Button variant="outline" size="sm" onClick={handleNavigateBack}>
@@ -108,7 +109,9 @@ export default function SettingsRoute() {
           </ScrollArea>
 
           <ScrollArea type="always" className="flex-1 md:min-h-0">
-            <SettingsContent activeSection={displayedSection} />
+            <div role="tabpanel" tabIndex={0}>
+              <SettingsContent activeSection={displayedSection} />
+            </div>
           </ScrollArea>
         </div>
       </div>

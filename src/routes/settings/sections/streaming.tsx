@@ -141,6 +141,7 @@ export default function StreamingSection() {
                 max={10000}
                 step={10}
                 className="flex-1"
+                aria-label="Throttle value"
               />
               <Button
                 variant="ghost"

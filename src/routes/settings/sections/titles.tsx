@@ -68,7 +68,10 @@ export default function TitlesSection() {
               })
             }
           >
-            <SelectTrigger className="w-full md:w-fit md:max-w-96">
+            <SelectTrigger
+              className="w-full md:w-fit md:max-w-96"
+              aria-label="Select generation method"
+            >
               <SelectValue placeholder="Select method" />
             </SelectTrigger>
             <SelectContent>
@@ -88,12 +91,15 @@ export default function TitlesSection() {
           titleGeneration.method === "first-assistant-message") && (
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Character Limit</Label>
+              <Label htmlFor="character-limit" className="text-sm font-medium">
+                Character Limit
+              </Label>
               <p className="text-muted-foreground mt-1 text-sm">
                 Maximum characters to use from the message.
               </p>
             </div>
             <Input
+              id="character-limit"
               type="number"
               min="10"
               max="200"
@@ -111,12 +117,15 @@ export default function TitlesSection() {
         {titleGeneration.method === "custom" && (
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Custom Phrase</Label>
+              <Label htmlFor="custom-phrase" className="text-sm font-medium">
+                Custom Phrase
+              </Label>
               <p className="text-muted-foreground mt-1 text-sm">
                 The phrase to use as the chat title.
               </p>
             </div>
             <Input
+              id="custom-phrase"
               type="text"
               value={titleGeneration.customPhrase}
               onChange={(e) =>
@@ -133,12 +142,15 @@ export default function TitlesSection() {
         {titleGeneration.method !== "custom" && (
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Fallback Phrase</Label>
+              <Label htmlFor="fallback-phrase" className="text-sm font-medium">
+                Fallback Phrase
+              </Label>
               <p className="text-muted-foreground mt-1 text-sm">
                 Used when title generation fails or no content is available.
               </p>
             </div>
             <Input
+              id="fallback-phrase"
               type="text"
               value={titleGeneration.fallbackPhrase}
               onChange={(e) =>

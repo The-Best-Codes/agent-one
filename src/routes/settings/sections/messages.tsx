@@ -103,7 +103,10 @@ export default function MessagesSection() {
                 setMarkdownRendering(value as MarkdownRenderingOption)
               }
             >
-              <SelectTrigger className="w-full md:w-fit md:max-w-96">
+              <SelectTrigger
+                className="w-full md:w-fit md:max-w-96"
+                aria-label="Select markdown rendering"
+              >
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
@@ -129,7 +132,9 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">Max Message Length</Label>
+            <Label htmlFor="max-message-length" className="text-sm font-medium">
+              Max Message Length
+            </Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Maximum characters before activating performance mode for that
               message.
@@ -137,6 +142,7 @@ export default function MessagesSection() {
           </div>
           <div className="flex items-center gap-2">
             <Input
+              id="max-message-length"
               type="number"
               min="1000"
               max="1000000"
@@ -160,7 +166,10 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">
+            <Label
+              htmlFor="max-codeblock-chars"
+              className="text-sm font-medium"
+            >
               Max Codeblock Characters
             </Label>
             <p className="text-muted-foreground mt-1 text-sm">
@@ -170,6 +179,7 @@ export default function MessagesSection() {
           </div>
           <div className="flex items-center gap-2">
             <Input
+              id="max-codeblock-chars"
               type="number"
               min="1000"
               max="1000000"
@@ -193,7 +203,10 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">
+            <Label
+              htmlFor="max-tool-result-chars"
+              className="text-sm font-medium"
+            >
               Max Tool Result Characters
             </Label>
             <p className="text-muted-foreground mt-1 text-sm">
@@ -203,6 +216,7 @@ export default function MessagesSection() {
           </div>
           <div className="flex items-center gap-2">
             <Input
+              id="max-tool-result-chars"
               type="number"
               min="1000"
               max="1000000"
@@ -240,7 +254,10 @@ export default function MessagesSection() {
                 setNotificationSetting(value as NotificationOption)
               }
             >
-              <SelectTrigger className="w-full md:w-fit md:max-w-96">
+              <SelectTrigger
+                className="w-full md:w-fit md:max-w-96"
+                aria-label="Select completion notification"
+              >
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
@@ -277,7 +294,10 @@ export default function MessagesSection() {
                 setShowMessageActionRow(value as MessageActionRowOption)
               }
             >
-              <SelectTrigger className="w-full md:w-fit md:max-w-96">
+              <SelectTrigger
+                className="w-full md:w-fit md:max-w-96"
+                aria-label="Select message action row"
+              >
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>

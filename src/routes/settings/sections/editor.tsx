@@ -127,7 +127,10 @@ export default function EditorSection() {
               value={submitKey}
               onValueChange={(value) => setSubmitKey(value as SubmitKeyOption)}
             >
-              <SelectTrigger className="w-full md:w-fit md:max-w-96">
+              <SelectTrigger
+                className="w-full md:w-fit md:max-w-96"
+                aria-label="Select submit key"
+              >
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
@@ -162,7 +165,10 @@ export default function EditorSection() {
                 setInputStyle(value as InputStyleOption)
               }
             >
-              <SelectTrigger className="w-full md:w-fit md:max-w-96">
+              <SelectTrigger
+                className="w-full md:w-fit md:max-w-96"
+                aria-label="Select input style"
+              >
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
               <SelectContent>
