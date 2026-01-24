@@ -1,5 +1,4 @@
 import { AxeBuilder } from "@axe-core/playwright";
-import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
 import { sectionsMetadata } from "../../src/routes/settings/sections-metadata";
@@ -7,18 +6,12 @@ import { sectionsMetadata } from "../../src/routes/settings/sections-metadata";
 type RouteConfig = {
   path: string;
   label: string;
-  updateAfter?: (page: Page) => Promise<void>;
 };
 
 const routes: RouteConfig[] = [
   {
     path: "/onboarding",
     label: "Onboarding",
-    updateAfter: async (page) => {
-      await page.evaluate(() => {
-        localStorage.setItem("agent-one-onboarding-completed", "true");
-      });
-    },
   },
   { path: "/chat", label: "Chat" },
   ...sectionsMetadata.map((section) => ({
@@ -28,10 +21,18 @@ const routes: RouteConfig[] = [
 ];
 
 test.describe("Accessibility", () => {
-  routes.forEach(({ path, label, updateAfter }) => {
+  routes.forEach(({ path, label }) => {
     test(`${label} has no critical accessibility violations`, async ({
       page,
     }) => {
+      await page.addInitScript((routePath) => {
+        const onboardingCompleted = routePath !== "/onboarding";
+        localStorage.setItem(
+          "agent-one-onboarding-completed",
+          String(onboardingCompleted),
+        );
+      }, path);
+
       await page.goto(path);
 
       await expect(page.locator("main[role='main']")).toBeVisible();
@@ -59,10 +60,6 @@ test.describe("Accessibility", () => {
           .map((v) => `- ${v.id}: ${v.description}\n  Help: ${v.helpUrl}`)
           .join("\n")}`,
       ).toEqual([]);
-
-      if (updateAfter) {
-        await updateAfter(page);
-      }
     });
   });
 });

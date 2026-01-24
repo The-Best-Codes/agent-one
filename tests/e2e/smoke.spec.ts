@@ -1,4 +1,4 @@
-import type { ConsoleMessage, Page } from "@playwright/test";
+import type { ConsoleMessage } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 
 import { sectionsMetadata } from "../../src/routes/settings/sections-metadata";
@@ -6,18 +6,12 @@ import { sectionsMetadata } from "../../src/routes/settings/sections-metadata";
 type RouteConfig = {
   path: string;
   label: string;
-  updateAfter?: (page: Page) => Promise<void>;
 };
 
 const routes: RouteConfig[] = [
   {
     path: "/onboarding",
     label: "Onboarding",
-    updateAfter: async (page) => {
-      await page.evaluate(() => {
-        localStorage.setItem("agent-one-onboarding-completed", "true");
-      });
-    },
   },
   { path: "/chat", label: "Chat" },
   ...sectionsMetadata.map((section) => ({
@@ -30,7 +24,15 @@ test.describe("App smoke test", () => {
   test("loads all pages, has correct title, and renders app root", async ({
     page,
   }) => {
-    for (const { path, updateAfter } of routes) {
+    for (const { path } of routes) {
+      await page.addInitScript((routePath) => {
+        const onboardingCompleted = routePath !== "/onboarding";
+        localStorage.setItem(
+          "agent-one-onboarding-completed",
+          String(onboardingCompleted),
+        );
+      }, path);
+
       await page.goto(path);
 
       await expect(page).toHaveTitle(/AgentOne/);
@@ -42,10 +44,6 @@ test.describe("App smoke test", () => {
       if (await h1.count()) {
         await expect(h1.first()).toBeVisible();
       }
-
-      if (updateAfter) {
-        await updateAfter(page);
-      }
     }
   });
 
@@ -54,7 +52,7 @@ test.describe("App smoke test", () => {
       'ConsoleError: Viewport argument key "interactive-widget" not recognized and ignored.',
     ];
 
-    for (const { path, updateAfter } of routes) {
+    for (const { path } of routes) {
       const errors: string[] = [];
 
       const errorHandler = (err: Error) =>
@@ -71,6 +69,14 @@ test.describe("App smoke test", () => {
       page.on("pageerror", errorHandler);
       page.on("console", consoleHandler);
 
+      await page.addInitScript((routePath) => {
+        const onboardingCompleted = routePath !== "/onboarding";
+        localStorage.setItem(
+          "agent-one-onboarding-completed",
+          String(onboardingCompleted),
+        );
+      }, path);
+
       await page.goto(path);
       await page.waitForTimeout(500);
 
@@ -81,10 +87,6 @@ test.describe("App smoke test", () => {
         errors,
         `No severe console/page errors on ${path}. Got:\n${errors.join("\n")}`,
       ).toEqual([]);
-
-      if (updateAfter) {
-        await updateAfter(page);
-      }
     }
   });
 });
