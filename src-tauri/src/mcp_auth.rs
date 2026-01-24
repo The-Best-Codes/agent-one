@@ -181,11 +181,11 @@ impl CredentialStore for KeyringCredentialStore {
 async fn callback_handler(
     Query(params): Query<CallbackParams>,
     State(state): State<AppState>,
-) -> Html<String> {
+) -> Html<&'static str> {
     if let Some(sender) = state.code_receiver.lock().await.take() {
         let _ = sender.send(params);
     }
-    Html("<h1>Authentication Successful</h1><p>You can close this window and return to AgentOne.</p>".to_string())
+    Html(include_str!("../static/mcp_oauth_callback.html"))
 }
 
 #[tauri::command]

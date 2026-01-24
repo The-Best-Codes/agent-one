@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentication Successful | AgentOne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: "var(--background)",
+              foreground: "var(--foreground)",
+              primary: "var(--primary)",
+              "primary-foreground": "var(--primary-foreground)",
+              "muted-foreground": "var(--muted-foreground)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.145 0 0);
+        --primary: oklch(0.205 0 0);
+        --primary-foreground: oklch(0.985 0 0);
+        --muted-foreground: oklch(0.457 0 0);
+      }
+
+      .dark {
+        --background: oklch(0.145 0 0);
+        --foreground: oklch(0.985 0 0);
+        --primary: oklch(0.922 0 0);
+        --primary-foreground: oklch(0.205 0 0);
+        --muted-foreground: oklch(0.708 0 0);
+      }
+
+      body {
+        @apply antialiased;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-foreground flex min-h-screen items-center justify-center"
+  >
+    <div class="text-center">
+      <svg
+        class="stroke-foreground mx-auto mb-6 size-12"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="m9 12 2 2 4-4"></path>
+      </svg>
+      <h1 class="mb-2 text-2xl font-semibold">Authentication Successful</h1>
+      <p class="text-muted-foreground">
+        You can close this window and return to AgentOne.
+      </p>
+    </div>
+  </body>
+</html>
