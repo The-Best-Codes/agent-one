@@ -70,7 +70,10 @@ export default function OnboardingRoute() {
   };
 
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center">
+    <main
+      role="main"
+      className="bg-background flex min-h-screen items-center justify-center"
+    >
       {currentStep === "splash" && (
         <SplashStep onGetStarted={handleGetStarted} />
       )}
@@ -87,6 +90,6 @@ export default function OnboardingRoute() {
       {currentStep === "welcome" && (
         <WelcomeStep name={userName} onComplete={handleWelcomeComplete} />
       )}
-    </div>
+    </main>
   );
 }
