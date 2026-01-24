@@ -2,9 +2,12 @@ import { UnauthorizedError } from "@ai-sdk/mcp";
 import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
 
+import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
 
 import { closeServerCache } from "./index";
+
+const logger = getLogger(import.meta.url);
 
 export function isAuthError(error: unknown): boolean {
   if (error instanceof UnauthorizedError) {
@@ -31,7 +34,14 @@ export async function mcpLogin(
   const toastId = toast.loading(`Starting OAuth flow for ${serverName}...`, {
     action: {
       label: "Cancel",
-      onClick: () => toast.dismiss(toastId),
+      onClick: async () => {
+        toast.dismiss(toastId);
+        try {
+          await invoke("mcp_cancel_auth", { serverId });
+        } catch (e) {
+          logger.error("Failed to cancel auth", e);
+        }
+      },
     },
   });
 
@@ -44,7 +54,11 @@ export async function mcpLogin(
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    toast.error(`Login failed: ${e}`, { id: toastId, action: null });
+    if (typeof e === "string" && e.includes("cancelled by user")) {
+      // no-op
+    } else {
+      toast.error(`Login failed: ${e}`, { id: toastId, action: null });
+    }
     return false;
   }
 }

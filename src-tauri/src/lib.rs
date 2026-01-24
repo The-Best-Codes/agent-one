@@ -89,6 +89,10 @@ pub fn run() {
                 println!("Deep link opened: {:?}", event.urls());
             });
 
+            app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
+                tokio::sync::Mutex::new(std::collections::HashMap::new()),
+            )));
+
             Ok(())
         })
         .invoke_handler({
@@ -105,6 +109,7 @@ pub fn run() {
                     keyring::storage_remove_item,
                     keyring::storage_has_item,
                     mcp_auth::mcp_authenticate,
+                    mcp_auth::mcp_cancel_auth,
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                 ]
@@ -119,6 +124,7 @@ pub fn run() {
                     keyring::storage_remove_item,
                     keyring::storage_has_item,
                     mcp_auth::mcp_authenticate,
+                    mcp_auth::mcp_cancel_auth,
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                 ]

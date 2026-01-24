@@ -9,11 +9,14 @@ use rmcp::transport::auth::{
     AuthError, AuthorizationManager, CredentialStore, OAuthState, StoredCredentials,
 };
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::{oneshot, Mutex};
 use url::Url;
+
+pub struct AuthCancellationState(pub Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>);
 
 const KEYRING_SERVICE: &str = "com.agentone.app";
 const OAUTH_CALLBACK_TIMEOUT_SECS: u64 = 300;
@@ -189,7 +192,11 @@ async fn callback_handler(
 }
 
 #[tauri::command]
-pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<String, String> {
+pub async fn mcp_authenticate(
+    state: tauri::State<'_, AuthCancellationState>,
+    server_id: String,
+    server_url: String,
+) -> Result<String, String> {
     // 1. Setup Callback Server (Bind to port 0 to let OS assign free port)
     let addr = SocketAddr::from(([127, 0, 0, 1], 0));
     let listener = tokio::net::TcpListener::bind(addr)
@@ -232,19 +239,39 @@ pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<S
     // 5. Open Browser
     open::that(&auth_url).map_err(|e| format!("Failed to open browser: {}", e))?;
 
-    // 6. Wait for code with timeout
-    let params = tokio::time::timeout(
-        Duration::from_secs(OAUTH_CALLBACK_TIMEOUT_SECS),
-        code_receiver,
-    )
-    .await
-    .map_err(|_| {
-        format!(
-            "OAuth flow timed out after {} seconds",
-            OAUTH_CALLBACK_TIMEOUT_SECS
-        )
-    })?
-    .map_err(|_| "Failed to receive authorization code (channel closed)".to_string())?;
+    // Create cancellation channel
+    let (cancel_tx, cancel_rx) = oneshot::channel::<()>();
+
+    // Store the cancellation sender
+    {
+        let mut map = state.0.lock().await;
+        map.insert(server_id.clone(), cancel_tx);
+    }
+
+    // 6. Wait for code with timeout or cancellation
+    let params_result = tokio::select! {
+        res = tokio::time::timeout(Duration::from_secs(OAUTH_CALLBACK_TIMEOUT_SECS), code_receiver) => {
+             match res {
+                Ok(Ok(params)) => Ok(params),
+                Ok(Err(_)) => Err("Failed to receive authorization code (channel closed)".to_string()),
+                Err(_) => Err(format!("OAuth flow timed out after {} seconds", OAUTH_CALLBACK_TIMEOUT_SECS)),
+            }
+        },
+        _ = cancel_rx => {
+            Err("OAuth flow cancelled by user".to_string())
+        }
+    };
+
+    // Remove cancellation sender
+    {
+        let mut map = state.0.lock().await;
+        map.remove(&server_id);
+    }
+
+    // Stop server
+    server_handle.abort();
+
+    let params = params_result?;
 
     // 7. Handle callback (Exchange code)
     oauth_state
@@ -267,10 +294,21 @@ pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<S
         .await
         .map_err(|e| e.to_string())?;
 
-    // Stop server
-    server_handle.abort();
-
     Ok("Authentication successful".to_string())
+}
+
+#[tauri::command]
+pub async fn mcp_cancel_auth(
+    state: tauri::State<'_, AuthCancellationState>,
+    server_id: String,
+) -> Result<(), String> {
+    let mut map = state.0.lock().await;
+    if let Some(tx) = map.remove(&server_id) {
+        let _ = tx.send(());
+        Ok(())
+    } else {
+        Ok(())
+    }
 }
 
 // Helper to attempt token retrieval with a specific URL
