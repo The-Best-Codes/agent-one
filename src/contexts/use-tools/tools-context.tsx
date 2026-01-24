@@ -36,6 +36,7 @@ export interface ToolsContextType {
   getTools: () => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
+  refreshTools: () => void;
 }
 
 interface ToolsProviderProps {
@@ -69,6 +70,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const mcpToolsRef = useRef<ToolSet>({});
   const mcpLoadedRef = useRef(false);
@@ -180,7 +182,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
     const promise = loadMcpTools();
     loadingPromiseRef.current = promise;
-  }, [mcpServers, parallelLoadLimit]);
+  }, [mcpServers, parallelLoadLimit, refreshKey]);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
     const filteredStaticTools: ToolSet = {};
@@ -221,8 +223,15 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     };
   }, [enabledTools, toolConfigs]);
 
+  const refreshTools = useCallback(() => {
+    logger.verbose("Refreshing MCP tools...");
+    setRefreshKey((prev) => prev + 1);
+  }, []);
+
   return (
-    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>
+    <ToolsContext.Provider
+      value={{ getTools, isMcpLoading, mcpLoaded, refreshTools }}
+    >
       {children}
     </ToolsContext.Provider>
   );

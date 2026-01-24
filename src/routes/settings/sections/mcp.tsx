@@ -31,12 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { closeServerCache } from "@/lib/ai/tools/mcp";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
 } from "@/lib/jotai/settings-atoms";
-import { getLogger } from "@/lib/logger";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
@@ -44,8 +44,6 @@ import {
   type McpServerConfig,
   type McpServerType,
 } from "@/lib/settings/types";
-
-const logger = getLogger(import.meta.url);
 
 interface HeaderEntry {
   key: string;
@@ -640,6 +638,7 @@ export default function McpSection() {
 function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  const { refreshTools } = useTools();
 
   const checkAuth = async () => {
     try {
@@ -667,6 +666,7 @@ function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
       });
       toast.success("Logged in successfully", { id: toastId });
       closeServerCache(server.id);
+      refreshTools();
       await checkAuth();
     } catch (e) {
       toast.error(`Login failed: ${e}`, { id: toastId });
@@ -681,6 +681,7 @@ function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
       await invoke("mcp_logout", { serverId: server.id });
       toast.success("Logged out successfully");
       closeServerCache(server.id);
+      refreshTools();
       await checkAuth();
     } catch (e) {
       toast.error(`Logout failed: ${e}`);
