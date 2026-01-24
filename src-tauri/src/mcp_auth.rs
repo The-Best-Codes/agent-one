@@ -302,7 +302,7 @@ pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<Stri
 
     // 1. Try with exact URL
     match try_get_token_with_url(&server_id, &server_url).await {
-        Ok(token) => return Ok(token),
+        Ok(token) => Ok(token),
         Err(e) => {
             // 2. If exact URL failed, try fallback if possible
             if let Some(origin_url) = get_origin_url(&server_url) {
@@ -325,7 +325,7 @@ pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<Stri
                 }
             }
             // No fallback possible, return original error
-            return Err(e);
+            Err(e)
         }
     }
 }
