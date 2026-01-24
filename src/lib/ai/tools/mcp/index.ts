@@ -16,7 +16,7 @@ import {
   type McpServerConfig,
 } from "@/lib/settings/types";
 
-import { isAuthError, promptLoginToast } from "./mcp-oauth";
+import { isAuthError, promptLoginToast } from "./oauth";
 
 const logger = getLogger(import.meta.url);
 

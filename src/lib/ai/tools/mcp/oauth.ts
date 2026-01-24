@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { type McpHttpServerConfig } from "@/lib/settings/types";
 
-import { closeServerCache, MCP_TOOLS_REFRESH_EVENT } from "./mcp";
+import { closeServerCache, MCP_TOOLS_REFRESH_EVENT } from "./index";
 
 export function isAuthError(error: unknown): boolean {
   if (error instanceof UnauthorizedError) {

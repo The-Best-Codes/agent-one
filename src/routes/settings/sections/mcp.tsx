@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp-oauth";
+import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
