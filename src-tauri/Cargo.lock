@@ -30,7 +30,6 @@ dependencies = [
  "html-escape",
  "keyring",
  "once_cell",
- "open",
  "rand 0.9.2",
  "regex",
  "rmcp",

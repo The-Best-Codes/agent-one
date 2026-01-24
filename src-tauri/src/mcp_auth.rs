@@ -13,6 +13,7 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
+use tauri_plugin_opener::OpenerExt;
 use tokio::sync::{oneshot, Mutex};
 use url::Url;
 
@@ -193,6 +194,7 @@ async fn callback_handler(
 
 #[tauri::command]
 pub async fn mcp_authenticate(
+    app: tauri::AppHandle,
     state: tauri::State<'_, AuthCancellationState>,
     server_id: String,
     server_url: String,
@@ -211,11 +213,11 @@ pub async fn mcp_authenticate(
         code_receiver: Arc::new(Mutex::new(Some(code_sender))),
     };
 
-    let app = Router::new()
+    let router = Router::new()
         .route("/callback", get(callback_handler))
         .with_state(app_state);
 
-    let server_handle = tokio::spawn(async move { axum::serve(listener, app).await });
+    let server_handle = tokio::spawn(async move { axum::serve(listener, router).await });
 
     let scopes = &["mcp", "profile", "email"];
     let client_name = Some("AgentOne");
@@ -232,7 +234,9 @@ pub async fn mcp_authenticate(
         .await
         .map_err(|e| e.to_string())?;
 
-    open::that(&auth_url).map_err(|e| format!("Failed to open browser: {}", e))?;
+    app.opener()
+        .open_url(&auth_url, None::<&str>)
+        .map_err(|e| format!("Failed to open browser: {}", e))?;
 
     let (cancel_tx, cancel_rx) = oneshot::channel::<()>();
 
