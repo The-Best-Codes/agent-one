@@ -197,7 +197,7 @@ pub async fn mcp_authenticate(
     server_id: String,
     server_url: String,
 ) -> Result<String, String> {
-    // 1. Setup Callback Server (Bind to port 0 to let OS assign free port)
+    // Setup Callback Server (Bind to port 0 to let OS assign free port)
     let addr = SocketAddr::from(([127, 0, 0, 1], 0));
     let listener = tokio::net::TcpListener::bind(addr)
         .await
@@ -206,7 +206,6 @@ pub async fn mcp_authenticate(
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
     let redirect_uri = format!("http://127.0.0.1:{}/callback", port);
 
-    // 2. Prepare App State
     let (code_sender, code_receiver) = oneshot::channel::<CallbackParams>();
     let app_state = AppState {
         code_receiver: Arc::new(Mutex::new(Some(code_sender))),
@@ -216,14 +215,11 @@ pub async fn mcp_authenticate(
         .route("/callback", get(callback_handler))
         .with_state(app_state);
 
-    // Spawn server
     let server_handle = tokio::spawn(async move { axum::serve(listener, app).await });
 
-    // 3. Setup Scopes (Aligned with official SDK)
     let scopes = &["mcp", "profile", "email"];
     let client_name = Some("AgentOne");
 
-    // 4. Init OAuth State & Start Authorization with Fallback
     let redirect_uri_clone = redirect_uri.clone();
     let mut oauth_state = try_with_origin_fallback(&server_url, |url| {
         let redirect = redirect_uri_clone.clone();
@@ -236,19 +232,16 @@ pub async fn mcp_authenticate(
         .await
         .map_err(|e| e.to_string())?;
 
-    // 5. Open Browser
     open::that(&auth_url).map_err(|e| format!("Failed to open browser: {}", e))?;
 
-    // Create cancellation channel
     let (cancel_tx, cancel_rx) = oneshot::channel::<()>();
 
-    // Store the cancellation sender
     {
         let mut map = state.0.lock().await;
         map.insert(server_id.clone(), cancel_tx);
     }
 
-    // 6. Wait for code with timeout or cancellation
+    // Wait for code with timeout or cancellation
     let params_result = tokio::select! {
         res = tokio::time::timeout(Duration::from_secs(OAUTH_CALLBACK_TIMEOUT_SECS), code_receiver) => {
              match res {
@@ -262,24 +255,20 @@ pub async fn mcp_authenticate(
         }
     };
 
-    // Remove cancellation sender
     {
         let mut map = state.0.lock().await;
         map.remove(&server_id);
     }
 
-    // Stop server
     server_handle.abort();
 
     let params = params_result?;
 
-    // 7. Handle callback (Exchange code)
     oauth_state
         .handle_callback(&params.code, &params.state)
         .await
         .map_err(|e| format!("Failed to exchange code: {}", e))?;
 
-    // 8. Save credentials
     let (client_id, token_response) = oauth_state
         .get_credentials()
         .await
