@@ -4,50 +4,64 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Authentication Successful | AgentOne</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              background: "var(--background)",
-              foreground: "var(--foreground)",
-              primary: "var(--primary)",
-              "primary-foreground": "var(--primary-foreground)",
-              "muted-foreground": "var(--muted-foreground)",
-            },
-          },
-        },
-      };
-    </script>
     <style>
       :root {
         --background: oklch(1 0 0);
         --foreground: oklch(0.145 0 0);
-        --primary: oklch(0.205 0 0);
-        --primary-foreground: oklch(0.985 0 0);
-        --muted-foreground: oklch(0.457 0 0);
       }
 
-      .dark {
+      @media (prefers-color-scheme: dark) {
         --background: oklch(0.145 0 0);
         --foreground: oklch(0.985 0 0);
-        --primary: oklch(0.922 0 0);
-        --primary-foreground: oklch(0.205 0 0);
-        --muted-foreground: oklch(0.708 0 0);
       }
 
       body {
-        @apply antialiased;
+        margin: 0;
+        padding: 0;
+        background-color: var(--background);
+        color: var(--foreground);
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        font-family:
+          ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      svg {
+        stroke: var(--foreground);
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 0.75rem;
+        width: 3rem;
+        height: 3rem;
+        display: block;
+      }
+
+      h1 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.5rem;
+        line-height: 2rem;
+        font-weight: 600;
+        color: var(--foreground);
+      }
+
+      p {
+        margin: 0;
+        color: var(--foreground);
       }
     </style>
   </head>
-  <body
-    class="bg-background text-foreground flex min-h-screen items-center justify-center"
-  >
+  <body>
     <div class="text-center">
       <svg
-        class="stroke-foreground mx-auto mb-6 size-12"
         viewBox="0 0 24 24"
         fill="none"
         stroke-width="2"
@@ -57,10 +71,8 @@
         <circle cx="12" cy="12" r="10"></circle>
         <path d="m9 12 2 2 4-4"></path>
       </svg>
-      <h1 class="mb-2 text-2xl font-semibold">Authentication Successful</h1>
-      <p class="text-muted-foreground">
-        You can close this window and return to AgentOne.
-      </p>
+      <h1>Authentication Successful</h1>
+      <p>You can close this and return to AgentOne.</p>
     </div>
   </body>
 </html>
