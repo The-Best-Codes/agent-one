@@ -51,7 +51,7 @@ export default function SettingsRoute() {
   };
 
   return (
-    <div className="bg-background min-h-screen">
+    <main role="main" className="bg-background min-h-screen">
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
           <Button variant="outline" size="sm" onClick={handleNavigateBack}>
@@ -112,6 +112,6 @@ export default function SettingsRoute() {
           </ScrollArea>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
