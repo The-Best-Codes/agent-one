@@ -3,15 +3,20 @@ import {
   type experimental_MCPClient as MCPClient,
   type JSONRPCMessage,
   type MCPTransport,
+  UnauthorizedError,
 } from "@ai-sdk/mcp";
 import { invoke } from "@tauri-apps/api/core";
 import { fetch } from "@tauri-apps/plugin-http";
 import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { ToolSet } from "ai";
-import { toast } from "sonner";
 
 import { getLogger } from "@/lib/logger";
-import { type McpServerConfig } from "@/lib/settings/types";
+import {
+  type McpHttpServerConfig,
+  type McpServerConfig,
+} from "@/lib/settings/types";
+
+import { isAuthError, promptLoginToast } from "./mcp-oauth";
 
 const logger = getLogger(import.meta.url);
 
@@ -205,7 +210,7 @@ class TauriHttpMCPTransport implements MCPTransport {
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error("Unauthorized");
+          throw new UnauthorizedError();
         }
         const errorText = await response.text();
         throw new Error(
@@ -401,28 +406,6 @@ async function getMcpClientAndTools(
   }
 }
 
-async function handleLogin(server: McpServerConfig) {
-  if (server.type !== "http") return;
-
-  const toastId = toast.loading("Starting OAuth flow...");
-
-  try {
-    await invoke("mcp_authenticate", {
-      serverId: server.id,
-      serverUrl: server.url,
-    });
-    toast.success("Logged in successfully", { id: toastId });
-
-    // Invalidate cache so next retry works
-    closeServerCache(server.id);
-
-    // Trigger refresh
-    window.dispatchEvent(new CustomEvent(MCP_TOOLS_REFRESH_EVENT));
-  } catch (e) {
-    toast.error(`Login failed: ${e}`, { id: toastId });
-  }
-}
-
 export async function getMcpToolsForServer(
   server: McpServerConfig,
 ): Promise<ToolSet> {
@@ -462,22 +445,8 @@ export async function getMcpToolsForServer(
   } catch (error) {
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
 
-    if (
-      server.type === "http" &&
-      !server.disableOAuth &&
-      ((error instanceof Error && error.message.includes("Unauthorized")) ||
-        (error instanceof Error && error.message.includes("401")) ||
-        (error instanceof Error &&
-          error.message.includes("No credentials found")))
-    ) {
-      toast(`Log in to ${server.name} MCP Server`, {
-        description: "Authentication required to access tools.",
-        action: {
-          label: "Login",
-          onClick: () => handleLogin(server),
-        },
-        duration: Infinity,
-      });
+    if (server.type === "http" && !server.disableOAuth && isAuthError(error)) {
+      promptLoginToast(server as McpHttpServerConfig);
     }
 
     return {};

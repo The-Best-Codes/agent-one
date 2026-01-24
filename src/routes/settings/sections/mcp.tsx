@@ -1,8 +1,6 @@
-import { invoke } from "@tauri-apps/api/core";
 import { useAtom } from "jotai";
 import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useId, useState } from "react";
-import { toast } from "sonner";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
 import {
@@ -31,8 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { useTools } from "@/contexts/use-tools/tools-hooks";
-import { closeServerCache } from "@/lib/ai/tools/mcp";
+import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp-oauth";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
@@ -638,56 +635,35 @@ export default function McpSection() {
 function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
-  const { refreshTools } = useTools();
-
-  const checkAuth = async () => {
-    try {
-      await invoke("mcp_get_token", {
-        serverId: server.id,
-        serverUrl: server.url,
-      });
-      setIsAuthenticated(true);
-    } catch {
-      setIsAuthenticated(false);
-    }
-  };
 
   useEffect(() => {
-    checkAuth();
+    let cancelled = false;
+    mcpCheckAuth(server.id, server.url).then((result) => {
+      if (!cancelled) {
+        setIsAuthenticated(result);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [server.id, server.url]);
 
   const handleLogin = async () => {
     setLoading(true);
-    const toastId = toast.loading("Starting OAuth flow...");
-    try {
-      await invoke("mcp_authenticate", {
-        serverId: server.id,
-        serverUrl: server.url,
-      });
-      toast.success("Logged in successfully", { id: toastId });
-      closeServerCache(server.id);
-      refreshTools();
-      await checkAuth();
-    } catch (e) {
-      toast.error(`Login failed: ${e}`, { id: toastId });
-    } finally {
-      setLoading(false);
+    const success = await mcpLogin(server.id, server.url);
+    if (success) {
+      setIsAuthenticated(true);
     }
+    setLoading(false);
   };
 
   const handleLogout = async () => {
     setLoading(true);
-    try {
-      await invoke("mcp_logout", { serverId: server.id });
-      toast.success("Logged out successfully");
-      closeServerCache(server.id);
-      refreshTools();
-      await checkAuth();
-    } catch (e) {
-      toast.error(`Logout failed: ${e}`);
-    } finally {
-      setLoading(false);
+    const success = await mcpLogout(server.id);
+    if (success) {
+      setIsAuthenticated(false);
     }
+    setLoading(false);
   };
 
   if (isAuthenticated === null) {
