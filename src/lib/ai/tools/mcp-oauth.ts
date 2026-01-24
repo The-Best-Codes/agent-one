@@ -6,8 +6,6 @@ import { type McpHttpServerConfig } from "@/lib/settings/types";
 
 import { closeServerCache, MCP_TOOLS_REFRESH_EVENT } from "./mcp";
 
-export { UnauthorizedError };
-
 export function isAuthError(error: unknown): boolean {
   if (error instanceof UnauthorizedError) {
     return true;
