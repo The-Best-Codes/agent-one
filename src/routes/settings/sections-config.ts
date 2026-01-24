@@ -9,6 +9,7 @@ import MessagesSection from "./sections/messages";
 import StreamingSection from "./sections/streaming";
 import TitlesSection from "./sections/titles";
 import ToolsSection from "./sections/tools";
+import { type SectionId, sectionsMetadata } from "./sections-metadata";
 
 interface SettingsSection {
   id: string;
@@ -17,17 +18,22 @@ interface SettingsSection {
   component: ComponentType;
 }
 
-export const sections: SettingsSection[] = [
-  { id: "account", label: "Account", component: AccountSection },
-  { id: "appearance", label: "Appearance", component: AppearanceSection },
-  { id: "editor", label: "Editor", component: EditorSection },
-  { id: "messages", label: "Messages", component: MessagesSection },
-  { id: "titles", label: "Titles", component: TitlesSection },
-  { id: "tools", label: "Tools", component: ToolsSection },
-  { id: "mcp", label: "MCP Servers", component: McpSection },
-  { id: "streaming", label: "Streaming", component: StreamingSection },
-  { id: "about", label: "About", component: AboutSection },
-];
+const componentMap: Record<SectionId, ComponentType> = {
+  account: AccountSection,
+  appearance: AppearanceSection,
+  editor: EditorSection,
+  messages: MessagesSection,
+  titles: TitlesSection,
+  tools: ToolsSection,
+  mcp: McpSection,
+  streaming: StreamingSection,
+  about: AboutSection,
+};
+
+export const sections: SettingsSection[] = sectionsMetadata.map((meta) => ({
+  ...meta,
+  component: componentMap[meta.id],
+}));
 
 export const isValidSection = (section: string): boolean => {
   return sections.some((s) => s.id === section);
