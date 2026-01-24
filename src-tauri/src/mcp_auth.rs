@@ -18,6 +18,8 @@ use url::Url;
 const KEYRING_SERVICE: &str = "com.agentone.app";
 const OAUTH_CALLBACK_TIMEOUT_SECS: u64 = 300;
 
+const CLIENT_METADATA_URL: &str = "https://raw.githubusercontent.com/modelcontextprotocol/rust-sdk/refs/heads/main/client-metadata.json";
+
 async fn initialize_and_start_auth(
     url: &str,
     scopes: &[&str],
@@ -28,7 +30,12 @@ async fn initialize_and_start_auth(
         .await
         .map_err(|e| e.to_string())?;
     state
-        .start_authorization(scopes, redirect_uri, client_name)
+        .start_authorization_with_metadata_url(
+            scopes,
+            redirect_uri,
+            client_name,
+            Some(CLIENT_METADATA_URL),
+        )
         .await
         .map_err(|e| e.to_string())?;
     Ok(state)
@@ -183,11 +190,16 @@ async fn callback_handler(
 
 #[tauri::command]
 pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<String, String> {
-    // 1. Find a free port
-    let port = portpicker::pick_unused_port().ok_or("No free ports available")?;
+    // 1. Setup Callback Server (Bind to port 0 to let OS assign free port)
+    let addr = SocketAddr::from(([127, 0, 0, 1], 0));
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let port = listener.local_addr().map_err(|e| e.to_string())?.port();
     let redirect_uri = format!("http://127.0.0.1:{}/callback", port);
 
-    // 2. Start callback server
+    // 2. Prepare App State
     let (code_sender, code_receiver) = oneshot::channel::<CallbackParams>();
     let app_state = AppState {
         code_receiver: Arc::new(Mutex::new(Some(code_sender))),
@@ -197,16 +209,11 @@ pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<S
         .route("/callback", get(callback_handler))
         .with_state(app_state);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], port));
-    let listener = tokio::net::TcpListener::bind(addr)
-        .await
-        .map_err(|e| e.to_string())?;
-
     // Spawn server
     let server_handle = tokio::spawn(async move { axum::serve(listener, app).await });
 
-    // 3. Setup Scopes (Default)
-    let scopes = &["mcp"];
+    // 3. Setup Scopes (Aligned with official SDK)
+    let scopes = &["mcp", "profile", "email"];
     let client_name = Some("AgentOne");
 
     // 4. Init OAuth State & Start Authorization with Fallback
