@@ -22,7 +22,9 @@ async fn initialize_and_start_auth(
     redirect_uri: &str,
     client_name: Option<&str>,
 ) -> Result<OAuthState, String> {
-    let mut state = OAuthState::new(url, None).await.map_err(|e| e.to_string())?;
+    let mut state = OAuthState::new(url, None)
+        .await
+        .map_err(|e| e.to_string())?;
     state
         .start_authorization(scopes, redirect_uri, client_name)
         .await
@@ -185,32 +187,26 @@ pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<S
     let client_name = Some("AgentOne");
 
     // 4. Init OAuth State & Start Authorization with Fallback
-    let mut oauth_state = match initialize_and_start_auth(
-        &server_url,
-        scopes,
-        &redirect_uri,
-        client_name,
-    )
-    .await
-    {
-        Ok(state) => state,
-        Err(e) => {
-            // If the error indicates missing auth support, try fallback
-            // We blindly try fallback if the first one failed, hoping it works.
-            if let Some(origin_url) = get_origin_url(&server_url) {
-                initialize_and_start_auth(&origin_url, scopes, &redirect_uri, client_name)
-                    .await
-                    .map_err(|e2| {
-                        format!(
-                            "Failed to start authorization on both {} ({}) and {} ({})",
-                            server_url, e, origin_url, e2
-                        )
-                    })?
-            } else {
-                return Err(format!("Failed to start authorization: {}", e));
+    let mut oauth_state =
+        match initialize_and_start_auth(&server_url, scopes, &redirect_uri, client_name).await {
+            Ok(state) => state,
+            Err(e) => {
+                // If the error indicates missing auth support, try fallback
+                // We blindly try fallback if the first one failed, hoping it works.
+                if let Some(origin_url) = get_origin_url(&server_url) {
+                    initialize_and_start_auth(&origin_url, scopes, &redirect_uri, client_name)
+                        .await
+                        .map_err(|e2| {
+                            format!(
+                                "Failed to start authorization on both {} ({}) and {} ({})",
+                                server_url, e, origin_url, e2
+                            )
+                        })?
+                } else {
+                    return Err(format!("Failed to start authorization: {}", e));
+                }
             }
-        }
-    };
+        };
 
     let auth_url = oauth_state
         .get_authorization_url()
@@ -253,18 +249,15 @@ pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<S
 }
 
 // Helper to attempt token retrieval with a specific URL
-async fn try_get_token_with_url(
-    server_id: &str,
-    url: &str,
-) -> Result<String, String> {
+async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, String> {
     let cred_store = KeyringCredentialStore::new(server_id.to_string());
-    
+
     // AuthorizationManager::new might return Ok even if config is bad,
     // so we must proceed to check if it actually works with stored creds.
     let mut auth_manager = AuthorizationManager::new(url)
         .await
         .map_err(|e| e.to_string())?;
-        
+
     auth_manager.set_credential_store(cred_store);
 
     // Initialize from store checks if creds exist and are compatible
@@ -309,17 +302,20 @@ pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<Stri
             if let Some(origin_url) = get_origin_url(&server_url) {
                 // If this succeeds, great. If not, return the original error or a combined one.
                 match try_get_token_with_url(&server_id, &origin_url).await {
-                     Ok(token) => return Ok(token),
-                     Err(e2) => {
-                         // Fallback also failed.
-                         // Log or return error. Usually the first error is more relevant if the user intended that URL.
-                         // But if the auth was done on origin, e2 might be the "real" error (e.g. expired token).
-                         // However, if the first failed because "No auth support" (invalid config) and second failed because "Expired",
-                         // we want the second error.
-                         // It's hard to distinguish without error codes.
-                         // Let's return a combined error for debuggability.
-                         return Err(format!("Primary URL failed: {}. Origin URL failed: {}", e, e2));
-                     }
+                    Ok(token) => return Ok(token),
+                    Err(e2) => {
+                        // Fallback also failed.
+                        // Log or return error. Usually the first error is more relevant if the user intended that URL.
+                        // But if the auth was done on origin, e2 might be the "real" error (e.g. expired token).
+                        // However, if the first failed because "No auth support" (invalid config) and second failed because "Expired",
+                        // we want the second error.
+                        // It's hard to distinguish without error codes.
+                        // Let's return a combined error for debuggability.
+                        return Err(format!(
+                            "Primary URL failed: {}. Origin URL failed: {}",
+                            e, e2
+                        ));
+                    }
                 }
             }
             // No fallback possible, return original error
