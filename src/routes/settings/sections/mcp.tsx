@@ -36,6 +36,7 @@ import {
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
+  type McpHttpServerConfig,
   type McpServerConfig,
   type McpServerType,
 } from "@/lib/settings/types";
@@ -83,6 +84,7 @@ export default function McpSection() {
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
   const [newServerRequiresApproval, setNewServerRequiresApproval] =
     useState(false);
+  const [newServerDisableOAuth, setNewServerDisableOAuth] = useState(false);
 
   const isAddFormValid =
     newServerName.trim() !== "" &&
@@ -121,6 +123,7 @@ export default function McpSection() {
         type: "http",
         url: newServerUrl.trim(),
         headers,
+        disableOAuth: newServerDisableOAuth,
       };
     }
 
@@ -137,6 +140,7 @@ export default function McpSection() {
     setNewServerHeaders([]);
     setNewServerTimeoutSec(30);
     setNewServerRequiresApproval(false);
+    setNewServerDisableOAuth(false);
   };
 
   const handleCancelAdd = () => {
@@ -350,6 +354,31 @@ export default function McpSection() {
                             updateMcpServer(index, { headers })
                           }
                         />
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <Label
+                              htmlFor={`disable-oauth-${server.id}`}
+                              className="text-sm"
+                            >
+                              Opt out of OAuth
+                            </Label>
+                            <span className="text-muted-foreground text-xs">
+                              Do not attempt to authenticate with this server
+                            </span>
+                          </div>
+                          <Switch
+                            id={`disable-oauth-${server.id}`}
+                            checked={
+                              (server as McpHttpServerConfig).disableOAuth ??
+                              false
+                            }
+                            onCheckedChange={(checked) =>
+                              updateMcpServer(index, {
+                                disableOAuth: checked,
+                              })
+                            }
+                          />
+                        </div>
                       </>
                     )}
 
@@ -509,6 +538,22 @@ export default function McpSection() {
                       other purposes.
                     </p>
                   )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <Label htmlFor="server-disable-oauth" className="text-sm">
+                      Opt out of OAuth
+                    </Label>
+                    <span className="text-muted-foreground text-xs">
+                      Do not attempt to authenticate with this server
+                    </span>
+                  </div>
+                  <Switch
+                    id="server-disable-oauth"
+                    checked={newServerDisableOAuth}
+                    onCheckedChange={setNewServerDisableOAuth}
+                  />
                 </div>
               </>
             )}

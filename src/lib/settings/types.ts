@@ -52,6 +52,7 @@ export interface McpHttpServerConfig extends McpServerConfigBase {
   type: "http";
   url: string;
   headers: Record<string, string>;
+  disableOAuth?: boolean;
 }
 
 export type McpServerConfig = McpStdioServerConfig | McpHttpServerConfig;
