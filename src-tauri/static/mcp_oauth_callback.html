@@ -38,7 +38,7 @@
       }
 
       svg {
-        stroke: var(--foreground);
+        stroke: oklch(62.7% 0.194 149.214);
         margin-left: auto;
         margin-right: auto;
         margin-bottom: 0.75rem;
@@ -59,7 +59,19 @@
         margin: 0;
         color: var(--foreground);
       }
+
+      button {
+        margin-top: 1rem;
+        padding: 0.5rem 0.75rem;
+        border: none;
+        border-radius: 0.5rem;
+        background-color: var(--foreground);
+        color: var(--background);
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
     </style>
+    <meta http-equiv="refresh" content="0; url=agent-one://" />
   </head>
   <body>
     <div class="text-center">
@@ -75,6 +87,14 @@
       </svg>
       <h1>Authentication Successful</h1>
       <p>You can close this and return to AgentOne.</p>
+      <button onclick="location.href = 'agent-one://'">
+        Return to AgentOne
+      </button>
     </div>
+
+    <script>
+      const protocol = "agent-one://";
+      window.location.href = protocol;
+    </script>
   </body>
 </html>
