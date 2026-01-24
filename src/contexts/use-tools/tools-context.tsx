@@ -18,7 +18,6 @@ import {
   closeServerCache,
   getMcpToolsForServer,
   invalidateServerCache,
-  MCP_TOOLS_REFRESH_EVENT,
 } from "@/lib/ai/tools/mcp";
 import {
   enabledToolsAtom,
@@ -37,7 +36,6 @@ export interface ToolsContextType {
   getTools: () => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
-  refreshTools: () => void;
 }
 
 interface ToolsProviderProps {
@@ -71,7 +69,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const mcpToolsRef = useRef<ToolSet>({});
   const mcpLoadedRef = useRef(false);
@@ -183,7 +180,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
     const promise = loadMcpTools();
     loadingPromiseRef.current = promise;
-  }, [mcpServers, parallelLoadLimit, refreshKey]);
+  }, [mcpServers, parallelLoadLimit]);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
     const filteredStaticTools: ToolSet = {};
@@ -224,22 +221,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     };
   }, [enabledTools, toolConfigs]);
 
-  const refreshTools = useCallback(() => {
-    logger.verbose("Refreshing MCP tools...");
-    setRefreshKey((prev) => prev + 1);
-  }, []);
-
-  useEffect(() => {
-    const handleRefresh = () => refreshTools();
-    window.addEventListener(MCP_TOOLS_REFRESH_EVENT, handleRefresh);
-    return () =>
-      window.removeEventListener(MCP_TOOLS_REFRESH_EVENT, handleRefresh);
-  }, [refreshTools]);
-
   return (
-    <ToolsContext.Provider
-      value={{ getTools, isMcpLoading, mcpLoaded, refreshTools }}
-    >
+    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>
       {children}
     </ToolsContext.Provider>
   );

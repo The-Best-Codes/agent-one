@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { type McpHttpServerConfig } from "@/lib/settings/types";
 
-import { closeServerCache, MCP_TOOLS_REFRESH_EVENT } from "./index";
+import { closeServerCache } from "./index";
 
 export function isAuthError(error: unknown): boolean {
   if (error instanceof UnauthorizedError) {
@@ -33,10 +33,7 @@ export async function mcpLogin(
       serverUrl,
     });
     toast.success("Logged in successfully", { id: toastId });
-
     closeServerCache(serverId);
-    window.dispatchEvent(new CustomEvent(MCP_TOOLS_REFRESH_EVENT));
-
     return true;
   } catch (e) {
     toast.error(`Login failed: ${e}`, { id: toastId });
@@ -49,7 +46,6 @@ export async function mcpLogout(serverId: string): Promise<boolean> {
     await invoke("mcp_logout", { serverId });
     toast.success("Logged out successfully");
     closeServerCache(serverId);
-    window.dispatchEvent(new CustomEvent(MCP_TOOLS_REFRESH_EVENT));
     return true;
   } catch (e) {
     toast.error(`Logout failed: ${e}`);

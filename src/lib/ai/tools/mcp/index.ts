@@ -20,8 +20,6 @@ import { isAuthError, promptLoginToast } from "./oauth";
 
 const logger = getLogger(import.meta.url);
 
-export const MCP_TOOLS_REFRESH_EVENT = "mcp-tools-refresh";
-
 interface ManagedMCPServer {
   client: MCPClient;
   transport: MCPTransport;
