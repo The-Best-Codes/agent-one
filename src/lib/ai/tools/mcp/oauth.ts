@@ -24,21 +24,27 @@ export function isAuthError(error: unknown): boolean {
 export async function mcpLogin(
   serverId: string,
   serverUrl: string,
+  serverName: string,
 ): Promise<boolean> {
-  toast.dismiss(`mcp-login-${serverId}`);
+  toast.dismiss(`mcp-prompt-login-${serverId}`);
 
-  const toastId = toast.loading("Starting OAuth flow...");
+  const toastId = toast.loading(`Starting OAuth flow for ${serverName}...`, {
+    action: {
+      label: "Cancel",
+      onClick: () => toast.dismiss(toastId),
+    },
+  });
 
   try {
     await invoke("mcp_authenticate", {
       serverId,
       serverUrl,
     });
-    toast.success("Logged in successfully", { id: toastId });
+    toast.success("Logged in successfully", { id: toastId, action: null });
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    toast.error(`Login failed: ${e}`, { id: toastId });
+    toast.error(`Login failed: ${e}`, { id: toastId, action: null });
     return false;
   }
 }
@@ -72,11 +78,11 @@ export async function mcpCheckAuth(
 
 export function promptLoginToast(server: McpHttpServerConfig): void {
   toast(`Log in to ${server.name} MCP Server`, {
-    id: `mcp-login-${server.id}`,
+    id: `mcp-prompt-login-${server.id}`,
     description: "Authentication required to access tools.",
     action: {
       label: "Login",
-      onClick: () => mcpLogin(server.id, server.url),
+      onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     duration: Infinity,
   });

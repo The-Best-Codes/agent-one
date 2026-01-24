@@ -650,7 +650,7 @@ function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
 
   const handleLogin = async () => {
     setLoading(true);
-    const success = await mcpLogin(server.id, server.url);
+    const success = await mcpLogin(server.id, server.url, server.name);
     if (success) {
       setIsAuthenticated(true);
     }
