@@ -15,6 +15,8 @@ import { type McpServerConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
+export const MCP_TOOLS_REFRESH_EVENT = "mcp-tools-refresh";
+
 interface ManagedMCPServer {
   client: MCPClient;
   transport: MCPTransport;
@@ -414,7 +416,8 @@ async function handleLogin(server: McpServerConfig) {
     // Invalidate cache so next retry works
     closeServerCache(server.id);
 
-    toast.info("Please refresh or retry the operation.", { duration: 5000 });
+    // Trigger refresh
+    window.dispatchEvent(new CustomEvent(MCP_TOOLS_REFRESH_EVENT));
   } catch (e) {
     toast.error(`Login failed: ${e}`, { id: toastId });
   }

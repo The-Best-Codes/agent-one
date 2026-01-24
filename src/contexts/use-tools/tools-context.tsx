@@ -18,6 +18,7 @@ import {
   closeServerCache,
   getMcpToolsForServer,
   invalidateServerCache,
+  MCP_TOOLS_REFRESH_EVENT,
 } from "@/lib/ai/tools/mcp";
 import {
   enabledToolsAtom,
@@ -227,6 +228,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     logger.verbose("Refreshing MCP tools...");
     setRefreshKey((prev) => prev + 1);
   }, []);
+
+  useEffect(() => {
+    const handleRefresh = () => refreshTools();
+    window.addEventListener(MCP_TOOLS_REFRESH_EVENT, handleRefresh);
+    return () =>
+      window.removeEventListener(MCP_TOOLS_REFRESH_EVENT, handleRefresh);
+  }, [refreshTools]);
 
   return (
     <ToolsContext.Provider
