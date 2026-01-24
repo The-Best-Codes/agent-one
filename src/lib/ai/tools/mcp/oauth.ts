@@ -25,6 +25,8 @@ export async function mcpLogin(
   serverId: string,
   serverUrl: string,
 ): Promise<boolean> {
+  toast.dismiss(`mcp-login-${serverId}`);
+
   const toastId = toast.loading("Starting OAuth flow...");
 
   try {
@@ -70,6 +72,7 @@ export async function mcpCheckAuth(
 
 export function promptLoginToast(server: McpHttpServerConfig): void {
   toast(`Log in to ${server.name} MCP Server`, {
+    id: `mcp-login-${server.id}`,
     description: "Authentication required to access tools.",
     action: {
       label: "Login",
