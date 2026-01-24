@@ -28,7 +28,7 @@ function App() {
     <BrowserRouter>
       <KbdRegistry />
       <DeepLinkHandler />
-      <Toaster position="top-right" richColors />
+      <Toaster position="top-right" richColors closeButton />
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<IndexRoute />} />
