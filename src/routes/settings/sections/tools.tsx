@@ -8,7 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,7 +68,7 @@ export default function ToolsSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Static Tools</CardTitle>
+        <h2 className="leading-none font-semibold">Static Tools</h2>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
