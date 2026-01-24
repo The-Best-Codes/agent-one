@@ -285,6 +285,12 @@ async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, St
 }
 
 #[tauri::command]
+pub async fn mcp_logout(server_id: String) -> Result<(), String> {
+    let cred_store = KeyringCredentialStore::new(server_id);
+    cred_store.clear().await.map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<String, String> {
     let cred_store = KeyringCredentialStore::new(server_id.clone());
 

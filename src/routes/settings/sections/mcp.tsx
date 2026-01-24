@@ -1,6 +1,8 @@
+import { invoke } from "@tauri-apps/api/core";
 import { useAtom } from "jotai";
 import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { toast } from "sonner";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
 import {
@@ -29,10 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { closeServerCache } from "@/lib/ai/tools/mcp";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
 } from "@/lib/jotai/settings-atoms";
+import { getLogger } from "@/lib/logger";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
@@ -40,6 +44,8 @@ import {
   type McpServerConfig,
   type McpServerType,
 } from "@/lib/settings/types";
+
+const logger = getLogger(import.meta.url);
 
 interface HeaderEntry {
   key: string;
@@ -379,6 +385,12 @@ export default function McpSection() {
                             }
                           />
                         </div>
+
+                        {!(server as McpHttpServerConfig).disableOAuth && (
+                          <McpAuthStatus
+                            server={server as McpHttpServerConfig}
+                          />
+                        )}
                       </>
                     )}
 
@@ -622,6 +634,97 @@ export default function McpSection() {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+}
+
+function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const checkAuth = async () => {
+    try {
+      await invoke("mcp_get_token", {
+        serverId: server.id,
+        serverUrl: server.url,
+      });
+      setIsAuthenticated(true);
+    } catch {
+      setIsAuthenticated(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, [server.id, server.url]);
+
+  const handleLogin = async () => {
+    setLoading(true);
+    const toastId = toast.loading("Starting OAuth flow...");
+    try {
+      await invoke("mcp_authenticate", {
+        serverId: server.id,
+        serverUrl: server.url,
+      });
+      toast.success("Logged in successfully", { id: toastId });
+      closeServerCache(server.id);
+      await checkAuth();
+    } catch (e) {
+      toast.error(`Login failed: ${e}`, { id: toastId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await invoke("mcp_logout", { serverId: server.id });
+      toast.success("Logged out successfully");
+      closeServerCache(server.id);
+      await checkAuth();
+    } catch (e) {
+      toast.error(`Logout failed: ${e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex flex-col gap-1">
+          <Label className="text-sm">Authentication Status</Label>
+          <span className="text-muted-foreground text-xs">Checking...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between rounded-md border p-3">
+      <div className="flex flex-col gap-1">
+        <Label className="text-sm">Authentication Status</Label>
+        <span
+          className={`text-xs ${isAuthenticated ? "text-green-600" : "text-muted-foreground"}`}
+        >
+          {isAuthenticated ? "Authenticated" : "Not Authenticated"}
+        </span>
+      </div>
+      {isAuthenticated ? (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          disabled={loading}
+        >
+          Logout
+        </Button>
+      ) : (
+        <Button size="sm" onClick={handleLogin} disabled={loading}>
+          Login
+        </Button>
+      )}
+    </div>
   );
 }
 

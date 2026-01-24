@@ -106,6 +106,7 @@ pub fn run() {
                     keyring::storage_has_item,
                     mcp_auth::mcp_authenticate,
                     mcp_auth::mcp_get_token,
+                    mcp_auth::mcp_logout,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -119,6 +120,7 @@ pub fn run() {
                     keyring::storage_has_item,
                     mcp_auth::mcp_authenticate,
                     mcp_auth::mcp_get_token,
+                    mcp_auth::mcp_logout,
                 ]
             }
         })
