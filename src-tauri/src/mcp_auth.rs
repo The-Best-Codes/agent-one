@@ -12,8 +12,41 @@ use serde::Deserialize;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::{oneshot, Mutex};
+use url::Url;
 
 const KEYRING_SERVICE: &str = "com.agentone.app";
+
+async fn initialize_and_start_auth(
+    url: &str,
+    scopes: &[&str],
+    redirect_uri: &str,
+    client_name: Option<&str>,
+) -> Result<OAuthState, String> {
+    let mut state = OAuthState::new(url, None).await.map_err(|e| e.to_string())?;
+    state
+        .start_authorization(scopes, redirect_uri, client_name)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(state)
+}
+
+fn get_origin_url(url: &str) -> Option<String> {
+    if let Ok(mut parsed) = Url::parse(url) {
+        if parsed.path() != "/" && !parsed.path().is_empty() {
+            parsed.set_path("");
+            parsed.set_query(None);
+            parsed.set_fragment(None);
+            let origin_str = parsed.to_string();
+
+            if origin_str != url && origin_str.trim_end_matches('/') != url.trim_end_matches('/') {
+                return Some(origin_str);
+            }
+        }
+    }
+    None
+}
+
+// Helper to attempt token retrieval with a specific URL
 
 #[derive(Clone)]
 struct AppState {
@@ -147,23 +180,37 @@ pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<S
     // Spawn server
     let server_handle = tokio::spawn(async move { axum::serve(listener, app).await });
 
-    // 3. Init OAuth State
-    let mut oauth_state = OAuthState::new(&server_url, None)
-        .await
-        .map_err(|e| format!("Failed to init OAuth state: {}", e))?;
-
-    // 4. Start Authorization
-    // We use "mcp" scope as default? The example used ["mcp", "profile", "email"]
-    // TODO: Should we get scopes from somewhere?
-    // The rmcp example: &["mcp", "profile", "email"]
-    // Let's assume standard scopes or empty.
-    // OAuthState::start_authorization takes scopes.
+    // 3. Setup Scopes (Default)
     let scopes = &["mcp"];
+    let client_name = Some("AgentOne");
 
-    oauth_state
-        .start_authorization(scopes, &redirect_uri, Some("AgentOne"))
-        .await
-        .map_err(|e| format!("Failed to start authorization: {}", e))?;
+    // 4. Init OAuth State & Start Authorization with Fallback
+    let mut oauth_state = match initialize_and_start_auth(
+        &server_url,
+        scopes,
+        &redirect_uri,
+        client_name,
+    )
+    .await
+    {
+        Ok(state) => state,
+        Err(e) => {
+            // If the error indicates missing auth support, try fallback
+            // We blindly try fallback if the first one failed, hoping it works.
+            if let Some(origin_url) = get_origin_url(&server_url) {
+                initialize_and_start_auth(&origin_url, scopes, &redirect_uri, client_name)
+                    .await
+                    .map_err(|e2| {
+                        format!(
+                            "Failed to start authorization on both {} ({}) and {} ({})",
+                            server_url, e, origin_url, e2
+                        )
+                    })?
+            } else {
+                return Err(format!("Failed to start authorization: {}", e));
+            }
+        }
+    };
 
     let auth_url = oauth_state
         .get_authorization_url()
@@ -205,27 +252,28 @@ pub async fn mcp_authenticate(server_id: String, server_url: String) -> Result<S
     Ok("Authentication successful".to_string())
 }
 
-#[tauri::command]
-pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<String, String> {
-    let cred_store = KeyringCredentialStore::new(server_id);
-
-    // Check if we have creds
-    let loaded = cred_store.load().await.map_err(|e| e.to_string())?;
-    if loaded.is_none() {
-        return Err("No credentials found. Please login.".to_string());
-    }
-
-    // Use AuthorizationManager to handle refresh if needed
-    let mut auth_manager = AuthorizationManager::new(&server_url)
+// Helper to attempt token retrieval with a specific URL
+async fn try_get_token_with_url(
+    server_id: &str,
+    url: &str,
+) -> Result<String, String> {
+    let cred_store = KeyringCredentialStore::new(server_id.to_string());
+    
+    // AuthorizationManager::new might return Ok even if config is bad,
+    // so we must proceed to check if it actually works with stored creds.
+    let mut auth_manager = AuthorizationManager::new(url)
         .await
         .map_err(|e| e.to_string())?;
+        
     auth_manager.set_credential_store(cred_store);
 
-    if auth_manager
+    // Initialize from store checks if creds exist and are compatible
+    let initialized = auth_manager
         .initialize_from_store()
         .await
-        .map_err(|e| e.to_string())?
-    {
+        .map_err(|e| e.to_string())?;
+
+    if initialized {
         // Refresh checks expiration automatically
         auth_manager
             .refresh_token()
@@ -236,8 +284,46 @@ pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<Stri
             .get_access_token()
             .await
             .map_err(|e| e.to_string())?;
+
         Ok(token)
     } else {
         Err("Failed to initialize from store".to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<String, String> {
+    let cred_store = KeyringCredentialStore::new(server_id.clone());
+
+    // Check if we have creds at all first
+    let loaded = cred_store.load().await.map_err(|e| e.to_string())?;
+    if loaded.is_none() {
+        return Err("No credentials found. Please login.".to_string());
+    }
+
+    // 1. Try with exact URL
+    match try_get_token_with_url(&server_id, &server_url).await {
+        Ok(token) => return Ok(token),
+        Err(e) => {
+            // 2. If exact URL failed, try fallback if possible
+            if let Some(origin_url) = get_origin_url(&server_url) {
+                // If this succeeds, great. If not, return the original error or a combined one.
+                match try_get_token_with_url(&server_id, &origin_url).await {
+                     Ok(token) => return Ok(token),
+                     Err(e2) => {
+                         // Fallback also failed.
+                         // Log or return error. Usually the first error is more relevant if the user intended that URL.
+                         // But if the auth was done on origin, e2 might be the "real" error (e.g. expired token).
+                         // However, if the first failed because "No auth support" (invalid config) and second failed because "Expired",
+                         // we want the second error.
+                         // It's hard to distinguish without error codes.
+                         // Let's return a combined error for debuggability.
+                         return Err(format!("Primary URL failed: {}. Origin URL failed: {}", e, e2));
+                     }
+                }
+            }
+            // No fallback possible, return original error
+            return Err(e);
+        }
     }
 }
