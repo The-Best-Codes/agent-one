@@ -135,40 +135,34 @@ class TauriHttpMCPTransport implements MCPTransport {
   private sessionId?: string;
   private closed = false;
   private serverId: string;
-  private disableOAuth: boolean;
   private token: string | null = null;
 
   constructor(
     url: string,
     headers: Record<string, string> | undefined,
     serverId: string,
-    disableOAuth: boolean | undefined,
   ) {
     this.url = url;
     this.headers = headers || {};
     this.serverId = serverId;
-    this.disableOAuth = disableOAuth || false;
   }
 
   async start(): Promise<void> {
     this.closed = false;
     logger.verbose(`[MCP HTTP] Starting transport for ${this.url}`);
 
-    if (!this.disableOAuth) {
-      try {
-        const token = await invoke<string>("mcp_get_token", {
-          serverId: this.serverId,
-          serverUrl: this.url,
-        });
-        this.token = token;
-        logger.verbose(`[MCP HTTP] Acquired OAuth token for ${this.serverId}`);
-      } catch (error) {
-        logger.verbose(
-          `[MCP HTTP] Failed to get OAuth token for ${this.serverId} (this might be normal if not logged in):`,
-          error,
-        );
-        // We don't throw here, we let the request fail with 401 if auth is required
-      }
+    try {
+      const token = await invoke<string>("mcp_get_token", {
+        serverId: this.serverId,
+        serverUrl: this.url,
+      });
+      this.token = token;
+      logger.verbose(`[MCP HTTP] Acquired OAuth token for ${this.serverId}`);
+    } catch (error) {
+      logger.verbose(
+        `[MCP HTTP] Failed to get OAuth token for ${this.serverId}:`,
+        error,
+      );
     }
   }
 
@@ -344,12 +338,7 @@ function createTransport(server: McpServerConfig): MCPTransport {
   if (server.type === "stdio") {
     return new TauriStdioMCPTransport(server.command);
   } else {
-    return new TauriHttpMCPTransport(
-      server.url,
-      server.headers,
-      server.id,
-      server.disableOAuth,
-    );
+    return new TauriHttpMCPTransport(server.url, server.headers, server.id);
   }
 }
 
@@ -443,7 +432,7 @@ export async function getMcpToolsForServer(
   } catch (error) {
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
 
-    if (server.type === "http" && !server.disableOAuth && isAuthError(error)) {
+    if (server.type === "http" && isAuthError(error)) {
       promptLoginToast(server as McpHttpServerConfig);
     }
 
