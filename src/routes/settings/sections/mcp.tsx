@@ -686,10 +686,12 @@ function McpAuthStatus({
           onClick={handleLogout}
           disabled={loading}
         >
+          {loading && <Loader2Icon className="animate-spin" />}
           Logout
         </Button>
       ) : (
         <Button size="sm" onClick={handleLogin} disabled={loading}>
+          {loading && <Loader2Icon className="animate-spin" />}
           Login
         </Button>
       )}
