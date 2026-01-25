@@ -4,7 +4,6 @@ use axum::{
     routing::get,
     Router,
 };
-use keyring::{Entry, Error as KeyringError};
 use rmcp::transport::auth::{
     AuthError, AuthorizationManager, CredentialStore, OAuthState, StoredCredentials,
 };
@@ -17,9 +16,9 @@ use tauri_plugin_opener::OpenerExt;
 use tokio::sync::{oneshot, Mutex};
 use url::Url;
 
-pub struct AuthCancellationState(pub Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>);
+use crate::keyring::{delete_password, get_password, set_password};
 
-const KEYRING_SERVICE: &str = "com.agentone.app";
+pub struct AuthCancellationState(pub Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>);
 const OAUTH_CALLBACK_TIMEOUT_SECS: u64 = 300;
 
 const CLIENT_METADATA_URL: &str = "https://raw.githubusercontent.com/modelcontextprotocol/rust-sdk/refs/heads/main/client-metadata.json";
@@ -113,72 +112,31 @@ impl KeyringCredentialStore {
 #[async_trait::async_trait]
 impl CredentialStore for KeyringCredentialStore {
     async fn load(&self) -> Result<Option<StoredCredentials>, AuthError> {
-        let key = self.key();
-        let service = KEYRING_SERVICE.to_string();
-
-        let result = tokio::task::spawn_blocking(move || {
-            let entry = Entry::new(&service, &key)
-                .map_err(|e| AuthError::InternalError(format!("Keyring error: {}", e)))?;
-            match entry.get_password() {
-                Ok(json) => {
-                    let creds: StoredCredentials = serde_json::from_str(&json).map_err(|e| {
-                        AuthError::InternalError(format!("JSON parse error: {}", e))
-                    })?;
-                    Ok::<Option<StoredCredentials>, AuthError>(Some(creds))
-                }
-                Err(KeyringError::NoEntry) => Ok::<Option<StoredCredentials>, AuthError>(None),
-                Err(e) => Err(AuthError::InternalError(format!(
-                    "Keyring get error: {}",
-                    e
-                ))),
+        match get_password(&self.key()).await {
+            Ok(Some(json)) => {
+                let creds: StoredCredentials = serde_json::from_str(&json)
+                    .map_err(|e| AuthError::InternalError(format!("JSON parse error: {}", e)))?;
+                Ok(Some(creds))
             }
-        })
-        .await
-        .map_err(|e| AuthError::InternalError(format!("Join error: {}", e)))??;
-
-        Ok(result)
+            Ok(None) => Ok(None),
+            Err(e) => Err(AuthError::InternalError(e)),
+        }
     }
 
     async fn save(&self, credentials: StoredCredentials) -> Result<(), AuthError> {
-        let key = self.key();
-        let service = KEYRING_SERVICE.to_string();
         let json = serde_json::to_string(&credentials)
             .map_err(|e| AuthError::InternalError(format!("JSON serialize error: {}", e)))?;
 
-        tokio::task::spawn_blocking(move || {
-            let entry = Entry::new(&service, &key)
-                .map_err(|e| AuthError::InternalError(format!("Keyring error: {}", e)))?;
-            entry
-                .set_password(&json)
-                .map_err(|e| AuthError::InternalError(format!("Keyring set error: {}", e)))?;
-            Ok::<(), AuthError>(())
-        })
-        .await
-        .map_err(|e| AuthError::InternalError(format!("Join error: {}", e)))??;
-
-        Ok(())
+        set_password(&self.key(), &json)
+            .await
+            .map_err(AuthError::InternalError)
     }
 
     async fn clear(&self) -> Result<(), AuthError> {
-        let key = self.key();
-        let service = KEYRING_SERVICE.to_string();
-
-        tokio::task::spawn_blocking(move || {
-            let entry = Entry::new(&service, &key)
-                .map_err(|e| AuthError::InternalError(format!("Keyring error: {}", e)))?;
-            match entry.delete_credential() {
-                Ok(_) => Ok::<(), AuthError>(()),
-                Err(KeyringError::NoEntry) => Ok::<(), AuthError>(()),
-                Err(e) => Err(AuthError::InternalError(format!(
-                    "Keyring delete error: {}",
-                    e
-                ))),
-            }
-        })
-        .await
-        .map_err(|e| AuthError::InternalError(format!("Join error: {}", e)))??;
-
-        Ok(())
+        delete_password(&self.key())
+            .await
+            .map(|_| ())
+            .map_err(AuthError::InternalError)
     }
 }
 
