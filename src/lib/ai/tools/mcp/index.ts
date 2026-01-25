@@ -38,7 +38,6 @@ interface LoadingOperation {
 
 const serverCache = new Map<string, ManagedMCPServer>();
 const loadingOperations = new Map<string, LoadingOperation>();
-const failedServerCache = new Map<string, string>();
 
 class TauriStdioMCPTransport implements MCPTransport {
   public onclose?: () => void;
@@ -410,7 +409,6 @@ export async function getMcpToolsForServer(
 ): Promise<ToolSet> {
   const configHash = getConfigHash(server);
   const cached = serverCache.get(server.id);
-  const failedHash = failedServerCache.get(server.id);
 
   if (cached && cached.configHash === configHash) {
     return cached.tools;
@@ -418,14 +416,6 @@ export async function getMcpToolsForServer(
 
   if (cached && cached.configHash !== configHash) {
     closeServerCache(server.id);
-  }
-
-  if (failedHash && failedHash !== configHash) {
-    failedServerCache.delete(server.id);
-  }
-
-  if (failedHash === configHash) {
-    return {};
   }
 
   const existingLoad = loadingOperations.get(server.id);
@@ -440,7 +430,6 @@ export async function getMcpToolsForServer(
     try {
       const result = await getMcpClientAndTools(server, controller.signal);
       serverCache.set(server.id, { ...result, configHash });
-      failedServerCache.delete(server.id);
 
       if (server.type === "http") {
         const authState = result.hasToken ? "logged-in" : "no-auth";
@@ -466,7 +455,6 @@ export async function getMcpToolsForServer(
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
 
     if (server.type === "http" && isAuthError(error)) {
-      failedServerCache.set(server.id, configHash);
       store.set(mcpAuthStatesAtom, (prev) => {
         if (prev[server.id] === "logged-out") return prev;
         return {
@@ -495,8 +483,6 @@ export function closeServerCache(serverId: string): void {
     });
     serverCache.delete(serverId);
   }
-
-  failedServerCache.delete(serverId);
 }
 
 export function invalidateServerCache(): void {
@@ -510,5 +496,4 @@ export function invalidateServerCache(): void {
     });
   }
   serverCache.clear();
-  failedServerCache.clear();
 }
