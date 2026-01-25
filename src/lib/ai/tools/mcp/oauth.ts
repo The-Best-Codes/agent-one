@@ -55,10 +55,13 @@ export async function mcpLogin(
       serverUrl,
     });
     toast.success("Logged in successfully", { id: toastId, action: null });
-    store.set(mcpAuthStatesAtom, (prev) => ({
-      ...prev,
-      [serverId]: "logged-in",
-    }));
+    store.set(mcpAuthStatesAtom, (prev) => {
+      if (prev[serverId] === "logged-in") return prev;
+      return {
+        ...prev,
+        [serverId]: "logged-in",
+      };
+    });
     closeServerCache(serverId);
     return true;
   } catch (e) {
@@ -75,10 +78,13 @@ export async function mcpLogout(serverId: string): Promise<boolean> {
   try {
     await invoke("mcp_logout", { serverId });
     toast.success("Logged out successfully");
-    store.set(mcpAuthStatesAtom, (prev) => ({
-      ...prev,
-      [serverId]: "logged-out",
-    }));
+    store.set(mcpAuthStatesAtom, (prev) => {
+      if (prev[serverId] === "logged-out") return prev;
+      return {
+        ...prev,
+        [serverId]: "logged-out",
+      };
+    });
     closeServerCache(serverId);
     return true;
   } catch (e) {
@@ -96,10 +102,13 @@ export async function mcpCheckAuth(
       serverId,
       serverUrl,
     });
-    store.set(mcpAuthStatesAtom, (prev) => ({
-      ...prev,
-      [serverId]: "logged-in",
-    }));
+    store.set(mcpAuthStatesAtom, (prev) => {
+      if (prev[serverId] === "logged-in") return prev;
+      return {
+        ...prev,
+        [serverId]: "logged-in",
+      };
+    });
     return "logged-in";
   } catch {
     return undefined;

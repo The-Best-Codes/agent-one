@@ -433,10 +433,13 @@ export async function getMcpToolsForServer(
 
       if (server.type === "http") {
         const authState = result.hasToken ? "logged-in" : "no-auth";
-        store.set(mcpAuthStatesAtom, (prev) => ({
-          ...prev,
-          [server.id]: authState,
-        }));
+        store.set(mcpAuthStatesAtom, (prev) => {
+          if (prev[server.id] === authState) return prev;
+          return {
+            ...prev,
+            [server.id]: authState,
+          };
+        });
       }
     } finally {
       loadingOperations.delete(server.id);
@@ -452,10 +455,13 @@ export async function getMcpToolsForServer(
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
 
     if (server.type === "http" && isAuthError(error)) {
-      store.set(mcpAuthStatesAtom, (prev) => ({
-        ...prev,
-        [server.id]: "logged-out",
-      }));
+      store.set(mcpAuthStatesAtom, (prev) => {
+        if (prev[server.id] === "logged-out") return prev;
+        return {
+          ...prev,
+          [server.id]: "logged-out",
+        };
+      });
       promptLoginToast(server as McpHttpServerConfig);
     }
 
