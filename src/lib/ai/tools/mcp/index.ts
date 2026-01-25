@@ -25,8 +25,8 @@ const store = getDefaultStore();
 const logger = getLogger(import.meta.url);
 
 interface ManagedMCPServer {
-  client: MCPClient;
-  transport: MCPTransport;
+  client?: MCPClient;
+  transport?: MCPTransport;
   tools: ToolSet;
   configHash: string;
 }
@@ -454,6 +454,11 @@ export async function getMcpToolsForServer(
   } catch (error) {
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
 
+    serverCache.set(server.id, {
+      tools: {},
+      configHash,
+    });
+
     if (server.type === "http" && isAuthError(error)) {
       store.set(mcpAuthStatesAtom, (prev) => {
         if (prev[server.id] === "logged-out") return prev;
@@ -478,7 +483,7 @@ export function closeServerCache(serverId: string): void {
 
   const cached = serverCache.get(serverId);
   if (cached) {
-    cached.transport.close().catch((error) => {
+    cached.transport?.close().catch((error) => {
       logger.error(`Error closing MCP server ${serverId}:`, error);
     });
     serverCache.delete(serverId);
@@ -491,7 +496,7 @@ export function invalidateServerCache(): void {
   }
   loadingOperations.clear();
   for (const [, cached] of serverCache) {
-    cached.transport.close().catch((error) => {
+    cached.transport?.close().catch((error) => {
       logger.error("Error closing MCP server:", error);
     });
   }
