@@ -1,5 +1,14 @@
 import { useAtom, useAtomValue } from "jotai";
-import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
+import {
+  CheckCircle2Icon,
+  InfoIcon,
+  Loader2Icon,
+  PlusIcon,
+  RotateCcwIcon,
+  ShieldOffIcon,
+  Trash2Icon,
+  XCircleIcon,
+} from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
@@ -617,15 +626,24 @@ function McpAuthStatus({
   };
 
   if (disabled) {
-    return null;
+    return (
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex items-center gap-2">
+          <InfoIcon className="text-foreground size-5" />
+          <span className="text-foreground text-sm">
+            Enable server to see auth status
+          </span>
+        </div>
+      </div>
+    );
   }
 
   if (authState === "no-auth") {
     return (
       <div className="flex items-center justify-between rounded-md border p-3">
-        <div className="flex flex-col gap-1">
-          <Label className="text-sm">Authorization</Label>
-          <span className="text-muted-foreground text-xs">
+        <div className="flex items-center gap-2">
+          <ShieldOffIcon className="text-foreground size-5" />
+          <span className="text-foreground text-sm">
             No authorization required
           </span>
         </div>
@@ -636,9 +654,11 @@ function McpAuthStatus({
   if (authState === undefined) {
     return (
       <div className="flex items-center justify-between rounded-md border p-3">
-        <div className="flex flex-col gap-1">
-          <Label className="text-sm">Authorization</Label>
-          <span className="text-muted-foreground text-xs">Checking...</span>
+        <div className="flex items-center gap-2">
+          <Loader2Icon className="text-foreground size-5 animate-spin" />
+          <span className="text-foreground text-sm">
+            Checking auth status...
+          </span>
         </div>
       </div>
     );
@@ -646,13 +666,18 @@ function McpAuthStatus({
 
   return (
     <div className="flex items-center justify-between rounded-md border p-3">
-      <div className="flex flex-col gap-1">
-        <Label className="text-sm">Authorization</Label>
-        <span
-          className="text-xs text-muted-foreground"
-        >
-          {authState === "logged-in" ? "Logged in" : "Not logged in"}
-        </span>
+      <div className="flex items-center gap-2">
+        {authState === "logged-in" ? (
+          <>
+            <CheckCircle2Icon className="text-foreground size-5" />
+            <span className="text-sm">Logged in</span>
+          </>
+        ) : (
+          <>
+            <XCircleIcon className="text-foreground size-5" />
+            <span className="text-foreground text-sm">Not logged in</span>
+          </>
+        )}
       </div>
       {authState === "logged-in" ? (
         <Button
