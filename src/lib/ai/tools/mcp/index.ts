@@ -9,7 +9,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { fetch } from "@tauri-apps/plugin-http";
 import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { ToolSet } from "ai";
+import { getDefaultStore } from "jotai";
 
+import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { getLogger } from "@/lib/logger";
 import {
   type McpHttpServerConfig,
@@ -17,6 +19,8 @@ import {
 } from "@/lib/settings/types";
 
 import { isAuthError, promptLoginToast } from "./oauth";
+
+const store = getDefaultStore();
 
 const logger = getLogger(import.meta.url);
 
@@ -129,6 +133,7 @@ class TauriHttpMCPTransport implements MCPTransport {
   public onclose?: () => void;
   public onerror?: (error: Error) => void;
   public onmessage?: (message: JSONRPCMessage) => void;
+  public hasToken = false;
 
   private url: string;
   private headers: Record<string, string>;
@@ -157,8 +162,10 @@ class TauriHttpMCPTransport implements MCPTransport {
         serverUrl: this.url,
       });
       this.token = token;
+      this.hasToken = true;
       logger.verbose(`[MCP HTTP] Acquired OAuth token for ${this.serverId}`);
     } catch (error) {
+      this.hasToken = false;
       logger.verbose(
         `[MCP HTTP] Failed to get OAuth token for ${this.serverId}:`,
         error,
@@ -349,6 +356,7 @@ async function getMcpClientAndTools(
   client: MCPClient;
   tools: ToolSet;
   transport: MCPTransport;
+  hasToken: boolean;
 }> {
   if (signal.aborted) {
     throw new Error("Operation aborted");
@@ -385,8 +393,11 @@ async function getMcpClientAndTools(
       Object.keys(tools),
     );
 
+    const hasToken =
+      transport instanceof TauriHttpMCPTransport ? transport.hasToken : false;
+
     signal.removeEventListener("abort", onAbort);
-    return { client, tools, transport };
+    return { client, tools, transport, hasToken };
   } catch (error) {
     signal.removeEventListener("abort", onAbort);
     throw error;
@@ -419,6 +430,14 @@ export async function getMcpToolsForServer(
     try {
       const result = await getMcpClientAndTools(server, controller.signal);
       serverCache.set(server.id, { ...result, configHash });
+
+      if (server.type === "http") {
+        const authState = result.hasToken ? "logged-in" : "no-auth";
+        store.set(mcpAuthStatesAtom, (prev) => ({
+          ...prev,
+          [server.id]: authState,
+        }));
+      }
     } finally {
       loadingOperations.delete(server.id);
     }
@@ -433,6 +452,10 @@ export async function getMcpToolsForServer(
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
 
     if (server.type === "http" && isAuthError(error)) {
+      store.set(mcpAuthStatesAtom, (prev) => ({
+        ...prev,
+        [server.id]: "logged-out",
+      }));
       promptLoginToast(server as McpHttpServerConfig);
     }
 

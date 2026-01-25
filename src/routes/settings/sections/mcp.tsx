@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
+import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
@@ -345,6 +346,10 @@ export default function McpSection() {
                             placeholder="https://mcp.example.com/api"
                           />
                         </div>
+                        <McpAuthStatus
+                          server={server as McpHttpServerConfig}
+                          disabled={!server.enabled}
+                        />
                         <HttpHeadersEditor
                           serverId={server.id}
                           headers={server.headers}
@@ -352,7 +357,6 @@ export default function McpSection() {
                             updateMcpServer(index, { headers })
                           }
                         />
-                        <McpAuthStatus server={server as McpHttpServerConfig} />
                       </>
                     )}
 
@@ -583,45 +587,57 @@ export default function McpSection() {
   );
 }
 
-function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+function McpAuthStatus({
+  server,
+  disabled,
+}: {
+  server: McpHttpServerConfig;
+  disabled?: boolean;
+}) {
+  const authStates = useAtomValue(mcpAuthStatesAtom);
+  const authState = authStates[server.id];
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    mcpCheckAuth(server.id, server.url).then((result) => {
-      if (!cancelled) {
-        setIsAuthenticated(result);
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [server.id, server.url]);
+    if (authState === undefined && !disabled) {
+      mcpCheckAuth(server.id, server.url);
+    }
+  }, [server.id, server.url, authState, disabled]);
 
   const handleLogin = async () => {
     setLoading(true);
-    const success = await mcpLogin(server.id, server.url, server.name);
-    if (success) {
-      setIsAuthenticated(true);
-    }
+    await mcpLogin(server.id, server.url, server.name);
     setLoading(false);
   };
 
   const handleLogout = async () => {
     setLoading(true);
-    const success = await mcpLogout(server.id);
-    if (success) {
-      setIsAuthenticated(false);
-    }
+    await mcpLogout(server.id);
     setLoading(false);
   };
 
-  if (isAuthenticated === null) {
+  if (disabled) {
+    return null;
+  }
+
+  if (authState === "no-auth") {
     return (
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex flex-col gap-1">
-          <Label className="text-sm">Authentication Status</Label>
+          <Label className="text-sm">Authorization</Label>
+          <span className="text-muted-foreground text-xs">
+            No authorization required
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (authState === undefined) {
+    return (
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex flex-col gap-1">
+          <Label className="text-sm">Authorization</Label>
           <span className="text-muted-foreground text-xs">Checking...</span>
         </div>
       </div>
@@ -631,14 +647,14 @@ function McpAuthStatus({ server }: { server: McpHttpServerConfig }) {
   return (
     <div className="flex items-center justify-between rounded-md border p-3">
       <div className="flex flex-col gap-1">
-        <Label className="text-sm">Authentication Status</Label>
+        <Label className="text-sm">Authorization</Label>
         <span
-          className={`text-xs ${isAuthenticated ? "text-green-600" : "text-muted-foreground"}`}
+          className="text-xs text-muted-foreground"
         >
-          {isAuthenticated ? "Authenticated" : "Not Authenticated"}
+          {authState === "logged-in" ? "Logged in" : "Not logged in"}
         </span>
       </div>
-      {isAuthenticated ? (
+      {authState === "logged-in" ? (
         <Button
           variant="outline"
           size="sm"
