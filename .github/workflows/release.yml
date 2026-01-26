@@ -33,6 +33,10 @@ jobs:
           node-version: lts/*
           cache: "npm"
 
+      - name: Add cargo bin to PATH
+        if: runner.os == 'macOS'
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
