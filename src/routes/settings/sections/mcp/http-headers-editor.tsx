@@ -80,8 +80,8 @@ export function HttpHeadersEditor({
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground text-sm">
-          No headers configured yet.
+        <p className="text-muted-foreground flex h-9 flex-col items-center justify-center rounded-md border border-dashed p-2 text-sm">
+          No headers configured.
         </p>
       )}
     </div>
