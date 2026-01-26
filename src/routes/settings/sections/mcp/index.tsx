@@ -1,15 +1,6 @@
-import { useAtom, useAtomValue } from "jotai";
-import {
-  CheckCircle2Icon,
-  InfoIcon,
-  Loader2Icon,
-  PlusIcon,
-  RotateCcwIcon,
-  ShieldOffIcon,
-  Trash2Icon,
-  XCircleIcon,
-} from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useAtom } from "jotai";
+import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
+import { useId, useState } from "react";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
 import {
@@ -38,8 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
-import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
@@ -51,6 +40,9 @@ import {
   type McpServerConfig,
   type McpServerType,
 } from "@/lib/settings/types";
+
+import { HttpHeadersEditor } from "./http-headers-editor";
+import { McpAuthStatus } from "./mcp-auth-status";
 
 interface HeaderEntry {
   key: string;
@@ -593,188 +585,5 @@ export default function McpSection() {
         </DialogContent>
       </Dialog>
     </Card>
-  );
-}
-
-function McpAuthStatus({
-  server,
-  disabled,
-}: {
-  server: McpHttpServerConfig;
-  disabled?: boolean;
-}) {
-  const authStates = useAtomValue(mcpAuthStatesAtom);
-  const authState = authStates[server.id];
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (authState === undefined && !disabled) {
-      mcpCheckAuth(server.id, server.url);
-    }
-  }, [server.id, server.url, authState, disabled]);
-
-  const handleLogin = async () => {
-    setLoading(true);
-    await mcpLogin(server.id, server.url, server.name);
-    setLoading(false);
-  };
-
-  const handleLogout = async () => {
-    setLoading(true);
-    await mcpLogout(server.id);
-    setLoading(false);
-  };
-
-  if (disabled) {
-    return (
-      <div className="flex items-center justify-between rounded-md border p-3">
-        <div className="flex items-center gap-2">
-          <InfoIcon className="text-foreground size-5" />
-          <span className="text-foreground text-sm">
-            Enable server to see auth status
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (authState === "no-auth") {
-    return (
-      <div className="flex items-center justify-between rounded-md border p-3">
-        <div className="flex items-center gap-2">
-          <ShieldOffIcon className="text-foreground size-5" />
-          <span className="text-foreground text-sm">
-            No authorization required
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (authState === undefined) {
-    return (
-      <div className="flex items-center justify-between rounded-md border p-3">
-        <div className="flex items-center gap-2">
-          <Loader2Icon className="text-foreground size-5 animate-spin" />
-          <span className="text-foreground text-sm">
-            Checking auth status...
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center justify-between rounded-md border p-3">
-      <div className="flex items-center gap-2">
-        {authState === "logged-in" ? (
-          <>
-            <CheckCircle2Icon className="text-foreground size-5" />
-            <span className="text-sm">Logged in</span>
-          </>
-        ) : (
-          <>
-            <XCircleIcon className="text-foreground size-5" />
-            <span className="text-foreground text-sm">Not logged in</span>
-          </>
-        )}
-      </div>
-      {authState === "logged-in" ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLogout}
-          disabled={loading}
-        >
-          {loading && <Loader2Icon className="animate-spin" />}
-          Logout
-        </Button>
-      ) : (
-        <Button size="sm" onClick={handleLogin} disabled={loading}>
-          {loading && <Loader2Icon className="animate-spin" />}
-          Login
-        </Button>
-      )}
-    </div>
-  );
-}
-
-function HttpHeadersEditor({
-  serverId,
-  headers,
-  onChange,
-}: {
-  serverId: string;
-  headers: Record<string, string>;
-  onChange: (headers: Record<string, string>) => void;
-}) {
-  const entries = Object.entries(headers);
-
-  const addHeader = () => {
-    onChange({ ...headers, "": "" });
-  };
-
-  const updateHeader = (newKey: string, newValue: string, index: number) => {
-    const newHeaders: Record<string, string> = {};
-    let i = 0;
-    for (const [key, value] of Object.entries(headers)) {
-      if (i === index) {
-        if (newKey.trim()) {
-          newHeaders[newKey] = newValue;
-        }
-      } else {
-        newHeaders[key] = value;
-      }
-      i++;
-    }
-    onChange(newHeaders);
-  };
-
-  const removeHeader = (keyToRemove: string) => {
-    const newHeaders = { ...headers };
-    delete newHeaders[keyToRemove];
-    onChange(newHeaders);
-  };
-
-  return (
-    <div className="grid gap-1.5">
-      <div className="flex items-center justify-between">
-        <Label className="text-xs">HTTP Headers</Label>
-        <Button type="button" variant="outline" size="sm" onClick={addHeader}>
-          <PlusIcon className="size-4" />
-          Add
-        </Button>
-      </div>
-      {entries.length > 0 ? (
-        <div className="flex flex-col gap-2">
-          {entries.map(([key, value], idx) => (
-            <div key={`${serverId}-header-${idx}`} className="flex gap-2">
-              <Input
-                placeholder="Header name"
-                value={key}
-                onChange={(e) => updateHeader(e.target.value, value, idx)}
-                className="flex-1"
-              />
-              <Input
-                placeholder="Value"
-                value={value}
-                onChange={(e) => updateHeader(key, e.target.value, idx)}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeHeader(key)}
-              >
-                <Trash2Icon className="size-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-muted-foreground text-xs">No headers configured.</p>
-      )}
-    </div>
   );
 }
