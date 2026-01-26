@@ -60,7 +60,9 @@ pub fn run() {
 
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
-        builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+        builder = builder
+            .plugin(tauri_plugin_updater::Builder::new().build())
+            .plugin(tauri_plugin_window_state::Builder::new().build());
     }
 
     builder
