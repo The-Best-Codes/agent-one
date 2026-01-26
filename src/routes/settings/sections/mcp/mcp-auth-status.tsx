@@ -3,6 +3,8 @@ import {
   CheckCircle2Icon,
   InfoIcon,
   Loader2Icon,
+  LogInIcon,
+  LogOutIcon,
   ShieldOffIcon,
   XCircleIcon,
 } from "lucide-react";
@@ -103,12 +105,12 @@ export function McpAuthStatus({
           onClick={handleLogout}
           disabled={loading}
         >
-          {loading && <Loader2Icon className="animate-spin" />}
+          {loading ? <Loader2Icon className="animate-spin" /> : <LogOutIcon />}
           Logout
         </Button>
       ) : (
         <Button size="sm" onClick={handleLogin} disabled={loading}>
-          {loading && <Loader2Icon className="animate-spin" />}
+          {loading ? <Loader2Icon className="animate-spin" /> : <LogInIcon />}
           Login
         </Button>
       )}
