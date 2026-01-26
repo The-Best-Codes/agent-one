@@ -160,6 +160,7 @@ export function AddServerDialog({
                 serverId="new-server-dialog"
                 headers={newServerHeaders}
                 onChange={setNewServerHeaders}
+                labelClassName="text-sm"
               />
             </>
           )}

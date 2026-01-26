@@ -8,10 +8,12 @@ export function HttpHeadersEditor({
   serverId,
   headers,
   onChange,
+  labelClassName,
 }: {
   serverId: string;
   headers: Record<string, string>;
   onChange: (headers: Record<string, string>) => void;
+  labelClassName?: string;
 }) {
   const entries = Object.entries(headers);
 
@@ -42,9 +44,9 @@ export function HttpHeadersEditor({
   };
 
   return (
-    <div className="grid gap-1.5">
-      <div className="flex items-center justify-between">
-        <Label className="text-xs">HTTP Headers</Label>
+    <div className="rounded-md border p-3">
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <Label className={labelClassName || "text-xs"}>HTTP Headers</Label>
         <Button type="button" variant="outline" size="sm" onClick={addHeader}>
           <PlusIcon className="size-4" />
           Add
@@ -68,7 +70,7 @@ export function HttpHeadersEditor({
               />
               <Button
                 type="button"
-                variant="ghost"
+                variant="destructive"
                 size="icon"
                 onClick={() => removeHeader(key)}
               >
@@ -78,7 +80,9 @@ export function HttpHeadersEditor({
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground text-xs">No headers configured.</p>
+        <p className="text-muted-foreground text-sm">
+          No headers configured yet.
+        </p>
       )}
     </div>
   );
