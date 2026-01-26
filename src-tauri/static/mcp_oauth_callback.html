@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentication Successful | AgentOne</title>
+    <style>
+      :root {
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.145 0 0);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --background: oklch(0.145 0 0);
+          --foreground: oklch(0.985 0 0);
+        }
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--background);
+        color: var(--foreground);
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        font-family:
+          ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      svg {
+        stroke: oklch(62.7% 0.194 149.214);
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 0.75rem;
+        width: 3rem;
+        height: 3rem;
+        display: block;
+      }
+
+      h1 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.5rem;
+        line-height: 2rem;
+        font-weight: 600;
+        color: var(--foreground);
+      }
+
+      p {
+        margin: 0;
+        color: var(--foreground);
+      }
+
+      button {
+        margin-top: 1rem;
+        padding: 0.5rem 0.75rem;
+        border: none;
+        border-radius: 0.5rem;
+        background-color: var(--foreground);
+        color: var(--background);
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+    </style>
+    <meta http-equiv="refresh" content="0; url=agent-one://" />
+  </head>
+  <body>
+    <div class="text-center">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="m9 12 2 2 4-4"></path>
+      </svg>
+      <h1>Authentication Successful</h1>
+      <p>You can close this and return to AgentOne.</p>
+      <button onclick="location.href = 'agent-one://'">
+        Return to AgentOne
+      </button>
+    </div>
+
+    <script>
+      const protocol = "agent-one://";
+      window.location.href = protocol;
+    </script>
+  </body>
+</html>

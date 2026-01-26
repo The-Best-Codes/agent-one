@@ -1,6 +1,15 @@
-import { useAtom } from "jotai";
-import { PlusIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
-import { useId, useState } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import {
+  CheckCircle2Icon,
+  InfoIcon,
+  Loader2Icon,
+  PlusIcon,
+  RotateCcwIcon,
+  ShieldOffIcon,
+  Trash2Icon,
+  XCircleIcon,
+} from "lucide-react";
+import { useEffect, useId, useState } from "react";
 
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
 import {
@@ -29,6 +38,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
+import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
@@ -36,6 +47,7 @@ import {
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   DEFAULT_SETTINGS,
+  type McpHttpServerConfig,
   type McpServerConfig,
   type McpServerType,
 } from "@/lib/settings/types";
@@ -343,6 +355,10 @@ export default function McpSection() {
                             placeholder="https://mcp.example.com/api"
                           />
                         </div>
+                        <McpAuthStatus
+                          server={server as McpHttpServerConfig}
+                          disabled={!server.enabled}
+                        />
                         <HttpHeadersEditor
                           serverId={server.id}
                           headers={server.headers}
@@ -577,6 +593,109 @@ export default function McpSection() {
         </DialogContent>
       </Dialog>
     </Card>
+  );
+}
+
+function McpAuthStatus({
+  server,
+  disabled,
+}: {
+  server: McpHttpServerConfig;
+  disabled?: boolean;
+}) {
+  const authStates = useAtomValue(mcpAuthStatesAtom);
+  const authState = authStates[server.id];
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (authState === undefined && !disabled) {
+      mcpCheckAuth(server.id, server.url);
+    }
+  }, [server.id, server.url, authState, disabled]);
+
+  const handleLogin = async () => {
+    setLoading(true);
+    await mcpLogin(server.id, server.url, server.name);
+    setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    await mcpLogout(server.id);
+    setLoading(false);
+  };
+
+  if (disabled) {
+    return (
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex items-center gap-2">
+          <InfoIcon className="text-foreground size-5" />
+          <span className="text-foreground text-sm">
+            Enable server to see auth status
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (authState === "no-auth") {
+    return (
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex items-center gap-2">
+          <ShieldOffIcon className="text-foreground size-5" />
+          <span className="text-foreground text-sm">
+            No authorization required
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (authState === undefined) {
+    return (
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex items-center gap-2">
+          <Loader2Icon className="text-foreground size-5 animate-spin" />
+          <span className="text-foreground text-sm">
+            Checking auth status...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between rounded-md border p-3">
+      <div className="flex items-center gap-2">
+        {authState === "logged-in" ? (
+          <>
+            <CheckCircle2Icon className="text-foreground size-5" />
+            <span className="text-sm">Logged in</span>
+          </>
+        ) : (
+          <>
+            <XCircleIcon className="text-foreground size-5" />
+            <span className="text-foreground text-sm">Not logged in</span>
+          </>
+        )}
+      </div>
+      {authState === "logged-in" ? (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          disabled={loading}
+        >
+          {loading && <Loader2Icon className="animate-spin" />}
+          Logout
+        </Button>
+      ) : (
+        <Button size="sm" onClick={handleLogin} disabled={loading}>
+          {loading && <Loader2Icon className="animate-spin" />}
+          Login
+        </Button>
+      )}
+    </div>
   );
 }
 

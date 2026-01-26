@@ -19,6 +19,7 @@ import {
   getMcpToolsForServer,
   invalidateServerCache,
 } from "@/lib/ai/tools/mcp";
+import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
@@ -65,6 +66,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
   const [toolConfigs] = useAtom(toolConfigsAtom);
+  const [mcpAuthStates] = useAtom(mcpAuthStatesAtom);
 
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
@@ -180,7 +182,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
     const promise = loadMcpTools();
     loadingPromiseRef.current = promise;
-  }, [mcpServers, parallelLoadLimit]);
+  }, [mcpServers, parallelLoadLimit, mcpAuthStates]);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
     const filteredStaticTools: ToolSet = {};
