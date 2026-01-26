@@ -61,7 +61,11 @@ export default function SettingsRoute() {
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Open settings menu"
+              >
                 <SettingsIcon className="size-4" />
               </Button>
             </DrawerTrigger>
