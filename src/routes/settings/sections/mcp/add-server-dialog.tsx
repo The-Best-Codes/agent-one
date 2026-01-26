@@ -1,4 +1,3 @@
-import { PlusIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -22,10 +21,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { type McpServerType } from "@/lib/settings/types";
 
-interface HeaderEntry {
-  key: string;
-  value: string;
-}
+import { HttpHeadersEditor } from "./http-headers-editor";
 
 interface AddServerDialogProps {
   open: boolean;
@@ -50,7 +46,9 @@ export function AddServerDialog({
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
   const [newServerUrl, setNewServerUrl] = useState("");
-  const [newServerHeaders, setNewServerHeaders] = useState<HeaderEntry[]>([]);
+  const [newServerHeaders, setNewServerHeaders] = useState<
+    Record<string, string>
+  >({});
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
   const [newServerRequiresApproval, setNewServerRequiresApproval] =
     useState(false);
@@ -67,7 +65,7 @@ export function AddServerDialog({
     setNewServerName("");
     setNewServerCommand("");
     setNewServerUrl("");
-    setNewServerHeaders([]);
+    setNewServerHeaders({});
     setNewServerTimeoutSec(30);
     setNewServerRequiresApproval(false);
   };
@@ -75,19 +73,12 @@ export function AddServerDialog({
   const handleAddServer = () => {
     if (!isAddFormValid) return;
 
-    const headers: Record<string, string> = {};
-    for (const entry of newServerHeaders) {
-      if (entry.key.trim() && entry.value.trim()) {
-        headers[entry.key.trim()] = entry.value.trim();
-      }
-    }
-
     onAddServer({
       type: newServerType,
       name: newServerName.trim(),
       command: newServerType === "stdio" ? newServerCommand.trim() : undefined,
       url: newServerType === "http" ? newServerUrl.trim() : undefined,
-      headers: newServerType === "http" ? headers : undefined,
+      headers: newServerType === "http" ? newServerHeaders : undefined,
       timeoutSec: newServerTimeoutSec,
       requiresApproval: newServerRequiresApproval,
     });
@@ -99,26 +90,6 @@ export function AddServerDialog({
   const handleCancelAdd = () => {
     resetAddForm();
     onOpenChange(false);
-  };
-
-  const addHeaderEntry = () => {
-    setNewServerHeaders((prev) => [...prev, { key: "", value: "" }]);
-  };
-
-  const updateHeaderEntry = (
-    index: number,
-    field: "key" | "value",
-    value: string,
-  ) => {
-    setNewServerHeaders((prev) =>
-      prev.map((entry, i) =>
-        i === index ? { ...entry, [field]: value } : entry,
-      ),
-    );
-  };
-
-  const removeHeaderEntry = (index: number) => {
-    setNewServerHeaders((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -185,57 +156,11 @@ export function AddServerDialog({
                 />
               </div>
 
-              <div className="grid gap-2">
-                <div className="flex items-center justify-between">
-                  <Label>HTTP Headers</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addHeaderEntry}
-                  >
-                    <PlusIcon className="size-4" />
-                    Add Header
-                  </Button>
-                </div>
-                {newServerHeaders.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    {newServerHeaders.map((entry, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <Input
-                          placeholder="Header name"
-                          value={entry.key}
-                          onChange={(e) =>
-                            updateHeaderEntry(idx, "key", e.target.value)
-                          }
-                          className="flex-1"
-                        />
-                        <Input
-                          placeholder="Value"
-                          value={entry.value}
-                          onChange={(e) =>
-                            updateHeaderEntry(idx, "value", e.target.value)
-                          }
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeHeaderEntry(idx)}
-                        >
-                          <Trash2Icon className="size-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    No headers configured. Add headers for authentication or
-                    other purposes.
-                  </p>
-                )}
-              </div>
+              <HttpHeadersEditor
+                serverId="new-server-dialog"
+                headers={newServerHeaders}
+                onChange={setNewServerHeaders}
+              />
             </>
           )}
 
