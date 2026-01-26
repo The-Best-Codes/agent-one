@@ -67,12 +67,12 @@ class TauriStdioMCPTransport implements MCPTransport {
       });
 
       this.commandInstance.stderr.on("data", (line: string) => {
-        logger.verbose(`[MCP Server Stderr]: ${line}`);
+        logger.verbose(`MCP Server Stderr: ${line}`);
       });
 
       this.commandInstance.on("error", (error: string) => {
         const err = new Error(error);
-        logger.verbose(`[MCP Server] Command error:`, err);
+        logger.verbose(`MCP Server Command error:`, err);
         this.onerror?.(err);
       });
 
@@ -80,14 +80,14 @@ class TauriStdioMCPTransport implements MCPTransport {
         "close",
         (data: { code: number | null; signal: number | null }) => {
           logger.verbose(
-            `[MCP Server] Closed with code ${data.code} and signal ${data.signal}`,
+            `MCP Server Closed with code ${data.code} and signal ${data.signal}`,
           );
           this.onclose?.();
         },
       );
 
       this.childProcess = await this.commandInstance.spawn();
-      logger.verbose(`[MCP Server] Spawned with PID: ${this.childProcess.pid}`);
+      logger.verbose(`MCP Server Spawned with PID: ${this.childProcess.pid}`);
     } catch (error) {
       logger.warn("Failed to start MCP server:", error);
       this.onerror?.(error as Error);
@@ -154,7 +154,7 @@ class TauriHttpMCPTransport implements MCPTransport {
 
   async start(): Promise<void> {
     this.closed = false;
-    logger.verbose(`[MCP HTTP] Starting transport for ${this.url}`);
+    logger.verbose(`Starting HTTP MCP transport for ${this.url}`);
 
     try {
       const token = await invoke<string>("mcp_get_token", {
@@ -163,13 +163,10 @@ class TauriHttpMCPTransport implements MCPTransport {
       });
       this.token = token;
       this.hasToken = true;
-      logger.verbose(`[MCP HTTP] Acquired OAuth token for ${this.serverId}`);
+      logger.verbose(`Acquired OAuth token for ${this.serverId}`);
     } catch (error) {
       this.hasToken = false;
-      logger.verbose(
-        `[MCP HTTP] Failed to get OAuth token for ${this.serverId}:`,
-        error,
-      );
+      logger.verbose(`Failed to get OAuth token for ${this.serverId}:`, error);
     }
   }
 
@@ -193,7 +190,7 @@ class TauriHttpMCPTransport implements MCPTransport {
         requestHeaders["Authorization"] = `Bearer ${this.token}`;
       }
 
-      logger.verbose(`[MCP HTTP] Sending message:`, message);
+      logger.verbose(`Sending HTTP MCP message:`, message);
 
       const response = await fetch(this.url, {
         method: "POST",
@@ -204,7 +201,7 @@ class TauriHttpMCPTransport implements MCPTransport {
       const newSessionId = response.headers.get("mcp-session-id");
       if (newSessionId) {
         this.sessionId = newSessionId;
-        logger.verbose(`[MCP HTTP] Session ID set to: ${this.sessionId}`);
+        logger.verbose(`HTTP MCP Session ID set to: ${this.sessionId}`);
       }
 
       if (!response.ok) {
@@ -225,7 +222,7 @@ class TauriHttpMCPTransport implements MCPTransport {
         const responseText = await response.text();
         if (responseText.trim()) {
           const responseMessage = JSON.parse(responseText) as JSONRPCMessage;
-          logger.verbose(`[MCP HTTP] Received response:`, responseMessage);
+          logger.verbose(`HTTP MCP Received response:`, responseMessage);
           this.onmessage?.(responseMessage);
         }
       } else {
@@ -233,18 +230,18 @@ class TauriHttpMCPTransport implements MCPTransport {
         if (responseText.trim()) {
           try {
             const responseMessage = JSON.parse(responseText) as JSONRPCMessage;
-            logger.verbose(`[MCP HTTP] Received response:`, responseMessage);
+            logger.verbose(`HTTP MCP Received response:`, responseMessage);
             this.onmessage?.(responseMessage);
           } catch {
             logger.warn(
-              `[MCP HTTP] Could not parse response as JSON:`,
+              `HTTP MCP Could not parse response as JSON:`,
               responseText,
             );
           }
         }
       }
     } catch (error) {
-      logger.error(`[MCP HTTP] Error sending message:`, error);
+      logger.error(`HTTP MCP Error sending message:`, error);
       this.onerror?.(error as Error);
       throw error;
     }
@@ -275,16 +272,16 @@ class TauriHttpMCPTransport implements MCPTransport {
             if (data && data !== "[DONE]") {
               try {
                 const message = JSON.parse(data) as JSONRPCMessage;
-                logger.verbose(`[MCP HTTP] Received stream message:`, message);
+                logger.verbose(`HTTP MCP Received stream message:`, message);
                 this.onmessage?.(message);
               } catch {
-                logger.warn(`[MCP HTTP] Failed to parse stream data:`, data);
+                logger.warn(`HTTP MCP Failed to parse stream data:`, data);
               }
             }
           } else if (line.trim() && !line.startsWith(":")) {
             try {
               const message = JSON.parse(line) as JSONRPCMessage;
-              logger.verbose(`[MCP HTTP] Received JSONL message:`, message);
+              logger.verbose(`HTTP MCP Received JSONL message:`, message);
               this.onmessage?.(message);
             } catch {
               // Not JSON, might be a comment or other format
@@ -296,7 +293,7 @@ class TauriHttpMCPTransport implements MCPTransport {
       if (buffer.trim()) {
         try {
           const message = JSON.parse(buffer) as JSONRPCMessage;
-          logger.verbose(`[MCP HTTP] Received final message:`, message);
+          logger.verbose(`HTTP MCP Received final message:`, message);
           this.onmessage?.(message);
         } catch {
           // Ignore final buffer that cannot be parsed
@@ -319,9 +316,9 @@ class TauriHttpMCPTransport implements MCPTransport {
             ...this.headers,
           },
         });
-        logger.verbose(`[MCP HTTP] Session closed: ${this.sessionId}`);
+        logger.verbose(`HTTP MCP Session closed: ${this.sessionId}`);
       } catch (error) {
-        logger.verbose(`[MCP HTTP] Error closing session:`, error);
+        logger.verbose(`Error closing HTTP MCP session:`, error);
       }
     }
 
