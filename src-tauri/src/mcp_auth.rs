@@ -21,43 +21,172 @@ use crate::keyring::{delete_password, get_password, set_password};
 pub struct AuthCancellationState(pub Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>);
 const OAUTH_CALLBACK_TIMEOUT_SECS: u64 = 300;
 
-const CLIENT_METADATA_URL: &str = "https://raw.githubusercontent.com/modelcontextprotocol/rust-sdk/refs/heads/main/client-metadata.json";
+fn get_client_metadata_url(port: u16) -> String {
+    format!(
+        "https://auth.agent-one.dev/client-metadata.json?port={}",
+        port
+    )
+}
+
+#[derive(Debug, Deserialize)]
+struct ProtectedResourceMetadata {
+    scopes_supported: Option<Vec<String>>,
+}
+
+fn parse_www_authenticate_scopes(header: &str) -> Option<Vec<String>> {
+    for part in header.split(',') {
+        let part = part.trim();
+        let lower = part.to_lowercase();
+        if lower.starts_with("scope=") {
+            let value = &part["scope=".len()..];
+            return Some(
+                value
+                    .trim_matches('"')
+                    .split_whitespace()
+                    .map(|s| s.to_string())
+                    .collect(),
+            );
+        }
+    }
+    None
+}
+
+fn parse_resource_metadata_url(header: &str) -> Option<String> {
+    for part in header.split(',') {
+        let part = part.trim();
+        let lower = part.to_lowercase();
+        if lower.starts_with("resource_metadata=") {
+            let value = &part["resource_metadata=".len()..];
+            return Some(value.trim_matches('"').to_string());
+        }
+    }
+    None
+}
+
+async fn discover_scopes(server_url: &str) -> Vec<String> {
+    let client = wreq::Client::new();
+
+    let response = match client.get(server_url).send().await {
+        Ok(r) => r,
+        Err(_) => return vec!["mcp".to_string()],
+    };
+
+    if let Some(www_auth) = response.headers().get("www-authenticate") {
+        if let Ok(header_str) = www_auth.to_str() {
+            if let Some(scopes) = parse_www_authenticate_scopes(header_str) {
+                if !scopes.is_empty() {
+                    return scopes;
+                }
+            }
+
+            if let Some(rm_url) = parse_resource_metadata_url(header_str) {
+                if let Ok(rm_resp) = client.get(&rm_url).send().await {
+                    if let Ok(prm) = rm_resp.json::<ProtectedResourceMetadata>().await {
+                        if let Some(scopes) = prm.scopes_supported {
+                            if !scopes.is_empty() {
+                                return scopes;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let parsed_url = match Url::parse(server_url) {
+        Ok(u) => u,
+        Err(_) => return vec!["mcp".to_string()],
+    };
+
+    let base = format!(
+        "{}://{}{}",
+        parsed_url.scheme(),
+        parsed_url.host_str().unwrap_or(""),
+        parsed_url
+            .port()
+            .map(|p| format!(":{}", p))
+            .unwrap_or_default()
+    );
+    let path = parsed_url.path();
+
+    let mut well_known_urls = Vec::new();
+    if path != "/" && !path.is_empty() {
+        let trimmed = path.trim_matches('/');
+        well_known_urls.push(format!(
+            "{}/.well-known/oauth-protected-resource/{}",
+            base, trimmed
+        ));
+    }
+    well_known_urls.push(format!("{}/.well-known/oauth-protected-resource", base));
+
+    for url in well_known_urls {
+        if let Ok(resp) = client.get(&url).send().await {
+            if resp.status().is_success() {
+                if let Ok(prm) = resp.json::<ProtectedResourceMetadata>().await {
+                    if let Some(scopes) = prm.scopes_supported {
+                        if !scopes.is_empty() {
+                            return scopes;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    vec!["mcp".to_string()]
+}
 
 async fn initialize_and_start_auth(
-    url: &str,
-    scopes: &[&str],
+    server_url: &str,
     redirect_uri: &str,
-    client_name: Option<&str>,
+    client_metadata_url: &str,
+    scopes: &[String],
 ) -> Result<OAuthState, String> {
-    let mut state = OAuthState::new(url, None)
+    let scope_refs: Vec<&str> = scopes.iter().map(|s| s.as_str()).collect();
+
+    let mut state = OAuthState::new(server_url, None)
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| format!("Failed to initialize OAuth: {}", e))?;
+
     state
         .start_authorization_with_metadata_url(
-            scopes,
+            &scope_refs,
             redirect_uri,
-            client_name,
-            Some(CLIENT_METADATA_URL),
+            Some("AgentOne"),
+            Some(client_metadata_url),
         )
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| {
+            let err = e.to_string();
+            if err.contains("Dynamic client registration not supported") {
+                "This server's authorization provider does not support automatic client registration. Manual OAuth app setup may be required.".to_string()
+            } else if err.contains("No authorization support detected") {
+                "Could not discover OAuth configuration for this server.".to_string()
+            } else {
+                err
+            }
+        })?;
+
     Ok(state)
 }
 
 fn get_origin_url(url: &str) -> Option<String> {
-    if let Ok(mut parsed) = Url::parse(url) {
-        if parsed.path() != "/" && !parsed.path().is_empty() {
-            parsed.set_path("");
-            parsed.set_query(None);
-            parsed.set_fragment(None);
-            let origin_str = parsed.to_string();
-
-            if origin_str != url && origin_str.trim_end_matches('/') != url.trim_end_matches('/') {
-                return Some(origin_str);
-            }
-        }
+    let parsed = Url::parse(url).ok()?;
+    if parsed.path() == "/" || parsed.path().is_empty() {
+        return None;
     }
-    None
+
+    let mut origin = parsed.clone();
+    origin.set_path("");
+    origin.set_query(None);
+    origin.set_fragment(None);
+
+    let origin_str = origin.to_string();
+    if origin_str.trim_end_matches('/') != url.trim_end_matches('/') {
+        Some(origin_str)
+    } else {
+        None
+    }
 }
 
 async fn try_with_origin_fallback<T, F, Fut>(primary_url: &str, operation: F) -> Result<T, String>
@@ -69,12 +198,9 @@ where
         Ok(result) => Ok(result),
         Err(primary_err) => {
             if let Some(origin_url) = get_origin_url(primary_url) {
-                match operation(origin_url.clone()).await {
+                match operation(origin_url).await {
                     Ok(result) => Ok(result),
-                    Err(origin_err) => Err(format!(
-                        "Primary URL failed: {}. Origin URL failed: {}",
-                        primary_err, origin_err
-                    )),
+                    Err(_) => Err(primary_err),
                 }
             } else {
                 Err(primary_err)
@@ -157,7 +283,6 @@ pub async fn mcp_authenticate(
     server_id: String,
     server_url: String,
 ) -> Result<String, String> {
-    // Setup Callback Server (Bind to port 0 to let OS assign free port)
     let addr = SocketAddr::from(([127, 0, 0, 1], 0));
     let listener = tokio::net::TcpListener::bind(addr)
         .await
@@ -165,6 +290,7 @@ pub async fn mcp_authenticate(
 
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
     let redirect_uri = format!("http://127.0.0.1:{}/callback", port);
+    let client_metadata_url = get_client_metadata_url(port);
 
     let (code_sender, code_receiver) = oneshot::channel::<CallbackParams>();
     let app_state = AppState {
@@ -177,13 +303,17 @@ pub async fn mcp_authenticate(
 
     let server_handle = tokio::spawn(async move { axum::serve(listener, router).await });
 
-    let scopes = &["mcp", "profile", "email"];
-    let client_name = Some("AgentOne");
+    let scopes = discover_scopes(&server_url).await;
 
     let redirect_uri_clone = redirect_uri.clone();
+    let client_metadata_clone = client_metadata_url.clone();
+    let scopes_clone = scopes.clone();
+
     let mut oauth_state = try_with_origin_fallback(&server_url, |url| {
         let redirect = redirect_uri_clone.clone();
-        async move { initialize_and_start_auth(&url, scopes, &redirect, client_name).await }
+        let metadata = client_metadata_clone.clone();
+        let sc = scopes_clone.clone();
+        async move { initialize_and_start_auth(&url, &redirect, &metadata, &sc).await }
     })
     .await?;
 
@@ -203,17 +333,16 @@ pub async fn mcp_authenticate(
         map.insert(server_id.clone(), cancel_tx);
     }
 
-    // Wait for code with timeout or cancellation
     let params_result = tokio::select! {
         res = tokio::time::timeout(Duration::from_secs(OAUTH_CALLBACK_TIMEOUT_SECS), code_receiver) => {
-             match res {
+            match res {
                 Ok(Ok(params)) => Ok(params),
-                Ok(Err(_)) => Err("Failed to receive authorization code (channel closed)".to_string()),
-                Err(_) => Err(format!("OAuth flow timed out after {} seconds", OAUTH_CALLBACK_TIMEOUT_SECS)),
+                Ok(Err(_)) => Err("Authorization callback failed".to_string()),
+                Err(_) => Err(format!("Authorization timed out after {} seconds", OAUTH_CALLBACK_TIMEOUT_SECS)),
             }
         },
         _ = cancel_rx => {
-            Err("OAuth flow cancelled by user".to_string())
+            Err("Authorization cancelled".to_string())
         }
     };
 
@@ -229,7 +358,7 @@ pub async fn mcp_authenticate(
     oauth_state
         .handle_callback(&params.code, &params.state)
         .await
-        .map_err(|e| format!("Failed to exchange code: {}", e))?;
+        .map_err(|e| format!("Token exchange failed: {}", e))?;
 
     let (client_id, token_response) = oauth_state
         .get_credentials()
@@ -256,45 +385,36 @@ pub async fn mcp_cancel_auth(
     let mut map = state.0.lock().await;
     if let Some(tx) = map.remove(&server_id) {
         let _ = tx.send(());
-        Ok(())
-    } else {
-        Ok(())
     }
+    Ok(())
 }
 
-// Helper to attempt token retrieval with a specific URL
 async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, String> {
     let cred_store = KeyringCredentialStore::new(server_id.to_string());
 
-    // AuthorizationManager::new might return Ok even if config is bad,
-    // so we must proceed to check if it actually works with stored creds.
     let mut auth_manager = AuthorizationManager::new(url)
         .await
         .map_err(|e| e.to_string())?;
 
     auth_manager.set_credential_store(cred_store);
 
-    // Initialize from store checks if creds exist and are compatible
     let initialized = auth_manager
         .initialize_from_store()
         .await
         .map_err(|e| e.to_string())?;
 
     if initialized {
-        // Refresh checks expiration automatically
         auth_manager
             .refresh_token()
             .await
             .map_err(|e| e.to_string())?;
 
-        let token = auth_manager
+        auth_manager
             .get_access_token()
             .await
-            .map_err(|e| e.to_string())?;
-
-        Ok(token)
+            .map_err(|e| e.to_string())
     } else {
-        Err("Failed to initialize from store".to_string())
+        Err("No valid credentials found".to_string())
     }
 }
 
@@ -308,7 +428,6 @@ pub async fn mcp_logout(server_id: String) -> Result<(), String> {
 pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<String, String> {
     let cred_store = KeyringCredentialStore::new(server_id.clone());
 
-    // Check if we have creds at all first
     let loaded = cred_store.load().await.map_err(|e| e.to_string())?;
     if loaded.is_none() {
         return Err("No credentials found. Please login.".to_string());
