@@ -29,7 +29,7 @@ export default function SettingsSidebar({
             variant={isSelected ? "secondary" : "ghost"}
             className={cn(
               "justify-start text-left transition-none",
-              isSelected && "border pl-[calc(1rem-1px)]",
+              isSelected && "border pl-3.75",
             )}
             role="tab"
             aria-selected={isSelected}

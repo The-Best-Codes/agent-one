@@ -160,7 +160,7 @@ export default function AppearanceSection() {
               }
             }}
             aria-label="Select font"
-            className="w-full md:w-fit"
+            className="w-full min-w-64 md:w-fit"
           >
             {fontOptions.map((option) => (
               <ToggleGroupItem

@@ -92,7 +92,7 @@ export default function SettingsRoute() {
         <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
           <ScrollArea
             type="always"
-            className="hidden w-64 shrink-0 md:flex md:flex-col"
+            className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64"
           >
             <div className="flex flex-col gap-2">
               <div className="mb-2">
