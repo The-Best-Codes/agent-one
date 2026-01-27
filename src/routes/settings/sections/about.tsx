@@ -1,12 +1,23 @@
 import { relaunch } from "@tauri-apps/plugin-process";
 import { check } from "@tauri-apps/plugin-updater";
-import { Loader2 } from "lucide-react";
+import {
+  AlertCircleIcon,
+  CheckCircle2Icon,
+  Download,
+  DownloadIcon,
+  Loader2,
+  Loader2Icon,
+  RefreshCw,
+  RocketIcon,
+  ShieldCheckIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -24,18 +35,60 @@ export default function AboutSection() {
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>("idle");
   const [updateProgress, setUpdateProgress] = useState(0);
   const [updateVersion, setUpdateVersion] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const currentVersion = packageJson.version;
+
+  const getStateDisplay = () => {
+    switch (updateStatus) {
+      case "idle":
+        return {
+          icon: <ShieldCheckIcon className="text-muted-foreground size-5" />,
+          title: "Check for updates",
+          description: "Stay up to date with the latest features and bug fixes",
+        };
+      case "checking":
+        return {
+          icon: <Loader2Icon className="text-primary size-5 animate-spin" />,
+          title: "Checking for updates...",
+          description: "Please wait while we check for the latest version",
+        };
+      case "up-to-date":
+        return {
+          icon: <CheckCircle2Icon className="size-5" />,
+          title: "You're up to date",
+          description: "AgentOne is running the latest version",
+        };
+      case "available":
+        return {
+          icon: <RocketIcon className="text-primary size-5" />,
+          title: `Update available: v${updateVersion}`,
+          description: "A new version is ready to install",
+        };
+      case "downloading":
+        return {
+          icon: <DownloadIcon className="text-primary size-5" />,
+          title: "Downloading update...",
+          description: `${Math.round(updateProgress)}% complete`,
+        };
+      case "installing":
+        return {
+          icon: <Loader2Icon className="text-primary size-5 animate-spin" />,
+          title: "Installing update...",
+          description: "Please wait while we install the update",
+        };
+      case "error":
+        return {
+          icon: <AlertCircleIcon className="text-destructive size-5" />,
+          title: "Update failed",
+          description: "Something went wrong while checking for updates",
+        };
+    }
+  };
 
   const checkForUpdates = async () => {
     logger.verbose("Initiating update check.");
     try {
       setUpdateStatus("checking");
-      setErrorMessage("");
-      logger.verbose(
-        "Setting update status to 'checking' and clearing previous errors.",
-      );
 
       const update = await check();
       logger.verbose(`Update check completed. Update found: ${!!update}.`);
@@ -54,7 +107,6 @@ export default function AboutSection() {
       setUpdateStatus("error");
       const message =
         error instanceof Error ? error.message : "Failed to check for updates";
-      setErrorMessage(message);
       logger.error(`Error during update check: ${message}`, error);
     }
   };
@@ -64,15 +116,11 @@ export default function AboutSection() {
     try {
       setUpdateStatus("downloading");
       setUpdateProgress(0);
-      logger.verbose(
-        "Setting update status to 'downloading' and resetting progress.",
-      );
 
       const update = await check();
       if (!update) {
         setUpdateStatus("error");
-        setErrorMessage("Update not found");
-        logger.error("Update not found during download and install attempt.");
+        logger.error("Update not found during download attempt.");
         return;
       }
       logger.verbose(
@@ -80,29 +128,19 @@ export default function AboutSection() {
       );
 
       await update.downloadAndInstall((event) => {
-        logger.verbose(`Update download event: ${event.event}`);
         switch (event.event) {
           case "Started":
             setUpdateProgress(0);
-            logger.verbose("Update download started.");
             break;
           case "Progress":
             setUpdateProgress((prev) => {
               const chunkLength = event.data.chunkLength;
-              const newProgress = Math.min(
-                prev + (chunkLength / 1000) * 100,
-                100,
-              );
-              logger.verbose(`Download progress: ${newProgress.toFixed(2)}%`);
-              return newProgress;
+              return Math.min(prev + (chunkLength / 1000) * 100, 100);
             });
             break;
           case "Finished":
             setUpdateProgress(100);
             setUpdateStatus("installing");
-            logger.verbose(
-              "Update download finished. Setting status to 'installing'.",
-            );
             break;
         }
       });
@@ -114,13 +152,47 @@ export default function AboutSection() {
       setUpdateStatus("error");
       const message =
         error instanceof Error ? error.message : "Failed to install update";
-      setErrorMessage(message);
-      logger.error(
-        `Error during update download or installation: ${message}`,
-        error,
-      );
+      logger.error(`Error during update: ${message}`, error);
     }
   };
+
+  const getActionButton = () => {
+    switch (updateStatus) {
+      case "idle":
+      case "up-to-date":
+        return (
+          <Button onClick={checkForUpdates} variant="outline" size="sm">
+            <RefreshCw className="size-4" />
+            Check Now
+          </Button>
+        );
+      case "checking":
+        return (
+          <Button variant="outline" size="sm" disabled>
+            <Loader2 className="size-4 animate-spin" />
+            Checking...
+          </Button>
+        );
+      case "available":
+        return (
+          <Button onClick={downloadAndInstallUpdate} size="sm">
+            <Download className="size-4" />
+            Download &amp; Install
+          </Button>
+        );
+      case "error":
+        return (
+          <Button onClick={checkForUpdates} variant="outline" size="sm">
+            <RefreshCw className="size-4" />
+            Try Again
+          </Button>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const stateDisplay = getStateDisplay();
 
   return (
     <div className="flex flex-col gap-6">
@@ -129,103 +201,36 @@ export default function AboutSection() {
           <CardTitle>About AgentOne</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Current Version</p>
-              <p className="text-2xl font-bold">{currentVersion}</p>
-            </div>
+          <div>
+            <p className="text-muted-foreground text-sm">Current Version</p>
+            <p className="text-3xl font-bold tracking-tight">
+              {currentVersion}
+            </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-medium">Check for updates</p>
-                <p className="text-muted-foreground text-sm">
-                  Stay up to date with the latest features and bug fixes
-                </p>
-              </div>
-              {updateStatus === "idle" && (
-                <Button onClick={checkForUpdates} variant="outline">
-                  Check Now
-                </Button>
-              )}
-              {updateStatus === "checking" && (
-                <Button variant="outline" disabled>
-                  <Loader2 className="size-4 animate-spin" />
-                  Checking...
-                </Button>
-              )}
-              {updateStatus === "error" && (
-                <Button onClick={checkForUpdates} variant="outline">
-                  Try Again
-                </Button>
-              )}
-            </div>
+          <Separator />
 
-            {updateStatus === "up-to-date" && (
-              <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
+                  {stateDisplay.icon}
+                </div>
                 <div>
-                  <p className="text-sm font-medium">You're up to date!</p>
+                  <p className="leading-none font-medium">
+                    {stateDisplay.title}
+                  </p>
                   <p className="text-muted-foreground text-sm">
-                    AgentOne {currentVersion} is the latest version
+                    {stateDisplay.description}
                   </p>
                 </div>
               </div>
-            )}
-
-            {updateStatus === "available" && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Update available</p>
-                    <p className="text-muted-foreground text-sm">
-                      Version {updateVersion} is ready to install
-                    </p>
-                  </div>
-                </div>
-                <Button onClick={downloadAndInstallUpdate} className="w-full">
-                  Download and Install
-                </Button>
-              </div>
-            )}
+              {getActionButton()}
+            </div>
 
             {(updateStatus === "downloading" ||
               updateStatus === "installing") && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">
-                      {updateStatus === "downloading"
-                        ? "Downloading update..."
-                        : "Installing update..."}
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                      {updateStatus === "downloading"
-                        ? `Version ${updateVersion} - ${Math.round(updateProgress)}% complete`
-                        : "Please wait while we install the update"}
-                    </p>
-                  </div>
-                </div>
-                {updateStatus === "downloading" && (
-                  <Progress value={updateProgress} className="w-full" />
-                )}
-              </div>
-            )}
-
-            {updateStatus === "error" && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-destructive text-sm font-medium">
-                      Update failed
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                      {errorMessage ||
-                        "An error occurred while checking for updates"}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <Progress value={updateProgress} />
             )}
           </div>
         </CardContent>
