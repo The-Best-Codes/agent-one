@@ -11,6 +11,7 @@ import {
   useChatFunctions,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
 
 export const MainInputErrorSection = ({
@@ -20,6 +21,7 @@ export const MainInputErrorSection = ({
 }) => {
   const { error } = useChatStatus();
   const { regenerate, clearError } = useChatFunctions();
+  const { hasAvailableModels } = useModelCatalog();
 
   if (!error) {
     return null;
@@ -48,6 +50,7 @@ export const MainInputErrorSection = ({
                   onRetry?.();
                 }}
                 variant="destructive"
+                disabled={!hasAvailableModels}
               >
                 <RefreshCcwIcon />
                 Retry

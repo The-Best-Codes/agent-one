@@ -71,7 +71,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const getModelForChat = useCallback(
-    (chatId: string | undefined): ModelData => {
+    (chatId: string | undefined): ModelData | undefined => {
       if (chatId) {
         const chatData = loadChatData(chatId);
         if (chatData.modelId) {
@@ -244,7 +244,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [currentChatId, lastStatusChange]);
 
   const defaultChat = useChat(
-    defaultModelForNewChats.model,
+    defaultModelForNewChats?.model ?? null,
     defaultModelConfigForNewChats,
   );
 
@@ -253,6 +253,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       message: Parameters<typeof defaultChat.sendMessage>[0],
       options?: Parameters<typeof defaultChat.sendMessage>[1],
     ) => {
+      if (!focusedModel) return Promise.resolve();
       const newChatId = createChat(focusedModel.id, focusedModelConfig);
       navigate(`/chat/${newChatId}`, {
         replace: true,
@@ -261,7 +262,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       return Promise.resolve();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [navigate, defaultChat.sendMessage, focusedModel.id, focusedModelConfig],
+    [navigate, defaultChat.sendMessage, focusedModel?.id, focusedModelConfig],
   );
 
   const isNewChat = !currentChatId;
@@ -419,6 +420,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       {Array.from(activeChatIds).map((id) => {
         const chatModel = getModelForChat(id);
         const chatConfig = getConfigForChat(id);
+        if (!chatModel) return null;
         return (
           <ChatInstance
             key={id}

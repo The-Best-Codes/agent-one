@@ -21,7 +21,7 @@ type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
   Pick<UseChatOptions<UIMessage>, "experimental_throttle" | "resume">;
 
 export function useChat(
-  model: LanguageModel,
+  model: LanguageModel | null,
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
 ) {

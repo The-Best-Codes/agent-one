@@ -16,7 +16,7 @@ import { getLogger } from "@/lib/logger";
 const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
-  private model: LanguageModel;
+  private model: LanguageModel | null;
   private modelConfig: ModelConfig;
   private smoothStreamEnabled: boolean;
   private getTools: () => Promise<ToolSet>;
@@ -24,7 +24,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private getApiKeysLoadedPromise: () => Promise<void>;
 
   constructor(
-    model: LanguageModel,
+    model: LanguageModel | null,
     modelConfig: ModelConfig,
     smoothStreamEnabled: boolean,
     getTools: () => Promise<ToolSet>,
@@ -39,7 +39,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     this.getApiKeysLoadedPromise = getApiKeysLoadedPromise;
   }
 
-  updateModel(model: LanguageModel) {
+  updateModel(model: LanguageModel | null) {
     this.model = model;
     logger.verbose("CustomChatTransport model updated to:", model);
   }
@@ -77,6 +77,12 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messageId: string | undefined;
     } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
+    if (!this.model) {
+      throw new Error(
+        "Cannot send messages: no model selected. Please select a model first.",
+      );
+    }
+
     await this.getApiKeysLoadedPromise();
     const tools = await this.getTools();
 

@@ -1,5 +1,4 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useAtomValue } from "jotai";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import {
   type FC,
@@ -25,17 +24,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { commandScore } from "@/lib/command-score";
-import {
-  cerebrasApiKeyAtom,
-  googleGenerativeAiApiKeyAtom,
-  groqApiKeyAtom,
-  opencodeApiKeyAtom,
-  openrouterApiKeyAtom,
-} from "@/lib/jotai/api-key-atoms";
 import { cn } from "@/lib/utils";
 
 interface ModelSelectorProps {
@@ -45,7 +39,7 @@ interface ModelSelectorProps {
 
 interface ModelListProps {
   filteredModels: ModelData[];
-  currentModel: ModelData;
+  currentModel: ModelData | undefined;
   parentRef: React.RefObject<HTMLDivElement | null>;
   virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
@@ -83,6 +77,7 @@ const ModelList: FC<ModelListProps> = ({
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const model = filteredModels[virtualItem.index];
+              const isSelected = currentModel?.id === model.id;
               return (
                 <CommandItem
                   key={virtualItem.key}
@@ -96,15 +91,10 @@ const ModelList: FC<ModelListProps> = ({
                     height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
-                  className={cn(
-                    currentModel.id === model.id &&
-                      "border-border bg-accent border",
-                  )}
+                  className={cn(isSelected && "border-border bg-accent border")}
                 >
                   <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
-                    {currentModel.id === model.id && (
-                      <CheckIcon className="size-4" />
-                    )}
+                    {isSelected && <CheckIcon className="size-4" />}
                     <div className="scrollbar-size-xs w-full overflow-x-auto">
                       <div className="flex flex-col whitespace-nowrap">
                         <span className="text-muted-foreground text-xs">
@@ -133,45 +123,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 640px)");
-  const { AVAILABLE_CHAT_MODELS } = useModelCatalog();
+  const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
+  const { isApiKeysLoading } = useApiKeys();
 
-  const googleApiKey = useAtomValue(googleGenerativeAiApiKeyAtom);
-  const groqApiKey = useAtomValue(groqApiKeyAtom);
-  const cerebrasApiKey = useAtomValue(cerebrasApiKeyAtom);
-  const openrouterApiKey = useAtomValue(openrouterApiKeyAtom);
-  const opencodeApiKey = useAtomValue(opencodeApiKeyAtom);
-
-  const providerHasApiKey = useMemo(
-    () => ({
-      Google: Boolean(
-        googleApiKey || import.meta.env.AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY,
-      ),
-      Groq: Boolean(groqApiKey || import.meta.env.AGENT_ONE_GROQ_API_KEY),
-      Cerebras: Boolean(
-        cerebrasApiKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY,
-      ),
-      OpenRouter: Boolean(
-        openrouterApiKey || import.meta.env.AGENT_ONE_OPENROUTER_API_KEY,
-      ),
-      OpenCode: Boolean(
-        opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY,
-      ),
-    }),
-    [
-      googleApiKey,
-      groqApiKey,
-      cerebrasApiKey,
-      openrouterApiKey,
-      opencodeApiKey,
-    ],
-  );
-
-  const modelsWithApiKey = useMemo(() => {
-    return AVAILABLE_CHAT_MODELS.filter(
-      (model) =>
-        providerHasApiKey[model.provider as keyof typeof providerHasApiKey],
-    );
-  }, [AVAILABLE_CHAT_MODELS, providerHasApiKey]);
+  const modelsWithApiKey = AVAILABLE_CHAT_MODELS_WITH_API_KEY;
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -226,7 +181,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     }
   };
 
-  const triggerContent = (
+  const triggerContent = currentModel ? (
     <>
       <div className="min-w-0 flex-1">
         <div className="scrollbar-size-xs w-full overflow-x-auto" tabIndex={0}>
@@ -240,7 +195,20 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       </div>
       <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
     </>
+  ) : (
+    <>
+      <div className="min-w-0 flex-1">
+        <span className="text-muted-foreground">No model selected</span>
+      </div>
+      <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+    </>
   );
+
+  const modelLabel = currentModel ? `Model: ${currentModel.name}` : "No model";
+
+  if (isApiKeysLoading) {
+    return <Skeleton className={cn("h-9 w-full", className)} />;
+  }
 
   return isDesktop ? (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -250,7 +218,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
-          aria-label={`Model: ${currentModel.name}`}
+          aria-label={modelLabel}
         >
           {triggerContent}
         </Button>
@@ -278,7 +246,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn("w-full justify-between", className)}
-          aria-label={`Model: ${currentModel.name}`}
+          aria-label={modelLabel}
         >
           {triggerContent}
         </Button>

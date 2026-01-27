@@ -25,6 +25,7 @@ import {
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { useTheme } from "@/hooks/use-theme";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
@@ -41,6 +42,7 @@ import { cn } from "@/lib/utils";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
+import { MainInputNoModelSection } from "./no-model-section";
 
 const logger = getLogger(import.meta.url);
 
@@ -82,6 +84,7 @@ export const MainChatInput = ({
   const { status } = useChatStatus();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
+  const { hasAvailableModels } = useModelCatalog();
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
   const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
@@ -131,6 +134,11 @@ export const MainChatInput = ({
   };
 
   const submitMessage = () => {
+    if (!hasAvailableModels) {
+      logger.verbose("No models available, message submission aborted");
+      return;
+    }
+
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
     if ((currentText.trim() || files) && status === "ready") {
@@ -365,6 +373,7 @@ export const MainChatInput = ({
 
   return (
     <div className={cn(isFloating ? "px-2 pb-2" : "px-0 md:px-2")}>
+      <MainInputNoModelSection />
       <MainInputErrorSection onRetry={onScrollNeededAction} />
       <MainInputIncompleteSection onRetry={onScrollNeededAction} />
       <form
@@ -496,7 +505,7 @@ export const MainChatInput = ({
                 <Button
                   data-testid="attach-button"
                   type="button"
-                  disabled={status !== "ready"}
+                  disabled={status !== "ready" || !hasAvailableModels}
                   size="icon"
                   variant="outline"
                   onClick={() => {
@@ -542,7 +551,11 @@ export const MainChatInput = ({
                     data-testid="send-button"
                     type="submit"
                     size="icon"
-                    disabled={status !== "ready" || (isEmpty && !files)}
+                    disabled={
+                      status !== "ready" ||
+                      (isEmpty && !files) ||
+                      !hasAvailableModels
+                    }
                     aria-label="Send message"
                   >
                     {status === "submitted" ? (
