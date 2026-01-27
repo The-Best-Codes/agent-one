@@ -59,13 +59,20 @@ export function ThemeRegistry() {
     root.setAttribute("data-roundness", roundness || "md");
 
     // Handle font
-    root.classList.remove("font-space-grotesk", "font-sans", "font-mono");
+    root.classList.remove(
+      "font-space-grotesk",
+      "font-sans",
+      "font-mono",
+      "font-roboto",
+    );
     if (font === "default") {
       root.classList.add("font-space-grotesk");
     } else if (font === "system") {
       root.classList.add("font-sans");
     } else if (font === "mono") {
       root.classList.add("font-mono");
+    } else if (font === "roboto") {
+      root.classList.add("font-roboto");
     }
     root.setAttribute("data-font", font || "default");
 

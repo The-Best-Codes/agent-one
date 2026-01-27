@@ -33,6 +33,7 @@ const fontOptions = [
   { value: "default", label: "Default", className: "font-space-grotesk" },
   { value: "system", label: "System", className: "font-sans" },
   { value: "mono", label: "Mono", className: "font-mono" },
+  { value: "roboto", label: "Roboto", className: "font-roboto" },
 ] as const;
 
 const textScaleOptions = [

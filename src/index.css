@@ -41,6 +41,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-space-grotesk: "Space Grotesk", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
 }
 
 :root {
@@ -551,6 +552,12 @@
 @font-face {
   font-family: "Space Grotesk";
   src: url("assets/fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf")
+    format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("assets/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf")
     format("truetype");
 }
 
