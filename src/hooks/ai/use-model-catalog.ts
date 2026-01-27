@@ -50,6 +50,14 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
+const PREFERRED_MODELS_BY_PROVIDER: Record<string, string[]> = {
+  openrouter: ["openrouter-x-ai/grok-4.1-fast"],
+  groq: ["groq-moonshotai/kimi-k2-instruct-0905"],
+  google: ["google-gemini-2.5-flash"],
+  cerebras: ["cerebras-zai-glm-4.7"],
+  opencode: ["opencode-claude-sonnet-4-5"],
+};
+
 const typedModelsDevData = modelsDevData as unknown as ModelsDevData;
 
 function getProviderModels(providerId: string): ModelsDevModel[] {
@@ -92,6 +100,31 @@ export function useModelCatalog() {
   const cerebrasApiKey = useAtomValue(cerebrasApiKeyAtom);
   const openrouterApiKey = useAtomValue(openrouterApiKeyAtom);
   const opencodeApiKey = useAtomValue(opencodeApiKeyAtom);
+
+  const providerHasApiKey = useMemo(
+    () => ({
+      google: Boolean(
+        googleApiKey || import.meta.env.AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY,
+      ),
+      groq: Boolean(groqApiKey || import.meta.env.AGENT_ONE_GROQ_API_KEY),
+      cerebras: Boolean(
+        cerebrasApiKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY,
+      ),
+      openrouter: Boolean(
+        openrouterApiKey || import.meta.env.AGENT_ONE_OPENROUTER_API_KEY,
+      ),
+      opencode: Boolean(
+        opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY,
+      ),
+    }),
+    [
+      googleApiKey,
+      groqApiKey,
+      cerebrasApiKey,
+      openrouterApiKey,
+      opencodeApiKey,
+    ],
+  );
 
   const googleProvider = useMemo(
     () =>
@@ -178,23 +211,92 @@ export function useModelCatalog() {
     ];
   }, [googleProvider, openRouterProvider]);
 
+  const AVAILABLE_CHAT_MODELS_WITH_API_KEY = useMemo(() => {
+    const providerIdToName: Record<string, string> = {
+      google: "Google",
+      groq: "Groq",
+      cerebras: "Cerebras",
+      openrouter: "OpenRouter",
+      opencode: "OpenCode",
+    };
+
+    return AVAILABLE_CHAT_MODELS.filter((model) => {
+      const providerId = Object.entries(providerIdToName).find(
+        ([, name]) => name === model.provider,
+      )?.[0];
+      return providerId
+        ? providerHasApiKey[providerId as keyof typeof providerHasApiKey]
+        : false;
+    });
+  }, [AVAILABLE_CHAT_MODELS, providerHasApiKey]);
+
   const getModelByIdMemoized = useMemo(
     () => (id: string) => AVAILABLE_MODELS.find((model) => model.id === id),
     [AVAILABLE_MODELS],
   );
 
-  const getDefaultChatModelMemoized = useMemo(
-    () => () =>
-      getModelByIdMemoized(DEFAULT_CHAT_MODEL_ID) || AVAILABLE_CHAT_MODELS[0],
-    [AVAILABLE_CHAT_MODELS, getModelByIdMemoized],
+  const getChatModelByIdMemoized = useMemo(
+    () => (id: string) =>
+      AVAILABLE_CHAT_MODELS_WITH_API_KEY.find((model) => model.id === id),
+    [AVAILABLE_CHAT_MODELS_WITH_API_KEY],
   );
+
+  const getSmartDefaultChatModel = useMemo(() => {
+    return (): ModelData | undefined => {
+      if (AVAILABLE_CHAT_MODELS_WITH_API_KEY.length === 0) {
+        return AVAILABLE_CHAT_MODELS[0];
+      }
+
+      const providerOrder = [
+        "openrouter",
+        "groq",
+        "google",
+        "cerebras",
+        "opencode",
+      ];
+
+      for (const providerId of providerOrder) {
+        if (!providerHasApiKey[providerId as keyof typeof providerHasApiKey]) {
+          continue;
+        }
+
+        const preferredModels = PREFERRED_MODELS_BY_PROVIDER[providerId] || [];
+        for (const preferredId of preferredModels) {
+          const model = getChatModelByIdMemoized(preferredId);
+          if (model) {
+            return model;
+          }
+        }
+
+        const firstModelFromProvider = AVAILABLE_CHAT_MODELS_WITH_API_KEY.find(
+          (m) => m.id.startsWith(`${providerId}-`),
+        );
+        if (firstModelFromProvider) {
+          return firstModelFromProvider;
+        }
+      }
+
+      return AVAILABLE_CHAT_MODELS_WITH_API_KEY[0];
+    };
+  }, [
+    AVAILABLE_CHAT_MODELS,
+    AVAILABLE_CHAT_MODELS_WITH_API_KEY,
+    providerHasApiKey,
+    getChatModelByIdMemoized,
+  ]);
+
+  const hasAvailableModels = AVAILABLE_CHAT_MODELS_WITH_API_KEY.length > 0;
 
   return {
     AVAILABLE_MODELS,
     AVAILABLE_CHAT_MODELS,
+    AVAILABLE_CHAT_MODELS_WITH_API_KEY,
     AVAILABLE_IMAGE_MODELS,
     getModelById: getModelByIdMemoized,
-    getDefaultChatModel: getDefaultChatModelMemoized,
+    getChatModelById: getChatModelByIdMemoized,
+    getSmartDefaultChatModel,
+    hasAvailableModels,
+    providerHasApiKey,
     DEFAULT_MODEL_CONFIG,
     DEFAULT_CHAT_MODEL_ID,
   };

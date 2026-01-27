@@ -6,6 +6,7 @@ import {
   useChatMessages,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 
 export const MainInputIncompleteSection = ({
   onRetry,
@@ -15,6 +16,7 @@ export const MainInputIncompleteSection = ({
   const { error, status } = useChatStatus();
   const { regenerate } = useChatFunctions();
   const messages = useChatMessages();
+  const { hasAvailableModels } = useModelCatalog();
 
   if (error || status === "streaming" || status === "submitted") {
     return null;
@@ -44,6 +46,7 @@ export const MainInputIncompleteSection = ({
             onRetry?.();
           }}
           variant="default"
+          disabled={!hasAvailableModels}
         >
           <RefreshCcwIcon />
           Retry

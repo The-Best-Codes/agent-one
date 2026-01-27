@@ -1,4 +1,4 @@
-import React, { type ReactNode, useCallback, useState } from "react";
+import React, { type ReactNode, useCallback, useMemo, useState } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
@@ -7,7 +7,7 @@ import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
 import { ModelContext } from "./model-contexts";
 
 export interface ModelContextType {
-  currentModel: ModelData;
+  currentModel: ModelData | undefined;
   setModel: (modelId: string) => void;
   currentModelConfig: ModelConfig;
   setModelConfig: (config: ModelConfig) => void;
@@ -24,18 +24,21 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     getNewChatModelConfig,
     saveNewChatModelConfig,
   } = usePersistence();
-  const { getModelById, getDefaultChatModel } = useModelCatalog();
+  const { getChatModelById, getSmartDefaultChatModel } = useModelCatalog();
 
-  const [currentModel, setCurrentModel] = useState<ModelData>(() => {
-    const savedModelId = getNewChatModelId();
-    if (savedModelId) {
-      const savedModel = getModelById(savedModelId);
-      if (savedModel) {
-        return savedModel;
+  const [selectedModelId, setSelectedModelId] = useState<string | undefined>(
+    () => getNewChatModelId() ?? undefined,
+  );
+
+  const currentModel = useMemo(() => {
+    if (selectedModelId) {
+      const model = getChatModelById(selectedModelId);
+      if (model) {
+        return model;
       }
     }
-    return getDefaultChatModel();
-  });
+    return getSmartDefaultChatModel();
+  }, [selectedModelId, getChatModelById, getSmartDefaultChatModel]);
 
   const [currentModelConfig, setCurrentModelConfig] = useState<ModelConfig>(
     () => {
@@ -45,13 +48,13 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
 
   const setModel = useCallback(
     (modelId: string) => {
-      const model = getModelById(modelId);
+      const model = getChatModelById(modelId);
       if (model) {
-        setCurrentModel(model);
+        setSelectedModelId(modelId);
         saveNewChatModelId(modelId);
       }
     },
-    [saveNewChatModelId, getModelById],
+    [saveNewChatModelId, getChatModelById],
   );
 
   const setModelConfig = useCallback(
