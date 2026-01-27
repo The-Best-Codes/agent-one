@@ -244,7 +244,7 @@ export function useModelCatalog() {
   const getSmartDefaultChatModel = useMemo(() => {
     return (): ModelData | undefined => {
       if (AVAILABLE_CHAT_MODELS_WITH_API_KEY.length === 0) {
-        return AVAILABLE_CHAT_MODELS[0];
+        return undefined;
       }
 
       const providerOrder = [
@@ -279,7 +279,6 @@ export function useModelCatalog() {
       return AVAILABLE_CHAT_MODELS_WITH_API_KEY[0];
     };
   }, [
-    AVAILABLE_CHAT_MODELS,
     AVAILABLE_CHAT_MODELS_WITH_API_KEY,
     providerHasApiKey,
     getChatModelByIdMemoized,
