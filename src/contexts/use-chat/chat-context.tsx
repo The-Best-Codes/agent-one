@@ -244,7 +244,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [currentChatId, lastStatusChange]);
 
   const defaultChat = useChat(
-    defaultModelForNewChats?.model ?? ({} as never),
+    defaultModelForNewChats?.model ?? null,
     defaultModelConfigForNewChats,
   );
 
