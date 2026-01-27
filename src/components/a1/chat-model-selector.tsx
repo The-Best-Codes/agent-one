@@ -24,6 +24,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -122,6 +124,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const parentRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
+  const { isApiKeysLoading } = useApiKeys();
 
   const modelsWithApiKey = AVAILABLE_CHAT_MODELS_WITH_API_KEY;
 
@@ -202,6 +205,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   );
 
   const modelLabel = currentModel ? `Model: ${currentModel.name}` : "No model";
+
+  if (isApiKeysLoading) {
+    return <Skeleton className={cn("h-9 w-full", className)} />;
+  }
 
   return isDesktop ? (
     <Popover open={open} onOpenChange={handleOpenChange}>
