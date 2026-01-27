@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
+import { CheckIcon, ChevronsUpDown, Loader2 } from "lucide-react";
 import {
   type FC,
   useEffect,
@@ -24,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -122,6 +123,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const parentRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
+  const { isApiKeysLoading } = useApiKeys();
 
   const modelsWithApiKey = AVAILABLE_CHAT_MODELS_WITH_API_KEY;
 
@@ -192,6 +194,13 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       </div>
       <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
     </>
+  ) : isApiKeysLoading ? (
+    <>
+      <div className="min-w-0 flex-1">
+        <span className="text-muted-foreground">Loading models...</span>
+      </div>
+      <Loader2 className="size-4 shrink-0 animate-spin opacity-50" />
+    </>
   ) : (
     <>
       <div className="min-w-0 flex-1">
@@ -201,7 +210,11 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     </>
   );
 
-  const modelLabel = currentModel ? `Model: ${currentModel.name}` : "No model";
+  const modelLabel = currentModel
+    ? `Model: ${currentModel.name}`
+    : isApiKeysLoading
+      ? "Loading models..."
+      : "No model";
 
   return isDesktop ? (
     <Popover open={open} onOpenChange={handleOpenChange}>

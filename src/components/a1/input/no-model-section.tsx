@@ -2,13 +2,16 @@ import { KeyIcon } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 
 export const MainInputNoModelSection = () => {
   const { hasAvailableModels } = useModelCatalog();
+  const { isApiKeysLoading } = useApiKeys();
   const { chatId } = useParams();
 
-  if (hasAvailableModels) {
+  // Don't show the banner while API keys are still loading to prevent flash of content
+  if (hasAvailableModels || isApiKeysLoading) {
     return null;
   }
 
