@@ -5,6 +5,7 @@ import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -117,22 +118,28 @@ export default function AppearanceSection() {
           <div className="flex flex-col items-start">
             <Label className="text-sm font-medium">Color Theme</Label>
           </div>
-          <div className="grid grid-cols-4 gap-2 lg:grid-cols-8">
-            {colorThemeOptions.map((option) => (
-              <Button
-                key={option.value}
-                onClick={() => setColorTheme(option.value as typeof colorTheme)}
-                size="icon"
-                className={cn(
-                  "border-foreground rounded-md border-0",
-                  option.className,
-                )}
-                title={option.label}
-              >
-                {colorTheme === option.value && <Check className="size-5" />}
-              </Button>
-            ))}
-          </div>
+          {/* TODO: Scroll to active color selection on load */}
+          <ScrollArea className="max-w-full md:max-w-64">
+            <ScrollBar className="w-full" orientation="horizontal" />
+            <div className="flex flex-row flex-nowrap gap-2">
+              {colorThemeOptions.map((option) => (
+                <Button
+                  key={option.value}
+                  onClick={() =>
+                    setColorTheme(option.value as typeof colorTheme)
+                  }
+                  size="icon"
+                  className={cn(
+                    "border-foreground rounded-md border-0",
+                    option.className,
+                  )}
+                  title={option.label}
+                >
+                  {colorTheme === option.value && <Check className="size-5" />}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
