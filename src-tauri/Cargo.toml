@@ -68,3 +68,11 @@ async-trait = "0.1.89"
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"
+
+[profile.dev]
+incremental = true # Compile your binary in smaller steps.
+
+[profile.release]
+codegen-units = 1 # Allows LLVM to perform better optimization.
+lto = true        # Enables link-time-optimizations.
+strip = true      # Ensures debug symbols are removed.
