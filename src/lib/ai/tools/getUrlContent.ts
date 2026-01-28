@@ -80,7 +80,9 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
 
       let timeoutId: NodeJS.Timeout | undefined = undefined;
 
-      const partialResults: FetchResult[] = new Array(input.urls.length);
+      const partialResults: FetchResult[] = Array.from({
+        length: input.urls.length,
+      });
 
       const singleFetch = async (
         url: string,
