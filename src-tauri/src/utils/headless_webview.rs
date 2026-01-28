@@ -26,7 +26,7 @@ pub struct WebviewFetchResult {
 fn generate_webview_id() -> String {
     use rand::Rng;
     let id: u64 = rand::rng().random();
-    format!("webview-{}", id)
+    format!("headless-webview-{}", id)
 }
 
 #[tauri::command]
