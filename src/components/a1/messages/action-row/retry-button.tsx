@@ -14,6 +14,7 @@ type RetryButtonProps = {
   "onClick" | "disabled" | "size" | "variant" | "aria-label" | "children"
 >;
 
+// TODO: Disable this button when no models are available (see ../../input/no-model-section.tsx for example)
 export const RetryButton = ({
   messageId,
   className,
