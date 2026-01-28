@@ -59,9 +59,9 @@
     "id": "moonshotai-cn",
     "name": "Moonshot AI (China)",
     "models": {
-      "kimi-k2-thinking-turbo": {
-        "id": "kimi-k2-thinking-turbo",
-        "name": "Kimi K2 Thinking Turbo",
+      "kimi-k2-0905-preview": {
+        "id": "kimi-k2-0905-preview",
+        "name": "Kimi K2 0905",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -79,9 +79,9 @@
           ]
         }
       },
-      "kimi-k2-0905-preview": {
-        "id": "kimi-k2-0905-preview",
-        "name": "Kimi K2 0905",
+      "kimi-k2-0711-preview": {
+        "id": "kimi-k2-0711-preview",
+        "name": "Kimi K2 0711",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -89,9 +89,9 @@
           ]
         }
       },
-      "kimi-k2-0711-preview": {
-        "id": "kimi-k2-0711-preview",
-        "name": "Kimi K2 0711",
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -108,6 +108,16 @@
             "text"
           ]
         }
+      },
+      "kimi-k2-thinking-turbo": {
+        "id": "kimi-k2-thinking-turbo",
+        "name": "Kimi K2 Thinking Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
       }
     }
   },
@@ -115,8 +125,8 @@
     "id": "firmware",
     "name": "Firmware",
     "models": {
-      "xai/grok-4-fast-non-reasoning": {
-        "id": "xai/grok-4-fast-non-reasoning",
+      "grok-4-fast-non-reasoning": {
+        "id": "grok-4-fast-non-reasoning",
         "name": "Grok 4 Fast (Non-Reasoning)",
         "tool_call": true,
         "modalities": {
@@ -125,8 +135,8 @@
           ]
         }
       },
-      "xai/grok-4-fast-reasoning": {
-        "id": "xai/grok-4-fast-reasoning",
+      "grok-4-fast-reasoning": {
+        "id": "grok-4-fast-reasoning",
         "name": "Grok 4 Fast (Reasoning)",
         "tool_call": true,
         "modalities": {
@@ -135,48 +145,8 @@
           ]
         }
       },
-      "xai/grok-code-fast-1": {
-        "id": "xai/grok-code-fast-1",
-        "name": "Grok Code Fast 1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek/deepseek-coder": {
-        "id": "deepseek/deepseek-coder",
-        "name": "DeepSeek Coder",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek/deepseek-chat": {
-        "id": "deepseek/deepseek-chat",
-        "name": "DeepSeek Chat",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek/deepseek-reasoner": {
-        "id": "deepseek/deepseek-reasoner",
-        "name": "DeepSeek Reasoner",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "google/gemini-3-flash-preview": {
-        "id": "google/gemini-3-flash-preview",
+      "gemini-3-flash-preview": {
+        "id": "gemini-3-flash-preview",
         "name": "Gemini 3 Flash Preview",
         "tool_call": true,
         "modalities": {
@@ -185,9 +155,9 @@
           ]
         }
       },
-      "google/gemini-3-pro-preview": {
-        "id": "google/gemini-3-pro-preview",
-        "name": "Gemini 3 Pro Preview",
+      "grok-code-fast-1": {
+        "id": "grok-code-fast-1",
+        "name": "Grok Code Fast 1",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -195,9 +165,9 @@
           ]
         }
       },
-      "google/gemini-2.5-flash": {
-        "id": "google/gemini-2.5-flash",
-        "name": "Gemini 2.5 Flash",
+      "claude-haiku-4-5": {
+        "id": "claude-haiku-4-5",
+        "name": "Claude Haiku 4.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -205,9 +175,9 @@
           ]
         }
       },
-      "google/gemini-2.5-pro": {
-        "id": "google/gemini-2.5-pro",
-        "name": "Gemini 2.5 Pro",
+      "cerebras-zai-glm-4.7": {
+        "id": "cerebras-zai-glm-4.7",
+        "name": "Z.AI GLM-4.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -215,38 +185,8 @@
           ]
         }
       },
-      "openai/gpt-4o": {
-        "id": "openai/gpt-4o",
-        "name": "GPT-4o",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "openai/gpt-5": {
-        "id": "openai/gpt-5",
-        "name": "GPT-5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "openai/gpt-5.2": {
-        "id": "openai/gpt-5.2",
-        "name": "GPT-5.2",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic/claude-opus-4-5": {
-        "id": "anthropic/claude-opus-4-5",
+      "claude-opus-4-5": {
+        "id": "claude-opus-4-5",
         "name": "Claude Opus 4.5 (latest)",
         "tool_call": true,
         "modalities": {
@@ -255,8 +195,38 @@
           ]
         }
       },
-      "anthropic/claude-sonnet-4-5-20250929": {
-        "id": "anthropic/claude-sonnet-4-5-20250929",
+      "deepseek-chat": {
+        "id": "deepseek-chat",
+        "name": "DeepSeek Chat",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gemini-3-pro-preview": {
+        "id": "gemini-3-pro-preview",
+        "name": "Gemini 3 Pro Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gemini-2.5-flash": {
+        "id": "gemini-2.5-flash",
+        "name": "Gemini 2.5 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "claude-sonnet-4-5": {
+        "id": "claude-sonnet-4-5",
         "name": "Claude Sonnet 4.5",
         "tool_call": true,
         "modalities": {
@@ -265,9 +235,79 @@
           ]
         }
       },
-      "anthropic/claude-haiku-4-5-20251001": {
-        "id": "anthropic/claude-haiku-4-5-20251001",
-        "name": "Claude Haiku 4.5",
+      "gpt-5-nano": {
+        "id": "gpt-5-nano",
+        "name": "GPT-5 Nano",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-4o": {
+        "id": "gpt-4o",
+        "name": "GPT-4o",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-5-mini": {
+        "id": "gpt-5-mini",
+        "name": "GPT-5 Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-reasoner": {
+        "id": "deepseek-reasoner",
+        "name": "DeepSeek Reasoner",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gemini-2.5-pro": {
+        "id": "gemini-2.5-pro",
+        "name": "Gemini 2.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "cerebras-gpt-oss-120b": {
+        "id": "cerebras-gpt-oss-120b",
+        "name": "GPT OSS 120B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-5": {
+        "id": "gpt-5",
+        "name": "GPT-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-5.2": {
+        "id": "gpt-5.2",
+        "name": "GPT-5.2",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -320,6 +360,16 @@
       "kimi-k2-turbo-preview": {
         "id": "kimi-k2-turbo-preview",
         "name": "Kimi K2 Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -393,6 +443,16 @@
           ]
         }
       },
+      "glm-4.7-flash": {
+        "id": "glm-4.7-flash",
+        "name": "GLM-4.7-Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "glm-4.5-air": {
         "id": "glm-4.5-air",
         "name": "GLM-4.5-Air",
@@ -439,9 +499,9 @@
     "id": "ollama-cloud",
     "name": "Ollama Cloud",
     "models": {
-      "kimi-k2-thinking:cloud": {
-        "id": "kimi-k2-thinking:cloud",
-        "name": "Kimi K2 Thinking",
+      "glm-4.7": {
+        "id": "glm-4.7",
+        "name": "glm-4.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -449,9 +509,9 @@
           ]
         }
       },
-      "qwen3-vl-235b-cloud": {
-        "id": "qwen3-vl-235b-cloud",
-        "name": "Qwen3-VL 235B Instruct",
+      "qwen3-next:80b": {
+        "id": "qwen3-next:80b",
+        "name": "qwen3-next:80b",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -459,9 +519,9 @@
           ]
         }
       },
-      "qwen3-coder:480b-cloud": {
-        "id": "qwen3-coder:480b-cloud",
-        "name": "Qwen3 Coder 480B",
+      "cogito-2.1:671b": {
+        "id": "cogito-2.1:671b",
+        "name": "cogito-2.1:671b",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -469,9 +529,9 @@
           ]
         }
       },
-      "gpt-oss:120b-cloud": {
-        "id": "gpt-oss:120b-cloud",
-        "name": "GPT-OSS 120B",
+      "gemini-3-flash-preview": {
+        "id": "gemini-3-flash-preview",
+        "name": "gemini-3-flash-preview",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -479,9 +539,9 @@
           ]
         }
       },
-      "deepseek-v3.1:671b-cloud": {
-        "id": "deepseek-v3.1:671b-cloud",
-        "name": "DeepSeek-V3.1 671B",
+      "qwen3-vl:235b": {
+        "id": "qwen3-vl:235b",
+        "name": "qwen3-vl:235b",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -489,9 +549,9 @@
           ]
         }
       },
-      "glm-4.6:cloud": {
-        "id": "glm-4.6:cloud",
-        "name": "GLM-4.6",
+      "ministral-3:3b": {
+        "id": "ministral-3:3b",
+        "name": "ministral-3:3b",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -499,9 +559,9 @@
           ]
         }
       },
-      "cogito-2.1:671b-cloud": {
-        "id": "cogito-2.1:671b-cloud",
-        "name": "Cogito 2.1 671B",
+      "gemini-3-pro-preview": {
+        "id": "gemini-3-pro-preview",
+        "name": "gemini-3-pro-preview",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -509,9 +569,9 @@
           ]
         }
       },
-      "gpt-oss:20b-cloud": {
-        "id": "gpt-oss:20b-cloud",
-        "name": "GPT-OSS 20B",
+      "qwen3-vl:235b-instruct": {
+        "id": "qwen3-vl:235b-instruct",
+        "name": "qwen3-vl:235b-instruct",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -519,9 +579,9 @@
           ]
         }
       },
-      "qwen3-vl-235b-instruct-cloud": {
-        "id": "qwen3-vl-235b-instruct-cloud",
-        "name": "Qwen3-VL 235B Instruct",
+      "devstral-small-2:24b": {
+        "id": "devstral-small-2:24b",
+        "name": "devstral-small-2:24b",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -529,9 +589,9 @@
           ]
         }
       },
-      "kimi-k2:1t-cloud": {
-        "id": "kimi-k2:1t-cloud",
-        "name": "Kimi K2",
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "kimi-k2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -539,9 +599,9 @@
           ]
         }
       },
-      "minimax-m2:cloud": {
-        "id": "minimax-m2:cloud",
-        "name": "MiniMax M2",
+      "minimax-m2": {
+        "id": "minimax-m2",
+        "name": "minimax-m2",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -549,10 +609,180 @@
           ]
         }
       },
-      "gemini-3-pro-preview:latest": {
-        "id": "gemini-3-pro-preview:latest",
-        "name": "Gemini 3 Pro Preview",
+      "qwen3-coder:480b": {
+        "id": "qwen3-coder:480b",
+        "name": "qwen3-coder:480b",
         "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-oss:20b": {
+        "id": "gpt-oss:20b",
+        "name": "gpt-oss:20b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gemma3:27b": {
+        "id": "gemma3:27b",
+        "name": "gemma3:27b",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "kimi-k2-thinking": {
+        "id": "kimi-k2-thinking",
+        "name": "kimi-k2-thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "rnj-1:8b": {
+        "id": "rnj-1:8b",
+        "name": "rnj-1:8b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-v3.1:671b": {
+        "id": "deepseek-v3.1:671b",
+        "name": "deepseek-v3.1:671b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "ministral-3:8b": {
+        "id": "ministral-3:8b",
+        "name": "ministral-3:8b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "glm-4.6": {
+        "id": "glm-4.6",
+        "name": "glm-4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "kimi-k2:1t": {
+        "id": "kimi-k2:1t",
+        "name": "kimi-k2:1t",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "devstral-2:123b": {
+        "id": "devstral-2:123b",
+        "name": "devstral-2:123b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-oss:120b": {
+        "id": "gpt-oss:120b",
+        "name": "gpt-oss:120b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gemma3:4b": {
+        "id": "gemma3:4b",
+        "name": "gemma3:4b",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "nemotron-3-nano:30b": {
+        "id": "nemotron-3-nano:30b",
+        "name": "nemotron-3-nano:30b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "ministral-3:14b": {
+        "id": "ministral-3:14b",
+        "name": "ministral-3:14b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "mistral-large-3:675b": {
+        "id": "mistral-large-3:675b",
+        "name": "mistral-large-3:675b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "minimax-m2.1": {
+        "id": "minimax-m2.1",
+        "name": "minimax-m2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-v3.2": {
+        "id": "deepseek-v3.2",
+        "name": "deepseek-v3.2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gemma3:12b": {
+        "id": "gemma3:12b",
+        "name": "gemma3:12b",
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -1265,6 +1495,16 @@
     "id": "nvidia",
     "name": "Nvidia",
     "models": {
+      "moonshotai/kimi-k2.5": {
+        "id": "moonshotai/kimi-k2.5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "moonshotai/kimi-k2-instruct-0905": {
         "id": "moonshotai/kimi-k2-instruct-0905",
         "name": "Kimi K2 0905",
@@ -1428,6 +1668,16 @@
       "minimaxai/minimax-m2": {
         "id": "minimaxai/minimax-m2",
         "name": "MiniMax-M2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "minimaxai/minimax-m2.1": {
+        "id": "minimaxai/minimax-m2.1",
+        "name": "MiniMax-M2.1",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -1619,6 +1869,26 @@
         "id": "openai/gpt-oss-120b",
         "name": "GPT-OSS-120B",
         "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "z-ai/glm-4.7": {
+        "id": "z-ai/glm-4.7",
+        "name": "GLM-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "z-ai/glm4.7": {
+        "id": "z-ai/glm4.7",
+        "name": "GLM-4.7",
+        "tool_call": true,
         "modalities": {
           "output": [
             "text"
@@ -1898,6 +2168,16 @@
       "deepseek-ai/deepseek-v3.1": {
         "id": "deepseek-ai/deepseek-v3.1",
         "name": "DeepSeek V3.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-ai/deepseek-v3.2": {
+        "id": "deepseek-ai/deepseek-v3.2",
+        "name": "DeepSeek V3.2",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2245,9 +2525,9 @@
     "id": "github-copilot",
     "name": "GitHub Copilot",
     "models": {
-      "gemini-2.0-flash-001": {
-        "id": "gemini-2.0-flash-001",
-        "name": "Gemini 2.0 Flash",
+      "gemini-3-flash-preview": {
+        "id": "gemini-3-flash-preview",
+        "name": "Gemini 3 Flash",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2255,19 +2535,9 @@
           ]
         }
       },
-      "claude-opus-4": {
-        "id": "claude-opus-4",
-        "name": "Claude Opus 4",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "gemini-3-flash-preview": {
-        "id": "gemini-3-flash-preview",
-        "name": "Gemini 3 Flash",
+      "gpt-5.2-codex": {
+        "id": "gpt-5.2-codex",
+        "name": "GPT-5.2-Codex",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2315,26 +2585,6 @@
           ]
         }
       },
-      "oswe-vscode-prime": {
-        "id": "oswe-vscode-prime",
-        "name": "Raptor Mini (Preview)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "claude-3.5-sonnet": {
-        "id": "claude-3.5-sonnet",
-        "name": "Claude Sonnet 3.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "gpt-5.1-codex-mini": {
         "id": "gpt-5.1-codex-mini",
         "name": "GPT-5.1-Codex-mini",
@@ -2345,29 +2595,9 @@
           ]
         }
       },
-      "o3-mini": {
-        "id": "o3-mini",
-        "name": "o3-mini",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "gpt-5.1": {
         "id": "gpt-5.1",
         "name": "GPT-5.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "gpt-5-codex": {
-        "id": "gpt-5-codex",
-        "name": "GPT-5-Codex",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2395,16 +2625,6 @@
           ]
         }
       },
-      "o4-mini": {
-        "id": "o4-mini",
-        "name": "o4-mini (Preview)",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "claude-opus-41": {
         "id": "claude-opus-41",
         "name": "Claude Opus 4.1",
@@ -2418,16 +2638,6 @@
       "gpt-5-mini": {
         "id": "gpt-5-mini",
         "name": "GPT-5-mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "claude-3.7-sonnet": {
-        "id": "claude-3.7-sonnet",
-        "name": "Claude Sonnet 3.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2455,16 +2665,6 @@
           ]
         }
       },
-      "o3": {
-        "id": "o3",
-        "name": "o3 (Preview)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "claude-sonnet-4": {
         "id": "claude-sonnet-4",
         "name": "Claude Sonnet 4",
@@ -2478,16 +2678,6 @@
       "gpt-5": {
         "id": "gpt-5",
         "name": "GPT-5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "claude-3.7-sonnet-thought": {
-        "id": "claude-3.7-sonnet-thought",
-        "name": "Claude Sonnet 3.7 Thinking",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2827,26 +3017,6 @@
           ]
         }
       },
-      "deepseek-ai-DeepSeek-V3.2": {
-        "id": "deepseek-ai-DeepSeek-V3.2",
-        "name": "DeepSeek V3.2",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "meta-llama-Meta-Llama-3.1-405B-Instruct-Turbo": {
-        "id": "meta-llama-Meta-Llama-3.1-405B-Instruct-Turbo",
-        "name": "Llama 3.1 405B Instruct Turbo",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "gemini-3-flash-preview": {
         "id": "gemini-3-flash-preview",
         "name": "Gemini 3 Flash Preview",
@@ -2857,19 +3027,9 @@
           ]
         }
       },
-      "Qwen-Qwen3-235B-A22B-Instruct-2507": {
-        "id": "Qwen-Qwen3-235B-A22B-Instruct-2507",
-        "name": "Qwen3 235B A22B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "meta-llama-Meta-Llama-3.1-8B-Instruct": {
-        "id": "meta-llama-Meta-Llama-3.1-8B-Instruct",
-        "name": "Llama 3.1 8B Instruct",
+      "route-llm": {
+        "id": "route-llm",
+        "name": "Route LLM",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2880,16 +3040,6 @@
       "grok-code-fast-1": {
         "id": "grok-code-fast-1",
         "name": "Grok Code Fast 1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek-ai-DeepSeek-R1": {
-        "id": "deepseek-ai-DeepSeek-R1",
-        "name": "DeepSeek R1",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2910,16 +3060,6 @@
       "gemini-3-pro-preview": {
         "id": "gemini-3-pro-preview",
         "name": "Gemini 3 Pro Preview",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "qwen-qwen3-coder-480b-a35b-instruct": {
-        "id": "qwen-qwen3-coder-480b-a35b-instruct",
-        "name": "Qwen3 Coder 480B A35B Instruct",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -2977,39 +3117,9 @@
           ]
         }
       },
-      "openai-gpt-oss-120b": {
-        "id": "openai-gpt-oss-120b",
-        "name": "GPT-OSS 120B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "qwen-qwen3-Max": {
-        "id": "qwen-qwen3-Max",
-        "name": "Qwen3 Max",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "grok-4-0709": {
         "id": "grok-4-0709",
         "name": "Grok 4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "meta-llama-Meta-Llama-3.1-70B-Instruct": {
-        "id": "meta-llama-Meta-Llama-3.1-70B-Instruct",
-        "name": "Llama 3.1 70B Instruct",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -3027,9 +3137,9 @@
           ]
         }
       },
-      "zai-org-glm-4.5": {
-        "id": "zai-org-glm-4.5",
-        "name": "GLM-4.5",
+      "gpt-5.2-chat-latest": {
+        "id": "gpt-5.2-chat-latest",
+        "name": "GPT-5.2 Chat Latest",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -3097,16 +3207,6 @@
           ]
         }
       },
-      "Qwen-Qwen3-32B": {
-        "id": "Qwen-Qwen3-32B",
-        "name": "Qwen3 32B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "claude-opus-4-20250514": {
         "id": "claude-opus-4-20250514",
         "name": "Claude Opus 4",
@@ -3127,16 +3227,6 @@
           ]
         }
       },
-      "meta-llama-Llama-4-Maverick-17B-128E-Instruct-FP8": {
-        "id": "meta-llama-Llama-4-Maverick-17B-128E-Instruct-FP8",
-        "name": "Llama 4 Maverick 17B 128E Instruct FP8",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "o3-pro": {
         "id": "o3-pro",
         "name": "o3-pro",
@@ -3150,16 +3240,6 @@
       "claude-3-7-sonnet-20250219": {
         "id": "claude-3-7-sonnet-20250219",
         "name": "Claude Sonnet 3.7",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek-ai-DeepSeek-V3.1-Terminus": {
-        "id": "deepseek-ai-DeepSeek-V3.1-Terminus",
-        "name": "DeepSeek V3.1 Terminus",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -3197,49 +3277,19 @@
           ]
         }
       },
-      "Qwen-Qwen2.5-72B-Instruct": {
-        "id": "Qwen-Qwen2.5-72B-Instruct",
-        "name": "Qwen 2.5 72B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "zai-org-glm-4.6": {
-        "id": "zai-org-glm-4.6",
-        "name": "GLM-4.6",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek-deepseek-v3.1": {
-        "id": "deepseek-deepseek-v3.1",
-        "name": "DeepSeek V3.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "Qwen-QwQ-32B": {
-        "id": "Qwen-QwQ-32B",
-        "name": "QwQ 32B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "gpt-4o-mini": {
         "id": "gpt-4o-mini",
         "name": "GPT-4o Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "qwen3-max": {
+        "id": "qwen3-max",
+        "name": "Qwen3 Max",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -3316,6 +3366,176 @@
             "text"
           ]
         }
+      },
+      "deepseek/deepseek-v3.1": {
+        "id": "deepseek/deepseek-v3.1",
+        "name": "DeepSeek V3.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "openai/gpt-oss-120b": {
+        "id": "openai/gpt-oss-120b",
+        "name": "GPT-OSS 120B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "meta-llama/Meta-Llama-3.1-8B-Instruct": {
+        "id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+        "name": "Llama 3.1 8B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo": {
+        "id": "meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo",
+        "name": "Llama 3.1 405B Instruct Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": {
+        "id": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+        "name": "Llama 4 Maverick 17B 128E Instruct FP8",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "meta-llama/Meta-Llama-3.1-70B-Instruct": {
+        "id": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+        "name": "Llama 3.1 70B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+        "id": "Qwen/Qwen3-235B-A22B-Instruct-2507",
+        "name": "Qwen3 235B A22B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Qwen/Qwen2.5-72B-Instruct": {
+        "id": "Qwen/Qwen2.5-72B-Instruct",
+        "name": "Qwen 2.5 72B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Qwen/QwQ-32B": {
+        "id": "Qwen/QwQ-32B",
+        "name": "QwQ 32B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Qwen/Qwen3-32B": {
+        "id": "Qwen/Qwen3-32B",
+        "name": "Qwen3 32B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Qwen/qwen3-coder-480b-a35b-instruct": {
+        "id": "Qwen/qwen3-coder-480b-a35b-instruct",
+        "name": "Qwen3 Coder 480B A35B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/glm-4.7": {
+        "id": "zai-org/glm-4.7",
+        "name": "GLM-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/glm-4.5": {
+        "id": "zai-org/glm-4.5",
+        "name": "GLM-4.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/glm-4.6": {
+        "id": "zai-org/glm-4.6",
+        "name": "GLM-4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-ai/DeepSeek-R1": {
+        "id": "deepseek-ai/DeepSeek-R1",
+        "name": "DeepSeek R1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-ai/DeepSeek-V3.1-Terminus": {
+        "id": "deepseek-ai/DeepSeek-V3.1-Terminus",
+        "name": "DeepSeek V3.1 Terminus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-ai/DeepSeek-V3.2": {
+        "id": "deepseek-ai/DeepSeek-V3.2",
+        "name": "DeepSeek V3.2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
       }
     }
   },
@@ -3336,6 +3556,16 @@
       "moonshotai/kimi-k2-turbo": {
         "id": "moonshotai/kimi-k2-turbo",
         "name": "Kimi K2 Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "moonshotai/kimi-k2.5": {
+        "id": "moonshotai/kimi-k2.5",
+        "name": "Kimi K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -4013,6 +4243,26 @@
           ]
         }
       },
+      "recraft/recraft-v3": {
+        "id": "recraft/recraft-v3",
+        "name": "Recraft V3",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
+          ]
+        }
+      },
+      "recraft/recraft-v2": {
+        "id": "recraft/recraft-v2",
+        "name": "Recraft V2",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
+          ]
+        }
+      },
       "bfl/flux-kontext-pro": {
         "id": "bfl/flux-kontext-pro",
         "name": "FLUX.1 Kontext Pro",
@@ -4106,6 +4356,16 @@
       "bytedance/seed-1.6": {
         "id": "bytedance/seed-1.6",
         "name": "Seed 1.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "bytedance/seed-1.8": {
+        "id": "bytedance/seed-1.8",
+        "name": "Seed 1.8",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -4409,6 +4669,16 @@
       "openai/gpt-oss-safeguard-20b": {
         "id": "openai/gpt-oss-safeguard-20b",
         "name": "gpt-oss-safeguard-20b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "openai/gpt-5.2-codex": {
+        "id": "openai/gpt-5.2-codex",
+        "name": "GPT-5.2-Codex",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -6882,6 +7152,16 @@
           ]
         }
       },
+      "qwen3-vl-235b-a22b": {
+        "id": "qwen3-vl-235b-a22b",
+        "name": "Qwen3 VL 235B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "venice-uncensored": {
         "id": "venice-uncensored",
         "name": "Venice Uncensored 1.1",
@@ -6925,6 +7205,16 @@
       "llama-3.3-70b": {
         "id": "llama-3.3-70b",
         "name": "Llama 3.3 70B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "claude-sonnet-45": {
+        "id": "claude-sonnet-45",
+        "name": "Claude Sonnet 4.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -6982,20 +7272,20 @@
           ]
         }
       },
-      "hermes-3-llama-3.1-405b": {
-        "id": "hermes-3-llama-3.1-405b",
-        "name": "Hermes 3 Llama 3.1 405b",
-        "tool_call": false,
+      "kimi-k2-5": {
+        "id": "kimi-k2-5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
         }
       },
-      "zai-org-glm-4.6v": {
-        "id": "zai-org-glm-4.6v",
-        "name": "GLM 4.6V",
-        "tool_call": true,
+      "hermes-3-llama-3.1-405b": {
+        "id": "hermes-3-llama-3.1-405b",
+        "name": "Hermes 3 Llama 3.1 405b",
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -7025,6 +7315,16 @@
       "qwen3-coder-480b-a35b-instruct": {
         "id": "qwen3-coder-480b-a35b-instruct",
         "name": "Qwen 3 Coder 480b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "openai-gpt-52-codex": {
+        "id": "openai-gpt-52-codex",
+        "name": "GPT-5.2 Codex",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7078,6 +7378,16 @@
           ]
         }
       },
+      "Kwaipilot/KAT-Dev": {
+        "id": "Kwaipilot/KAT-Dev",
+        "name": "Kwaipilot/KAT-Dev",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "moonshotai/Kimi-K2-Thinking": {
         "id": "moonshotai/Kimi-K2-Thinking",
         "name": "moonshotai/Kimi-K2-Thinking",
@@ -7101,16 +7411,6 @@
       "moonshotai/Kimi-Dev-72B": {
         "id": "moonshotai/Kimi-Dev-72B",
         "name": "moonshotai/Kimi-Dev-72B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "moonshotai/Kimi-K2-Instruct": {
-        "id": "moonshotai/Kimi-K2-Instruct",
-        "name": "moonshotai/Kimi-K2-Instruct",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7208,20 +7508,10 @@
           ]
         }
       },
-      "openai/gpt-oss-120b": {
-        "id": "openai/gpt-oss-120b",
-        "name": "openai/gpt-oss-120b",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "openai/gpt-oss-20b": {
-        "id": "openai/gpt-oss-20b",
-        "name": "openai/gpt-oss-20b",
-        "tool_call": true,
+      "ascend-tribe/pangu-pro-moe": {
+        "id": "ascend-tribe/pangu-pro-moe",
+        "name": "ascend-tribe/pangu-pro-moe",
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -7231,16 +7521,6 @@
       "stepfun-ai/step3": {
         "id": "stepfun-ai/step3",
         "name": "stepfun-ai/step3",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "nex-agi/DeepSeek-V3.1-Nex-N1": {
-        "id": "nex-agi/DeepSeek-V3.1-Nex-N1",
-        "name": "nex-agi/DeepSeek-V3.1-Nex-N1",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7258,39 +7538,9 @@
           ]
         }
       },
-      "z-ai/GLM-4.5-Air": {
-        "id": "z-ai/GLM-4.5-Air",
-        "name": "z-ai/GLM-4.5-Air",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "z-ai/GLM-4.5": {
-        "id": "z-ai/GLM-4.5",
-        "name": "z-ai/GLM-4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "ByteDance-Seed/Seed-OSS-36B-Instruct": {
         "id": "ByteDance-Seed/Seed-OSS-36B-Instruct",
         "name": "ByteDance-Seed/Seed-OSS-36B-Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "meta-llama/Meta-Llama-3.1-8B-Instruct": {
-        "id": "meta-llama/Meta-Llama-3.1-8B-Instruct",
-        "name": "meta-llama/Meta-Llama-3.1-8B-Instruct",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7438,16 +7688,6 @@
           ]
         }
       },
-      "Qwen/Qwen2.5-VL-7B-Instruct": {
-        "id": "Qwen/Qwen2.5-VL-7B-Instruct",
-        "name": "Qwen/Qwen2.5-VL-7B-Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "Qwen/QwQ-32B": {
         "id": "Qwen/QwQ-32B",
         "name": "Qwen/QwQ-32B",
@@ -7461,16 +7701,6 @@
       "Qwen/Qwen2.5-VL-72B-Instruct": {
         "id": "Qwen/Qwen2.5-VL-72B-Instruct",
         "name": "Qwen/Qwen2.5-VL-72B-Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "Qwen/Qwen3-235B-A22B": {
-        "id": "Qwen/Qwen3-235B-A22B",
-        "name": "Qwen/Qwen3-235B-A22B",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7668,19 +7898,9 @@
           ]
         }
       },
-      "zai-org/GLM-4.5": {
-        "id": "zai-org/GLM-4.5",
-        "name": "zai-org/GLM-4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek-ai/DeepSeek-V3.1": {
-        "id": "deepseek-ai/DeepSeek-V3.1",
-        "name": "deepseek-ai/DeepSeek-V3.1",
+      "zai-org/GLM-4.6V": {
+        "id": "zai-org/GLM-4.6V",
+        "name": "zai-org/GLM-4.6V",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7691,6 +7911,16 @@
       "deepseek-ai/DeepSeek-V3": {
         "id": "deepseek-ai/DeepSeek-V3",
         "name": "deepseek-ai/DeepSeek-V3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "deepseek-ai/DeepSeek-V3.2": {
+        "id": "deepseek-ai/DeepSeek-V3.2",
+        "name": "deepseek-ai/DeepSeek-V3.2",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7711,16 +7941,6 @@
       "deepseek-ai/DeepSeek-V3.1-Terminus": {
         "id": "deepseek-ai/DeepSeek-V3.1-Terminus",
         "name": "deepseek-ai/DeepSeek-V3.1-Terminus",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "deepseek-ai/DeepSeek-V3.2-Exp": {
-        "id": "deepseek-ai/DeepSeek-V3.2-Exp",
-        "name": "deepseek-ai/DeepSeek-V3.2-Exp",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7767,6 +7987,86 @@
             "text"
           ]
         }
+      },
+      "Pro/moonshotai/Kimi-K2-Instruct-0905": {
+        "id": "Pro/moonshotai/Kimi-K2-Instruct-0905",
+        "name": "Pro/moonshotai/Kimi-K2-Instruct-0905",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Pro/moonshotai/Kimi-K2-Thinking": {
+        "id": "Pro/moonshotai/Kimi-K2-Thinking",
+        "name": "Pro/moonshotai/Kimi-K2-Thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Pro/MiniMaxAI/MiniMax-M2.1": {
+        "id": "Pro/MiniMaxAI/MiniMax-M2.1",
+        "name": "Pro/MiniMaxAI/MiniMax-M2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Pro/zai-org/GLM-4.7": {
+        "id": "Pro/zai-org/GLM-4.7",
+        "name": "Pro/zai-org/GLM-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Pro/deepseek-ai/DeepSeek-R1": {
+        "id": "Pro/deepseek-ai/DeepSeek-R1",
+        "name": "Pro/deepseek-ai/DeepSeek-R1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Pro/deepseek-ai/DeepSeek-V3.1-Terminus": {
+        "id": "Pro/deepseek-ai/DeepSeek-V3.1-Terminus",
+        "name": "Pro/deepseek-ai/DeepSeek-V3.1-Terminus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Pro/deepseek-ai/DeepSeek-V3.2": {
+        "id": "Pro/deepseek-ai/DeepSeek-V3.2",
+        "name": "Pro/deepseek-ai/DeepSeek-V3.2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "Pro/deepseek-ai/DeepSeek-V3": {
+        "id": "Pro/deepseek-ai/DeepSeek-V3",
+        "name": "Pro/deepseek-ai/DeepSeek-V3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
       }
     }
   },
@@ -7774,9 +8074,49 @@
     "id": "vivgrid",
     "name": "Vivgrid",
     "models": {
+      "gemini-3-flash-preview": {
+        "id": "gemini-3-flash-preview",
+        "name": "Gemini 3 Flash Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-5.2-codex": {
+        "id": "gpt-5.2-codex",
+        "name": "GPT-5.2 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "gpt-5.1-codex": {
         "id": "gpt-5.1-codex",
         "name": "GPT-5.1 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gemini-3-pro-preview": {
+        "id": "gemini-3-pro-preview",
+        "name": "Gemini 3 Pro Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-5.1-codex-max": {
+        "id": "gpt-5.1-codex-max",
+        "name": "GPT-5.1 Codex Max",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7850,6 +8190,16 @@
           ]
         }
       },
+      "moonshotai/Kimi-K2.5-TEE": {
+        "id": "moonshotai/Kimi-K2.5-TEE",
+        "name": "Kimi K2.5 TEE",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "moonshotai/Kimi-K2-Instruct-0905": {
         "id": "moonshotai/Kimi-K2-Instruct-0905",
         "name": "Kimi K2 Instruct 0905",
@@ -7883,6 +8233,16 @@
       "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16": {
         "id": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
         "name": "NVIDIA Nemotron 3 Nano 30B A3B BF16",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "tngtech/TNG-R1T-Chimera-Turbo": {
+        "id": "tngtech/TNG-R1T-Chimera-Turbo",
+        "name": "TNG R1T Chimera Turbo",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7980,16 +8340,6 @@
           ]
         }
       },
-      "mistralai/Devstral-2-123B-Instruct-2512": {
-        "id": "mistralai/Devstral-2-123B-Instruct-2512",
-        "name": "Devstral 2 123B Instruct 2512",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "mistralai/Devstral-2-123B-Instruct-2512-TEE": {
         "id": "mistralai/Devstral-2-123B-Instruct-2512-TEE",
         "name": "Devstral 2 123B Instruct 2512 TEE",
@@ -8024,6 +8374,16 @@
         "id": "unsloth/Mistral-Small-24B-Instruct-2501",
         "name": "Mistral Small 24B Instruct 2501",
         "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "unsloth/Llama-3.2-1B-Instruct": {
+        "id": "unsloth/Llama-3.2-1B-Instruct",
+        "name": "Llama 3.2 1B Instruct",
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -8240,9 +8600,49 @@
           ]
         }
       },
+      "zai-org/GLM-4.7-FP8": {
+        "id": "zai-org/GLM-4.7-FP8",
+        "name": "GLM 4.7 FP8",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/GLM-4.6-FP8": {
+        "id": "zai-org/GLM-4.6-FP8",
+        "name": "GLM 4.6 FP8",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "zai-org/GLM-4.7-TEE": {
         "id": "zai-org/GLM-4.7-TEE",
         "name": "GLM 4.7 TEE",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/GLM-4.5-FP8": {
+        "id": "zai-org/GLM-4.5-FP8",
+        "name": "GLM 4.5 FP8",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/GLM-4.7-Flash": {
+        "id": "zai-org/GLM-4.7-Flash",
+        "name": "GLM 4.7 Flash",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -8356,6 +8756,16 @@
     "id": "kimi-for-coding",
     "name": "Kimi For Coding",
     "models": {
+      "k2p5": {
+        "id": "k2p5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "kimi-k2-thinking": {
         "id": "kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
@@ -9360,6 +9770,16 @@
           ]
         }
       },
+      "gpt-5.2-codex": {
+        "id": "gpt-5.2-codex",
+        "name": "GPT-5.2 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "meta-llama-3.1-405b-instruct": {
         "id": "meta-llama-3.1-405b-instruct",
         "name": "Meta-Llama-3.1-405B-Instruct",
@@ -10194,6 +10614,32 @@
       }
     }
   },
+  "moark": {
+    "id": "moark",
+    "name": "Moark",
+    "models": {
+      "GLM-4.7": {
+        "id": "GLM-4.7",
+        "name": "GLM-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "MiniMax-M2.1": {
+        "id": "MiniMax-M2.1",
+        "name": "MiniMax-M2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      }
+    }
+  },
   "siliconflow": {
     "id": "siliconflow",
     "name": "SiliconFlow",
@@ -10308,6 +10754,16 @@
           ]
         }
       },
+      "MiniMaxAI/MiniMax-M2.1": {
+        "id": "MiniMaxAI/MiniMax-M2.1",
+        "name": "MiniMaxAI/MiniMax-M2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "THUDM/GLM-4-32B-0414": {
         "id": "THUDM/GLM-4-32B-0414",
         "name": "THUDM/GLM-4-32B-0414",
@@ -10401,26 +10857,6 @@
       "baidu/ERNIE-4.5-300B-A47B": {
         "id": "baidu/ERNIE-4.5-300B-A47B",
         "name": "baidu/ERNIE-4.5-300B-A47B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "z-ai/GLM-4.5": {
-        "id": "z-ai/GLM-4.5",
-        "name": "z-ai/GLM-4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "z-ai/GLM-4.5-Air": {
-        "id": "z-ai/GLM-4.5-Air",
-        "name": "z-ai/GLM-4.5-Air",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -11885,6 +12321,16 @@
           ]
         }
       },
+      "moonshotai/Kimi-K2.5": {
+        "id": "moonshotai/Kimi-K2.5",
+        "name": "Kimi-K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "moonshotai/Kimi-K2-Instruct-0905": {
         "id": "moonshotai/Kimi-K2-Instruct-0905",
         "name": "Kimi-K2-Instruct-0905",
@@ -11995,6 +12441,16 @@
           ]
         }
       },
+      "zai-org/GLM-4.7-Flash": {
+        "id": "zai-org/GLM-4.7-Flash",
+        "name": "GLM-4.7-Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "deepseek-ai/DeepSeek-R1-0528": {
         "id": "deepseek-ai/DeepSeek-R1-0528",
         "name": "DeepSeek-R1-0528",
@@ -12021,6 +12477,16 @@
     "id": "opencode",
     "name": "OpenCode Zen",
     "models": {
+      "glm-4.7": {
+        "id": "glm-4.7",
+        "name": "GLM-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "qwen3-coder": {
         "id": "qwen3-coder",
         "name": "Qwen3 Coder",
@@ -12044,6 +12510,16 @@
       "kimi-k2": {
         "id": "kimi-k2",
         "name": "Kimi K2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-5.2-codex": {
+        "id": "gpt-5.2-codex",
+        "name": "GPT-5.2 Codex",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -12081,9 +12557,9 @@
           ]
         }
       },
-      "gemini-3-pro": {
-        "id": "gemini-3-pro",
-        "name": "Gemini 3 Pro",
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -12091,9 +12567,9 @@
           ]
         }
       },
-      "alpha-glm-4.7": {
-        "id": "alpha-glm-4.7",
-        "name": "Alpha GLM-4.7",
+      "gemini-3-pro": {
+        "id": "gemini-3-pro",
+        "name": "Gemini 3 Pro",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -12114,16 +12590,6 @@
       "gpt-5.1-codex-mini": {
         "id": "gpt-5.1-codex-mini",
         "name": "GPT-5.1 Codex Mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "alpha-gd4": {
-        "id": "alpha-gd4",
-        "name": "Alpha GD4",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -12264,6 +12730,16 @@
       "gpt-5": {
         "id": "gpt-5",
         "name": "GPT-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "minimax-m2.1": {
+        "id": "minimax-m2.1",
+        "name": "MiniMax M2.1",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -12431,7 +12907,7 @@
   },
   "minimax": {
     "id": "minimax",
-    "name": "MiniMax",
+    "name": "MiniMax (minimax.io)",
     "models": {
       "MiniMax-M2": {
         "id": "MiniMax-M2",
@@ -12912,6 +13388,16 @@
       "openai/gpt-oss-20b-maas": {
         "id": "openai/gpt-oss-20b-maas",
         "name": "GPT OSS 20B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/glm-4.7-maas": {
+        "id": "zai-org/glm-4.7-maas",
+        "name": "GLM-4.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -14929,7 +15415,7 @@
   },
   "minimax-cn": {
     "id": "minimax-cn",
-    "name": "MiniMax (China)",
+    "name": "MiniMax (minimaxi.com)",
     "models": {
       "MiniMax-M2.1": {
         "id": "MiniMax-M2.1",
@@ -14996,6 +15482,16 @@
       "moonshotai/kimi-k2": {
         "id": "moonshotai/kimi-k2",
         "name": "Kimi K2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "moonshotai/kimi-k2.5": {
+        "id": "moonshotai/kimi-k2.5",
+        "name": "Kimi K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -15731,6 +16227,16 @@
           "output": [
             "text",
             "image"
+          ]
+        }
+      },
+      "openai/gpt-5.1-codex-max": {
+        "id": "openai/gpt-5.1-codex-max",
+        "name": "GPT-5.1-Codex-Max",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
           ]
         }
       },
@@ -16902,6 +17408,32 @@
       }
     }
   },
+  "minimax-coding-plan": {
+    "id": "minimax-coding-plan",
+    "name": "MiniMax Coding Plan (minimax.io)",
+    "models": {
+      "MiniMax-M2": {
+        "id": "MiniMax-M2",
+        "name": "MiniMax-M2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "MiniMax-M2.1": {
+        "id": "MiniMax-M2.1",
+        "name": "MiniMax-M2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      }
+    }
+  },
   "ovhcloud": {
     "id": "ovhcloud",
     "name": "OVHcloud AI Endpoints",
@@ -16986,30 +17518,10 @@
           ]
         }
       },
-      "llava-next-mistral-7b": {
-        "id": "llava-next-mistral-7b",
-        "name": "llava-next-mistral-7b",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "deepseek-r1-distill-llama-70b": {
         "id": "deepseek-r1-distill-llama-70b",
         "name": "DeepSeek-R1-Distill-Llama-70B",
         "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "meta-llama-3_1-70b-instruct": {
-        "id": "meta-llama-3_1-70b-instruct",
-        "name": "Meta-Llama-3_1-70B-Instruct",
-        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -17530,6 +18042,16 @@
           ]
         }
       },
+      "MiniMaxAI/MiniMax-M2.1": {
+        "id": "MiniMaxAI/MiniMax-M2.1",
+        "name": "MiniMax M2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "openai/gpt-oss-20b": {
         "id": "openai/gpt-oss-20b",
         "name": "GPT OSS 20B",
@@ -17599,6 +18121,16 @@
       "glm-4.6v-flash": {
         "id": "glm-4.6v-flash",
         "name": "GLM-4.6V-Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "glm-4.7-flash": {
+        "id": "glm-4.7-flash",
+        "name": "GLM-4.7-Flash",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -18562,6 +19094,16 @@
     "id": "sap-ai-core",
     "name": "SAP AI Core",
     "models": {
+      "anthropic--claude-4.5-opus": {
+        "id": "anthropic--claude-4.5-opus",
+        "name": "anthropic--claude-4.5-opus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "anthropic--claude-3.5-sonnet": {
         "id": "anthropic--claude-3.5-sonnet",
         "name": "anthropic--claude-3.5-sonnet",
@@ -19270,6 +19812,16 @@
     "id": "gitlab",
     "name": "GitLab Duo",
     "models": {
+      "duo-chat-gpt-5-1": {
+        "id": "duo-chat-gpt-5-1",
+        "name": "Agentic Chat (GPT-5.1)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "duo-chat-opus-4-5": {
         "id": "duo-chat-opus-4-5",
         "name": "Agentic Chat (Claude Opus 4.5)",
@@ -19283,6 +19835,46 @@
       "duo-chat-sonnet-4-5": {
         "id": "duo-chat-sonnet-4-5",
         "name": "Agentic Chat (Claude Sonnet 4.5)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "duo-chat-gpt-5-mini": {
+        "id": "duo-chat-gpt-5-mini",
+        "name": "Agentic Chat (GPT-5 Mini)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "duo-chat-gpt-5-2": {
+        "id": "duo-chat-gpt-5-2",
+        "name": "Agentic Chat (GPT-5.2)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "duo-chat-gpt-5-2-codex": {
+        "id": "duo-chat-gpt-5-2-codex",
+        "name": "Agentic Chat (GPT-5.2 Codex)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "duo-chat-gpt-5-codex": {
+        "id": "duo-chat-gpt-5-codex",
+        "name": "Agentic Chat (GPT-5 Codex)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -19399,6 +19991,16 @@
       "accounts/fireworks/models/kimi-k2-instruct": {
         "id": "accounts/fireworks/models/kimi-k2-instruct",
         "name": "Kimi K2 Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "accounts/fireworks/models/kimi-k2p5": {
+        "id": "accounts/fireworks/models/kimi-k2p5",
+        "name": "Kimi K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -20463,6 +21065,16 @@
       "meta-llama-3.1-405b-instruct": {
         "id": "meta-llama-3.1-405b-instruct",
         "name": "Meta-Llama-3.1-405B-Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "gpt-5.2-codex": {
+        "id": "gpt-5.2-codex",
+        "name": "GPT-5.2 Codex",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22687,6 +23299,32 @@
       }
     }
   },
+  "minimax-cn-coding-plan": {
+    "id": "minimax-cn-coding-plan",
+    "name": "MiniMax Coding Plan (minimaxi.com)",
+    "models": {
+      "MiniMax-M2": {
+        "id": "MiniMax-M2",
+        "name": "MiniMax-M2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "MiniMax-M2.1": {
+        "id": "MiniMax-M2.1",
+        "name": "MiniMax-M2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      }
+    }
+  },
   "cerebras": {
     "id": "cerebras",
     "name": "Cerebras",
@@ -22704,16 +23342,6 @@
       "qwen-3-235b-a22b-instruct-2507": {
         "id": "qwen-3-235b-a22b-instruct-2507",
         "name": "Qwen 3 235B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "zai-glm-4.6": {
-        "id": "zai-glm-4.6",
-        "name": "Z.AI GLM-4.6",
         "tool_call": true,
         "modalities": {
           "output": [
