@@ -141,14 +141,13 @@ export function useModelCatalog() {
 
   const providerIsAvailable = useMemo(
     () => ({
-      google: providerHasApiKey.google && googleConfig.enabled,
-      groq: providerHasApiKey.groq && groqConfig.enabled,
-      cerebras: providerHasApiKey.cerebras && cerebrasConfig.enabled,
-      openrouter: providerHasApiKey.openrouter && openrouterConfig.enabled,
-      opencode: providerHasApiKey.opencode && opencodeConfig.enabled,
+      google: googleConfig.enabled,
+      groq: groqConfig.enabled,
+      cerebras: cerebrasConfig.enabled,
+      openrouter: openrouterConfig.enabled,
+      opencode: opencodeConfig.enabled,
     }),
     [
-      providerHasApiKey,
       googleConfig.enabled,
       groqConfig.enabled,
       cerebrasConfig.enabled,
