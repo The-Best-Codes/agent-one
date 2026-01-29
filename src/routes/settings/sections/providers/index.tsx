@@ -2,7 +2,6 @@ import { useAtom } from "jotai";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import {
@@ -151,32 +150,30 @@ export default function ProvidersSection() {
           to control which models appear in the model selector.
         </p>
 
-        <ScrollArea className="max-h-96">
-          <Accordion
-            type="single"
-            collapsible
-            className="border-border w-full rounded-md border"
-          >
-            {PROVIDERS.map((provider) => {
-              const state = getProviderState(provider.id);
-              return (
-                <ProviderListItem
-                  key={provider.id}
-                  providerId={provider.id}
-                  label={provider.label}
-                  description={provider.description}
-                  config={state.config}
-                  apiKey={state.apiKey}
-                  hasEnvKey={state.hasEnvKey}
-                  onConfigChange={(updates) =>
-                    state.setConfig((prev) => ({ ...prev, ...updates }))
-                  }
-                  onApiKeyChange={state.setApiKey}
-                />
-              );
-            })}
-          </Accordion>
-        </ScrollArea>
+        <Accordion
+          type="single"
+          collapsible
+          className="border-border w-full rounded-md border"
+        >
+          {PROVIDERS.map((provider) => {
+            const state = getProviderState(provider.id);
+            return (
+              <ProviderListItem
+                key={provider.id}
+                providerId={provider.id}
+                label={provider.label}
+                description={provider.description}
+                config={state.config}
+                apiKey={state.apiKey}
+                hasEnvKey={state.hasEnvKey}
+                onConfigChange={(updates) =>
+                  state.setConfig((prev) => ({ ...prev, ...updates }))
+                }
+                onApiKeyChange={state.setApiKey}
+              />
+            );
+          })}
+        </Accordion>
       </CardContent>
     </Card>
   );
