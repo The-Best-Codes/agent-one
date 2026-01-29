@@ -84,6 +84,7 @@ export function resetSetting(key: keyof DefaultSettings): void {
   if (isProviderStorageKey(key)) {
     const provider = PROVIDER_REGISTRY.find((p) => p.storageKey === key)!;
     store.set(getApiKeyBaseAtom(provider.id), RESET);
+    store.set(providerConfigAtoms[provider.id], RESET);
     return;
   }
 
