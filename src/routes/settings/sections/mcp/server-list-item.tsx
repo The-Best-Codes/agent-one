@@ -1,5 +1,6 @@
 import { Trash2Icon } from "lucide-react";
 
+import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import {
   AccordionContent,
   AccordionItem,
@@ -14,7 +15,6 @@ import {
   type McpServerConfig,
 } from "@/lib/settings/types";
 
-import { HttpHeadersEditor } from "./http-headers-editor";
 import { McpAuthStatus } from "./mcp-auth-status";
 
 interface ServerListItemProps {
@@ -118,7 +118,7 @@ export function ServerListItem({
                 disabled={!server.enabled}
               />
               <HttpHeadersEditor
-                serverId={server.id}
+                id={server.id}
                 headers={server.headers}
                 onChange={(headers) => onUpdate(index, { headers })}
               />

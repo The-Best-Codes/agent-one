@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function HttpHeadersEditor({
-  serverId,
+  id,
   headers,
   onChange,
   labelClassName,
 }: {
-  serverId: string;
+  id: string;
   headers: Record<string, string>;
   onChange: (headers: Record<string, string>) => void;
   labelClassName?: string;
@@ -55,7 +55,7 @@ export function HttpHeadersEditor({
       {entries.length > 0 ? (
         <div className="flex flex-col gap-2">
           {entries.map(([key, value], idx) => (
-            <div key={`${serverId}-header-${idx}`} className="flex gap-2">
+            <div key={`${id}-header-${idx}`} className="flex gap-2">
               <Input
                 placeholder="Header name"
                 value={key}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,8 +21,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { type McpServerType } from "@/lib/settings/types";
-
-import { HttpHeadersEditor } from "./http-headers-editor";
 
 interface AddServerDialogProps {
   open: boolean;
@@ -157,7 +156,7 @@ export function AddServerDialog({
               </div>
 
               <HttpHeadersEditor
-                serverId="new-server-dialog"
+                id="new-server-dialog"
                 headers={newServerHeaders}
                 onChange={setNewServerHeaders}
                 labelClassName="text-sm"

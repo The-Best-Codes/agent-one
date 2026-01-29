@@ -161,33 +161,45 @@ export function useModelCatalog() {
     () =>
       getGoogle(
         googleApiKey || import.meta.env.AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY,
+        googleConfig.headers,
       ),
-    [googleApiKey],
+    [googleApiKey, googleConfig.headers],
   );
 
   const groqProvider = useMemo(
-    () => getGroq(groqApiKey || import.meta.env.AGENT_ONE_GROQ_API_KEY),
-    [groqApiKey],
+    () =>
+      getGroq(
+        groqApiKey || import.meta.env.AGENT_ONE_GROQ_API_KEY,
+        groqConfig.headers,
+      ),
+    [groqApiKey, groqConfig.headers],
   );
 
   const cerebrasProvider = useMemo(
     () =>
-      getCerebras(cerebrasApiKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY),
-    [cerebrasApiKey],
+      getCerebras(
+        cerebrasApiKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY,
+        cerebrasConfig.headers,
+      ),
+    [cerebrasApiKey, cerebrasConfig.headers],
   );
 
   const openRouterProvider = useMemo(
     () =>
       getOpenRouter(
         openrouterApiKey || import.meta.env.AGENT_ONE_OPENROUTER_API_KEY,
+        openrouterConfig.headers,
       ),
-    [openrouterApiKey],
+    [openrouterApiKey, openrouterConfig.headers],
   );
 
   const openCodeProvider = useMemo(
     () =>
-      getOpenCode(opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY),
-    [opencodeApiKey],
+      getOpenCode(
+        opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY,
+        opencodeConfig.headers,
+      ),
+    [opencodeApiKey, opencodeConfig.headers],
   );
 
   const AVAILABLE_MODELS = useMemo(() => {

@@ -1,6 +1,7 @@
 import { EyeIcon, EyeOffIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import {
   AccordionContent,
   AccordionItem,
@@ -11,8 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import type { ProviderConfig, ProviderId } from "@/lib/settings/types";
-
-import { HttpHeadersEditor } from "../mcp/http-headers-editor";
 
 interface ProviderListItemProps {
   providerId: ProviderId;
@@ -124,7 +123,7 @@ export function ProviderListItem({
           </div>
 
           <HttpHeadersEditor
-            serverId={providerId}
+            id={providerId}
             headers={config.headers}
             onChange={(headers) => onConfigChange({ headers })}
             labelClassName="text-xs"
