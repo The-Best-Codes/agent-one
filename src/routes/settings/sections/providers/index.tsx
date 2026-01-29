@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
@@ -60,7 +60,7 @@ export default function ProvidersSection() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Providers</CardTitle>
+          <h2 className="leading-none font-semibold">Providers</h2>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Skeleton className="h-12 w-full" />
@@ -74,7 +74,7 @@ export default function ProvidersSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Providers</CardTitle>
+        <h2 className="leading-none font-semibold">Providers</h2>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="text-muted-foreground text-sm">
