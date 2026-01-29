@@ -1,3 +1,4 @@
+import { atom } from "jotai";
 import { atomWithStorage, loadable, unwrap } from "jotai/utils";
 
 import {
@@ -36,3 +37,9 @@ export function getApiKeyLoadableAtom(providerId: ProviderId) {
 export function getApiKeyBaseAtom(providerId: ProviderId) {
   return apiKeyAtoms[providerId].baseAtom;
 }
+
+export const apiKeysLoadingAtom = atom((get) => {
+  return PROVIDER_REGISTRY.some(
+    (p) => get(apiKeyAtoms[p.id].loadableAtom).state === "loading",
+  );
+});
