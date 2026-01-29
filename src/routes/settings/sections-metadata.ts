@@ -1,5 +1,6 @@
 export const sectionsMetadata = [
   { id: "account", label: "Account" },
+  { id: "providers", label: "Providers" },
   { id: "appearance", label: "Appearance" },
   { id: "editor", label: "Editor" },
   { id: "messages", label: "Messages" },

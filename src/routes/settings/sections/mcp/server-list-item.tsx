@@ -1,10 +1,12 @@
 import { Trash2Icon } from "lucide-react";
 
+import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +16,6 @@ import {
   type McpServerConfig,
 } from "@/lib/settings/types";
 
-import { HttpHeadersEditor } from "./http-headers-editor";
 import { McpAuthStatus } from "./mcp-auth-status";
 
 interface ServerListItemProps {
@@ -40,9 +41,7 @@ export function ServerListItem({
         <AccordionTrigger className="hover:no-underline">
           <div className="flex items-center gap-2">
             <span>{server.name || "Unnamed Server"}</span>
-            <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
-              {getServerTypeLabel(server)}
-            </span>
+            <Badge>{getServerTypeLabel(server)}</Badge>
           </div>
         </AccordionTrigger>
         <Switch
@@ -118,7 +117,7 @@ export function ServerListItem({
                 disabled={!server.enabled}
               />
               <HttpHeadersEditor
-                serverId={server.id}
+                id={server.id}
                 headers={server.headers}
                 onChange={(headers) => onUpdate(index, { headers })}
               />

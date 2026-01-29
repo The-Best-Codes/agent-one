@@ -1,5 +1,7 @@
 // If you update this file, check if you also need to update reset-settings.ts in this directory
 
+import type { ProviderStorageKey } from "@/lib/providers/registry";
+
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
@@ -94,7 +96,9 @@ export interface ToolConfigs {
   webSearch: WebSearchToolConfig;
 }
 
-export interface DefaultSettings {
+type ApiKeySettings = Record<ProviderStorageKey, string>;
+
+export interface DefaultSettings extends ApiKeySettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
   SUBMIT_KEY: SubmitKeyOption;
@@ -122,11 +126,6 @@ export interface DefaultSettings {
   MCP_PARALLEL_LOAD_LIMIT: number;
   USER_NAME: string;
   SYSTEM_PROMPT_APPENDIX: string;
-  GOOGLE_GENERATIVE_AI_API_KEY: string;
-  GROQ_API_KEY: string;
-  OPENROUTER_API_KEY: string;
-  CEREBRAS_API_KEY: string;
-  OPENCODE_API_KEY: string;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -189,9 +188,8 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MCP_PARALLEL_LOAD_LIMIT: 8,
   USER_NAME: "",
   SYSTEM_PROMPT_APPENDIX: "",
-  GOOGLE_GENERATIVE_AI_API_KEY: "",
-  GROQ_API_KEY: "",
   OPENROUTER_API_KEY: "",
+  GROQ_API_KEY: "",
+  GOOGLE_GENERATIVE_AI_API_KEY: "",
   CEREBRAS_API_KEY: "",
-  OPENCODE_API_KEY: "",
 };

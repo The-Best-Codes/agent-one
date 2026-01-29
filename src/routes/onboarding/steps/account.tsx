@@ -1,67 +1,91 @@
+import { useAtom } from "jotai";
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
-  EyeIcon,
-  EyeOffIcon,
   KeyIcon,
   LogInIcon,
-  SearchIcon,
   UserPlusIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
+import {
+  getProviderConfigAtom,
+  type ProviderConfig,
+  type ProviderId,
+} from "@/lib/jotai/provider-atoms";
+import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/providers/registry";
 import { cn } from "@/lib/utils";
-
-interface ApiKeyConfig {
-  provider: string;
-  key: string;
-  label: string;
-  description?: string;
-}
+import { ProviderListItem } from "@/routes/settings/sections/providers/provider-list-item";
 
 interface AccountStepProps {
-  onSubmit: (keys: Record<string, string>) => void;
-  initialKeys?: Record<string, string>;
+  onSubmit: () => void;
 }
 
-const API_KEY_CONFIG: ApiKeyConfig[] = [
-  {
-    provider: "openrouter",
-    key: "OPENROUTER_API_KEY",
-    label: "OpenRouter",
-  },
-  {
-    provider: "google",
-    key: "GOOGLE_GENERATIVE_AI_API_KEY",
-    label: "Google",
-  },
-  {
-    provider: "groq",
-    key: "GROQ_API_KEY",
-    label: "Groq",
-  },
-  {
-    provider: "cerebras",
-    key: "CEREBRAS_API_KEY",
-    label: "Cerebras",
-  },
-  {
-    provider: "opencode",
-    key: "OPENCODE_API_KEY",
-    label: "OpenCode",
-  },
-];
+function useProviderState(providerId: ProviderId) {
+  const [apiKey, setApiKey] = useAtom(getApiKeyAtom(providerId));
+  const [config, setConfig] = useAtom(getProviderConfigAtom(providerId));
 
-export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
+  return {
+    apiKey,
+    setApiKey,
+    config,
+    setConfig: (updates: Partial<ProviderConfig>) =>
+      setConfig((prev) => ({ ...prev, ...updates })),
+    hasEnvKey: hasEnvKey(providerId),
+  };
+}
+
+function ProviderItem({
+  providerId,
+  onEnabledChange,
+}: {
+  providerId: ProviderId;
+  onEnabledChange: (providerId: ProviderId, enabled: boolean) => void;
+}) {
+  const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
+  const state = useProviderState(providerId);
+
+  useEffect(() => {
+    if (state.config.enabled) {
+      onEnabledChange(providerId, true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleConfigChange = (updates: Partial<ProviderConfig>) => {
+    state.setConfig(updates);
+    if (updates.enabled !== undefined) {
+      onEnabledChange(providerId, updates.enabled);
+    }
+  };
+
+  const handleApiKeyChange = (key: string) => {
+    state.setApiKey(key);
+  };
+
+  return (
+    <ProviderListItem
+      providerId={providerId}
+      label={provider.label}
+      config={state.config}
+      apiKey={state.apiKey}
+      hasEnvKey={state.hasEnvKey}
+      onConfigChange={handleConfigChange}
+      onApiKeyChange={handleApiKeyChange}
+    />
+  );
+}
+
+export function AccountStep({ onSubmit }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiKeyInputs, setApiKeyInputs] =
-    useState<Record<string, string>>(initialKeys);
-  const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
-  const [search, setSearch] = useState("");
+  const [enabledProviders, setEnabledProviders] = useState<Set<ProviderId>>(
+    new Set(),
+  );
 
   const handleViewChange = (newView: "account" | "byok") => {
     setIsExiting(true);
@@ -74,31 +98,21 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
   const handleSubmit = () => {
     setIsSubmitting(true);
     setTimeout(() => {
-      onSubmit(apiKeyInputs);
+      onSubmit();
     }, 500);
   };
 
-  const handleApiKeyChange = (provider: string, value: string) => {
-    setApiKeyInputs((prev) => ({
-      ...prev,
-      [provider]: value,
-    }));
+  const handleEnabledChange = (providerId: ProviderId, enabled: boolean) => {
+    setEnabledProviders((prev) => {
+      const next = new Set(prev);
+      if (enabled) {
+        next.add(providerId);
+      } else {
+        next.delete(providerId);
+      }
+      return next;
+    });
   };
-
-  const toggleKeyVisibility = (provider: string) => {
-    setShowKeys((prev) => ({
-      ...prev,
-      [provider]: !prev[provider],
-    }));
-  };
-
-  const hasAtLeastOneKey = Object.values(apiKeyInputs).some(
-    (val) => val.trim().length > 0,
-  );
-
-  const filteredProviders = API_KEY_CONFIG.filter((p) =>
-    p.label.toLowerCase().includes(search.toLowerCase()),
-  );
 
   if (view === "byok") {
     return (
@@ -116,70 +130,32 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <h2 className="text-foreground text-2xl font-bold">
-              Bring your own keys
+              Configure providers
             </h2>
             <p className="text-muted-foreground text-sm">
-              Your keys are stored securely on your device and never leave it.
+              Your API keys are stored securely on your device. Enable providers
+              and configure their API keys to get started.
             </p>
           </div>
 
-          <div className="relative">
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-            <Input
-              placeholder="Search providers..."
-              className="pl-9"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="grid max-h-[50svh] grid-cols-1 gap-3 overflow-y-auto pr-2 md:grid-cols-2">
-            {filteredProviders.map((config) => {
-              return (
-                <div
-                  key={config.provider}
-                  className={cn("flex flex-col gap-3 rounded-md border p-4")}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold">{config.label}</span>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      type={showKeys[config.provider] ? "text" : "password"}
-                      autoSave="false"
-                      placeholder="API Key"
-                      className="h-8 pr-8 text-xs"
-                      value={apiKeyInputs[config.provider] || ""}
-                      onChange={(e) =>
-                        handleApiKeyChange(config.provider, e.target.value)
-                      }
-                    />
-                    <Button
-                      title={
-                        showKeys[config.provider] ? "Hide Key" : "Show Key"
-                      }
-                      variant="ghost"
-                      onClick={() => toggleKeyVisibility(config.provider)}
-                      className="absolute top-1/2 right-2 size-4 -translate-y-1/2 p-0 hover:bg-transparent"
-                    >
-                      {showKeys[config.provider] ? (
-                        <EyeOffIcon className="size-3" />
-                      ) : (
-                        <EyeIcon className="size-3" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <Accordion
+            type="single"
+            collapsible
+            className="border-border max-h-[50svh] w-full overflow-y-auto rounded-md border"
+          >
+            {PROVIDER_REGISTRY.map((provider) => (
+              <ProviderItem
+                key={provider.id}
+                providerId={provider.id}
+                onEnabledChange={handleEnabledChange}
+              />
+            ))}
+          </Accordion>
 
           <div className="mt-2 flex flex-col gap-3">
             <Button
               onClick={handleSubmit}
-              disabled={!hasAtLeastOneKey || isSubmitting}
+              disabled={enabledProviders.size < 1 || isSubmitting}
               className="w-full"
             >
               Finish Setup

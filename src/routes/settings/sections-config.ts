@@ -6,6 +6,7 @@ import AppearanceSection from "./sections/appearance";
 import EditorSection from "./sections/editor";
 import McpSection from "./sections/mcp";
 import MessagesSection from "./sections/messages";
+import ProvidersSection from "./sections/providers";
 import StreamingSection from "./sections/streaming";
 import TitlesSection from "./sections/titles";
 import ToolsSection from "./sections/tools";
@@ -20,6 +21,7 @@ interface SettingsSection {
 
 const componentMap: Record<SectionId, ComponentType> = {
   account: AccountSection,
+  providers: ProvidersSection,
   appearance: AppearanceSection,
   editor: EditorSection,
   messages: MessagesSection,

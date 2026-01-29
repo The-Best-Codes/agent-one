@@ -1,12 +1,8 @@
 import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
-import {
-  cerebrasApiKeyAtom,
-  googleGenerativeAiApiKeyAtom,
-  groqApiKeyAtom,
-  openrouterApiKeyAtom,
-} from "../jotai/api-key-atoms";
+import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
+import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
   colorThemeAtom,
   enabledToolsAtom,
@@ -36,12 +32,12 @@ import {
   toolConfigsAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
+import {
+  PROVIDER_REGISTRY,
+  type ProviderStorageKey,
+} from "../providers/registry";
 import { type DefaultSettings } from "./types";
 
-/**
- * Resets all settings to their default values.
- * This function updates all Jotai atoms to their default values.
- */
 export function resetAllSettings(): void {
   const store = getDefaultStore();
 
@@ -66,23 +62,31 @@ export function resetAllSettings(): void {
   store.set(notificationSettingAtom, RESET);
   store.set(userNameAtom, RESET);
   store.set(systemPromptAppendixAtom, RESET);
-  store.set(googleGenerativeAiApiKeyAtom, RESET);
-  store.set(groqApiKeyAtom, RESET);
-  store.set(openrouterApiKeyAtom, RESET);
-  store.set(cerebrasApiKeyAtom, RESET);
   store.set(enabledToolsAtom, RESET);
   store.set(toolConfigsAtom, RESET);
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
   store.set(titleGenerationAtom, RESET);
+
+  for (const provider of PROVIDER_REGISTRY) {
+    store.set(getApiKeyBaseAtom(provider.id), RESET);
+    store.set(providerConfigAtoms[provider.id], RESET);
+  }
 }
 
-/**
- * Resets a specific setting to its default value.
- * @param key - The key of the setting to reset
- */
+function isProviderStorageKey(key: string): key is ProviderStorageKey {
+  return PROVIDER_REGISTRY.some((p) => p.storageKey === key);
+}
+
 export function resetSetting(key: keyof DefaultSettings): void {
   const store = getDefaultStore();
+
+  if (isProviderStorageKey(key)) {
+    const provider = PROVIDER_REGISTRY.find((p) => p.storageKey === key)!;
+    store.set(getApiKeyBaseAtom(provider.id), RESET);
+    store.set(providerConfigAtoms[provider.id], RESET);
+    return;
+  }
 
   switch (key) {
     case "MARKDOWN_HIGHLIGHTING":
@@ -162,18 +166,6 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SYSTEM_PROMPT_APPENDIX":
       store.set(systemPromptAppendixAtom, RESET);
-      break;
-    case "GOOGLE_GENERATIVE_AI_API_KEY":
-      store.set(googleGenerativeAiApiKeyAtom, RESET);
-      break;
-    case "GROQ_API_KEY":
-      store.set(groqApiKeyAtom, RESET);
-      break;
-    case "OPENROUTER_API_KEY":
-      store.set(openrouterApiKeyAtom, RESET);
-      break;
-    case "CEREBRAS_API_KEY":
-      store.set(cerebrasApiKeyAtom, RESET);
       break;
     case "TITLE_GENERATION":
       store.set(titleGenerationAtom, RESET);
