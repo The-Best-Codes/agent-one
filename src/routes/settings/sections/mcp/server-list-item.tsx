@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,9 +41,7 @@ export function ServerListItem({
         <AccordionTrigger className="hover:no-underline">
           <div className="flex items-center gap-2">
             <span>{server.name || "Unnamed Server"}</span>
-            <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-xs">
-              {getServerTypeLabel(server)}
-            </span>
+            <Badge>{getServerTypeLabel(server)}</Badge>
           </div>
         </AccordionTrigger>
         <Switch
