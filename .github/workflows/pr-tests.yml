@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: tenki-standard-autoscale
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: true
