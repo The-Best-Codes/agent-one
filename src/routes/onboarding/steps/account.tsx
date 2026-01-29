@@ -40,22 +40,23 @@ function useProviderState(providerId: ProviderId) {
 
 function ProviderItem({
   providerId,
-  onConfigured,
+  onEnabledChange,
 }: {
   providerId: ProviderId;
-  onConfigured: () => void;
+  onEnabledChange: (enabled: boolean) => void;
 }) {
   const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
   const state = useProviderState(providerId);
 
   const handleConfigChange = (updates: Partial<ProviderConfig>) => {
     state.setConfig(updates);
-    onConfigured();
+    if (updates.enabled !== undefined) {
+      onEnabledChange(updates.enabled);
+    }
   };
 
   const handleApiKeyChange = (key: string) => {
     state.setApiKey(key);
-    onConfigured();
   };
 
   return (
@@ -75,7 +76,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasConfiguredAny, setHasConfiguredAny] = useState(false);
+  const [enabledCount, setEnabledCount] = useState(0);
 
   const handleViewChange = (newView: "account" | "byok") => {
     setIsExiting(true);
@@ -92,8 +93,8 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     }, 500);
   };
 
-  const handleProviderConfigured = () => {
-    setHasConfiguredAny(true);
+  const handleEnabledChange = (enabled: boolean) => {
+    setEnabledCount((prev) => prev + (enabled ? 1 : -1));
   };
 
   if (view === "byok") {
@@ -115,8 +116,8 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
               Configure providers
             </h2>
             <p className="text-muted-foreground text-sm">
-              Your keys are stored securely on your device and never leave it.
-              Enable providers and configure their API keys to get started.
+              Your API keys are stored securely on your device. Enable providers
+              and configure their API keys to get started.
             </p>
           </div>
 
@@ -129,7 +130,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
               <ProviderItem
                 key={provider.id}
                 providerId={provider.id}
-                onConfigured={handleProviderConfigured}
+                onEnabledChange={handleEnabledChange}
               />
             ))}
           </Accordion>
@@ -137,7 +138,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
           <div className="mt-2 flex flex-col gap-3">
             <Button
               onClick={handleSubmit}
-              disabled={!hasConfiguredAny || isSubmitting}
+              disabled={enabledCount < 1 || isSubmitting}
               className="w-full"
             >
               Finish Setup
