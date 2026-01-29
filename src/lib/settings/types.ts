@@ -56,28 +56,6 @@ export interface McpHttpServerConfig extends McpServerConfigBase {
 
 export type McpServerConfig = McpStdioServerConfig | McpHttpServerConfig;
 
-export type ProviderId =
-  | "cerebras"
-  | "google"
-  | "groq"
-  | "openrouter"
-  | "opencode";
-
-export interface ProviderConfig {
-  enabled: boolean;
-  headers: Record<string, string>;
-}
-
-export type ProviderConfigs = Record<ProviderId, ProviderConfig>;
-
-export const DEFAULT_PROVIDER_CONFIGS: ProviderConfigs = {
-  cerebras: { enabled: true, headers: {} },
-  google: { enabled: true, headers: {} },
-  groq: { enabled: true, headers: {} },
-  openrouter: { enabled: true, headers: {} },
-  opencode: { enabled: true, headers: {} },
-};
-
 export type ToolId =
   | "dateTime"
   | "waitNumberMilliseconds"
@@ -148,7 +126,6 @@ export interface DefaultSettings {
   GROQ_API_KEY: string;
   OPENROUTER_API_KEY: string;
   CEREBRAS_API_KEY: string;
-  OPENCODE_API_KEY: string;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -215,5 +192,4 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   GROQ_API_KEY: "",
   OPENROUTER_API_KEY: "",
   CEREBRAS_API_KEY: "",
-  OPENCODE_API_KEY: "",
 };

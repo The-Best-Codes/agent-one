@@ -11,7 +11,6 @@ import {
   cerebrasConfigAtom,
   googleConfigAtom,
   groqConfigAtom,
-  opencodeConfigAtom,
   openrouterConfigAtom,
 } from "../jotai/provider-atoms";
 import {
@@ -83,7 +82,6 @@ export function resetAllSettings(): void {
   store.set(googleConfigAtom, RESET);
   store.set(groqConfigAtom, RESET);
   store.set(openrouterConfigAtom, RESET);
-  store.set(opencodeConfigAtom, RESET);
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
   store.set(titleGenerationAtom, RESET);

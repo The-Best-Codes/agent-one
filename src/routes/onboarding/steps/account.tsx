@@ -47,11 +47,6 @@ const API_KEY_CONFIG: ApiKeyConfig[] = [
     key: "CEREBRAS_API_KEY",
     label: "Cerebras",
   },
-  {
-    provider: "opencode",
-    key: "OPENCODE_API_KEY",
-    label: "OpenCode",
-  },
 ];
 
 export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {

@@ -10,20 +10,17 @@ import {
 import { getCerebras } from "@/lib/ai/providers/cerebras";
 import { getGoogle } from "@/lib/ai/providers/google";
 import { getGroq } from "@/lib/ai/providers/groq";
-import { getOpenCode } from "@/lib/ai/providers/opencode";
 import { getOpenRouter } from "@/lib/ai/providers/openrouter";
 import {
   cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
-  opencodeApiKeyAtom,
   openrouterApiKeyAtom,
 } from "@/lib/jotai/api-key-atoms";
 import {
   cerebrasConfigAtom,
   googleConfigAtom,
   groqConfigAtom,
-  opencodeConfigAtom,
   openrouterConfigAtom,
 } from "@/lib/jotai/provider-atoms";
 
@@ -62,7 +59,6 @@ const PREFERRED_MODELS_BY_PROVIDER: Record<string, string[]> = {
   groq: ["groq-moonshotai/kimi-k2-instruct-0905"],
   google: ["google-gemini-2.5-flash"],
   cerebras: ["cerebras-zai-glm-4.7"],
-  opencode: ["opencode-claude-sonnet-4-5"],
 };
 
 const typedModelsDevData = modelsDevData as unknown as ModelsDevData;
@@ -106,13 +102,11 @@ export function useModelCatalog() {
   const groqApiKey = useAtomValue(groqApiKeyAtom);
   const cerebrasApiKey = useAtomValue(cerebrasApiKeyAtom);
   const openrouterApiKey = useAtomValue(openrouterApiKeyAtom);
-  const opencodeApiKey = useAtomValue(opencodeApiKeyAtom);
 
   const cerebrasConfig = useAtomValue(cerebrasConfigAtom);
   const googleConfig = useAtomValue(googleConfigAtom);
   const groqConfig = useAtomValue(groqConfigAtom);
   const openrouterConfig = useAtomValue(openrouterConfigAtom);
-  const opencodeConfig = useAtomValue(opencodeConfigAtom);
 
   const providerHasApiKey = useMemo(
     () => ({
@@ -126,17 +120,8 @@ export function useModelCatalog() {
       openrouter: Boolean(
         openrouterApiKey || import.meta.env.AGENT_ONE_OPENROUTER_API_KEY,
       ),
-      opencode: Boolean(
-        opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY,
-      ),
     }),
-    [
-      googleApiKey,
-      groqApiKey,
-      cerebrasApiKey,
-      openrouterApiKey,
-      opencodeApiKey,
-    ],
+    [googleApiKey, groqApiKey, cerebrasApiKey, openrouterApiKey],
   );
 
   const providerIsAvailable = useMemo(
@@ -145,14 +130,12 @@ export function useModelCatalog() {
       groq: groqConfig.enabled,
       cerebras: cerebrasConfig.enabled,
       openrouter: openrouterConfig.enabled,
-      opencode: opencodeConfig.enabled,
     }),
     [
       googleConfig.enabled,
       groqConfig.enabled,
       cerebrasConfig.enabled,
       openrouterConfig.enabled,
-      opencodeConfig.enabled,
     ],
   );
 
@@ -192,15 +175,6 @@ export function useModelCatalog() {
     [openrouterApiKey, openrouterConfig.headers],
   );
 
-  const openCodeProvider = useMemo(
-    () =>
-      getOpenCode(
-        opencodeApiKey || import.meta.env.AGENT_ONE_OPENCODE_API_KEY,
-        opencodeConfig.headers,
-      ),
-    [opencodeApiKey, opencodeConfig.headers],
-  );
-
   const AVAILABLE_MODELS = useMemo(() => {
     return [
       ...mapModelsDevModels("cerebras", "Cerebras", cerebrasProvider),
@@ -226,20 +200,8 @@ export function useModelCatalog() {
         openRouterProvider,
         isChatModel,
       ),
-      ...mapModelsDevModels(
-        "opencode",
-        "OpenCode",
-        openCodeProvider,
-        isChatModel,
-      ),
     ];
-  }, [
-    googleProvider,
-    groqProvider,
-    cerebrasProvider,
-    openRouterProvider,
-    openCodeProvider,
-  ]);
+  }, [googleProvider, groqProvider, cerebrasProvider, openRouterProvider]);
 
   const AVAILABLE_IMAGE_MODELS = useMemo(() => {
     return [
@@ -259,7 +221,6 @@ export function useModelCatalog() {
       groq: "Groq",
       cerebras: "Cerebras",
       openrouter: "OpenRouter",
-      opencode: "OpenCode",
     };
 
     return AVAILABLE_CHAT_MODELS.filter((model) => {
@@ -289,13 +250,7 @@ export function useModelCatalog() {
         return undefined;
       }
 
-      const providerOrder = [
-        "openrouter",
-        "groq",
-        "google",
-        "cerebras",
-        "opencode",
-      ];
+      const providerOrder = ["openrouter", "groq", "google", "cerebras"];
 
       for (const providerId of providerOrder) {
         if (

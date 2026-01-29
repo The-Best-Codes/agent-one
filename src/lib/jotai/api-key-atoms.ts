@@ -48,10 +48,3 @@ const cerebrasAtoms = createApiKeyAtoms(
 );
 export const cerebrasApiKeyAtom = cerebrasAtoms.unwrappedAtom;
 export const cerebrasApiKeyLoadableAtom = cerebrasAtoms.loadableAtom;
-
-const opencodeAtoms = createApiKeyAtoms(
-  "OPENCODE_API_KEY",
-  DEFAULT_SETTINGS.OPENCODE_API_KEY,
-);
-export const opencodeApiKeyAtom = opencodeAtoms.unwrappedAtom;
-export const opencodeApiKeyLoadableAtom = opencodeAtoms.loadableAtom;

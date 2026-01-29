@@ -8,17 +8,15 @@ import {
   cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
-  opencodeApiKeyAtom,
   openrouterApiKeyAtom,
 } from "@/lib/jotai/api-key-atoms";
 import {
   cerebrasConfigAtom,
   googleConfigAtom,
   groqConfigAtom,
-  opencodeConfigAtom,
   openrouterConfigAtom,
+  type ProviderId,
 } from "@/lib/jotai/provider-atoms";
-import type { ProviderId } from "@/lib/settings/types";
 
 import { ProviderListItem } from "./provider-list-item";
 
@@ -54,12 +52,6 @@ const PROVIDERS: ProviderDefinition[] = [
     description: "Unified access to many AI models via a single API.",
     envKey: "AGENT_ONE_OPENROUTER_API_KEY",
   },
-  {
-    id: "opencode",
-    label: "OpenCode",
-    description: "OpenCode AI models and services.",
-    envKey: "AGENT_ONE_OPENCODE_API_KEY",
-  },
 ];
 
 export default function ProvidersSection() {
@@ -69,13 +61,11 @@ export default function ProvidersSection() {
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
-  const [opencodeKey, setOpencodeKey] = useAtom(opencodeApiKeyAtom);
 
   const [cerebrasConfig, setCerebrasConfig] = useAtom(cerebrasConfigAtom);
   const [googleConfig, setGoogleConfig] = useAtom(googleConfigAtom);
   const [groqConfig, setGroqConfig] = useAtom(groqConfigAtom);
   const [openrouterConfig, setOpenrouterConfig] = useAtom(openrouterConfigAtom);
-  const [opencodeConfig, setOpencodeConfig] = useAtom(opencodeConfigAtom);
 
   const getProviderState = (providerId: ProviderId) => {
     switch (providerId) {
@@ -112,14 +102,6 @@ export default function ProvidersSection() {
           config: openrouterConfig,
           setConfig: setOpenrouterConfig,
           hasEnvKey: Boolean(import.meta.env.AGENT_ONE_OPENROUTER_API_KEY),
-        };
-      case "opencode":
-        return {
-          apiKey: opencodeKey,
-          setApiKey: setOpencodeKey,
-          config: opencodeConfig,
-          setConfig: setOpencodeConfig,
-          hasEnvKey: Boolean(import.meta.env.AGENT_ONE_OPENCODE_API_KEY),
         };
     }
   };

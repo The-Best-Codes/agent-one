@@ -6,7 +6,6 @@ import {
   cerebrasApiKeyAtom,
   googleGenerativeAiApiKeyAtom,
   groqApiKeyAtom,
-  opencodeApiKeyAtom,
   openrouterApiKeyAtom,
 } from "@/lib/jotai/api-key-atoms";
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
@@ -30,7 +29,6 @@ export default function OnboardingRoute() {
   const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
   const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
   const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
-  const [opencodeKey, setOpencodeKey] = useAtom(opencodeApiKeyAtom);
 
   useEffect(() => {
     if (onboardingCompleted) {
@@ -52,7 +50,6 @@ export default function OnboardingRoute() {
     if (keys.google) setGoogleKey(keys.google);
     if (keys.groq) setGroqKey(keys.groq);
     if (keys.openrouter) setOpenrouterKey(keys.openrouter);
-    if (keys.opencode) setOpencodeKey(keys.opencode);
 
     setCurrentStep("welcome");
   };
@@ -66,7 +63,6 @@ export default function OnboardingRoute() {
     google: googleKey,
     groq: groqKey,
     openrouter: openrouterKey,
-    opencode: opencodeKey,
   };
 
   return (
