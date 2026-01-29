@@ -1,33 +1,81 @@
+import { useAtom } from "jotai";
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
-  EyeIcon,
-  EyeOffIcon,
   KeyIcon,
   LogInIcon,
-  SearchIcon,
   UserPlusIcon,
 } from "lucide-react";
 import { useState } from "react";
 
+import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PROVIDER_REGISTRY } from "@/lib/providers/registry";
+import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
+import {
+  getProviderConfigAtom,
+  type ProviderConfig,
+  type ProviderId,
+} from "@/lib/jotai/provider-atoms";
+import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/providers/registry";
 import { cn } from "@/lib/utils";
+import { ProviderListItem } from "@/routes/settings/sections/providers/provider-list-item";
 
 interface AccountStepProps {
-  onSubmit: (keys: Record<string, string>) => void;
-  initialKeys?: Record<string, string>;
+  onSubmit: () => void;
 }
 
-export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
+function useProviderState(providerId: ProviderId) {
+  const [apiKey, setApiKey] = useAtom(getApiKeyAtom(providerId));
+  const [config, setConfig] = useAtom(getProviderConfigAtom(providerId));
+
+  return {
+    apiKey,
+    setApiKey,
+    config,
+    setConfig: (updates: Partial<ProviderConfig>) =>
+      setConfig((prev) => ({ ...prev, ...updates })),
+    hasEnvKey: hasEnvKey(providerId),
+  };
+}
+
+function ProviderItem({
+  providerId,
+  onConfigured,
+}: {
+  providerId: ProviderId;
+  onConfigured: () => void;
+}) {
+  const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
+  const state = useProviderState(providerId);
+
+  const handleConfigChange = (updates: Partial<ProviderConfig>) => {
+    state.setConfig(updates);
+    onConfigured();
+  };
+
+  const handleApiKeyChange = (key: string) => {
+    state.setApiKey(key);
+    onConfigured();
+  };
+
+  return (
+    <ProviderListItem
+      providerId={providerId}
+      label={provider.label}
+      config={state.config}
+      apiKey={state.apiKey}
+      hasEnvKey={state.hasEnvKey}
+      onConfigChange={handleConfigChange}
+      onApiKeyChange={handleApiKeyChange}
+    />
+  );
+}
+
+export function AccountStep({ onSubmit }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiKeyInputs, setApiKeyInputs] =
-    useState<Record<string, string>>(initialKeys);
-  const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
-  const [search, setSearch] = useState("");
+  const [hasConfiguredAny, setHasConfiguredAny] = useState(false);
 
   const handleViewChange = (newView: "account" | "byok") => {
     setIsExiting(true);
@@ -40,31 +88,13 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
   const handleSubmit = () => {
     setIsSubmitting(true);
     setTimeout(() => {
-      onSubmit(apiKeyInputs);
+      onSubmit();
     }, 500);
   };
 
-  const handleApiKeyChange = (provider: string, value: string) => {
-    setApiKeyInputs((prev) => ({
-      ...prev,
-      [provider]: value,
-    }));
+  const handleProviderConfigured = () => {
+    setHasConfiguredAny(true);
   };
-
-  const toggleKeyVisibility = (provider: string) => {
-    setShowKeys((prev) => ({
-      ...prev,
-      [provider]: !prev[provider],
-    }));
-  };
-
-  const hasAtLeastOneKey = Object.values(apiKeyInputs).some(
-    (val) => val.trim().length > 0,
-  );
-
-  const filteredProviders = PROVIDER_REGISTRY.filter((p) =>
-    p.label.toLowerCase().includes(search.toLowerCase()),
-  );
 
   if (view === "byok") {
     return (
@@ -82,66 +112,32 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <h2 className="text-foreground text-2xl font-bold">
-              Bring your own keys
+              Configure providers
             </h2>
             <p className="text-muted-foreground text-sm">
               Your keys are stored securely on your device and never leave it.
+              Enable providers and configure their API keys to get started.
             </p>
           </div>
 
-          <div className="relative">
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-            <Input
-              placeholder="Search providers..."
-              className="pl-9"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="grid max-h-[50svh] grid-cols-1 gap-3 overflow-y-auto pr-2 md:grid-cols-2">
-            {filteredProviders.map((provider) => (
-              <div
+          <Accordion
+            type="single"
+            collapsible
+            className="border-border max-h-[50svh] w-full overflow-y-auto rounded-md border"
+          >
+            {PROVIDER_REGISTRY.map((provider) => (
+              <ProviderItem
                 key={provider.id}
-                className={cn("flex flex-col gap-3 rounded-md border p-4")}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold">{provider.label}</span>
-                  </div>
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showKeys[provider.id] ? "text" : "password"}
-                    autoSave="false"
-                    placeholder="API Key"
-                    className="h-8 pr-8 text-xs"
-                    value={apiKeyInputs[provider.id] || ""}
-                    onChange={(e) =>
-                      handleApiKeyChange(provider.id, e.target.value)
-                    }
-                  />
-                  <Button
-                    title={showKeys[provider.id] ? "Hide Key" : "Show Key"}
-                    variant="ghost"
-                    onClick={() => toggleKeyVisibility(provider.id)}
-                    className="absolute top-1/2 right-2 size-4 -translate-y-1/2 p-0 hover:bg-transparent"
-                  >
-                    {showKeys[provider.id] ? (
-                      <EyeOffIcon className="size-3" />
-                    ) : (
-                      <EyeIcon className="size-3" />
-                    )}
-                  </Button>
-                </div>
-              </div>
+                providerId={provider.id}
+                onConfigured={handleProviderConfigured}
+              />
             ))}
-          </div>
+          </Accordion>
 
           <div className="mt-2 flex flex-col gap-3">
             <Button
               onClick={handleSubmit}
-              disabled={!hasAtLeastOneKey || isSubmitting}
+              disabled={!hasConfiguredAny || isSubmitting}
               className="w-full"
             >
               Finish Setup
