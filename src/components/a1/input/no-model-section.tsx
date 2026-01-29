@@ -15,8 +15,8 @@ export const MainInputNoModelSection = () => {
   }
 
   const settingsPath = chatId
-    ? `/settings?tab=account&chatId=${chatId}`
-    : "/settings?tab=account";
+    ? `/settings?tab=providers&chatId=${chatId}`
+    : "/settings?tab=providers";
 
   return (
     <div className="bg-muted/50 border-muted-foreground/20 text-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none border p-2 md:mb-2 md:rounded-md">
