@@ -1,7 +1,9 @@
 import { useAtom } from "jotai";
+import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
@@ -48,6 +50,11 @@ function ProviderItem({ providerId }: { providerId: ProviderId }) {
 
 export default function ProvidersSection() {
   const { isApiKeysLoading } = useApiKeys();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredProviders = PROVIDER_REGISTRY.filter((provider) =>
+    provider.label.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   if (isApiKeysLoading) {
     return (
@@ -75,15 +82,27 @@ export default function ProvidersSection() {
           to control which models appear in the model selector.
         </p>
 
-        <Accordion
-          type="single"
-          collapsible
-          className="border-border w-full rounded-md border"
-        >
-          {PROVIDER_REGISTRY.map((provider) => (
-            <ProviderItem key={provider.id} providerId={provider.id} />
-          ))}
-        </Accordion>
+        <Input
+          placeholder="Search providers..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
+        {filteredProviders.length > 0 ? (
+          <Accordion
+            type="single"
+            collapsible
+            className="border-border w-full rounded-md border"
+          >
+            {filteredProviders.map((provider) => (
+              <ProviderItem key={provider.id} providerId={provider.id} />
+            ))}
+          </Accordion>
+        ) : (
+          <p className="text-muted-foreground py-4 text-center text-sm">
+            No providers found
+          </p>
+        )}
       </CardContent>
     </Card>
   );
