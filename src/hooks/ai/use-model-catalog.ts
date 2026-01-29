@@ -19,6 +19,13 @@ import {
   opencodeApiKeyAtom,
   openrouterApiKeyAtom,
 } from "@/lib/jotai/api-key-atoms";
+import {
+  cerebrasConfigAtom,
+  googleConfigAtom,
+  groqConfigAtom,
+  opencodeConfigAtom,
+  openrouterConfigAtom,
+} from "@/lib/jotai/provider-atoms";
 
 export interface ModelData {
   id: string;
@@ -101,6 +108,12 @@ export function useModelCatalog() {
   const openrouterApiKey = useAtomValue(openrouterApiKeyAtom);
   const opencodeApiKey = useAtomValue(opencodeApiKeyAtom);
 
+  const cerebrasConfig = useAtomValue(cerebrasConfigAtom);
+  const googleConfig = useAtomValue(googleConfigAtom);
+  const groqConfig = useAtomValue(groqConfigAtom);
+  const openrouterConfig = useAtomValue(openrouterConfigAtom);
+  const opencodeConfig = useAtomValue(opencodeConfigAtom);
+
   const providerHasApiKey = useMemo(
     () => ({
       google: Boolean(
@@ -123,6 +136,24 @@ export function useModelCatalog() {
       cerebrasApiKey,
       openrouterApiKey,
       opencodeApiKey,
+    ],
+  );
+
+  const providerIsAvailable = useMemo(
+    () => ({
+      google: providerHasApiKey.google && googleConfig.enabled,
+      groq: providerHasApiKey.groq && groqConfig.enabled,
+      cerebras: providerHasApiKey.cerebras && cerebrasConfig.enabled,
+      openrouter: providerHasApiKey.openrouter && openrouterConfig.enabled,
+      opencode: providerHasApiKey.opencode && opencodeConfig.enabled,
+    }),
+    [
+      providerHasApiKey,
+      googleConfig.enabled,
+      groqConfig.enabled,
+      cerebrasConfig.enabled,
+      openrouterConfig.enabled,
+      opencodeConfig.enabled,
     ],
   );
 
@@ -225,10 +256,10 @@ export function useModelCatalog() {
         ([, name]) => name === model.provider,
       )?.[0];
       return providerId
-        ? providerHasApiKey[providerId as keyof typeof providerHasApiKey]
+        ? providerIsAvailable[providerId as keyof typeof providerIsAvailable]
         : false;
     });
-  }, [AVAILABLE_CHAT_MODELS, providerHasApiKey]);
+  }, [AVAILABLE_CHAT_MODELS, providerIsAvailable]);
 
   const getModelByIdMemoized = useMemo(
     () => (id: string) => AVAILABLE_MODELS.find((model) => model.id === id),
@@ -256,7 +287,9 @@ export function useModelCatalog() {
       ];
 
       for (const providerId of providerOrder) {
-        if (!providerHasApiKey[providerId as keyof typeof providerHasApiKey]) {
+        if (
+          !providerIsAvailable[providerId as keyof typeof providerIsAvailable]
+        ) {
           continue;
         }
 
@@ -280,7 +313,7 @@ export function useModelCatalog() {
     };
   }, [
     AVAILABLE_CHAT_MODELS_WITH_API_KEY,
-    providerHasApiKey,
+    providerIsAvailable,
     getChatModelByIdMemoized,
   ]);
 

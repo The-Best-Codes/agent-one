@@ -8,6 +8,13 @@ import {
   openrouterApiKeyAtom,
 } from "../jotai/api-key-atoms";
 import {
+  cerebrasConfigAtom,
+  googleConfigAtom,
+  groqConfigAtom,
+  opencodeConfigAtom,
+  openrouterConfigAtom,
+} from "../jotai/provider-atoms";
+import {
   colorThemeAtom,
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
@@ -72,6 +79,11 @@ export function resetAllSettings(): void {
   store.set(cerebrasApiKeyAtom, RESET);
   store.set(enabledToolsAtom, RESET);
   store.set(toolConfigsAtom, RESET);
+  store.set(cerebrasConfigAtom, RESET);
+  store.set(googleConfigAtom, RESET);
+  store.set(groqConfigAtom, RESET);
+  store.set(openrouterConfigAtom, RESET);
+  store.set(opencodeConfigAtom, RESET);
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
   store.set(titleGenerationAtom, RESET);

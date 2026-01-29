@@ -56,6 +56,28 @@ export interface McpHttpServerConfig extends McpServerConfigBase {
 
 export type McpServerConfig = McpStdioServerConfig | McpHttpServerConfig;
 
+export type ProviderId =
+  | "cerebras"
+  | "google"
+  | "groq"
+  | "openrouter"
+  | "opencode";
+
+export interface ProviderConfig {
+  enabled: boolean;
+  headers: Record<string, string>;
+}
+
+export type ProviderConfigs = Record<ProviderId, ProviderConfig>;
+
+export const DEFAULT_PROVIDER_CONFIGS: ProviderConfigs = {
+  cerebras: { enabled: true, headers: {} },
+  google: { enabled: true, headers: {} },
+  groq: { enabled: true, headers: {} },
+  openrouter: { enabled: true, headers: {} },
+  opencode: { enabled: true, headers: {} },
+};
+
 export type ToolId =
   | "dateTime"
   | "waitNumberMilliseconds"
