@@ -1,8 +1,10 @@
 import { atomWithStorage } from "jotai/utils";
 
-const SETTING_PREFIX = "agent-one-setting-";
+import { PROVIDER_REGISTRY, type ProviderId } from "@/lib/providers/registry";
 
-export type ProviderId = "cerebras" | "google" | "groq" | "openrouter";
+export type { ProviderId } from "@/lib/providers/registry";
+
+const SETTING_PREFIX = "agent-one-setting-";
 
 export interface ProviderConfig {
   enabled: boolean;
@@ -14,7 +16,7 @@ const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
   headers: {},
 };
 
-const createProviderConfigAtom = (providerId: ProviderId) => {
+function createProviderConfigAtom(providerId: ProviderId) {
   const key = `${SETTING_PREFIX}PROVIDER_CONFIG_${providerId.toUpperCase()}`;
   return atomWithStorage<ProviderConfig>(
     key,
@@ -24,16 +26,17 @@ const createProviderConfigAtom = (providerId: ProviderId) => {
       getOnInit: true,
     },
   );
-};
+}
 
-export const cerebrasConfigAtom = createProviderConfigAtom("cerebras");
-export const googleConfigAtom = createProviderConfigAtom("google");
-export const groqConfigAtom = createProviderConfigAtom("groq");
-export const openrouterConfigAtom = createProviderConfigAtom("openrouter");
+type ProviderConfigAtom = ReturnType<typeof createProviderConfigAtom>;
 
-export const providerConfigAtoms = {
-  cerebras: cerebrasConfigAtom,
-  google: googleConfigAtom,
-  groq: groqConfigAtom,
-  openrouter: openrouterConfigAtom,
-} as const;
+export const providerConfigAtoms = Object.fromEntries(
+  PROVIDER_REGISTRY.map((provider) => [
+    provider.id,
+    createProviderConfigAtom(provider.id),
+  ]),
+) as Record<ProviderId, ProviderConfigAtom>;
+
+export function getProviderConfigAtom(providerId: ProviderId) {
+  return providerConfigAtoms[providerId];
+}

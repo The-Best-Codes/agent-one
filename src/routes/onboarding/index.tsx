@@ -2,14 +2,10 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-import {
-  cerebrasApiKeyAtom,
-  googleGenerativeAiApiKeyAtom,
-  groqApiKeyAtom,
-  openrouterApiKeyAtom,
-} from "@/lib/jotai/api-key-atoms";
+import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
 import { userNameAtom } from "@/lib/jotai/settings-atoms";
+import { PROVIDER_REGISTRY } from "@/lib/providers/registry";
 
 import { AccountStep } from "./steps/account";
 import { NameStep } from "./steps/name";
@@ -25,10 +21,13 @@ export default function OnboardingRoute() {
   );
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
   const [userName, setUserName] = useAtom(userNameAtom);
-  const [cerebrasKey, setCerebrasKey] = useAtom(cerebrasApiKeyAtom);
-  const [googleKey, setGoogleKey] = useAtom(googleGenerativeAiApiKeyAtom);
-  const [groqKey, setGroqKey] = useAtom(groqApiKeyAtom);
-  const [openrouterKey, setOpenrouterKey] = useAtom(openrouterApiKeyAtom);
+
+  const [openrouterKey, setOpenrouterKey] = useAtom(
+    apiKeyAtoms.openrouter.atom,
+  );
+  const [groqKey, setGroqKey] = useAtom(apiKeyAtoms.groq.atom);
+  const [googleKey, setGoogleKey] = useAtom(apiKeyAtoms.google.atom);
+  const [cerebrasKey, setCerebrasKey] = useAtom(apiKeyAtoms.cerebras.atom);
 
   useEffect(() => {
     if (onboardingCompleted) {
@@ -46,11 +45,10 @@ export default function OnboardingRoute() {
   };
 
   const handleAccountComplete = (keys: Record<string, string>) => {
-    if (keys.cerebras) setCerebrasKey(keys.cerebras);
-    if (keys.google) setGoogleKey(keys.google);
-    if (keys.groq) setGroqKey(keys.groq);
     if (keys.openrouter) setOpenrouterKey(keys.openrouter);
-
+    if (keys.groq) setGroqKey(keys.groq);
+    if (keys.google) setGoogleKey(keys.google);
+    if (keys.cerebras) setCerebrasKey(keys.cerebras);
     setCurrentStep("welcome");
   };
 
@@ -58,12 +56,19 @@ export default function OnboardingRoute() {
     setOnboardingCompleted(true);
   };
 
-  const initialApiKeys = {
-    cerebras: cerebrasKey,
-    google: googleKey,
-    groq: groqKey,
-    openrouter: openrouterKey,
-  };
+  const initialApiKeys = Object.fromEntries(
+    PROVIDER_REGISTRY.map((p) => {
+      const key =
+        p.id === "openrouter"
+          ? openrouterKey
+          : p.id === "groq"
+            ? groqKey
+            : p.id === "google"
+              ? googleKey
+              : cerebrasKey;
+      return [p.id, key];
+    }),
+  );
 
   return (
     <main

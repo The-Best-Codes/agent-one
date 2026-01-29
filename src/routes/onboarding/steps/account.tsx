@@ -12,42 +12,13 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PROVIDER_REGISTRY } from "@/lib/providers/registry";
 import { cn } from "@/lib/utils";
-
-interface ApiKeyConfig {
-  provider: string;
-  key: string;
-  label: string;
-  description?: string;
-}
 
 interface AccountStepProps {
   onSubmit: (keys: Record<string, string>) => void;
   initialKeys?: Record<string, string>;
 }
-
-const API_KEY_CONFIG: ApiKeyConfig[] = [
-  {
-    provider: "openrouter",
-    key: "OPENROUTER_API_KEY",
-    label: "OpenRouter",
-  },
-  {
-    provider: "google",
-    key: "GOOGLE_GENERATIVE_AI_API_KEY",
-    label: "Google",
-  },
-  {
-    provider: "groq",
-    key: "GROQ_API_KEY",
-    label: "Groq",
-  },
-  {
-    provider: "cerebras",
-    key: "CEREBRAS_API_KEY",
-    label: "Cerebras",
-  },
-];
 
 export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
@@ -91,7 +62,7 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
     (val) => val.trim().length > 0,
   );
 
-  const filteredProviders = API_KEY_CONFIG.filter((p) =>
+  const filteredProviders = PROVIDER_REGISTRY.filter((p) =>
     p.label.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -129,46 +100,42 @@ export function AccountStep({ onSubmit, initialKeys = {} }: AccountStepProps) {
           </div>
 
           <div className="grid max-h-[50svh] grid-cols-1 gap-3 overflow-y-auto pr-2 md:grid-cols-2">
-            {filteredProviders.map((config) => {
-              return (
-                <div
-                  key={config.provider}
-                  className={cn("flex flex-col gap-3 rounded-md border p-4")}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold">{config.label}</span>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      type={showKeys[config.provider] ? "text" : "password"}
-                      autoSave="false"
-                      placeholder="API Key"
-                      className="h-8 pr-8 text-xs"
-                      value={apiKeyInputs[config.provider] || ""}
-                      onChange={(e) =>
-                        handleApiKeyChange(config.provider, e.target.value)
-                      }
-                    />
-                    <Button
-                      title={
-                        showKeys[config.provider] ? "Hide Key" : "Show Key"
-                      }
-                      variant="ghost"
-                      onClick={() => toggleKeyVisibility(config.provider)}
-                      className="absolute top-1/2 right-2 size-4 -translate-y-1/2 p-0 hover:bg-transparent"
-                    >
-                      {showKeys[config.provider] ? (
-                        <EyeOffIcon className="size-3" />
-                      ) : (
-                        <EyeIcon className="size-3" />
-                      )}
-                    </Button>
+            {filteredProviders.map((provider) => (
+              <div
+                key={provider.id}
+                className={cn("flex flex-col gap-3 rounded-md border p-4")}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold">{provider.label}</span>
                   </div>
                 </div>
-              );
-            })}
+                <div className="relative">
+                  <Input
+                    type={showKeys[provider.id] ? "text" : "password"}
+                    autoSave="false"
+                    placeholder="API Key"
+                    className="h-8 pr-8 text-xs"
+                    value={apiKeyInputs[provider.id] || ""}
+                    onChange={(e) =>
+                      handleApiKeyChange(provider.id, e.target.value)
+                    }
+                  />
+                  <Button
+                    title={showKeys[provider.id] ? "Hide Key" : "Show Key"}
+                    variant="ghost"
+                    onClick={() => toggleKeyVisibility(provider.id)}
+                    className="absolute top-1/2 right-2 size-4 -translate-y-1/2 p-0 hover:bg-transparent"
+                  >
+                    {showKeys[provider.id] ? (
+                      <EyeOffIcon className="size-3" />
+                    ) : (
+                      <EyeIcon className="size-3" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="mt-2 flex flex-col gap-3">

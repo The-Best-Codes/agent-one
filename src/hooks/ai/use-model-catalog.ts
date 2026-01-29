@@ -7,22 +7,14 @@ import {
   modelsDevData,
   type ModelsDevModel,
 } from "@/assets/model-lists/models-dev";
-import { getCerebras } from "@/lib/ai/providers/cerebras";
-import { getGoogle } from "@/lib/ai/providers/google";
-import { getGroq } from "@/lib/ai/providers/groq";
-import { getOpenRouter } from "@/lib/ai/providers/openrouter";
+import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
+import { providerConfigAtoms } from "@/lib/jotai/provider-atoms";
 import {
-  cerebrasApiKeyAtom,
-  googleGenerativeAiApiKeyAtom,
-  groqApiKeyAtom,
-  openrouterApiKeyAtom,
-} from "@/lib/jotai/api-key-atoms";
-import {
-  cerebrasConfigAtom,
-  googleConfigAtom,
-  groqConfigAtom,
-  openrouterConfigAtom,
-} from "@/lib/jotai/provider-atoms";
+  getEffectiveApiKey,
+  hasApiKey,
+  PROVIDER_REGISTRY,
+  type ProviderId,
+} from "@/lib/providers/registry";
 
 export interface ModelData {
   id: string;
@@ -54,7 +46,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
-const PREFERRED_MODELS_BY_PROVIDER: Record<string, string[]> = {
+const PREFERRED_MODELS_BY_PROVIDER: Record<ProviderId, string[]> = {
   openrouter: ["openrouter-x-ai/grok-4.1-fast"],
   groq: ["groq-moonshotai/kimi-k2-instruct-0905"],
   google: ["google-gemini-2.5-flash"],
@@ -98,138 +90,102 @@ function isImageModel(model: ModelsDevModel): boolean {
 }
 
 export function useModelCatalog() {
-  const googleApiKey = useAtomValue(googleGenerativeAiApiKeyAtom);
-  const groqApiKey = useAtomValue(groqApiKeyAtom);
-  const cerebrasApiKey = useAtomValue(cerebrasApiKeyAtom);
-  const openrouterApiKey = useAtomValue(openrouterApiKeyAtom);
+  const openrouterKey = useAtomValue(apiKeyAtoms.openrouter.atom);
+  const groqKey = useAtomValue(apiKeyAtoms.groq.atom);
+  const googleKey = useAtomValue(apiKeyAtoms.google.atom);
+  const cerebrasKey = useAtomValue(apiKeyAtoms.cerebras.atom);
 
-  const cerebrasConfig = useAtomValue(cerebrasConfigAtom);
-  const googleConfig = useAtomValue(googleConfigAtom);
-  const groqConfig = useAtomValue(groqConfigAtom);
-  const openrouterConfig = useAtomValue(openrouterConfigAtom);
+  const openrouterConfig = useAtomValue(providerConfigAtoms.openrouter);
+  const groqConfig = useAtomValue(providerConfigAtoms.groq);
+  const googleConfig = useAtomValue(providerConfigAtoms.google);
+  const cerebrasConfig = useAtomValue(providerConfigAtoms.cerebras);
+
+  const apiKeys = useMemo(
+    () => ({
+      openrouter: openrouterKey,
+      groq: groqKey,
+      google: googleKey,
+      cerebras: cerebrasKey,
+    }),
+    [openrouterKey, groqKey, googleKey, cerebrasKey],
+  );
+
+  const configs = useMemo(
+    () => ({
+      openrouter: openrouterConfig,
+      groq: groqConfig,
+      google: googleConfig,
+      cerebras: cerebrasConfig,
+    }),
+    [openrouterConfig, groqConfig, googleConfig, cerebrasConfig],
+  );
 
   const providerHasApiKey = useMemo(
-    () => ({
-      google: Boolean(
-        googleApiKey || import.meta.env.AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY,
-      ),
-      groq: Boolean(groqApiKey || import.meta.env.AGENT_ONE_GROQ_API_KEY),
-      cerebras: Boolean(
-        cerebrasApiKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY,
-      ),
-      openrouter: Boolean(
-        openrouterApiKey || import.meta.env.AGENT_ONE_OPENROUTER_API_KEY,
-      ),
-    }),
-    [googleApiKey, groqApiKey, cerebrasApiKey, openrouterApiKey],
+    () =>
+      Object.fromEntries(
+        PROVIDER_REGISTRY.map((p) => [p.id, hasApiKey(p.id, apiKeys[p.id])]),
+      ) as Record<ProviderId, boolean>,
+    [apiKeys],
   );
 
   const providerIsAvailable = useMemo(
-    () => ({
-      google: googleConfig.enabled,
-      groq: groqConfig.enabled,
-      cerebras: cerebrasConfig.enabled,
-      openrouter: openrouterConfig.enabled,
-    }),
-    [
-      googleConfig.enabled,
-      groqConfig.enabled,
-      cerebrasConfig.enabled,
-      openrouterConfig.enabled,
-    ],
+    () =>
+      Object.fromEntries(
+        PROVIDER_REGISTRY.map((p) => [p.id, configs[p.id].enabled]),
+      ) as Record<ProviderId, boolean>,
+    [configs],
   );
 
-  const googleProvider = useMemo(
-    () =>
-      getGoogle(
-        googleApiKey || import.meta.env.AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY,
-        googleConfig.headers,
-      ),
-    [googleApiKey, googleConfig.headers],
-  );
-
-  const groqProvider = useMemo(
-    () =>
-      getGroq(
-        groqApiKey || import.meta.env.AGENT_ONE_GROQ_API_KEY,
-        groqConfig.headers,
-      ),
-    [groqApiKey, groqConfig.headers],
-  );
-
-  const cerebrasProvider = useMemo(
-    () =>
-      getCerebras(
-        cerebrasApiKey || import.meta.env.AGENT_ONE_CEREBRAS_API_KEY,
-        cerebrasConfig.headers,
-      ),
-    [cerebrasApiKey, cerebrasConfig.headers],
-  );
-
-  const openRouterProvider = useMemo(
-    () =>
-      getOpenRouter(
-        openrouterApiKey || import.meta.env.AGENT_ONE_OPENROUTER_API_KEY,
-        openrouterConfig.headers,
-      ),
-    [openrouterApiKey, openrouterConfig.headers],
-  );
+  const providers = useMemo(() => {
+    return Object.fromEntries(
+      PROVIDER_REGISTRY.map((p) => [
+        p.id,
+        p.factory(
+          getEffectiveApiKey(p.id, apiKeys[p.id]),
+          configs[p.id].headers,
+        ),
+      ]),
+    );
+  }, [apiKeys, configs]);
 
   const AVAILABLE_MODELS = useMemo(() => {
-    return [
-      ...mapModelsDevModels("cerebras", "Cerebras", cerebrasProvider),
-      ...mapModelsDevModels("google", "Google", googleProvider),
-      ...mapModelsDevModels("groq", "Groq", groqProvider),
-      ...mapModelsDevModels("openrouter", "OpenRouter", openRouterProvider),
-    ];
-  }, [googleProvider, groqProvider, cerebrasProvider, openRouterProvider]);
+    return PROVIDER_REGISTRY.flatMap((p) =>
+      mapModelsDevModels(p.id, p.label, providers[p.id].languageModel),
+    );
+  }, [providers]);
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
-    return [
-      ...mapModelsDevModels(
-        "cerebras",
-        "Cerebras",
-        cerebrasProvider,
+    return PROVIDER_REGISTRY.flatMap((p) =>
+      mapModelsDevModels(
+        p.id,
+        p.label,
+        providers[p.id].languageModel,
         isChatModel,
       ),
-      ...mapModelsDevModels("google", "Google", googleProvider, isChatModel),
-      ...mapModelsDevModels("groq", "Groq", groqProvider, isChatModel),
-      ...mapModelsDevModels(
-        "openrouter",
-        "OpenRouter",
-        openRouterProvider,
-        isChatModel,
-      ),
-    ];
-  }, [googleProvider, groqProvider, cerebrasProvider, openRouterProvider]);
+    );
+  }, [providers]);
 
   const AVAILABLE_IMAGE_MODELS = useMemo(() => {
-    return [
-      ...mapModelsDevModels("google", "Google", googleProvider, isImageModel),
-      ...mapModelsDevModels(
-        "openrouter",
-        "OpenRouter",
-        openRouterProvider,
+    return PROVIDER_REGISTRY.filter(
+      (p) => p.id === "google" || p.id === "openrouter",
+    ).flatMap((p) =>
+      mapModelsDevModels(
+        p.id,
+        p.label,
+        providers[p.id].languageModel,
         isImageModel,
       ),
-    ];
-  }, [googleProvider, openRouterProvider]);
+    );
+  }, [providers]);
 
   const AVAILABLE_CHAT_MODELS_WITH_API_KEY = useMemo(() => {
-    const providerIdToName: Record<string, string> = {
-      google: "Google",
-      groq: "Groq",
-      cerebras: "Cerebras",
-      openrouter: "OpenRouter",
-    };
+    const providerIdByLabel = Object.fromEntries(
+      PROVIDER_REGISTRY.map((p) => [p.label, p.id]),
+    );
 
     return AVAILABLE_CHAT_MODELS.filter((model) => {
-      const providerId = Object.entries(providerIdToName).find(
-        ([, name]) => name === model.provider,
-      )?.[0];
-      return providerId
-        ? providerIsAvailable[providerId as keyof typeof providerIsAvailable]
-        : false;
+      const providerId = providerIdByLabel[model.provider];
+      return providerId ? providerIsAvailable[providerId as ProviderId] : false;
     });
   }, [AVAILABLE_CHAT_MODELS, providerIsAvailable]);
 
@@ -250,12 +206,10 @@ export function useModelCatalog() {
         return undefined;
       }
 
-      const providerOrder = ["openrouter", "groq", "google", "cerebras"];
+      const providerOrder = PROVIDER_REGISTRY.map((p) => p.id);
 
       for (const providerId of providerOrder) {
-        if (
-          !providerIsAvailable[providerId as keyof typeof providerIsAvailable]
-        ) {
+        if (!providerIsAvailable[providerId]) {
           continue;
         }
 

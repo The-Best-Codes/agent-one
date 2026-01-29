@@ -1,13 +1,9 @@
 import { useAtomValue } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 
-import {
-  cerebrasApiKeyLoadableAtom,
-  googleGenerativeAiApiKeyLoadableAtom,
-  groqApiKeyLoadableAtom,
-  openrouterApiKeyLoadableAtom,
-} from "@/lib/jotai/api-key-atoms";
+import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
 import { getLogger } from "@/lib/logger";
+import { PROVIDER_REGISTRY } from "@/lib/providers/registry";
 
 import { ApiKeysContext } from "./api-keys-contexts";
 
@@ -16,14 +12,9 @@ const logger = getLogger(import.meta.url);
 export const ApiKeysProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const google = useAtomValue(googleGenerativeAiApiKeyLoadableAtom);
-  const groq = useAtomValue(groqApiKeyLoadableAtom);
-  const openrouter = useAtomValue(openrouterApiKeyLoadableAtom);
-  const cerebras = useAtomValue(cerebrasApiKeyLoadableAtom);
-
-  const loadables = useMemo(
-    () => [google, groq, openrouter, cerebras],
-    [google, groq, openrouter, cerebras],
+  const loadables = PROVIDER_REGISTRY.map((p) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useAtomValue(apiKeyAtoms[p.id].loadableAtom),
   );
 
   const isApiKeysLoading = loadables.some((l) => l.state === "loading");

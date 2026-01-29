@@ -1,50 +1,38 @@
 import { atomWithStorage, loadable, unwrap } from "jotai/utils";
 
-import { DEFAULT_SETTINGS } from "@/lib/settings/types";
+import {
+  PROVIDER_REGISTRY,
+  type ProviderId,
+  type ProviderStorageKey,
+} from "@/lib/providers/registry";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 
-const createApiKeyAtoms = <T>(
-  key: keyof typeof DEFAULT_SETTINGS,
-  defaultValue: T,
-) => {
-  const baseAtom = atomWithStorage<T>(key, defaultValue, keyringStorage, {
+function createApiKeyAtoms(storageKey: ProviderStorageKey) {
+  const baseAtom = atomWithStorage<string>(storageKey, "", keyringStorage, {
     getOnInit: true,
   });
 
-  const unwrappedAtom = unwrap(
-    baseAtom,
-    (prev) => (prev as T | undefined) ?? defaultValue,
-  );
-
+  const unwrappedAtom = unwrap(baseAtom, (prev) => prev ?? "");
   const loadableAtom = loadable(baseAtom);
 
-  return { unwrappedAtom, loadableAtom };
-};
+  return { atom: unwrappedAtom, loadableAtom, baseAtom };
+}
 
-const googleAtoms = createApiKeyAtoms(
-  "GOOGLE_GENERATIVE_AI_API_KEY",
-  DEFAULT_SETTINGS.GOOGLE_GENERATIVE_AI_API_KEY,
-);
-export const googleGenerativeAiApiKeyAtom = googleAtoms.unwrappedAtom;
-export const googleGenerativeAiApiKeyLoadableAtom = googleAtoms.loadableAtom;
+export const apiKeyAtoms = Object.fromEntries(
+  PROVIDER_REGISTRY.map((provider) => [
+    provider.id,
+    createApiKeyAtoms(provider.storageKey),
+  ]),
+) as Record<ProviderId, ReturnType<typeof createApiKeyAtoms>>;
 
-const groqAtoms = createApiKeyAtoms(
-  "GROQ_API_KEY",
-  DEFAULT_SETTINGS.GROQ_API_KEY,
-);
-export const groqApiKeyAtom = groqAtoms.unwrappedAtom;
-export const groqApiKeyLoadableAtom = groqAtoms.loadableAtom;
+export function getApiKeyAtom(providerId: ProviderId) {
+  return apiKeyAtoms[providerId].atom;
+}
 
-const openrouterAtoms = createApiKeyAtoms(
-  "OPENROUTER_API_KEY",
-  DEFAULT_SETTINGS.OPENROUTER_API_KEY,
-);
-export const openrouterApiKeyAtom = openrouterAtoms.unwrappedAtom;
-export const openrouterApiKeyLoadableAtom = openrouterAtoms.loadableAtom;
+export function getApiKeyLoadableAtom(providerId: ProviderId) {
+  return apiKeyAtoms[providerId].loadableAtom;
+}
 
-const cerebrasAtoms = createApiKeyAtoms(
-  "CEREBRAS_API_KEY",
-  DEFAULT_SETTINGS.CEREBRAS_API_KEY,
-);
-export const cerebrasApiKeyAtom = cerebrasAtoms.unwrappedAtom;
-export const cerebrasApiKeyLoadableAtom = cerebrasAtoms.loadableAtom;
+export function getApiKeyBaseAtom(providerId: ProviderId) {
+  return apiKeyAtoms[providerId].baseAtom;
+}
