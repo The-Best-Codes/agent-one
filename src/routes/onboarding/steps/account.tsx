@@ -6,7 +6,7 @@ import {
   LogInIcon,
   UserPlusIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -43,15 +43,22 @@ function ProviderItem({
   onEnabledChange,
 }: {
   providerId: ProviderId;
-  onEnabledChange: (enabled: boolean) => void;
+  onEnabledChange: (providerId: ProviderId, enabled: boolean) => void;
 }) {
   const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
   const state = useProviderState(providerId);
 
+  useEffect(() => {
+    if (state.config.enabled) {
+      onEnabledChange(providerId, true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleConfigChange = (updates: Partial<ProviderConfig>) => {
     state.setConfig(updates);
     if (updates.enabled !== undefined) {
-      onEnabledChange(updates.enabled);
+      onEnabledChange(providerId, updates.enabled);
     }
   };
 
@@ -76,7 +83,9 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [enabledCount, setEnabledCount] = useState(0);
+  const [enabledProviders, setEnabledProviders] = useState<Set<ProviderId>>(
+    new Set(),
+  );
 
   const handleViewChange = (newView: "account" | "byok") => {
     setIsExiting(true);
@@ -93,8 +102,16 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     }, 500);
   };
 
-  const handleEnabledChange = (enabled: boolean) => {
-    setEnabledCount((prev) => prev + (enabled ? 1 : -1));
+  const handleEnabledChange = (providerId: ProviderId, enabled: boolean) => {
+    setEnabledProviders((prev) => {
+      const next = new Set(prev);
+      if (enabled) {
+        next.add(providerId);
+      } else {
+        next.delete(providerId);
+      }
+      return next;
+    });
   };
 
   if (view === "byok") {
@@ -138,7 +155,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
           <div className="mt-2 flex flex-col gap-3">
             <Button
               onClick={handleSubmit}
-              disabled={enabledCount < 1 || isSubmitting}
+              disabled={enabledProviders.size < 1 || isSubmitting}
               className="w-full"
             >
               Finish Setup
