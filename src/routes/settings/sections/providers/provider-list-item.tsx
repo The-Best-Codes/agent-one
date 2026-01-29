@@ -16,7 +16,6 @@ import type { ProviderConfig, ProviderId } from "@/lib/jotai/provider-atoms";
 interface ProviderListItemProps {
   providerId: ProviderId;
   label: string;
-  description?: string;
   config: ProviderConfig;
   apiKey: string;
   hasEnvKey: boolean;
@@ -27,7 +26,6 @@ interface ProviderListItemProps {
 export function ProviderListItem({
   providerId,
   label,
-  description,
   config,
   apiKey,
   hasEnvKey,
@@ -67,10 +65,6 @@ export function ProviderListItem({
       </div>
       <AccordionContent className="px-3 pb-3">
         <div className="flex flex-col gap-4">
-          {description && (
-            <p className="text-muted-foreground text-sm">{description}</p>
-          )}
-
           <div className="flex flex-col gap-2">
             <Label htmlFor={`api-key-${providerId}`} className="text-xs">
               API Key

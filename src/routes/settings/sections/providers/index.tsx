@@ -23,33 +23,20 @@ import { ProviderListItem } from "./provider-list-item";
 interface ProviderDefinition {
   id: ProviderId;
   label: string;
-  description?: string;
   envKey: string;
 }
 
 const PROVIDERS: ProviderDefinition[] = [
-  {
-    id: "cerebras",
-    label: "Cerebras",
-    description: "Fast inference provider for LLM models.",
-    envKey: "AGENT_ONE_CEREBRAS_API_KEY",
-  },
+  { id: "cerebras", label: "Cerebras", envKey: "AGENT_ONE_CEREBRAS_API_KEY" },
   {
     id: "google",
     label: "Google Generative AI",
-    description: "Access Gemini and other Google AI models.",
     envKey: "AGENT_ONE_GOOGLE_GENERATIVE_AI_API_KEY",
   },
-  {
-    id: "groq",
-    label: "Groq",
-    description: "Ultra-fast inference with Groq LPUs.",
-    envKey: "AGENT_ONE_GROQ_API_KEY",
-  },
+  { id: "groq", label: "Groq", envKey: "AGENT_ONE_GROQ_API_KEY" },
   {
     id: "openrouter",
     label: "OpenRouter",
-    description: "Unified access to many AI models via a single API.",
     envKey: "AGENT_ONE_OPENROUTER_API_KEY",
   },
 ];
@@ -144,7 +131,6 @@ export default function ProvidersSection() {
                 key={provider.id}
                 providerId={provider.id}
                 label={provider.label}
-                description={provider.description}
                 config={state.config}
                 apiKey={state.apiKey}
                 hasEnvKey={state.hasEnvKey}
