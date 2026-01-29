@@ -1,5 +1,7 @@
 // If you update this file, check if you also need to update reset-settings.ts in this directory
 
+import type { ProviderStorageKey } from "@/lib/providers/registry";
+
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
 export type ThemeOption = "light" | "dark" | "system";
@@ -93,8 +95,6 @@ export interface ToolConfigs {
   getUrlContent: GetUrlContentToolConfig;
   webSearch: WebSearchToolConfig;
 }
-
-import type { ProviderStorageKey } from "@/lib/providers/registry";
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
 
