@@ -21,7 +21,7 @@ import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -47,6 +47,16 @@ export default function SettingsRoute() {
       navigate(`/chat/${chatId}`);
     } else {
       navigate("/chat");
+    }
+  };
+
+  const handleSectionChange = (section: string) => {
+    setActiveSection(section);
+    if (tabParam) {
+      setSearchParams((prev) => {
+        prev.delete("tab");
+        return prev;
+      });
     }
   };
 
@@ -78,7 +88,7 @@ export default function SettingsRoute() {
                 <SettingsSidebar
                   activeSection={displayedSection}
                   onSectionChange={(section) => {
-                    setActiveSection(section);
+                    handleSectionChange(section);
                     setIsDrawerOpen(false);
                   }}
                 />
@@ -107,7 +117,7 @@ export default function SettingsRoute() {
               </div>
               <SettingsSidebar
                 activeSection={displayedSection}
-                onSectionChange={setActiveSection}
+                onSectionChange={handleSectionChange}
               />
             </div>
           </ScrollArea>

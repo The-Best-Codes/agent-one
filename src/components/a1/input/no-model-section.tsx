@@ -23,7 +23,7 @@ export const MainInputNoModelSection = () => {
       <div className="flex max-h-24 w-full flex-col items-start overflow-auto">
         <span className="text-lg font-bold">No Models Available</span>
         <span className="text-base">
-          Configure an API key in settings to start chatting.
+          Configure a provider in settings to start chatting.
         </span>
       </div>
       <div className="flex flex-row items-center gap-2">
