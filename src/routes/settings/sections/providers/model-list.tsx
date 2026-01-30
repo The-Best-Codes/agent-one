@@ -161,6 +161,7 @@ export function AddModelForm({
       <div className="flex gap-2">
         <Toggle
           size="sm"
+          variant="outline"
           pressed={supportsTools}
           onPressedChange={setSupportsTools}
           aria-label="Supports tools"
@@ -171,6 +172,7 @@ export function AddModelForm({
 
         <Toggle
           size="sm"
+          variant="outline"
           pressed={supportsImages}
           onPressedChange={setSupportsImages}
           aria-label="Supports images"
