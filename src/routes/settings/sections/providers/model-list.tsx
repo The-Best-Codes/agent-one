@@ -1,7 +1,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   ImageIcon,
-  LoaderIcon,
+  Loader2Icon,
   PlusIcon,
   SparklesIcon,
   Trash2Icon,
@@ -290,7 +290,7 @@ export function ModelList({
             disabled={isFetching || !baseUrl}
           >
             {isFetching ? (
-              <LoaderIcon className="animate-spin" />
+              <Loader2Icon className="animate-spin" />
             ) : (
               <SparklesIcon />
             )}
