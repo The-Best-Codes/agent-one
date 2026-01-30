@@ -104,7 +104,7 @@ export function AddOpenAICompatibleDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="provider-api-key">API Key (optional)</Label>
+            <Label htmlFor="provider-api-key">API Key</Label>
             <div className="flex gap-2">
               <Input
                 id="provider-api-key"

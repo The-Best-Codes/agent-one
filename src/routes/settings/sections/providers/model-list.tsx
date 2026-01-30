@@ -1,11 +1,13 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
+  CheckIcon,
   ImageIcon,
   Loader2Icon,
   PlusIcon,
   SparklesIcon,
   Trash2Icon,
   WrenchIcon,
+  XIcon,
 } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -125,7 +127,7 @@ export function AddModelForm({
   };
 
   return (
-    <div className="bg-muted/50 flex flex-col gap-3 rounded-md p-3">
+    <div className="bg-muted/50 border-border flex flex-col gap-3 rounded-md border p-3">
       <div className="flex gap-2">
         <div className="flex-1">
           <Label htmlFor="new-model-id" className="text-xs">
@@ -135,7 +137,7 @@ export function AddModelForm({
             id="new-model-id"
             value={id}
             onChange={(e) => setId(e.target.value)}
-            placeholder="e.g., gpt-4"
+            placeholder="e.g., gpt-5"
             className="mt-1"
           />
           {isDuplicate && (
@@ -146,13 +148,13 @@ export function AddModelForm({
         </div>
         <div className="flex-1">
           <Label htmlFor="new-model-name" className="text-xs">
-            Display Name (optional)
+            Display Name
           </Label>
           <Input
             id="new-model-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., GPT-4"
+            placeholder="e.g., GPT 5.0"
             className="mt-1"
           />
         </div>
@@ -166,8 +168,8 @@ export function AddModelForm({
           onPressedChange={setSupportsTools}
           aria-label="Supports tools"
         >
-          <WrenchIcon />
-          Tools
+          {supportsTools ? <CheckIcon /> : <XIcon />}
+          Supports Tools
         </Toggle>
 
         <Toggle
@@ -177,8 +179,8 @@ export function AddModelForm({
           onPressedChange={setSupportsImages}
           aria-label="Supports images"
         >
-          <ImageIcon />
-          Images
+          {supportsImages ? <CheckIcon /> : <XIcon />}
+          Supports Images
         </Toggle>
       </div>
 
