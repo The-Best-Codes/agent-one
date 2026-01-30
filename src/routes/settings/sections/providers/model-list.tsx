@@ -105,7 +105,7 @@ export function AddModelForm({
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [supportsTools, setSupportsTools] = useState(true);
-  const [supportsImages, setSupportsImages] = useState(false);
+  const [supportsImages, setSupportsImages] = useState(true);
 
   const isDuplicate = existingIds.includes(id.trim());
   const isValid = id.trim() !== "" && !isDuplicate;
@@ -121,7 +121,7 @@ export function AddModelForm({
     setId("");
     setName("");
     setSupportsTools(true);
-    setSupportsImages(false);
+    setSupportsImages(true);
   };
 
   return (
@@ -260,7 +260,7 @@ export function ModelList({
           id: m.id,
           name: undefined,
           supportsTools: true,
-          supportsImages: false,
+          supportsImages: true,
         }));
 
       if (newModels.length > 0) {
@@ -314,7 +314,7 @@ export function ModelList({
       )}
 
       {isAdding && (
-        <div className="mb-3">
+        <div className="not-last:mb-3">
           <AddModelForm
             onAdd={handleAddModel}
             onCancel={() => setIsAdding(false)}
