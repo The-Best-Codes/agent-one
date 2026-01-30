@@ -1,5 +1,5 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { fetch } from "@tauri-apps/plugin-http";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import type { CustomProvider } from "@/lib/jotai/custom-provider-atoms";
 
@@ -8,7 +8,7 @@ export function createCustomProvider(provider: CustomProvider) {
     name: provider.id,
     apiKey: provider.apiKey || "not-required",
     baseURL: provider.baseUrl,
-    fetch: fetch,
+    fetch: tauriFetch,
     headers: provider.headers,
   });
 }
@@ -29,7 +29,7 @@ export async function fetchProviderModels(
 ): Promise<OpenAIModelsResponse> {
   const url = baseUrl.endsWith("/") ? `${baseUrl}models` : `${baseUrl}/models`;
 
-  const response = await fetch(url, {
+  const response = await tauriFetch(url, {
     method: "GET",
     headers: {
       ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
