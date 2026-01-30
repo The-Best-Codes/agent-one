@@ -8,7 +8,12 @@ import {
   type ModelsDevModel,
 } from "@/assets/model-lists/models-dev";
 import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
+import {
+  type CustomProvider,
+  customProvidersAtom,
+} from "@/lib/jotai/custom-provider-atoms";
 import { providerConfigAtoms } from "@/lib/jotai/provider-atoms";
+import { createCustomProvider } from "@/lib/providers/custom-provider-factory";
 import {
   getEffectiveApiKey,
   hasApiKey,
@@ -79,6 +84,18 @@ function mapModelsDevModels(
   }));
 }
 
+function mapCustomProviderModels(provider: CustomProvider): ModelData[] {
+  const instance = createCustomProvider(provider);
+
+  return provider.models.map((model) => ({
+    id: `custom-${provider.id}-${model.id}`,
+    name: model.name || model.id,
+    provider: provider.name,
+    model: instance.languageModel(model.id),
+    supportsToolUse: model.supportsTools,
+  }));
+}
+
 function isChatModel(model: ModelsDevModel): boolean {
   const outputModalities = model.modalities?.output ?? [];
   return outputModalities.includes("text");
@@ -99,6 +116,8 @@ export function useModelCatalog() {
   const groqConfig = useAtomValue(providerConfigAtoms.groq);
   const googleConfig = useAtomValue(providerConfigAtoms.google);
   const cerebrasConfig = useAtomValue(providerConfigAtoms.cerebras);
+
+  const customProviders = useAtomValue(customProvidersAtom);
 
   const apiKeys = useMemo(
     () => ({
@@ -149,13 +168,19 @@ export function useModelCatalog() {
   }, [apiKeys, configs]);
 
   const AVAILABLE_MODELS = useMemo(() => {
-    return PROVIDER_REGISTRY.flatMap((p) =>
+    const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
       mapModelsDevModels(p.id, p.label, providers[p.id].languageModel),
     );
-  }, [providers]);
+
+    const customModels = customProviders.flatMap((p) =>
+      mapCustomProviderModels(p),
+    );
+
+    return [...builtInModels, ...customModels];
+  }, [providers, customProviders]);
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
-    return PROVIDER_REGISTRY.flatMap((p) =>
+    const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
       mapModelsDevModels(
         p.id,
         p.label,
@@ -163,10 +188,16 @@ export function useModelCatalog() {
         isChatModel,
       ),
     );
-  }, [providers]);
+
+    const customModels = customProviders.flatMap((p) =>
+      mapCustomProviderModels(p),
+    );
+
+    return [...builtInModels, ...customModels];
+  }, [providers, customProviders]);
 
   const AVAILABLE_IMAGE_MODELS = useMemo(() => {
-    return PROVIDER_REGISTRY.filter(
+    const builtInModels = PROVIDER_REGISTRY.filter(
       (p) => p.id === "google" || p.id === "openrouter",
     ).flatMap((p) =>
       mapModelsDevModels(
@@ -176,18 +207,45 @@ export function useModelCatalog() {
         isImageModel,
       ),
     );
-  }, [providers]);
+
+    const customModels = customProviders
+      .filter((p) => p.enabled)
+      .flatMap((p) =>
+        p.models
+          .filter((m) => m.supportsImages)
+          .map((m) => {
+            const instance = createCustomProvider(p);
+            return {
+              id: `custom-${p.id}-${m.id}`,
+              name: m.name || m.id,
+              provider: p.name,
+              model: instance.languageModel(m.id),
+              supportsToolUse: m.supportsTools,
+            };
+          }),
+      );
+
+    return [...builtInModels, ...customModels];
+  }, [providers, customProviders]);
 
   const AVAILABLE_CHAT_MODELS_WITH_API_KEY = useMemo(() => {
     const providerIdByLabel = Object.fromEntries(
       PROVIDER_REGISTRY.map((p) => [p.label, p.id]),
     );
 
+    const customProviderNames = new Set(
+      customProviders.filter((p) => p.enabled).map((p) => p.name),
+    );
+
     return AVAILABLE_CHAT_MODELS.filter((model) => {
+      if (customProviderNames.has(model.provider)) {
+        return true;
+      }
+
       const providerId = providerIdByLabel[model.provider];
       return providerId ? providerIsAvailable[providerId as ProviderId] : false;
     });
-  }, [AVAILABLE_CHAT_MODELS, providerIsAvailable]);
+  }, [AVAILABLE_CHAT_MODELS, providerIsAvailable, customProviders]);
 
   const getModelByIdMemoized = useMemo(
     () => (id: string) => AVAILABLE_MODELS.find((model) => model.id === id),

@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
+import {
+  addCustomProviderAtom,
+  type CustomProviderModel,
+  customProvidersAtom,
+  deleteCustomProviderAtom,
+  updateCustomProviderAtom,
+} from "@/lib/jotai/custom-provider-atoms";
 import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import {
   hasEnvKey,
@@ -14,6 +21,8 @@ import {
   type ProviderId,
 } from "@/lib/providers/registry";
 
+import { AddProviderDropdown } from "./add-provider-dropdown";
+import { CustomProviderListItem } from "./custom-provider-list-item";
 import { ProviderListItem } from "./provider-list-item";
 
 function useProviderState(providerId: ProviderId) {
@@ -52,9 +61,37 @@ export default function ProvidersSection() {
   const { isApiKeysLoading } = useApiKeys();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredProviders = PROVIDER_REGISTRY.filter((provider) =>
+  const [customProviders] = useAtom(customProvidersAtom);
+  const [, addCustomProvider] = useAtom(addCustomProviderAtom);
+  const [, updateCustomProvider] = useAtom(updateCustomProviderAtom);
+  const [, deleteCustomProvider] = useAtom(deleteCustomProviderAtom);
+
+  const filteredBuiltInProviders = PROVIDER_REGISTRY.filter((provider) =>
     provider.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const filteredCustomProviders = customProviders.filter((provider) =>
+    provider.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const hasResults =
+    filteredBuiltInProviders.length > 0 || filteredCustomProviders.length > 0;
+
+  const handleAddProvider = (data: {
+    name: string;
+    baseUrl: string;
+    apiKey: string;
+    headers: Record<string, string>;
+    models: CustomProviderModel[];
+  }) => {
+    addCustomProvider({
+      name: data.name,
+      baseUrl: data.baseUrl,
+      apiKey: data.apiKey,
+      headers: data.headers,
+      models: data.models,
+    });
+  };
 
   if (isApiKeysLoading) {
     return (
@@ -82,20 +119,34 @@ export default function ProvidersSection() {
           to control which models appear in the model selector.
         </p>
 
-        <Input
-          placeholder="Search providers..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="flex gap-2">
+          <Input
+            placeholder="Search providers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1"
+          />
+          <AddProviderDropdown onAddProvider={handleAddProvider} />
+        </div>
 
-        {filteredProviders.length > 0 ? (
+        {hasResults ? (
           <Accordion
             type="single"
             collapsible
             className="border-border w-full rounded-md border"
           >
-            {filteredProviders.map((provider) => (
+            {filteredBuiltInProviders.map((provider) => (
               <ProviderItem key={provider.id} providerId={provider.id} />
+            ))}
+            {filteredCustomProviders.map((provider) => (
+              <CustomProviderListItem
+                key={provider.id}
+                provider={provider}
+                onUpdate={(updates) =>
+                  updateCustomProvider(provider.id, updates)
+                }
+                onDelete={() => deleteCustomProvider(provider.id)}
+              />
             ))}
           </Accordion>
         ) : (
