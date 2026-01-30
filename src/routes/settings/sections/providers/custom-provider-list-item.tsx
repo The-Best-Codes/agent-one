@@ -117,7 +117,7 @@ export function CustomProviderListItem({
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-2">
               <span>{provider.name}</span>
-              <Badge variant="secondary">Custom</Badge>
+              <Badge>Custom</Badge>
             </div>
           </AccordionTrigger>
           <Switch
