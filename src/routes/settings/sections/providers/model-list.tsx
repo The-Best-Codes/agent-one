@@ -194,7 +194,7 @@ export function AddModelForm({
   );
 }
 
-const MODEL_ITEM_HEIGHT = 44;
+const MODEL_ITEM_HEIGHT = 40;
 
 export function ModelList({
   models,
