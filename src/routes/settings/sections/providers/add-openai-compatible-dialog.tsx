@@ -5,7 +5,6 @@ import {
   LoaderIcon,
   PlusIcon,
   SparklesIcon,
-  Trash2Icon,
   WrenchIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -25,6 +24,8 @@ import { Label } from "@/components/ui/label";
 import { Toggle } from "@/components/ui/toggle";
 import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
 import { fetchProviderModels } from "@/lib/providers/custom-provider-factory";
+
+import { ModelItemControls, ModelItemInfo } from "./model-list";
 
 interface AddOpenAICompatibleDialogProps {
   open: boolean;
@@ -60,8 +61,8 @@ export function AddOpenAICompatibleDialog({
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const isValid = name.trim() !== "" && baseUrl.trim() !== "";
-  const isNewModelValid =
-    newModelId.trim() !== "" && !models.some((m) => m.id === newModelId.trim());
+  const isDuplicate = models.some((m) => m.id === newModelId.trim());
+  const isNewModelValid = newModelId.trim() !== "" && !isDuplicate;
 
   const resetForm = () => {
     setName("");
@@ -102,13 +103,13 @@ export function AddOpenAICompatibleDialog({
     if (!isNewModelValid) return;
 
     setModels([
-      ...models,
       {
         id: newModelId.trim(),
         name: newModelName.trim() || undefined,
         supportsTools: newModelSupportsTools,
         supportsImages: newModelSupportsImages,
       },
+      ...models,
     ]);
 
     setNewModelId("");
@@ -162,7 +163,7 @@ export function AddOpenAICompatibleDialog({
         }));
 
       if (newModels.length > 0) {
-        setModels([...models, ...newModels]);
+        setModels([...newModels, ...models]);
       }
     } catch (error) {
       setFetchError(
@@ -222,11 +223,7 @@ export function AddOpenAICompatibleDialog({
                 size="icon"
                 title={showKey ? "Hide key" : "Show key"}
               >
-                {showKey ? (
-                  <EyeOffIcon className="size-4" />
-                ) : (
-                  <EyeIcon className="size-4" />
-                )}
+                {showKey ? <EyeOffIcon /> : <EyeIcon />}
               </Button>
             </div>
           </div>
@@ -249,9 +246,9 @@ export function AddOpenAICompatibleDialog({
                   disabled={isFetching || !baseUrl.trim()}
                 >
                   {isFetching ? (
-                    <LoaderIcon className="size-4 animate-spin" />
+                    <LoaderIcon className="animate-spin" />
                   ) : (
-                    <SparklesIcon className="size-4" />
+                    <SparklesIcon />
                   )}
                   Auto
                 </Button>
@@ -262,7 +259,7 @@ export function AddOpenAICompatibleDialog({
                   onClick={() => setIsAddingModel(true)}
                   disabled={isAddingModel}
                 >
-                  <PlusIcon className="size-4" />
+                  <PlusIcon />
                   Add
                 </Button>
               </div>
@@ -270,66 +267,6 @@ export function AddOpenAICompatibleDialog({
 
             {fetchError && (
               <p className="text-destructive text-xs">{fetchError}</p>
-            )}
-
-            {models.length > 0 && (
-              <div className="border-border flex max-h-48 flex-col divide-y overflow-y-auto rounded-md border">
-                {models.map((model) => (
-                  <div
-                    key={model.id}
-                    className="flex items-center gap-2 px-3 py-2"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {model.name || model.id}
-                      </p>
-                      {model.name && (
-                        <p className="text-muted-foreground truncate text-xs">
-                          {model.id}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <Toggle
-                        size="sm"
-                        pressed={model.supportsTools}
-                        onPressedChange={() => handleToggleTools(model.id)}
-                        title="Toggle tool support"
-                        aria-label="Toggle tool support"
-                      >
-                        <WrenchIcon className="size-3" />
-                      </Toggle>
-
-                      <Toggle
-                        size="sm"
-                        pressed={model.supportsImages}
-                        onPressedChange={() => handleToggleImages(model.id)}
-                        title="Toggle image support"
-                        aria-label="Toggle image support"
-                      >
-                        <ImageIcon className="size-3" />
-                      </Toggle>
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="size-7"
-                        onClick={() => handleDeleteModel(model.id)}
-                      >
-                        <Trash2Icon className="size-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {models.length === 0 && !isAddingModel && (
-              <p className="text-muted-foreground rounded-md border border-dashed py-4 text-center text-xs">
-                No models configured. Fetch models or add them manually.
-              </p>
             )}
 
             {isAddingModel && (
@@ -346,6 +283,11 @@ export function AddOpenAICompatibleDialog({
                       placeholder="e.g., gpt-4"
                       className="mt-1"
                     />
+                    {isDuplicate && (
+                      <p className="text-destructive mt-1 text-xs">
+                        Model ID already exists
+                      </p>
+                    )}
                   </div>
                   <div className="flex-1">
                     <Label htmlFor="new-model-name" className="text-xs">
@@ -368,7 +310,7 @@ export function AddOpenAICompatibleDialog({
                     onPressedChange={setNewModelSupportsTools}
                     aria-label="Supports tools"
                   >
-                    <WrenchIcon className="size-3" />
+                    <WrenchIcon />
                     Tools
                   </Toggle>
 
@@ -378,7 +320,7 @@ export function AddOpenAICompatibleDialog({
                     onPressedChange={setNewModelSupportsImages}
                     aria-label="Supports images"
                   >
-                    <ImageIcon className="size-3" />
+                    <ImageIcon />
                     Images
                   </Toggle>
                 </div>
@@ -386,7 +328,7 @@ export function AddOpenAICompatibleDialog({
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsAddingModel(false)}
                   >
@@ -402,6 +344,31 @@ export function AddOpenAICompatibleDialog({
                   </Button>
                 </div>
               </div>
+            )}
+
+            {models.length > 0 && (
+              <div className="border-border flex max-h-48 flex-col divide-y overflow-y-auto rounded-md border">
+                {models.map((model) => (
+                  <div
+                    key={model.id}
+                    className="flex items-center gap-2 px-3 py-2"
+                  >
+                    <ModelItemInfo model={model} />
+                    <ModelItemControls
+                      model={model}
+                      onToggleTools={handleToggleTools}
+                      onToggleImages={handleToggleImages}
+                      onDelete={handleDeleteModel}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {models.length === 0 && !isAddingModel && (
+              <p className="text-muted-foreground rounded-md border border-dashed py-4 text-center text-xs">
+                No models configured. Fetch models or add them manually.
+              </p>
             )}
           </div>
         </div>

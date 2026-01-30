@@ -33,7 +33,75 @@ interface AddModelFormProps {
   existingIds: string[];
 }
 
-function AddModelForm({ onAdd, onCancel, existingIds }: AddModelFormProps) {
+export interface ModelItemControlsProps {
+  model: CustomProviderModel;
+  onToggleTools: (id: string) => void;
+  onToggleImages: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
+export function ModelItemControls({
+  model,
+  onToggleTools,
+  onToggleImages,
+  onDelete,
+}: ModelItemControlsProps) {
+  return (
+    <div className="flex items-center gap-1">
+      <Toggle
+        size="sm"
+        variant="outline"
+        pressed={model.supportsTools}
+        onPressedChange={() => onToggleTools(model.id)}
+        title="Toggle tool support"
+        aria-label="Toggle tool support"
+      >
+        <WrenchIcon />
+      </Toggle>
+
+      <Toggle
+        size="sm"
+        variant="outline"
+        pressed={model.supportsImages}
+        onPressedChange={() => onToggleImages(model.id)}
+        title="Toggle image support"
+        aria-label="Toggle image support"
+      >
+        <ImageIcon />
+      </Toggle>
+
+      <Button
+        variant="destructive"
+        size="icon"
+        className="size-8"
+        onClick={() => onDelete(model.id)}
+      >
+        <Trash2Icon />
+      </Button>
+    </div>
+  );
+}
+
+export interface ModelItemInfoProps {
+  model: CustomProviderModel;
+}
+
+export function ModelItemInfo({ model }: ModelItemInfoProps) {
+  return (
+    <div className="min-w-0 flex-1">
+      <p className="truncate text-sm font-medium">{model.name || model.id}</p>
+      {model.name && (
+        <p className="text-muted-foreground truncate text-xs">{model.id}</p>
+      )}
+    </div>
+  );
+}
+
+export function AddModelForm({
+  onAdd,
+  onCancel,
+  existingIds,
+}: AddModelFormProps) {
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [supportsTools, setSupportsTools] = useState(true);
@@ -97,7 +165,7 @@ function AddModelForm({ onAdd, onCancel, existingIds }: AddModelFormProps) {
           onPressedChange={setSupportsTools}
           aria-label="Supports tools"
         >
-          <WrenchIcon className="size-3" />
+          <WrenchIcon />
           Tools
         </Toggle>
 
@@ -107,13 +175,13 @@ function AddModelForm({ onAdd, onCancel, existingIds }: AddModelFormProps) {
           onPressedChange={setSupportsImages}
           aria-label="Supports images"
         >
-          <ImageIcon className="size-3" />
+          <ImageIcon />
           Images
         </Toggle>
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button variant="ghost" size="sm" onClick={onCancel}>
+        <Button variant="outline" size="sm" onClick={onCancel}>
           Cancel
         </Button>
         <Button size="sm" onClick={handleAdd} disabled={!isValid}>
@@ -146,7 +214,7 @@ export function ModelList({
   });
 
   const handleAddModel = (model: CustomProviderModel) => {
-    onChange([...models, model]);
+    onChange([model, ...models]);
     setIsAdding(false);
   };
 
@@ -194,7 +262,7 @@ export function ModelList({
         }));
 
       if (newModels.length > 0) {
-        onChange([...models, ...newModels]);
+        onChange([...newModels, ...models]);
       }
     } catch (error) {
       setFetchError(
@@ -219,9 +287,9 @@ export function ModelList({
             disabled={isFetching || !baseUrl}
           >
             {isFetching ? (
-              <LoaderIcon className="size-4 animate-spin" />
+              <LoaderIcon className="animate-spin" />
             ) : (
-              <SparklesIcon className="size-4" />
+              <SparklesIcon />
             )}
             Auto
           </Button>
@@ -231,13 +299,21 @@ export function ModelList({
             onClick={() => setIsAdding(true)}
             disabled={isAdding}
           >
-            <PlusIcon className="size-4" />
+            <PlusIcon />
             Add
           </Button>
         </div>
       </div>
 
       {fetchError && <p className="text-destructive text-xs">{fetchError}</p>}
+
+      {isAdding && (
+        <AddModelForm
+          onAdd={handleAddModel}
+          onCancel={() => setIsAdding(false)}
+          existingIds={models.map((m) => m.id)}
+        />
+      )}
 
       {models.length > 0 && (
         <div
@@ -267,47 +343,13 @@ export function ModelList({
                   }}
                 >
                   <div className="flex h-full items-center gap-2 border-b px-3 last:border-b-0">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {model.name || model.id}
-                      </p>
-                      {model.name && (
-                        <p className="text-muted-foreground truncate text-xs">
-                          {model.id}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <Toggle
-                        size="sm"
-                        pressed={model.supportsTools}
-                        onPressedChange={() => handleToggleTools(model.id)}
-                        title="Toggle tool support"
-                        aria-label="Toggle tool support"
-                      >
-                        <WrenchIcon className="size-3" />
-                      </Toggle>
-
-                      <Toggle
-                        size="sm"
-                        pressed={model.supportsImages}
-                        onPressedChange={() => handleToggleImages(model.id)}
-                        title="Toggle image support"
-                        aria-label="Toggle image support"
-                      >
-                        <ImageIcon className="size-3" />
-                      </Toggle>
-
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7"
-                        onClick={() => handleDeleteModel(model.id)}
-                      >
-                        <Trash2Icon className="size-3" />
-                      </Button>
-                    </div>
+                    <ModelItemInfo model={model} />
+                    <ModelItemControls
+                      model={model}
+                      onToggleTools={handleToggleTools}
+                      onToggleImages={handleToggleImages}
+                      onDelete={handleDeleteModel}
+                    />
                   </div>
                 </div>
               );
@@ -320,14 +362,6 @@ export function ModelList({
         <p className="text-muted-foreground py-2 text-center text-xs">
           No models configured. Fetch models or add them manually.
         </p>
-      )}
-
-      {isAdding && (
-        <AddModelForm
-          onAdd={handleAddModel}
-          onCancel={() => setIsAdding(false)}
-          existingIds={models.map((m) => m.id)}
-        />
       )}
     </div>
   );
