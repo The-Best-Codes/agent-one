@@ -1,8 +1,11 @@
 import { atomWithStorage } from "jotai/utils";
 
-import { PROVIDER_REGISTRY, type ProviderId } from "@/lib/providers/registry";
+import {
+  PROVIDER_REGISTRY,
+  type ProviderId,
+} from "@/lib/ai/providers/registry";
 
-export type { ProviderId } from "@/lib/providers/registry";
+export type { ProviderId } from "@/lib/ai/providers/registry";
 
 const SETTING_PREFIX = "agent-one-setting-";
 

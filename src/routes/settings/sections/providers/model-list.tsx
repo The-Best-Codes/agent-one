@@ -16,11 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toggle } from "@/components/ui/toggle";
-import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
 import {
   fetchProviderModels,
   type OpenAIModelsResponse,
-} from "@/lib/providers/custom-provider-factory";
+} from "@/lib/ai/providers/custom-provider-factory";
+import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
 
 interface ModelListProps {
   models: CustomProviderModel[];

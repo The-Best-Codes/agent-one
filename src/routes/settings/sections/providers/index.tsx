@@ -6,6 +6,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
+import {
+  hasEnvKey,
+  PROVIDER_REGISTRY,
+  type ProviderId,
+} from "@/lib/ai/providers/registry";
 import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
 import {
   addCustomProviderAtom,
@@ -15,11 +20,6 @@ import {
   updateCustomProviderAtom,
 } from "@/lib/jotai/custom-provider-atoms";
 import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
-import {
-  hasEnvKey,
-  PROVIDER_REGISTRY,
-  type ProviderId,
-} from "@/lib/providers/registry";
 
 import { AddProviderDropdown } from "./add-provider-dropdown";
 import { CustomProviderListItem } from "./custom-provider-list-item";

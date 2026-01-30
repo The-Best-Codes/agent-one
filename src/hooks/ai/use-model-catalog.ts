@@ -7,19 +7,19 @@ import {
   modelsDevData,
   type ModelsDevModel,
 } from "@/assets/model-lists/models-dev";
+import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
+import {
+  getEffectiveApiKey,
+  hasApiKey,
+  PROVIDER_REGISTRY,
+  type ProviderId,
+} from "@/lib/ai/providers/registry";
 import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
 import {
   type CustomProvider,
   customProvidersAtom,
 } from "@/lib/jotai/custom-provider-atoms";
 import { providerConfigAtoms } from "@/lib/jotai/provider-atoms";
-import { createCustomProvider } from "@/lib/providers/custom-provider-factory";
-import {
-  getEffectiveApiKey,
-  hasApiKey,
-  PROVIDER_REGISTRY,
-  type ProviderId,
-} from "@/lib/providers/registry";
 
 export interface ModelData {
   id: string;

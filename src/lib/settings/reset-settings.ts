@@ -1,6 +1,11 @@
 import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
+import {
+  PROVIDER_REGISTRY,
+  type ProviderStorageKey,
+} from "@/lib/ai/providers/registry";
+
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
@@ -32,10 +37,6 @@ import {
   toolConfigsAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
-import {
-  PROVIDER_REGISTRY,
-  type ProviderStorageKey,
-} from "../providers/registry";
 import { type DefaultSettings } from "./types";
 
 export function resetAllSettings(): void {

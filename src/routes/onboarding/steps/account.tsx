@@ -10,13 +10,13 @@ import { useEffect, useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
 import {
   getProviderConfigAtom,
   type ProviderConfig,
   type ProviderId,
 } from "@/lib/jotai/provider-atoms";
-import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/providers/registry";
 import { cn } from "@/lib/utils";
 import { ProviderListItem } from "@/routes/settings/sections/providers/provider-list-item";
 
