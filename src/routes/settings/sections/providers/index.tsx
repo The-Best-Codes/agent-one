@@ -7,11 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import {
-  hasEnvKey,
   PROVIDER_REGISTRY,
   type ProviderId,
 } from "@/lib/ai/providers/registry";
-import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
+import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
   addCustomProviderAtom,
   type CustomProviderModel,
@@ -19,24 +18,10 @@ import {
   deleteCustomProviderAtom,
   updateCustomProviderAtom,
 } from "@/lib/jotai/custom-provider-atoms";
-import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 
 import { AddProviderDropdown } from "./add-provider-dropdown";
 import { CustomProviderListItem } from "./custom-provider-list-item";
 import { ProviderListItem } from "./provider-list-item";
-
-function useProviderState(providerId: ProviderId) {
-  const [apiKey, setApiKey] = useAtom(getApiKeyAtom(providerId));
-  const [config, setConfig] = useAtom(getProviderConfigAtom(providerId));
-
-  return {
-    apiKey,
-    setApiKey,
-    config,
-    setConfig: (updates: Parameters<typeof setConfig>[0]) => setConfig(updates),
-    hasEnvKey: hasEnvKey(providerId),
-  };
-}
 
 function ProviderItem({ providerId }: { providerId: ProviderId }) {
   const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
@@ -49,9 +34,7 @@ function ProviderItem({ providerId }: { providerId: ProviderId }) {
       config={state.config}
       apiKey={state.apiKey}
       hasEnvKey={state.hasEnvKey}
-      onConfigChange={(updates) =>
-        state.setConfig((prev) => ({ ...prev, ...updates }))
-      }
+      onConfigChange={state.setConfig}
       onApiKeyChange={state.setApiKey}
     />
   );

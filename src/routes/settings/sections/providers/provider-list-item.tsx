@@ -1,14 +1,10 @@
-import { EyeIcon, EyeOffIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
+import { SecretInput } from "@/components/a1/input/secret-input";
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import type { ProviderConfig, ProviderId } from "@/lib/jotai/provider-atoms";
@@ -32,23 +28,6 @@ export function ProviderListItem({
   onConfigChange,
   onApiKeyChange,
 }: ProviderListItemProps) {
-  const [showKey, setShowKey] = useState(false);
-  const [keyInput, setKeyInput] = useState(apiKey);
-
-  useEffect(() => {
-    setKeyInput(apiKey);
-  }, [apiKey]);
-
-  const hasChanges = keyInput !== apiKey;
-
-  const handleSave = () => {
-    onApiKeyChange(keyInput);
-  };
-
-  const handleCancel = () => {
-    setKeyInput(apiKey);
-  };
-
   return (
     <AccordionItem value={providerId}>
       <div className="flex items-center gap-2 px-3 *:first:flex-1">
@@ -74,46 +53,14 @@ export function ProviderListItem({
                 Using environment variable. Override below if needed.
               </p>
             ) : null}
-            <div className="flex gap-2">
-              <Input
-                id={`api-key-${providerId}`}
-                type={showKey ? "text" : "password"}
-                value={keyInput}
-                onChange={(e) => setKeyInput(e.target.value)}
-                placeholder={`Enter your ${label} API key`}
-                className="flex-1"
-              />
-              <Button
-                onClick={() => setShowKey(!showKey)}
-                variant="outline"
-                size="icon"
-                title={showKey ? "Hide key" : "Show key"}
-              >
-                {showKey ? (
-                  <EyeOffIcon className="size-4" />
-                ) : (
-                  <EyeIcon className="size-4" />
-                )}
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={!hasChanges}
-                variant="outline"
-                size="icon"
-                title="Save key"
-              >
-                <SaveIcon className="size-4" />
-              </Button>
-              <Button
-                onClick={handleCancel}
-                disabled={!hasChanges}
-                variant="outline"
-                size="icon"
-                title="Cancel changes"
-              >
-                <RotateCcwIcon className="size-4" />
-              </Button>
-            </div>
+            <SecretInput
+              key={apiKey}
+              id={`api-key-${providerId}`}
+              value={apiKey}
+              onChange={onApiKeyChange}
+              placeholder={`Enter your ${label} API key`}
+              showSaveCancel
+            />
           </div>
 
           <HttpHeadersEditor

@@ -1,7 +1,7 @@
-import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
+import { SecretInput } from "@/components/a1/input/secret-input";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,7 +37,6 @@ export function AddOpenAICompatibleDialog({
   const [name, setName] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
-  const [showKey, setShowKey] = useState(false);
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [models, setModels] = useState<CustomProviderModel[]>([]);
 
@@ -47,7 +46,6 @@ export function AddOpenAICompatibleDialog({
     setName("");
     setBaseUrl("");
     setApiKey("");
-    setShowKey(false);
     setHeaders({});
     setModels([]);
   };
@@ -105,25 +103,12 @@ export function AddOpenAICompatibleDialog({
 
           <div className="grid gap-2">
             <Label htmlFor="provider-api-key">API Key</Label>
-            <div className="flex gap-2">
-              <Input
-                id="provider-api-key"
-                type={showKey ? "text" : "password"}
-                placeholder="Enter API key if required"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                variant="outline"
-                size="icon"
-                title={showKey ? "Hide key" : "Show key"}
-              >
-                {showKey ? <EyeOffIcon /> : <EyeIcon />}
-              </Button>
-            </div>
+            <SecretInput
+              id="provider-api-key"
+              value={apiKey}
+              onChange={setApiKey}
+              placeholder="Enter API key if required"
+            />
           </div>
 
           <HttpHeadersEditor

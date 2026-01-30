@@ -1,13 +1,8 @@
-import {
-  EyeIcon,
-  EyeOffIcon,
-  RotateCcwIcon,
-  SaveIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
+import { SecretInput } from "@/components/a1/input/secret-input";
 import {
   AccordionContent,
   AccordionItem,
@@ -27,75 +22,6 @@ interface CustomProviderListItemProps {
   provider: CustomProvider;
   onUpdate: (updates: Partial<Omit<CustomProvider, "id">>) => void;
   onDelete: () => void;
-}
-
-interface ApiKeyInputProps {
-  providerId: string;
-  apiKey: string;
-  onSave: (key: string) => void;
-}
-
-function ApiKeyInput({ providerId, apiKey, onSave }: ApiKeyInputProps) {
-  const [showKey, setShowKey] = useState(false);
-  const [keyInput, setKeyInput] = useState(apiKey);
-
-  const hasChanges = keyInput !== apiKey;
-
-  const handleSave = () => {
-    onSave(keyInput);
-  };
-
-  const handleCancel = () => {
-    setKeyInput(apiKey);
-  };
-
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={`api-key-${providerId}`} className="text-xs">
-        API Key
-      </Label>
-      <div className="flex gap-2">
-        <Input
-          id={`api-key-${providerId}`}
-          type={showKey ? "text" : "password"}
-          value={keyInput}
-          onChange={(e) => setKeyInput(e.target.value)}
-          placeholder="Enter API key if required"
-          className="flex-1"
-        />
-        <Button
-          onClick={() => setShowKey(!showKey)}
-          variant="outline"
-          size="icon"
-          title={showKey ? "Hide key" : "Show key"}
-        >
-          {showKey ? (
-            <EyeOffIcon className="size-4" />
-          ) : (
-            <EyeIcon className="size-4" />
-          )}
-        </Button>
-        <Button
-          onClick={handleSave}
-          disabled={!hasChanges}
-          variant="outline"
-          size="icon"
-          title="Save key"
-        >
-          <SaveIcon className="size-4" />
-        </Button>
-        <Button
-          onClick={handleCancel}
-          disabled={!hasChanges}
-          variant="outline"
-          size="icon"
-          title="Cancel changes"
-        >
-          <RotateCcwIcon className="size-4" />
-        </Button>
-      </div>
-    </div>
-  );
 }
 
 export function CustomProviderListItem({
@@ -154,12 +80,19 @@ export function CustomProviderListItem({
               />
             </div>
 
-            <ApiKeyInput
-              key={provider.apiKey}
-              providerId={provider.id}
-              apiKey={provider.apiKey}
-              onSave={(key) => onUpdate({ apiKey: key })}
-            />
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={`api-key-${provider.id}`} className="text-xs">
+                API Key
+              </Label>
+              <SecretInput
+                key={provider.apiKey}
+                id={`api-key-${provider.id}`}
+                value={provider.apiKey}
+                onChange={(key) => onUpdate({ apiKey: key })}
+                placeholder="Enter API key if required"
+                showSaveCancel
+              />
+            </div>
 
             <HttpHeadersEditor
               id={provider.id}
