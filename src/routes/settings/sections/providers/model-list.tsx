@@ -278,11 +278,12 @@ export function ModelList({
   const listHeight = Math.min(models.length * MODEL_ITEM_HEIGHT, 220);
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
+    <div className="rounded-md border p-3">
+      <div className="mb-3 flex items-start justify-between gap-2">
         <Label className="text-xs">Models</Label>
         <div className="flex gap-2">
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={handleFetchModels}
@@ -296,6 +297,7 @@ export function ModelList({
             Auto
           </Button>
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => setIsAdding(true)}
@@ -307,17 +309,21 @@ export function ModelList({
         </div>
       </div>
 
-      {fetchError && <p className="text-destructive text-xs">{fetchError}</p>}
-
-      {isAdding && (
-        <AddModelForm
-          onAdd={handleAddModel}
-          onCancel={() => setIsAdding(false)}
-          existingIds={models.map((m) => m.id)}
-        />
+      {fetchError && (
+        <p className="text-destructive mb-3 text-xs">{fetchError}</p>
       )}
 
-      {models.length > 0 && (
+      {isAdding && (
+        <div className="mb-3">
+          <AddModelForm
+            onAdd={handleAddModel}
+            onCancel={() => setIsAdding(false)}
+            existingIds={models.map((m) => m.id)}
+          />
+        </div>
+      )}
+
+      {models.length > 0 ? (
         <div
           ref={parentRef}
           className="border-border overflow-y-auto rounded-md border"
@@ -358,12 +364,12 @@ export function ModelList({
             })}
           </div>
         </div>
-      )}
-
-      {models.length === 0 && !isAdding && (
-        <p className="text-muted-foreground py-2 text-center text-xs">
-          No models configured. Fetch models or add them manually.
-        </p>
+      ) : (
+        !isAdding && (
+          <p className="text-muted-foreground flex h-9 flex-col items-center justify-center rounded-md border border-dashed p-2 text-sm">
+            No models configured.
+          </p>
+        )
       )}
     </div>
   );

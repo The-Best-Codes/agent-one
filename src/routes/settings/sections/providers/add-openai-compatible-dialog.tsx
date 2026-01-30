@@ -1,12 +1,4 @@
-import {
-  EyeIcon,
-  EyeOffIcon,
-  ImageIcon,
-  LoaderIcon,
-  PlusIcon,
-  SparklesIcon,
-  WrenchIcon,
-} from "lucide-react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
@@ -21,11 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Toggle } from "@/components/ui/toggle";
 import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
-import { fetchProviderModels } from "@/lib/providers/custom-provider-factory";
 
-import { ModelItemControls, ModelItemInfo } from "./model-list";
+import { ModelList } from "./model-list";
 
 interface AddOpenAICompatibleDialogProps {
   open: boolean;
@@ -51,18 +41,7 @@ export function AddOpenAICompatibleDialog({
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [models, setModels] = useState<CustomProviderModel[]>([]);
 
-  const [isAddingModel, setIsAddingModel] = useState(false);
-  const [newModelId, setNewModelId] = useState("");
-  const [newModelName, setNewModelName] = useState("");
-  const [newModelSupportsTools, setNewModelSupportsTools] = useState(true);
-  const [newModelSupportsImages, setNewModelSupportsImages] = useState(false);
-
-  const [isFetching, setIsFetching] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
   const isValid = name.trim() !== "" && baseUrl.trim() !== "";
-  const isDuplicate = models.some((m) => m.id === newModelId.trim());
-  const isNewModelValid = newModelId.trim() !== "" && !isDuplicate;
 
   const resetForm = () => {
     setName("");
@@ -71,12 +50,6 @@ export function AddOpenAICompatibleDialog({
     setShowKey(false);
     setHeaders({});
     setModels([]);
-    setIsAddingModel(false);
-    setNewModelId("");
-    setNewModelName("");
-    setNewModelSupportsTools(true);
-    setNewModelSupportsImages(false);
-    setFetchError(null);
   };
 
   const handleAdd = () => {
@@ -97,81 +70,6 @@ export function AddOpenAICompatibleDialog({
   const handleCancel = () => {
     resetForm();
     onOpenChange(false);
-  };
-
-  const handleAddModel = () => {
-    if (!isNewModelValid) return;
-
-    setModels([
-      {
-        id: newModelId.trim(),
-        name: newModelName.trim() || undefined,
-        supportsTools: newModelSupportsTools,
-        supportsImages: newModelSupportsImages,
-      },
-      ...models,
-    ]);
-
-    setNewModelId("");
-    setNewModelName("");
-    setNewModelSupportsTools(true);
-    setNewModelSupportsImages(false);
-    setIsAddingModel(false);
-  };
-
-  const handleDeleteModel = (id: string) => {
-    setModels(models.filter((m) => m.id !== id));
-  };
-
-  const handleToggleTools = (id: string) => {
-    setModels(
-      models.map((m) =>
-        m.id === id ? { ...m, supportsTools: !m.supportsTools } : m,
-      ),
-    );
-  };
-
-  const handleToggleImages = (id: string) => {
-    setModels(
-      models.map((m) =>
-        m.id === id ? { ...m, supportsImages: !m.supportsImages } : m,
-      ),
-    );
-  };
-
-  const handleFetchModels = async () => {
-    if (!baseUrl.trim()) return;
-
-    setIsFetching(true);
-    setFetchError(null);
-
-    try {
-      const response = await fetchProviderModels(
-        baseUrl.trim(),
-        apiKey.trim() || undefined,
-        headers,
-      );
-
-      const existingIds = new Set(models.map((m) => m.id));
-      const newModels: CustomProviderModel[] = response.data
-        .filter((m) => !existingIds.has(m.id))
-        .map((m) => ({
-          id: m.id,
-          name: undefined,
-          supportsTools: true,
-          supportsImages: false,
-        }));
-
-      if (newModels.length > 0) {
-        setModels([...newModels, ...models]);
-      }
-    } catch (error) {
-      setFetchError(
-        error instanceof Error ? error.message : "Failed to fetch models",
-      );
-    } finally {
-      setIsFetching(false);
-    }
   };
 
   return (
@@ -234,143 +132,13 @@ export function AddOpenAICompatibleDialog({
             onChange={setHeaders}
           />
 
-          <div className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <Label>Models</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleFetchModels}
-                  disabled={isFetching || !baseUrl.trim()}
-                >
-                  {isFetching ? (
-                    <LoaderIcon className="animate-spin" />
-                  ) : (
-                    <SparklesIcon />
-                  )}
-                  Auto
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsAddingModel(true)}
-                  disabled={isAddingModel}
-                >
-                  <PlusIcon />
-                  Add
-                </Button>
-              </div>
-            </div>
-
-            {fetchError && (
-              <p className="text-destructive text-xs">{fetchError}</p>
-            )}
-
-            {isAddingModel && (
-              <div className="bg-muted/50 flex flex-col gap-3 rounded-md p-3">
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <Label htmlFor="new-model-id" className="text-xs">
-                      Model ID
-                    </Label>
-                    <Input
-                      id="new-model-id"
-                      value={newModelId}
-                      onChange={(e) => setNewModelId(e.target.value)}
-                      placeholder="e.g., gpt-4"
-                      className="mt-1"
-                    />
-                    {isDuplicate && (
-                      <p className="text-destructive mt-1 text-xs">
-                        Model ID already exists
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <Label htmlFor="new-model-name" className="text-xs">
-                      Display Name (optional)
-                    </Label>
-                    <Input
-                      id="new-model-name"
-                      value={newModelName}
-                      onChange={(e) => setNewModelName(e.target.value)}
-                      placeholder="e.g., GPT-4"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Toggle
-                    size="sm"
-                    pressed={newModelSupportsTools}
-                    onPressedChange={setNewModelSupportsTools}
-                    aria-label="Supports tools"
-                  >
-                    <WrenchIcon />
-                    Tools
-                  </Toggle>
-
-                  <Toggle
-                    size="sm"
-                    pressed={newModelSupportsImages}
-                    onPressedChange={setNewModelSupportsImages}
-                    aria-label="Supports images"
-                  >
-                    <ImageIcon />
-                    Images
-                  </Toggle>
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsAddingModel(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleAddModel}
-                    disabled={!isNewModelValid}
-                  >
-                    Add Model
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {models.length > 0 && (
-              <div className="border-border flex max-h-48 flex-col divide-y overflow-y-auto rounded-md border">
-                {models.map((model) => (
-                  <div
-                    key={model.id}
-                    className="flex items-center gap-2 px-3 py-2"
-                  >
-                    <ModelItemInfo model={model} />
-                    <ModelItemControls
-                      model={model}
-                      onToggleTools={handleToggleTools}
-                      onToggleImages={handleToggleImages}
-                      onDelete={handleDeleteModel}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {models.length === 0 && !isAddingModel && (
-              <p className="text-muted-foreground rounded-md border border-dashed py-4 text-center text-xs">
-                No models configured. Fetch models or add them manually.
-              </p>
-            )}
-          </div>
+          <ModelList
+            models={models}
+            baseUrl={baseUrl.trim()}
+            apiKey={apiKey.trim()}
+            headers={headers}
+            onChange={setModels}
+          />
         </div>
 
         <DialogFooter>
