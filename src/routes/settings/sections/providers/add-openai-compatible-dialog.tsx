@@ -1,10 +1,10 @@
 import {
-  DownloadIcon,
   EyeIcon,
   EyeOffIcon,
   ImageIcon,
   LoaderIcon,
   PlusIcon,
+  SparklesIcon,
   Trash2Icon,
   WrenchIcon,
 } from "lucide-react";
@@ -240,20 +240,32 @@ export function AddOpenAICompatibleDialog({
           <div className="grid gap-3">
             <div className="flex items-center justify-between">
               <Label>Models</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleFetchModels}
-                disabled={isFetching || !baseUrl.trim()}
-              >
-                {isFetching ? (
-                  <LoaderIcon className="size-4 animate-spin" />
-                ) : (
-                  <DownloadIcon className="size-4" />
-                )}
-                Fetch Models
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleFetchModels}
+                  disabled={isFetching || !baseUrl.trim()}
+                >
+                  {isFetching ? (
+                    <LoaderIcon className="size-4 animate-spin" />
+                  ) : (
+                    <SparklesIcon className="size-4" />
+                  )}
+                  Auto
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddingModel(true)}
+                  disabled={isAddingModel}
+                >
+                  <PlusIcon className="size-4" />
+                  Add
+                </Button>
+              </div>
             </div>
 
             {fetchError && (
@@ -320,7 +332,7 @@ export function AddOpenAICompatibleDialog({
               </p>
             )}
 
-            {isAddingModel ? (
+            {isAddingModel && (
               <div className="bg-muted/50 flex flex-col gap-3 rounded-md p-3">
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -390,17 +402,6 @@ export function AddOpenAICompatibleDialog({
                   </Button>
                 </div>
               </div>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAddingModel(true)}
-                className="w-fit"
-              >
-                <PlusIcon className="size-4" />
-                Add Model
-              </Button>
             )}
           </div>
         </div>

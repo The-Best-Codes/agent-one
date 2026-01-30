@@ -1,9 +1,9 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
-  DownloadIcon,
   ImageIcon,
   LoaderIcon,
   PlusIcon,
+  SparklesIcon,
   Trash2Icon,
   WrenchIcon,
 } from "lucide-react";
@@ -211,19 +211,30 @@ export function ModelList({
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <Label className="text-xs">Models</Label>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleFetchModels}
-          disabled={isFetching || !baseUrl}
-        >
-          {isFetching ? (
-            <LoaderIcon className="size-4 animate-spin" />
-          ) : (
-            <DownloadIcon className="size-4" />
-          )}
-          Fetch Models
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleFetchModels}
+            disabled={isFetching || !baseUrl}
+          >
+            {isFetching ? (
+              <LoaderIcon className="size-4 animate-spin" />
+            ) : (
+              <SparklesIcon className="size-4" />
+            )}
+            Auto
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsAdding(true)}
+            disabled={isAdding}
+          >
+            <PlusIcon className="size-4" />
+            Add
+          </Button>
+        </div>
       </div>
 
       {fetchError && <p className="text-destructive text-xs">{fetchError}</p>}
@@ -311,22 +322,12 @@ export function ModelList({
         </p>
       )}
 
-      {isAdding ? (
+      {isAdding && (
         <AddModelForm
           onAdd={handleAddModel}
           onCancel={() => setIsAdding(false)}
           existingIds={models.map((m) => m.id)}
         />
-      ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsAdding(true)}
-          className="w-fit"
-        >
-          <PlusIcon className="size-4" />
-          Add Model
-        </Button>
       )}
     </div>
   );
