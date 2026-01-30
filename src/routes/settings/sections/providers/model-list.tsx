@@ -1,6 +1,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   CheckIcon,
+  CircleXIcon,
   ImageIcon,
   Loader2Icon,
   PlusIcon,
@@ -206,10 +207,12 @@ export function ModelList({
   onChange,
 }: ModelListProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchState, setFetchState] = useState<
+    "idle" | "fetching" | "success" | "error"
+  >("idle");
   const parentRef = useRef<HTMLDivElement>(null);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: models.length,
     getScrollElement: () => parentRef.current,
@@ -243,10 +246,9 @@ export function ModelList({
   };
 
   const handleFetchModels = async () => {
-    if (!baseUrl) return;
+    if (!baseUrl || fetchState !== "idle") return;
 
-    setIsFetching(true);
-    setFetchError(null);
+    setFetchState("fetching");
 
     try {
       const response: OpenAIModelsResponse = await fetchProviderModels(
@@ -268,12 +270,25 @@ export function ModelList({
       if (newModels.length > 0) {
         onChange([...newModels, ...models]);
       }
-    } catch (error) {
-      setFetchError(
-        error instanceof Error ? error.message : "Failed to fetch models",
-      );
-    } finally {
-      setIsFetching(false);
+
+      setFetchState("success");
+      setTimeout(() => setFetchState("idle"), 2000);
+    } catch {
+      setFetchState("error");
+      setTimeout(() => setFetchState("idle"), 2000);
+    }
+  };
+
+  const getFetchIcon = () => {
+    switch (fetchState) {
+      case "idle":
+        return <SparklesIcon />;
+      case "fetching":
+        return <Loader2Icon className="animate-spin" />;
+      case "success":
+        return <CheckIcon />;
+      case "error":
+        return <CircleXIcon />;
     }
   };
 
@@ -289,13 +304,9 @@ export function ModelList({
             variant="outline"
             size="sm"
             onClick={handleFetchModels}
-            disabled={isFetching || !baseUrl}
+            disabled={fetchState !== "idle" || !baseUrl}
           >
-            {isFetching ? (
-              <Loader2Icon className="animate-spin" />
-            ) : (
-              <SparklesIcon />
-            )}
+            {getFetchIcon()}
             Auto
           </Button>
           <Button
@@ -310,10 +321,6 @@ export function ModelList({
           </Button>
         </div>
       </div>
-
-      {fetchError && (
-        <p className="text-destructive mb-3 text-xs">{fetchError}</p>
-      )}
 
       {isAdding && (
         <div className="not-last:mb-3">
