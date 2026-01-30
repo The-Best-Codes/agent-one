@@ -20,6 +20,8 @@ export interface CustomProvider {
   models: CustomProviderModel[];
 }
 
+export type NewCustomProviderData = Omit<CustomProvider, "id" | "enabled">;
+
 export const customProvidersAtom = atomWithStorage<CustomProvider[]>(
   STORAGE_KEY,
   [],
@@ -29,7 +31,7 @@ export const customProvidersAtom = atomWithStorage<CustomProvider[]>(
 
 export const addCustomProviderAtom = atom(
   null,
-  (get, set, provider: Omit<CustomProvider, "id" | "enabled">) => {
+  (get, set, provider: NewCustomProviderData) => {
     const existing = get(customProvidersAtom);
     const newProvider: CustomProvider = {
       ...provider,

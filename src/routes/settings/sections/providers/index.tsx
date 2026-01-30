@@ -13,9 +13,9 @@ import {
 import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
   addCustomProviderAtom,
-  type CustomProviderModel,
   customProvidersAtom,
   deleteCustomProviderAtom,
+  type NewCustomProviderData,
   updateCustomProviderAtom,
 } from "@/lib/jotai/custom-provider-atoms";
 
@@ -60,20 +60,8 @@ export default function ProvidersSection() {
   const hasResults =
     filteredBuiltInProviders.length > 0 || filteredCustomProviders.length > 0;
 
-  const handleAddProvider = (data: {
-    name: string;
-    baseUrl: string;
-    apiKey: string;
-    headers: Record<string, string>;
-    models: CustomProviderModel[];
-  }) => {
-    addCustomProvider({
-      name: data.name,
-      baseUrl: data.baseUrl,
-      apiKey: data.apiKey,
-      headers: data.headers,
-      models: data.models,
-    });
+  const handleAddProvider = (data: NewCustomProviderData) => {
+    addCustomProvider(data);
   };
 
   if (isApiKeysLoading) {

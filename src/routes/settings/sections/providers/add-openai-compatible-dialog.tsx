@@ -13,20 +13,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
+import type {
+  CustomProviderModel,
+  NewCustomProviderData,
+} from "@/lib/jotai/custom-provider-atoms";
 
 import { ModelList } from "./model-list";
 
 interface AddOpenAICompatibleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (data: {
-    name: string;
-    baseUrl: string;
-    apiKey: string;
-    headers: Record<string, string>;
-    models: CustomProviderModel[];
-  }) => void;
+  onAdd: (data: NewCustomProviderData) => void;
 }
 
 export function AddOpenAICompatibleDialog({

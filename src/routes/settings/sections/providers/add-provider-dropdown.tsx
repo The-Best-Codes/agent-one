@@ -8,18 +8,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
+import type { NewCustomProviderData } from "@/lib/jotai/custom-provider-atoms";
 
 import { AddOpenAICompatibleDialog } from "./add-openai-compatible-dialog";
 
 interface AddProviderDropdownProps {
-  onAddProvider: (data: {
-    name: string;
-    baseUrl: string;
-    apiKey: string;
-    headers: Record<string, string>;
-    models: CustomProviderModel[];
-  }) => void;
+  onAddProvider: (data: NewCustomProviderData) => void;
 }
 
 export function AddProviderDropdown({
