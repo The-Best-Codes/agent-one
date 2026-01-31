@@ -22,7 +22,6 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Import aliases */
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
