@@ -46,9 +46,13 @@ export const updateCustomProviderAtom = atom(
   null,
   (get, set, id: string, updates: Partial<Omit<CustomProvider, "id">>) => {
     const existing = get(customProvidersAtom);
+    const sanitizedUpdates = { ...updates };
+    if ("name" in sanitizedUpdates && !sanitizedUpdates.name?.trim()) {
+      sanitizedUpdates.name = "Unnamed provider";
+    }
     set(
       customProvidersAtom,
-      existing.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+      existing.map((p) => (p.id === id ? { ...p, ...sanitizedUpdates } : p)),
     );
   },
 );
