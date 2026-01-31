@@ -41,7 +41,8 @@ export function AddOpenAICompatibleDialog({
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [models, setModels] = useState<CustomProviderModel[]>([]);
 
-  const isValid = name.trim() !== "" && baseUrl.trim() !== "";
+  const isValid =
+    name.trim() !== "" && baseUrl.trim() !== "" && models.length > 0;
 
   const resetForm = () => {
     setName("");
