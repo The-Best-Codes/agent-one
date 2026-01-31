@@ -37,7 +37,7 @@ export const addCustomProviderAtom = atom(
       id: crypto.randomUUID(),
       enabled: true,
     };
-    set(customProvidersAtom, [...existing, newProvider]);
+    set(customProvidersAtom, [newProvider, ...existing]);
     return newProvider.id;
   },
 );

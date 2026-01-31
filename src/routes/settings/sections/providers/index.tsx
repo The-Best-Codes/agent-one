@@ -122,9 +122,6 @@ export default function ProvidersSection() {
             collapsible
             className="border-border w-full rounded-md border"
           >
-            {filteredBuiltInProviders.map((provider) => (
-              <ProviderItem key={provider.id} providerId={provider.id} />
-            ))}
             {filteredCustomProviders.map((provider) => (
               <CustomProviderListItem
                 key={provider.id}
@@ -134,6 +131,9 @@ export default function ProvidersSection() {
                 }
                 onDelete={() => handleDeleteProvider(provider.id)}
               />
+            ))}
+            {filteredBuiltInProviders.map((provider) => (
+              <ProviderItem key={provider.id} providerId={provider.id} />
             ))}
           </Accordion>
         ) : (
