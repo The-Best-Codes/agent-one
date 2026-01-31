@@ -3,10 +3,10 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import type { CustomProvider } from "@/lib/jotai/custom-provider-atoms";
 
-export function createCustomProvider(provider: CustomProvider) {
+export function createCustomProvider(provider: CustomProvider, apiKey: string) {
   return createOpenAICompatible({
     name: provider.id,
-    apiKey: provider.apiKey || "not-required",
+    apiKey: apiKey || "not-required",
     baseURL: provider.baseUrl,
     fetch: tauriFetch,
     headers: provider.headers,

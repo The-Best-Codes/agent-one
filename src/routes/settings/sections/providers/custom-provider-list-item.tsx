@@ -1,3 +1,4 @@
+import { useAtomValue, useSetAtom } from "jotai";
 import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
@@ -13,6 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  customProviderApiKeysAtom,
+  setCustomProviderApiKeyAtom,
+} from "@/lib/jotai/custom-provider-api-key-atoms";
 import type { CustomProvider } from "@/lib/jotai/custom-provider-atoms";
 
 import { DeleteProviderDialog } from "./delete-provider-dialog";
@@ -30,6 +35,9 @@ export function CustomProviderListItem({
   onDelete,
 }: CustomProviderListItemProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const apiKeys = useAtomValue(customProviderApiKeysAtom);
+  const setApiKey = useSetAtom(setCustomProviderApiKeyAtom);
+  const apiKey = apiKeys[provider.id] ?? "";
 
   const handleDeleteConfirm = () => {
     setDeleteDialogOpen(false);
@@ -85,10 +93,10 @@ export function CustomProviderListItem({
                 API Key
               </Label>
               <SecretInput
-                key={provider.apiKey}
+                key={apiKey}
                 id={`api-key-${provider.id}`}
-                value={provider.apiKey}
-                onChange={(key) => onUpdate({ apiKey: key })}
+                value={apiKey}
+                onChange={(key) => setApiKey(provider.id, key)}
                 placeholder="Enter API key if required"
                 showSaveCancel
               />
@@ -104,7 +112,7 @@ export function CustomProviderListItem({
             <ModelList
               models={provider.models}
               baseUrl={provider.baseUrl}
-              apiKey={provider.apiKey}
+              apiKey={apiKey}
               headers={provider.headers}
               onChange={(models) => onUpdate({ models })}
             />

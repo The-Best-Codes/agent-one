@@ -15,6 +15,7 @@ import {
   type ProviderId,
 } from "@/lib/ai/providers/registry";
 import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
+import { customProviderApiKeysAtom } from "@/lib/jotai/custom-provider-api-key-atoms";
 import {
   type CustomProvider,
   customProvidersAtom,
@@ -84,8 +85,11 @@ function mapModelsDevModels(
   }));
 }
 
-function mapCustomProviderModels(provider: CustomProvider): ModelData[] {
-  const instance = createCustomProvider(provider);
+function mapCustomProviderModels(
+  provider: CustomProvider,
+  apiKey: string,
+): ModelData[] {
+  const instance = createCustomProvider(provider, apiKey);
 
   return provider.models.map((model) => ({
     id: `custom-${provider.id}-${model.id}`,
@@ -118,6 +122,7 @@ export function useModelCatalog() {
   const cerebrasConfig = useAtomValue(providerConfigAtoms.cerebras);
 
   const customProviders = useAtomValue(customProvidersAtom);
+  const customProviderApiKeys = useAtomValue(customProviderApiKeysAtom);
 
   const apiKeys = useMemo(
     () => ({
@@ -173,11 +178,11 @@ export function useModelCatalog() {
     );
 
     const customModels = customProviders.flatMap((p) =>
-      mapCustomProviderModels(p),
+      mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
     );
 
     return [...builtInModels, ...customModels];
-  }, [providers, customProviders]);
+  }, [providers, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
@@ -190,11 +195,11 @@ export function useModelCatalog() {
     );
 
     const customModels = customProviders.flatMap((p) =>
-      mapCustomProviderModels(p),
+      mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
     );
 
     return [...builtInModels, ...customModels];
-  }, [providers, customProviders]);
+  }, [providers, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_IMAGE_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.filter(
@@ -214,7 +219,10 @@ export function useModelCatalog() {
         p.models
           .filter((m) => m.supportsImages)
           .map((m) => {
-            const instance = createCustomProvider(p);
+            const instance = createCustomProvider(
+              p,
+              customProviderApiKeys[p.id] ?? "",
+            );
             return {
               id: `custom-${p.id}-${m.id}`,
               name: m.name || m.id,
@@ -226,7 +234,7 @@ export function useModelCatalog() {
       );
 
     return [...builtInModels, ...customModels];
-  }, [providers, customProviders]);
+  }, [providers, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_CHAT_MODELS_WITH_API_KEY = useMemo(() => {
     const providerIdByLabel = Object.fromEntries(

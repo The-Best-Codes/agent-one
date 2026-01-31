@@ -2,6 +2,7 @@ import { useAtomValue } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { apiKeysLoadingAtom } from "@/lib/jotai/api-key-atoms";
+import { customProviderApiKeysLoadableAtom } from "@/lib/jotai/custom-provider-api-key-atoms";
 import { getLogger } from "@/lib/logger";
 
 import { ApiKeysContext } from "./api-keys-contexts";
@@ -11,7 +12,10 @@ const logger = getLogger(import.meta.url);
 export const ApiKeysProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const isApiKeysLoading = useAtomValue(apiKeysLoadingAtom);
+  const isBuiltInKeysLoading = useAtomValue(apiKeysLoadingAtom);
+  const customKeysLoadable = useAtomValue(customProviderApiKeysLoadableAtom);
+  const isApiKeysLoading =
+    isBuiltInKeysLoading || customKeysLoadable.state === "loading";
 
   const deferredRef = useRef<{
     promise: Promise<void>;

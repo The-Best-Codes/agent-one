@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
@@ -12,10 +12,13 @@ import {
 } from "@/lib/ai/providers/registry";
 import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
+  deleteCustomProviderApiKeyAtom,
+  setCustomProviderApiKeyAtom,
+} from "@/lib/jotai/custom-provider-api-key-atoms";
+import {
   addCustomProviderAtom,
   customProvidersAtom,
   deleteCustomProviderAtom,
-  type NewCustomProviderData,
   updateCustomProviderAtom,
 } from "@/lib/jotai/custom-provider-atoms";
 
@@ -48,6 +51,8 @@ export default function ProvidersSection() {
   const [, addCustomProvider] = useAtom(addCustomProviderAtom);
   const [, updateCustomProvider] = useAtom(updateCustomProviderAtom);
   const [, deleteCustomProvider] = useAtom(deleteCustomProviderAtom);
+  const setCustomProviderApiKey = useSetAtom(setCustomProviderApiKeyAtom);
+  const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
 
   const filteredBuiltInProviders = PROVIDER_REGISTRY.filter((provider) =>
     provider.label.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -60,8 +65,19 @@ export default function ProvidersSection() {
   const hasResults =
     filteredBuiltInProviders.length > 0 || filteredCustomProviders.length > 0;
 
-  const handleAddProvider = (data: NewCustomProviderData) => {
-    addCustomProvider(data);
+  const handleAddProvider = (
+    data: Parameters<typeof addCustomProvider>[0],
+    apiKey: string,
+  ) => {
+    const providerId = addCustomProvider(data);
+    if (apiKey) {
+      setCustomProviderApiKey(providerId, apiKey);
+    }
+  };
+
+  const handleDeleteProvider = (providerId: string) => {
+    deleteCustomProvider(providerId);
+    deleteCustomProviderApiKey(providerId);
   };
 
   if (isApiKeysLoading) {
@@ -116,7 +132,7 @@ export default function ProvidersSection() {
                 onUpdate={(updates) =>
                   updateCustomProvider(provider.id, updates)
                 }
-                onDelete={() => deleteCustomProvider(provider.id)}
+                onDelete={() => handleDeleteProvider(provider.id)}
               />
             ))}
           </Accordion>
