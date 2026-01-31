@@ -219,23 +219,21 @@ export function useModelCatalog() {
 
     const customModels = customProviders
       .filter((p) => p.enabled)
-      .flatMap((p) =>
-        p.models
+      .flatMap((p) => {
+        const instance = createCustomProvider(
+          p,
+          customProviderApiKeys[p.id] ?? "",
+        );
+        return p.models
           .filter((m) => m.supportsImages)
-          .map((m) => {
-            const instance = createCustomProvider(
-              p,
-              customProviderApiKeys[p.id] ?? "",
-            );
-            return {
-              id: `custom-${p.id}-${m.id}`,
-              name: m.name || m.id,
-              provider: p.name,
-              model: instance.languageModel(m.id),
-              supportsToolUse: m.supportsTools,
-            };
-          }),
-      );
+          .map((m) => ({
+            id: `custom-${p.id}-${m.id}`,
+            name: m.name || m.id,
+            provider: p.name,
+            model: instance.languageModel(m.id),
+            supportsToolUse: m.supportsTools,
+          }));
+      });
 
     return [...builtInModels, ...customModels];
   }, [providers, customProviders, customProviderApiKeys]);
