@@ -16,12 +16,14 @@ const vendorManualChunks = {
     "@openrouter/ai-sdk-provider",
     "@ai-sdk/openai-compatible",
   ],
-  codemirror: [
+  codemirrorCore: [
     "codemirror",
-    "@uiw/react-codemirror",
     "@codemirror/view",
     "@codemirror/state",
+    "@codemirror/language",
+    "@codemirror/commands",
   ],
+  codemirrorReact: ["@uiw/react-codemirror"],
   codemirrorLangs: ["@codemirror/lang-markdown"],
   markdown: ["react-markdown", "remark-breaks", "remark-gfm", "marked"],
   radixUi: [
