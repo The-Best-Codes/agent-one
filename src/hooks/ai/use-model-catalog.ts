@@ -177,9 +177,11 @@ export function useModelCatalog() {
       mapModelsDevModels(p.id, p.label, providers[p.id].languageModel),
     );
 
-    const customModels = customProviders.flatMap((p) =>
-      mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
-    );
+    const customModels = customProviders
+      .filter((p) => p.enabled)
+      .flatMap((p) =>
+        mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
+      );
 
     return [...builtInModels, ...customModels];
   }, [providers, customProviders, customProviderApiKeys]);
@@ -194,9 +196,11 @@ export function useModelCatalog() {
       ),
     );
 
-    const customModels = customProviders.flatMap((p) =>
-      mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
-    );
+    const customModels = customProviders
+      .filter((p) => p.enabled)
+      .flatMap((p) =>
+        mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
+      );
 
     return [...builtInModels, ...customModels];
   }, [providers, customProviders, customProviderApiKeys]);
