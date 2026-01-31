@@ -16,6 +16,7 @@ const vendorManualChunks = {
     "@ai-sdk/groq",
     "@ai-sdk/mcp",
     "@openrouter/ai-sdk-provider",
+    "@ai-sdk/openai-compatible",
   ],
   codemirror: [
     "codemirror",
@@ -43,8 +44,16 @@ const vendorManualChunks = {
     "@radix-ui/react-slot",
     "@radix-ui/react-direction",
     "@radix-ui/react-visually-hidden",
+    "@radix-ui/react-accordion",
+    "@radix-ui/react-checkbox",
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-label",
+    "@radix-ui/react-progress",
+    "@radix-ui/react-separator",
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-toggle",
   ],
-  miscUi: ["vaul", "tailwind-merge"],
+  miscUi: ["vaul", "tailwind-merge", "sonner", "cmdk"],
 };
 
 export default defineConfig(
