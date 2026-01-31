@@ -52,8 +52,10 @@ const vendorManualChunks = {
     "@radix-ui/react-separator",
     "@radix-ui/react-tabs",
     "@radix-ui/react-toggle",
+    // cmdk has to go in the Radix chunk or you get import errors in prod
+    "cmdk",
   ],
-  miscUi: ["vaul", "tailwind-merge", "sonner", "cmdk"],
+  miscUi: ["vaul", "tailwind-merge", "sonner"],
 };
 
 export default defineConfig(
