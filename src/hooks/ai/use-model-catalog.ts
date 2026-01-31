@@ -245,19 +245,15 @@ export function useModelCatalog() {
       PROVIDER_REGISTRY.map((p) => [p.label, p.id]),
     );
 
-    const customProviderNames = new Set(
-      customProviders.filter((p) => p.enabled).map((p) => p.name),
-    );
-
     return AVAILABLE_CHAT_MODELS.filter((model) => {
-      if (customProviderNames.has(model.provider)) {
+      if (model.id.startsWith("custom-")) {
         return true;
       }
 
       const providerId = providerIdByLabel[model.provider];
       return providerId ? providerIsAvailable[providerId as ProviderId] : false;
     });
-  }, [AVAILABLE_CHAT_MODELS, providerIsAvailable, customProviders]);
+  }, [AVAILABLE_CHAT_MODELS, providerIsAvailable]);
 
   const getModelByIdMemoized = useMemo(
     () => (id: string) => AVAILABLE_MODELS.find((model) => model.id === id),
