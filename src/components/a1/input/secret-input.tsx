@@ -1,5 +1,5 @@
 import { EyeIcon, EyeOffIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,10 @@ export function SecretInput({
 }: SecretInputProps) {
   const [showValue, setShowValue] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
   const hasChanges = inputValue !== value;
 

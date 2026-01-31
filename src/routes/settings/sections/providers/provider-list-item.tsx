@@ -54,7 +54,6 @@ export function ProviderListItem({
               </p>
             ) : null}
             <SecretInput
-              key={apiKey}
               id={`api-key-${providerId}`}
               value={apiKey}
               onChange={onApiKeyChange}

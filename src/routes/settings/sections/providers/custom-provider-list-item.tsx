@@ -93,7 +93,6 @@ export function CustomProviderListItem({
                 API Key
               </Label>
               <SecretInput
-                key={apiKey}
                 id={`api-key-${provider.id}`}
                 value={apiKey}
                 onChange={(key) => setApiKey(provider.id, key)}
