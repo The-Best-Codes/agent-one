@@ -1,9 +1,9 @@
 import type { LanguageModel } from "ai";
 
-import { getCerebras } from "@/lib/ai/providers/cerebras";
-import { getGoogle } from "@/lib/ai/providers/google";
-import { getGroq } from "@/lib/ai/providers/groq";
-import { getOpenRouter } from "@/lib/ai/providers/openrouter";
+import { getCerebras } from "./factories/cerebras";
+import { getGoogle } from "./factories/google";
+import { getGroq } from "./factories/groq";
+import { getOpenRouter } from "./factories/openrouter";
 
 export type ProviderFactory = (
   apiKey: string,

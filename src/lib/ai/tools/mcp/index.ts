@@ -6,7 +6,7 @@ import {
   UnauthorizedError,
 } from "@ai-sdk/mcp";
 import { invoke } from "@tauri-apps/api/core";
-import { fetch } from "@tauri-apps/plugin-http";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { ToolSet } from "ai";
 import { getDefaultStore } from "jotai";
@@ -192,7 +192,7 @@ class TauriHttpMCPTransport implements MCPTransport {
 
       logger.verbose(`Sending HTTP MCP message:`, message);
 
-      const response = await fetch(this.url, {
+      const response = await tauriFetch(this.url, {
         method: "POST",
         headers: requestHeaders,
         body: JSON.stringify(message),
@@ -309,7 +309,7 @@ class TauriHttpMCPTransport implements MCPTransport {
 
     if (this.sessionId) {
       try {
-        await fetch(this.url, {
+        await tauriFetch(this.url, {
           method: "DELETE",
           headers: {
             "mcp-session-id": this.sessionId,

@@ -1,6 +1,6 @@
 // If you update this file, check if you also need to update reset-settings.ts in this directory
 
-import type { ProviderStorageKey } from "@/lib/providers/registry";
+import type { ProviderStorageKey } from "@/lib/ai/providers/registry";
 
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";

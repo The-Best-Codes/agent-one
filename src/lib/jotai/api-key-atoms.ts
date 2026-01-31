@@ -5,7 +5,7 @@ import {
   PROVIDER_REGISTRY,
   type ProviderId,
   type ProviderStorageKey,
-} from "@/lib/providers/registry";
+} from "@/lib/ai/providers/registry";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 
 function createApiKeyAtoms(storageKey: ProviderStorageKey) {

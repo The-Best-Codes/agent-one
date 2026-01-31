@@ -1,4 +1,3 @@
-import { useAtom } from "jotai";
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
@@ -10,32 +9,17 @@ import { useEffect, useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
+import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
+import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
-  getProviderConfigAtom,
   type ProviderConfig,
   type ProviderId,
 } from "@/lib/jotai/provider-atoms";
-import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/providers/registry";
 import { cn } from "@/lib/utils";
 import { ProviderListItem } from "@/routes/settings/sections/providers/provider-list-item";
 
 interface AccountStepProps {
   onSubmit: () => void;
-}
-
-function useProviderState(providerId: ProviderId) {
-  const [apiKey, setApiKey] = useAtom(getApiKeyAtom(providerId));
-  const [config, setConfig] = useAtom(getProviderConfigAtom(providerId));
-
-  return {
-    apiKey,
-    setApiKey,
-    config,
-    setConfig: (updates: Partial<ProviderConfig>) =>
-      setConfig((prev) => ({ ...prev, ...updates })),
-    hasEnvKey: hasEnvKey(providerId),
-  };
 }
 
 function ProviderItem({

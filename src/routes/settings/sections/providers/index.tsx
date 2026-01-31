@@ -1,4 +1,4 @@
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
@@ -6,28 +6,25 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
-import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
-import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import {
-  hasEnvKey,
   PROVIDER_REGISTRY,
   type ProviderId,
-} from "@/lib/providers/registry";
+} from "@/lib/ai/providers/registry";
+import { useProviderState } from "@/lib/hooks/use-provider-state";
+import {
+  deleteCustomProviderApiKeyAtom,
+  setCustomProviderApiKeyAtom,
+} from "@/lib/jotai/custom-provider-api-key-atoms";
+import {
+  addCustomProviderAtom,
+  customProvidersAtom,
+  deleteCustomProviderAtom,
+  updateCustomProviderAtom,
+} from "@/lib/jotai/custom-provider-atoms";
 
+import { AddProviderDropdown } from "./add-provider-dropdown";
+import { CustomProviderListItem } from "./custom-provider-list-item";
 import { ProviderListItem } from "./provider-list-item";
-
-function useProviderState(providerId: ProviderId) {
-  const [apiKey, setApiKey] = useAtom(getApiKeyAtom(providerId));
-  const [config, setConfig] = useAtom(getProviderConfigAtom(providerId));
-
-  return {
-    apiKey,
-    setApiKey,
-    config,
-    setConfig: (updates: Parameters<typeof setConfig>[0]) => setConfig(updates),
-    hasEnvKey: hasEnvKey(providerId),
-  };
-}
 
 function ProviderItem({ providerId }: { providerId: ProviderId }) {
   const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
@@ -40,9 +37,7 @@ function ProviderItem({ providerId }: { providerId: ProviderId }) {
       config={state.config}
       apiKey={state.apiKey}
       hasEnvKey={state.hasEnvKey}
-      onConfigChange={(updates) =>
-        state.setConfig((prev) => ({ ...prev, ...updates }))
-      }
+      onConfigChange={state.setConfig}
       onApiKeyChange={state.setApiKey}
     />
   );
@@ -52,9 +47,38 @@ export default function ProvidersSection() {
   const { isApiKeysLoading } = useApiKeys();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredProviders = PROVIDER_REGISTRY.filter((provider) =>
+  const [customProviders] = useAtom(customProvidersAtom);
+  const [, addCustomProvider] = useAtom(addCustomProviderAtom);
+  const [, updateCustomProvider] = useAtom(updateCustomProviderAtom);
+  const [, deleteCustomProvider] = useAtom(deleteCustomProviderAtom);
+  const setCustomProviderApiKey = useSetAtom(setCustomProviderApiKeyAtom);
+  const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
+
+  const filteredBuiltInProviders = PROVIDER_REGISTRY.filter((provider) =>
     provider.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const filteredCustomProviders = customProviders.filter((provider) =>
+    provider.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const hasResults =
+    filteredBuiltInProviders.length > 0 || filteredCustomProviders.length > 0;
+
+  const handleAddProvider = (
+    data: Parameters<typeof addCustomProvider>[0],
+    apiKey: string,
+  ) => {
+    const providerId = addCustomProvider(data);
+    if (apiKey) {
+      setCustomProviderApiKey(providerId, apiKey);
+    }
+  };
+
+  const handleDeleteProvider = (providerId: string) => {
+    deleteCustomProvider(providerId);
+    deleteCustomProviderApiKey(providerId);
+  };
 
   if (isApiKeysLoading) {
     return (
@@ -82,19 +106,33 @@ export default function ProvidersSection() {
           to control which models appear in the model selector.
         </p>
 
-        <Input
-          placeholder="Search providers..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="flex gap-2">
+          <Input
+            placeholder="Search providers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1"
+          />
+          <AddProviderDropdown onAddProvider={handleAddProvider} />
+        </div>
 
-        {filteredProviders.length > 0 ? (
+        {hasResults ? (
           <Accordion
             type="single"
             collapsible
             className="border-border w-full rounded-md border"
           >
-            {filteredProviders.map((provider) => (
+            {filteredCustomProviders.map((provider) => (
+              <CustomProviderListItem
+                key={provider.id}
+                provider={provider}
+                onUpdate={(updates) =>
+                  updateCustomProvider(provider.id, updates)
+                }
+                onDelete={() => handleDeleteProvider(provider.id)}
+              />
+            ))}
+            {filteredBuiltInProviders.map((provider) => (
               <ProviderItem key={provider.id} providerId={provider.id} />
             ))}
           </Accordion>
