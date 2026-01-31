@@ -74,8 +74,15 @@ export function AddOpenAICompatibleDialog({
     onOpenChange(false);
   };
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      resetForm();
+    }
+    onOpenChange(isOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Add OpenAI Compatible Provider</DialogTitle>

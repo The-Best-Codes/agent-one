@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface SecretInputProps {
   id?: string;
@@ -46,7 +47,7 @@ export function SecretInput({
   };
 
   return (
-    <div className={`flex gap-2 ${className ?? ""}`}>
+    <div className={cn("flex gap-2", className)}>
       <Input
         id={id}
         type={showValue ? "text" : "password"}
