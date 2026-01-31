@@ -27,6 +27,26 @@ Run the application:
 npm run tauri dev
 ```
 
+## Linting with OXLint (unstable)
+
+Install `oxlint-tsgolint` without saving it to the package.json:
+
+```bash
+npm install --no-save oxlint-tsgolint
+```
+
+Run the linter:
+
+```bash
+npx oxlint --type-aware
+```
+
+Or without types:
+
+```bash
+npx oxlint
+```
+
 ## Build
 
 To build the application for production, run the following command:
