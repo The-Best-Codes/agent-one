@@ -1,11 +1,12 @@
 import { atom } from "jotai";
-import { atomWithStorage, loadable, unwrap } from "jotai/utils";
+import { atomWithStorage, unwrap } from "jotai/utils";
 
 import {
   PROVIDER_REGISTRY,
   type ProviderId,
   type ProviderStorageKey,
 } from "@/lib/ai/providers/registry";
+import { loadable } from "@/lib/jotai/loadable";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 
 function createApiKeyAtoms(storageKey: ProviderStorageKey) {

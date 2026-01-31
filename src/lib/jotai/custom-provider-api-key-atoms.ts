@@ -1,6 +1,7 @@
 import { atom } from "jotai";
-import { atomWithStorage, loadable, unwrap } from "jotai/utils";
+import { atomWithStorage, unwrap } from "jotai/utils";
 
+import { loadable } from "@/lib/jotai/loadable";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 
 const STORAGE_KEY = "agent-one-custom-provider-api-keys";
