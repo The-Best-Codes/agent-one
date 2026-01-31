@@ -43,5 +43,9 @@ export async function fetchProviderModels(
     );
   }
 
-  return response.json();
+  const json = await response.json();
+  if (!json || typeof json !== "object" || !Array.isArray(json.data)) {
+    throw new Error("Invalid models response format: missing 'data' array");
+  }
+  return json as OpenAIModelsResponse;
 }
