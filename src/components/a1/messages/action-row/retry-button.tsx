@@ -27,7 +27,7 @@ export const RetryButton = ({
 
   const handleRetry = () => {
     if (!isDisabled) {
-      regenerate({ messageId });
+      void regenerate({ messageId });
     }
   };
 

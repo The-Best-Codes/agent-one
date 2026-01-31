@@ -28,7 +28,7 @@ export function McpAuthStatus({
 
   useEffect(() => {
     if (authState === undefined && !disabled) {
-      mcpCheckAuth(server.id, server.url);
+      void mcpCheckAuth(server.id, server.url);
     }
   }, [server.id, server.url, authState, disabled]);
 

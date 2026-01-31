@@ -7,7 +7,7 @@ export default function NotFoundRoute() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate("/");
+    void navigate("/");
   });
 
   return <SuspenseFallback />;

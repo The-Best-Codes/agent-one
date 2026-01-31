@@ -7,13 +7,13 @@ export function KbdRegistry() {
   // TODO: Disable this in prod
   const navigate = useNavigate();
   useHotkeys(kbdRegistry.openTests, () => {
-    navigate("/tests");
+    void navigate("/tests");
   });
   useHotkeys(kbdRegistry.openSettings, () => {
-    navigate("/settings");
+    void navigate("/settings");
   });
   useHotkeys(kbdRegistry.newChat, () => {
-    navigate("/chat");
+    void navigate("/chat");
   });
 
   return null;

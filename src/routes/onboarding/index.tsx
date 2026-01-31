@@ -22,7 +22,7 @@ export default function OnboardingRoute() {
 
   useEffect(() => {
     if (onboardingCompleted) {
-      navigate("/chat");
+      void navigate("/chat");
     }
   }, [onboardingCompleted, navigate]);
 

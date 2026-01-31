@@ -68,7 +68,7 @@ export async function mcpLogin(
     if (typeof e === "string" && e.includes("cancelled by user")) {
       // no-op
     } else {
-      toast.error(`Login failed: ${e}`, { id: toastId, action: null });
+      toast.error(`Login failed: ${String(e)}`, { id: toastId, action: null });
     }
     return false;
   }
@@ -88,7 +88,7 @@ export async function mcpLogout(serverId: string): Promise<boolean> {
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    toast.error(`Logout failed: ${e}`);
+    toast.error(`Logout failed: ${String(e)}`);
     return false;
   }
 }

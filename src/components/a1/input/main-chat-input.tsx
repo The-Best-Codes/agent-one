@@ -147,7 +147,7 @@ export const MainChatInput = ({
         hasFiles: !!files,
         fileCount: files?.length || 0,
       });
-      sendMessage({
+      void sendMessage({
         text: currentText || "",
         files: files,
       });

@@ -44,9 +44,9 @@ export default function SettingsRoute() {
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
     if (chatId) {
-      navigate(`/chat/${chatId}`);
+      void navigate(`/chat/${chatId}`);
     } else {
-      navigate("/chat");
+      void navigate("/chat");
     }
   };
 

@@ -77,7 +77,7 @@ const MessagePartsInternal = ({
         originalChatId: activeChatId,
         branchFromMessageId: message.id,
       });
-      navigate(`/chat/${newChatId}`);
+      void navigate(`/chat/${newChatId}`);
     } catch (error) {
       logger.error("Failed to branch chat:", error);
     }

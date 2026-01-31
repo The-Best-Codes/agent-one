@@ -12,9 +12,9 @@ export default function IndexRoute() {
 
   useEffect(() => {
     if (!onboardingCompleted) {
-      navigate("/onboarding");
+      void navigate("/onboarding");
     } else {
-      navigate("/chat");
+      void navigate("/chat");
     }
   });
 

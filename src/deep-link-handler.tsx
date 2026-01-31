@@ -103,14 +103,16 @@ export function DeepLinkHandler() {
           if (message) {
             params.set("initialMessage", message);
           }
-          navigate(`/chat${params.size > 0 ? `?${params.toString()}` : ""}`);
+          void navigate(
+            `/chat${params.size > 0 ? `?${params.toString()}` : ""}`,
+          );
         }
       } catch (error) {
         logger.error("Failed to parse deep link URL:", error);
       }
     };
 
-    setupDeepLink();
+    void setupDeepLink();
   }, [navigate, handledDeepLink, setHandledDeepLink]);
 
   return null;

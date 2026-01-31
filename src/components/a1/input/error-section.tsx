@@ -46,7 +46,7 @@ export const MainInputErrorSection = ({
             <TooltipTrigger asChild>
               <Button
                 onClick={() => {
-                  regenerate();
+                  void regenerate();
                   onRetry?.();
                 }}
                 variant="destructive"

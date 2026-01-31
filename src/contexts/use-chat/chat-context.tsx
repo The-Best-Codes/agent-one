@@ -255,7 +255,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ) => {
       if (!focusedModel) return Promise.resolve();
       const newChatId = createChat(focusedModel.id, focusedModelConfig);
-      navigate(`/chat/${newChatId}`, {
+      void navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
       });
@@ -279,9 +279,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ) {
       const instance = chatInstancesRef.current.get(currentChatId);
       if (instance?.sendMessage) {
-        navigate(location.pathname, { replace: true, state: {} });
+        void navigate(location.pathname, { replace: true, state: {} });
         const { message, options } = pendingState;
-        instance.sendMessage(message, options);
+        void instance.sendMessage(message, options);
       }
     }
   }, [
@@ -364,7 +364,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           notificationSetting === "always" ||
           (notificationSetting === "when-unfocused" && !document.hasFocus())
         ) {
-          sendNotificationIfAllowed(
+          void sendNotificationIfAllowed(
             "AgentOne Finished Responding",
             "You can disable this notification in settings.",
           );
@@ -380,13 +380,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
         const { status, stop } = instance;
         if (status === "streaming" || status === "submitted") {
           logger.verbose(`Stopping stream for deleted chat: ${currentChatId}`);
-          stop();
+          void stop();
         }
       }
       logger.verbose(
         `Invalid chat ID detected: ${currentChatId}. Redirecting to /chat`,
       );
-      navigate("/chat", { replace: true });
+      void navigate("/chat", { replace: true });
     }
   }, [currentChatId, chatIds, navigate]);
 

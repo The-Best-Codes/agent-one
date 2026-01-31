@@ -26,7 +26,7 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
 
   useEffect(() => {
     let cancelled = false;
-    highlight(code, language, theme).then((result) => {
+    void highlight(code, language, theme).then((result) => {
       if (cancelled) return;
 
       setError(null);

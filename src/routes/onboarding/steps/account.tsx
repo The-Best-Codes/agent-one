@@ -47,7 +47,7 @@ function ProviderItem({
   };
 
   const handleApiKeyChange = (key: string) => {
-    state.setApiKey(key);
+    void state.setApiKey(key);
   };
 
   return (

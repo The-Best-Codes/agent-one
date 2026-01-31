@@ -70,7 +70,7 @@ export function resetAllSettings(): void {
   store.set(titleGenerationAtom, RESET);
 
   for (const provider of PROVIDER_REGISTRY) {
-    store.set(getApiKeyBaseAtom(provider.id), RESET);
+    void store.set(getApiKeyBaseAtom(provider.id), RESET);
     store.set(providerConfigAtoms[provider.id], RESET);
   }
 }
@@ -84,7 +84,7 @@ export function resetSetting(key: keyof DefaultSettings): void {
 
   if (isProviderStorageKey(key)) {
     const provider = PROVIDER_REGISTRY.find((p) => p.storageKey === key)!;
-    store.set(getApiKeyBaseAtom(provider.id), RESET);
+    void store.set(getApiKeyBaseAtom(provider.id), RESET);
     store.set(providerConfigAtoms[provider.id], RESET);
     return;
   }

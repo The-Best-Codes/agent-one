@@ -102,7 +102,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   const handleNewChat = () => {
     logger.verbose("Creating new chat", { isDesktop, isDrawerOpen });
-    navigate("/chat");
+    void navigate("/chat");
     if (!isDesktop) {
       setIsDrawerOpen(false);
     }

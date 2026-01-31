@@ -71,13 +71,13 @@ export default function ProvidersSection() {
   ) => {
     const providerId = addCustomProvider(data);
     if (apiKey) {
-      setCustomProviderApiKey(providerId, apiKey);
+      void setCustomProviderApiKey(providerId, apiKey);
     }
   };
 
   const handleDeleteProvider = (providerId: string) => {
     deleteCustomProvider(providerId);
-    deleteCustomProviderApiKey(providerId);
+    void deleteCustomProviderApiKey(providerId);
   };
 
   if (isApiKeysLoading) {

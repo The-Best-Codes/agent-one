@@ -42,7 +42,7 @@ export const MainInputIncompleteSection = ({
       <div className="flex flex-row items-center gap-2">
         <Button
           onClick={() => {
-            regenerate();
+            void regenerate();
             onRetry?.();
           }}
           variant="default"

@@ -120,7 +120,7 @@ export const useMessageEditing = ({
         setIsEditing(false);
 
         if (shouldRegenerate) {
-          regenerate({ messageId: message.id });
+          void regenerate({ messageId: message.id });
         }
       } catch (e) {
         logger.error(e);
