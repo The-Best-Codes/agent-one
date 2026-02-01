@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
 import { sections } from "./sections-config";
@@ -15,30 +15,33 @@ export default function SettingsSidebar({
   className,
 }: SettingsSidebarProps) {
   return (
-    <div
-      className={cn("flex flex-col gap-1", className)}
+    <ToggleGroup
+      type="single"
+      value={activeSection}
+      onValueChange={(value) => {
+        if (value) {
+          onSectionChange(value);
+        }
+      }}
+      orientation="vertical"
+      className={cn("flex w-full flex-col gap-1", className)}
       role="tablist"
       aria-orientation="vertical"
     >
-      {sections.map((section) => {
-        const isSelected = activeSection === section.id;
-
-        return (
-          <Button
-            key={section.id}
-            variant={isSelected ? "secondary" : "ghost"}
-            className={cn(
-              "justify-start text-left transition-none",
-              isSelected && "border pl-3.75",
-            )}
-            role="tab"
-            aria-selected={isSelected}
-            onClick={() => onSectionChange(section.id)}
-          >
-            {section.label}
-          </Button>
-        );
-      })}
-    </div>
+      {sections.map((section) => (
+        <ToggleGroupItem
+          key={section.id}
+          value={section.id}
+          role="tab"
+          aria-selected={activeSection === section.id}
+          className={cn(
+            "hover:text-foreground h-9 w-full flex-none justify-start rounded-md border-0 px-4 text-left shadow-none transition-none",
+            "data-[state=on]:bg-secondary data-[state=on]:border data-[state=on]:pl-3.75",
+          )}
+        >
+          {section.label}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
   );
 }
