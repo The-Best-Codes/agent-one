@@ -46,13 +46,15 @@ export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);
 
-  const basePrompt = dedent`You are AgentOne. You are a helpful assistant.${
-    userName ? ` The user prefers to be called "${userName}".` : ""
-  }`;
+  const settings = [
+    userName && `- Name: ${userName}`,
+    appendix.trim() && `- Instructions for you: ${appendix.trim()}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
-  if (appendix.trim()) {
-    return `${basePrompt}\n\nAdditional instructions from the user:\n${appendix}`;
-  }
-
-  return basePrompt;
+  return dedent`
+    You are AgentOne, a helpful AI agent.
+    ${settings ? `\nUser settings:\n${settings}` : ""}
+  `.trim();
 });
