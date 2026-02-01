@@ -51,6 +51,8 @@ export function SecretInput({
       <Input
         id={id}
         type={showValue ? "text" : "password"}
+        autoSave="off"
+        autoComplete="off"
         value={inputValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
