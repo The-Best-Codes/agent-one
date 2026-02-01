@@ -123,7 +123,11 @@ export default function SettingsRoute() {
           </ScrollArea>
 
           <ScrollArea type="always" className="flex-1 md:min-h-0">
-            <div role="tabpanel" tabIndex={0}>
+            <div
+              role="tabpanel"
+              tabIndex={0}
+              className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
+            >
               <SettingsContent activeSection={displayedSection} />
             </div>
           </ScrollArea>
