@@ -34,6 +34,7 @@ export default function SettingsSidebar({
           value={section.id}
           role="tab"
           aria-selected={activeSection === section.id}
+          aria-checked={undefined}
           className={cn(
             "hover:text-foreground h-9 w-full flex-none justify-start rounded-md border-0 px-4 text-left shadow-none transition-none",
             "data-[state=on]:bg-secondary data-[state=on]:border data-[state=on]:pl-3.75",
