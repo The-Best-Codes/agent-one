@@ -4925,16 +4925,6 @@
           ]
         }
       },
-      "deepseek/deepseek-r1": {
-        "id": "deepseek/deepseek-r1",
-        "name": "DeepSeek-R1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "recraft/recraft-v3": {
         "id": "recraft/recraft-v3",
         "name": "Recraft V3",
@@ -6431,6 +6421,16 @@
           ]
         }
       },
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Moonshot Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "deepseek-r1-distill-qwen-32b": {
         "id": "deepseek-r1-distill-qwen-32b",
         "name": "DeepSeek R1 Distill Qwen 32B",
@@ -6524,6 +6524,16 @@
       "qwen-deep-research": {
         "id": "qwen-deep-research",
         "name": "Qwen Deep Research",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "kimi-k2-thinking": {
+        "id": "kimi-k2-thinking",
+        "name": "Moonshot Kimi K2 Thinking",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16381,9 +16391,49 @@
           ]
         }
       },
+      "nousresearch/hermes-3-llama-3.1-405b:free": {
+        "id": "nousresearch/hermes-3-llama-3.1-405b:free",
+        "name": "Hermes 3 405B Instruct (free)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "nvidia/nemotron-nano-12b-v2-vl:free": {
+        "id": "nvidia/nemotron-nano-12b-v2-vl:free",
+        "name": "Nemotron Nano 12B 2 VL (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "nvidia/nemotron-nano-9b-v2": {
         "id": "nvidia/nemotron-nano-9b-v2",
         "name": "nvidia-nemotron-nano-9b-v2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "nvidia/nemotron-3-nano-30b-a3b:free": {
+        "id": "nvidia/nemotron-3-nano-30b-a3b:free",
+        "name": "Nemotron 3 Nano 30B A3B (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "nvidia/nemotron-nano-9b-v2:free": {
+        "id": "nvidia/nemotron-nano-9b-v2:free",
+        "name": "Nemotron Nano 9B V2 (free)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16481,6 +16531,16 @@
           ]
         }
       },
+      "cognitivecomputations/dolphin-mistral-24b-venice-edition:free": {
+        "id": "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+        "name": "Uncensored (free)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "cognitivecomputations/dolphin3.0-mistral-24b": {
         "id": "cognitivecomputations/dolphin3.0-mistral-24b",
         "name": "Dolphin3.0 Mistral 24B",
@@ -16498,6 +16558,36 @@
         "modalities": {
           "output": [
             "text"
+          ]
+        }
+      },
+      "sourceful/riverflow-v2-max-preview": {
+        "id": "sourceful/riverflow-v2-max-preview",
+        "name": "Riverflow V2 Max Preview",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
+          ]
+        }
+      },
+      "sourceful/riverflow-v2-fast-preview": {
+        "id": "sourceful/riverflow-v2-fast-preview",
+        "name": "Riverflow V2 Fast Preview",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
+          ]
+        }
+      },
+      "sourceful/riverflow-v2-standard-preview": {
+        "id": "sourceful/riverflow-v2-standard-preview",
+        "name": "Riverflow V2 Standard Preview",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
           ]
         }
       },
@@ -16574,7 +16664,7 @@
       "deepseek/deepseek-r1-0528:free": {
         "id": "deepseek/deepseek-r1-0528:free",
         "name": "R1 0528 (free)",
-        "tool_call": true,
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -16631,12 +16721,43 @@
           ]
         }
       },
+      "tngtech/tng-r1t-chimera:free": {
+        "id": "tngtech/tng-r1t-chimera:free",
+        "name": "R1T Chimera (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "tngtech/deepseek-r1t2-chimera:free": {
         "id": "tngtech/deepseek-r1t2-chimera:free",
         "name": "DeepSeek R1T2 Chimera (free)",
         "tool_call": false,
         "modalities": {
           "output": [
+            "text"
+          ]
+        }
+      },
+      "allenai/molmo-2-8b:free": {
+        "id": "allenai/molmo-2-8b:free",
+        "name": "Molmo2 8B (free)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "bytedance-seed/seedream-4.5": {
+        "id": "bytedance-seed/seedream-4.5",
+        "name": "Seedream 4.5",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image",
             "text"
           ]
         }
@@ -16655,6 +16776,26 @@
         "id": "arcee-ai/trinity-large-preview:free",
         "name": "Trinity Large Preview",
         "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "liquid/lfm-2.5-1.2b-thinking:free": {
+        "id": "liquid/lfm-2.5-1.2b-thinking:free",
+        "name": "LFM2.5-1.2B-Thinking (free)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "liquid/lfm-2.5-1.2b-instruct:free": {
+        "id": "liquid/lfm-2.5-1.2b-instruct:free",
+        "name": "LFM2.5-1.2B-Instruct (free)",
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -16921,6 +17062,26 @@
           ]
         }
       },
+      "openai/gpt-5.2-chat": {
+        "id": "openai/gpt-5.2-chat",
+        "name": "GPT-5.2 Chat",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "openai/gpt-oss-20b:free": {
+        "id": "openai/gpt-oss-20b:free",
+        "name": "gpt-oss-20b (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "openai/gpt-oss-safeguard-20b": {
         "id": "openai/gpt-oss-safeguard-20b",
         "name": "GPT OSS Safeguard 20B",
@@ -16961,6 +17122,16 @@
           ]
         }
       },
+      "openai/gpt-oss-120b:free": {
+        "id": "openai/gpt-oss-120b:free",
+        "name": "gpt-oss-120b (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "openai/gpt-5-chat": {
         "id": "openai/gpt-5-chat",
         "name": "GPT-5 Chat (latest)",
@@ -16984,16 +17155,6 @@
       "openai/gpt-5.1-codex-mini": {
         "id": "openai/gpt-5.1-codex-mini",
         "name": "GPT-5.1-Codex-Mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "openai/gpt-5.2-chat-latest": {
-        "id": "openai/gpt-5.2-chat-latest",
-        "name": "GPT-5.2 Chat",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -17322,6 +17483,16 @@
           ]
         }
       },
+      "qwen/qwen-2.5-vl-7b-instruct:free": {
+        "id": "qwen/qwen-2.5-vl-7b-instruct:free",
+        "name": "Qwen2.5-VL 7B Instruct (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "qwen/qwq-32b:free": {
         "id": "qwen/qwq-32b:free",
         "name": "QwQ 32B (free)",
@@ -17335,6 +17506,16 @@
       "qwen/qwen3-30b-a3b-thinking-2507": {
         "id": "qwen/qwen3-30b-a3b-thinking-2507",
         "name": "Qwen3 30B A3B Thinking 2507",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "qwen/qwen3-4b:free": {
+        "id": "qwen/qwen3-4b:free",
+        "name": "Qwen3 4B (free)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -17405,6 +17586,16 @@
       "qwen/qwen2.5-vl-32b-instruct:free": {
         "id": "qwen/qwen2.5-vl-32b-instruct:free",
         "name": "Qwen2.5 VL 32B Instruct (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "qwen/qwen3-next-80b-a3b-instruct:free": {
+        "id": "qwen/qwen3-next-80b-a3b-instruct:free",
+        "name": "Qwen3 Next 80B A3B Instruct (free)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -17672,6 +17863,26 @@
           ]
         }
       },
+      "meta-llama/llama-3.2-3b-instruct:free": {
+        "id": "meta-llama/llama-3.2-3b-instruct:free",
+        "name": "Llama 3.2 3B Instruct (free)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "meta-llama/llama-3.1-405b-instruct:free": {
+        "id": "meta-llama/llama-3.1-405b-instruct:free",
+        "name": "Llama 3.1 405B Instruct (free)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "anthropic/claude-opus-4": {
         "id": "anthropic/claude-opus-4",
         "name": "Claude Opus 4",
@@ -17761,6 +17972,50 @@
             "text"
           ]
         }
+      },
+      "black-forest-labs/flux.2-klein-4b": {
+        "id": "black-forest-labs/flux.2-klein-4b",
+        "name": "FLUX.2 Klein 4B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image",
+            "text"
+          ]
+        }
+      },
+      "black-forest-labs/flux.2-max": {
+        "id": "black-forest-labs/flux.2-max",
+        "name": "FLUX.2 Max",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image",
+            "text"
+          ]
+        }
+      },
+      "black-forest-labs/flux.2-pro": {
+        "id": "black-forest-labs/flux.2-pro",
+        "name": "FLUX.2 Pro",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image",
+            "text"
+          ]
+        }
+      },
+      "black-forest-labs/flux.2-flex": {
+        "id": "black-forest-labs/flux.2-flex",
+        "name": "FLUX.2 Flex",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image",
+            "text"
+          ]
+        }
       }
     }
   },
@@ -17768,9 +18023,29 @@
     "id": "zenmux",
     "name": "ZenMux",
     "models": {
+      "stepfun/step-3.5-flash-free": {
+        "id": "stepfun/step-3.5-flash-free",
+        "name": "Step 3.5 Flash (Free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "stepfun/step-3": {
         "id": "stepfun/step-3",
         "name": "Step-3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "stepfun/step-3.5-flash": {
+        "id": "stepfun/step-3.5-flash",
+        "name": "Step 3.5 Flash",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -17908,16 +18183,6 @@
           ]
         }
       },
-      "deepseek/deepseek-reasoner": {
-        "id": "deepseek/deepseek-reasoner",
-        "name": "DeepSeek-V3.2 (Thinking Mode)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "deepseek/deepseek-v3.2": {
         "id": "deepseek/deepseek-v3.2",
         "name": "DeepSeek V3.2",
@@ -17951,16 +18216,6 @@
       "google/gemini-3-flash-preview": {
         "id": "google/gemini-3-flash-preview",
         "name": "Gemini 3 Flash Preview",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "google/gemini-3-flash-preview-free": {
-        "id": "google/gemini-3-flash-preview-free",
-        "name": "Gemini 3 Flash Preview Free",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -18110,7 +18365,7 @@
       },
       "baidu/ernie-5.0-thinking-preview": {
         "id": "baidu/ernie-5.0-thinking-preview",
-        "name": "ERNIE-5.0-Thinking-Preview",
+        "name": "ERNIE 5.0",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -18198,6 +18453,16 @@
           ]
         }
       },
+      "z-ai/glm-4.7-flash-free": {
+        "id": "z-ai/glm-4.7-flash-free",
+        "name": "GLM 4.7 Flash (Free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "z-ai/glm-4.7-flashx": {
         "id": "z-ai/glm-4.7-flashx",
         "name": "GLM 4.7 FlashX",
@@ -18218,8 +18483,8 @@
           ]
         }
       },
-      "qwen/qwen3-max-thinking": {
-        "id": "qwen/qwen3-max-thinking",
+      "qwen/qwen3-max": {
+        "id": "qwen/qwen3-max",
         "name": "Qwen3-Max-Thinking",
         "tool_call": true,
         "modalities": {
@@ -18278,9 +18543,39 @@
           ]
         }
       },
+      "anthropic/claude-3.5-sonnet": {
+        "id": "anthropic/claude-3.5-sonnet",
+        "name": "Claude 3.5 Sonnet (Retiring Soon)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "anthropic/claude-opus-4.1": {
         "id": "anthropic/claude-opus-4.1",
         "name": "Claude Opus 4.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "anthropic/claude-3.7-sonnet": {
+        "id": "anthropic/claude-3.7-sonnet",
+        "name": "Claude 3.7 Sonnet",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "anthropic/claude-3.5-haiku": {
+        "id": "anthropic/claude-3.5-haiku",
+        "name": "Claude 3.5 Haiku",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -19511,6 +19806,92 @@
       "glm-4.6v": {
         "id": "glm-4.6v",
         "name": "GLM-4.6V",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      }
+    }
+  },
+  "berget": {
+    "id": "berget",
+    "name": "Berget.AI",
+    "models": {
+      "intfloat/multilingual-e5-large": {
+        "id": "intfloat/multilingual-e5-large",
+        "name": "Multilingual-E5-large",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "intfloat/multilingual-e5-large-instruct": {
+        "id": "intfloat/multilingual-e5-large-instruct",
+        "name": "Multilingual-E5-large-instruct",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "KBLab/kb-whisper-large": {
+        "id": "KBLab/kb-whisper-large",
+        "name": "KB-Whisper-Large",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "BAAI/bge-reranker-v2-m3": {
+        "id": "BAAI/bge-reranker-v2-m3",
+        "name": "bge-reranker-v2-m3",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "openai/gpt-oss-120b": {
+        "id": "openai/gpt-oss-120b",
+        "name": "GPT-OSS-120B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "mistralai/Mistral-Small-3.2-24B-Instruct-2506": {
+        "id": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+        "name": "Mistral Small 3.2 24B Instruct 2506",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "meta-llama/Llama-3.3-70B-Instruct": {
+        "id": "meta-llama/Llama-3.3-70B-Instruct",
+        "name": "Llama 3.3 70B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "zai-org/GLM-4.7": {
+        "id": "zai-org/GLM-4.7",
+        "name": "GLM 4.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22382,6 +22763,26 @@
     "id": "amazon-bedrock",
     "name": "Amazon Bedrock",
     "models": {
+      "us.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+        "id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "name": "Claude Sonnet 4.5 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "eu.meta.llama3-2-3b-instruct-v1:0": {
+        "id": "eu.meta.llama3-2-3b-instruct-v1:0",
+        "name": "Llama 3.2 3B Instruct (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "cohere.command-r-plus-v1:0": {
         "id": "cohere.command-r-plus-v1:0",
         "name": "Command R+",
@@ -22392,19 +22793,9 @@
           ]
         }
       },
-      "anthropic.claude-v2": {
-        "id": "anthropic.claude-v2",
-        "name": "Claude 2",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic.claude-3-7-sonnet-20250219-v1:0": {
-        "id": "anthropic.claude-3-7-sonnet-20250219-v1:0",
-        "name": "Claude Sonnet 3.7",
+      "us.amazon.nova-micro-v1:0": {
+        "id": "us.amazon.nova-micro-v1:0",
+        "name": "Nova Micro (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22412,9 +22803,9 @@
           ]
         }
       },
-      "anthropic.claude-sonnet-4-20250514-v1:0": {
-        "id": "anthropic.claude-sonnet-4-20250514-v1:0",
-        "name": "Claude Sonnet 4",
+      "us.meta.llama3-2-3b-instruct-v1:0": {
+        "id": "us.meta.llama3-2-3b-instruct-v1:0",
+        "name": "Llama 3.2 3B Instruct (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22452,16 +22843,6 @@
           ]
         }
       },
-      "meta.llama3-2-11b-instruct-v1:0": {
-        "id": "meta.llama3-2-11b-instruct-v1:0",
-        "name": "Llama 3.2 11B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "qwen.qwen3-next-80b-a3b": {
         "id": "qwen.qwen3-next-80b-a3b",
         "name": "Qwen/Qwen3-Next-80B-A3B-Instruct",
@@ -22482,16 +22863,6 @@
           ]
         }
       },
-      "meta.llama3-2-90b-instruct-v1:0": {
-        "id": "meta.llama3-2-90b-instruct-v1:0",
-        "name": "Llama 3.2 90B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "qwen.qwen3-vl-235b-a22b": {
         "id": "qwen.qwen3-vl-235b-a22b",
         "name": "Qwen/Qwen3-VL-235B-A22B-Instruct",
@@ -22502,20 +22873,10 @@
           ]
         }
       },
-      "meta.llama3-2-1b-instruct-v1:0": {
-        "id": "meta.llama3-2-1b-instruct-v1:0",
-        "name": "Llama 3.2 1B Instruct",
+      "apac.anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "apac.anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4 (APAC)",
         "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic.claude-v2:1": {
-        "id": "anthropic.claude-v2:1",
-        "name": "Claude 2.1",
-        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -22526,26 +22887,6 @@
         "id": "deepseek.v3-v1:0",
         "name": "DeepSeek-V3.1",
         "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic.claude-opus-4-5-20251101-v1:0": {
-        "id": "anthropic.claude-opus-4-5-20251101-v1:0",
-        "name": "Claude Opus 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "cohere.command-light-text-v14": {
-        "id": "cohere.command-light-text-v14",
-        "name": "Command Light",
-        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -22582,6 +22923,26 @@
           ]
         }
       },
+      "eu.amazon.nova-pro-v1:0": {
+        "id": "eu.amazon.nova-pro-v1:0",
+        "name": "Nova Pro (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us-gov.anthropic.claude-3-5-sonnet-20240620-v1:0": {
+        "id": "us-gov.anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "name": "Claude Sonnet 3.5 (US Gov)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "google.gemma-3-12b-it": {
         "id": "google.gemma-3-12b-it",
         "name": "Google Gemma 3 12B",
@@ -22602,9 +22963,89 @@
           ]
         }
       },
-      "meta.llama3-3-70b-instruct-v1:0": {
-        "id": "meta.llama3-3-70b-instruct-v1:0",
-        "name": "Llama 3.3 70B Instruct",
+      "eu.anthropic.claude-haiku-4-5-20251001-v1:0": {
+        "id": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "name": "Claude Haiku 4.5 (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.amazon.nova-lite-v1:0": {
+        "id": "us.amazon.nova-lite-v1:0",
+        "name": "Nova Lite (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.anthropic.claude-3-7-sonnet-20250219-v1:0": {
+        "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        "name": "Claude Sonnet 3.7 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.meta.llama4-scout-17b-instruct-v1:0": {
+        "id": "us.meta.llama4-scout-17b-instruct-v1:0",
+        "name": "Llama 4 Scout 17B Instruct (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "global.anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "global.anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4 (Global)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "global.anthropic.claude-haiku-4-5-20251001-v1:0": {
+        "id": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "name": "Claude Haiku 4.5 (Global)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.anthropic.claude-opus-4-5-20251101-v1:0": {
+        "id": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+        "name": "Claude Opus 4.5 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us-gov.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+        "id": "us-gov.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "name": "Claude Sonnet 4.5 (US Gov)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22615,6 +23056,26 @@
       "anthropic.claude-3-opus-20240229-v1:0": {
         "id": "anthropic.claude-3-opus-20240229-v1:0",
         "name": "Claude Opus 3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.meta.llama3-3-70b-instruct-v1:0": {
+        "id": "us.meta.llama3-3-70b-instruct-v1:0",
+        "name": "Llama 3.3 70B Instruct (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "apac.amazon.nova-lite-v1:0": {
+        "id": "apac.amazon.nova-lite-v1:0",
+        "name": "Nova Lite (APAC)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22635,6 +23096,26 @@
       "meta.llama3-1-8b-instruct-v1:0": {
         "id": "meta.llama3-1-8b-instruct-v1:0",
         "name": "Llama 3.1 8B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.anthropic.claude-opus-4-1-20250805-v1:0": {
+        "id": "us.anthropic.claude-opus-4-1-20250805-v1:0",
+        "name": "Claude Opus 4.1 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "eu.meta.llama3-2-1b-instruct-v1:0": {
+        "id": "eu.meta.llama3-2-1b-instruct-v1:0",
+        "name": "Llama 3.2 1B Instruct (EU)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22672,16 +23153,6 @@
           ]
         }
       },
-      "anthropic.claude-haiku-4-5-20251001-v1:0": {
-        "id": "anthropic.claude-haiku-4-5-20251001-v1:0",
-        "name": "Claude Haiku 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "cohere.command-r-v1:0": {
         "id": "cohere.command-r-v1:0",
         "name": "Command R",
@@ -22695,6 +23166,36 @@
       "mistral.voxtral-small-24b-2507": {
         "id": "mistral.voxtral-small-24b-2507",
         "name": "Voxtral Small 24B 2507",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.meta.llama3-2-1b-instruct-v1:0": {
+        "id": "us.meta.llama3-2-1b-instruct-v1:0",
+        "name": "Llama 3.2 1B Instruct (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us-gov.anthropic.claude-3-7-sonnet-20250219-v1:0": {
+        "id": "us-gov.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        "name": "Claude Sonnet 3.7 (US Gov)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "eu.amazon.nova-lite-v1:0": {
+        "id": "eu.amazon.nova-lite-v1:0",
+        "name": "Nova Lite (EU)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22732,9 +23233,9 @@
           ]
         }
       },
-      "deepseek.r1-v1:0": {
-        "id": "deepseek.r1-v1:0",
-        "name": "DeepSeek-R1",
+      "anthropic.claude-3-5-sonnet-20241022-v2:0": {
+        "id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "name": "Claude Sonnet 3.5 v2",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22742,9 +23243,9 @@
           ]
         }
       },
-      "anthropic.claude-3-5-sonnet-20241022-v2:0": {
-        "id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
-        "name": "Claude Sonnet 3.5 v2",
+      "eu.amazon.nova-2-lite-v1:0": {
+        "id": "eu.amazon.nova-2-lite-v1:0",
+        "name": "Nova 2 Lite (EU)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22762,19 +23263,29 @@
           ]
         }
       },
-      "cohere.command-text-v14": {
-        "id": "cohere.command-text-v14",
-        "name": "Command",
-        "tool_call": false,
+      "us.amazon.nova-premier-v1:0": {
+        "id": "us.amazon.nova-premier-v1:0",
+        "name": "Nova Premier (US)",
+        "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
         }
       },
-      "anthropic.claude-opus-4-20250514-v1:0": {
-        "id": "anthropic.claude-opus-4-20250514-v1:0",
-        "name": "Claude Opus 4",
+      "us.amazon.nova-2-lite-v1:0": {
+        "id": "us.amazon.nova-2-lite-v1:0",
+        "name": "Nova 2 Lite (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.anthropic.claude-haiku-4-5-20251001-v1:0": {
+        "id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "name": "Claude Haiku 4.5 (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22792,9 +23303,9 @@
           ]
         }
       },
-      "global.anthropic.claude-opus-4-5-20251101-v1:0": {
-        "id": "global.anthropic.claude-opus-4-5-20251101-v1:0",
-        "name": "Claude Opus 4.5 (Global)",
+      "global.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+        "id": "global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "name": "Claude Sonnet 4.5 (Global)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22802,9 +23313,19 @@
           ]
         }
       },
-      "amazon.nova-2-lite-v1:0": {
-        "id": "amazon.nova-2-lite-v1:0",
-        "name": "Nova 2 Lite",
+      "us.meta.llama4-maverick-17b-instruct-v1:0": {
+        "id": "us.meta.llama4-maverick-17b-instruct-v1:0",
+        "name": "Llama 4 Maverick 17B Instruct (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "global.anthropic.claude-opus-4-5-20251101-v1:0": {
+        "id": "global.anthropic.claude-opus-4-5-20251101-v1:0",
+        "name": "Claude Opus 4.5 (Global)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22822,9 +23343,19 @@
           ]
         }
       },
-      "anthropic.claude-sonnet-4-5-20250929-v1:0": {
-        "id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "name": "Claude Sonnet 4.5",
+      "apac.anthropic.claude-3-7-sonnet-20250219-v1:0": {
+        "id": "apac.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        "name": "Claude Sonnet 3.7 (APAC)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.meta.llama3-1-70b-instruct-v1:0": {
+        "id": "us.meta.llama3-1-70b-instruct-v1:0",
+        "name": "Llama 3.1 70B Instruct (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22852,29 +23383,9 @@
           ]
         }
       },
-      "meta.llama3-2-3b-instruct-v1:0": {
-        "id": "meta.llama3-2-3b-instruct-v1:0",
-        "name": "Llama 3.2 3B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic.claude-instant-v1": {
-        "id": "anthropic.claude-instant-v1",
-        "name": "Claude Instant",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "amazon.nova-premier-v1:0": {
-        "id": "amazon.nova-premier-v1:0",
-        "name": "Nova Premier",
+      "us.meta.llama3-2-11b-instruct-v1:0": {
+        "id": "us.meta.llama3-2-11b-instruct-v1:0",
+        "name": "Llama 3.2 11B Instruct (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22892,6 +23403,26 @@
           ]
         }
       },
+      "eu.amazon.nova-micro-v1:0": {
+        "id": "eu.amazon.nova-micro-v1:0",
+        "name": "Nova Micro (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "eu.anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "eu.anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4 (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "mistral.mixtral-8x7b-instruct-v0:1": {
         "id": "mistral.mixtral-8x7b-instruct-v0:1",
         "name": "Mixtral-8x7B-Instruct-v0.1",
@@ -22902,9 +23433,9 @@
           ]
         }
       },
-      "anthropic.claude-opus-4-1-20250805-v1:0": {
-        "id": "anthropic.claude-opus-4-1-20250805-v1:0",
-        "name": "Claude Opus 4.1",
+      "us.meta.llama3-1-8b-instruct-v1:0": {
+        "id": "us.meta.llama3-1-8b-instruct-v1:0",
+        "name": "Llama 3.1 8B Instruct (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22912,9 +23443,9 @@
           ]
         }
       },
-      "meta.llama4-scout-17b-instruct-v1:0": {
-        "id": "meta.llama4-scout-17b-instruct-v1:0",
-        "name": "Llama 4 Scout 17B Instruct",
+      "us.deepseek.r1-v1:0": {
+        "id": "us.deepseek.r1-v1:0",
+        "name": "DeepSeek-R1 (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22942,9 +23473,19 @@
           ]
         }
       },
-      "amazon.titan-text-express-v1:0:8k": {
-        "id": "amazon.titan-text-express-v1:0:8k",
-        "name": "Titan Text G1 - Express",
+      "us.amazon.nova-pro-v1:0": {
+        "id": "us.amazon.nova-pro-v1:0",
+        "name": "Nova Pro (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "us.meta.llama3-2-90b-instruct-v1:0": {
+        "id": "us.meta.llama3-2-90b-instruct-v1:0",
+        "name": "Llama 3.2 90B Instruct (US)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -22972,19 +23513,9 @@
           ]
         }
       },
-      "amazon.titan-text-express-v1": {
-        "id": "amazon.titan-text-express-v1",
-        "name": "Titan Text G1 - Express",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "meta.llama4-maverick-17b-instruct-v1:0": {
-        "id": "meta.llama4-maverick-17b-instruct-v1:0",
-        "name": "Llama 4 Maverick 17B Instruct",
+      "eu.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+        "id": "eu.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "name": "Claude Sonnet 4.5 (EU)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -23022,6 +23553,16 @@
           ]
         }
       },
+      "us.anthropic.claude-opus-4-20250514-v1:0": {
+        "id": "us.anthropic.claude-opus-4-20250514-v1:0",
+        "name": "Claude Opus 4 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "amazon.nova-lite-v1:0": {
         "id": "amazon.nova-lite-v1:0",
         "name": "Nova Lite",
@@ -23045,6 +23586,46 @@
       "moonshot.kimi-k2-thinking": {
         "id": "moonshot.kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "global.amazon.nova-2-lite-v1:0": {
+        "id": "global.amazon.nova-2-lite-v1:0",
+        "name": "Nova 2 Lite (Global)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "eu.anthropic.claude-opus-4-5-20251101-v1:0": {
+        "id": "eu.anthropic.claude-opus-4-5-20251101-v1:0",
+        "name": "Claude Opus 4.5 (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "apac.amazon.nova-micro-v1:0": {
+        "id": "apac.amazon.nova-micro-v1:0",
+        "name": "Nova Micro (APAC)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "apac.amazon.nova-pro-v1:0": {
+        "id": "apac.amazon.nova-pro-v1:0",
+        "name": "Nova Pro (APAC)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -23489,6 +24070,16 @@
           ]
         }
       },
+      "openai/gpt-5.2-codex": {
+        "id": "openai/gpt-5.2-codex",
+        "name": "gpt-5.2-codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "openai/gpt-5.1-codex": {
         "id": "openai/gpt-5.1-codex",
         "name": "GPT-5.1-Codex",
@@ -23919,49 +24510,9 @@
           ]
         }
       },
-      "lumalabs/dream-machine": {
-        "id": "lumalabs/dream-machine",
-        "name": "Dream-Machine",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "video"
-          ]
-        }
-      },
-      "anthropic/claude-opus-3": {
-        "id": "anthropic/claude-opus-3",
-        "name": "Claude-Opus-3",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "anthropic/claude-opus-4": {
         "id": "anthropic/claude-opus-4",
         "name": "Claude Opus 4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic/claude-sonnet-3.7-reasoning": {
-        "id": "anthropic/claude-sonnet-3.7-reasoning",
-        "name": "Claude Sonnet 3.7 Reasoning",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic/claude-opus-4-search": {
-        "id": "anthropic/claude-opus-4-search",
-        "name": "Claude Opus 4 Search",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -23979,29 +24530,9 @@
           ]
         }
       },
-      "anthropic/claude-haiku-3.5-search": {
-        "id": "anthropic/claude-haiku-3.5-search",
-        "name": "Claude-Haiku-3.5-Search",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "anthropic/claude-haiku-4.5": {
         "id": "anthropic/claude-haiku-4.5",
         "name": "Claude Haiku 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic/claude-sonnet-4-reasoning": {
-        "id": "anthropic/claude-sonnet-4-reasoning",
-        "name": "Claude Sonnet 4 Reasoning",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -24022,26 +24553,6 @@
       "anthropic/claude-opus-4.1": {
         "id": "anthropic/claude-opus-4.1",
         "name": "Claude Opus 4.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic/claude-sonnet-3.7-search": {
-        "id": "anthropic/claude-sonnet-3.7-search",
-        "name": "Claude Sonnet 3.7 Search",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "anthropic/claude-opus-4-reasoning": {
-        "id": "anthropic/claude-opus-4-reasoning",
-        "name": "Claude Opus 4 Reasoning",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -24109,16 +24620,6 @@
           ]
         }
       },
-      "anthropic/claude-sonnet-4-search": {
-        "id": "anthropic/claude-sonnet-4-search",
-        "name": "Claude Sonnet 4 Search",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "trytako/tako": {
         "id": "trytako/tako",
         "name": "Tako",
@@ -24139,6 +24640,26 @@
           ]
         }
       },
+      "novita/kimi-k2.5": {
+        "id": "novita/kimi-k2.5",
+        "name": "kimi-k2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "novita/glm-4.7-flash": {
+        "id": "novita/glm-4.7-flash",
+        "name": "glm-4.7-flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "novita/kimi-k2-thinking": {
         "id": "novita/kimi-k2-thinking",
         "name": "kimi-k2-thinking",
@@ -24149,9 +24670,9 @@
           ]
         }
       },
-      "novita/kat-coder-pro": {
-        "id": "novita/kat-coder-pro",
-        "name": "kat-coder-pro",
+      "novita/glm-4.6": {
+        "id": "novita/glm-4.6",
+        "name": "GLM-4.6",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -24159,9 +24680,9 @@
           ]
         }
       },
-      "novita/glm-4.6": {
-        "id": "novita/glm-4.6",
-        "name": "GLM-4.6",
+      "novita/glm-4.7-n": {
+        "id": "novita/glm-4.7-n",
+        "name": "glm-4.7-n",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -24189,6 +24710,16 @@
           ]
         }
       },
+      "cerebras/llama-3.1-8b-cs": {
+        "id": "cerebras/llama-3.1-8b-cs",
+        "name": "llama-3.1-8b-cs",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "cerebras/gpt-oss-120b-cs": {
         "id": "cerebras/gpt-oss-120b-cs",
         "name": "gpt-oss-120b-cs",
@@ -24199,10 +24730,30 @@
           ]
         }
       },
-      "cerebras/zai-glm-4.6-cs": {
-        "id": "cerebras/zai-glm-4.6-cs",
-        "name": "zai-glm-4.6-cs",
+      "cerebras/qwen3-235b-2507-cs": {
+        "id": "cerebras/qwen3-235b-2507-cs",
+        "name": "qwen3-235b-2507-cs",
         "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "cerebras/qwen3-32b-cs": {
+        "id": "cerebras/qwen3-32b-cs",
+        "name": "qwen3-32b-cs",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "cerebras/llama-3.3-70b-cs": {
+        "id": "cerebras/llama-3.3-70b-cs",
+        "name": "llama-3.3-70b-cs",
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
