@@ -1,0 +1,2 @@
+- [ ] Show status of MCP servers somewhere (e.g. starting, error, or success in each MCP server's UI)
+- [ ] Check OAuth support for all HTTP servers (not just ones that are successful). Don't show "Login" prompt for an MCP server that failed until we know that it supports OAuth. For any HTTP MCP server that supports OAuth but did not fail, also show a Login prompt (but more like "Log in to [name] MCP server to unlock more features" and with a dismiss option to dismiss and not show that sort of "soft login" prompt again).
