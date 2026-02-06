@@ -9,7 +9,12 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default [
-  globalIgnores(["dist"]),
+  globalIgnores([
+    "dist",
+    "src/assets/model-lists/models-dev.json",
+    "src/assets/mcp-registry/mcp-registry.json",
+    "src/assets/mcp-registry/types.ts",
+  ]),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   reactHooks.configs.flat.recommended,
