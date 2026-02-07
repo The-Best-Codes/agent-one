@@ -71,6 +71,7 @@ export default function McpSection() {
     type: "stdio" | "http";
     name: string;
     command?: string;
+    env?: Record<string, string>;
     url?: string;
     headers?: Record<string, string>;
     timeoutSec: number;
@@ -83,6 +84,7 @@ export default function McpSection() {
             type: "stdio",
             name: serverData.name,
             command: serverData.command!,
+            env: serverData.env || {},
             enabled: true,
             timeoutMs: serverData.timeoutSec * 1000,
             requiresApproval: serverData.requiresApproval,

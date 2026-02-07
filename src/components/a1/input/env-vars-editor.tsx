@@ -1,4 +1,11 @@
-import { PlusIcon, RotateCcwIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import {
+  EyeIcon,
+  EyeOffIcon,
+  PlusIcon,
+  RotateCcwIcon,
+  SaveIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -39,30 +46,31 @@ function hasEmptyKeys(draft: DraftEntry[]): boolean {
   return draft.some(([key]) => !key.trim());
 }
 
-export function HttpHeadersEditor({
+export function EnvVarsEditor({
   id,
-  headers,
+  env,
   onChange,
   labelClassName,
 }: {
   id: string;
-  headers: Record<string, string>;
-  onChange: (headers: Record<string, string>) => void;
+  env: Record<string, string>;
+  onChange: (env: Record<string, string>) => void;
   labelClassName?: string;
 }) {
-  const [syncedHeaders, setSyncedHeaders] = useState(headers);
-  const [draft, setDraft] = useState<DraftEntry[]>(() => toDraft(headers));
+  const [syncedEnv, setSyncedEnv] = useState(env);
+  const [draft, setDraft] = useState<DraftEntry[]>(() => toDraft(env));
+  const [visibleValues, setVisibleValues] = useState<Set<number>>(new Set());
 
-  if (syncedHeaders !== headers) {
-    setSyncedHeaders(headers);
-    setDraft(toDraft(headers));
+  if (syncedEnv !== env) {
+    setSyncedEnv(env);
+    setDraft(toDraft(env));
+    setVisibleValues(new Set());
   }
 
   const duplicateKeys = useMemo(() => getDuplicateKeys(draft), [draft]);
   const emptyKeys = hasEmptyKeys(draft);
 
-  const hasChanges =
-    JSON.stringify(toRecord(draft)) !== JSON.stringify(headers);
+  const hasChanges = JSON.stringify(toRecord(draft)) !== JSON.stringify(env);
   const canSave = hasChanges && !emptyKeys && duplicateKeys.size === 0;
 
   const addEntry = () => {
@@ -84,11 +92,31 @@ export function HttpHeadersEditor({
   const removeEntry = (index: number) => {
     const next = draft.filter((_, i) => i !== index);
     setDraft(next);
+    setVisibleValues((prev) => {
+      const updated = new Set<number>();
+      for (const v of prev) {
+        if (v < index) updated.add(v);
+        else if (v > index) updated.add(v - 1);
+      }
+      return updated;
+    });
     const nextDupes = getDuplicateKeys(next);
     const nextEmpty = next.some(([key]) => !key.trim());
     if (!nextEmpty && nextDupes.size === 0) {
       onChange(toRecord(next));
     }
+  };
+
+  const toggleVisibility = (index: number) => {
+    setVisibleValues((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   };
 
   const handleSave = () => {
@@ -97,13 +125,16 @@ export function HttpHeadersEditor({
   };
 
   const handleRevert = () => {
-    setDraft(toDraft(headers));
+    setDraft(toDraft(env));
+    setVisibleValues(new Set());
   };
 
   return (
     <div className="rounded-md border p-3">
       <div className="mb-3 flex items-start justify-between gap-2">
-        <Label className={labelClassName || "text-xs"}>HTTP Headers</Label>
+        <Label className={labelClassName || "text-xs"}>
+          Environment Variables
+        </Label>
         <div className="flex gap-1.5">
           {hasChanges && (
             <>
@@ -142,11 +173,12 @@ export function HttpHeadersEditor({
             const isDupe = duplicateKeys.has(idx);
             const isEmpty = !key.trim();
             const hasError = isDupe || isEmpty;
+            const isVisible = visibleValues.has(idx);
             return (
-              <div key={`${id}-header-${idx}`}>
+              <div key={`${id}-env-${idx}`}>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Header name"
+                    placeholder="Variable name"
                     value={key}
                     onChange={(e) => updateKey(idx, e.target.value)}
                     aria-invalid={hasError}
@@ -154,10 +186,25 @@ export function HttpHeadersEditor({
                   />
                   <Input
                     placeholder="Value"
+                    type={isVisible ? "text" : "password"}
+                    autoComplete="off"
                     value={value}
                     onChange={(e) => updateValue(idx, e.target.value)}
                     className="flex-1"
                   />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => toggleVisibility(idx)}
+                    title={isVisible ? "Hide value" : "Show value"}
+                  >
+                    {isVisible ? (
+                      <EyeOffIcon className="size-4" />
+                    ) : (
+                      <EyeIcon className="size-4" />
+                    )}
+                  </Button>
                   <Button
                     type="button"
                     variant="destructive"
@@ -169,12 +216,12 @@ export function HttpHeadersEditor({
                 </div>
                 {isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    Duplicate header name
+                    Duplicate variable name
                   </p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    Header name cannot be empty
+                    Variable name cannot be empty
                   </p>
                 )}
               </div>
@@ -183,7 +230,7 @@ export function HttpHeadersEditor({
         </div>
       ) : (
         <p className="text-muted-foreground flex h-9 flex-col items-center justify-center rounded-md border border-dashed p-2 text-sm">
-          No headers configured.
+          No environment variables configured.
         </p>
       )}
     </div>

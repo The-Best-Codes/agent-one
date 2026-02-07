@@ -48,6 +48,7 @@ export interface McpServerConfigBase {
 export interface McpStdioServerConfig extends McpServerConfigBase {
   type: "stdio";
   command: string;
+  env: Record<string, string>;
 }
 
 export interface McpHttpServerConfig extends McpServerConfigBase {

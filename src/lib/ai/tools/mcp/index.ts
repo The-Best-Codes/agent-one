@@ -48,9 +48,11 @@ class TauriStdioMCPTransport implements MCPTransport {
   private commandInstance: Command<string> | null = null;
   private readBuffer = "";
   private command: string;
+  private env: Record<string, string>;
 
-  constructor(command: string) {
+  constructor(command: string, env: Record<string, string>) {
     this.command = command;
+    this.env = env;
   }
 
   async start(): Promise<void> {
@@ -59,7 +61,9 @@ class TauriStdioMCPTransport implements MCPTransport {
       const cmd = parts[0];
       const args = parts.slice(1);
 
-      this.commandInstance = Command.create(cmd, args);
+      const options: { env?: Record<string, string> } =
+        Object.keys(this.env).length > 0 ? { env: this.env } : {};
+      this.commandInstance = Command.create(cmd, args, options);
 
       this.commandInstance.stdout.on("data", (line: string) => {
         this.readBuffer += line;
@@ -328,7 +332,11 @@ class TauriHttpMCPTransport implements MCPTransport {
 
 function getConfigHash(server: McpServerConfig): string {
   if (server.type === "stdio") {
-    return JSON.stringify({ type: "stdio", command: server.command });
+    return JSON.stringify({
+      type: "stdio",
+      command: server.command,
+      env: server.env,
+    });
   } else {
     return JSON.stringify({
       type: "http",
@@ -340,7 +348,7 @@ function getConfigHash(server: McpServerConfig): string {
 
 function createTransport(server: McpServerConfig): MCPTransport {
   if (server.type === "stdio") {
-    return new TauriStdioMCPTransport(server.command);
+    return new TauriStdioMCPTransport(server.command, server.env);
   } else {
     return new TauriHttpMCPTransport(server.url, server.headers, server.id);
   }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ interface AddServerDialogProps {
     type: McpServerType;
     name: string;
     command?: string;
+    env?: Record<string, string>;
     url?: string;
     headers?: Record<string, string>;
     timeoutSec: number;
@@ -44,6 +46,7 @@ export function AddServerDialog({
   const [newServerType, setNewServerType] = useState<McpServerType>("stdio");
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
+  const [newServerEnv, setNewServerEnv] = useState<Record<string, string>>({});
   const [newServerUrl, setNewServerUrl] = useState("");
   const [newServerHeaders, setNewServerHeaders] = useState<
     Record<string, string>
@@ -63,6 +66,7 @@ export function AddServerDialog({
     setNewServerType("stdio");
     setNewServerName("");
     setNewServerCommand("");
+    setNewServerEnv({});
     setNewServerUrl("");
     setNewServerHeaders({});
     setNewServerTimeoutSec(30);
@@ -76,6 +80,7 @@ export function AddServerDialog({
       type: newServerType,
       name: newServerName.trim(),
       command: newServerType === "stdio" ? newServerCommand.trim() : undefined,
+      env: newServerType === "stdio" ? newServerEnv : undefined,
       url: newServerType === "http" ? newServerUrl.trim() : undefined,
       headers: newServerType === "http" ? newServerHeaders : undefined,
       timeoutSec: newServerTimeoutSec,
@@ -134,15 +139,24 @@ export function AddServerDialog({
           </div>
 
           {newServerType === "stdio" ? (
-            <div className="grid gap-2">
-              <Label htmlFor="server-command">Command</Label>
-              <Input
-                id="server-command"
-                placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
-                value={newServerCommand}
-                onChange={(e) => setNewServerCommand(e.target.value)}
+            <>
+              <div className="grid gap-2">
+                <Label htmlFor="server-command">Command</Label>
+                <Input
+                  id="server-command"
+                  placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
+                  value={newServerCommand}
+                  onChange={(e) => setNewServerCommand(e.target.value)}
+                />
+              </div>
+
+              <EnvVarsEditor
+                id="new-server-dialog"
+                env={newServerEnv}
+                onChange={setNewServerEnv}
+                labelClassName="text-sm"
               />
-            </div>
+            </>
           ) : (
             <>
               <div className="grid gap-2">

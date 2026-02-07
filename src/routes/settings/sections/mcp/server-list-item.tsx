@@ -1,5 +1,6 @@
 import { Trash2Icon } from "lucide-react";
 
+import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import {
   AccordionContent,
@@ -85,17 +86,24 @@ export function ServerListItem({
           </div>
 
           {server.type === "stdio" ? (
-            <div className="grid gap-1.5">
-              <Label htmlFor={`command-${server.id}`} className="text-xs">
-                Command
-              </Label>
-              <Input
-                id={`command-${server.id}`}
-                value={server.command}
-                onChange={(e) => onUpdate(index, { command: e.target.value })}
-                placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
+            <>
+              <div className="grid gap-1.5">
+                <Label htmlFor={`command-${server.id}`} className="text-xs">
+                  Command
+                </Label>
+                <Input
+                  id={`command-${server.id}`}
+                  value={server.command}
+                  onChange={(e) => onUpdate(index, { command: e.target.value })}
+                  placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
+                />
+              </div>
+              <EnvVarsEditor
+                id={server.id}
+                env={server.env}
+                onChange={(env) => onUpdate(index, { env })}
               />
-            </div>
+            </>
           ) : (
             <>
               <div className="grid gap-1.5">
