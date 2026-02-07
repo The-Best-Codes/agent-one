@@ -128,7 +128,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         return id;
       } catch (error) {
         logger.error("Failed to create chat in localStorage", error);
-        throw new Error("Failed to create new chat in localStorage.");
+        throw new Error("Failed to create new chat in localStorage.", {
+          cause: error,
+        });
       }
     },
     [setChatIds, setChatUpdateTrigger],
@@ -338,7 +340,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         return newId;
       } catch (error) {
         logger.error("Failed to branch chat in localStorage", error);
-        throw new Error("Failed to branch chat.");
+        throw new Error("Failed to branch chat.", { cause: error });
       }
     },
     [loadChatData, setChatIds, setChatUpdateTrigger],

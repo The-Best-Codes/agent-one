@@ -96,7 +96,9 @@ async function loadLanguage(lang: string) {
     const langModule = await langLoader();
     await highlighter.loadLanguage(langModule.default);
   } catch (error) {
-    throw new Error(`Failed to load language ${lang}: ${String(error)}`);
+    throw new Error(`Failed to load language ${lang}: ${String(error)}`, {
+      cause: error,
+    });
   }
 }
 
@@ -122,7 +124,9 @@ async function highlightCode(
 
     return html;
   } catch (error) {
-    throw new Error(`Failed to highlight code: ${String(error)}`);
+    throw new Error(`Failed to highlight code: ${String(error)}`, {
+      cause: error,
+    });
   }
 }
 
