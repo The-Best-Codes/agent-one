@@ -146,20 +146,24 @@ export function promptSoftLoginToast(server: McpHttpServerConfig): void {
     return;
   }
 
-  toast(`Log in to ${server.name} MCP Server to unlock more features`, {
+  toast(`Log in to ${server.name} MCP Server for full access`, {
     id: `mcp-soft-login-${server.id}`,
     action: {
       label: "Login",
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     cancel: {
-      label: "Dismiss",
+      label: "Never",
       onClick: () => {
         store.set(dismissedOAuthPromptsAtom, (prev) => {
           if (prev.includes(server.id)) return prev;
           return [...prev, server.id];
         });
       },
+    },
+    cancelButtonStyle: {
+      color: "white",
+      backgroundColor: "var(--color-destructive)",
     },
     duration: Infinity,
   });
