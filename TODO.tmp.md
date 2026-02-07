@@ -1,1 +1,2 @@
-- [ ] Show status of MCP servers somewhere (e.g. starting, error, or success in each MCP server's UI)
+- [ ] Show status of MCP servers somewhere (e.g. starting, error, or success in each MCP server's UI) and even a list of the tools the server provides and info about them.
+- [ ] Prevent tool name conflicts by prefixing MCP tool names with something unique.
