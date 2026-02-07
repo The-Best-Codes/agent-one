@@ -18,7 +18,12 @@ import {
   type McpServerConfig,
 } from "@/lib/settings/types";
 
-import { isAuthError, promptLoginToast } from "./oauth";
+import {
+  checkOAuthSupport,
+  isAuthError,
+  promptLoginToast,
+  promptSoftLoginToast,
+} from "./oauth";
 
 const store = getDefaultStore();
 
@@ -437,14 +442,27 @@ export async function getMcpToolsForServer(
       serverCache.set(server.id, { ...result, configHash });
 
       if (server.type === "http") {
-        const authState = result.hasToken ? "logged-in" : "no-auth";
-        store.set(mcpAuthStatesAtom, (prev) => {
-          if (prev[server.id] === authState) return prev;
-          return {
-            ...prev,
-            [server.id]: authState,
-          };
-        });
+        if (result.hasToken) {
+          store.set(mcpAuthStatesAtom, (prev) => {
+            if (prev[server.id] === "logged-in") return prev;
+            return { ...prev, [server.id]: "logged-in" };
+          });
+        } else {
+          checkOAuthSupport(server.url).then((supportsOAuth) => {
+            if (supportsOAuth) {
+              store.set(mcpAuthStatesAtom, (prev) => {
+                if (prev[server.id] === "supports-oauth") return prev;
+                return { ...prev, [server.id]: "supports-oauth" };
+              });
+              promptSoftLoginToast(server as McpHttpServerConfig);
+            } else {
+              store.set(mcpAuthStatesAtom, (prev) => {
+                if (prev[server.id] === "no-auth") return prev;
+                return { ...prev, [server.id]: "no-auth" };
+              });
+            }
+          });
+        }
       }
     } finally {
       loadingOperations.delete(server.id);
@@ -465,14 +483,19 @@ export async function getMcpToolsForServer(
     });
 
     if (server.type === "http" && isAuthError(error)) {
-      store.set(mcpAuthStatesAtom, (prev) => {
-        if (prev[server.id] === "logged-out") return prev;
-        return {
-          ...prev,
-          [server.id]: "logged-out",
-        };
+      checkOAuthSupport(server.url).then((supportsOAuth) => {
+        if (supportsOAuth) {
+          store.set(mcpAuthStatesAtom, (prev) => {
+            if (prev[server.id] === "logged-out") return prev;
+            return { ...prev, [server.id]: "logged-out" };
+          });
+          promptLoginToast(server as McpHttpServerConfig);
+        } else {
+          logger.warn(
+            `MCP server ${server.name} returned an auth error but does not appear to support OAuth`,
+          );
+        }
       });
-      promptLoginToast(server as McpHttpServerConfig);
     }
 
     return {};

@@ -419,6 +419,74 @@ async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, St
 }
 
 #[tauri::command]
+pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String> {
+    let client = wreq::Client::new();
+
+    let response = match client.get(&server_url).send().await {
+        Ok(r) => r,
+        Err(_) => return Ok(false),
+    };
+
+    if response.headers().get("www-authenticate").is_some() {
+        return Ok(true);
+    }
+
+    let parsed_url = match Url::parse(&server_url) {
+        Ok(u) => u,
+        Err(_) => return Ok(false),
+    };
+
+    let base = format!(
+        "{}://{}{}",
+        parsed_url.scheme(),
+        parsed_url.host_str().unwrap_or(""),
+        parsed_url
+            .port()
+            .map(|p| format!(":{}", p))
+            .unwrap_or_default()
+    );
+    let path = parsed_url.path();
+
+    let mut well_known_urls = Vec::new();
+    if path != "/" && !path.is_empty() {
+        let trimmed = path.trim_matches('/');
+        well_known_urls.push(format!(
+            "{}/.well-known/oauth-protected-resource/{}",
+            base, trimmed
+        ));
+    }
+    well_known_urls.push(format!("{}/.well-known/oauth-protected-resource", base));
+
+    for url in &well_known_urls {
+        if let Ok(resp) = client.get(url).send().await {
+            if resp.status().is_success() {
+                return Ok(true);
+            }
+        }
+    }
+
+    let mut auth_server_urls = Vec::new();
+    if path != "/" && !path.is_empty() {
+        let trimmed = path.trim_matches('/');
+        auth_server_urls.push(format!(
+            "{}/.well-known/oauth-authorization-server/{}",
+            base, trimmed
+        ));
+    }
+    auth_server_urls.push(format!("{}/.well-known/oauth-authorization-server", base));
+
+    for url in &auth_server_urls {
+        if let Ok(resp) = client.get(url).send().await {
+            if resp.status().is_success() {
+                return Ok(true);
+            }
+        }
+    }
+
+    Ok(false)
+}
+
+#[tauri::command]
 pub async fn mcp_logout(server_id: String) -> Result<(), String> {
     let cred_store = KeyringCredentialStore::new(server_id);
     cred_store.clear().await.map_err(|e| e.to_string())

@@ -3,7 +3,10 @@ import { invoke } from "@tauri-apps/api/core";
 import { getDefaultStore } from "jotai";
 import { toast } from "sonner";
 
-import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
+import {
+  dismissedOAuthPromptsAtom,
+  mcpAuthStatesAtom,
+} from "@/lib/jotai/mcp-atoms";
 import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
 
@@ -28,12 +31,22 @@ export function isAuthError(error: unknown): boolean {
   return false;
 }
 
+export async function checkOAuthSupport(serverUrl: string): Promise<boolean> {
+  try {
+    return await invoke<boolean>("mcp_check_oauth_support", { serverUrl });
+  } catch (e) {
+    logger.verbose("Failed to check OAuth support:", e);
+    return false;
+  }
+}
+
 export async function mcpLogin(
   serverId: string,
   serverUrl: string,
   serverName: string,
 ): Promise<boolean> {
   toast.dismiss(`mcp-prompt-login-${serverId}`);
+  toast.dismiss(`mcp-soft-login-${serverId}`);
 
   const toastId = toast.loading(`Starting OAuth flow for ${serverName}...`, {
     action: {
@@ -122,6 +135,31 @@ export function promptLoginToast(server: McpHttpServerConfig): void {
     action: {
       label: "Login",
       onClick: () => mcpLogin(server.id, server.url, server.name),
+    },
+    duration: Infinity,
+  });
+}
+
+export function promptSoftLoginToast(server: McpHttpServerConfig): void {
+  const dismissed = store.get(dismissedOAuthPromptsAtom);
+  if (dismissed.includes(server.id)) {
+    return;
+  }
+
+  toast(`Log in to ${server.name} MCP Server to unlock more features`, {
+    id: `mcp-soft-login-${server.id}`,
+    action: {
+      label: "Login",
+      onClick: () => mcpLogin(server.id, server.url, server.name),
+    },
+    cancel: {
+      label: "Dismiss",
+      onClick: () => {
+        store.set(dismissedOAuthPromptsAtom, (prev) => {
+          if (prev.includes(server.id)) return prev;
+          return [...prev, server.id];
+        });
+      },
     },
     duration: Infinity,
   });

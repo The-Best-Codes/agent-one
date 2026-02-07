@@ -2,6 +2,7 @@ import { useAtomValue } from "jotai";
 import {
   CheckCircle2Icon,
   InfoIcon,
+  KeyIcon,
   Loader2Icon,
   LogInIcon,
   LogOutIcon,
@@ -66,6 +67,23 @@ export function McpAuthStatus({
             No authorization required
           </span>
         </div>
+      </div>
+    );
+  }
+
+  if (authState === "supports-oauth") {
+    return (
+      <div className="flex items-center justify-between rounded-md border p-3">
+        <div className="flex items-center gap-2">
+          <KeyIcon className="text-foreground size-5" />
+          <span className="text-foreground text-sm">
+            Login available for more features
+          </span>
+        </div>
+        <Button size="sm" onClick={handleLogin} disabled={loading}>
+          {loading ? <Loader2Icon className="animate-spin" /> : <LogInIcon />}
+          Login
+        </Button>
       </div>
     );
   }
