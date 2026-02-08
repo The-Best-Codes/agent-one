@@ -16,6 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
 import { cn } from "@/lib/utils";
 
 interface ToolCallPartProps {
@@ -24,7 +25,7 @@ interface ToolCallPartProps {
 
 export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
   const callId = part.toolCallId;
-  const toolName = part.type.replace("tool-", "");
+  const toolName = stripMcpToolPrefix(part.type.replace("tool-", ""));
   const { addToolApprovalResponse } = useChatFunctions();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
     boolean | undefined

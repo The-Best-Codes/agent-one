@@ -15,9 +15,11 @@ import {
   createWebSearchTool,
 } from "@/lib/ai/tools";
 import {
+  buildMcpServerSlugMap,
   closeServerCache,
   getMcpToolsForServer,
   invalidateServerCache,
+  prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
 import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import {
@@ -115,6 +117,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       setMcpLoaded(false);
 
       try {
+        const slugMap = buildMcpServerSlugMap(enabledServers);
+
         const chunks: McpServerConfig[][] = [];
         for (let i = 0; i < enabledServers.length; i += parallelLoadLimit) {
           chunks.push(enabledServers.slice(i, i + parallelLoadLimit));
@@ -144,7 +148,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   tools,
                   server.requiresApproval ?? false,
                 );
-                return { serverId: server.id, tools: wrappedTools };
+                return {
+                  serverSlug: slugMap.get(server.id) ?? server.id,
+                  tools: wrappedTools,
+                };
               } catch (error) {
                 const serverTypeLabel =
                   server.type === "stdio" ? "STDIO" : "HTTP";
@@ -153,13 +160,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   error,
                 );
                 closeServerCache(server.id);
-                return { serverId: server.id, tools: {} };
+                return {
+                  serverSlug: slugMap.get(server.id) ?? server.id,
+                  tools: {},
+                };
               }
             }),
           );
 
           for (const result of results) {
-            Object.assign(allTools, result.tools);
+            Object.assign(
+              allTools,
+              prefixMcpToolNames(result.tools, result.serverSlug),
+            );
           }
         }
 

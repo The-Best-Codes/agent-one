@@ -32,6 +32,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +53,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
     boolean | undefined
   >();
   const callId = part.toolCallId;
-  const toolName = part.toolName;
+  const toolName = stripMcpToolPrefix(part.toolName);
   const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
   const { addToolApprovalResponse } = useChatFunctions();
 

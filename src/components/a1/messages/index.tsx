@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
+import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
 import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -99,9 +100,9 @@ const MessagePartsInternal = ({
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
         } else if (part.type.startsWith("tool-")) {
-          return `[Tool: ${part.type}]`;
+          return `[Tool: ${stripMcpToolPrefix(part.type.replace("tool-", ""))}]`;
         } else if (part.type === "dynamic-tool") {
-          return `[Dynamic Tool: ${part.toolName}]`;
+          return `[Dynamic Tool: ${stripMcpToolPrefix(part.toolName)}]`;
         } else if (part.type === "step-start") {
           return null; // Nothing for now
         }

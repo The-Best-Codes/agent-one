@@ -530,3 +530,55 @@ export function invalidateServerCache(): void {
   }
   serverCache.clear();
 }
+
+const MCP_TOOL_PREFIX = "mcp__";
+const MCP_TOOL_SEPARATOR = "__";
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function buildMcpServerSlugMap(
+  servers: McpServerConfig[],
+): Map<string, string> {
+  const slugCounts = new Map<string, number>();
+  const slugMap = new Map<string, string>();
+
+  for (const server of servers) {
+    const base = slugify(server.name) || "mcp-server";
+    const count = slugCounts.get(base) ?? 0;
+    slugCounts.set(base, count + 1);
+    const slug = count === 0 ? base : `${base}-${count + 1}`;
+    slugMap.set(server.id, slug);
+  }
+
+  return slugMap;
+}
+
+export function prefixMcpToolNames(
+  tools: ToolSet,
+  serverSlug: string,
+): ToolSet {
+  const prefixed: ToolSet = {};
+  for (const [name, tool] of Object.entries(tools)) {
+    prefixed[`${MCP_TOOL_PREFIX}${serverSlug}${MCP_TOOL_SEPARATOR}${name}`] =
+      tool;
+  }
+  return prefixed;
+}
+
+export function stripMcpToolPrefix(toolName: string): string {
+  if (!toolName.startsWith(MCP_TOOL_PREFIX)) {
+    return toolName;
+  }
+  const withoutPrefix = toolName.slice(MCP_TOOL_PREFIX.length);
+  const separatorIndex = withoutPrefix.indexOf(MCP_TOOL_SEPARATOR);
+  if (separatorIndex === -1) {
+    return toolName;
+  }
+  return withoutPrefix.slice(separatorIndex + MCP_TOOL_SEPARATOR.length);
+}
