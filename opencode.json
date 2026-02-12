@@ -7,5 +7,12 @@
       "disabled": true
     }
   },
-  "$schema": "https://opencode.ai/config.json"
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "better-auth": {
+      "type": "remote",
+      "url": "https://mcp.inkeep.com/better-auth/mcp",
+      "enabled": true
+    }
+  }
 }
