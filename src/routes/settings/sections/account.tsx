@@ -1,14 +1,9 @@
 import { useAtom } from "jotai";
-import {
-  ClipboardCopyIcon,
-  LoaderIcon,
-  LogInIcon,
-  LogOutIcon,
-  XIcon,
-} from "lucide-react";
+import { Loader2Icon, LogInIcon, LogOutIcon } from "lucide-react";
 import { useState } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DeviceCodeDisplay } from "@/components/a1/device-code-display";
+import { UserProfileDisplay } from "@/components/a1/user-profile-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,14 +28,6 @@ function AgentOneAccountCard() {
     cancelSignIn,
     signOut,
   } = useWebAuth();
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    if (!deviceFlow) return;
-    await navigator.clipboard.writeText(deviceFlow.userCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   if (isLoading) {
     return (
@@ -49,7 +36,7 @@ function AgentOneAccountCard() {
           <CardTitle>AgentOne Account</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-2">
-          <LoaderIcon className="text-muted-foreground size-4 animate-spin" />
+          <Loader2Icon className="text-muted-foreground size-4 animate-spin" />
           <span className="text-muted-foreground text-sm">Loading...</span>
         </CardContent>
       </Card>
@@ -62,66 +49,21 @@ function AgentOneAccountCard() {
         <CardHeader>
           <CardTitle>AgentOne Account</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <p className="text-muted-foreground text-sm">
-            A browser window has been opened. Enter the code below to link this
-            device to your account.
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={handleCopy}
-              className="bg-muted hover:bg-muted/80 flex items-center gap-2 rounded-md px-4 py-2 font-mono text-xl font-bold tracking-[0.2em] transition-colors"
-            >
-              {deviceFlow.userCode}
-              <ClipboardCopyIcon className="text-muted-foreground size-4" />
-            </button>
-          </div>
-          <p className="text-muted-foreground text-center text-xs">
-            {copied ? "Copied!" : "Click code to copy"}
-          </p>
-          <div className="flex items-center justify-center gap-2">
-            <LoaderIcon className="text-muted-foreground size-3 animate-spin" />
-            <span className="text-muted-foreground text-sm">
-              Waiting for authorization...
-            </span>
-          </div>
-          <Button variant="ghost" size="sm" onClick={cancelSignIn}>
-            <XIcon className="size-4" />
-            Cancel
-          </Button>
+        <CardContent>
+          <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={cancelSignIn} />
         </CardContent>
       </Card>
     );
   }
 
   if (user) {
-    const initials = user.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
     return (
       <Card>
         <CardHeader>
           <CardTitle>AgentOne Account</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <Avatar className="size-12">
-              <AvatarImage src={user.image ?? undefined} alt={user.name} />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-foreground text-sm font-medium">
-                {user.name}
-              </span>
-              <span className="text-muted-foreground text-sm">
-                {user.email}
-              </span>
-            </div>
-          </div>
+          <UserProfileDisplay user={user} />
           <Button variant="outline" size="sm" onClick={signOut}>
             <LogOutIcon className="size-4" />
             Sign out

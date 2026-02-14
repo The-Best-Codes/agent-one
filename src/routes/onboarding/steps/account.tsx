@@ -1,14 +1,12 @@
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
-  ClipboardCopyIcon,
   KeyIcon,
-  LoaderIcon,
   LogInIcon,
-  XIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { DeviceCodeDisplay } from "@/components/a1/device-code-display";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
@@ -74,20 +72,12 @@ function DeviceFlowView({
   onComplete: () => void;
 }) {
   const { user, isSigningIn, deviceFlow, cancelSignIn } = useWebAuth();
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (user) {
       onComplete();
     }
   }, [user, onComplete]);
-
-  const handleCopy = async () => {
-    if (!deviceFlow) return;
-    await navigator.clipboard.writeText(deviceFlow.userCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleCancel = () => {
     cancelSignIn();
@@ -102,34 +92,8 @@ function DeviceFlowView({
         <h2 className="text-foreground text-2xl font-bold">
           Sign in with AgentOne
         </h2>
-        <p className="text-muted-foreground text-sm">
-          A browser window has been opened. Enter the code below to link this
-          device to your account.
-        </p>
       </div>
-
-      <button
-        onClick={handleCopy}
-        className="bg-muted hover:bg-muted/80 flex items-center gap-3 rounded-lg px-6 py-4 font-mono text-3xl font-bold tracking-[0.3em] transition-colors"
-      >
-        {deviceFlow.userCode}
-        <ClipboardCopyIcon className="text-muted-foreground size-5" />
-      </button>
-      <p className="text-muted-foreground text-xs">
-        {copied ? "Copied!" : "Click to copy"}
-      </p>
-
-      <div className="flex items-center gap-2">
-        <LoaderIcon className="text-muted-foreground size-4 animate-spin" />
-        <span className="text-muted-foreground text-sm">
-          Waiting for authorization...
-        </span>
-      </div>
-
-      <Button variant="ghost" onClick={handleCancel}>
-        <XIcon className="size-4" />
-        Cancel
-      </Button>
+      <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={handleCancel} />
     </div>
   );
 }
