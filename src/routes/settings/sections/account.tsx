@@ -1,15 +1,11 @@
 import { useAtom } from "jotai";
-import { Loader2Icon, LogInIcon } from "lucide-react";
 import { useState } from "react";
 
-import { DeviceCodeDisplay } from "@/components/a1/device-code-display";
-import { UserProfileDisplay } from "@/components/a1/user-profile-display";
-import { Button } from "@/components/ui/button";
+import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
   systemPromptAppendixAtom,
   userNameAtom,
@@ -18,104 +14,13 @@ import {
 const MAX_APPENDIX_CHARS = 2000;
 
 function AgentOneAccountCard() {
-  const {
-    user,
-    isLoading,
-    isSigningIn,
-    deviceFlow,
-    startSignIn,
-    cancelSignIn,
-    signOut,
-  } = useWebAuth();
-
-  const getStatusDisplay = () => {
-    if (isLoading) {
-      return {
-        icon: (
-          <Loader2Icon className="text-muted-foreground size-5 animate-spin" />
-        ),
-        title: "Checking status...",
-        description: "Please wait while we check your account",
-        action: null,
-      };
-    }
-
-    if (isSigningIn && !deviceFlow) {
-      return {
-        icon: <Loader2Icon className="text-primary size-5 animate-spin" />,
-        title: "Signing in...",
-        description: "Preparing device authorization",
-        action: (
-          <Button variant="secondary" size="sm" onClick={cancelSignIn}>
-            Cancel
-          </Button>
-        ),
-      };
-    }
-
-    if (isSigningIn && deviceFlow) {
-      return {
-        isCustom: true,
-        content: (
-          <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={cancelSignIn} />
-        ),
-      };
-    }
-
-    if (user) {
-      return {
-        isCustom: true,
-        content: (
-          <UserProfileDisplay
-            user={user}
-            action={
-              <Button variant="secondary" size="sm" onClick={signOut}>
-                Sign out
-              </Button>
-            }
-          />
-        ),
-      };
-    }
-
-    return {
-      icon: <LogInIcon className="text-muted-foreground size-5" />,
-      title: "Not signed in",
-      description: "Sign in to synchronize your data and access models",
-      action: (
-        <Button onClick={startSignIn} size="sm">
-          Sign in
-        </Button>
-      ),
-    };
-  };
-
-  const status = getStatusDisplay();
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>AgentOne Account</CardTitle>
       </CardHeader>
       <CardContent>
-        {status.isCustom ? (
-          status.content
-        ) : (
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
-                {status.icon}
-              </div>
-              <div>
-                <p className="leading-none font-medium">{status.title}</p>
-                <p className="text-muted-foreground text-sm">
-                  {status.description}
-                </p>
-              </div>
-            </div>
-            {status.action}
-          </div>
-        )}
+        <AuthStatusDisplay />
       </CardContent>
     </Card>
   );

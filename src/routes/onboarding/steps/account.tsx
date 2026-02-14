@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { DeviceCodeDisplay } from "@/components/a1/device-code-display";
+import { DeviceCodeDisplay } from "@/components/a1/web-auth/device-code-display";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
