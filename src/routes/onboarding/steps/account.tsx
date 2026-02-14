@@ -3,10 +3,11 @@ import {
   ChevronRightIcon,
   KeyIcon,
   LogInIcon,
+  MonitorSmartphoneIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { DeviceCodeDisplay } from "@/components/a1/web-auth/device-code-display";
+import { CopyButton } from "@/components/a1/copy-button";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
@@ -88,8 +89,35 @@ function DeviceFlowView({
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="border-border rounded-lg border p-4">
-        <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={handleCancel} />
+      <div className="border-border flex items-center justify-between gap-4 rounded-lg border p-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
+            <MonitorSmartphoneIcon className="text-primary size-5" />
+          </div>
+          <div>
+            <p className="leading-none font-medium">Link this device</p>
+            <p className="text-muted-foreground text-sm">
+              <span className="font-mono font-bold tracking-wider">
+                {deviceFlow.userCode}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <CopyButton
+            text={deviceFlow.userCode}
+            size="sm"
+            variants={{
+              idle: "secondary",
+              copying: "secondary",
+              success: "secondary",
+              error: "secondary",
+            }}
+          />
+          <Button variant="secondary" size="sm" onClick={handleCancel}>
+            Cancel
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Loader2Icon, LogInIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
-import { DeviceCodeDisplay } from "@/components/a1/web-auth/device-code-display";
+import { CopyButton } from "@/components/a1/copy-button";
 import { UserProfileDisplay } from "@/components/a1/web-auth/user-profile-display";
 import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
@@ -52,10 +53,32 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
 
   if (isSigningIn && deviceFlow) {
     return (
-      <DeviceCodeDisplay
+      <StatusRow
         className={className}
-        deviceFlow={deviceFlow}
-        onCancel={cancelSignIn}
+        icon={<Loader2Icon className="text-primary size-5 animate-spin" />}
+        title="Link this device"
+        description={
+          <span className="font-mono font-bold tracking-wider">
+            {deviceFlow.userCode}
+          </span>
+        }
+        action={
+          <>
+            <CopyButton
+              text={deviceFlow.userCode}
+              size="sm"
+              variants={{
+                idle: "secondary",
+                copying: "secondary",
+                success: "secondary",
+                error: "secondary",
+              }}
+            />
+            <Button variant="secondary" size="sm" onClick={cancelSignIn}>
+              Cancel
+            </Button>
+          </>
+        }
       />
     );
   }
@@ -79,7 +102,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
       className={className}
       icon={<LogInIcon className="text-muted-foreground size-5" />}
       title="Not signed in"
-      description="Sign in to synchronize your data and access models"
+      description="Sign in to synchronize your data"
       action={
         <Button onClick={startSignIn} size="sm">
           Sign in
@@ -90,10 +113,10 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
 }
 
 interface StatusRowProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
-  description: string;
-  action?: React.ReactNode;
+  description: ReactNode;
+  action?: ReactNode;
   className?: string;
 }
 
@@ -115,7 +138,7 @@ function StatusRow({
           <p className="text-muted-foreground text-sm">{description}</p>
         </div>
       </div>
-      {action}
+      <div className="flex items-center gap-2">{action}</div>
     </div>
   );
 }
