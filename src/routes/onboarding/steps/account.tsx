@@ -1,14 +1,17 @@
 import {
   ArrowLeftIcon,
   ChevronRightIcon,
+  ClipboardCopyIcon,
   KeyIcon,
+  LoaderIcon,
   LogInIcon,
-  UserPlusIcon,
+  XIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
@@ -63,15 +66,93 @@ function ProviderItem({
   );
 }
 
+function DeviceFlowView({
+  onCancel,
+  onComplete,
+}: {
+  onCancel: () => void;
+  onComplete: () => void;
+}) {
+  const { user, isSigningIn, deviceFlow, cancelSignIn } = useWebAuth();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      onComplete();
+    }
+  }, [user, onComplete]);
+
+  const handleCopy = async () => {
+    if (!deviceFlow) return;
+    await navigator.clipboard.writeText(deviceFlow.userCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCancel = () => {
+    cancelSignIn();
+    onCancel();
+  };
+
+  if (!isSigningIn || !deviceFlow) return null;
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col gap-2 text-center">
+        <h2 className="text-foreground text-2xl font-bold">
+          Sign in with AgentOne
+        </h2>
+        <p className="text-muted-foreground text-sm">
+          A browser window has been opened. Enter the code below to link this
+          device to your account.
+        </p>
+      </div>
+
+      <button
+        onClick={handleCopy}
+        className="bg-muted hover:bg-muted/80 flex items-center gap-3 rounded-lg px-6 py-4 font-mono text-3xl font-bold tracking-[0.3em] transition-colors"
+      >
+        {deviceFlow.userCode}
+        <ClipboardCopyIcon className="text-muted-foreground size-5" />
+      </button>
+      <p className="text-muted-foreground text-xs">
+        {copied ? "Copied!" : "Click to copy"}
+      </p>
+
+      <div className="flex items-center gap-2">
+        <LoaderIcon className="text-muted-foreground size-4 animate-spin" />
+        <span className="text-muted-foreground text-sm">
+          Waiting for authorization...
+        </span>
+      </div>
+
+      <Button variant="ghost" onClick={handleCancel}>
+        <XIcon className="size-4" />
+        Cancel
+      </Button>
+    </div>
+  );
+}
+
 export function AccountStep({ onSubmit }: AccountStepProps) {
-  const [view, setView] = useState<"account" | "byok">("account");
+  const { user, isSigningIn, startSignIn } = useWebAuth();
+  const [view, setView] = useState<"account" | "byok" | "device-flow">(
+    "account",
+  );
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [enabledProviders, setEnabledProviders] = useState<Set<ProviderId>>(
     new Set(),
   );
 
-  const handleViewChange = (newView: "account" | "byok") => {
+  useEffect(() => {
+    if (user && view === "account") {
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  const handleViewChange = (newView: "account" | "byok" | "device-flow") => {
     setIsExiting(true);
     setTimeout(() => {
       setView(newView);
@@ -86,6 +167,11 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     }, 500);
   };
 
+  const handleSignIn = async () => {
+    await startSignIn();
+    handleViewChange("device-flow");
+  };
+
   const handleEnabledChange = (providerId: ProviderId, enabled: boolean) => {
     setEnabledProviders((prev) => {
       const next = new Set(prev);
@@ -97,6 +183,27 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
       return next;
     });
   };
+
+  if (view === "device-flow") {
+    return (
+      <div
+        key="device-flow"
+        className={cn(
+          "w-full max-w-md px-4 duration-500",
+          isSubmitting
+            ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
+            : isExiting
+              ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
+              : "animate-in slide-in-from-bottom-5 fade-in-0",
+        )}
+      >
+        <DeviceFlowView
+          onCancel={() => handleViewChange("account")}
+          onComplete={handleSubmit}
+        />
+      </div>
+    );
+  }
 
   if (view === "byok") {
     return (
@@ -183,25 +290,14 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
             variant="default"
             size="lg"
             className="h-16 justify-between px-6 text-xl"
+            disabled={isSigningIn}
+            onClick={handleSignIn}
           >
             <span className="flex items-center gap-2">
               <div className="rounded-md p-2">
                 <LogInIcon className="text-secondary size-6" />
               </div>
               Sign in with AgentOne
-            </span>
-            <ChevronRightIcon className="text-secondary size-4" />
-          </Button>
-          <Button
-            variant="default"
-            size="lg"
-            className="h-16 justify-between px-6 text-xl"
-          >
-            <span className="flex items-center gap-2">
-              <div className="rounded-md p-2">
-                <UserPlusIcon className="text-secondary size-6" />
-              </div>
-              Create AgentOne account
             </span>
             <ChevronRightIcon className="text-secondary size-4" />
           </Button>
