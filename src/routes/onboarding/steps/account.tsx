@@ -1,13 +1,7 @@
-import {
-  ArrowLeftIcon,
-  ChevronRightIcon,
-  KeyIcon,
-  LogInIcon,
-  MonitorSmartphoneIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, ChevronRightIcon, KeyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { CopyButton } from "@/components/a1/copy-button";
+import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
@@ -65,69 +59,9 @@ function ProviderItem({
   );
 }
 
-function DeviceFlowView({
-  onCancel,
-  onComplete,
-}: {
-  onCancel: () => void;
-  onComplete: () => void;
-}) {
-  const { user, isSigningIn, deviceFlow, cancelSignIn } = useWebAuth();
-
-  useEffect(() => {
-    if (user) {
-      onComplete();
-    }
-  }, [user, onComplete]);
-
-  const handleCancel = () => {
-    cancelSignIn();
-    onCancel();
-  };
-
-  if (!isSigningIn || !deviceFlow) return null;
-
-  return (
-    <div className="flex w-full flex-col gap-6">
-      <div className="border-border flex items-center justify-between gap-4 rounded-lg border p-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
-            <MonitorSmartphoneIcon className="text-primary size-5" />
-          </div>
-          <div>
-            <p className="leading-none font-medium">Link this device</p>
-            <p className="text-muted-foreground text-sm">
-              <span className="font-mono font-bold tracking-wider">
-                {deviceFlow.userCode}
-              </span>
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <CopyButton
-            text={deviceFlow.userCode}
-            size="sm"
-            variants={{
-              idle: "secondary",
-              copying: "secondary",
-              success: "secondary",
-              error: "secondary",
-            }}
-          />
-          <Button variant="secondary" size="sm" onClick={handleCancel}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function AccountStep({ onSubmit }: AccountStepProps) {
-  const { user, isSigningIn, startSignIn } = useWebAuth();
-  const [view, setView] = useState<"account" | "byok" | "device-flow">(
-    "account",
-  );
+  const { user } = useWebAuth();
+  const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [enabledProviders, setEnabledProviders] = useState<Set<ProviderId>>(
@@ -141,7 +75,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const handleViewChange = (newView: "account" | "byok" | "device-flow") => {
+  const handleViewChange = (newView: "account" | "byok") => {
     setIsExiting(true);
     setTimeout(() => {
       setView(newView);
@@ -156,11 +90,6 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     }, 500);
   };
 
-  const handleSignIn = async () => {
-    await startSignIn();
-    handleViewChange("device-flow");
-  };
-
   const handleEnabledChange = (providerId: ProviderId, enabled: boolean) => {
     setEnabledProviders((prev) => {
       const next = new Set(prev);
@@ -172,27 +101,6 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
       return next;
     });
   };
-
-  if (view === "device-flow") {
-    return (
-      <div
-        key="device-flow"
-        className={cn(
-          "w-full max-w-md px-4 duration-500",
-          isSubmitting
-            ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
-            : isExiting
-              ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
-              : "animate-in slide-in-from-bottom-5 fade-in-0",
-        )}
-      >
-        <DeviceFlowView
-          onCancel={() => handleViewChange("account")}
-          onComplete={handleSubmit}
-        />
-      </div>
-    );
-  }
 
   if (view === "byok") {
     return (
@@ -275,21 +183,9 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <Button
-            variant="default"
-            size="lg"
-            className="h-16 justify-between px-6 text-xl"
-            disabled={isSigningIn}
-            onClick={handleSignIn}
-          >
-            <span className="flex items-center gap-2">
-              <div className="rounded-md p-2">
-                <LogInIcon className="text-secondary size-6" />
-              </div>
-              Sign in with AgentOne
-            </span>
-            <ChevronRightIcon className="text-secondary size-4" />
-          </Button>
+          <div className="border-border rounded-lg border p-4">
+            <AuthStatusDisplay />
+          </div>
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">

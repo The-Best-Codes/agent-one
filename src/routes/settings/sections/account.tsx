@@ -13,19 +13,6 @@ import {
 
 const MAX_APPENDIX_CHARS = 2000;
 
-function AgentOneAccountCard() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>AgentOne Account</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <AuthStatusDisplay />
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
@@ -48,7 +35,14 @@ export default function AccountSection() {
 
   return (
     <div className="flex flex-col gap-6">
-      <AgentOneAccountCard />
+      <Card>
+        <CardHeader>
+          <CardTitle>AgentOne Account</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AuthStatusDisplay />
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
