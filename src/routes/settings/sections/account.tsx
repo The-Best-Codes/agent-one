@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { Loader2Icon, LogInIcon, LogOutIcon } from "lucide-react";
+import { Loader2Icon, LogInIcon } from "lucide-react";
 import { useState } from "react";
 
 import { DeviceCodeDisplay } from "@/components/a1/device-code-display";
@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
@@ -29,64 +28,94 @@ function AgentOneAccountCard() {
     signOut,
   } = useWebAuth();
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>AgentOne Account</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center gap-2">
-          <Loader2Icon className="text-muted-foreground size-4 animate-spin" />
-          <span className="text-muted-foreground text-sm">Loading...</span>
-        </CardContent>
-      </Card>
-    );
-  }
+  const getStatusDisplay = () => {
+    if (isLoading) {
+      return {
+        icon: (
+          <Loader2Icon className="text-muted-foreground size-5 animate-spin" />
+        ),
+        title: "Checking status...",
+        description: "Please wait while we check your account",
+        action: null,
+      };
+    }
 
-  if (isSigningIn && deviceFlow) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>AgentOne Account</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={cancelSignIn} />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (user) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>AgentOne Account</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <UserProfileDisplay user={user} />
-          <Button variant="outline" size="sm" onClick={signOut}>
-            <LogOutIcon className="size-4" />
-            Sign out
+    if (isSigningIn && !deviceFlow) {
+      return {
+        icon: <Loader2Icon className="text-primary size-5 animate-spin" />,
+        title: "Signing in...",
+        description: "Preparing device authorization",
+        action: (
+          <Button variant="secondary" size="sm" onClick={cancelSignIn}>
+            Cancel
           </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+        ),
+      };
+    }
+
+    if (isSigningIn && deviceFlow) {
+      return {
+        isCustom: true,
+        content: (
+          <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={cancelSignIn} />
+        ),
+      };
+    }
+
+    if (user) {
+      return {
+        isCustom: true,
+        content: (
+          <UserProfileDisplay
+            user={user}
+            action={
+              <Button variant="secondary" size="sm" onClick={signOut}>
+                Sign out
+              </Button>
+            }
+          />
+        ),
+      };
+    }
+
+    return {
+      icon: <LogInIcon className="text-muted-foreground size-5" />,
+      title: "Not signed in",
+      description: "Sign in to synchronize your data and access models",
+      action: (
+        <Button onClick={startSignIn} size="sm">
+          Sign in
+        </Button>
+      ),
+    };
+  };
+
+  const status = getStatusDisplay();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>AgentOne Account</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <p className="text-muted-foreground text-sm">
-          Sign in to synchronize your data across devices and access AgentOne
-          models.
-        </p>
-        <Button disabled={isSigningIn} onClick={startSignIn}>
-          <LogInIcon className="size-4" />
-          Sign in with AgentOne
-        </Button>
+      <CardContent>
+        {status.isCustom ? (
+          status.content
+        ) : (
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
+                {status.icon}
+              </div>
+              <div>
+                <p className="leading-none font-medium">{status.title}</p>
+                <p className="text-muted-foreground text-sm">
+                  {status.description}
+                </p>
+              </div>
+            </div>
+            {status.action}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -115,9 +144,6 @@ export default function AccountSection() {
   return (
     <div className="flex flex-col gap-6">
       <AgentOneAccountCard />
-
-      <Separator />
-
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>

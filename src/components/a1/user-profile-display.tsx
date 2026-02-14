@@ -1,11 +1,14 @@
+import type { ReactNode } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { WebAuthUser } from "@/contexts/use-web-auth/web-auth-contexts";
 
 interface UserProfileDisplayProps {
   user: WebAuthUser;
+  action?: ReactNode;
 }
 
-export function UserProfileDisplay({ user }: UserProfileDisplayProps) {
+export function UserProfileDisplay({ user, action }: UserProfileDisplayProps) {
   const initials = user.name
     .split(" ")
     .map((n) => n[0])
@@ -14,15 +17,18 @@ export function UserProfileDisplay({ user }: UserProfileDisplayProps) {
     .slice(0, 2);
 
   return (
-    <div className="flex items-center gap-4">
-      <Avatar className="size-12">
-        <AvatarImage src={user.image ?? undefined} alt={user.name} />
-        <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col">
-        <span className="text-foreground text-sm font-medium">{user.name}</span>
-        <span className="text-muted-foreground text-sm">{user.email}</span>
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <Avatar size="lg" className="rounded-md">
+          <AvatarImage src={user.image ?? undefined} alt={user.name} />
+          <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="leading-none font-medium">{user.name}</p>
+          <p className="text-muted-foreground text-sm">{user.email}</p>
+        </div>
       </div>
+      {action}
     </div>
   );
 }

@@ -87,13 +87,10 @@ function DeviceFlowView({
   if (!isSigningIn || !deviceFlow) return null;
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="flex flex-col gap-2 text-center">
-        <h2 className="text-foreground text-2xl font-bold">
-          Sign in with AgentOne
-        </h2>
+    <div className="flex w-full flex-col gap-6">
+      <div className="border-border rounded-lg border p-4">
+        <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={handleCancel} />
       </div>
-      <DeviceCodeDisplay deviceFlow={deviceFlow} onCancel={handleCancel} />
     </div>
   );
 }
