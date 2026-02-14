@@ -1,4 +1,4 @@
-import { Loader2Icon, LogInIcon } from "lucide-react";
+import { ExternalLinkIcon, Loader2Icon, LogInIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
@@ -58,22 +58,35 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         icon={<Loader2Icon className="text-primary size-5 animate-spin" />}
         title="Link this device"
         description={
-          <span className="font-mono font-bold tracking-wider">
-            {deviceFlow.userCode}
-          </span>
+          <a
+            href={
+              deviceFlow.verificationUriComplete || deviceFlow.verificationUri
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-row items-center justify-center gap-1 hover:underline"
+          >
+            Open Login Form Manually
+            <ExternalLinkIcon className="size-4" />
+          </a>
         }
         action={
           <>
-            <CopyButton
-              text={deviceFlow.userCode}
-              size="sm"
-              variants={{
-                idle: "secondary",
-                copying: "secondary",
-                success: "secondary",
-                error: "secondary",
-              }}
-            />
+            <div className="bg-accent flex flex-row items-center justify-center rounded-md pl-2">
+              <span className="font-mono text-sm leading-none font-bold tracking-wider">
+                {deviceFlow.userCode}
+              </span>
+              <CopyButton
+                text={deviceFlow.userCode}
+                size="sm"
+                variants={{
+                  idle: "secondary",
+                  copying: "secondary",
+                  success: "secondary",
+                  error: "secondary",
+                }}
+              />
+            </div>
             <Button variant="secondary" size="sm" onClick={cancelSignIn}>
               Cancel
             </Button>
