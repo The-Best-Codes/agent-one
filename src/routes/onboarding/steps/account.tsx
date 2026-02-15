@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, ChevronRightIcon, KeyIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -67,13 +67,6 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
   const [enabledProviders, setEnabledProviders] = useState<Set<ProviderId>>(
     new Set(),
   );
-
-  useEffect(() => {
-    if (user && view === "account") {
-      handleSubmit();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
 
   const handleViewChange = (newView: "account" | "byok") => {
     setIsExiting(true);
@@ -182,35 +175,25 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <div className="border-border rounded-lg border p-4">
             <AuthStatusDisplay />
           </div>
 
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="border-border w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background text-muted-foreground px-4">
-                Or
-              </span>
-            </div>
-          </div>
+          {user && (
+            <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
+              Continue
+              <ChevronRightIcon />
+            </Button>
+          )}
 
-          <Button
-            variant="outline"
-            className="h-16 justify-between px-6 text-xl"
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground mt-2 cursor-pointer text-sm underline"
             onClick={() => handleViewChange("byok")}
           >
-            <span className="flex items-center gap-2">
-              <div className="rounded-md p-2">
-                <KeyIcon className="text-foreground size-6" />
-              </div>
-              Continue without an account
-            </span>
-            <ChevronRightIcon className="text-muted-foreground size-4" />
-          </Button>
+            Or continue without an account
+          </button>
         </div>
       </div>
     </div>
