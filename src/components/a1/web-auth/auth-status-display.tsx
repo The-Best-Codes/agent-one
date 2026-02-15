@@ -16,6 +16,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
     user,
     isLoading,
     isSigningIn,
+    isSigningOut,
     deviceFlow,
     startSignIn,
     cancelSignIn,
@@ -102,7 +103,13 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         className={className}
         user={user}
         action={
-          <Button variant="secondary" size="sm" onClick={signOut}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={signOut}
+            disabled={isSigningOut}
+          >
+            {isSigningOut && <Loader2Icon className="animate-spin" />}
             Sign out
           </Button>
         }

@@ -30,6 +30,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
   const [user, setUser] = useState<WebAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState | null>(null);
   const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
@@ -196,24 +197,16 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
   }, [stopPolling]);
 
   const signOut = useCallback(async () => {
-    stopPolling();
-    const token = await keyringStorage.getItem<string | null>(TOKEN_KEY, null);
-    if (token) {
-      try {
-        await authClient.revokeSession({
-          token,
-          fetchOptions: {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        });
-      } catch (error) {
-        logger.warn("Failed to revoke server session:", error);
-      }
+    setIsSigningOut(true);
+    try {
+      stopPolling();
+      await keyringStorage.removeItem(TOKEN_KEY);
+      setUser(null);
+      setDeviceFlow(null);
+      setIsSigningIn(false);
+    } finally {
+      setIsSigningOut(false);
     }
-    await keyringStorage.removeItem(TOKEN_KEY);
-    setUser(null);
-    setDeviceFlow(null);
-    setIsSigningIn(false);
   }, [stopPolling]);
 
   useEffect(() => {
@@ -225,6 +218,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
       user,
       isLoading,
       isSigningIn,
+      isSigningOut,
       deviceFlow,
       startSignIn,
       cancelSignIn,
@@ -234,6 +228,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
       user,
       isLoading,
       isSigningIn,
+      isSigningOut,
       deviceFlow,
       startSignIn,
       cancelSignIn,

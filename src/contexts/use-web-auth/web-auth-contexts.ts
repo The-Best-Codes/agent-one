@@ -20,6 +20,7 @@ export interface WebAuthContextType {
   user: WebAuthUser | null;
   isLoading: boolean;
   isSigningIn: boolean;
+  isSigningOut: boolean;
   deviceFlow: DeviceFlowState | null;
   startSignIn: () => Promise<void>;
   cancelSignIn: () => void;
