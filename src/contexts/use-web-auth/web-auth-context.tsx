@@ -197,6 +197,19 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const signOut = useCallback(async () => {
     stopPolling();
+    const token = await keyringStorage.getItem<string | null>(TOKEN_KEY, null);
+    if (token) {
+      try {
+        await authClient.revokeSession({
+          token,
+          fetchOptions: {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        });
+      } catch (error) {
+        logger.warn("Failed to revoke server session:", error);
+      }
+    }
     await keyringStorage.removeItem(TOKEN_KEY);
     setUser(null);
     setDeviceFlow(null);
