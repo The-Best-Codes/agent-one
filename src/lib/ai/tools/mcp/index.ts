@@ -448,7 +448,7 @@ export async function getMcpToolsForServer(
             return { ...prev, [server.id]: "logged-in" };
           });
         } else {
-          checkOAuthSupport(server.url).then((supportsOAuth) => {
+          void checkOAuthSupport(server.url).then((supportsOAuth) => {
             if (supportsOAuth) {
               store.set(mcpAuthStatesAtom, (prev) => {
                 if (prev[server.id] === "supports-oauth") return prev;
@@ -483,7 +483,7 @@ export async function getMcpToolsForServer(
     });
 
     if (server.type === "http" && isAuthError(error)) {
-      checkOAuthSupport(server.url).then((supportsOAuth) => {
+      void checkOAuthSupport(server.url).then((supportsOAuth) => {
         if (supportsOAuth) {
           store.set(mcpAuthStatesAtom, (prev) => {
             if (prev[server.id] === "logged-out") return prev;
