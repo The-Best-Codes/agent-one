@@ -9,7 +9,6 @@ import OnboardingRoute from "@/routes/onboarding";
 import SettingsRoute from "@/routes/settings";
 import TestsRoute from "@/routes/tests";
 import NotificationsTestRoute from "@/routes/tests/notifications";
-import SplashTestRoute from "@/routes/tests/splash";
 
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
@@ -41,7 +40,6 @@ function App() {
             path="/tests/notifications"
             element={<NotificationsTestRoute />}
           />
-          <Route path="/tests/splash" element={<SplashTestRoute />} />
           <Route path="*" element={<NotFoundRoute />} />
         </Route>
       </Routes>

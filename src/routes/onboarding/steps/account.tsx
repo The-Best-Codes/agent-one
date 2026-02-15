@@ -165,7 +165,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     <div
       key="account"
       className={cn(
-        "w-full max-w-md px-4 duration-500",
+        "w-full max-w-xl px-4 duration-500",
         isExiting
           ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
           : "animate-in slide-in-from-bottom-5 fade-in-0",
