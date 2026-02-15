@@ -7,31 +7,5 @@
       "disabled": true
     }
   },
-  "$schema": "https://opencode.ai/config.json",
-  "agent": {
-    "fast-explore": {
-      "description": "Fast, read-only agent for quickly exploring and searching the codebase using Claude Haiku 4.5 for high speed",
-      "mode": "subagent",
-      "model": "openrouter/anthropic/claude-haiku-4.5",
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": false
-      }
-    }
-  },
-  "mcp": {
-    "better-auth": {
-      "type": "remote",
-      "url": "https://mcp.inkeep.com/better-auth/mcp",
-      "enabled": true
-    },
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "headers": {
-        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
-      }
-    }
-  }
+  "$schema": "https://opencode.ai/config.json"
 }
