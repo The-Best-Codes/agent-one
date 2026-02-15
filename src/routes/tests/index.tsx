@@ -1,11 +1,14 @@
+import { useSetAtom } from "jotai";
 import { ArrowLeftIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
 
 export default function TestsRoute() {
   const navigate = useNavigate();
+  const setOnboardingCompleted = useSetAtom(onboardingCompletedAtom);
 
   return (
     <div className="bg-background min-h-screen">
@@ -45,13 +48,16 @@ export default function TestsRoute() {
               </div>
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
-                  <h3 className="font-medium">Splash Animation</h3>
+                  <h3 className="font-medium">Trigger Onboarding</h3>
                   <p className="text-muted-foreground text-sm">
-                    Test the app splash screen animation
+                    Reset onboarding state and restart the onboarding flow
                   </p>
                 </div>
                 <Button
-                  onClick={() => navigate("/tests/splash")}
+                  onClick={() => {
+                    setOnboardingCompleted(false);
+                    void navigate("/");
+                  }}
                   variant="outline"
                 >
                   Run Test

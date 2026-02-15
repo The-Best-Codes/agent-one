@@ -53,7 +53,7 @@ keyring = { version = "3.6.3", features = [
     "tokio",
     "crypto-rust",
 ] }
-tauri-plugin-http = "2"
+tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
 axum = "0.8.8"
 url = "2.5.8"
 rmcp = { version = "0.14.0", features = [

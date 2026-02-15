@@ -1,14 +1,10 @@
-import {
-  ArrowLeftIcon,
-  ChevronRightIcon,
-  KeyIcon,
-  LogInIcon,
-  UserPlusIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
@@ -64,6 +60,7 @@ function ProviderItem({
 }
 
 export function AccountStep({ onSubmit }: AccountStepProps) {
+  const { user } = useWebAuth();
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -161,8 +158,8 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     <div
       key="account"
       className={cn(
-        "w-full max-w-md px-4 duration-500",
-        isExiting
+        "w-full max-w-xl px-4 duration-500",
+        isSubmitting || isExiting
           ? "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards"
           : "animate-in slide-in-from-bottom-5 fade-in-0",
       )}
@@ -178,58 +175,25 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <Button
-            variant="default"
-            size="lg"
-            className="h-16 justify-between px-6 text-xl"
-          >
-            <span className="flex items-center gap-2">
-              <div className="rounded-md p-2">
-                <LogInIcon className="text-secondary size-6" />
-              </div>
-              Sign in with AgentOne
-            </span>
-            <ChevronRightIcon className="text-secondary size-4" />
-          </Button>
-          <Button
-            variant="default"
-            size="lg"
-            className="h-16 justify-between px-6 text-xl"
-          >
-            <span className="flex items-center gap-2">
-              <div className="rounded-md p-2">
-                <UserPlusIcon className="text-secondary size-6" />
-              </div>
-              Create AgentOne account
-            </span>
-            <ChevronRightIcon className="text-secondary size-4" />
-          </Button>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="border-border w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background text-muted-foreground px-4">
-                Or
-              </span>
-            </div>
+        <div className="flex flex-col gap-4">
+          <div className="border-border rounded-lg border p-4">
+            <AuthStatusDisplay />
           </div>
 
-          <Button
-            variant="outline"
-            className="h-16 justify-between px-6 text-xl"
+          {user && (
+            <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
+              Continue
+              <ChevronRightIcon />
+            </Button>
+          )}
+
+          <button
+            type="button"
+            className="text-muted-foreground hover:text-foreground mt-2 cursor-pointer text-sm underline"
             onClick={() => handleViewChange("byok")}
           >
-            <span className="flex items-center gap-2">
-              <div className="rounded-md p-2">
-                <KeyIcon className="text-foreground size-6" />
-              </div>
-              Continue without an account
-            </span>
-            <ChevronRightIcon className="text-muted-foreground size-4" />
-          </Button>
+            Or continue without an account
+          </button>
         </div>
       </div>
     </div>
