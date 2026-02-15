@@ -1,5 +1,5 @@
 /*
-  When @/index.html's loader is updated, this should be updated as well!
+  When this file is updated, @/index.html's loader section should be updated as well!
 */
 
 export default function SuspenseFallback() {
