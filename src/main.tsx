@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 
 import ErrorBoundary from "@/components/error-boundary";
+import { SettingsSyncManager } from "@/components/settings-sync-manager";
 import { ThemeRegistry } from "@/components/theme/theme-registry";
 import { ApiKeysProvider } from "@/contexts/use-api-keys/api-keys-context";
 import { ModelProvider } from "@/contexts/use-model/model-context";
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <ErrorBoundary>
       <ThemeRegistry />
       <WebAuthProvider>
+        <SettingsSyncManager />
         <PersistenceProvider>
           <ApiKeysProvider>
             <ToolsProvider>

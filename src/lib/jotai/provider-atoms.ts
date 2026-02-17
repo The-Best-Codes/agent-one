@@ -4,6 +4,7 @@ import {
   PROVIDER_REGISTRY,
   type ProviderId,
 } from "@/lib/ai/providers/registry";
+import { createSyncedStorage } from "@/lib/sync/synced-storage";
 
 export type { ProviderId } from "@/lib/ai/providers/registry";
 
@@ -24,7 +25,7 @@ function createProviderConfigAtom(providerId: ProviderId) {
   return atomWithStorage<ProviderConfig>(
     key,
     DEFAULT_PROVIDER_CONFIG,
-    undefined,
+    createSyncedStorage<ProviderConfig>(),
     {
       getOnInit: true,
     },

@@ -1,6 +1,8 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
+import { createSyncedStorage } from "@/lib/sync/synced-storage";
+
 const STORAGE_KEY = "agent-one-custom-providers";
 
 export interface CustomProviderModel {
@@ -24,7 +26,7 @@ export type NewCustomProviderData = Omit<CustomProvider, "id" | "enabled">;
 export const customProvidersAtom = atomWithStorage<CustomProvider[]>(
   STORAGE_KEY,
   [],
-  undefined,
+  createSyncedStorage<CustomProvider[]>(),
   { getOnInit: true },
 );
 

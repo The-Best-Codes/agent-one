@@ -18,6 +18,7 @@ import {
   type ToolConfigs,
   type ToolId,
 } from "@/lib/settings/types";
+import { createSyncedStorage } from "@/lib/sync/synced-storage";
 
 const SETTING_PREFIX = "agent-one-setting-";
 
@@ -26,7 +27,7 @@ const createSettingAtom = <T>(
   defaultValue: T,
 ) => {
   const lsKey = `${SETTING_PREFIX}${key}`;
-  return atomWithStorage<T>(lsKey, defaultValue, undefined, {
+  return atomWithStorage<T>(lsKey, defaultValue, createSyncedStorage<T>(), {
     getOnInit: true,
   });
 };
