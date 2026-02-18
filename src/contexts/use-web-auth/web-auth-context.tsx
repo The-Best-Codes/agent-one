@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 
-import { authClient, CLIENT_ID } from "@/lib/auth/auth-client";
+import { authClient, CLIENT_ID, TOKEN_KEY } from "@/lib/auth/auth-client";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 
@@ -19,8 +19,6 @@ import {
 } from "./web-auth-contexts";
 
 const logger = getLogger(import.meta.url);
-
-const TOKEN_KEY = "agent-one-web-auth-token";
 const DEVICE_GRANT_TYPE =
   "urn:ietf:params:oauth:grant-type:device_code" as const;
 

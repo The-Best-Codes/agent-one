@@ -1,8 +1,13 @@
-import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import type { SyncStorage } from "jotai/vanilla/utils/atomWithStorage";
 
-import { SERVER_URL } from "../auth/auth-client";
+import { authClient, SERVER_URL } from "../auth/auth-client";
+import {
+  clearSyncTokenValue,
+  getSyncToken,
+  setSyncTokenValue,
+} from "../auth/sync-token";
 import { getLogger } from "../logger";
+import { debounce } from "../utils";
 
 const logger = getLogger(import.meta.url);
 
@@ -11,27 +16,10 @@ const LOCAL_UPDATED_AT_KEY = "agent-one-settings-sync-updated-at";
 const PUSH_DEBOUNCE_MS = 2000;
 const POLL_INTERVAL_MS = 60_000;
 
-let authToken: string | null = null;
-let pushTimer: ReturnType<typeof setTimeout> | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 
 const syncedKeys = new Set<string>();
 const pulledKeys = new Set<string>();
-
-function fetchWithAuth(
-  url: string,
-  token: string,
-  options?: RequestInit,
-): Promise<Response> {
-  return tauriFetch(url, {
-    ...options,
-    headers: {
-      ...options?.headers,
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-}
 
 function collectSettings(): Record<string, unknown> {
   const blob: Record<string, unknown> = {};
@@ -49,22 +37,25 @@ function collectSettings(): Record<string, unknown> {
 }
 
 async function push(): Promise<void> {
-  if (!authToken) return;
+  const token = getSyncToken();
+  if (!token) return;
 
   try {
     const settings = collectSettings();
-    const res = await fetchWithAuth(SYNC_ENDPOINT, authToken, {
+    const { data, error } = await authClient.$fetch<{
+      updatedAt: string | null;
+    }>(SYNC_ENDPOINT, {
       method: "PUT",
-      body: JSON.stringify({ settings }),
+      body: { settings },
+      auth: { type: "Bearer", token },
     });
 
-    if (!res.ok) {
-      logger.warn(`sync push failed: ${res.status}`);
+    if (error) {
+      logger.warn("sync push failed:", error);
       return;
     }
 
-    const data = (await res.json()) as { updatedAt: string | null };
-    if (data.updatedAt) {
+    if (data?.updatedAt) {
       localStorage.setItem(LOCAL_UPDATED_AT_KEY, data.updatedAt);
     }
   } catch (err) {
@@ -72,38 +63,33 @@ async function push(): Promise<void> {
   }
 }
 
-function schedulePush(): void {
-  if (pushTimer) clearTimeout(pushTimer);
-  pushTimer = setTimeout(() => {
-    pushTimer = null;
-    void push();
-  }, PUSH_DEBOUNCE_MS);
-}
+const debouncedPush = debounce(() => void push(), PUSH_DEBOUNCE_MS);
 
 window.addEventListener("beforeunload", () => {
-  if (pushTimer) {
-    clearTimeout(pushTimer);
-    pushTimer = null;
+  if (debouncedPush.pending()) {
+    debouncedPush.cancel();
     void push();
   }
 });
 
 async function pull(): Promise<void> {
-  if (!authToken) return;
+  const token = getSyncToken();
+  if (!token) return;
 
   try {
-    const res = await fetchWithAuth(SYNC_ENDPOINT, authToken);
-    if (!res.ok) {
-      logger.warn(`sync pull failed: ${res.status}`);
+    const { data, error } = await authClient.$fetch<{
+      settings: Record<string, unknown>;
+      updatedAt: string | null;
+    }>(SYNC_ENDPOINT, {
+      auth: { type: "Bearer", token },
+    });
+
+    if (error) {
+      logger.warn("sync pull failed:", error);
       return;
     }
 
-    const data = (await res.json()) as {
-      settings: Record<string, unknown>;
-      updatedAt: string | null;
-    };
-
-    if (!data.updatedAt) return;
+    if (!data?.updatedAt) return;
 
     const localUpdatedAt = localStorage.getItem(LOCAL_UPDATED_AT_KEY);
     if (
@@ -137,26 +123,24 @@ async function pull(): Promise<void> {
   }
 }
 
-export function setAuthToken(token: string): void {
-  authToken = token;
+export function setSyncToken(token: string): void {
+  setSyncTokenValue(token);
   void pull();
   if (!pollTimer) {
     pollTimer = setInterval(() => void pull(), POLL_INTERVAL_MS);
   }
 }
 
-export function clearAuthToken(): void {
-  if (pushTimer) {
-    clearTimeout(pushTimer);
-    pushTimer = null;
-    if (authToken) void push();
+export function clearSyncToken(): void {
+  if (debouncedPush.pending()) {
+    debouncedPush.cancel();
+    if (getSyncToken()) void push();
   }
-  authToken = null;
+  clearSyncTokenValue();
   if (pollTimer) {
     clearInterval(pollTimer);
     pollTimer = null;
   }
-
   localStorage.removeItem(LOCAL_UPDATED_AT_KEY);
 }
 
@@ -176,7 +160,7 @@ export function createSyncedStorage<T>(): SyncStorage<T> {
       syncedKeys.add(key);
       localStorage.setItem(key, JSON.stringify(newValue));
       if (!pulledKeys.has(key)) {
-        schedulePush();
+        debouncedPush();
       }
     },
 
@@ -184,7 +168,7 @@ export function createSyncedStorage<T>(): SyncStorage<T> {
       syncedKeys.delete(key);
       localStorage.removeItem(key);
       if (!pulledKeys.has(key)) {
-        schedulePush();
+        debouncedPush();
       }
     },
 

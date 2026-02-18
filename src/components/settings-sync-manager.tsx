@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { TOKEN_KEY } from "@/lib/auth/auth-client";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
-import { clearAuthToken, setAuthToken } from "@/lib/sync/synced-storage";
-
-const TOKEN_KEY = "agent-one-web-auth-token";
+import { clearSyncToken, setSyncToken } from "@/lib/sync/synced-storage";
 
 export function SettingsSyncManager() {
   const { user, isLoading } = useWebAuth();
@@ -17,15 +16,15 @@ export function SettingsSyncManager() {
         .getItem<string | null>(TOKEN_KEY, null)
         .then((token) => {
           if (token) {
-            setAuthToken(token);
+            setSyncToken(token);
           }
         });
     } else {
-      clearAuthToken();
+      clearSyncToken();
     }
 
     return () => {
-      clearAuthToken();
+      clearSyncToken();
     };
   }, [user, isLoading]);
 

@@ -13,4 +13,6 @@ export const authClient = createAuthClient({
   plugins: [deviceAuthorizationClient()],
 });
 
-export { CLIENT_ID, SERVER_URL };
+const TOKEN_KEY = "agent-one-web-auth-token";
+
+export { CLIENT_ID, SERVER_URL, TOKEN_KEY };
