@@ -80,6 +80,14 @@ function schedulePush(): void {
   }, PUSH_DEBOUNCE_MS);
 }
 
+window.addEventListener("beforeunload", () => {
+  if (pushTimer) {
+    clearTimeout(pushTimer);
+    pushTimer = null;
+    void push();
+  }
+});
+
 async function pull(): Promise<void> {
   if (!authToken) return;
 
@@ -138,15 +146,18 @@ export function setAuthToken(token: string): void {
 }
 
 export function clearAuthToken(): void {
-  authToken = null;
   if (pushTimer) {
     clearTimeout(pushTimer);
     pushTimer = null;
+    if (authToken) void push();
   }
+  authToken = null;
   if (pollTimer) {
     clearInterval(pollTimer);
     pollTimer = null;
   }
+
+  localStorage.removeItem(LOCAL_UPDATED_AT_KEY);
 }
 
 export function createSyncedStorage<T>(): SyncStorage<T> {
