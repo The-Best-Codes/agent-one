@@ -109,10 +109,13 @@ class SettingsSyncManager {
         `Sending PUT to /api/sync/settings with ${payloadKeyCount} keys`,
       );
 
-      const { error } = await authClient.$fetch("/api/sync/settings", {
-        method: "PUT",
-        body: { settings: payload },
-      });
+      const { error } = await authClient.$fetch(
+        `${SERVER_URL}/api/sync/settings`,
+        {
+          method: "PUT",
+          body: { settings: payload },
+        },
+      );
 
       if (error) {
         throw new Error(`Server returned error: ${JSON.stringify(error)}`);
@@ -147,8 +150,16 @@ class SettingsSyncManager {
     try {
       const response = await authClient.$fetch(
         `${SERVER_URL}/api/sync/settings`,
-        { method: "GET" },
+        {
+          method: "GET",
+        },
       );
+
+      if (response.error) {
+        throw new Error(
+          `Server returned error: ${JSON.stringify(response.error)}`,
+        );
+      }
 
       const body = response.data as { settings?: ServerSettings } | null;
       const serverSettings = body?.settings;
