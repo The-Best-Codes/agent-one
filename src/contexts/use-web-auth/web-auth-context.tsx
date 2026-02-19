@@ -218,6 +218,16 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
     return () => stopPolling();
   }, [stopPolling]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const id = setInterval(() => {
+      void settingsSyncManager.pull();
+    }, 60_000);
+
+    return () => clearInterval(id);
+  }, [user]);
+
   const value = useMemo(
     () => ({
       user,

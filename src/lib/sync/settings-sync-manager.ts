@@ -38,7 +38,7 @@ function readLocalSetting(key: SettingKey): unknown | undefined {
     const raw = localStorage.getItem(`${SETTING_PREFIX}${key}`);
     if (raw !== null) return JSON.parse(raw);
   } catch {
-    logger.verbose("Failed to read setting %s from localStorage", key);
+    logger.verbose(`Failed to read setting ${key} from localStorage`);
   }
   return undefined;
 }
@@ -57,14 +57,13 @@ class SettingsSyncManager {
     this.timestamps = loadTimestamps();
     const keyCount = Object.keys(this.timestamps).length;
     logger.verbose(
-      "SettingsSyncManager initialized with %d tracked timestamps",
-      keyCount,
+      `SettingsSyncManager initialized with ${keyCount} tracked timestamps`,
     );
   }
 
   registerAtomSetter(key: SettingKey, setter: (value: unknown) => void): void {
     this.atomSetters.set(key, setter);
-    logger.verbose("Registered atom setter for key: %s", key);
+    logger.verbose("Registered atom setter for key:", key);
   }
 
   markDirty(key: SettingKey): void {
@@ -74,10 +73,7 @@ class SettingsSyncManager {
 
     this.dirtyKeys.add(key);
     logger.verbose(
-      "Marked key dirty: %s (timestamp: %d, total dirty: %d)",
-      key,
-      now,
-      this.dirtyKeys.size,
+      `Marked key dirty: ${key} (timestamp: ${now}, total dirty: ${this.dirtyKeys.size})`,
     );
     this.debouncedPush();
   }
@@ -90,7 +86,7 @@ class SettingsSyncManager {
 
     const keys = [...this.dirtyKeys];
     this.dirtyKeys.clear();
-    logger.verbose("Pushing %d dirty keys to server: %s", keys.length, keys);
+    logger.verbose(`Pushing dirty keys to server:`, keys);
 
     const payload: ServerSettings = {};
     for (const key of keys) {
@@ -109,20 +105,18 @@ class SettingsSyncManager {
 
     try {
       logger.verbose(
-        "Sending PUT to /api/sync/settings with %d keys",
-        payloadKeyCount,
+        `Sending PUT to /api/sync/settings with ${payloadKeyCount} keys`,
       );
       await authClient.$fetch(`${SERVER_URL}/api/sync/settings`, {
         method: "PUT",
         body: { settings: payload },
       });
-      logger.verbose("Push succeeded for %d keys", payloadKeyCount);
+      logger.verbose(`Push succeeded for ${payloadKeyCount} keys`);
     } catch (error) {
       logger.warn("Failed to push settings to server:", error);
       for (const key of keys) this.dirtyKeys.add(key);
       logger.verbose(
-        "Re-queued %d keys for retry, scheduling another push",
-        keys.length,
+        `Re-queued ${keys.length} keys for retry, scheduling another push`,
       );
       this.debouncedPush();
     }
@@ -158,8 +152,7 @@ class SettingsSyncManager {
 
       const serverKeys = Object.keys(serverSettings);
       logger.verbose(
-        "Received %d settings from server: %s",
-        serverKeys.length,
+        `Received ${serverKeys.length} settings from server:`,
         serverKeys,
       );
 
@@ -177,25 +170,18 @@ class SettingsSyncManager {
           if (setter) {
             setter(entry.value);
             logger.verbose(
-              "Applied server value for %s (server: %d, local: %s)",
-              settingKey,
-              serverTime,
-              localTime ?? "none",
+              `Applied server value for ${settingKey} (server: ${serverTime}, local: ${localTime ?? "none"})`,
             );
           } else {
             logger.verbose(
-              "No atom setter registered for %s, skipping apply",
-              settingKey,
+              `No atom setter registered for ${settingKey}, skipping apply`,
             );
           }
           this.timestamps[settingKey] = serverTime;
           appliedCount++;
         } else {
           logger.verbose(
-            "Kept local value for %s (local: %d >= server: %d)",
-            settingKey,
-            localTime,
-            serverTime,
+            `Kept local value for ${settingKey} (local: ${localTime} >= server: ${serverTime})`,
           );
           skippedCount++;
         }
@@ -203,9 +189,7 @@ class SettingsSyncManager {
 
       saveTimestamps(this.timestamps);
       logger.verbose(
-        "Pull complete: %d applied, %d skipped (local was newer)",
-        appliedCount,
-        skippedCount,
+        `Pull complete: ${appliedCount} applied, ${skippedCount} skipped (local was newer)`,
       );
     } catch (error) {
       logger.warn("Failed to pull settings from server:", error);
