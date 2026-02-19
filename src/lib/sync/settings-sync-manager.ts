@@ -18,7 +18,7 @@ function loadTimestamps(): TimestampMap {
     const raw = localStorage.getItem(TIMESTAMPS_LS_KEY);
     if (raw) return JSON.parse(raw);
   } catch {
-    // corrupt data, start fresh
+    logger.verbose("Timestamps in localStorage were corrupt, starting fresh");
   }
   return {};
 }
@@ -27,7 +27,7 @@ function saveTimestamps(timestamps: TimestampMap): void {
   try {
     localStorage.setItem(TIMESTAMPS_LS_KEY, JSON.stringify(timestamps));
   } catch {
-    // storage full or unavailable
+    logger.warn("Failed to save timestamps to localStorage");
   }
 }
 
@@ -36,7 +36,7 @@ function readLocalSetting(key: SettingKey): unknown | undefined {
     const raw = localStorage.getItem(`${SETTING_PREFIX}${key}`);
     if (raw !== null) return JSON.parse(raw);
   } catch {
-    // corrupt data
+    logger.verbose("Failed to read setting %s from localStorage", key);
   }
   return undefined;
 }
@@ -50,10 +50,16 @@ class SettingsSyncManager {
 
   constructor() {
     this.timestamps = loadTimestamps();
+    const keyCount = Object.keys(this.timestamps).length;
+    logger.verbose(
+      "SettingsSyncManager initialized with %d tracked timestamps",
+      keyCount,
+    );
   }
 
   registerAtomSetter(key: SettingKey, setter: (value: unknown) => void): void {
     this.atomSetters.set(key, setter);
+    logger.verbose("Registered atom setter for key: %s", key);
   }
 
   markDirty(key: SettingKey): void {
@@ -62,11 +68,22 @@ class SettingsSyncManager {
     saveTimestamps(this.timestamps);
 
     this.dirtyKeys.add(key);
+    logger.verbose(
+      "Marked key dirty: %s (timestamp: %d, total dirty: %d)",
+      key,
+      now,
+      this.dirtyKeys.size,
+    );
     this.schedulePush();
   }
 
   private schedulePush(): void {
-    if (this.pushTimer) clearTimeout(this.pushTimer);
+    if (this.pushTimer) {
+      clearTimeout(this.pushTimer);
+      logger.verbose("Reset push debounce timer (%dms)", DEBOUNCE_MS);
+    } else {
+      logger.verbose("Scheduled push in %dms", DEBOUNCE_MS);
+    }
     this.pushTimer = setTimeout(() => {
       this.pushTimer = null;
       void this.push();
@@ -74,10 +91,14 @@ class SettingsSyncManager {
   }
 
   private async push(): Promise<void> {
-    if (this.dirtyKeys.size === 0) return;
+    if (this.dirtyKeys.size === 0) {
+      logger.verbose("Push called but no dirty keys, skipping");
+      return;
+    }
 
     const keys = [...this.dirtyKeys];
     this.dirtyKeys.clear();
+    logger.verbose("Pushing %d dirty keys to server: %s", keys.length, keys);
 
     const payload: ServerSettings = {};
     for (const key of keys) {
@@ -88,22 +109,39 @@ class SettingsSyncManager {
       }
     }
 
-    if (Object.keys(payload).length === 0) return;
+    const payloadKeyCount = Object.keys(payload).length;
+    if (payloadKeyCount === 0) {
+      logger.verbose("No valid payload entries after reading localStorage");
+      return;
+    }
 
     try {
+      logger.verbose(
+        "Sending PUT to /api/sync/settings with %d keys",
+        payloadKeyCount,
+      );
       await authClient.$fetch(`${SERVER_URL}/api/sync/settings`, {
         method: "PUT",
         body: { settings: payload },
       });
+      logger.verbose("Push succeeded for %d keys", payloadKeyCount);
     } catch (error) {
       logger.warn("Failed to push settings to server:", error);
       for (const key of keys) this.dirtyKeys.add(key);
+      logger.verbose(
+        "Re-queued %d keys for retry, scheduling another push",
+        keys.length,
+      );
       this.schedulePush();
     }
   }
 
   async pull(): Promise<void> {
-    if (this.pullPromise) return this.pullPromise;
+    if (this.pullPromise) {
+      logger.verbose("Pull already in progress, deduplicating");
+      return this.pullPromise;
+    }
+    logger.verbose("Starting settings pull from server");
     this.pullPromise = this.doPull();
     try {
       await this.pullPromise;
@@ -121,7 +159,20 @@ class SettingsSyncManager {
 
       const body = response.data as { settings?: ServerSettings } | null;
       const serverSettings = body?.settings;
-      if (!serverSettings || typeof serverSettings !== "object") return;
+      if (!serverSettings || typeof serverSettings !== "object") {
+        logger.verbose("Server returned no settings or empty response");
+        return;
+      }
+
+      const serverKeys = Object.keys(serverSettings);
+      logger.verbose(
+        "Received %d settings from server: %s",
+        serverKeys.length,
+        serverKeys,
+      );
+
+      let appliedCount = 0;
+      let skippedCount = 0;
 
       for (const [key, rawEntry] of Object.entries(serverSettings)) {
         const entry = rawEntry as SettingEntry;
@@ -131,13 +182,39 @@ class SettingsSyncManager {
 
         if (localTime === undefined || serverTime > localTime) {
           const setter = this.atomSetters.get(settingKey);
-          if (setter) setter(entry.value);
-
+          if (setter) {
+            setter(entry.value);
+            logger.verbose(
+              "Applied server value for %s (server: %d, local: %s)",
+              settingKey,
+              serverTime,
+              localTime ?? "none",
+            );
+          } else {
+            logger.verbose(
+              "No atom setter registered for %s, skipping apply",
+              settingKey,
+            );
+          }
           this.timestamps[settingKey] = serverTime;
+          appliedCount++;
+        } else {
+          logger.verbose(
+            "Kept local value for %s (local: %d >= server: %d)",
+            settingKey,
+            localTime,
+            serverTime,
+          );
+          skippedCount++;
         }
       }
 
       saveTimestamps(this.timestamps);
+      logger.verbose(
+        "Pull complete: %d applied, %d skipped (local was newer)",
+        appliedCount,
+        skippedCount,
+      );
     } catch (error) {
       logger.warn("Failed to pull settings from server:", error);
     }
