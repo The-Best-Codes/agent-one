@@ -22,7 +22,7 @@ import {
 } from "@/lib/settings/types";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
-const SETTING_PREFIX = "agent-one-setting-";
+export const SETTING_PREFIX = "agent-one-setting-";
 
 const createSettingAtom = <T>(key: keyof DefaultSettings, defaultValue: T) => {
   const lsKey = `${SETTING_PREFIX}${key}`;

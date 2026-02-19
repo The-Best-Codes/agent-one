@@ -4,10 +4,11 @@ import { authClient, SERVER_URL } from "@/lib/auth/auth-client";
 import { getLogger } from "@/lib/logger";
 import type { DefaultSettings } from "@/lib/settings/types";
 
+import { SETTING_PREFIX } from "../jotai/settings-atoms";
+
 const logger = getLogger(import.meta.url);
 
 const TIMESTAMPS_LS_KEY = "agent-one-setting-timestamps";
-const SETTING_PREFIX = "agent-one-setting-";
 const DEBOUNCE_MS = 2000;
 
 type SettingKey = keyof DefaultSettings;

@@ -5,9 +5,9 @@ import {
   type ProviderId,
 } from "@/lib/ai/providers/registry";
 
-export type { ProviderId } from "@/lib/ai/providers/registry";
+import { SETTING_PREFIX } from "./settings-atoms";
 
-const SETTING_PREFIX = "agent-one-setting-";
+export type { ProviderId } from "@/lib/ai/providers/registry";
 
 export interface ProviderConfig {
   enabled: boolean;
