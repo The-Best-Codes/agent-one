@@ -1,3 +1,5 @@
+import debounce from "lodash.debounce";
+
 import { authClient, SERVER_URL } from "@/lib/auth/auth-client";
 import { getLogger } from "@/lib/logger";
 import type { DefaultSettings } from "@/lib/settings/types";
@@ -44,9 +46,12 @@ function readLocalSetting(key: SettingKey): unknown | undefined {
 class SettingsSyncManager {
   private timestamps: TimestampMap;
   private dirtyKeys: Set<SettingKey> = new Set();
-  private pushTimer: ReturnType<typeof setTimeout> | null = null;
   private pullPromise: Promise<void> | null = null;
   private atomSetters = new Map<SettingKey, (value: unknown) => void>();
+
+  private debouncedPush = debounce(() => {
+    void this.push();
+  }, DEBOUNCE_MS);
 
   constructor() {
     this.timestamps = loadTimestamps();
@@ -74,20 +79,7 @@ class SettingsSyncManager {
       now,
       this.dirtyKeys.size,
     );
-    this.schedulePush();
-  }
-
-  private schedulePush(): void {
-    if (this.pushTimer) {
-      clearTimeout(this.pushTimer);
-      logger.verbose("Reset push debounce timer (%dms)", DEBOUNCE_MS);
-    } else {
-      logger.verbose("Scheduled push in %dms", DEBOUNCE_MS);
-    }
-    this.pushTimer = setTimeout(() => {
-      this.pushTimer = null;
-      void this.push();
-    }, DEBOUNCE_MS);
+    this.debouncedPush();
   }
 
   private async push(): Promise<void> {
@@ -132,7 +124,7 @@ class SettingsSyncManager {
         "Re-queued %d keys for retry, scheduling another push",
         keys.length,
       );
-      this.schedulePush();
+      this.debouncedPush();
     }
   }
 
