@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 
-import { authClient, CLIENT_ID } from "@/lib/auth/auth-client";
+import { authClient, CLIENT_ID, setAuthToken } from "@/lib/auth/auth-client";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
@@ -38,6 +38,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchSession = useCallback(async (accessToken: string) => {
     try {
+      setAuthToken(accessToken);
       const { data } = await authClient.getSession({
         fetchOptions: {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -56,6 +57,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
     } catch (error) {
       logger.warn("Failed to fetch session:", error);
     }
+    setAuthToken(null);
     return false;
   }, []);
 
@@ -202,6 +204,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
     setIsSigningOut(true);
     try {
       stopPolling();
+      setAuthToken(null);
       await keyringStorage.removeItem(TOKEN_KEY);
       setUser(null);
       setDeviceFlow(null);
