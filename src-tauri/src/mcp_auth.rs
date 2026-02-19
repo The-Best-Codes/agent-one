@@ -370,6 +370,7 @@ pub async fn mcp_authenticate(
         .save(StoredCredentials {
             client_id,
             token_response,
+            granted_scopes: Vec::new(),
         })
         .await
         .map_err(|e| e.to_string())?;

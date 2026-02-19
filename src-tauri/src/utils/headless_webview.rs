@@ -24,7 +24,7 @@ pub struct WebviewFetchResult {
 }
 
 fn generate_webview_id() -> String {
-    use rand::Rng;
+    use rand::RngExt;
     let id: u64 = rand::rng().random();
     format!("headless-webview-{}", id)
 }
