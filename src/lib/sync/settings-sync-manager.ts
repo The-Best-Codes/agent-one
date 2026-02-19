@@ -34,7 +34,7 @@ function saveTimestamps(timestamps: TimestampMap): void {
   }
 }
 
-function readLocalSetting(key: SettingKey): unknown | undefined {
+function readLocalSetting(key: SettingKey): unknown {
   try {
     const raw = localStorage.getItem(`${SETTING_PREFIX}${key}`);
     if (raw !== null) return JSON.parse(raw);
