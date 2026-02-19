@@ -1,5 +1,7 @@
-import { atomWithStorage } from "jotai/utils";
+import { atom, getDefaultStore } from "jotai";
+import { atomWithStorage, RESET } from "jotai/utils";
 
+import type { DefaultSettings } from "@/lib/settings/types";
 import {
   type ColorThemeOption,
   DEFAULT_SETTINGS,
@@ -18,17 +20,37 @@ import {
   type ToolConfigs,
   type ToolId,
 } from "@/lib/settings/types";
+import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
 const SETTING_PREFIX = "agent-one-setting-";
 
-const createSettingAtom = <T>(
-  key: keyof typeof DEFAULT_SETTINGS,
-  defaultValue: T,
-) => {
+const createSettingAtom = <T>(key: keyof DefaultSettings, defaultValue: T) => {
   const lsKey = `${SETTING_PREFIX}${key}`;
-  return atomWithStorage<T>(lsKey, defaultValue, undefined, {
+  const baseAtom = atomWithStorage<T>(lsKey, defaultValue, undefined, {
     getOnInit: true,
   });
+
+  type Update = T | typeof RESET | ((prev: T) => T);
+
+  const syncedAtom = atom(
+    (get) => get(baseAtom),
+    (get, set, update: Update) => {
+      if (update === RESET) {
+        set(baseAtom, RESET);
+      } else if (typeof update === "function") {
+        set(baseAtom, (update as (prev: T) => T)(get(baseAtom)));
+      } else {
+        set(baseAtom, update);
+      }
+      settingsSyncManager.markDirty(key);
+    },
+  );
+
+  settingsSyncManager.registerAtomSetter(key, (value: unknown) => {
+    getDefaultStore().set(baseAtom, value as T);
+  });
+
+  return syncedAtom;
 };
 
 export const markdownHighlightingAtom = createSettingAtom(
