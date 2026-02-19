@@ -1,3 +1,4 @@
 - [ ] Show status of MCP servers somewhere (e.g. starting, error, or success in each MCP server's UI) and even a list of the tools the server provides and info about them.
 - [ ] Bug: Opening a second window logs out other windows. Repro: `npm run tauri dev` and sign in, `cd src-tauri && cargo run`, reload both windows (they both show signed out)
 - [ ] Fix username setting requiring rerender to show updated value after sync (use atom directly instead of separate state?)
+- [ ] Allow users to disable sync (disabled by default, show in account section)
