@@ -108,10 +108,16 @@ class SettingsSyncManager {
       logger.verbose(
         `Sending PUT to /api/sync/settings with ${payloadKeyCount} keys`,
       );
-      await authClient.$fetch(`${SERVER_URL}/api/sync/settings`, {
+
+      const { error } = await authClient.$fetch("/api/sync/settings", {
         method: "PUT",
         body: { settings: payload },
       });
+
+      if (error) {
+        throw new Error(`Server returned error: ${JSON.stringify(error)}`);
+      }
+
       logger.verbose(`Push succeeded for ${payloadKeyCount} keys`);
     } catch (error) {
       logger.warn("Failed to push settings to server:", error);
