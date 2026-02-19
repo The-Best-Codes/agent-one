@@ -1,5 +1,4 @@
 import { useAtom } from "jotai";
-import { useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,18 +18,8 @@ export default function AccountSection() {
     systemPromptAppendixAtom,
   );
 
-  const [nameInput, setNameInput] = useState(userName);
-  const [appendixInput, setAppendixInput] = useState(systemPromptAppendix);
-
-  const handleNameChange = (value: string) => {
-    setNameInput(value);
-    setUserName(value);
-  };
-
   const handleAppendixChange = (value: string) => {
-    const truncated = value.slice(0, MAX_APPENDIX_CHARS);
-    setAppendixInput(truncated);
-    setSystemPromptAppendix(truncated);
+    setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
   };
 
   return (
@@ -58,8 +47,8 @@ export default function AccountSection() {
             <Input
               id="user-name"
               type="text"
-              value={nameInput}
-              onChange={(e) => handleNameChange(e.target.value)}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
               placeholder="Enter your name"
             />
           </div>
@@ -77,13 +66,13 @@ export default function AccountSection() {
             <div className="relative">
               <Textarea
                 id="system-prompt-appendix"
-                value={appendixInput}
+                value={systemPromptAppendix}
                 onChange={(e) => handleAppendixChange(e.target.value)}
                 placeholder="e.g., Always use British English. Be concise and technical."
                 className="field-sizing-fixed max-h-96 min-h-15 resize-y"
               />
               <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
-                {appendixInput.length} / {MAX_APPENDIX_CHARS}
+                {systemPromptAppendix.length} / {MAX_APPENDIX_CHARS}
               </span>
             </div>
           </div>
