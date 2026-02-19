@@ -90,6 +90,7 @@
     "fast-equals": "^6.0.0",
     "globals": "^17.3.0",
     "jotai": "^2.17.1",
+    "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.574.0",
     "marked": "^17.0.3",
     "radix-ui": "^1.4.3",
