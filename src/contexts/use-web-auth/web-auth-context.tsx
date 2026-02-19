@@ -8,9 +8,10 @@ import {
   useState,
 } from "react";
 
-import { authClient, CLIENT_ID } from "@/lib/auth/auth-client";
+import { authClient, CLIENT_ID, setAuthToken } from "@/lib/auth/auth-client";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
+import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
 import {
   type DeviceFlowState,
@@ -37,6 +38,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchSession = useCallback(async (accessToken: string) => {
     try {
+      setAuthToken(accessToken);
       const { data } = await authClient.getSession({
         fetchOptions: {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -49,11 +51,13 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
           email: data.user.email,
           image: data.user.image,
         });
+        void settingsSyncManager.pull();
         return true;
       }
     } catch (error) {
       logger.warn("Failed to fetch session:", error);
     }
+    setAuthToken(null);
     return false;
   }, []);
 
@@ -200,6 +204,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
     setIsSigningOut(true);
     try {
       stopPolling();
+      setAuthToken(null);
       await keyringStorage.removeItem(TOKEN_KEY);
       setUser(null);
       setDeviceFlow(null);
@@ -212,6 +217,16 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     return () => stopPolling();
   }, [stopPolling]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const id = setInterval(() => {
+      void settingsSyncManager.pull();
+    }, 60_000);
+
+    return () => clearInterval(id);
+  }, [user]);
 
   const value = useMemo(
     () => ({
