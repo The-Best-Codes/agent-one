@@ -62,6 +62,14 @@ class SettingsSyncManager {
     logger.verbose(
       `SettingsSyncManager initialized with ${keyCount} tracked timestamps`,
     );
+
+    const store = getDefaultStore();
+    store.sub(syncEnabledAtom, () => {
+      if (store.get(syncEnabledAtom)) {
+        logger.verbose("Sync enabled, triggering pull");
+        void this.pull();
+      }
+    });
   }
 
   registerAtomSetter(key: SettingKey, setter: (value: unknown) => void): void {
