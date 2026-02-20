@@ -36,30 +36,42 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
   const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
 
-  const fetchSession = useCallback(async (accessToken: string) => {
-    try {
-      setAuthToken(accessToken);
-      const { data } = await authClient.getSession({
-        fetchOptions: {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      });
-      if (data?.user) {
-        setUser({
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
-          image: data.user.image,
+  const fetchSession = useCallback(
+    async (accessToken: string): Promise<"valid" | "invalid" | "error"> => {
+      try {
+        setAuthToken(accessToken);
+        const { data, error } = await authClient.getSession({
+          fetchOptions: {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
         });
-        void settingsSyncManager.pull();
-        return true;
+        if (data?.user) {
+          setUser({
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            image: data.user.image,
+          });
+          void settingsSyncManager.pull();
+          return "valid";
+        }
+        if (error?.status === 401 || error?.status === 403) {
+          setAuthToken(null);
+          return "invalid";
+        }
+        if (error) {
+          logger.warn("Session fetch returned error:", error);
+          return "error";
+        }
+        setAuthToken(null);
+        return "invalid";
+      } catch (error) {
+        logger.warn("Failed to fetch session:", error);
+        return "error";
       }
-    } catch (error) {
-      logger.warn("Failed to fetch session:", error);
-    }
-    setAuthToken(null);
-    return false;
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     const restoreSession = async () => {
@@ -69,8 +81,8 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
           null,
         );
         if (token) {
-          const valid = await fetchSession(token);
-          if (!valid) {
+          const result = await fetchSession(token);
+          if (result === "invalid") {
             await keyringStorage.removeItem(TOKEN_KEY);
           }
         }
