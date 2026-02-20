@@ -13,7 +13,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { activeSettingsSectionAtom } from "@/lib/jotai/atoms";
+import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";

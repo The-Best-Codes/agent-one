@@ -21,20 +21,6 @@ export const chatIdsAtom = atomWithStorage(
 
 export const chatUpdateTriggerAtom = atom(0);
 
-export const sidebarCollapsedAtom = atomWithStorage(
-  "agent-one-sidebar-collapsed",
-  false,
-  undefined,
-  { getOnInit: true },
-);
-
-export const activeSettingsSectionAtom = atomWithStorage(
-  "agent-one-active-settings-section",
-  "account",
-  undefined,
-  { getOnInit: true },
-);
-
 export const onboardingCompletedAtom = atomWithStorage(
   "agent-one-onboarding-completed",
   false,

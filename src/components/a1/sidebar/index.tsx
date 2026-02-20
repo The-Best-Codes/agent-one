@@ -20,7 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { sidebarCollapsedAtom } from "@/lib/jotai/atoms";
+import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
