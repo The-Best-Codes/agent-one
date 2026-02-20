@@ -42,6 +42,13 @@ export const onboardingCompletedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
+export const syncEnabledAtom = atomWithStorage(
+  "agent-one-sync-enabled",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);

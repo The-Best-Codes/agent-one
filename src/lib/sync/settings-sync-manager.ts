@@ -1,6 +1,8 @@
+import { getDefaultStore } from "jotai";
 import debounce from "lodash.debounce";
 
 import { authClient, SERVER_URL } from "@/lib/auth/auth-client";
+import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import type { DefaultSettings } from "@/lib/settings/types";
 
@@ -68,6 +70,8 @@ class SettingsSyncManager {
   }
 
   markDirty(key: SettingKey): void {
+    if (!getDefaultStore().get(syncEnabledAtom)) return;
+
     const now = Date.now();
     this.timestamps[key] = now;
     saveTimestamps(this.timestamps);
@@ -80,6 +84,8 @@ class SettingsSyncManager {
   }
 
   private async push(): Promise<void> {
+    if (!getDefaultStore().get(syncEnabledAtom)) return;
+
     if (this.dirtyKeys.size === 0) {
       logger.verbose("Push called but no dirty keys, skipping");
       return;
@@ -133,6 +139,8 @@ class SettingsSyncManager {
   }
 
   async pull(): Promise<void> {
+    if (!getDefaultStore().get(syncEnabledAtom)) return;
+
     if (this.pullPromise) {
       logger.verbose("Pull already in progress, deduplicating");
       return this.pullPromise;

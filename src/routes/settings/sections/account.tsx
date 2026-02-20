@@ -4,7 +4,10 @@ import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import {
   systemPromptAppendixAtom,
   userNameAtom,
@@ -17,6 +20,8 @@ export default function AccountSection() {
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
     systemPromptAppendixAtom,
   );
+  const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
+  const { user } = useWebAuth();
 
   const handleAppendixChange = (value: string) => {
     setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
@@ -32,6 +37,31 @@ export default function AccountSection() {
           <AuthStatusDisplay />
         </CardContent>
       </Card>
+      {user && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Sync</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="sync-enabled" className="text-sm font-medium">
+                  Synchronize my settings
+                </Label>
+                <p className="text-muted-foreground text-sm">
+                  Keep your settings in sync across devices using your AgentOne
+                  account.
+                </p>
+              </div>
+              <Switch
+                id="sync-enabled"
+                checked={syncEnabled}
+                onCheckedChange={setSyncEnabled}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
