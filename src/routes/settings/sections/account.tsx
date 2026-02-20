@@ -6,6 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import {
@@ -33,35 +38,34 @@ export default function AccountSection() {
         <CardHeader>
           <CardTitle>AgentOne Account</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-6">
           <AuthStatusDisplay />
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="sync-enabled" className="text-sm font-medium">
+                Synchronize my settings
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Keep your settings in sync across devices using your AgentOne
+                account.
+              </p>
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Switch
+                    id="sync-enabled"
+                    checked={syncEnabled}
+                    onCheckedChange={setSyncEnabled}
+                    disabled={!user}
+                  />
+                </span>
+              </TooltipTrigger>
+              {!user && <TooltipContent>Sign in to enable sync</TooltipContent>}
+            </Tooltip>
+          </div>
         </CardContent>
       </Card>
-      {user && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sync</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-col gap-1">
-                <Label htmlFor="sync-enabled" className="text-sm font-medium">
-                  Synchronize my settings
-                </Label>
-                <p className="text-muted-foreground text-sm">
-                  Keep your settings in sync across devices using your AgentOne
-                  account.
-                </p>
-              </div>
-              <Switch
-                id="sync-enabled"
-                checked={syncEnabled}
-                onCheckedChange={setSyncEnabled}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
