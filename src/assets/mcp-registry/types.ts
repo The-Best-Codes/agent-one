@@ -21,11 +21,11 @@ export type Server = {
   repository?: Repository;
   version: string;
   packages?: Package[];
-  remotes?: Remote[];
   title?: string;
-  icons?: Icon[];
-  _meta?: ServerMeta;
   websiteUrl?: string;
+  icons?: Icon[];
+  remotes?: Remote[];
+  _meta?: ServerMeta;
 };
 
 export type ServerMeta = {
@@ -50,16 +50,19 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   build_info?: BuildInfoClass;
   capabilities?: string[] | CapabilitiesClass;
   tags?: string[];
-  homepage?: string;
+  authentication?: Authentication;
   categories?: string[];
+  homepage?: string;
   author?: string;
   issues?: string;
   repository?: string;
   features?: string[] | FeaturesClass;
   installationMethods?: InstallationMethod[];
   toolCategories?: ToolCategories;
-  tools?: Tool[];
+  tools?: Array<ToolClass | string>;
   buildInfo?: BuildInfo;
+  contact?: string;
+  rateLimit?: RateLimit;
   variants?: Variants;
   architectures?: string[];
   platforms?: string[];
@@ -96,6 +99,11 @@ export type Auth = {
   token_endpoint?: string;
 };
 
+export type Authentication = {
+  description: string;
+  type: string;
+};
+
 export type BuildInfo = {
   imageSha256: string;
 };
@@ -118,10 +126,10 @@ export type CapabilitiesClass = {
   search_types?: string[];
   sparse_embedding_providers?: string[];
   vector_store_providers?: string[];
-  tools?: Tool[];
+  tools?: ToolClass[];
 };
 
-export type Tool = {
+export type ToolClass = {
   description: string;
   name: string;
 };
@@ -144,12 +152,25 @@ export type Endpoints = {
 };
 
 export type ExampleElement = {
-  config?: string;
+  config?: ConfigClass | string;
   description: string;
   name: string;
   note?: string;
   command?: string;
   example?: ExampleExample;
+};
+
+export type ConfigClass = {
+  mcpServers: MCPServers;
+};
+
+export type MCPServers = {
+  codeix: Codeix;
+};
+
+export type Codeix = {
+  args: string[];
+  command: string;
 };
 
 export type ExampleExample = {
@@ -206,6 +227,12 @@ export type Option = {
   proof: string;
 };
 
+export type RateLimit = {
+  note: string;
+  requests: number;
+  windowSeconds: number;
+};
+
 export type ToolCategories = {
   containers: string[];
   data: string[];
@@ -232,8 +259,8 @@ export type HTTP = {
 export type Icon = {
   src: string;
   mimeType?: string;
-  theme?: string;
   sizes?: string[];
+  theme?: string;
 };
 
 export type Package = {
@@ -283,14 +310,15 @@ export type PackageArgument = {
   variables?: PackageArgumentVariables;
   choices?: string[];
   isSecret?: boolean;
+  placeholder?: string;
   isRepeated?: boolean;
 };
 
 export type PackageArgumentVariables = {
-  region: TenantID;
+  region: Instance;
 };
 
-export type TenantID = {
+export type Instance = {
   description: string;
   isRequired?: boolean;
   default: string;
@@ -311,27 +339,27 @@ export type RuntimeArgument = {
 };
 
 export type RuntimeArgumentVariables = {
-  source_path?: HapiFQDN;
+  source_path?: ApifyToken;
   workspace?: Endpoint;
   host_port?: HostPort;
   network?: HostPort;
-  api_key?: HapiFQDN;
-  models_path?: HapiFQDN;
-  encoder_file?: HapiFQDN;
-  decoder_file?: HapiFQDN;
-  tokens_file?: HapiFQDN;
-  config_path?: HapiFQDN;
-  data_path?: HapiFQDN;
-  workspace_path?: HapiFQDN;
+  api_key?: ApifyToken;
+  models_path?: ApifyToken;
+  encoder_file?: ApifyToken;
+  decoder_file?: ApifyToken;
+  tokens_file?: ApifyToken;
+  config_path?: ApifyToken;
+  data_path?: ApifyToken;
+  workspace_path?: ApifyToken;
   group?: CompanyCode;
   user?: CompanyCode;
   hostPath?: CompanyCode;
-  token?: HapiFQDN;
-  host?: TenantID;
-  port?: HapiFQDN;
+  token?: ApifyToken;
+  host?: Instance;
+  port?: ApifyToken;
 };
 
-export type HapiFQDN = {
+export type ApifyToken = {
   description?: string;
   isRequired?: boolean;
   format?: string;
@@ -387,23 +415,36 @@ export type RemoteHeader = {
 };
 
 export type HeaderVariables = {
-  INFOBIP_API_KEY?: HapiFQDN;
-  YUOR_MCP_TOKEN?: HapiFQDN;
-  api_key?: HapiFQDN;
+  INFOBIP_API_KEY?: ApifyToken;
+  YUOR_MCP_TOKEN?: ApifyToken;
+  api_key?: ApifyToken;
+  NETDATA_CLOUD_API_TOKEN?: NetdataCloudAPIToken;
+};
+
+export type NetdataCloudAPIToken = {
+  description: string;
+  isSecret: boolean;
 };
 
 export type RemoteVariables = {
-  HAPI_FQDN?: HapiFQDN;
-  HAPI_PORT?: HapiFQDN;
-  instance?: HapiFQDN;
+  HAPI_FQDN?: ApifyToken;
+  HAPI_PORT?: ApifyToken;
+  instance?: Instance;
+  baseUrl?: ApifyToken;
   "server-name"?: Endpoint;
-  region?: HapiFQDN;
-  token?: HapiFQDN;
-  tenant_id?: TenantID;
+  env?: ApifyToken;
+  api_key?: ApifyToken;
+  region?: ApifyToken;
+  qovery_token?: ApifyToken;
+  token?: ApifyToken;
+  tenant_id?: Instance;
   company_code?: CompanyCode;
+  BILT_API_KEY?: ApifyToken;
+  site_key?: Endpoint;
+  APIFY_TOKEN?: ApifyToken;
   your_mcp_server_host?: Endpoint;
   endpoint?: Endpoint;
-  api_token?: HapiFQDN;
+  api_token?: ApifyToken;
 };
 
 export type Repository = {
