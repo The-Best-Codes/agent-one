@@ -24,6 +24,7 @@ import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 import {
   ChatFunctionsContext,
+  ChatLoadingContext,
   ChatMessagesContext,
   ChatStatusContext,
 } from "./chat-contexts";
@@ -40,8 +41,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     currentModelConfig: defaultModelConfigForNewChats,
     setModelConfig: setDefaultModelConfigForNewChats,
   } = useModel();
-  const { createChat, loadChatData, saveChatModel, saveChatModelConfig } =
-    usePersistence();
+  const {
+    createChat,
+    loadChatMetadata,
+    loadChatMessages,
+    saveChatModel,
+    saveChatModelConfig,
+  } = usePersistence();
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams<{ id: string }>();
@@ -70,12 +76,57 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     status: "",
   });
 
+  const loadedMessagesRef = useRef<Map<string, UIMessage[]>>(new Map());
+  const [chatMessagesLoaded, setChatMessagesLoaded] = useState<Set<string>>(
+    new Set(),
+  );
+  const loadingChatIdRef = useRef<string | null>(null);
+
+  const isChatLoading = useMemo(() => {
+    if (!currentChatId) return false;
+    return !chatMessagesLoaded.has(currentChatId);
+  }, [currentChatId, chatMessagesLoaded]);
+
+  useEffect(() => {
+    if (!currentChatId) return;
+    if (chatMessagesLoaded.has(currentChatId)) return;
+    if (loadingChatIdRef.current === currentChatId) return;
+
+    loadingChatIdRef.current = currentChatId;
+    const chatIdToLoad = currentChatId;
+
+    loadChatMessages(chatIdToLoad)
+      .then((messages) => {
+        loadedMessagesRef.current.set(chatIdToLoad, messages);
+        setChatMessagesLoaded((prev) => {
+          const next = new Set(prev);
+          next.add(chatIdToLoad);
+          return next;
+        });
+        if (loadingChatIdRef.current === chatIdToLoad) {
+          loadingChatIdRef.current = null;
+        }
+      })
+      .catch((error) => {
+        logger.error(`Failed to load messages for chat ${chatIdToLoad}`, error);
+        loadedMessagesRef.current.set(chatIdToLoad, []);
+        setChatMessagesLoaded((prev) => {
+          const next = new Set(prev);
+          next.add(chatIdToLoad);
+          return next;
+        });
+        if (loadingChatIdRef.current === chatIdToLoad) {
+          loadingChatIdRef.current = null;
+        }
+      });
+  }, [currentChatId, chatMessagesLoaded, loadChatMessages]);
+
   const getModelForChat = useCallback(
     (chatId: string | undefined): ModelData | undefined => {
       if (chatId) {
-        const chatData = loadChatData(chatId);
-        if (chatData.modelId) {
-          const chatModel = getModelById(chatData.modelId);
+        const chatMetadata = loadChatMetadata(chatId);
+        if (chatMetadata.modelId) {
+          const chatModel = getModelById(chatMetadata.modelId);
           if (chatModel) {
             return chatModel;
           }
@@ -90,9 +141,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const getConfigForChat = useCallback(
     (chatId: string | undefined): ModelConfig => {
       if (chatId) {
-        const chatData = loadChatData(chatId);
-        if (chatData.modelConfig) {
-          return chatData.modelConfig;
+        const chatMetadata = loadChatMetadata(chatId);
+        if (chatMetadata.modelConfig) {
+          return chatMetadata.modelConfig;
         }
       }
       return defaultModelConfigForNewChats;
@@ -255,6 +306,12 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ) => {
       if (!focusedModel) return Promise.resolve();
       const newChatId = createChat(focusedModel.id, focusedModelConfig);
+      loadedMessagesRef.current.set(newChatId, []);
+      setChatMessagesLoaded((prev) => {
+        const next = new Set(prev);
+        next.add(newChatId);
+        return next;
+      });
       void navigate(`/chat/${newChatId}`, {
         replace: true,
         state: { pendingMessage: { message, options } },
@@ -418,15 +475,18 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ModelContext.Provider value={modelContextValue}>
       {Array.from(activeChatIds).map((id) => {
+        if (!chatMessagesLoaded.has(id)) return null;
         const chatModel = getModelForChat(id);
         const chatConfig = getConfigForChat(id);
         if (!chatModel) return null;
+        const initialMessages = loadedMessagesRef.current.get(id) ?? [];
         return (
           <ChatInstance
             key={id}
             chatId={id}
             model={chatModel.model}
             modelConfig={chatConfig}
+            initialMessages={initialMessages}
             onInstanceUpdate={handleInstanceUpdate}
             onStatusChange={handleStatusChange}
           />
@@ -434,9 +494,11 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       })}
       <ChatMessagesContext.Provider value={messages}>
         <ChatStatusContext.Provider value={statusValue}>
-          <ChatFunctionsContext.Provider value={functionsValue}>
-            {children}
-          </ChatFunctionsContext.Provider>
+          <ChatLoadingContext.Provider value={isChatLoading}>
+            <ChatFunctionsContext.Provider value={functionsValue}>
+              {children}
+            </ChatFunctionsContext.Provider>
+          </ChatLoadingContext.Provider>
         </ChatStatusContext.Provider>
       </ChatMessagesContext.Provider>
     </ModelContext.Provider>

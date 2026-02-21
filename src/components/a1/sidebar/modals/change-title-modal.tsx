@@ -44,7 +44,8 @@ const ChangeTitleForm = ({
 }) => {
   const [title, setTitle] = useState(currentTitle);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { saveChatTitle, loadChatData } = usePersistence();
+  const { saveChatTitle, loadChatMetadata, loadChatMessages } =
+    usePersistence();
   const { getModelById } = useModelCatalog();
   const titleGenerationSettings = useAtomValue(titleGenerationAtom);
 
@@ -64,12 +65,13 @@ const ChangeTitleForm = ({
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const chatData = loadChatData(chatId);
-      const modelConfig = getModelById(chatData.modelId || "");
+      const chatMetadata = loadChatMetadata(chatId);
+      const messages = await loadChatMessages(chatId);
+      const modelConfig = getModelById(chatMetadata.modelId || "");
       if (modelConfig) {
         const generatedTitle = await generateChatTitleAI(
           modelConfig.model,
-          chatData.messages,
+          messages,
           titleGenerationSettings.fallbackPhrase,
           "none",
         );

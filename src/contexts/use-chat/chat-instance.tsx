@@ -6,7 +6,7 @@ import {
   type UIMessage,
 } from "ai";
 import { useAtomValue } from "jotai";
-import { memo, useEffect, useMemo } from "react";
+import { memo, useEffect } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
@@ -30,12 +30,14 @@ export const ChatInstance = memo(
     chatId,
     model,
     modelConfig,
+    initialMessages,
     onInstanceUpdate,
     onStatusChange,
   }: {
     chatId: string;
     model: LanguageModel;
     modelConfig: ModelConfig;
+    initialMessages: UIMessage[];
     onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
     onStatusChange: (
       id: string,
@@ -50,15 +52,9 @@ export const ChatInstance = memo(
       experimentalThrottleValueAtom,
     );
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
-    const {
-      loadChat,
-      loadChatData,
-      saveChat,
-      saveChatTitleState,
-      saveChatTitle,
-    } = usePersistence();
+    const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } =
+      usePersistence();
     const chatIds = useAtomValue(chatIdsAtom);
-    const initialMessages = useMemo(() => loadChat(chatId), [chatId, loadChat]);
 
     const chat = useChat(model, modelConfig, {
       experimental_throttle: experimentalThrottleEnabled
@@ -81,7 +77,7 @@ export const ChatInstance = memo(
           saveChat({ chatId, messages: chat.messages });
         }
 
-        const chatData = loadChatData(chatId);
+        const chatMetadata = loadChatMetadata(chatId);
         const hasUserMessage = chat.messages.some((m) => m.role === "user");
         const needsAssistantMessage =
           titleGenerationSettings.method === "first-assistant-message" &&
@@ -89,11 +85,14 @@ export const ChatInstance = memo(
             (m) => m.role === "assistant" && hasMessageTextContent(m),
           );
 
-        if (hasUserMessage && !chatData.titleState && !needsAssistantMessage) {
+        if (
+          hasUserMessage &&
+          !chatMetadata.titleState &&
+          !needsAssistantMessage
+        ) {
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
-          // TODO: We need to make this state in-memory if we migrate to an async DB, otherwise rerenders, new messages, etc. will trigger title generation again
           saveChatTitleState({ chatId, titleState: "generating" });
           generateChatTitle(model, chat.messages, titleGenerationSettings)
             .then((generatedTitle) => {
@@ -115,7 +114,7 @@ export const ChatInstance = memo(
       chatId,
       model,
       chatIds,
-      loadChatData,
+      loadChatMetadata,
       saveChat,
       saveChatTitle,
       saveChatTitleState,
@@ -133,12 +132,10 @@ export const ChatInstance = memo(
     return null;
   },
   (prevProps, nextProps) => {
-    // TODO: This (the JSON.stringify calls at the end) may be inefficient with future architecture changes, keep an eye on it
-    // Custom comparison to prevent re-renders when modelConfig object reference changes
-    // but the content is the same (which happens because of JSON.parse in persistence).
     return (
       prevProps.chatId === nextProps.chatId &&
       prevProps.model === nextProps.model &&
+      prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&
       JSON.stringify(prevProps.modelConfig) ===

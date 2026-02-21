@@ -13,6 +13,7 @@ export const ChatMessagesContext = createContext<
 export const ChatStatusContext = createContext<
   ChatStatusContextType | undefined
 >(undefined);
+export const ChatLoadingContext = createContext<boolean>(false);
 export const ChatFunctionsContext = createContext<
   ChatFunctionsContextType | undefined
 >(undefined);

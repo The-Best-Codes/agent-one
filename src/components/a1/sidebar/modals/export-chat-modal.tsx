@@ -29,9 +29,9 @@ export const ExportChatModal = ({
   chatId,
   chatTitle,
 }: ExportChatModalProps) => {
-  const { loadChatData } = usePersistence();
+  const { loadFullChatData } = usePersistence();
   const handleExportJSON = async () => {
-    const chatData = loadChatData(chatId);
+    const chatData = await loadFullChatData(chatId);
     const dataStr = JSON.stringify(chatData, null, 2);
     const filePath = await save({
       defaultPath: `${chatTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.json`,
