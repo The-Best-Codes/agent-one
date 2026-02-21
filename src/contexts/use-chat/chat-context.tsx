@@ -80,7 +80,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const [chatMessagesLoaded, setChatMessagesLoaded] = useState<Set<string>>(
     new Set(),
   );
-  const loadingChatIdRef = useRef<string | null>(null);
+  const loadVersionRef = useRef(0);
 
   const isChatLoading = useMemo(() => {
     if (!currentChatId) return false;
@@ -90,34 +90,29 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!currentChatId) return;
     if (chatMessagesLoaded.has(currentChatId)) return;
-    if (loadingChatIdRef.current === currentChatId) return;
 
-    loadingChatIdRef.current = currentChatId;
+    const version = ++loadVersionRef.current;
     const chatIdToLoad = currentChatId;
 
     loadChatMessages(chatIdToLoad)
       .then((messages) => {
+        if (loadVersionRef.current !== version) return;
         loadedMessagesRef.current.set(chatIdToLoad, messages);
         setChatMessagesLoaded((prev) => {
           const next = new Set(prev);
           next.add(chatIdToLoad);
           return next;
         });
-        if (loadingChatIdRef.current === chatIdToLoad) {
-          loadingChatIdRef.current = null;
-        }
       })
       .catch((error) => {
         logger.error(`Failed to load messages for chat ${chatIdToLoad}`, error);
+        if (loadVersionRef.current !== version) return;
         loadedMessagesRef.current.set(chatIdToLoad, []);
         setChatMessagesLoaded((prev) => {
           const next = new Set(prev);
           next.add(chatIdToLoad);
           return next;
         });
-        if (loadingChatIdRef.current === chatIdToLoad) {
-          loadingChatIdRef.current = null;
-        }
       });
   }, [currentChatId, chatMessagesLoaded, loadChatMessages]);
 
@@ -264,6 +259,32 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [currentChatId, setChatStatusIndicators]);
 
+  const evictInactiveMessages = useCallback((keepIds: Set<string>) => {
+    for (const id of loadedMessagesRef.current.keys()) {
+      if (!keepIds.has(id)) {
+        loadedMessagesRef.current.delete(id);
+      }
+    }
+    setChatMessagesLoaded((prevLoaded) => {
+      let changed = false;
+      for (const id of prevLoaded) {
+        if (!keepIds.has(id)) {
+          changed = true;
+          break;
+        }
+      }
+      if (!changed) return prevLoaded;
+
+      const next = new Set<string>();
+      for (const id of prevLoaded) {
+        if (keepIds.has(id)) {
+          next.add(id);
+        }
+      }
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     const newActiveIds = new Set<string>();
     if (currentChatId) {
@@ -280,6 +301,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
+    evictInactiveMessages(newActiveIds);
+
     setActiveChatIds((prev) => {
       if (
         prev.size === newActiveIds.size &&
@@ -288,35 +311,12 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
         return prev;
       }
 
-      for (const id of prev) {
-        if (!newActiveIds.has(id)) {
-          loadedMessagesRef.current.delete(id);
-        }
-      }
-      setChatMessagesLoaded((prevLoaded) => {
-        let changed = false;
-        for (const id of prevLoaded) {
-          if (!newActiveIds.has(id)) {
-            changed = true;
-          }
-        }
-        if (!changed) return prevLoaded;
-
-        const next = new Set<string>();
-        for (const id of prevLoaded) {
-          if (newActiveIds.has(id)) {
-            next.add(id);
-          }
-        }
-        return next;
-      });
-
       logger.verbose("Updating active chat IDs", {
         new: Array.from(newActiveIds),
       });
       return newActiveIds;
     });
-  }, [currentChatId, lastStatusChange]);
+  }, [currentChatId, lastStatusChange, evictInactiveMessages]);
 
   const defaultChat = useChat(
     defaultModelForNewChats?.model ?? null,

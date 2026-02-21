@@ -10,14 +10,7 @@ export const chatStatusIndicatorsAtom = atom<
   Record<string, ChatStatusIndicator>
 >({});
 
-export const chatIdsAtom = atomWithStorage(
-  "chat-ids",
-  [] as string[],
-  undefined,
-  {
-    getOnInit: true,
-  },
-);
+export const chatIdsAtom = atom<string[]>([]);
 
 export const chatUpdateTriggerAtom = atom(0);
 

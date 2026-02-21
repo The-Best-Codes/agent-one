@@ -63,6 +63,7 @@ export interface PersistenceContextType {
   chatUpdateTrigger: number;
 }
 
+const CHAT_IDS_KEY = "chat-ids";
 const NEW_CHAT_MODEL_ID_KEY = "new-chat-model-id";
 const NEW_CHAT_MODEL_CONFIG_KEY = "new-chat-model-config";
 
@@ -81,7 +82,7 @@ const DEFAULT_METADATA: ChatMetadata = {
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [_chatIds, setChatIds] = useAtom(chatIdsAtom);
+  const [, setChatIds] = useAtom(chatIdsAtom);
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(
     chatUpdateTriggerAtom,
   );
@@ -89,11 +90,26 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
 
+  const persistChatIds = useCallback((ids: string[]) => {
+    asyncLocalStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
-    const loadAllMetadata = async () => {
-      const ids = _chatIds;
+    const loadInitialData = async () => {
+      const rawIds = await asyncLocalStorage.getItem(CHAT_IDS_KEY);
+      if (cancelled) return;
+
+      let ids: string[] = [];
+      if (rawIds) {
+        try {
+          ids = JSON.parse(rawIds);
+        } catch (error) {
+          logger.error("Failed to parse chat IDs from storage", error);
+        }
+      }
+
       const cache = new Map<string, ChatMetadata>();
 
       const results = await Promise.all(
@@ -126,10 +142,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       metadataCacheRef.current = cache;
+      setChatIds(ids);
       setIsMetadataLoaded(true);
     };
 
-    void loadAllMetadata();
+    void loadInitialData();
 
     return () => {
       cancelled = true;
@@ -213,11 +230,21 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       };
       setMetadata(id, metadata);
       persistChatData(id, metadata, []);
-      setChatIds((currentChatIds) => [id, ...currentChatIds]);
+      setChatIds((currentChatIds) => {
+        const next = [id, ...currentChatIds];
+        persistChatIds(next);
+        return next;
+      });
       setChatUpdateTrigger((prev) => prev + 1);
       return id;
     },
-    [setChatIds, setChatUpdateTrigger, setMetadata, persistChatData],
+    [
+      setChatIds,
+      setChatUpdateTrigger,
+      setMetadata,
+      persistChatData,
+      persistChatIds,
+    ],
   );
 
   const loadChatMetadata = useCallback(
@@ -386,15 +413,17 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       try {
         asyncLocalStorage.removeItem(getChatKey(chatId));
         removeMetadata(chatId);
-        setChatIds((currentChatIds) =>
-          currentChatIds.filter((id: string) => id !== chatId),
-        );
+        setChatIds((currentChatIds) => {
+          const next = currentChatIds.filter((id: string) => id !== chatId);
+          persistChatIds(next);
+          return next;
+        });
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to delete chat ${chatId}`, error);
       }
     },
-    [setChatIds, setChatUpdateTrigger, removeMetadata],
+    [setChatIds, setChatUpdateTrigger, removeMetadata, persistChatIds],
   );
 
   const branchChat = useCallback(
@@ -434,7 +463,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         setMetadata(newId, newMetadata);
         persistChatData(newId, newMetadata, branchedMessages);
 
-        setChatIds((currentChatIds) => [newId, ...currentChatIds]);
+        setChatIds((currentChatIds) => {
+          const next = [newId, ...currentChatIds];
+          persistChatIds(next);
+          return next;
+        });
         setChatUpdateTrigger((prev) => prev + 1);
 
         logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
@@ -450,6 +483,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       persistChatData,
       setChatIds,
       setChatUpdateTrigger,
+      persistChatIds,
     ],
   );
 
