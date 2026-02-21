@@ -287,6 +287,30 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       ) {
         return prev;
       }
+
+      for (const id of prev) {
+        if (!newActiveIds.has(id)) {
+          loadedMessagesRef.current.delete(id);
+        }
+      }
+      setChatMessagesLoaded((prevLoaded) => {
+        let changed = false;
+        for (const id of prevLoaded) {
+          if (!newActiveIds.has(id)) {
+            changed = true;
+          }
+        }
+        if (!changed) return prevLoaded;
+
+        const next = new Set<string>();
+        for (const id of prevLoaded) {
+          if (newActiveIds.has(id)) {
+            next.add(id);
+          }
+        }
+        return next;
+      });
+
       logger.verbose("Updating active chat IDs", {
         new: Array.from(newActiveIds),
       });
