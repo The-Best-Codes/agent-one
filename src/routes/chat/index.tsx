@@ -42,43 +42,45 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               <Loader2Icon className="text-muted-foreground size-8 animate-spin" />
             </div>
           ) : (
-            <AutoScrollContainer
-              ref={scrollRef}
-              className="max-h-full min-h-0 flex-1 pr-0 pb-2 md:pr-2"
-              scrollableClassName="pr-2 pt-2 h-full"
-              scrollButtonClassName="mr-2"
-              behavior="instant"
-              buttonScrollBehavior={
-                status === "streaming" ? "instant" : "smooth"
-              }
-            >
-              {messages.length === 0 && <NoMessagesGreeting />}
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.role === "user"
-                      ? "justify-end"
-                      : "mb-1 justify-start last:mb-0",
-                  )}
-                >
-                  <MessageParts
-                    message={message}
-                    isLastMessage={message.id === lastMessageId}
-                  />
-                </div>
-              ))}
-              {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
-            </AutoScrollContainer>
+            <>
+              <AutoScrollContainer
+                ref={scrollRef}
+                className="max-h-full min-h-0 flex-1 pr-0 pb-2 md:pr-2"
+                scrollableClassName="pr-2 pt-2 h-full"
+                scrollButtonClassName="mr-2"
+                behavior="instant"
+                buttonScrollBehavior={
+                  status === "streaming" ? "instant" : "smooth"
+                }
+              >
+                {messages.length === 0 && <NoMessagesGreeting />}
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex",
+                      message.role === "user"
+                        ? "justify-end"
+                        : "mb-1 justify-start last:mb-0",
+                    )}
+                  >
+                    <MessageParts
+                      message={message}
+                      isLastMessage={message.id === lastMessageId}
+                    />
+                  </div>
+                ))}
+                {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
+              </AutoScrollContainer>
+              <MainChatInput
+                key={chatId || "new-chat"}
+                initialValue={initialInputValue}
+                onScrollNeededAction={() => {
+                  scrollRef.current?.scrollToBottom();
+                }}
+              />
+            </>
           )}
-          <MainChatInput
-            key={chatId || "new-chat"}
-            initialValue={initialInputValue}
-            onScrollNeededAction={() => {
-              scrollRef.current?.scrollToBottom();
-            }}
-          />
         </div>
       </div>
     </main>

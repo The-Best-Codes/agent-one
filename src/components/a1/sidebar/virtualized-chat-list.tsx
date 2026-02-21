@@ -1,11 +1,12 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
-import { InboxIcon, Loader2Icon, PlusIcon, SearchIcon } from "lucide-react";
+import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
@@ -180,8 +181,11 @@ export const VirtualizedChatList = ({
         className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}
       >
         {!isMetadataLoaded ? (
-          <div className="flex h-full items-center justify-center">
-            <Loader2Icon className="text-muted-foreground size-6 animate-spin" />
+          <div className="flex flex-col gap-1 pt-1">
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
           </div>
         ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
