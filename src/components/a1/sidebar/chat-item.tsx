@@ -3,10 +3,10 @@ import {
   AlertCircleIcon,
   CircleDotDashedIcon,
   DownloadIcon,
-  GitBranch,
   Loader2Icon,
   MoreHorizontalIcon,
   PencilIcon,
+  SplitIcon,
   TrashIcon,
 } from "lucide-react";
 import { memo, useState } from "react";
@@ -104,7 +104,7 @@ export const ChatItem = memo(
           <Link to={`/chat/${id}`} className="relative block overflow-hidden">
             <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
               <StatusIndicator status={statusIndicator} />
-              {branchOf && <GitBranch className="text-foreground size-3" />}
+              {branchOf && <SplitIcon className="text-foreground size-3" />}
               <span className="min-w-0 truncate">{title}</span>
             </span>
             <div
