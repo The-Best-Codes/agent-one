@@ -36,6 +36,7 @@ interface ModelSelectorProps {
   className?: string;
   popoverClassName?: string;
   disabled?: boolean;
+  loading?: boolean;
 }
 
 interface ModelListProps {
@@ -119,6 +120,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   className,
   popoverClassName,
   disabled = false,
+  loading = false,
 }) => {
   const { currentModel, setModel } = useModel();
   const [open, setOpen] = useState(false);
@@ -209,7 +211,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const modelLabel = currentModel ? `Model: ${currentModel.name}` : "No model";
 
-  if (isApiKeysLoading) {
+  if (isApiKeysLoading || loading) {
     return <Skeleton className={cn("h-9 w-full", className)} />;
   }
 

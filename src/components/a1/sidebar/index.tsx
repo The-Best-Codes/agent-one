@@ -65,7 +65,7 @@ const SidebarContent = ({
           <ModelSelector
             className="max-w-60 min-w-0 flex-1"
             popoverClassName="w-60 max-w-60"
-            disabled={isChatLoading}
+            loading={isChatLoading}
           />
           <ChatModelConfig disabled={isChatLoading} />
         </div>
