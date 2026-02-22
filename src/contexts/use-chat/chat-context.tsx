@@ -47,6 +47,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     loadChatMessages,
     saveChatModel,
     saveChatModelConfig,
+    isMetadataLoaded,
   } = usePersistence();
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,10 +89,11 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [currentChatId, chatMessagesLoaded]);
 
   useEffect(() => {
+    const version = ++loadVersionRef.current;
+
     if (!currentChatId) return;
     if (chatMessagesLoaded.has(currentChatId)) return;
 
-    const version = ++loadVersionRef.current;
     const chatIdToLoad = currentChatId;
 
     loadChatMessages(chatIdToLoad)
@@ -455,6 +457,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [statusValue.status, messages, setMessages, notificationSetting]);
 
   useEffect(() => {
+    if (!isMetadataLoaded) return;
     if (currentChatId && !chatIds.includes(currentChatId)) {
       const instance = chatInstancesRef.current.get(currentChatId);
       if (instance) {
@@ -469,7 +472,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       );
       void navigate("/chat", { replace: true });
     }
-  }, [currentChatId, chatIds, navigate]);
+  }, [currentChatId, chatIds, navigate, isMetadataLoaded]);
 
   const functionsValue = useMemo(
     () => ({

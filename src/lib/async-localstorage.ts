@@ -43,6 +43,31 @@ class AsyncStorageDB extends Dexie {
 
 const db = new AsyncStorageDB();
 
+const writeQueues = new Map<string, Promise<void>>();
+const deletedKeys = new Set<string>();
+
+function enqueueWrite(key: string, operation: () => Promise<void>): void {
+  if (deletedKeys.has(key)) return;
+
+  const prev = writeQueues.get(key) ?? Promise.resolve();
+  const next = prev.then(() => {
+    if (deletedKeys.has(key)) return;
+    return delay(SIMULATED_DELAY_MS).then(() => {
+      if (deletedKeys.has(key)) return;
+      return operation();
+    });
+  });
+  writeQueues.set(key, next);
+}
+
+function cancelPendingWrites(key: string): void {
+  deletedKeys.add(key);
+  writeQueues.delete(key);
+  queueMicrotask(() => {
+    deletedKeys.delete(key);
+  });
+}
+
 export const asyncLocalStorage = {
   async getItem(key: string): Promise<string | null> {
     await delay(SIMULATED_DELAY_MS);
@@ -51,11 +76,15 @@ export const asyncLocalStorage = {
   },
 
   setItem(key: string, value: string): void {
-    void delay(SIMULATED_DELAY_MS).then(() => db.kv.put({ key, value }));
+    enqueueWrite(`kv:${key}`, async () => {
+      await db.kv.put({ key, value });
+    });
   },
 
   removeItem(key: string): void {
-    void delay(SIMULATED_DELAY_MS).then(() => db.kv.delete(key));
+    enqueueWrite(`kv:${key}`, async () => {
+      await db.kv.delete(key);
+    });
   },
 
   async getChatMetadata(id: string): Promise<ChatMetadata | null> {
@@ -68,9 +97,9 @@ export const asyncLocalStorage = {
   },
 
   setChatMetadata(id: string, metadata: ChatMetadata): void {
-    void delay(SIMULATED_DELAY_MS).then(() =>
-      db.chatMetadata.put({ id, ...metadata }),
-    );
+    enqueueWrite(`meta:${id}`, async () => {
+      await db.chatMetadata.put({ id, ...metadata });
+    });
   },
 
   async getChatMessages(id: string): Promise<UIMessage[] | null> {
@@ -80,12 +109,14 @@ export const asyncLocalStorage = {
   },
 
   setChatMessages(id: string, messages: UIMessage[]): void {
-    void delay(SIMULATED_DELAY_MS).then(() =>
-      db.chatMessages.put({ id, messages }),
-    );
+    enqueueWrite(`msgs:${id}`, async () => {
+      await db.chatMessages.put({ id, messages });
+    });
   },
 
   deleteChat(id: string): void {
+    cancelPendingWrites(`meta:${id}`);
+    cancelPendingWrites(`msgs:${id}`);
     void delay(SIMULATED_DELAY_MS).then(() =>
       Promise.all([db.chatMetadata.delete(id), db.chatMessages.delete(id)]),
     );
