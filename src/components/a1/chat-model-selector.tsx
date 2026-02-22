@@ -127,6 +127,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
+  // Remove in favor of disabled prop later
   const isChatLoading = useChatLoading();
 
   const modelsWithApiKey = AVAILABLE_CHAT_MODELS_WITH_API_KEY;
