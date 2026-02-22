@@ -74,6 +74,7 @@ const editorTheme = EditorView.theme({
   },
 });
 
+// TODO: Add disabled prop
 export const MainChatInput = ({
   onScrollNeededAction,
   initialValue,
