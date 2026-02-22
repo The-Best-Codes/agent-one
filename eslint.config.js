@@ -58,6 +58,8 @@ export default [
               "Loadables",
               "byok",
               "deeplink",
+              "dexie",
+              "Dexie",
             ],
           },
         },

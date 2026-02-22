@@ -67,10 +67,6 @@ const CHAT_IDS_KEY = "chat-ids";
 const NEW_CHAT_MODEL_ID_KEY = "new-chat-model-id";
 const NEW_CHAT_MODEL_CONFIG_KEY = "new-chat-model-config";
 
-function getChatKey(id: string): string {
-  return `chat-${id}`;
-}
-
 const DEFAULT_METADATA: ChatMetadata = {
   title: "New chat",
   titleState: undefined,
@@ -115,16 +111,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       const results = await Promise.all(
         ids.map(async (id) => {
           try {
-            const raw = await asyncLocalStorage.getItem(getChatKey(id));
-            if (raw) {
-              const parsed = JSON.parse(raw) as ChatData;
-              const metadata: ChatMetadata = {
-                title: parsed.title,
-                titleState: parsed.titleState,
-                modelId: parsed.modelId,
-                modelConfig: parsed.modelConfig,
-                branchOf: parsed.branchOf,
-              };
+            const metadata = await asyncLocalStorage.getChatMetadata(id);
+            if (metadata) {
               return [id, metadata] as const;
             }
             return [id, { ...DEFAULT_METADATA }] as const;
@@ -210,13 +198,13 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  const persistChatData = useCallback(
-    (id: string, metadata: ChatMetadata, messages: UIMessage[]) => {
-      const chatData: ChatData = { ...metadata, messages };
-      asyncLocalStorage.setItem(getChatKey(id), JSON.stringify(chatData));
-    },
-    [],
-  );
+  const persistMetadata = useCallback((id: string, metadata: ChatMetadata) => {
+    asyncLocalStorage.setChatMetadata(id, metadata);
+  }, []);
+
+  const persistMessages = useCallback((id: string, messages: UIMessage[]) => {
+    asyncLocalStorage.setChatMessages(id, messages);
+  }, []);
 
   const createChat = useCallback(
     (modelId: string, modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG) => {
@@ -229,7 +217,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         branchOf: undefined,
       };
       setMetadata(id, metadata);
-      persistChatData(id, metadata, []);
+      persistMetadata(id, metadata);
+      persistMessages(id, []);
       setChatIds((currentChatIds) => {
         const next = [id, ...currentChatIds];
         persistChatIds(next);
@@ -242,7 +231,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       setChatIds,
       setChatUpdateTrigger,
       setMetadata,
-      persistChatData,
+      persistMetadata,
+      persistMessages,
       persistChatIds,
     ],
   );
@@ -256,11 +246,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
 
   const loadChatMessages = useCallback(async (id: string) => {
     try {
-      const raw = await asyncLocalStorage.getItem(getChatKey(id));
-      if (raw) {
-        const parsed = JSON.parse(raw) as ChatData;
-        return parsed.messages;
-      }
+      const messages = await asyncLocalStorage.getChatMessages(id);
+      if (messages) return messages;
       logger.warn(`No chat found for id: ${id}`);
       return [];
     } catch (error) {
@@ -272,9 +259,12 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const loadFullChatData = useCallback(
     async (id: string): Promise<ChatData> => {
       try {
-        const raw = await asyncLocalStorage.getItem(getChatKey(id));
-        if (raw) {
-          return JSON.parse(raw) as ChatData;
+        const [metadata, messages] = await Promise.all([
+          asyncLocalStorage.getChatMetadata(id),
+          asyncLocalStorage.getChatMessages(id),
+        ]);
+        if (metadata) {
+          return { ...metadata, messages: messages ?? [] };
         }
         logger.warn(`No chat found for id: ${id}`);
         return { messages: [], ...DEFAULT_METADATA };
@@ -289,56 +279,38 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const saveChat = useCallback(
     ({ chatId, messages }: { chatId: string; messages: UIMessage[] }) => {
       try {
-        const metadata = getMetadata(chatId);
-        persistChatData(chatId, metadata, messages);
+        persistMessages(chatId, messages);
       } catch (error) {
         logger.error(`Failed to save chat ${chatId}`, error);
       }
     },
-    [getMetadata, persistChatData],
+    [persistMessages],
   );
 
   const saveChatModel = useCallback(
     ({ chatId, modelId }: { chatId: string; modelId: string }) => {
       try {
-        const metadata = getMetadata(chatId);
-        const updated = { ...metadata, modelId };
+        const updated = { ...getMetadata(chatId), modelId };
         setMetadata(chatId, updated);
-        loadChatMessages(chatId)
-          .then((messages) => {
-            persistChatData(chatId, getMetadata(chatId), messages);
-          })
-          .catch((error) => {
-            logger.error(`Failed to persist chat model for ${chatId}`, error);
-          });
+        persistMetadata(chatId, updated);
       } catch (error) {
         logger.error(`Failed to save chat model ${chatId}`, error);
       }
     },
-    [getMetadata, setMetadata, loadChatMessages, persistChatData],
+    [getMetadata, setMetadata, persistMetadata],
   );
 
   const saveChatModelConfig = useCallback(
     ({ chatId, modelConfig }: { chatId: string; modelConfig: ModelConfig }) => {
       try {
-        const metadata = getMetadata(chatId);
-        const updated = { ...metadata, modelConfig };
+        const updated = { ...getMetadata(chatId), modelConfig };
         setMetadata(chatId, updated);
-        loadChatMessages(chatId)
-          .then((messages) => {
-            persistChatData(chatId, getMetadata(chatId), messages);
-          })
-          .catch((error) => {
-            logger.error(
-              `Failed to persist chat model config for ${chatId}`,
-              error,
-            );
-          });
+        persistMetadata(chatId, updated);
       } catch (error) {
         logger.error(`Failed to save chat model config ${chatId}`, error);
       }
     },
-    [getMetadata, setMetadata, loadChatMessages, persistChatData],
+    [getMetadata, setMetadata, persistMetadata],
   );
 
   const saveChatTitleState = useCallback(
@@ -350,68 +322,39 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       titleState: "generating" | "generated" | "error";
     }) => {
       try {
-        const metadata = getMetadata(chatId);
-        const updated = { ...metadata, titleState };
+        const updated = { ...getMetadata(chatId), titleState };
         setMetadata(chatId, updated);
-        loadChatMessages(chatId)
-          .then((messages) => {
-            persistChatData(chatId, getMetadata(chatId), messages);
-          })
-          .catch((error) => {
-            logger.error(
-              `Failed to persist chat title state for ${chatId}`,
-              error,
-            );
-          });
+        persistMetadata(chatId, updated);
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title state ${chatId}`, error);
       }
     },
-    [
-      getMetadata,
-      setMetadata,
-      loadChatMessages,
-      persistChatData,
-      setChatUpdateTrigger,
-    ],
+    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
   );
 
   const saveChatTitle = useCallback(
     ({ chatId, title }: { chatId: string; title: string }) => {
       try {
-        const metadata = getMetadata(chatId);
         const updated: ChatMetadata = {
-          ...metadata,
+          ...getMetadata(chatId),
           title,
           titleState: "generated",
         };
         setMetadata(chatId, updated);
-        loadChatMessages(chatId)
-          .then((messages) => {
-            persistChatData(chatId, getMetadata(chatId), messages);
-          })
-          .catch((error) => {
-            logger.error(`Failed to persist chat title for ${chatId}`, error);
-          });
+        persistMetadata(chatId, updated);
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title ${chatId}`, error);
       }
     },
-    [
-      getMetadata,
-      setMetadata,
-      loadChatMessages,
-      persistChatData,
-      setChatUpdateTrigger,
-    ],
+    [getMetadata, setMetadata, persistMetadata, setChatUpdateTrigger],
   );
 
   const deleteChat = useCallback(
     (chatId: string) => {
       try {
-        asyncLocalStorage.removeItem(getChatKey(chatId));
+        asyncLocalStorage.deleteChat(chatId);
         removeMetadata(chatId);
         setChatIds((currentChatIds) => {
           const next = currentChatIds.filter((id: string) => id !== chatId);
@@ -461,7 +404,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         };
 
         setMetadata(newId, newMetadata);
-        persistChatData(newId, newMetadata, branchedMessages);
+        persistMetadata(newId, newMetadata);
+        persistMessages(newId, branchedMessages);
 
         setChatIds((currentChatIds) => {
           const next = [newId, ...currentChatIds];
@@ -480,7 +424,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     [
       getMetadata,
       setMetadata,
-      persistChatData,
+      persistMetadata,
+      persistMessages,
       setChatIds,
       setChatUpdateTrigger,
       persistChatIds,
