@@ -37,6 +37,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
         data-testid="chat-main"
       >
         <div className="flex h-full w-full max-w-3xl flex-1 flex-col">
+          {/* TODO: Only show loader when taking longer than 500ms */}
           {isChatLoading ? (
             <div className="flex flex-1 items-center justify-center">
               <Loader2Icon className="text-muted-foreground size-8 animate-spin" />
