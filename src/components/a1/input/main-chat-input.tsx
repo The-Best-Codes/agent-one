@@ -136,6 +136,9 @@ export const MainChatInput = ({
   };
 
   const submitMessage = () => {
+    if (disabled) {
+      return;
+    }
     if (!hasAvailableModels) {
       logger.verbose("No models available, message submission aborted");
       return;
@@ -441,6 +444,9 @@ export const MainChatInput = ({
               // eslint-disable-next-line react-hooks/refs
               EditorView.domEventHandlers({
                 paste: (event) => {
+                  if (disabled) {
+                    return false;
+                  }
                   const pastedFiles = event.clipboardData?.files;
                   if (pastedFiles && pastedFiles.length > 0) {
                     logger.verbose("Files pasted", {
