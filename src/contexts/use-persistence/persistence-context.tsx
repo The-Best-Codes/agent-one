@@ -13,9 +13,9 @@ import {
   DEFAULT_MODEL_CONFIG,
   type ModelConfig,
 } from "@/hooks/ai/use-model-catalog";
-import { asyncLocalStorage } from "@/lib/async-localstorage";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
+import { chatStorage } from "@/lib/storage/chat-storage";
 
 import { PersistenceContext } from "./persistence-contexts";
 
@@ -87,14 +87,14 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
 
   const persistChatIds = useCallback((ids: string[]) => {
-    asyncLocalStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
+    void chatStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
   }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadInitialData = async () => {
-      const rawIds = await asyncLocalStorage.getItem(CHAT_IDS_KEY);
+      const rawIds = await chatStorage.getItem(CHAT_IDS_KEY);
       if (cancelled) return;
 
       let ids: string[] = [];
@@ -111,7 +111,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       const results = await Promise.all(
         ids.map(async (id) => {
           try {
-            const metadata = await asyncLocalStorage.getChatMetadata(id);
+            const metadata = await chatStorage.getChatMetadata(id);
             if (metadata) {
               return [id, metadata] as const;
             }
@@ -199,11 +199,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   const persistMetadata = useCallback((id: string, metadata: ChatMetadata) => {
-    asyncLocalStorage.setChatMetadata(id, metadata);
+    void chatStorage.setChatMetadata(id, metadata);
   }, []);
 
   const persistMessages = useCallback((id: string, messages: UIMessage[]) => {
-    asyncLocalStorage.setChatMessages(id, messages);
+    void chatStorage.setChatMessages(id, messages);
   }, []);
 
   const createChat = useCallback(
@@ -246,7 +246,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
 
   const loadChatMessages = useCallback(async (id: string) => {
     try {
-      const messages = await asyncLocalStorage.getChatMessages(id);
+      const messages = await chatStorage.getChatMessages(id);
       if (messages) return messages;
       logger.warn(`No chat found for id: ${id}`);
       return [];
@@ -260,8 +260,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     async (id: string): Promise<ChatData> => {
       try {
         const [metadata, messages] = await Promise.all([
-          asyncLocalStorage.getChatMetadata(id),
-          asyncLocalStorage.getChatMessages(id),
+          chatStorage.getChatMetadata(id),
+          chatStorage.getChatMessages(id),
         ]);
         if (metadata) {
           return { ...metadata, messages: messages ?? [] };
@@ -354,7 +354,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const deleteChat = useCallback(
     (chatId: string) => {
       try {
-        asyncLocalStorage.deleteChat(chatId);
+        void chatStorage.deleteChat(chatId);
         removeMetadata(chatId);
         setChatIds((currentChatIds) => {
           const next = currentChatIds.filter((id: string) => id !== chatId);

@@ -11,14 +11,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -107,11 +105,15 @@ const SliderConfig = ({
   );
 };
 
-export const ChatModelConfig = () => {
+export const ChatModelConfig = ({
+  disabled = false,
+}: {
+  disabled?: boolean;
+}) => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
-  const isChatLoading = useChatLoading();
+  const effectiveOpen = disabled ? false : open;
 
   const handleTemperatureChange = (value: number | undefined) => {
     setModelConfig({ ...currentModelConfig, temperature: value });
@@ -304,6 +306,7 @@ export const ChatModelConfig = () => {
       size="icon"
       aria-label="Model configuration"
       className="relative"
+      disabled={disabled}
     >
       <Settings2Icon className="size-4" />
       {!isAtDefaults && (
@@ -315,21 +318,17 @@ export const ChatModelConfig = () => {
     </Button>
   );
 
-  if (isChatLoading) {
-    return <Skeleton className="size-9" />;
-  }
-
   return (
     <>
       {isDesktop ? (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={effectiveOpen} onOpenChange={setOpen}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
           <PopoverContent className="max-h-[70vh] w-80 overflow-auto p-4">
             {content}
           </PopoverContent>
         </Popover>
       ) : (
-        <Drawer open={open} onOpenChange={setOpen}>
+        <Drawer open={effectiveOpen} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
           <DrawerContent className="max-h-[70vh]" showHandle={false}>
             <ScrollArea className="max-h-[calc(70vh-2rem)] overflow-auto">

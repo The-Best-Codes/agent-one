@@ -1,5 +1,5 @@
 import { Loader2Icon } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
 import {
@@ -18,12 +18,30 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
+const CHAT_LOADING_SPINNER_DELAY_MS = 500;
+
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
   const [searchParams] = useSearchParams();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
+  const [delayPassed, setDelayPassed] = useState(false);
+
+  useEffect(() => {
+    if (!isChatLoading) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      setDelayPassed(true);
+    }, CHAT_LOADING_SPINNER_DELAY_MS);
+    return () => {
+      clearTimeout(timer);
+      setDelayPassed(false);
+    };
+  }, [isChatLoading]);
+
+  const showSpinner = isChatLoading && delayPassed;
 
   const lastMessageId = messages[messages.length - 1]?.id;
   const initialInputValue = searchParams.get("initialMessage") || undefined;
@@ -37,50 +55,49 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
         data-testid="chat-main"
       >
         <div className="flex h-full w-full max-w-3xl flex-1 flex-col">
-          {isChatLoading ? (
+          {isChatLoading && showSpinner ? (
             <div className="flex flex-1 items-center justify-center">
               <Loader2Icon className="text-muted-foreground size-8 animate-spin" />
             </div>
           ) : (
-            <>
-              <AutoScrollContainer
-                ref={scrollRef}
-                className="max-h-full min-h-0 flex-1 pr-0 pb-2 md:pr-2"
-                scrollableClassName="pr-2 pt-2 h-full"
-                scrollButtonClassName="mr-2"
-                behavior="instant"
-                buttonScrollBehavior={
-                  status === "streaming" ? "instant" : "smooth"
-                }
-              >
-                {messages.length === 0 && <NoMessagesGreeting />}
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={cn(
-                      "flex",
-                      message.role === "user"
-                        ? "justify-end"
-                        : "mb-1 justify-start last:mb-0",
-                    )}
-                  >
-                    <MessageParts
-                      message={message}
-                      isLastMessage={message.id === lastMessageId}
-                    />
-                  </div>
-                ))}
-                {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
-              </AutoScrollContainer>
-              <MainChatInput
-                key={chatId || "new-chat"}
-                initialValue={initialInputValue}
-                onScrollNeededAction={() => {
-                  scrollRef.current?.scrollToBottom();
-                }}
-              />
-            </>
+            <AutoScrollContainer
+              ref={scrollRef}
+              className="max-h-full min-h-0 flex-1 pr-0 pb-2 md:pr-2"
+              scrollableClassName="pr-2 pt-2 h-full"
+              scrollButtonClassName="mr-2"
+              behavior="instant"
+              buttonScrollBehavior={
+                status === "streaming" ? "instant" : "smooth"
+              }
+            >
+              {messages.length === 0 && <NoMessagesGreeting />}
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={cn(
+                    "flex",
+                    message.role === "user"
+                      ? "justify-end"
+                      : "mb-1 justify-start last:mb-0",
+                  )}
+                >
+                  <MessageParts
+                    message={message}
+                    isLastMessage={message.id === lastMessageId}
+                  />
+                </div>
+              ))}
+              {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
+            </AutoScrollContainer>
           )}
+          <MainChatInput
+            key={chatId || "new-chat"}
+            initialValue={initialInputValue}
+            disabled={isChatLoading}
+            onScrollNeededAction={() => {
+              scrollRef.current?.scrollToBottom();
+            }}
+          />
         </div>
       </div>
     </main>

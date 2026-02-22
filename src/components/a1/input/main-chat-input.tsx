@@ -77,9 +77,11 @@ const editorTheme = EditorView.theme({
 export const MainChatInput = ({
   onScrollNeededAction,
   initialValue,
+  disabled = false,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
+  disabled?: boolean;
 }) => {
   const { status } = useChatStatus();
   const { resolvedTheme } = useTheme();
@@ -134,6 +136,9 @@ export const MainChatInput = ({
   };
 
   const submitMessage = () => {
+    if (disabled) {
+      return;
+    }
     if (!hasAvailableModels) {
       logger.verbose("No models available, message submission aborted");
       return;
@@ -417,6 +422,7 @@ export const MainChatInput = ({
         <div className="grow overflow-hidden">
           <CodeMirror
             autoFocus
+            editable={!disabled}
             theme={resolvedTheme === "dark" ? "dark" : "light"}
             // Note: Explicitly setting the value like this might prevent edits or input. It seems to be working fine, but if there are issues in the future, inspect this.
             value={initialValue || ""}
@@ -438,6 +444,9 @@ export const MainChatInput = ({
               // eslint-disable-next-line react-hooks/refs
               EditorView.domEventHandlers({
                 paste: (event) => {
+                  if (disabled) {
+                    return false;
+                  }
                   const pastedFiles = event.clipboardData?.files;
                   if (pastedFiles && pastedFiles.length > 0) {
                     logger.verbose("Files pasted", {
@@ -506,7 +515,9 @@ export const MainChatInput = ({
                 <Button
                   data-testid="attach-button"
                   type="button"
-                  disabled={status !== "ready" || !hasAvailableModels}
+                  disabled={
+                    disabled || status !== "ready" || !hasAvailableModels
+                  }
                   size="icon"
                   variant="outline"
                   onClick={() => {
@@ -553,6 +564,7 @@ export const MainChatInput = ({
                     type="submit"
                     size="icon"
                     disabled={
+                      disabled ||
                       status !== "ready" ||
                       (isEmpty && !files) ||
                       !hasAvailableModels

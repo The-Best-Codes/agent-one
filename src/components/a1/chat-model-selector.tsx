@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
-import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -36,6 +35,8 @@ import { cn } from "@/lib/utils";
 interface ModelSelectorProps {
   className?: string;
   popoverClassName?: string;
+  disabled?: boolean;
+  loading?: boolean;
 }
 
 interface ModelListProps {
@@ -118,6 +119,8 @@ const ModelList: FC<ModelListProps> = ({
 export const ModelSelector: FC<ModelSelectorProps> = ({
   className,
   popoverClassName,
+  disabled = false,
+  loading = false,
 }) => {
   const { currentModel, setModel } = useModel();
   const [open, setOpen] = useState(false);
@@ -126,9 +129,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
-  const isChatLoading = useChatLoading();
 
   const modelsWithApiKey = AVAILABLE_CHAT_MODELS_WITH_API_KEY;
+  const effectiveOpen = disabled ? false : open;
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -159,7 +162,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   // Read https://react.dev/learn/separating-events-from-effects#extracting-non-reactive-logic-out-of-effects for more info about useEffectEvent
   const measureVirtualizer = useEffectEvent(() => {
-    if (open) {
+    if (effectiveOpen) {
       const frame = requestAnimationFrame(() => {
         virtualizer.measure();
       });
@@ -169,7 +172,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   useEffect(() => {
     measureVirtualizer();
-  }, [open]);
+  }, [effectiveOpen]);
 
   const handleSelect = (modelId: string) => {
     setModel(modelId);
@@ -208,19 +211,20 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const modelLabel = currentModel ? `Model: ${currentModel.name}` : "No model";
 
-  if (isApiKeysLoading || isChatLoading) {
+  if (isApiKeysLoading || loading) {
     return <Skeleton className={cn("h-9 w-full", className)} />;
   }
 
   return isDesktop ? (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    <Popover open={effectiveOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           aria-haspopup="listbox"
-          aria-expanded={open}
+          aria-expanded={effectiveOpen}
           className={cn("w-full justify-between", className)}
           aria-label={modelLabel}
+          disabled={disabled}
         >
           {triggerContent}
         </Button>
@@ -241,14 +245,15 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       </PopoverContent>
     </Popover>
   ) : (
-    <Drawer open={open} onOpenChange={handleOpenChange}>
+    <Drawer open={effectiveOpen} onOpenChange={handleOpenChange}>
       <DrawerTrigger asChild>
         <Button
           variant="outline"
           aria-haspopup="listbox"
-          aria-expanded={open}
+          aria-expanded={effectiveOpen}
           className={cn("w-full justify-between", className)}
           aria-label={modelLabel}
+          disabled={disabled}
         >
           {triggerContent}
         </Button>
