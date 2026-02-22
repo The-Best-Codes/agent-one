@@ -2,6 +2,9 @@ import type { UIMessage } from "ai";
 import Dexie from "dexie";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
+import { getLogger } from "@/lib/logger";
+
+const logger = getLogger(import.meta.url);
 
 const SIMULATED_DELAY_MS = 1000;
 
@@ -47,9 +50,11 @@ const writeQueues = new Map<string, Promise<void>>();
 
 function enqueueWrite(key: string, operation: () => Promise<void>): void {
   const prev = writeQueues.get(key) ?? Promise.resolve();
-  const next = prev.then(() =>
-    delay(SIMULATED_DELAY_MS).then(() => operation()),
-  );
+  const next = prev
+    .then(() => delay(SIMULATED_DELAY_MS).then(() => operation()))
+    .catch((error) => {
+      logger.error(`Write failed for key "${key}":`, error);
+    });
   writeQueues.set(key, next);
 }
 
