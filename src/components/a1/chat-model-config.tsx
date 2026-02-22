@@ -111,6 +111,7 @@ export const ChatModelConfig = () => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
+  // TODO: Add disabled prop, just gray out and become non-interactive instead of only rendering a skeleton
   const isChatLoading = useChatLoading();
 
   const handleTemperatureChange = (value: number | undefined) => {

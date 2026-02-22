@@ -33,6 +33,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
+// TODO: Add disabled prop, just gray out and become non-interactive instead of only rendering a skeleton when disabled
 interface ModelSelectorProps {
   className?: string;
   popoverClassName?: string;
