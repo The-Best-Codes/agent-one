@@ -458,15 +458,18 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!isMetadataLoaded) return;
-    if (currentChatId && !chatIds.includes(currentChatId)) {
-      const instance = chatInstancesRef.current.get(currentChatId);
-      if (instance) {
+
+    chatInstancesRef.current.forEach((instance, id) => {
+      if (!chatIds.includes(id)) {
         const { status, stop } = instance;
         if (status === "streaming" || status === "submitted") {
-          logger.verbose(`Stopping stream for deleted chat: ${currentChatId}`);
+          logger.verbose(`Stopping stream for deleted chat: ${id}`);
           void stop();
         }
       }
+    });
+
+    if (currentChatId && !chatIds.includes(currentChatId)) {
       logger.verbose(
         `Invalid chat ID detected: ${currentChatId}. Redirecting to /chat`,
       );
