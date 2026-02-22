@@ -19,6 +19,7 @@ import {
   TooltipRoot,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
@@ -44,6 +45,8 @@ const SidebarContent = ({
   handleNewChat: () => void;
   onChatClick?: (id: string) => void;
 }) => {
+  const isChatLoading = useChatLoading();
+
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex flex-row items-center justify-center">
@@ -62,8 +65,9 @@ const SidebarContent = ({
           <ModelSelector
             className="max-w-60 min-w-0 flex-1"
             popoverClassName="w-60 max-w-60"
+            disabled={isChatLoading}
           />
-          <ChatModelConfig />
+          <ChatModelConfig disabled={isChatLoading} />
         </div>
         <Button variant="outline" className="w-full justify-start" asChild>
           <Link

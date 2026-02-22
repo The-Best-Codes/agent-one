@@ -74,13 +74,14 @@ const editorTheme = EditorView.theme({
   },
 });
 
-// TODO: Add disabled prop
 export const MainChatInput = ({
   onScrollNeededAction,
   initialValue,
+  disabled = false,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
+  disabled?: boolean;
 }) => {
   const { status } = useChatStatus();
   const { resolvedTheme } = useTheme();
@@ -418,6 +419,7 @@ export const MainChatInput = ({
         <div className="grow overflow-hidden">
           <CodeMirror
             autoFocus
+            editable={!disabled}
             theme={resolvedTheme === "dark" ? "dark" : "light"}
             // Note: Explicitly setting the value like this might prevent edits or input. It seems to be working fine, but if there are issues in the future, inspect this.
             value={initialValue || ""}
@@ -507,7 +509,9 @@ export const MainChatInput = ({
                 <Button
                   data-testid="attach-button"
                   type="button"
-                  disabled={status !== "ready" || !hasAvailableModels}
+                  disabled={
+                    disabled || status !== "ready" || !hasAvailableModels
+                  }
                   size="icon"
                   variant="outline"
                   onClick={() => {
@@ -554,6 +558,7 @@ export const MainChatInput = ({
                     type="submit"
                     size="icon"
                     disabled={
+                      disabled ||
                       status !== "ready" ||
                       (isEmpty && !files) ||
                       !hasAvailableModels
