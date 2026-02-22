@@ -11,12 +11,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -109,6 +111,7 @@ export const ChatModelConfig = () => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
+  const isChatLoading = useChatLoading();
 
   const handleTemperatureChange = (value: number | undefined) => {
     setModelConfig({ ...currentModelConfig, temperature: value });
@@ -311,6 +314,10 @@ export const ChatModelConfig = () => {
       )}
     </Button>
   );
+
+  if (isChatLoading) {
+    return <Skeleton className="size-9" />;
+  }
 
   return (
     <>

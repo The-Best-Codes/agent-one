@@ -89,7 +89,7 @@ export const MainChatInput = ({
   const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
   const inputStyle = useAtomValue(inputStyleAtom);
-  const { loadChat } = usePersistence();
+  const { loadChatMessages } = usePersistence();
   const chatIds = useAtomValue(chatIdsAtom);
   const isMobile = useMobileDetection({
     anyHover: true,
@@ -297,43 +297,44 @@ export const MainChatInput = ({
         return;
       }
 
-      const messages = loadChat(chatId);
-      if (!messages || messages.length === 0) {
-        logger.error("Dropped chat has no messages", { chatId });
-        return;
-      }
+      void loadChatMessages(chatId).then((messages) => {
+        if (!messages || messages.length === 0) {
+          logger.error("Dropped chat has no messages", { chatId });
+          return;
+        }
 
-      const chatData = {
-        id: chatId,
-        title,
-        info: "This chat was attached as a file by the user",
-        messages,
-        exportedAt: new Date().toISOString(),
-      };
+        const chatData = {
+          id: chatId,
+          title,
+          info: "This chat was attached as a file by the user",
+          messages,
+          exportedAt: new Date().toISOString(),
+        };
 
-      const blob = new Blob([JSON.stringify(chatData, null, 2)], {
-        type: "application/json",
+        const blob = new Blob([JSON.stringify(chatData, null, 2)], {
+          type: "application/json",
+        });
+        const file = new File(
+          [blob],
+          `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_agent-one_chat.txt`,
+          {
+            type: "text/plain",
+          },
+        );
+
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        const fileList = dt.files;
+
+        logger.verbose("Chat exported and attached as file", {
+          chatId,
+          title,
+          fileName: file.name,
+        });
+        addFiles(fileList);
       });
-      const file = new File(
-        [blob],
-        `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_agent-one_chat.txt`,
-        {
-          type: "text/plain",
-        },
-      );
-
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      const fileList = dt.files;
-
-      logger.verbose("Chat exported and attached as file", {
-        chatId,
-        title,
-        fileName: file.name,
-      });
-      addFiles(fileList);
     },
-    [loadChat, chatIds, addFiles],
+    [loadChatMessages, chatIds, addFiles],
   );
 
   // Note: In src-tauri/tauri.conf.json, I set app.windows[0].dragDropEnabled to false to allow processing events in the JS here.

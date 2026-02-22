@@ -3,6 +3,7 @@ import { useContext } from "react";
 
 import {
   ChatFunctionsContext,
+  ChatLoadingContext,
   ChatMessagesContext,
   ChatStatusContext,
 } from "./chat-contexts";
@@ -39,6 +40,10 @@ export const useChatStatus = (): ChatStatusContextType => {
     throw new Error("useChatStatus must be used within a ChatProvider");
   }
   return context;
+};
+
+export const useChatLoading = (): boolean => {
+  return useContext(ChatLoadingContext);
 };
 
 export const useChatFunctions = (): ChatFunctionsContextType => {

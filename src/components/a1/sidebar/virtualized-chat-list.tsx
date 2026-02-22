@@ -6,6 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
@@ -54,17 +55,21 @@ export const VirtualizedChatList = ({
     searchInputRef.current?.focus();
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
-  const { loadChatData } = usePersistence();
+  const { loadChatMetadata, isMetadataLoaded } = usePersistence();
 
   const loadChats = useCallback(() => {
+    if (!isMetadataLoaded) return;
+
     try {
       const loadedChats = chatIds.map((id: string) => {
         try {
-          const chatData = loadChatData(id);
+          const chatMetadata = loadChatMetadata(id);
           return {
             id,
-            title: getChatTitle(chatData?.title || `Chat ${id.slice(0, 8)}`),
-            branchOf: chatData?.branchOf,
+            title: getChatTitle(
+              chatMetadata?.title || `Chat ${id.slice(0, 8)}`,
+            ),
+            branchOf: chatMetadata?.branchOf,
           };
         } catch (error) {
           logger.error(`Error loading chat ${id}:`, error);
@@ -80,7 +85,7 @@ export const VirtualizedChatList = ({
     } catch (error) {
       logger.error("Error loading chats:", error);
     }
-  }, [chatIds, loadChatData]);
+  }, [chatIds, loadChatMetadata, isMetadataLoaded]);
 
   useEffect(() => {
     loadChats();
@@ -124,7 +129,6 @@ export const VirtualizedChatList = ({
   }, [filteredChats.length]);
 
   useEffect(() => {
-    // TODO: Maybe only scroll to it on initial mount? In that case, remove filteredChats and searchQuery from deps
     if (scrollToActiveChat && activeChatId && virtualizer && !searchQuery) {
       const activeIndex = filteredChats.findIndex(
         (chat) => chat.id === activeChatId,
@@ -143,14 +147,7 @@ export const VirtualizedChatList = ({
     searchQuery,
   ]);
 
-  // This causes an infinite rerender bug
-  // useEffect(() => {
-  //   if (activeChatId && !chats.find((chat) => chat.id === activeChatId)) {
-  //     loadChats();
-  //   }
-  // }, [activeChatId, chats, loadChats]);
-
-  const showNoChatsPlaceholder = chats.length === 0;
+  const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
   const showNoSearchResults =
     chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
 
@@ -183,7 +180,14 @@ export const VirtualizedChatList = ({
         ref={parentRef}
         className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}
       >
-        {showNoChatsPlaceholder ? (
+        {!isMetadataLoaded ? (
+          <div className="flex flex-col gap-1 pt-1">
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+            <Skeleton className="h-8 w-full rounded-md" />
+          </div>
+        ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <InboxIcon className="text-muted-foreground size-16" />
             <p className="max-w-full min-w-0 truncate">No chats yet</p>

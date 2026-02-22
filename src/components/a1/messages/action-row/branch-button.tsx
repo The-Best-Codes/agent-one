@@ -1,4 +1,4 @@
-import { GitBranch } from "lucide-react";
+import { SplitIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export const BranchButton = ({
       aria-label="Branch conversation from this message"
       {...props}
     >
-      <GitBranch />
+      <SplitIcon />
     </Button>
   );
 };

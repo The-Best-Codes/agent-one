@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
@@ -56,6 +57,7 @@ const MessagePartsInternal = ({
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
   const { branchChat } = usePersistence();
+  const allMessages = useChatMessages();
 
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
 
@@ -69,7 +71,6 @@ const MessagePartsInternal = ({
 
   const handleBranch = useCallback(() => {
     if (!activeChatId) {
-      // TODO: Ensure the button is hidden from the UI in this case or give UI feedback?
       logger.error("Cannot branch a new, unsaved chat.");
       return;
     }
@@ -77,12 +78,13 @@ const MessagePartsInternal = ({
       const newChatId = branchChat({
         originalChatId: activeChatId,
         branchFromMessageId: message.id,
+        messages: allMessages,
       });
       void navigate(`/chat/${newChatId}`);
     } catch (error) {
       logger.error("Failed to branch chat:", error);
     }
-  }, [activeChatId, message.id, navigate, branchChat]);
+  }, [activeChatId, message.id, navigate, branchChat, allMessages]);
 
   const getCopyContent = useCallback(() => {
     return message.parts
