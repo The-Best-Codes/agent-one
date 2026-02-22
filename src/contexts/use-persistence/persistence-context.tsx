@@ -306,7 +306,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         setMetadata(chatId, updated);
         loadChatMessages(chatId)
           .then((messages) => {
-            persistChatData(chatId, updated, messages);
+            persistChatData(chatId, getMetadata(chatId), messages);
           })
           .catch((error) => {
             logger.error(`Failed to persist chat model for ${chatId}`, error);
@@ -326,7 +326,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         setMetadata(chatId, updated);
         loadChatMessages(chatId)
           .then((messages) => {
-            persistChatData(chatId, updated, messages);
+            persistChatData(chatId, getMetadata(chatId), messages);
           })
           .catch((error) => {
             logger.error(
@@ -355,7 +355,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         setMetadata(chatId, updated);
         loadChatMessages(chatId)
           .then((messages) => {
-            persistChatData(chatId, updated, messages);
+            persistChatData(chatId, getMetadata(chatId), messages);
           })
           .catch((error) => {
             logger.error(
@@ -389,7 +389,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         setMetadata(chatId, updated);
         loadChatMessages(chatId)
           .then((messages) => {
-            persistChatData(chatId, updated, messages);
+            persistChatData(chatId, getMetadata(chatId), messages);
           })
           .catch((error) => {
             logger.error(`Failed to persist chat title for ${chatId}`, error);
