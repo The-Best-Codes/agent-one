@@ -87,7 +87,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
 
   const persistChatIds = useCallback((ids: string[]) => {
-    chatStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
+    void chatStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
   }, []);
 
   useEffect(() => {
@@ -199,11 +199,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   const persistMetadata = useCallback((id: string, metadata: ChatMetadata) => {
-    chatStorage.setChatMetadata(id, metadata);
+    void chatStorage.setChatMetadata(id, metadata);
   }, []);
 
   const persistMessages = useCallback((id: string, messages: UIMessage[]) => {
-    chatStorage.setChatMessages(id, messages);
+    void chatStorage.setChatMessages(id, messages);
   }, []);
 
   const createChat = useCallback(
@@ -354,7 +354,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const deleteChat = useCallback(
     (chatId: string) => {
       try {
-        chatStorage.deleteChat(chatId);
+        void chatStorage.deleteChat(chatId);
         removeMetadata(chatId);
         setChatIds((currentChatIds) => {
           const next = currentChatIds.filter((id: string) => id !== chatId);
