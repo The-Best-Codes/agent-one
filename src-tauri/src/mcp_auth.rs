@@ -23,7 +23,7 @@ const OAUTH_CALLBACK_TIMEOUT_SECS: u64 = 300;
 
 fn get_client_metadata_url(port: u16) -> String {
     format!(
-        "https://auth.agent-one.dev/client-metadata.json?port={}",
+        "https://backend.agent-one.dev/mcp-oauth/client-metadata.json?port={}",
         port
     )
 }
