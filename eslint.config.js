@@ -17,7 +17,6 @@ export default [
   ...tseslint.configs.recommended,
   reactHooks.configs.flat.recommended,
   reactRefresh.configs.vite,
-  cspellESLintPluginRecommended,
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {
