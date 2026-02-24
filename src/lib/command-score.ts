@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-useless-escape */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @cspell/spellchecker */
 // See https://github.com/pacocoursey/cmdk/blob/d6fde235386414196bf80d9b9fa91e2cf89a72ea/cmdk/src/command-score.ts
 // The scores are arranged so that a continuous match of characters will
 // result in a total score of 1.
