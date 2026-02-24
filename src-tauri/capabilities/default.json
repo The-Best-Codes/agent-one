@@ -49,6 +49,7 @@
     },
     "shell:allow-kill",
     "fs:default",
+    "fs:allow-write-text-file",
     "dialog:default",
     "clipboard-manager:default",
     "clipboard-manager:allow-write-text",
