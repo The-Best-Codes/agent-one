@@ -14,6 +14,12 @@ import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -80,102 +86,149 @@ export const ChatItem = memo(
 
     return (
       <>
-        <Button
-          variant={isSelectedChat ? "secondary" : "ghost"}
-          size="sm"
-          className={cn(
-            "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
-            isSelectedChat && "border pl-[calc(0.5rem-1px)]",
-          )}
-          asChild
-          draggable={true}
-          aria-selected={isSelectedChat}
-          onDragStart={(e) => {
-            e.dataTransfer.setData(
-              "application/agent-one-chat",
-              JSON.stringify({ chatId: id, title }),
-            );
-            e.dataTransfer.effectAllowed = "copy";
-          }}
-          onClick={() =>
-            additionalOnChatClickCallback && additionalOnChatClickCallback(id)
-          }
-        >
-          <Link to={`/chat/${id}`} className="relative block overflow-hidden">
-            <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
-              <StatusIndicator status={statusIndicator} />
-              {branchOf && <SplitIcon className="text-foreground size-3" />}
-              <span className="min-w-0 truncate">{title}</span>
-            </span>
-            <div
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <Button
+              variant={isSelectedChat ? "secondary" : "ghost"}
+              size="sm"
               className={cn(
-                "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
-                isDropdownOpen ? "opacity-100" : "",
+                "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
+                isSelectedChat && "border pl-1.75",
               )}
+              asChild
+              draggable={true}
+              aria-selected={isSelectedChat}
+              onDragStart={(e) => {
+                e.dataTransfer.setData(
+                  "application/agent-one-chat",
+                  JSON.stringify({ chatId: id, title }),
+                );
+                e.dataTransfer.effectAllowed = "copy";
+              }}
+              onClick={() =>
+                additionalOnChatClickCallback &&
+                additionalOnChatClickCallback(id)
+              }
             >
-              <DropdownMenu onOpenChange={setIsDropdownOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="size-6"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
-                    <MoreHorizontalIcon />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-fit">
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      logger.verbose("Opening change title modal", {
-                        chatId: id,
-                        title,
-                      });
-                      setShowChangeTitleModal(true);
-                    }}
-                  >
-                    <PencilIcon className="size-4" />
-                    Change Title
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      logger.verbose("Opening export chat modal", {
-                        chatId: id,
-                        title,
-                      });
-                      setShowExportModal(true);
-                    }}
-                  >
-                    <DownloadIcon className="size-4" />
-                    Export Chat
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      logger.verbose("Opening delete chat modal", {
-                        chatId: id,
-                        title,
-                      });
-                      setShowDeleteModal(true);
-                    }}
-                    variant="destructive"
-                  >
-                    <TrashIcon className="size-4" />
-                    Delete Chat
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </Link>
-        </Button>
+              <Link
+                to={`/chat/${id}`}
+                className="relative block overflow-hidden"
+              >
+                <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
+                  <StatusIndicator status={statusIndicator} />
+                  {branchOf && <SplitIcon className="text-foreground size-3" />}
+                  <span className="min-w-0 truncate">{title}</span>
+                </span>
+                <div
+                  className={cn(
+                    "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+                    isDropdownOpen ? "opacity-100" : "",
+                  )}
+                >
+                  <DropdownMenu onOpenChange={setIsDropdownOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="size-6"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <MoreHorizontalIcon />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-fit">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          logger.verbose("Opening change title modal", {
+                            chatId: id,
+                            title,
+                          });
+                          setShowChangeTitleModal(true);
+                        }}
+                      >
+                        <PencilIcon className="size-4" />
+                        Change Title
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          logger.verbose("Opening export chat modal", {
+                            chatId: id,
+                            title,
+                          });
+                          setShowExportModal(true);
+                        }}
+                      >
+                        <DownloadIcon className="size-4" />
+                        Export Chat
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          logger.verbose("Opening delete chat modal", {
+                            chatId: id,
+                            title,
+                          });
+                          setShowDeleteModal(true);
+                        }}
+                        variant="destructive"
+                      >
+                        <TrashIcon className="size-4" />
+                        Delete Chat
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </Link>
+            </Button>
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem
+              onClick={() => {
+                logger.verbose("Opening change title modal", {
+                  chatId: id,
+                  title,
+                });
+                setShowChangeTitleModal(true);
+              }}
+            >
+              <PencilIcon className="size-4" />
+              Change Title
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => {
+                logger.verbose("Opening export chat modal", {
+                  chatId: id,
+                  title,
+                });
+                setShowExportModal(true);
+              }}
+            >
+              <DownloadIcon className="size-4" />
+              Export Chat
+            </ContextMenuItem>
+            <ContextMenuItem
+              variant="destructive"
+              onClick={() => {
+                logger.verbose("Opening delete chat modal", {
+                  chatId: id,
+                  title,
+                });
+                setShowDeleteModal(true);
+              }}
+            >
+              <TrashIcon className="size-4" />
+              Delete Chat
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
 
         <ChangeTitleModal
           isOpen={showChangeTitleModal}
