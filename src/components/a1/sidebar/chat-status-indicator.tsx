@@ -11,26 +11,42 @@ import {
   chatStatusIndicatorsAtom,
 } from "@/lib/jotai/atoms";
 import { showChatStatusIndicatorAtom } from "@/lib/jotai/settings-atoms";
+import { cn } from "@/lib/utils";
 
 const DEBOUNCE_MS = 150;
 
 const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
-  if (!status) return null;
+  const [prevStatus, setPrevStatus] = useState(status);
+  const [lastActiveStatus, setLastActiveStatus] = useState(status);
 
-  switch (status) {
-    case "loading":
-      return (
-        <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
-      );
-    case "error":
-      return <AlertCircleIcon className="text-destructive size-4 shrink-0" />;
-    case "unread":
-      return (
-        <CircleDotDashedIcon className="text-foreground size-4 shrink-0" />
-      );
-    default:
-      return null;
+  if (status !== prevStatus) {
+    setPrevStatus(status);
+    if (status) {
+      setLastActiveStatus(status);
+    }
   }
+
+  const isVisible = !!status;
+  const activeStatus = status || lastActiveStatus;
+
+  return (
+    <div
+      className={cn(
+        "ease flex items-center justify-center overflow-hidden transition-[width,opacity] duration-200",
+        isVisible ? "w-4 opacity-100" : "w-0 opacity-0",
+      )}
+    >
+      {activeStatus === "loading" && (
+        <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+      )}
+      {activeStatus === "error" && (
+        <AlertCircleIcon className="text-destructive size-4 shrink-0" />
+      )}
+      {activeStatus === "unread" && (
+        <CircleDotDashedIcon className="text-foreground size-4 shrink-0" />
+      )}
+    </div>
+  );
 };
 
 export const ChatStatusIndicator = ({ chatId }: { chatId: string }) => {
