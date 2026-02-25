@@ -1,8 +1,13 @@
 #!/bin/bash
 
+MANUAL_IGNORES=(
+    "package-lock.json"
+    "*.log"
+)
+
 {
     # Find all .gitignore and .prettierignore files in subdirectories
-    find . -name ".gitignore" -o -name ".prettierignore" | grep -v "^\./\.gitignore$\|^\./\.prettierignore$" | sort | while read file; do
+    find . -name ".gitignore" -o -name ".prettierignore" | grep -v "^\./\.gitignore$\|^\./\.prettierignore$" | sort | while read -r file; do
         dir=$(dirname "$file")
 
         echo "# from $file"
@@ -39,4 +44,13 @@
         # Add blank line between sections
         echo ""
     done
-} > .prettierignore
+
+    echo "# manually ignored"
+    for item in "${MANUAL_IGNORES[@]}"; do
+        echo "$item"
+    done
+
+} | awk '
+    /^$/ { if (!blank) print ""; blank=1; next }
+    { print; blank=0 }
+' | sed '${/^$/d;}' > .prettierignore

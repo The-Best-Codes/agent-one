@@ -2,6 +2,9 @@
 src/assets/fonts/**/*.ttf
 src/assets/fonts/**/static/*
 
+# from ./src/assets/mcp-registry/.prettierignore
+src/assets/mcp-registry/**/*.json
+
 # from ./src/assets/model-lists/.prettierignore
 src/assets/model-lists/**/*.json
 
@@ -33,10 +36,10 @@ src-tauri/gen/android/**/key.properties
 src-tauri/gen/android/.tauri
 src-tauri/gen/android/tauri.settings.gradle
 
-# from ./src-tauri/gen/android/.idea/.gitignore
-src-tauri/gen/android/.idea/shelf/
-src-tauri/gen/android/.idea/workspace.xml
-
 # from ./src-tauri/.gitignore
 src-tauri/target/
 src-tauri/gen/schemas
+
+# manually ignored
+package-lock.json
+*.log
