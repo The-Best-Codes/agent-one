@@ -375,7 +375,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     currentChatId,
   ]);
 
-  const messages = focusedChatInstance?.messages ?? defaultChat.messages;
+  const currentMessages =
+    focusedChatInstance?.messages ?? defaultChat.messages;
+  const prevMessagesRef = useRef<UIMessage[]>(currentMessages);
+  if (!isChatLoading) {
+    prevMessagesRef.current = currentMessages;
+  }
+  const messages = isChatLoading ? prevMessagesRef.current : currentMessages;
 
   const statusValue = useMemo(
     () => ({
