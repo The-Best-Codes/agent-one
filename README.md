@@ -72,6 +72,14 @@ See https://tauri.app/plugin/updater/.
 - `npx npm-check-updates -u` to update dependencies to the latest version (unsafe, test for breaking changes)
 - `npx actions-up` to update actions in workflows (test manually in a PR)
 
+## Testing
+
+### With Playwright
+
+- `npx -y playwright install` to download browsers
+- `npx -y playwright test` to run all tests in all projects
+- `npx -y playwright test --project="chromium-desktop-light" --project="pixel-7-dark"` to run only fast Chromium tests
+
 ---
 
 Copyright © 2026 bestcodes.dev
