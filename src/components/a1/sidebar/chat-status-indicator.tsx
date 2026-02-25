@@ -32,8 +32,8 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
   return (
     <div
       className={cn(
-        "ease flex items-center justify-center overflow-hidden transition-[width,opacity] duration-200",
-        isVisible ? "w-4 opacity-100" : "w-0 opacity-0",
+        "ease flex items-center justify-center overflow-hidden transition-[width,opacity,margin] duration-200",
+        isVisible ? "w-4 opacity-100" : "-ml-1.5 w-0 opacity-0",
       )}
     >
       {activeStatus === "loading" && (
