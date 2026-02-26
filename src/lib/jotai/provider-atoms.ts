@@ -1,3 +1,4 @@
+import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 import {
@@ -5,6 +6,7 @@ import {
   type ProviderId,
 } from "@/lib/ai/providers/registry";
 
+import { customProvidersAtom } from "./custom-provider-atoms";
 import { SETTING_PREFIX } from "./settings-atoms";
 
 export type { ProviderId } from "@/lib/ai/providers/registry";
@@ -43,3 +45,11 @@ export const providerConfigAtoms = Object.fromEntries(
 export function getProviderConfigAtom(providerId: ProviderId) {
   return providerConfigAtoms[providerId];
 }
+
+export const hasEnabledProviderAtom = atom((get) => {
+  const builtInEnabled = PROVIDER_REGISTRY.some(
+    (p) => get(providerConfigAtoms[p.id as ProviderId]).enabled,
+  );
+  if (builtInEnabled) return true;
+  return get(customProvidersAtom).some((p) => p.enabled);
+});
