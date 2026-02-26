@@ -9,12 +9,28 @@ const host = process.env.TAURI_DEV_HOST;
 const vendorManualChunks = {
   react: ["react", "react-dom", "react-dom/client"],
   reactRouter: ["react-router"],
-  aiMain: ["ai", "@ai-sdk/react", "@ai-sdk/mcp"],
-  aiSdk: [
+  aiMain: [
+    "ai",
+    "@ai-sdk/react",
+    "@ai-sdk/mcp",
+    "@ai-sdk/provider",
+    "@ai-sdk/provider-utils",
+  ],
+  aiSdkProviders: [
+    "@ai-sdk/anthropic",
+    "@ai-sdk/cohere",
+    "@ai-sdk/deepinfra",
+    "@ai-sdk/deepseek",
+    "@ai-sdk/fireworks",
     "@ai-sdk/google",
     "@ai-sdk/groq",
-    "@openrouter/ai-sdk-provider",
+    "@ai-sdk/mistral",
+    "@ai-sdk/openai",
     "@ai-sdk/openai-compatible",
+    "@ai-sdk/perplexity",
+    "@ai-sdk/togetherai",
+    "@ai-sdk/xai",
+    "@openrouter/ai-sdk-provider",
   ],
   codemirrorCore: [
     "codemirror",
@@ -55,7 +71,14 @@ const vendorManualChunks = {
     // cmdk has to go in the Radix chunk or you get import errors in prod
     "cmdk",
   ],
-  miscUi: ["vaul", "tailwind-merge", "sonner"],
+  miscUi: [
+    "vaul",
+    "tailwind-merge",
+    "sonner",
+    "class-variance-authority",
+    "clsx",
+    "fast-equals",
+  ],
 };
 
 export default defineConfig(

@@ -48,4 +48,3 @@ export interface ModelsDevProvider {
 export type ModelsDevData = Record<string, ModelsDevProvider>;
 
 export { modelsDevData };
-export type { modelsDevData as ModelsDevDataType };

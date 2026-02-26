@@ -1,62 +1,16 @@
+import { useAtomValue } from "jotai";
 import { ArrowLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
-import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import { PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
-import { useProviderState } from "@/lib/hooks/use-provider-state";
-import {
-  type ProviderConfig,
-  type ProviderId,
-} from "@/lib/jotai/provider-atoms";
+import { hasEnabledProviderAtom } from "@/lib/jotai/provider-atoms";
 import { cn } from "@/lib/utils";
-import { ProviderListItem } from "@/routes/settings/sections/providers/provider-list-item";
+import { ProvidersList } from "@/routes/settings/sections/providers/providers-list";
 
 interface AccountStepProps {
   onSubmit: () => void;
-}
-
-function ProviderItem({
-  providerId,
-  onEnabledChange,
-}: {
-  providerId: ProviderId;
-  onEnabledChange: (providerId: ProviderId, enabled: boolean) => void;
-}) {
-  const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
-  const state = useProviderState(providerId);
-
-  useEffect(() => {
-    if (state.config.enabled) {
-      onEnabledChange(providerId, true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleConfigChange = (updates: Partial<ProviderConfig>) => {
-    state.setConfig(updates);
-    if (updates.enabled !== undefined) {
-      onEnabledChange(providerId, updates.enabled);
-    }
-  };
-
-  const handleApiKeyChange = (key: string) => {
-    void state.setApiKey(key);
-  };
-
-  return (
-    <ProviderListItem
-      providerId={providerId}
-      label={provider.label}
-      config={state.config}
-      apiKey={state.apiKey}
-      hasEnvKey={state.hasEnvKey}
-      onConfigChange={handleConfigChange}
-      onApiKeyChange={handleApiKeyChange}
-    />
-  );
 }
 
 export function AccountStep({ onSubmit }: AccountStepProps) {
@@ -64,9 +18,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [enabledProviders, setEnabledProviders] = useState<Set<ProviderId>>(
-    new Set(),
-  );
+  const hasEnabledProvider = useAtomValue(hasEnabledProviderAtom);
 
   const handleViewChange = (newView: "account" | "byok") => {
     setIsExiting(true);
@@ -81,18 +33,6 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     setTimeout(() => {
       onSubmit();
     }, 500);
-  };
-
-  const handleEnabledChange = (providerId: ProviderId, enabled: boolean) => {
-    setEnabledProviders((prev) => {
-      const next = new Set(prev);
-      if (enabled) {
-        next.add(providerId);
-      } else {
-        next.delete(providerId);
-      }
-      return next;
-    });
   };
 
   if (view === "byok") {
@@ -119,24 +59,14 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
             </p>
           </div>
 
-          <Accordion
-            type="single"
-            collapsible
-            className="border-border max-h-[50svh] w-full overflow-y-auto rounded-md border"
-          >
-            {PROVIDER_REGISTRY.map((provider) => (
-              <ProviderItem
-                key={provider.id}
-                providerId={provider.id}
-                onEnabledChange={handleEnabledChange}
-              />
-            ))}
-          </Accordion>
+          <div className="max-h-[50svh] overflow-y-auto">
+            <ProvidersList />
+          </div>
 
           <div className="mt-2 flex flex-col gap-3">
             <Button
               onClick={handleSubmit}
-              disabled={enabledProviders.size < 1 || isSubmitting}
+              disabled={!hasEnabledProvider || isSubmitting}
               className="w-full"
             >
               Finish Setup
