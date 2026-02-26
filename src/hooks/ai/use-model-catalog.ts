@@ -57,6 +57,16 @@ const PREFERRED_MODELS_BY_PROVIDER: Record<ProviderId, string[]> = {
   groq: ["groq-moonshotai/kimi-k2-instruct-0905"],
   google: ["google-gemini-2.5-flash"],
   cerebras: ["cerebras-zai-glm-4.7"],
+  openai: ["openai-gpt-5.2-chat-latest"],
+  anthropic: ["anthropic-claude-sonnet-4-6"],
+  mistral: ["mistral-devstral-medium-2507"],
+  deepseek: ["deepseek-deepseek-chat"],
+  xai: ["xai-grok-4-1-fast"],
+  cohere: ["cohere-command-a-reasoning-08-2025"],
+  deepinfra: ["deepinfra-moonshotai/Kimi-K2.5"],
+  perplexity: ["perplexity-sonar-deep-research"],
+  togetherai: ["togetherai-moonshotai/Kimi-K2.5"],
+  "fireworks-ai": ["fireworks-ai-accounts/fireworks/models/kimi-k2p5"],
 };
 
 const typedModelsDevData = modelsDevData as unknown as ModelsDevData;
@@ -115,11 +125,31 @@ export function useModelCatalog() {
   const groqKey = useAtomValue(apiKeyAtoms.groq.atom);
   const googleKey = useAtomValue(apiKeyAtoms.google.atom);
   const cerebrasKey = useAtomValue(apiKeyAtoms.cerebras.atom);
+  const openaiKey = useAtomValue(apiKeyAtoms.openai.atom);
+  const anthropicKey = useAtomValue(apiKeyAtoms.anthropic.atom);
+  const mistralKey = useAtomValue(apiKeyAtoms.mistral.atom);
+  const deepseekKey = useAtomValue(apiKeyAtoms.deepseek.atom);
+  const xaiKey = useAtomValue(apiKeyAtoms.xai.atom);
+  const cohereKey = useAtomValue(apiKeyAtoms.cohere.atom);
+  const deepinfraKey = useAtomValue(apiKeyAtoms.deepinfra.atom);
+  const perplexityKey = useAtomValue(apiKeyAtoms.perplexity.atom);
+  const togetheraiKey = useAtomValue(apiKeyAtoms.togetherai.atom);
+  const fireworksAiKey = useAtomValue(apiKeyAtoms["fireworks-ai"].atom);
 
   const openrouterConfig = useAtomValue(providerConfigAtoms.openrouter);
   const groqConfig = useAtomValue(providerConfigAtoms.groq);
   const googleConfig = useAtomValue(providerConfigAtoms.google);
   const cerebrasConfig = useAtomValue(providerConfigAtoms.cerebras);
+  const openaiConfig = useAtomValue(providerConfigAtoms.openai);
+  const anthropicConfig = useAtomValue(providerConfigAtoms.anthropic);
+  const mistralConfig = useAtomValue(providerConfigAtoms.mistral);
+  const deepseekConfig = useAtomValue(providerConfigAtoms.deepseek);
+  const xaiConfig = useAtomValue(providerConfigAtoms.xai);
+  const cohereConfig = useAtomValue(providerConfigAtoms.cohere);
+  const deepinfraConfig = useAtomValue(providerConfigAtoms.deepinfra);
+  const perplexityConfig = useAtomValue(providerConfigAtoms.perplexity);
+  const togetheraiConfig = useAtomValue(providerConfigAtoms.togetherai);
+  const fireworksAiConfig = useAtomValue(providerConfigAtoms["fireworks-ai"]);
 
   const customProviders = useAtomValue(customProvidersAtom);
   const customProviderApiKeys = useAtomValue(customProviderApiKeysAtom);
@@ -130,8 +160,33 @@ export function useModelCatalog() {
       groq: groqKey,
       google: googleKey,
       cerebras: cerebrasKey,
+      openai: openaiKey,
+      anthropic: anthropicKey,
+      mistral: mistralKey,
+      deepseek: deepseekKey,
+      xai: xaiKey,
+      cohere: cohereKey,
+      deepinfra: deepinfraKey,
+      perplexity: perplexityKey,
+      togetherai: togetheraiKey,
+      "fireworks-ai": fireworksAiKey,
     }),
-    [openrouterKey, groqKey, googleKey, cerebrasKey],
+    [
+      openrouterKey,
+      groqKey,
+      googleKey,
+      cerebrasKey,
+      openaiKey,
+      anthropicKey,
+      mistralKey,
+      deepseekKey,
+      xaiKey,
+      cohereKey,
+      deepinfraKey,
+      perplexityKey,
+      togetheraiKey,
+      fireworksAiKey,
+    ],
   );
 
   const configs = useMemo(
@@ -140,8 +195,33 @@ export function useModelCatalog() {
       groq: groqConfig,
       google: googleConfig,
       cerebras: cerebrasConfig,
+      openai: openaiConfig,
+      anthropic: anthropicConfig,
+      mistral: mistralConfig,
+      deepseek: deepseekConfig,
+      xai: xaiConfig,
+      cohere: cohereConfig,
+      deepinfra: deepinfraConfig,
+      perplexity: perplexityConfig,
+      togetherai: togetheraiConfig,
+      "fireworks-ai": fireworksAiConfig,
     }),
-    [openrouterConfig, groqConfig, googleConfig, cerebrasConfig],
+    [
+      openrouterConfig,
+      groqConfig,
+      googleConfig,
+      cerebrasConfig,
+      openaiConfig,
+      anthropicConfig,
+      mistralConfig,
+      deepseekConfig,
+      xaiConfig,
+      cohereConfig,
+      deepinfraConfig,
+      perplexityConfig,
+      togetheraiConfig,
+      fireworksAiConfig,
+    ],
   );
 
   const providerHasApiKey = useMemo(
