@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Accordion } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import {
+  getProviderById,
   PROVIDER_REGISTRY,
   type ProviderId,
 } from "@/lib/ai/providers/registry";
@@ -24,7 +25,7 @@ import { CustomProviderListItem } from "./custom-provider-list-item";
 import { ProviderListItem } from "./provider-list-item";
 
 function ProviderItem({ providerId }: { providerId: ProviderId }) {
-  const provider = PROVIDER_REGISTRY.find((p) => p.id === providerId)!;
+  const provider = getProviderById(providerId);
   const state = useProviderState(providerId);
 
   return (
