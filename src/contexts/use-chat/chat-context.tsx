@@ -375,8 +375,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     currentChatId,
   ]);
 
-  const currentMessages =
-    focusedChatInstance?.messages ?? defaultChat.messages;
+  const currentMessages = focusedChatInstance?.messages ?? defaultChat.messages;
   const prevMessagesRef = useRef<UIMessage[]>(currentMessages);
   if (!isChatLoading) {
     prevMessagesRef.current = currentMessages;
