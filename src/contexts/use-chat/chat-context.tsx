@@ -26,6 +26,7 @@ import {
   ChatFunctionsContext,
   ChatLoadingContext,
   ChatMessagesContext,
+  ChatMetadataContext,
   ChatStatusContext,
 } from "./chat-contexts";
 import { ChatInstance } from "./chat-instance";
@@ -322,6 +323,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   const defaultChat = useChat(
     defaultModelForNewChats?.model ?? null,
+    defaultModelForNewChats?.id ?? null,
     defaultModelConfigForNewChats,
   );
 
@@ -394,6 +396,19 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       defaultChat.error,
     ],
   );
+
+  const metadataValue = currentChatId
+    ? loadChatMetadata(currentChatId)
+    : {
+        title: "New chat",
+        titleState: undefined,
+        modelId: undefined,
+        modelConfig: undefined,
+        branchOf: undefined,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalCostUsd: 0,
+      };
 
   const instanceForFunctions = focusedChatInstance || defaultChat;
   const {
@@ -529,11 +544,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       })}
       <ChatMessagesContext.Provider value={messages}>
         <ChatStatusContext.Provider value={statusValue}>
-          <ChatLoadingContext.Provider value={isChatLoading}>
-            <ChatFunctionsContext.Provider value={functionsValue}>
-              {children}
-            </ChatFunctionsContext.Provider>
-          </ChatLoadingContext.Provider>
+          <ChatMetadataContext.Provider value={metadataValue}>
+            <ChatLoadingContext.Provider value={isChatLoading}>
+              <ChatFunctionsContext.Provider value={functionsValue}>
+                {children}
+              </ChatFunctionsContext.Provider>
+            </ChatLoadingContext.Provider>
+          </ChatMetadataContext.Provider>
         </ChatStatusContext.Provider>
       </ChatMessagesContext.Provider>
     </ModelContext.Provider>

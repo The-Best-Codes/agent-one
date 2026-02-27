@@ -7,6 +7,7 @@ import {
   type AutoScrollHandle,
 } from "@/components/a1/auto-scroll-container";
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
+import { ChatUsageStatus } from "@/components/a1/chat-usage-status";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
@@ -49,6 +50,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   return (
     <main className="flex h-svh" role="main" data-testid="main">
       <Sidebar />
+      <ChatUsageStatus />
 
       <div
         className="flex min-w-0 flex-1 flex-col items-center justify-center"

@@ -56,7 +56,8 @@ export const ChatInstance = memo(
       usePersistence();
     const chatIds = useAtomValue(chatIdsAtom);
 
-    const chat = useChat(model, modelConfig, {
+    const chatModelId = loadChatMetadata(chatId).modelId ?? null;
+    const chat = useChat(model, chatModelId, modelConfig, {
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
