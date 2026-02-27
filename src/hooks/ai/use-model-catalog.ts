@@ -53,6 +53,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
 const PREFERRED_MODELS_BY_PROVIDER: Record<ProviderId, string[]> = {
+  "agent-one": ["agent-one-balanced"],
   openrouter: ["openrouter-x-ai/grok-4.1-fast"],
   groq: ["groq-moonshotai/kimi-k2-instruct-0905"],
   google: ["google-gemini-2.5-flash"],
@@ -121,6 +122,7 @@ function isImageModel(model: ModelsDevModel): boolean {
 }
 
 export function useModelCatalog() {
+  const agentOneKey = useAtomValue(apiKeyAtoms["agent-one"].atom);
   const openrouterKey = useAtomValue(apiKeyAtoms.openrouter.atom);
   const groqKey = useAtomValue(apiKeyAtoms.groq.atom);
   const googleKey = useAtomValue(apiKeyAtoms.google.atom);
@@ -136,6 +138,7 @@ export function useModelCatalog() {
   const togetheraiKey = useAtomValue(apiKeyAtoms.togetherai.atom);
   const fireworksAiKey = useAtomValue(apiKeyAtoms["fireworks-ai"].atom);
 
+  const agentOneConfig = useAtomValue(providerConfigAtoms["agent-one"]);
   const openrouterConfig = useAtomValue(providerConfigAtoms.openrouter);
   const groqConfig = useAtomValue(providerConfigAtoms.groq);
   const googleConfig = useAtomValue(providerConfigAtoms.google);
@@ -156,6 +159,7 @@ export function useModelCatalog() {
 
   const apiKeys = useMemo(
     () => ({
+      "agent-one": agentOneKey,
       openrouter: openrouterKey,
       groq: groqKey,
       google: googleKey,
@@ -172,6 +176,7 @@ export function useModelCatalog() {
       "fireworks-ai": fireworksAiKey,
     }),
     [
+      agentOneKey,
       openrouterKey,
       groqKey,
       googleKey,
@@ -191,6 +196,7 @@ export function useModelCatalog() {
 
   const configs = useMemo(
     () => ({
+      "agent-one": agentOneConfig,
       openrouter: openrouterConfig,
       groq: groqConfig,
       google: googleConfig,
@@ -207,6 +213,7 @@ export function useModelCatalog() {
       "fireworks-ai": fireworksAiConfig,
     }),
     [
+      agentOneConfig,
       openrouterConfig,
       groqConfig,
       googleConfig,
