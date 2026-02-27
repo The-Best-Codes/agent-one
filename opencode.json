@@ -7,5 +7,19 @@
       "disabled": true
     }
   },
+  "provider": {
+    "openrouter-new": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Updated OpenRouter",
+      "options": {
+        "baseURL": "https://openrouter.ai/api/v1"
+      },
+      "models": {
+        "gpt-5.3-codex": {
+          "name": "GPT 5.3 Codex"
+        }
+      }
+    }
+  },
   "$schema": "https://opencode.ai/config.json"
 }
