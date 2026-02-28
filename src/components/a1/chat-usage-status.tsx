@@ -1,24 +1,10 @@
+import NumberFlow from "@number-flow/react";
 import { useAtom } from "jotai";
 
 import { useChatMetadata } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
-
-function formatTokenCount(value: number | undefined): string {
-  return Intl.NumberFormat("en-US").format(value ?? 0);
-}
-
-function formatCostUsd(value: number | undefined): string {
-  const amount = value ?? 0;
-  if (amount >= 1) {
-    return `$${amount.toFixed(2)}`;
-  }
-  if (amount >= 0.01) {
-    return `$${amount.toFixed(3)}`;
-  }
-  return `$${amount.toFixed(4)}`;
-}
 
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
@@ -33,24 +19,31 @@ export const ChatUsageStatus = () => {
         isSidebarSmall ? "ml-24" : "ml-64",
       )}
     >
-      <div className="bg-background border-sidebar-border text-muted-foreground flex items-center gap-2 rounded-br-md border-r border-b px-2 py-2 text-xs md:rounded-md md:border">
+      <div className="bg-background border-sidebar-border text-muted-foreground flex items-center gap-2 rounded-br-md border-r border-b px-2 py-1.5 text-xs md:rounded-md md:border">
         <span>
           In{" "}
-          <span className="text-foreground">
-            {formatTokenCount(metadata.inputTokens)}
-          </span>
+          <NumberFlow
+            value={Number(metadata.inputTokens)}
+            className="text-foreground"
+          />
         </span>
         <span>
           Out{" "}
-          <span className="text-foreground">
-            {formatTokenCount(metadata.outputTokens)}
-          </span>
+          <NumberFlow
+            value={Number(metadata.outputTokens)}
+            className="text-foreground"
+          />
         </span>
         <span>
           Cost{" "}
-          <span className="text-foreground">
-            {formatCostUsd(metadata.totalCostUsd)}
-          </span>
+          <NumberFlow
+            value={Number(metadata.totalCostUsd)}
+            format={{
+              style: "currency",
+              currency: "USD",
+            }}
+            className="text-foreground"
+          />
         </span>
       </div>
     </div>
