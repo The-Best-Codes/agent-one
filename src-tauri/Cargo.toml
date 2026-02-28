@@ -56,7 +56,7 @@ keyring = { version = "3.6.3", features = [
 tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
 axum = "0.8.8"
 url = "2.5.8"
-rmcp = { version = "0.16.0", features = [
+rmcp = { version = "0.17.0", features = [
     "auth",
     "client",
     "transport-streamable-http-client",

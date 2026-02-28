@@ -371,6 +371,12 @@ pub async fn mcp_authenticate(
             client_id,
             token_response,
             granted_scopes: Vec::new(),
+            token_received_at: Some(
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|d| d.as_secs())
+                    .unwrap_or(0),
+            ),
         })
         .await
         .map_err(|e| e.to_string())?;
