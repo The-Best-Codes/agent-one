@@ -19,7 +19,7 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
-const CHAT_LOADING_SPINNER_DELAY_MS = 500;
+export const CHAT_LOADING_SPINNER_DELAY_MS = 500;
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();

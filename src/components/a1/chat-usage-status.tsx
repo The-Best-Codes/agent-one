@@ -16,6 +16,7 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
+import { CHAT_LOADING_SPINNER_DELAY_MS } from "@/routes/chat";
 
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
@@ -36,7 +37,7 @@ export const ChatUsageStatus = () => {
 
     const timer = setTimeout(() => {
       setDelayPassed(true);
-    }, 500);
+    }, CHAT_LOADING_SPINNER_DELAY_MS);
 
     return () => {
       clearTimeout(timer);
