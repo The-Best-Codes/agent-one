@@ -16,41 +16,49 @@ import {
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
-import { CHAT_LOADING_SPINNER_DELAY_MS } from "@/routes/chat";
+
+const CHAT_USAGE_LOADING_DELAY_MS = 500;
 
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
   const isChatLoading = useChatLoading();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
   const [delayPassed, setDelayPassed] = useState(false);
-  const [staleMetadata, setStaleMetadata] = useState<typeof metadata | null>(
-    null,
-  );
+  const [staleMetadata, setStaleMetadata] = useState(metadata);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
 
   useEffect(() => {
-    if (!isChatLoading) {
+    if (isChatLoading) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
       setStaleMetadata(metadata);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [isChatLoading, metadata]);
+
+  useEffect(() => {
+    if (!isChatLoading) {
       return;
     }
 
     const timer = setTimeout(() => {
       setDelayPassed(true);
-    }, CHAT_LOADING_SPINNER_DELAY_MS);
+    }, CHAT_USAGE_LOADING_DELAY_MS);
 
     return () => {
       clearTimeout(timer);
       setDelayPassed(false);
     };
-  }, [isChatLoading, metadata]);
+  }, [isChatLoading]);
 
   const showSkeleton = isChatLoading && delayPassed;
-  const displayedMetadata = showSkeleton
-    ? null
-    : isChatLoading
-      ? (staleMetadata ?? metadata)
-      : metadata;
+  const displayedMetadata = isChatLoading ? staleMetadata : metadata;
 
   return (
     <div
@@ -60,7 +68,7 @@ export const ChatUsageStatus = () => {
       )}
     >
       <div className="bg-background border-sidebar-border text-muted-foreground flex items-center gap-2 rounded-br-md border-r border-b px-2 py-1.5 text-xs md:rounded-md md:border">
-        {displayedMetadata === null ? (
+        {showSkeleton ? (
           <>
             <Skeleton className="h-5 w-12" />
             <Skeleton className="h-5 w-12" />

@@ -39,6 +39,8 @@ interface ModelSelectorProps {
   loading?: boolean;
 }
 
+const MODEL_SELECTOR_LOADING_DELAY_MS = 500;
+
 interface ModelListProps {
   filteredModels: ModelData[];
   currentModel: ModelData | undefined;
@@ -124,14 +126,40 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 }) => {
   const { currentModel, setModel } = useModel();
   const [open, setOpen] = useState(false);
+  const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
+  const staleModelRef = useRef(currentModel);
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
 
+  if (!loading) {
+    staleModelRef.current = currentModel;
+  }
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setLoadingDelayPassed(true);
+    }, MODEL_SELECTOR_LOADING_DELAY_MS);
+
+    return () => {
+      clearTimeout(timer);
+      setLoadingDelayPassed(false);
+    };
+  }, [loading]);
+
   const modelsWithApiKey = AVAILABLE_CHAT_MODELS_WITH_API_KEY;
-  const effectiveOpen = disabled ? false : open;
+  const shouldShowLoadingSkeleton = loading && loadingDelayPassed;
+  const effectiveDisabled = disabled || loading;
+  const effectiveOpen = effectiveDisabled ? false : open;
+  const displayedModel = loading
+    ? (staleModelRef.current ?? currentModel)
+    : currentModel;
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -186,15 +214,15 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     }
   };
 
-  const triggerContent = currentModel ? (
+  const triggerContent = displayedModel ? (
     <>
       <div className="min-w-0 flex-1">
         <div className="scrollbar-size-xs w-full overflow-x-auto" tabIndex={0}>
           <div className="w-full text-left whitespace-nowrap">
             <span className="text-muted-foreground text-xs">
-              {currentModel.provider}/
+              {displayedModel.provider}/
             </span>
-            <span className="font-medium">{currentModel.name}</span>
+            <span className="font-medium">{displayedModel.name}</span>
           </div>
         </div>
       </div>
@@ -209,9 +237,11 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     </>
   );
 
-  const modelLabel = currentModel ? `Model: ${currentModel.name}` : "No model";
+  const modelLabel = displayedModel
+    ? `Model: ${displayedModel.name}`
+    : "No model";
 
-  if (isApiKeysLoading || loading) {
+  if (isApiKeysLoading || shouldShowLoadingSkeleton) {
     return <Skeleton className={cn("h-9 w-full", className)} />;
   }
 
@@ -224,7 +254,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-expanded={effectiveOpen}
           className={cn("w-full justify-between", className)}
           aria-label={modelLabel}
-          disabled={disabled}
+          disabled={effectiveDisabled}
         >
           {triggerContent}
         </Button>
@@ -253,7 +283,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           aria-expanded={effectiveOpen}
           className={cn("w-full justify-between", className)}
           aria-label={modelLabel}
-          disabled={disabled}
+          disabled={effectiveDisabled}
         >
           {triggerContent}
         </Button>
