@@ -7,5 +7,27 @@
       "disabled": true
     }
   },
+  "provider": {
+    "openrouter-new": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Updated OpenRouter",
+      "options": {
+        "baseURL": "https://openrouter.ai/api/v1"
+      },
+      "models": {
+        "gpt-5.3-codex": {
+          "name": "GPT 5.3 Codex",
+          "cost": {
+            "input": 1.75,
+            "output": 14.0
+          },
+          "limit": {
+            "context": 400000,
+            "output": 128000
+          }
+        }
+      }
+    }
+  },
   "$schema": "https://opencode.ai/config.json"
 }

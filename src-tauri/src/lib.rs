@@ -81,12 +81,20 @@ pub fn run() {
             tauri_plugin_sql::Builder::default()
                 .add_migrations(
                     "sqlite:agent-one.db",
-                    vec![tauri_plugin_sql::Migration {
-                        version: 1,
-                        description: "create_initial_tables",
-                        sql: include_str!("../migrations/0001_create_tables.sql"),
-                        kind: tauri_plugin_sql::MigrationKind::Up,
-                    }],
+                    vec![
+                        tauri_plugin_sql::Migration {
+                            version: 1,
+                            description: "create_initial_tables",
+                            sql: include_str!("../migrations/0001_create_tables.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
+                        tauri_plugin_sql::Migration {
+                            version: 2,
+                            description: "add_chat_usage_columns",
+                            sql: include_str!("../migrations/0002_add_chat_usage_columns.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
+                    ],
                 )
                 .build(),
         )

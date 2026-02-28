@@ -47,6 +47,7 @@
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.39.15",
     "@eslint/js": "^10.0.1",
+    "@number-flow/react": "^0.5.14",
     "@openrouter/ai-sdk-provider": "^2.2.3",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-checkbox": "^1.3.3",

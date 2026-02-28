@@ -13,6 +13,7 @@ import {
   DEFAULT_MODEL_CONFIG,
   type ModelConfig,
 } from "@/hooks/ai/use-model-catalog";
+import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { chatStorage } from "@/lib/storage/chat-storage";
@@ -27,6 +28,9 @@ export interface ChatMetadata {
   modelId?: string;
   modelConfig?: ModelConfig;
   branchOf?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  totalCostUsd?: number;
 }
 
 export interface ChatData extends ChatMetadata {
@@ -73,6 +77,9 @@ const DEFAULT_METADATA: ChatMetadata = {
   modelId: undefined,
   modelConfig: undefined,
   branchOf: undefined,
+  inputTokens: 0,
+  outputTokens: 0,
+  totalCostUsd: 0,
 };
 
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
@@ -215,6 +222,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         modelId,
         modelConfig,
         branchOf: undefined,
+        inputTokens: 0,
+        outputTokens: 0,
+        totalCostUsd: 0,
       };
       setMetadata(id, metadata);
       persistMetadata(id, metadata);
@@ -279,12 +289,22 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
   const saveChat = useCallback(
     ({ chatId, messages }: { chatId: string; messages: UIMessage[] }) => {
       try {
+        const usage = calculateChatUsageFromMessages(messages);
+        const updatedMetadata: ChatMetadata = {
+          ...getMetadata(chatId),
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+          totalCostUsd: usage.totalCostUsd,
+        };
+
+        setMetadata(chatId, updatedMetadata);
+        persistMetadata(chatId, updatedMetadata);
         persistMessages(chatId, messages);
       } catch (error) {
         logger.error(`Failed to save chat ${chatId}`, error);
       }
     },
-    [persistMessages],
+    [getMetadata, setMetadata, persistMetadata, persistMessages],
   );
 
   const saveChatModel = useCallback(
@@ -393,6 +413,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
         }
 
         const branchedMessages = messages.slice(0, branchIndex + 1);
+        const branchUsage = calculateChatUsageFromMessages(branchedMessages);
 
         const newId = generateId();
         const newMetadata: ChatMetadata = {
@@ -401,6 +422,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
           modelId: originalMetadata.modelId,
           modelConfig: originalMetadata.modelConfig || DEFAULT_MODEL_CONFIG,
           branchOf: originalChatId,
+          inputTokens: branchUsage.inputTokens,
+          outputTokens: branchUsage.outputTokens,
+          totalCostUsd: branchUsage.totalCostUsd,
         };
 
         setMetadata(newId, newMetadata);

@@ -29,6 +29,7 @@ for (const [providerId, provider] of Object.entries(data)) {
       modalities: {
         output: model.modalities?.output,
       },
+      cost: model.cost,
     };
   }
 

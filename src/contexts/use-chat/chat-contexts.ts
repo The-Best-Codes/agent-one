@@ -3,6 +3,7 @@ import { createContext } from "react";
 import type {
   ChatFunctionsContextType,
   ChatMessagesContextType,
+  ChatMetadataContextType,
   ChatStatusContextType,
 } from "./chat-hooks";
 
@@ -12,6 +13,9 @@ export const ChatMessagesContext = createContext<
 >(undefined);
 export const ChatStatusContext = createContext<
   ChatStatusContextType | undefined
+>(undefined);
+export const ChatMetadataContext = createContext<
+  ChatMetadataContextType | undefined
 >(undefined);
 export const ChatLoadingContext = createContext<boolean>(false);
 export const ChatFunctionsContext = createContext<
