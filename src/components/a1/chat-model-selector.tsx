@@ -126,15 +126,15 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const { currentModel, setModel } = useModel();
   const [open, setOpen] = useState(false);
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
+  const [staleModel, setStaleModel] = useState(currentModel);
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
-  const staleModelRef = useRef(currentModel);
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
 
-  if (!loading) {
-    staleModelRef.current = currentModel;
+  if (!loading && staleModel !== currentModel) {
+    setStaleModel(currentModel);
   }
 
   useEffect(() => {
@@ -156,9 +156,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const shouldShowLoadingSkeleton = loading && loadingDelayPassed;
   const effectiveDisabled = disabled || loading;
   const effectiveOpen = effectiveDisabled ? false : open;
-  const displayedModel = loading
-    ? (staleModelRef.current ?? currentModel)
-    : currentModel;
+  const displayedModel = loading ? (staleModel ?? currentModel) : currentModel;
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {

@@ -27,19 +27,9 @@ export const ChatUsageStatus = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
 
-  useEffect(() => {
-    if (isChatLoading) {
-      return;
-    }
-
-    const frame = requestAnimationFrame(() => {
-      setStaleMetadata(metadata);
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }, [isChatLoading, metadata]);
+  if (!isChatLoading && staleMetadata !== metadata) {
+    setStaleMetadata(metadata);
+  }
 
   useEffect(() => {
     if (!isChatLoading) {
