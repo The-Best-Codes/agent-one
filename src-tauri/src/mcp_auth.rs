@@ -412,11 +412,6 @@ async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, St
 
     if initialized {
         auth_manager
-            .refresh_token()
-            .await
-            .map_err(|e| e.to_string())?;
-
-        auth_manager
             .get_access_token()
             .await
             .map_err(|e| e.to_string())
