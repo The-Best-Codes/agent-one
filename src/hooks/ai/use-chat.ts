@@ -22,6 +22,7 @@ type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
 
 export function useChat(
   model: LanguageModel | null,
+  modelId: string | null,
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
 ) {
@@ -34,6 +35,7 @@ export function useChat(
     () =>
       new CustomChatTransport(
         model,
+        modelId,
         modelConfig,
         smoothStreamEnabled,
         getTools,
@@ -46,6 +48,11 @@ export function useChat(
     transport.updateModel(model);
     logger.verbose("Updated chat transport with new model:", model);
   }, [model, transport]);
+
+  useEffect(() => {
+    transport.updateModelId(modelId);
+    logger.verbose("Updated chat transport with new model id:", modelId);
+  }, [modelId, transport]);
 
   useEffect(() => {
     transport.updateModelConfig(modelConfig);

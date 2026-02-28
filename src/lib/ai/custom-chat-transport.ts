@@ -4,6 +4,7 @@ import {
   type ChatTransport,
   convertToModelMessages,
   type LanguageModel,
+  type LanguageModelUsage,
   smoothStream,
   streamText,
   type ToolSet,
@@ -11,12 +12,18 @@ import {
 } from "ai";
 
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import {
+  calculateCostUsdFromUsage,
+  type ChatMessageMetadata,
+  getModelCostByChatModelId,
+} from "@/lib/ai/chat-usage";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
+  private modelId: string | null;
   private modelConfig: ModelConfig;
   private smoothStreamEnabled: boolean;
   private getTools: () => Promise<ToolSet>;
@@ -25,6 +32,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
   constructor(
     model: LanguageModel | null,
+    modelId: string | null,
     modelConfig: ModelConfig,
     smoothStreamEnabled: boolean,
     getTools: () => Promise<ToolSet>,
@@ -32,6 +40,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     getApiKeysLoadedPromise: () => Promise<void>,
   ) {
     this.model = model;
+    this.modelId = modelId;
     this.modelConfig = modelConfig;
     this.smoothStreamEnabled = smoothStreamEnabled;
     this.getTools = getTools;
@@ -42,6 +51,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   updateModel(model: LanguageModel | null) {
     this.model = model;
     logger.verbose("CustomChatTransport model updated to:", model);
+  }
+
+  updateModelId(modelId: string | null) {
+    this.modelId = modelId;
+    logger.verbose("CustomChatTransport modelId updated to:", modelId);
   }
 
   updateModelConfig(config: ModelConfig) {
@@ -116,6 +130,26 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     });
 
     return result.toUIMessageStream({
+      messageMetadata: ({ part }) => {
+        if (part.type !== "finish") {
+          return undefined;
+        }
+
+        const usage: LanguageModelUsage = part.totalUsage;
+        const inputTokens = usage.inputTokens ?? 0;
+        const outputTokens = usage.outputTokens ?? 0;
+        const modelCost = getModelCostByChatModelId(this.modelId ?? undefined);
+        const totalCostUsd = calculateCostUsdFromUsage(usage, modelCost);
+
+        const metadata: ChatMessageMetadata = {
+          modelId: this.modelId ?? undefined,
+          inputTokens,
+          outputTokens,
+          totalCostUsd,
+        };
+
+        return metadata;
+      },
       onError: (error) => {
         logger.error(
           "Error occurred in CustomChatTransport toUIMessageStream:",

@@ -13,6 +13,7 @@ import { useLocation, useNavigate, useParams } from "react-router";
 
 import { ModelContext } from "@/contexts/use-model/model-contexts";
 import { useModel } from "@/contexts/use-model/model-hooks";
+import { type ChatMetadata } from "@/contexts/use-persistence/persistence-context";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
@@ -26,6 +27,7 @@ import {
   ChatFunctionsContext,
   ChatLoadingContext,
   ChatMessagesContext,
+  ChatMetadataContext,
   ChatStatusContext,
 } from "./chat-contexts";
 import { ChatInstance } from "./chat-instance";
@@ -33,6 +35,17 @@ import { ChatInstance } from "./chat-instance";
 const logger = getLogger(import.meta.url);
 
 type ChatInstanceCollection = Map<string, UseChatHelpers<UIMessage>>;
+
+const DEFAULT_CHAT_METADATA: ChatMetadata = {
+  title: "New chat",
+  titleState: undefined,
+  modelId: undefined,
+  modelConfig: undefined,
+  branchOf: undefined,
+  inputTokens: 0,
+  outputTokens: 0,
+  totalCostUsd: 0,
+};
 
 export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const {
@@ -322,6 +335,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   const defaultChat = useChat(
     defaultModelForNewChats?.model ?? null,
+    defaultModelForNewChats?.id ?? null,
     defaultModelConfigForNewChats,
   );
 
@@ -394,6 +408,10 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       defaultChat.error,
     ],
   );
+
+  const metadataValue = currentChatId
+    ? loadChatMetadata(currentChatId)
+    : DEFAULT_CHAT_METADATA;
 
   const instanceForFunctions = focusedChatInstance || defaultChat;
   const {
@@ -529,11 +547,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       })}
       <ChatMessagesContext.Provider value={messages}>
         <ChatStatusContext.Provider value={statusValue}>
-          <ChatLoadingContext.Provider value={isChatLoading}>
-            <ChatFunctionsContext.Provider value={functionsValue}>
-              {children}
-            </ChatFunctionsContext.Provider>
-          </ChatLoadingContext.Provider>
+          <ChatMetadataContext.Provider value={metadataValue}>
+            <ChatLoadingContext.Provider value={isChatLoading}>
+              <ChatFunctionsContext.Provider value={functionsValue}>
+                {children}
+              </ChatFunctionsContext.Provider>
+            </ChatLoadingContext.Provider>
+          </ChatMetadataContext.Provider>
         </ChatStatusContext.Provider>
       </ChatMessagesContext.Provider>
     </ModelContext.Provider>
