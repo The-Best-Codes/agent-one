@@ -1,16 +1,55 @@
 import NumberFlow from "@number-flow/react";
 import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 
-import { useChatMetadata } from "@/contexts/use-chat/chat-hooks";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipRoot,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  useChatLoading,
+  useChatMetadata,
+} from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
+  const isChatLoading = useChatLoading();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
+  const [delayPassed, setDelayPassed] = useState(false);
+  const [staleMetadata, setStaleMetadata] = useState<typeof metadata | null>(
+    null,
+  );
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
+
+  useEffect(() => {
+    if (!isChatLoading) {
+      setStaleMetadata(metadata);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setDelayPassed(true);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+      setDelayPassed(false);
+    };
+  }, [isChatLoading, metadata]);
+
+  const showSkeleton = isChatLoading && delayPassed;
+  const displayedMetadata = showSkeleton
+    ? null
+    : isChatLoading
+      ? (staleMetadata ?? metadata)
+      : metadata;
 
   return (
     <div
@@ -20,31 +59,52 @@ export const ChatUsageStatus = () => {
       )}
     >
       <div className="bg-background border-sidebar-border text-muted-foreground flex items-center gap-2 rounded-br-md border-r border-b px-2 py-1.5 text-xs md:rounded-md md:border">
-        <span>
-          In{" "}
-          <NumberFlow
-            value={Number(metadata.inputTokens)}
-            className="text-foreground"
-          />
-        </span>
-        <span>
-          Out{" "}
-          <NumberFlow
-            value={Number(metadata.outputTokens)}
-            className="text-foreground"
-          />
-        </span>
-        <span>
-          Cost{" "}
-          <NumberFlow
-            value={Number(metadata.totalCostUsd)}
-            format={{
-              style: "currency",
-              currency: "USD",
-            }}
-            className="text-foreground"
-          />
-        </span>
+        {displayedMetadata === null ? (
+          <>
+            <Skeleton className="h-5 w-12" />
+            <Skeleton className="h-5 w-12" />
+            <Skeleton className="h-5 w-8" />
+          </>
+        ) : (
+          <TooltipProvider>
+            <TooltipRoot>
+              <TooltipTrigger asChild>
+                <div className="flex cursor-help items-center gap-2">
+                  <span>
+                    In{" "}
+                    <NumberFlow
+                      value={Number(displayedMetadata.inputTokens)}
+                      className="text-foreground"
+                    />
+                  </span>
+                  <span>
+                    Out{" "}
+                    <NumberFlow
+                      value={Number(displayedMetadata.outputTokens)}
+                      className="text-foreground"
+                    />
+                  </span>
+                  <span>
+                    Cost{" "}
+                    <NumberFlow
+                      value={Number(displayedMetadata.totalCostUsd)}
+                      format={{
+                        style: "currency",
+                        currency: "USD",
+                      }}
+                      className="text-foreground"
+                    />
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                Input tokens are what you send; output tokens are what the model
+                returns. Cost is shown in USD. Edits and deleted messages are
+                not included in these stats.
+              </TooltipContent>
+            </TooltipRoot>
+          </TooltipProvider>
+        )}
       </div>
     </div>
   );
