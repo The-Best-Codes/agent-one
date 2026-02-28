@@ -15,6 +15,7 @@ import {
   type ProviderId,
 } from "@/lib/ai/providers/registry";
 import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
+import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { customProviderApiKeysAtom } from "@/lib/jotai/custom-provider-api-key-atoms";
 import {
   type CustomProvider,
@@ -122,6 +123,7 @@ function isImageModel(model: ModelsDevModel): boolean {
 }
 
 export function useModelCatalog() {
+  const hideAgentOneModels = useAtomValue(hideAgentOneModelsAtom);
   const agentOneKey = useAtomValue(apiKeyAtoms["agent-one"].atom);
   const openrouterKey = useAtomValue(apiKeyAtoms.openrouter.atom);
   const groqKey = useAtomValue(apiKeyAtoms.groq.atom);
@@ -335,10 +337,14 @@ export function useModelCatalog() {
         return true;
       }
 
+      if (hideAgentOneModels && model.id.startsWith("agent-one-")) {
+        return false;
+      }
+
       const providerId = providerIdByLabel[model.provider];
       return providerId ? providerIsAvailable[providerId as ProviderId] : false;
     });
-  }, [AVAILABLE_CHAT_MODELS, providerIsAvailable]);
+  }, [AVAILABLE_CHAT_MODELS, providerIsAvailable, hideAgentOneModels]);
 
   const getModelByIdMemoized = useMemo(
     () => (id: string) => AVAILABLE_MODELS.find((model) => model.id === id),

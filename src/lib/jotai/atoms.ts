@@ -28,6 +28,13 @@ export const syncEnabledAtom = atomWithStorage(
   { getOnInit: true },
 );
 
+export const hideAgentOneModelsAtom = atomWithStorage(
+  "agent-one-hide-agentone-models",
+  false,
+  undefined,
+  { getOnInit: true },
+);
+
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);

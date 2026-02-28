@@ -1,4 +1,40 @@
 {
+  "agent-one": {
+    "id": "agent-one",
+    "name": "AgentOne",
+    "models": {
+      "fast": {
+        "id": "fast",
+        "name": "Fast",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "balanced": {
+        "id": "balanced",
+        "name": "Balanced",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "smart": {
+        "id": "smart",
+        "name": "Smart",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      }
+    }
+  },
   "evroc": {
     "id": "evroc",
     "name": "evroc",
