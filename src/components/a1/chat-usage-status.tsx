@@ -29,11 +29,11 @@ export const ChatUsageStatus = () => {
   return (
     <div
       className={cn(
-        "pointer-events-none fixed top-0 left-0 z-40 transition-[margin] duration-200 md:top-2 md:left-2",
-        isSidebarSmall ? "ml-22 md:ml-24" : "ml-64",
+        "fixed top-0 left-0 z-40 -translate-x-2 transition-[margin] duration-200 md:top-2 md:left-2 md:translate-x-0",
+        isSidebarSmall ? "ml-24" : "ml-64",
       )}
     >
-      <div className="bg-background border-sidebar-border text-muted-foreground flex items-center gap-2 rounded-br-md border-r border-b px-2 py-1 text-xs md:rounded-md md:border">
+      <div className="bg-background border-sidebar-border text-muted-foreground flex items-center gap-2 rounded-br-md border-r border-b px-2 py-2 text-xs md:rounded-md md:border">
         <span>
           In{" "}
           <span className="text-foreground">

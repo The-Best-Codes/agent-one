@@ -168,10 +168,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <>
-      <div className="animate-in fade-in-0 fixed top-0 left-0 z-50 duration-300 md:top-2 md:left-2">
+      <div className="animate-in fade-in-0 fixed top-0 left-0 z-50 transition-opacity duration-300 md:top-2 md:left-2">
         <div
           className={cn(
-            "bg-background border-sidebar-border flex items-center gap-1 rounded-none rounded-br-md border-0 border-r border-b p-1 transition-[border,padding,background-color] duration-200 md:rounded-md md:border",
+            "bg-background border-sidebar-border flex items-center gap-1 rounded-none border-0 border-r border-b p-1 transition-[padding,background-color] duration-200 md:rounded-md md:border",
             !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
           )}
         >
