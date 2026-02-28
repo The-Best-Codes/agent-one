@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import { syncEnabledAtom } from "@/lib/jotai/atoms";
+import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import {
   systemPromptAppendixAtom,
   userNameAtom,
@@ -26,6 +26,9 @@ export default function AccountSection() {
     systemPromptAppendixAtom,
   );
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
+  const [hideAgentOneModels, setHideAgentOneModels] = useAtom(
+    hideAgentOneModelsAtom,
+  );
   const { user } = useWebAuth();
 
   const handleAppendixChange = (value: string) => {
@@ -62,6 +65,34 @@ export default function AccountSection() {
                 </span>
               </TooltipTrigger>
               {!user && <TooltipContent>Sign in to enable sync</TooltipContent>}
+            </Tooltip>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              <Label
+                htmlFor="hide-agentone-models"
+                className="text-sm font-medium"
+              >
+                Hide AgentOne models
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Remove AgentOne models from the model selector.
+              </p>
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Switch
+                    id="hide-agentone-models"
+                    checked={hideAgentOneModels}
+                    onCheckedChange={setHideAgentOneModels}
+                    disabled={!user}
+                  />
+                </span>
+              </TooltipTrigger>
+              {!user && (
+                <TooltipContent>Sign in to hide AgentOne models</TooltipContent>
+              )}
             </Tooltip>
           </div>
         </CardContent>

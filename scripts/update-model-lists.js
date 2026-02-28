@@ -16,9 +16,46 @@ const response = await fetch("https://models.dev/api.json");
 const data = await response.json();
 
 console.log("Filtering data...");
-const filteredData = {};
+const agentOneProvider = {
+  id: "agent-one",
+  name: "AgentOne",
+  models: {
+    fast: {
+      id: "fast",
+      name: "Fast",
+      tool_call: true,
+      modalities: {
+        output: ["text"],
+      },
+    },
+    balanced: {
+      id: "balanced",
+      name: "Balanced",
+      tool_call: true,
+      modalities: {
+        output: ["text"],
+      },
+    },
+    smart: {
+      id: "smart",
+      name: "Smart",
+      tool_call: true,
+      modalities: {
+        output: ["text"],
+      },
+    },
+  },
+};
+
+const filteredData = {
+  "agent-one": agentOneProvider,
+};
 
 for (const [providerId, provider] of Object.entries(data)) {
+  if (providerId === "agent-one" || providerId === "agentone") {
+    continue;
+  }
+
   const filteredModels = {};
 
   for (const [modelId, model] of Object.entries(provider.models)) {

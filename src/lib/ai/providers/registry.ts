@@ -1,5 +1,6 @@
 import type { LanguageModel } from "ai";
 
+import { getAgentOne } from "./factories/agent-one";
 import { getAnthropic } from "./factories/anthropic";
 import { getCerebras } from "./factories/cerebras";
 import { getCohere } from "./factories/cohere";
@@ -30,6 +31,14 @@ export interface ProviderDefinition {
 }
 
 export const PROVIDER_REGISTRY = [
+  {
+    id: "agent-one",
+    label: "AgentOne",
+    storageKey: "AGENT_ONE_API_KEY",
+    envKey: "AGENT_ONE_API_KEY",
+    factory: getAgentOne as ProviderFactory,
+    priority: 0,
+  },
   {
     id: "anthropic",
     label: "Anthropic",

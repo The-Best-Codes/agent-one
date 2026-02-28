@@ -1,4 +1,5 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { useSetAtom } from "jotai";
 import {
   type ReactNode,
   useCallback,
@@ -9,6 +10,8 @@ import {
 } from "react";
 
 import { authClient, CLIENT_ID, setAuthToken } from "@/lib/auth/auth-client";
+import { getApiKeyBaseAtom } from "@/lib/jotai/api-key-atoms";
+import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
@@ -28,6 +31,9 @@ const DEVICE_GRANT_TYPE =
 export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const setAgentOneApiKey = useSetAtom(getApiKeyBaseAtom("agent-one"));
+  const setAgentOneConfig = useSetAtom(getProviderConfigAtom("agent-one"));
+
   const [user, setUser] = useState<WebAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -52,11 +58,15 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
             email: data.user.email,
             image: data.user.image,
           });
+          void setAgentOneApiKey(accessToken);
+          setAgentOneConfig({ enabled: true, headers: {} });
           void settingsSyncManager.pull();
           return "valid";
         }
         if (error?.status === 401 || error?.status === 403) {
           setAuthToken(null);
+          void setAgentOneApiKey("");
+          setAgentOneConfig({ enabled: false, headers: {} });
           return "invalid";
         }
         if (error) {
@@ -70,7 +80,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
         return "error";
       }
     },
-    [],
+    [setAgentOneApiKey, setAgentOneConfig],
   );
 
   useEffect(() => {
@@ -218,13 +228,15 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
       stopPolling();
       setAuthToken(null);
       await keyringStorage.removeItem(TOKEN_KEY);
+      void setAgentOneApiKey("");
+      setAgentOneConfig({ enabled: false, headers: {} });
       setUser(null);
       setDeviceFlow(null);
       setIsSigningIn(false);
     } finally {
       setIsSigningOut(false);
     }
-  }, [stopPolling]);
+  }, [stopPolling, setAgentOneApiKey, setAgentOneConfig]);
 
   useEffect(() => {
     return () => stopPolling();

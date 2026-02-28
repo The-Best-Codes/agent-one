@@ -51,8 +51,10 @@ export function ProvidersList() {
   const setCustomProviderApiKey = useSetAtom(setCustomProviderApiKeyAtom);
   const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
 
-  const filteredBuiltInProviders = PROVIDER_REGISTRY.filter((provider) =>
-    provider.label.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredBuiltInProviders = PROVIDER_REGISTRY.filter(
+    (provider) =>
+      provider.id !== "agent-one" &&
+      provider.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const filteredCustomProviders = customProviders.filter((provider) =>

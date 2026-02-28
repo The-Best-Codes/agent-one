@@ -371,6 +371,12 @@ pub async fn mcp_authenticate(
             client_id,
             token_response,
             granted_scopes: Vec::new(),
+            token_received_at: Some(
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|d| d.as_secs())
+                    .unwrap_or(0),
+            ),
         })
         .await
         .map_err(|e| e.to_string())?;
@@ -405,11 +411,6 @@ async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, St
         .map_err(|e| e.to_string())?;
 
     if initialized {
-        auth_manager
-            .refresh_token()
-            .await
-            .map_err(|e| e.to_string())?;
-
         auth_manager
             .get_access_token()
             .await
