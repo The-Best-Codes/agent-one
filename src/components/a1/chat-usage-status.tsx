@@ -14,10 +14,9 @@ import {
   useChatMetadata,
 } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { CHAT_LOADING_DELAY_MS } from "@/lib/chat-loading-delay";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
-
-const CHAT_USAGE_LOADING_DELAY_MS = 500;
 
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
@@ -49,7 +48,7 @@ export const ChatUsageStatus = () => {
 
     const timer = setTimeout(() => {
       setDelayPassed(true);
-    }, CHAT_USAGE_LOADING_DELAY_MS);
+    }, CHAT_LOADING_DELAY_MS);
 
     return () => {
       clearTimeout(timer);

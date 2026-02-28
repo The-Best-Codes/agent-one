@@ -17,9 +17,8 @@ import {
   useChatMessages,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
+import { CHAT_LOADING_DELAY_MS } from "@/lib/chat-loading-delay";
 import { cn } from "@/lib/utils";
-
-export const CHAT_LOADING_SPINNER_DELAY_MS = 500;
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
@@ -35,7 +34,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
     }
     const timer = setTimeout(() => {
       setDelayPassed(true);
-    }, CHAT_LOADING_SPINNER_DELAY_MS);
+    }, CHAT_LOADING_DELAY_MS);
     return () => {
       clearTimeout(timer);
       setDelayPassed(false);

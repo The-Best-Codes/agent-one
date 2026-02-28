@@ -29,6 +29,7 @@ import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { CHAT_LOADING_DELAY_MS } from "@/lib/chat-loading-delay";
 import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
@@ -38,8 +39,6 @@ interface ModelSelectorProps {
   disabled?: boolean;
   loading?: boolean;
 }
-
-const MODEL_SELECTOR_LOADING_DELAY_MS = 500;
 
 interface ModelListProps {
   filteredModels: ModelData[];
@@ -145,7 +144,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
     const timer = setTimeout(() => {
       setLoadingDelayPassed(true);
-    }, MODEL_SELECTOR_LOADING_DELAY_MS);
+    }, CHAT_LOADING_DELAY_MS);
 
     return () => {
       clearTimeout(timer);
