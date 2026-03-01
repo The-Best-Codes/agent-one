@@ -31,6 +31,7 @@ export const ChatInstance = memo(
     model,
     modelConfig,
     initialMessages,
+    isAutoSubmitBlocked,
     onInstanceUpdate,
     onStatusChange,
   }: {
@@ -38,6 +39,7 @@ export const ChatInstance = memo(
     model: LanguageModel;
     modelConfig: ModelConfig;
     initialMessages: UIMessage[];
+    isAutoSubmitBlocked: (id: string) => boolean;
     onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
     onStatusChange: (
       id: string,
@@ -61,9 +63,15 @@ export const ChatInstance = memo(
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
-      sendAutomaticallyWhen: (messages) =>
-        lastAssistantMessageIsCompleteWithToolCalls(messages) ||
-        lastAssistantMessageIsCompleteWithApprovalResponses(messages),
+      sendAutomaticallyWhen: ({ messages }) => {
+        if (isAutoSubmitBlocked(chatId)) {
+          return false;
+        }
+        return (
+          lastAssistantMessageIsCompleteWithToolCalls({ messages }) ||
+          lastAssistantMessageIsCompleteWithApprovalResponses({ messages })
+        );
+      },
       id: chatId,
       messages: initialMessages,
     });
@@ -137,6 +145,7 @@ export const ChatInstance = memo(
       prevProps.chatId === nextProps.chatId &&
       prevProps.model === nextProps.model &&
       prevProps.initialMessages === nextProps.initialMessages &&
+      prevProps.isAutoSubmitBlocked === nextProps.isAutoSubmitBlocked &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&
       JSON.stringify(prevProps.modelConfig) ===
