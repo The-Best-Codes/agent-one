@@ -21,6 +21,59 @@ import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
+function createAbortError(): Error {
+  const error = new Error("The operation was aborted.");
+  error.name = "AbortError";
+  return error;
+}
+
+function withAbortAwareToolExecution(tools: ToolSet): ToolSet {
+  const wrapped: ToolSet = {};
+
+  for (const [name, tool] of Object.entries(tools)) {
+    const execute = (tool as { execute?: unknown }).execute;
+
+    if (typeof execute !== "function") {
+      wrapped[name] = tool;
+      continue;
+    }
+
+    const originalExecute = execute as (
+      input: unknown,
+      context: { abortSignal?: AbortSignal },
+    ) => Promise<unknown>;
+
+    wrapped[name] = {
+      ...tool,
+      execute: async (
+        input: unknown,
+        context: { abortSignal?: AbortSignal },
+      ) => {
+        const signal = context?.abortSignal;
+        const executePromise = originalExecute(input, context);
+
+        if (!signal) {
+          return executePromise;
+        }
+
+        if (signal.aborted) {
+          throw createAbortError();
+        }
+
+        const abortPromise = new Promise<never>((_, reject) => {
+          signal.addEventListener("abort", () => reject(createAbortError()), {
+            once: true,
+          });
+        });
+
+        return Promise.race([executePromise, abortPromise]);
+      },
+    } as ToolSet[string];
+  }
+
+  return wrapped;
+}
+
 export class CustomChatTransport implements ChatTransport<UIMessage> {
   private model: LanguageModel | null;
   private modelId: string | null;
@@ -98,7 +151,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     }
 
     await this.getApiKeysLoadedPromise();
-    const tools = await this.getTools();
+    const tools = withAbortAwareToolExecution(await this.getTools());
 
     const result = streamText({
       model: this.model,
