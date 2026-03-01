@@ -62,7 +62,10 @@ function withAbortAwareToolExecution(tools: ToolSet): ToolSet {
 
         let abortHandler: (() => void) | undefined;
         const abortPromise = new Promise<never>((_, reject) => {
-          abortHandler = () => reject(createAbortError());
+          abortHandler = () => {
+            void executePromise.catch(() => {});
+            reject(createAbortError());
+          };
           signal.addEventListener("abort", abortHandler, {
             once: true,
           });
