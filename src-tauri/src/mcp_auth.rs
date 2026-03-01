@@ -14,7 +14,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use tauri_plugin_opener::OpenerExt;
 use tokio::sync::{oneshot, Mutex};
-use url::Url;
 
 use crate::keyring::{delete_password, get_password, set_password};
 
@@ -70,45 +69,6 @@ async fn initialize_and_start_auth(
         })?;
 
     Ok(state)
-}
-
-fn get_origin_url(url: &str) -> Option<String> {
-    let parsed = Url::parse(url).ok()?;
-    if parsed.path() == "/" || parsed.path().is_empty() {
-        return None;
-    }
-
-    let mut origin = parsed.clone();
-    origin.set_path("");
-    origin.set_query(None);
-    origin.set_fragment(None);
-
-    let origin_str = origin.to_string();
-    if origin_str.trim_end_matches('/') != url.trim_end_matches('/') {
-        Some(origin_str)
-    } else {
-        None
-    }
-}
-
-async fn try_with_origin_fallback<T, F, Fut>(primary_url: &str, operation: F) -> Result<T, String>
-where
-    F: Fn(String) -> Fut,
-    Fut: std::future::Future<Output = Result<T, String>>,
-{
-    match operation(primary_url.to_string()).await {
-        Ok(result) => Ok(result),
-        Err(primary_err) => {
-            if let Some(origin_url) = get_origin_url(primary_url) {
-                match operation(origin_url).await {
-                    Ok(result) => Ok(result),
-                    Err(_) => Err(primary_err),
-                }
-            } else {
-                Err(primary_err)
-            }
-        }
-    }
 }
 
 #[derive(Clone)]
@@ -205,22 +165,20 @@ pub async fn mcp_authenticate(
 
     let server_handle = tokio::spawn(async move { axum::serve(listener, router).await });
 
-    let scopes = try_with_origin_fallback(&server_url, |url| async move {
-        discover_scopes_with_rmcp(&url).await
-    })
-    .await
-    .unwrap_or_else(|_| vec!["mcp".to_string()]);
+    let scopes = discover_scopes_with_rmcp(&server_url)
+        .await
+        .unwrap_or_else(|_| vec!["mcp".to_string()]);
 
     let redirect_uri_clone = redirect_uri.clone();
     let client_metadata_clone = client_metadata_url.clone();
     let scopes_clone = scopes.clone();
 
-    let mut oauth_state = try_with_origin_fallback(&server_url, |url| {
-        let redirect = redirect_uri_clone.clone();
-        let metadata = client_metadata_clone.clone();
-        let sc = scopes_clone.clone();
-        async move { initialize_and_start_auth(&url, &redirect, &metadata, &sc).await }
-    })
+    let mut oauth_state = initialize_and_start_auth(
+        &server_url,
+        &redirect_uri_clone,
+        &client_metadata_clone,
+        &scopes_clone,
+    )
     .await?;
 
     let auth_url = oauth_state
@@ -328,8 +286,8 @@ async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, St
 
 #[tauri::command]
 pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String> {
-    let supported = try_with_origin_fallback(&server_url, |url| async move {
-        let auth_manager = AuthorizationManager::new(&url)
+    let supported = async {
+        let auth_manager = AuthorizationManager::new(&server_url)
             .await
             .map_err(|e| e.to_string())?;
 
@@ -338,7 +296,7 @@ pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String>
             .await
             .map(|_| true)
             .map_err(|e| e.to_string())
-    })
+    }
     .await;
 
     Ok(supported.is_ok())
@@ -359,9 +317,5 @@ pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<Stri
         return Err("No credentials found. Please login.".to_string());
     }
 
-    try_with_origin_fallback(&server_url, |url| {
-        let id = server_id.clone();
-        async move { try_get_token_with_url(&id, &url).await }
-    })
-    .await
+    try_get_token_with_url(&server_id, &server_url).await
 }
