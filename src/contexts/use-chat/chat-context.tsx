@@ -546,6 +546,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
     chatInstancesRef.current.forEach((instance, id) => {
       if (!chatIds.includes(id)) {
+        autoSubmitBlockedRef.current.delete(id);
         const { status, stop } = instance;
         if (status === "streaming" || status === "submitted") {
           logger.verbose(`Stopping stream for deleted chat: ${id}`);

@@ -50,23 +50,31 @@ function withAbortAwareToolExecution(tools: ToolSet): ToolSet {
         context: { abortSignal?: AbortSignal },
       ) => {
         const signal = context?.abortSignal;
-        const executePromise = originalExecute(input, context);
-
         if (!signal) {
-          return executePromise;
+          return originalExecute(input, context);
         }
 
         if (signal.aborted) {
           throw createAbortError();
         }
 
+        const executePromise = originalExecute(input, context);
+
+        let abortHandler: (() => void) | undefined;
         const abortPromise = new Promise<never>((_, reject) => {
-          signal.addEventListener("abort", () => reject(createAbortError()), {
+          abortHandler = () => reject(createAbortError());
+          signal.addEventListener("abort", abortHandler, {
             once: true,
           });
         });
 
-        return Promise.race([executePromise, abortPromise]);
+        try {
+          return await Promise.race([executePromise, abortPromise]);
+        } finally {
+          if (abortHandler) {
+            signal.removeEventListener("abort", abortHandler);
+          }
+        }
       },
     } as ToolSet[string];
   }
