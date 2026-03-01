@@ -10,7 +10,7 @@
   "provider": {
     "openrouter-new": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "Updated OpenRouter",
+      "name": "AgentOne Development",
       "options": {
         "baseURL": "https://openrouter.ai/api/v1"
       },
