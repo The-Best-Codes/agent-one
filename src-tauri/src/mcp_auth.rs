@@ -14,7 +14,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use tauri_plugin_opener::OpenerExt;
 use tokio::sync::{oneshot, Mutex};
-use url::Url;
 
 use crate::keyring::{delete_password, get_password, set_password};
 
@@ -28,112 +27,14 @@ fn get_client_metadata_url(port: u16) -> String {
     )
 }
 
-#[derive(Debug, Deserialize)]
-struct ProtectedResourceMetadata {
-    scopes_supported: Option<Vec<String>>,
-}
+async fn discover_scopes_with_rmcp(server_url: &str) -> Result<Vec<String>, String> {
+    let auth_manager = AuthorizationManager::new(server_url)
+        .await
+        .map_err(|e| e.to_string())?;
 
-fn parse_www_authenticate_scopes(header: &str) -> Option<Vec<String>> {
-    for part in header.split(',') {
-        let part = part.trim();
-        let lower = part.to_lowercase();
-        if lower.starts_with("scope=") {
-            let value = &part["scope=".len()..];
-            return Some(
-                value
-                    .trim_matches('"')
-                    .split_whitespace()
-                    .map(|s| s.to_string())
-                    .collect(),
-            );
-        }
-    }
-    None
-}
+    let _ = auth_manager.discover_metadata().await;
 
-fn parse_resource_metadata_url(header: &str) -> Option<String> {
-    for part in header.split(',') {
-        let part = part.trim();
-        let lower = part.to_lowercase();
-        if lower.starts_with("resource_metadata=") {
-            let value = &part["resource_metadata=".len()..];
-            return Some(value.trim_matches('"').to_string());
-        }
-    }
-    None
-}
-
-async fn discover_scopes(server_url: &str) -> Vec<String> {
-    let client = wreq::Client::new();
-
-    let response = match client.get(server_url).send().await {
-        Ok(r) => r,
-        Err(_) => return vec!["mcp".to_string()],
-    };
-
-    if let Some(www_auth) = response.headers().get("www-authenticate") {
-        if let Ok(header_str) = www_auth.to_str() {
-            if let Some(scopes) = parse_www_authenticate_scopes(header_str) {
-                if !scopes.is_empty() {
-                    return scopes;
-                }
-            }
-
-            if let Some(rm_url) = parse_resource_metadata_url(header_str) {
-                if let Ok(rm_resp) = client.get(&rm_url).send().await {
-                    if let Ok(prm) = rm_resp.json::<ProtectedResourceMetadata>().await {
-                        if let Some(scopes) = prm.scopes_supported {
-                            if !scopes.is_empty() {
-                                return scopes;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    let parsed_url = match Url::parse(server_url) {
-        Ok(u) => u,
-        Err(_) => return vec!["mcp".to_string()],
-    };
-
-    let base = format!(
-        "{}://{}{}",
-        parsed_url.scheme(),
-        parsed_url.host_str().unwrap_or(""),
-        parsed_url
-            .port()
-            .map(|p| format!(":{}", p))
-            .unwrap_or_default()
-    );
-    let path = parsed_url.path();
-
-    let mut well_known_urls = Vec::new();
-    if path != "/" && !path.is_empty() {
-        let trimmed = path.trim_matches('/');
-        well_known_urls.push(format!(
-            "{}/.well-known/oauth-protected-resource/{}",
-            base, trimmed
-        ));
-    }
-    well_known_urls.push(format!("{}/.well-known/oauth-protected-resource", base));
-
-    for url in well_known_urls {
-        if let Ok(resp) = client.get(&url).send().await {
-            if resp.status().is_success() {
-                if let Ok(prm) = resp.json::<ProtectedResourceMetadata>().await {
-                    if let Some(scopes) = prm.scopes_supported {
-                        if !scopes.is_empty() {
-                            return scopes;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    vec!["mcp".to_string()]
+    Ok(auth_manager.select_scopes(None, &["mcp"]))
 }
 
 async fn initialize_and_start_auth(
@@ -168,45 +69,6 @@ async fn initialize_and_start_auth(
         })?;
 
     Ok(state)
-}
-
-fn get_origin_url(url: &str) -> Option<String> {
-    let parsed = Url::parse(url).ok()?;
-    if parsed.path() == "/" || parsed.path().is_empty() {
-        return None;
-    }
-
-    let mut origin = parsed.clone();
-    origin.set_path("");
-    origin.set_query(None);
-    origin.set_fragment(None);
-
-    let origin_str = origin.to_string();
-    if origin_str.trim_end_matches('/') != url.trim_end_matches('/') {
-        Some(origin_str)
-    } else {
-        None
-    }
-}
-
-async fn try_with_origin_fallback<T, F, Fut>(primary_url: &str, operation: F) -> Result<T, String>
-where
-    F: Fn(String) -> Fut,
-    Fut: std::future::Future<Output = Result<T, String>>,
-{
-    match operation(primary_url.to_string()).await {
-        Ok(result) => Ok(result),
-        Err(primary_err) => {
-            if let Some(origin_url) = get_origin_url(primary_url) {
-                match operation(origin_url).await {
-                    Ok(result) => Ok(result),
-                    Err(_) => Err(primary_err),
-                }
-            } else {
-                Err(primary_err)
-            }
-        }
-    }
 }
 
 #[derive(Clone)]
@@ -303,18 +165,20 @@ pub async fn mcp_authenticate(
 
     let server_handle = tokio::spawn(async move { axum::serve(listener, router).await });
 
-    let scopes = discover_scopes(&server_url).await;
+    let scopes = discover_scopes_with_rmcp(&server_url)
+        .await
+        .unwrap_or_else(|_| vec!["mcp".to_string()]);
 
     let redirect_uri_clone = redirect_uri.clone();
     let client_metadata_clone = client_metadata_url.clone();
     let scopes_clone = scopes.clone();
 
-    let mut oauth_state = try_with_origin_fallback(&server_url, |url| {
-        let redirect = redirect_uri_clone.clone();
-        let metadata = client_metadata_clone.clone();
-        let sc = scopes_clone.clone();
-        async move { initialize_and_start_auth(&url, &redirect, &metadata, &sc).await }
-    })
+    let mut oauth_state = initialize_and_start_auth(
+        &server_url,
+        &redirect_uri_clone,
+        &client_metadata_clone,
+        &scopes_clone,
+    )
     .await?;
 
     let auth_url = oauth_state
@@ -422,70 +286,20 @@ async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, St
 
 #[tauri::command]
 pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String> {
-    let client = wreq::Client::new();
+    let supported = async {
+        let auth_manager = AuthorizationManager::new(&server_url)
+            .await
+            .map_err(|e| e.to_string())?;
 
-    let response = match client.get(&server_url).send().await {
-        Ok(r) => r,
-        Err(_) => return Ok(false),
-    };
-
-    if response.headers().get("www-authenticate").is_some() {
-        return Ok(true);
+        auth_manager
+            .discover_metadata()
+            .await
+            .map(|_| true)
+            .map_err(|e| e.to_string())
     }
+    .await;
 
-    let parsed_url = match Url::parse(&server_url) {
-        Ok(u) => u,
-        Err(_) => return Ok(false),
-    };
-
-    let base = format!(
-        "{}://{}{}",
-        parsed_url.scheme(),
-        parsed_url.host_str().unwrap_or(""),
-        parsed_url
-            .port()
-            .map(|p| format!(":{}", p))
-            .unwrap_or_default()
-    );
-    let path = parsed_url.path();
-
-    let mut well_known_urls = Vec::new();
-    if path != "/" && !path.is_empty() {
-        let trimmed = path.trim_matches('/');
-        well_known_urls.push(format!(
-            "{}/.well-known/oauth-protected-resource/{}",
-            base, trimmed
-        ));
-    }
-    well_known_urls.push(format!("{}/.well-known/oauth-protected-resource", base));
-
-    for url in &well_known_urls {
-        if let Ok(resp) = client.get(url).send().await {
-            if resp.status().is_success() {
-                return Ok(true);
-            }
-        }
-    }
-
-    let mut auth_server_urls = Vec::new();
-    if path != "/" && !path.is_empty() {
-        let trimmed = path.trim_matches('/');
-        auth_server_urls.push(format!(
-            "{}/.well-known/oauth-authorization-server/{}",
-            base, trimmed
-        ));
-    }
-    auth_server_urls.push(format!("{}/.well-known/oauth-authorization-server", base));
-
-    for url in &auth_server_urls {
-        if let Ok(resp) = client.get(url).send().await {
-            if resp.status().is_success() {
-                return Ok(true);
-            }
-        }
-    }
-
-    Ok(false)
+    Ok(supported.is_ok())
 }
 
 #[tauri::command]
@@ -503,9 +317,5 @@ pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<Stri
         return Err("No credentials found. Please login.".to_string());
     }
 
-    try_with_origin_fallback(&server_url, |url| {
-        let id = server_id.clone();
-        async move { try_get_token_with_url(&id, &url).await }
-    })
-    .await
+    try_get_token_with_url(&server_id, &server_url).await
 }

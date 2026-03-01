@@ -185,74 +185,110 @@ class TauriHttpMCPTransport implements MCPTransport {
     }
 
     try {
-      const requestHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-        Accept: "application/json, text/event-stream",
-        ...this.headers,
-      };
-
-      if (this.sessionId) {
-        requestHeaders["mcp-session-id"] = this.sessionId;
-      }
-
-      if (this.token) {
-        requestHeaders["Authorization"] = `Bearer ${this.token}`;
-      }
-
       logger.verbose(`Sending HTTP MCP message:`, message);
 
-      const response = await tauriFetch(this.url, {
-        method: "POST",
-        headers: requestHeaders,
-        body: JSON.stringify(message),
-      });
+      let response = await this.sendHttpRequest(message);
 
-      const newSessionId = response.headers.get("mcp-session-id");
-      if (newSessionId) {
-        this.sessionId = newSessionId;
-        logger.verbose(`HTTP MCP Session ID set to: ${this.sessionId}`);
-      }
+      if (response.status === 401) {
+        const refreshed = await this.refreshToken();
+        if (!refreshed) {
+          throw new UnauthorizedError();
+        }
 
-      if (!response.ok) {
+        logger.verbose(`Retrying HTTP MCP message after token refresh`);
+        response = await this.sendHttpRequest(message);
+
         if (response.status === 401) {
           throw new UnauthorizedError();
         }
-        const errorText = await response.text();
-        throw new Error(
-          `HTTP error ${response.status}: ${response.statusText} - ${errorText}`,
-        );
       }
 
-      const contentType = response.headers.get("content-type") || "";
-
-      if (contentType.includes("text/event-stream")) {
-        await this.handleStreamResponse(response);
-      } else if (contentType.includes("application/json")) {
-        const responseText = await response.text();
-        if (responseText.trim()) {
-          const responseMessage = JSON.parse(responseText) as JSONRPCMessage;
-          logger.verbose(`HTTP MCP Received response:`, responseMessage);
-          this.onmessage?.(responseMessage);
-        }
-      } else {
-        const responseText = await response.text();
-        if (responseText.trim()) {
-          try {
-            const responseMessage = JSON.parse(responseText) as JSONRPCMessage;
-            logger.verbose(`HTTP MCP Received response:`, responseMessage);
-            this.onmessage?.(responseMessage);
-          } catch {
-            logger.warn(
-              `HTTP MCP Could not parse response as JSON:`,
-              responseText,
-            );
-          }
-        }
-      }
+      await this.handleHttpResponse(response);
     } catch (error) {
       logger.error(`HTTP MCP Error sending message:`, error);
       this.onerror?.(error as Error);
       throw error;
+    }
+  }
+
+  private async refreshToken(): Promise<boolean> {
+    try {
+      const token = await invoke<string>("mcp_get_token", {
+        serverId: this.serverId,
+        serverUrl: this.url,
+      });
+      this.token = token;
+      this.hasToken = true;
+      return true;
+    } catch (error) {
+      this.hasToken = false;
+      logger.verbose(
+        `Failed to refresh OAuth token for ${this.serverId}:`,
+        error,
+      );
+      return false;
+    }
+  }
+
+  private async sendHttpRequest(message: JSONRPCMessage): Promise<Response> {
+    const requestHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+      ...this.headers,
+    };
+
+    if (this.sessionId) {
+      requestHeaders["mcp-session-id"] = this.sessionId;
+    }
+
+    if (this.token) {
+      requestHeaders["Authorization"] = `Bearer ${this.token}`;
+    }
+
+    const response = await tauriFetch(this.url, {
+      method: "POST",
+      headers: requestHeaders,
+      body: JSON.stringify(message),
+    });
+
+    const newSessionId = response.headers.get("mcp-session-id");
+    if (newSessionId) {
+      this.sessionId = newSessionId;
+      logger.verbose(`HTTP MCP Session ID set to: ${this.sessionId}`);
+    }
+
+    return response;
+  }
+
+  private async handleHttpResponse(response: Response): Promise<void> {
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new UnauthorizedError();
+      }
+      const errorText = await response.text();
+      throw new Error(
+        `HTTP error ${response.status}: ${response.statusText} - ${errorText}`,
+      );
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+
+    if (contentType.includes("text/event-stream")) {
+      await this.handleStreamResponse(response);
+      return;
+    }
+
+    const responseText = await response.text();
+    if (!responseText.trim()) {
+      return;
+    }
+
+    try {
+      const responseMessage = JSON.parse(responseText) as JSONRPCMessage;
+      logger.verbose(`HTTP MCP Received response:`, responseMessage);
+      this.onmessage?.(responseMessage);
+    } catch {
+      logger.warn(`HTTP MCP Could not parse response as JSON:`, responseText);
     }
   }
 
