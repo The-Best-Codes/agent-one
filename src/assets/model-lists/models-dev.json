@@ -36045,6 +36045,20 @@
           "output": 3.2
         }
       },
+      "MiniMaxAI/MiniMax-M2.5": {
+        "id": "MiniMaxAI/MiniMax-M2.5",
+        "name": "MiniMax M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2
+        }
+      },
       "MiniMaxAI/MiniMax-M2.1": {
         "id": "MiniMaxAI/MiniMax-M2.1",
         "name": "MiniMax M2.1",
@@ -36099,34 +36113,6 @@
         "cost": {
           "input": 0.2,
           "output": 0.8
-        }
-      },
-      "LGAI-EXAONE/EXAONE-4.0.1-32B": {
-        "id": "LGAI-EXAONE/EXAONE-4.0.1-32B",
-        "name": "EXAONE 4.0.1 32B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.6,
-          "output": 1
-        }
-      },
-      "LGAI-EXAONE/K-EXAONE-236B-A23B": {
-        "id": "LGAI-EXAONE/K-EXAONE-236B-A23B",
-        "name": "K EXAONE 236B A23B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
         }
       }
     }
