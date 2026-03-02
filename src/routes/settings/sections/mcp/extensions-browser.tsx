@@ -64,9 +64,6 @@ function ExtensionRow({
             {extension.displayName}
           </p>
           <Badge variant="outline">v{extension.version}</Badge>
-          {!extension.publisher ? (
-            <Badge variant="secondary">Community</Badge>
-          ) : null}
         </div>
 
         <p className="text-muted-foreground line-clamp-2 text-xs">
@@ -74,9 +71,6 @@ function ExtensionRow({
         </p>
 
         <div className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-2 text-xs">
-          {extension.publisher ? (
-            <span className="truncate">by {extension.publisher}</span>
-          ) : null}
           {(extension.categories.length > 0
             ? extension.categories
             : extension.tags
