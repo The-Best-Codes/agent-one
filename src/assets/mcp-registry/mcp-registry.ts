@@ -33,7 +33,15 @@ export interface McpRegistryExtension {
   version: string;
   websiteUrl?: string;
   iconUrl?: string;
-  officialStatus?: string;
+  publisher?: string;
+  categories: string[];
+  tags: string[];
+  license?: string;
+  keywords: string[];
+  packageCount: number;
+  installType?: "stdio" | "http";
+  requiredFieldCount: number;
+  transportTypes: string[];
   updatedAt?: string;
   install?: McpRegistryInstallTemplate;
   searchText: string;
@@ -70,6 +78,30 @@ let cachedExtensions: McpRegistryExtension[] | null = null;
 
 function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+function normalizeStringList(value: unknown): string[] {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed ? [trimmed] : [];
+  }
+
+  return asStringArray(value);
 }
 
 function extractTemplateVariables(template: string): string[] {
@@ -390,7 +422,13 @@ function createSearchText(entry: McpRegistryExtension): string {
     entry.displayName,
     entry.description,
     entry.version,
-    entry.officialStatus,
+    entry.publisher,
+    entry.license,
+    ...entry.categories,
+    ...entry.tags,
+    ...entry.keywords,
+    ...entry.transportTypes,
+    entry.installType,
   ]
     .filter(Boolean)
     .join(" ")
@@ -406,6 +444,33 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
 
   cachedExtensions = entries.map((entry) => {
     const server = entry.server;
+    const publisherProvided =
+      server._meta?.["io.modelcontextprotocol.registry/publisher-provided"];
+
+    const categories = Array.from(
+      new Set([
+        ...normalizeStringList(publisherProvided?.categories),
+        ...normalizeStringList(publisherProvided?.category),
+      ]),
+    );
+
+    const tags = normalizeStringList(publisherProvided?.tags);
+    const keywords = normalizeStringList(publisherProvided?.keywords);
+    const packages = Array.isArray(server.packages) ? server.packages : [];
+    const remotes = Array.isArray(server.remotes) ? server.remotes : [];
+    const transportTypes = Array.from(
+      new Set(
+        [
+          ...packages
+            .map((pkg) => asString(pkg.transport?.type))
+            .filter((item): item is string => Boolean(item)),
+          ...remotes
+            .map((remote) => asString(remote.type))
+            .filter((item): item is string => Boolean(item)),
+        ].map((transport) => transport.toLowerCase()),
+      ),
+    );
+
     const displayName =
       asString(server.title) ?? asString(server.name) ?? "Unnamed Server";
     const description =
@@ -414,6 +479,7 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
       Array.isArray(server.icons) && server.icons.length > 0
         ? asString(server.icons[0]?.src)
         : undefined;
+    const installTemplate = buildInstallTemplate(server);
 
     const extension: McpRegistryExtension = {
       id: `${server.name}@${server.version}`,
@@ -423,13 +489,22 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
       version: server.version,
       websiteUrl: asString(server.websiteUrl),
       iconUrl,
-      officialStatus: asString(
-        entry._meta?.["io.modelcontextprotocol.registry/official"]?.status,
-      ),
+      publisher:
+        asString(publisherProvided?.publisher) ??
+        asString(publisherProvided?.author),
+      categories,
+      tags,
+      license: asString(publisherProvided?.license),
+      keywords,
+      packageCount: packages.length,
+      installType: installTemplate?.type,
+      requiredFieldCount:
+        installTemplate?.fields.filter((field) => field.required).length ?? 0,
+      transportTypes,
       updatedAt: asString(
         entry._meta?.["io.modelcontextprotocol.registry/official"]?.updatedAt,
       ),
-      install: buildInstallTemplate(server),
+      install: installTemplate,
       searchText: "",
     };
 

@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { SearchIcon, SparklesIcon } from "lucide-react";
+import { ExternalLinkIcon, SparklesIcon } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import {
@@ -9,9 +9,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandList,
+} from "@/components/ui/command";
+import { commandScore } from "@/lib/command-score";
 
-const EXTENSION_ITEM_HEIGHT = 106;
+const ESTIMATED_EXTENSION_ITEM_HEIGHT = 148;
 
 interface ExtensionsBrowserProps {
   installedRegistryNames: Set<string>;
@@ -39,8 +46,8 @@ function ExtensionRow({
   onInstall: () => void;
 }) {
   return (
-    <div className="flex h-full items-start justify-between gap-3 border-b px-3 py-3">
-      <Avatar className="mt-0.5" size="sm">
+    <div className="flex w-full items-start gap-4 rounded-md border p-4">
+      <Avatar size="sm">
         <AvatarImage
           src={extension.iconUrl}
           alt={`${extension.displayName} icon`}
@@ -48,37 +55,59 @@ function ExtensionRow({
         <AvatarFallback>{getInitials(extension.displayName)}</AvatarFallback>
       </Avatar>
 
-      <div className="min-w-0 flex-1">
-        <div className="mb-1 flex items-center gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-medium">
             {extension.displayName}
           </p>
           <Badge variant="outline">v{extension.version}</Badge>
-          {extension.officialStatus === "active" ? (
-            <Badge className="bg-emerald-600 hover:bg-emerald-600">
-              Official
-            </Badge>
-          ) : null}
         </div>
+
         <p className="text-muted-foreground line-clamp-2 text-xs">
           {extension.description}
         </p>
-        <p className="text-muted-foreground mt-1 truncate text-xs">
-          {extension.registryName}
-        </p>
+
+        <div className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-2 text-xs">
+          <span className="truncate">{extension.registryName}</span>
+          {extension.publisher ? (
+            <span className="truncate">by {extension.publisher}</span>
+          ) : null}
+          {(extension.categories.length > 0
+            ? extension.categories
+            : extension.tags
+          )
+            .slice(0, 2)
+            .map((tag) => (
+              <Badge key={`${extension.id}-${tag}`} variant="outline">
+                {tag}
+              </Badge>
+            ))}
+        </div>
       </div>
-      <Button
-        size="sm"
-        variant={installed ? "outline" : "default"}
-        onClick={onInstall}
-        disabled={installed || !extension.install}
-      >
-        {installed
-          ? "Installed"
-          : extension.install
-            ? "Install"
-            : "Unsupported"}
-      </Button>
+
+      <div className="flex shrink-0 items-center gap-2">
+        {extension.websiteUrl ? (
+          <Button variant="outline" size="sm" asChild>
+            <a href={extension.websiteUrl} target="_blank" rel="noreferrer">
+              <ExternalLinkIcon className="size-4" />
+              Website
+            </a>
+          </Button>
+        ) : null}
+
+        <Button
+          size="sm"
+          variant={installed ? "outline" : "default"}
+          onClick={onInstall}
+          disabled={installed || !extension.install}
+        >
+          {installed
+            ? "Installed"
+            : extension.install
+              ? "Install"
+              : "Unsupported"}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -93,25 +122,37 @@ export function ExtensionsBrowser({
   const extensions = useMemo(() => getMcpRegistryExtensions(), []);
 
   const filteredExtensions = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = query.trim();
     if (!normalizedQuery) {
       return extensions;
     }
-    return extensions.filter((extension) =>
-      extension.searchText.includes(normalizedQuery),
-    );
+
+    return extensions
+      .map((extension) => ({
+        extension,
+        score: commandScore(extension.displayName, normalizedQuery, [
+          extension.registryName,
+          extension.searchText,
+        ]),
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ extension }) => extension);
   }, [extensions, query]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredExtensions.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => EXTENSION_ITEM_HEIGHT,
+    estimateSize: () => ESTIMATED_EXTENSION_ITEM_HEIGHT,
+    getItemKey: (index) => filteredExtensions[index]?.id ?? index,
+    measureElement: (element) => element.getBoundingClientRect().height,
     overscan: 6,
   });
 
+  const totalSize = virtualizer.getTotalSize();
   const listHeight = Math.min(
-    filteredExtensions.length * EXTENSION_ITEM_HEIGHT,
+    totalSize || ESTIMATED_EXTENSION_ITEM_HEIGHT,
     420,
   );
 
@@ -122,62 +163,62 @@ export function ExtensionsBrowser({
         <p className="text-sm font-medium">Extensions Registry</p>
       </div>
 
-      <div className="relative">
-        <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-        <Input
+      <Command shouldFilter={false}>
+        <CommandInput
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search extensions"
-          className="pl-9"
+          onValueChange={setQuery}
+          placeholder="Search extensions..."
         />
-      </div>
-
-      {filteredExtensions.length > 0 ? (
-        <div
+        <CommandList
           ref={parentRef}
-          className="border-border overflow-y-auto rounded-md border"
-          style={{ height: listHeight || EXTENSION_ITEM_HEIGHT }}
+          className="border-border rounded-md border"
+          style={{ height: listHeight }}
         >
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              width: "100%",
-              position: "relative",
-            }}
-          >
-            {virtualizer.getVirtualItems().map((virtualItem) => {
-              const extension = filteredExtensions[virtualItem.index];
-              const installed = installedRegistryNames.has(
-                extension.registryName,
-              );
+          {filteredExtensions.length === 0 ? (
+            <CommandEmpty>No extensions match your search.</CommandEmpty>
+          ) : (
+            <CommandGroup className="p-2">
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualItem) => {
+                  const extension = filteredExtensions[virtualItem.index];
+                  const installed = installedRegistryNames.has(
+                    extension.registryName,
+                  );
 
-              return (
-                <div
-                  key={extension.id}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: `${virtualItem.size}px`,
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                >
-                  <ExtensionRow
-                    extension={extension}
-                    installed={installed}
-                    onInstall={() => onInstallClick(extension)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ) : (
-        <div className="text-muted-foreground flex h-20 items-center justify-center rounded-md border border-dashed text-sm">
-          No extensions match your search.
-        </div>
-      )}
+                  return (
+                    <div
+                      key={extension.id}
+                      data-index={virtualItem.index}
+                      ref={virtualizer.measureElement}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                    >
+                      <div className="py-1">
+                        <ExtensionRow
+                          extension={extension}
+                          installed={installed}
+                          onInstall={() => onInstallClick(extension)}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CommandGroup>
+          )}
+        </CommandList>
+      </Command>
     </div>
   );
 }
