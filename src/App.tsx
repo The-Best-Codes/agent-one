@@ -26,7 +26,9 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
-      {process.env.NODE_ENV === "development" && <Agentation />}
+      {process.env.NODE_ENV === "development" && (
+        <Agentation endpoint="http://localhost:4747" />
+      )}
       <KbdRegistry />
       <DeepLinkHandler />
       <Toaster position="top-right" richColors closeButton />
