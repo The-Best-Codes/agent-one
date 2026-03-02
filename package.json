@@ -132,6 +132,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "@vitest/ui": "^4.0.18",
+    "agentation": "^2.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "jsdom": "^28.1.0",
     "prettier": "^3.8.1",
