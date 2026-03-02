@@ -38,9 +38,8 @@ function isServerInstalledFromExtension(
 ): boolean {
   const registryIdFragment = toRegistryIdFragment(extension.registryName);
   return (
-    server.id.includes(`registry-${registryIdFragment}`) ||
-    server.name === extension.displayName ||
-    server.name === extension.registryName
+    server.id === extension.id ||
+    server.id.includes(`registry-${registryIdFragment}`)
   );
 }
 
@@ -135,12 +134,9 @@ export default function McpSection() {
   };
 
   const handleInstallExtension = (installed: McpRegistryInstallResult) => {
-    const registryName = selectedExtension?.registryName;
-    const idPrefix = registryName
-      ? `server-${uniqueId}-registry-${toRegistryIdFragment(registryName)}`
-      : `server-${uniqueId}`;
+    const extensionId = selectedExtension?.id;
     const baseServer = {
-      id: `${idPrefix}-${crypto.randomUUID()}`,
+      id: extensionId ?? `server-${uniqueId}-${crypto.randomUUID()}`,
       name: installed.name,
       enabled: true,
       timeoutMs: installed.timeoutSec * 1000,
