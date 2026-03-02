@@ -68,10 +68,11 @@ function ExtensionRow({
         </p>
 
         <div className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-2 text-xs">
-          <span className="truncate">{extension.registryName}</span>
           {extension.publisher ? (
             <span className="truncate">by {extension.publisher}</span>
-          ) : null}
+          ) : (
+            <span>Community extension</span>
+          )}
           {(extension.categories.length > 0
             ? extension.categories
             : extension.tags
