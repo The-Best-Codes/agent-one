@@ -166,71 +166,65 @@ export function ExtensionsBrowser({
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded-md border p-3">
-      <div className="flex items-center gap-2">
-        <p className="text-sm font-medium">Browse Extensions</p>
-      </div>
-
-      <Command
-        shouldFilter={false}
-        className="border-border rounded-md border bg-transparent"
+    <Command
+      shouldFilter={false}
+      className="border-border rounded-md border bg-transparent"
+    >
+      <CommandInput
+        value={query}
+        onValueChange={setQuery}
+        placeholder="Search extensions..."
+      />
+      <CommandList
+        ref={parentRef}
+        className="rounded-none border-0"
+        style={{ height: listHeight }}
       >
-        <CommandInput
-          value={query}
-          onValueChange={setQuery}
-          placeholder="Search extensions..."
-        />
-        <CommandList
-          ref={parentRef}
-          className="rounded-none border-0"
-          style={{ height: listHeight }}
-        >
-          {filteredExtensions.length === 0 ? (
-            <CommandEmpty className="flex h-full items-center justify-center py-0 text-center">
-              No extensions match your search.
-            </CommandEmpty>
-          ) : (
-            <CommandGroup className="p-2">
-              <div
-                style={{
-                  height: `${virtualizer.getTotalSize()}px`,
-                  width: "100%",
-                  position: "relative",
-                }}
-              >
-                {virtualizer.getVirtualItems().map((virtualItem) => {
-                  const extension = filteredExtensions[virtualItem.index];
-                  const installed = isInstalled(extension);
+        {filteredExtensions.length === 0 ? (
+          <CommandEmpty className="flex h-full items-center justify-center py-0 text-center">
+            No extensions match your search.
+          </CommandEmpty>
+        ) : (
+          <CommandGroup className="p-2">
+            <div
+              style={{
+                height: `${virtualizer.getTotalSize()}px`,
+                width: "100%",
+                position: "relative",
+              }}
+            >
+              {virtualizer.getVirtualItems().map((virtualItem) => {
+                const extension = filteredExtensions[virtualItem.index];
+                const installed = isInstalled(extension);
 
-                  return (
-                    <div
-                      key={extension.id}
-                      data-index={virtualItem.index}
-                      ref={virtualizer.measureElement}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                    >
-                      <div className="py-1">
-                        <ExtensionRow
-                          extension={extension}
-                          installed={installed}
-                          onInstall={() => onInstallClick(extension)}
-                          onUninstall={() => onUninstallClick(extension)}
-                        />
-                      </div>
+                return (
+                  <div
+                    key={extension.id}
+                    data-index={virtualItem.index}
+                    ref={virtualizer.measureElement}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                  >
+                    <div className="py-1">
+                      <ExtensionRow
+                        extension={extension}
+                        installed={installed}
+                        onInstall={() => onInstallClick(extension)}
+                        onUninstall={() => onUninstallClick(extension)}
+                      />
                     </div>
-                  );
-                })}
-              </div>
-            </CommandGroup>
-          )}
-        </CommandList>
-      </Command>
-    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CommandGroup>
+        )}
+      </CommandList>
+    </Command>
   );
 }

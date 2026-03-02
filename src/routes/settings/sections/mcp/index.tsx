@@ -218,7 +218,7 @@ export default function McpSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Extensions</CardTitle>
+          <CardTitle>Browse Extensions</CardTitle>
         </CardHeader>
         <CardContent>
           <ExtensionsBrowser
