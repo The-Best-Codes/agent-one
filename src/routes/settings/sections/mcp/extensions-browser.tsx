@@ -163,7 +163,10 @@ export function ExtensionsBrowser({
         <p className="text-sm font-medium">Extensions Registry</p>
       </div>
 
-      <Command shouldFilter={false}>
+      <Command
+        shouldFilter={false}
+        className="border-border rounded-md border bg-transparent"
+      >
         <CommandInput
           value={query}
           onValueChange={setQuery}
@@ -171,7 +174,7 @@ export function ExtensionsBrowser({
         />
         <CommandList
           ref={parentRef}
-          className="border-border rounded-md border"
+          className="rounded-none border-0"
           style={{ height: listHeight }}
         >
           {filteredExtensions.length === 0 ? (
