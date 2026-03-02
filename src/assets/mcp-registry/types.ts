@@ -20,11 +20,11 @@ export type Server = {
   description: string;
   repository?: Repository;
   version: string;
-  packages?: Package[];
-  title?: string;
   websiteUrl?: string;
-  icons?: Icon[];
   remotes?: Remote[];
+  title?: string;
+  icons?: Icon[];
+  packages?: Package[];
   _meta?: ServerMeta;
 };
 
@@ -50,8 +50,12 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   build_info?: BuildInfoClass;
   capabilities?: string[] | CapabilitiesClass;
   tags?: string[];
-  authentication?: Authentication;
+  authentication?: AuthenticationClass | string;
   categories?: string[];
+  promptCount?: number;
+  resourceCount?: number;
+  toolCount?: number;
+  tools?: Array<ToolClass | string>;
   homepage?: string;
   author?: string;
   issues?: string;
@@ -59,7 +63,6 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   features?: string[] | FeaturesClass;
   installationMethods?: InstallationMethod[];
   toolCategories?: ToolCategories;
-  tools?: Array<ToolClass | string>;
   buildInfo?: BuildInfo;
   contact?: string;
   rateLimit?: RateLimit;
@@ -99,7 +102,7 @@ export type Auth = {
   token_endpoint?: string;
 };
 
-export type Authentication = {
+export type AuthenticationClass = {
   description: string;
   type: string;
 };
@@ -290,10 +293,31 @@ export type EnvironmentVariable = {
 };
 
 export type EnvironmentVariableVariables = {
-  weather_choices: Endpoint;
+  weather_choices?: AgentID;
+  TRILO_PAT?: ApifyToken;
+  INFOBIP_API_KEY?: ApifyToken;
+  YUOR_MCP_TOKEN?: ApifyToken;
+  api_key?: ApifyToken;
+  indicate_api_key?: ApifyToken;
+  NETDATA_CLOUD_API_TOKEN?: SgpDirectoryAPIKey;
 };
 
-export type Endpoint = {
+export type ApifyToken = {
+  description?: string;
+  isRequired?: boolean;
+  format?: string;
+  isSecret?: boolean;
+  default?: string;
+  placeholder?: string;
+  choices?: string[];
+};
+
+export type SgpDirectoryAPIKey = {
+  description: string;
+  isSecret: boolean;
+};
+
+export type AgentID = {
   description: string;
   isRequired?: boolean;
 };
@@ -340,7 +364,7 @@ export type RuntimeArgument = {
 
 export type RuntimeArgumentVariables = {
   source_path?: ApifyToken;
-  workspace?: Endpoint;
+  workspace?: AgentID;
   host_port?: HostPort;
   network?: HostPort;
   api_key?: ApifyToken;
@@ -348,28 +372,18 @@ export type RuntimeArgumentVariables = {
   encoder_file?: ApifyToken;
   decoder_file?: ApifyToken;
   tokens_file?: ApifyToken;
+  token?: ApifyToken;
   config_path?: ApifyToken;
   data_path?: ApifyToken;
   workspace_path?: ApifyToken;
-  group?: CompanyCode;
-  user?: CompanyCode;
-  hostPath?: CompanyCode;
-  token?: ApifyToken;
+  group?: APIKey;
+  user?: APIKey;
+  hostPath?: APIKey;
   host?: Instance;
   port?: ApifyToken;
 };
 
-export type ApifyToken = {
-  description?: string;
-  isRequired?: boolean;
-  format?: string;
-  isSecret?: boolean;
-  default?: string;
-  placeholder?: string;
-  choices?: string[];
-};
-
-export type CompanyCode = {
+export type APIKey = {
   description: string;
 };
 
@@ -381,49 +395,14 @@ export type HostPort = {
 export type Transport = {
   type: string;
   url?: string;
-  headers?: TransportHeader[];
-};
-
-export type TransportHeader = {
-  description: string;
-  format?: string;
-  isSecret?: boolean;
-  name: string;
-  default?: string;
-  choices?: string[];
-  isRequired?: boolean;
+  headers?: EnvironmentVariable[];
 };
 
 export type Remote = {
   type: string;
   url: string;
-  headers?: RemoteHeader[];
+  headers?: EnvironmentVariable[];
   variables?: RemoteVariables;
-};
-
-export type RemoteHeader = {
-  description?: string;
-  isRequired?: boolean;
-  format?: string;
-  isSecret?: boolean;
-  name: string;
-  value?: string;
-  placeholder?: string;
-  variables?: HeaderVariables;
-  default?: string;
-  choices?: string[];
-};
-
-export type HeaderVariables = {
-  INFOBIP_API_KEY?: ApifyToken;
-  YUOR_MCP_TOKEN?: ApifyToken;
-  api_key?: ApifyToken;
-  NETDATA_CLOUD_API_TOKEN?: NetdataCloudAPIToken;
-};
-
-export type NetdataCloudAPIToken = {
-  description: string;
-  isSecret: boolean;
 };
 
 export type RemoteVariables = {
@@ -431,25 +410,37 @@ export type RemoteVariables = {
   HAPI_PORT?: ApifyToken;
   instance?: Instance;
   baseUrl?: ApifyToken;
-  "server-name"?: Endpoint;
+  "server-name"?: AgentID;
   env?: ApifyToken;
+  agent_id?: AgentID;
   api_key?: ApifyToken;
   region?: ApifyToken;
   qovery_token?: ApifyToken;
+  SGP_DIRECTORY_API_KEY?: SgpDirectoryAPIKey;
   token?: ApifyToken;
+  AUTH_TOKEN?: ApifyToken;
   tenant_id?: Instance;
-  company_code?: CompanyCode;
+  API_KEY?: APIKey;
+  company_code?: APIKey;
   BILT_API_KEY?: ApifyToken;
-  site_key?: Endpoint;
+  site_key?: AgentID;
+  oauth_client_id?: OauthClientID;
+  oauth_client_secret?: ApifyToken;
   APIFY_TOKEN?: ApifyToken;
-  your_mcp_server_host?: Endpoint;
-  endpoint?: Endpoint;
+  your_mcp_server_host?: AgentID;
+  lobster_id?: AgentID;
+  endpoint?: AgentID;
   api_token?: ApifyToken;
+};
+
+export type OauthClientID = {
+  description: string;
+  value: string;
 };
 
 export type Repository = {
   url?: string;
   source?: string;
-  subfolder?: string;
   id?: string;
+  subfolder?: string;
 };
