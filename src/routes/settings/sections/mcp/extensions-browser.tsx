@@ -49,19 +49,20 @@ function ExtensionRow({
   onUninstall: () => void;
 }) {
   return (
-    <div className="flex w-full items-start gap-4 rounded-md border p-4">
-      <Avatar size="sm">
-        <AvatarImage
-          src={extension.iconUrl}
-          alt={`${extension.displayName} icon`}
-        />
-        <AvatarFallback>{getInitials(extension.displayName)}</AvatarFallback>
-      </Avatar>
-
+    <div className="flex w-full items-start gap-3 rounded-md border p-4">
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <p className="truncate text-sm font-medium">
-            {extension.displayName}
+          <p className="flex min-w-0 items-center gap-2 truncate text-lg font-medium">
+            <Avatar className="size-6">
+              <AvatarImage
+                src={extension.iconUrl}
+                alt={`${extension.displayName} icon`}
+              />
+              <AvatarFallback className="text-[0.7em]">
+                {getInitials(extension.displayName)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate">{extension.displayName}</span>
           </p>
           <Badge variant="outline">v{extension.version}</Badge>
         </div>
