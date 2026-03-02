@@ -26,6 +26,23 @@ import { DeleteServerDialog } from "./delete-server-dialog";
 import { ExtensionsBrowser } from "./extensions-browser";
 import { InstallExtensionDialog } from "./install-extension-dialog";
 import { ServerListItem } from "./server-list-item";
+import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
+
+function toRegistryIdFragment(registryName: string): string {
+  return registryName.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function isServerInstalledFromExtension(
+  server: McpServerConfig,
+  extension: McpRegistryExtension,
+): boolean {
+  const registryIdFragment = toRegistryIdFragment(extension.registryName);
+  return (
+    server.id.includes(`registry-${registryIdFragment}`) ||
+    server.name === extension.displayName ||
+    server.name === extension.registryName
+  );
+}
 
 export default function McpSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
@@ -59,6 +76,9 @@ export default function McpSection() {
   const [selectedExtension, setSelectedExtension] =
     useState<McpRegistryExtension | null>(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
+  const [extensionToUninstall, setExtensionToUninstall] =
+    useState<McpRegistryExtension | null>(null);
+  const [showUninstallDialog, setShowUninstallDialog] = useState(false);
 
   const handleDeleteClick = (index: number) => {
     setServerToDelete(index);
@@ -115,8 +135,12 @@ export default function McpSection() {
   };
 
   const handleInstallExtension = (installed: McpRegistryInstallResult) => {
+    const registryName = selectedExtension?.registryName;
+    const idPrefix = registryName
+      ? `server-${uniqueId}-registry-${toRegistryIdFragment(registryName)}`
+      : `server-${uniqueId}`;
     const baseServer = {
-      id: `server-${uniqueId}-${crypto.randomUUID()}`,
+      id: `${idPrefix}-${crypto.randomUUID()}`,
       name: installed.name,
       enabled: true,
       timeoutMs: installed.timeoutSec * 1000,
@@ -142,6 +166,44 @@ export default function McpSection() {
     toast.success(`${installed.name} installed`);
   };
 
+  const handleExtensionUninstallClick = (extension: McpRegistryExtension) => {
+    setExtensionToUninstall(extension);
+    setShowUninstallDialog(true);
+  };
+
+  const handleConfirmExtensionUninstall = () => {
+    if (!extensionToUninstall) {
+      return;
+    }
+
+    let removedServerName: string | null = null;
+
+    setMcpServers((prev) => {
+      const targetIndex = prev.findIndex((server) =>
+        isServerInstalledFromExtension(server, extensionToUninstall),
+      );
+
+      if (targetIndex === -1) {
+        return prev;
+      }
+
+      removedServerName =
+        prev[targetIndex]?.name ?? extensionToUninstall.displayName;
+      return prev.filter((_, index) => index !== targetIndex);
+    });
+
+    toast.success(
+      `${removedServerName ?? extensionToUninstall.displayName} removed`,
+    );
+    setExtensionToUninstall(null);
+    setShowUninstallDialog(false);
+  };
+
+  const handleCancelExtensionUninstall = () => {
+    setExtensionToUninstall(null);
+    setShowUninstallDialog(false);
+  };
+
   const handleExtensionInstallClick = (extension: McpRegistryExtension) => {
     if (!extension.install) {
       return;
@@ -151,9 +213,11 @@ export default function McpSection() {
     setShowInstallDialog(true);
   };
 
-  const installedRegistryNames = new Set(
-    mcpServers.map((server) => server.name),
-  );
+  const isExtensionInstalled = (extension: McpRegistryExtension): boolean => {
+    return mcpServers.some((server) =>
+      isServerInstalledFromExtension(server, extension),
+    );
+  };
 
   return (
     <Card>
@@ -234,8 +298,9 @@ export default function McpSection() {
 
           <TabsContent value="extensions" className="mt-3">
             <ExtensionsBrowser
-              installedRegistryNames={installedRegistryNames}
+              isInstalled={isExtensionInstalled}
               onInstallClick={handleExtensionInstallClick}
+              onUninstallClick={handleExtensionUninstallClick}
             />
           </TabsContent>
         </Tabs>
@@ -259,6 +324,14 @@ export default function McpSection() {
         open={showInstallDialog}
         onOpenChange={setShowInstallDialog}
         onInstall={handleInstallExtension}
+      />
+
+      <UninstallExtensionDialog
+        extension={extensionToUninstall}
+        open={showUninstallDialog}
+        onOpenChange={setShowUninstallDialog}
+        onConfirm={handleConfirmExtensionUninstall}
+        onCancel={handleCancelExtensionUninstall}
       />
     </Card>
   );

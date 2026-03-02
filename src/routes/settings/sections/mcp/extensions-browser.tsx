@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ExternalLinkIcon, SparklesIcon } from "lucide-react";
+import { ExternalLinkIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import {
@@ -21,8 +21,9 @@ import { commandScore } from "@/lib/command-score";
 const ESTIMATED_EXTENSION_ITEM_HEIGHT = 148;
 
 interface ExtensionsBrowserProps {
-  installedRegistryNames: Set<string>;
+  isInstalled: (extension: McpRegistryExtension) => boolean;
   onInstallClick: (extension: McpRegistryExtension) => void;
+  onUninstallClick: (extension: McpRegistryExtension) => void;
 }
 
 function getInitials(name: string): string {
@@ -40,10 +41,12 @@ function ExtensionRow({
   extension,
   installed,
   onInstall,
+  onUninstall,
 }: {
   extension: McpRegistryExtension;
   installed: boolean;
   onInstall: () => void;
+  onUninstall: () => void;
 }) {
   return (
     <div className="flex w-full items-start gap-4 rounded-md border p-4">
@@ -61,6 +64,9 @@ function ExtensionRow({
             {extension.displayName}
           </p>
           <Badge variant="outline">v{extension.version}</Badge>
+          {!extension.publisher ? (
+            <Badge variant="secondary">Community</Badge>
+          ) : null}
         </div>
 
         <p className="text-muted-foreground line-clamp-2 text-xs">
@@ -70,9 +76,7 @@ function ExtensionRow({
         <div className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-2 text-xs">
           {extension.publisher ? (
             <span className="truncate">by {extension.publisher}</span>
-          ) : (
-            <span>Community extension</span>
-          )}
+          ) : null}
           {(extension.categories.length > 0
             ? extension.categories
             : extension.tags
@@ -96,26 +100,30 @@ function ExtensionRow({
           </Button>
         ) : null}
 
-        <Button
-          size="sm"
-          variant={installed ? "outline" : "default"}
-          onClick={onInstall}
-          disabled={installed || !extension.install}
-        >
-          {installed
-            ? "Installed"
-            : extension.install
-              ? "Install"
-              : "Unsupported"}
-        </Button>
+        {installed ? (
+          <Button size="sm" variant="destructive" onClick={onUninstall}>
+            <Trash2Icon className="size-4" />
+            Uninstall
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="default"
+            onClick={onInstall}
+            disabled={!extension.install}
+          >
+            {extension.install ? "Install" : "Unsupported"}
+          </Button>
+        )}
       </div>
     </div>
   );
 }
 
 export function ExtensionsBrowser({
-  installedRegistryNames,
+  isInstalled,
   onInstallClick,
+  onUninstallClick,
 }: ExtensionsBrowserProps) {
   const [query, setQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
@@ -160,8 +168,7 @@ export function ExtensionsBrowser({
   return (
     <div className="flex flex-col gap-3 rounded-md border p-3">
       <div className="flex items-center gap-2">
-        <SparklesIcon className="text-muted-foreground size-4" />
-        <p className="text-sm font-medium">Extensions Registry</p>
+        <p className="text-sm font-medium">Browse Extensions</p>
       </div>
 
       <Command
@@ -179,7 +186,9 @@ export function ExtensionsBrowser({
           style={{ height: listHeight }}
         >
           {filteredExtensions.length === 0 ? (
-            <CommandEmpty>No extensions match your search.</CommandEmpty>
+            <CommandEmpty className="flex h-full items-center justify-center py-0 text-center">
+              No extensions match your search.
+            </CommandEmpty>
           ) : (
             <CommandGroup className="p-2">
               <div
@@ -191,9 +200,7 @@ export function ExtensionsBrowser({
               >
                 {virtualizer.getVirtualItems().map((virtualItem) => {
                   const extension = filteredExtensions[virtualItem.index];
-                  const installed = installedRegistryNames.has(
-                    extension.registryName,
-                  );
+                  const installed = isInstalled(extension);
 
                   return (
                     <div
@@ -213,6 +220,7 @@ export function ExtensionsBrowser({
                           extension={extension}
                           installed={installed}
                           onInstall={() => onInstallClick(extension)}
+                          onUninstall={() => onUninstallClick(extension)}
                         />
                       </div>
                     </div>
