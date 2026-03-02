@@ -1,13 +1,19 @@
 import { useAtom } from "jotai";
 import { RotateCcwIcon } from "lucide-react";
 import { useId, useState } from "react";
+import { toast } from "sonner";
 
+import {
+  type McpRegistryExtension,
+  type McpRegistryInstallResult,
+} from "@/assets/mcp-registry/mcp-registry";
 import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
@@ -17,6 +23,8 @@ import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
 
 import { AddServerDialog } from "./add-server-dialog";
 import { DeleteServerDialog } from "./delete-server-dialog";
+import { ExtensionsBrowser } from "./extensions-browser";
+import { InstallExtensionDialog } from "./install-extension-dialog";
 import { ServerListItem } from "./server-list-item";
 
 export default function McpSection() {
@@ -48,6 +56,9 @@ export default function McpSection() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [serverToDelete, setServerToDelete] = useState<number | null>(null);
+  const [selectedExtension, setSelectedExtension] =
+    useState<McpRegistryExtension | null>(null);
+  const [showInstallDialog, setShowInstallDialog] = useState(false);
 
   const handleDeleteClick = (index: number) => {
     setServerToDelete(index);
@@ -103,6 +114,47 @@ export default function McpSection() {
     setMcpServers((prev) => [newServer, ...prev]);
   };
 
+  const handleInstallExtension = (installed: McpRegistryInstallResult) => {
+    const baseServer = {
+      id: `server-${uniqueId}-${crypto.randomUUID()}`,
+      name: installed.name,
+      enabled: true,
+      timeoutMs: installed.timeoutSec * 1000,
+      requiresApproval: installed.requiresApproval,
+    };
+
+    const newServer: McpServerConfig =
+      installed.type === "stdio"
+        ? {
+            ...baseServer,
+            type: "stdio",
+            command: installed.command,
+            env: installed.env,
+          }
+        : {
+            ...baseServer,
+            type: "http",
+            url: installed.url,
+            headers: installed.headers,
+          };
+
+    setMcpServers((prev) => [newServer, ...prev]);
+    toast.success(`${installed.name} installed`);
+  };
+
+  const handleExtensionInstallClick = (extension: McpRegistryExtension) => {
+    if (!extension.install) {
+      return;
+    }
+
+    setSelectedExtension(extension);
+    setShowInstallDialog(true);
+  };
+
+  const installedRegistryNames = new Set(
+    mcpServers.map((server) => server.name),
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -145,32 +197,48 @@ export default function McpSection() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Configured Servers</Label>
-          <Button onClick={() => setShowAddDialog(true)} size="sm">
-            Add Server
-          </Button>
-        </div>
+        <Tabs defaultValue="servers" className="w-full">
+          <TabsList>
+            <TabsTrigger value="servers">Servers</TabsTrigger>
+            <TabsTrigger value="extensions">Extensions</TabsTrigger>
+          </TabsList>
 
-        {mcpServers.length === 0 ? (
-          <NoMcpServers />
-        ) : (
-          <Accordion
-            type="single"
-            collapsible
-            className="border-border w-full rounded-md border"
-          >
-            {mcpServers.map((server, index) => (
-              <ServerListItem
-                key={server.id}
-                server={server}
-                index={index}
-                onUpdate={updateMcpServer}
-                onDelete={handleDeleteClick}
-              />
-            ))}
-          </Accordion>
-        )}
+          <TabsContent value="servers" className="mt-3 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Configured Servers</Label>
+              <Button onClick={() => setShowAddDialog(true)} size="sm">
+                Add Server
+              </Button>
+            </div>
+
+            {mcpServers.length === 0 ? (
+              <NoMcpServers />
+            ) : (
+              <Accordion
+                type="single"
+                collapsible
+                className="border-border w-full rounded-md border"
+              >
+                {mcpServers.map((server, index) => (
+                  <ServerListItem
+                    key={server.id}
+                    server={server}
+                    index={index}
+                    onUpdate={updateMcpServer}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+              </Accordion>
+            )}
+          </TabsContent>
+
+          <TabsContent value="extensions" className="mt-3">
+            <ExtensionsBrowser
+              installedRegistryNames={installedRegistryNames}
+              onInstallClick={handleExtensionInstallClick}
+            />
+          </TabsContent>
+        </Tabs>
       </CardContent>
 
       <AddServerDialog
@@ -184,6 +252,13 @@ export default function McpSection() {
         onOpenChange={setShowDeleteDialog}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+      />
+
+      <InstallExtensionDialog
+        extension={selectedExtension}
+        open={showInstallDialog}
+        onOpenChange={setShowInstallDialog}
+        onInstall={handleInstallExtension}
       />
     </Card>
   );
