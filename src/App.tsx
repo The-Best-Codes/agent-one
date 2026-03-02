@@ -1,3 +1,4 @@
+import { Agentation } from "agentation";
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
@@ -25,6 +26,7 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
+      {process.env.NODE_ENV === "development" && <Agentation />}
       <KbdRegistry />
       <DeepLinkHandler />
       <Toaster position="top-right" richColors closeButton />
