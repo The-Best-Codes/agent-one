@@ -1,30 +1,24 @@
 import { useAtom } from "jotai";
-import { RotateCcwIcon } from "lucide-react";
-import { useId, useState } from "react";
+import { PlusIcon } from "lucide-react";
+import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
+  getMcpRegistryExtensions,
   type McpRegistryExtension,
   type McpRegistryInstallResult,
 } from "@/assets/mcp-registry/mcp-registry";
-import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
-import { Accordion } from "@/components/ui/accordion";
+import type { MCPRegistryEntry } from "@/assets/mcp-registry/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  mcpParallelLoadLimitAtom,
-  mcpServersAtom,
-} from "@/lib/jotai/settings-atoms";
-import { resetSetting } from "@/lib/settings/reset-settings";
-import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
+import { type McpServerConfig } from "@/lib/settings/types";
 
 import { AddServerDialog } from "./add-server-dialog";
-import { DeleteServerDialog } from "./delete-server-dialog";
+import { ExtensionAdvancedDetails } from "./extension-advanced-details";
+import { ExtensionListRow } from "./extension-list-row";
 import { ExtensionsBrowser } from "./extensions-browser";
 import { InstallExtensionDialog } from "./install-extension-dialog";
-import { ServerListItem } from "./server-list-item";
 import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
 
 function toRegistryIdFragment(registryName: string): string {
@@ -42,35 +36,164 @@ function isServerInstalledFromExtension(
   );
 }
 
+function isServerFromRegistry(server: McpServerConfig): boolean {
+  return server.id.includes("@");
+}
+
+function toCustomExtension(server: McpServerConfig): McpRegistryExtension {
+  return {
+    id: server.id,
+    registryName: server.name,
+    displayName: server.name || "Custom Extension",
+    description: server.type === "stdio" ? server.command : server.url,
+    version: "custom",
+    categories: ["custom"],
+    tags: [server.type],
+    keywords: [],
+    packageCount: 0,
+    requiredFieldCount: 0,
+    transportTypes: [server.type],
+    searchText: "custom",
+    registryEntry: {
+      server: {
+        $schema: "",
+        name: server.name || "custom",
+        description: "Custom extension",
+        version: "custom",
+      },
+      _meta: {
+        "io.modelcontextprotocol.registry/official": {
+          status: "custom",
+          publishedAt: new Date(),
+          updatedAt: new Date(),
+          isLatest: true,
+        },
+      },
+    },
+  };
+}
+
+function getFieldValue(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "-";
+  }
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return String(value);
+  }
+  return JSON.stringify(value);
+}
+
+function RegistryKeyValueList({
+  title,
+  data,
+}: {
+  title: string;
+  data: Record<string, unknown>;
+}) {
+  const entries = Object.entries(data);
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border p-3">
+      <p className="text-sm font-medium">{title}</p>
+      {entries.length === 0 ? (
+        <p className="text-muted-foreground text-xs">No data available.</p>
+      ) : (
+        <div className="grid gap-1">
+          {entries.map(([key, value]) => (
+            <div
+              key={key}
+              className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-2"
+            >
+              <span className="text-muted-foreground min-w-44 text-xs font-medium break-all">
+                {key}
+              </span>
+              <span className="text-xs break-all">{getFieldValue(value)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RegistryArrayList({
+  title,
+  items,
+}: {
+  title: string;
+  items: unknown[];
+}) {
+  return (
+    <div className="flex flex-col gap-2 rounded-md border p-3">
+      <p className="text-sm font-medium">{title}</p>
+      {items.length === 0 ? (
+        <p className="text-muted-foreground text-xs">No data available.</p>
+      ) : (
+        <ul className="list-disc pl-5 text-xs">
+          {items.map((item, index) => (
+            <li key={`${title}-${index}`} className="break-all">
+              {getFieldValue(item)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function RegistryValue({ title, value }: { title: string; value: unknown }) {
+  return (
+    <div className="flex flex-col gap-1 rounded-md border p-3">
+      <p className="text-sm font-medium">{title}</p>
+      <p className="text-xs break-all">{getFieldValue(value)}</p>
+    </div>
+  );
+}
+
+function RegistryDataViewer({ entry }: { entry: MCPRegistryEntry }) {
+  const rows = useMemo(() => {
+    const data: Array<{ key: string; value: unknown }> = [];
+    for (const [key, value] of Object.entries(entry.server)) {
+      data.push({ key: `server.${key}`, value });
+    }
+    for (const [key, value] of Object.entries(entry._meta)) {
+      data.push({ key: `_meta.${key}`, value });
+    }
+    return data;
+  }, [entry]);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {rows.map(({ key, value }) => {
+        if (Array.isArray(value)) {
+          return <RegistryArrayList key={key} title={key} items={value} />;
+        }
+
+        if (value && typeof value === "object") {
+          return (
+            <RegistryKeyValueList
+              key={key}
+              title={key}
+              data={value as Record<string, unknown>}
+            />
+          );
+        }
+
+        return <RegistryValue key={key} title={key} value={value} />;
+      })}
+    </div>
+  );
+}
+
 export default function McpSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
-  const [parallelLoadLimit, setParallelLoadLimit] = useAtom(
-    mcpParallelLoadLimitAtom,
-  );
-
   const uniqueId = useId();
 
-  const isParallelLoadLimitDefault =
-    parallelLoadLimit === DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT;
-
-  const handleResetParallelLoadLimit = () => {
-    resetSetting("MCP_PARALLEL_LOAD_LIMIT");
-  };
-
-  const updateMcpServer = (
-    index: number,
-    updates: Partial<McpServerConfig>,
-  ) => {
-    setMcpServers((prev) =>
-      prev.map((server, i) =>
-        i === index ? ({ ...server, ...updates } as McpServerConfig) : server,
-      ),
-    );
-  };
-
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [serverToDelete, setServerToDelete] = useState<number | null>(null);
   const [selectedExtension, setSelectedExtension] =
     useState<McpRegistryExtension | null>(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
@@ -78,22 +201,32 @@ export default function McpSection() {
     useState<McpRegistryExtension | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
 
-  const handleDeleteClick = (index: number) => {
-    setServerToDelete(index);
-    setShowDeleteDialog(true);
-  };
+  const defaultExtensions = useMemo(() => getMcpRegistryExtensions(), []);
 
-  const confirmDelete = () => {
-    if (serverToDelete !== null) {
-      setMcpServers((prev) => prev.filter((_, i) => i !== serverToDelete));
+  const extensionByServerId = useMemo(() => {
+    const map = new Map<string, McpRegistryExtension>();
+    for (const extension of defaultExtensions) {
+      map.set(extension.id, extension);
     }
-    setServerToDelete(null);
-    setShowDeleteDialog(false);
-  };
+    return map;
+  }, [defaultExtensions]);
 
-  const cancelDelete = () => {
-    setServerToDelete(null);
-    setShowDeleteDialog(false);
+  const customServers = useMemo(
+    () => mcpServers.filter((server) => !isServerFromRegistry(server)),
+    [mcpServers],
+  );
+
+  const updateMcpServerById = (
+    serverId: string,
+    updates: Partial<McpServerConfig>,
+  ) => {
+    setMcpServers((prev) =>
+      prev.map((server) =>
+        server.id === serverId
+          ? ({ ...server, ...updates } as McpServerConfig)
+          : server,
+      ),
+    );
   };
 
   const handleAddServer = (serverData: {
@@ -214,104 +347,132 @@ export default function McpSection() {
     );
   };
 
+  const getExtensionServer = (extension: McpRegistryExtension) => {
+    return mcpServers.find((server) =>
+      isServerInstalledFromExtension(server, extension),
+    );
+  };
+
+  // TODO: Reintroduce MCP parallel load limit in a dedicated runtime/performance settings section.
+
   return (
-    <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Browse Extensions</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="flex flex-col gap-4">
+      <h3 className="text-base font-semibold">Extensions</h3>
+
+      <Tabs defaultValue="all" className="gap-4">
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="installed">Installed</TabsTrigger>
+          <TabsTrigger value="custom">Custom</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all">
           <ExtensionsBrowser
+            filter="all"
             isInstalled={isExtensionInstalled}
             onInstallClick={handleExtensionInstallClick}
             onUninstallClick={handleExtensionUninstallClick}
-          />
-        </CardContent>
-      </Card>
+            getAdvancedContent={(extension) => {
+              const server = getExtensionServer(extension);
+              if (!server) {
+                return null;
+              }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Advanced</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label
-                htmlFor="parallel-load-limit"
-                className="text-sm font-medium"
-              >
-                Parallel Load Limit
-              </Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Maximum number of MCP servers to load concurrently.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Input
-                id="parallel-load-limit"
-                type="number"
-                min="1"
-                max="20"
-                value={parallelLoadLimit}
-                onChange={(e) =>
-                  setParallelLoadLimit(parseInt(e.target.value) || 8)
-                }
-                className="w-20"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleResetParallelLoadLimit}
-                disabled={isParallelLoadLimitDefault}
-                aria-label="Reset to default"
-              >
-                <RotateCcwIcon className="size-4" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Configured Servers</Label>
-              <Button onClick={() => setShowAddDialog(true)} size="sm">
-                Add Server
-              </Button>
-            </div>
-
-            {mcpServers.length === 0 ? (
-              <NoMcpServers />
-            ) : (
-              <Accordion
-                type="single"
-                collapsible
-                className="border-border w-full rounded-md border"
-              >
-                {mcpServers.map((server, index) => (
-                  <ServerListItem
-                    key={server.id}
-                    server={server}
-                    index={index}
-                    onUpdate={updateMcpServer}
-                    onDelete={handleDeleteClick}
-                  />
-                ))}
-              </Accordion>
+              return (
+                <ExtensionAdvancedDetails
+                  server={server}
+                  onUpdate={(updates) =>
+                    updateMcpServerById(server.id, updates)
+                  }
+                />
+              );
+            }}
+            getMoreInfoContent={(extension) => (
+              <RegistryDataViewer entry={extension.registryEntry} />
             )}
+          />
+        </TabsContent>
+
+        <TabsContent value="installed">
+          <ExtensionsBrowser
+            filter="installed"
+            isInstalled={isExtensionInstalled}
+            onInstallClick={handleExtensionInstallClick}
+            onUninstallClick={handleExtensionUninstallClick}
+            getAdvancedContent={(extension) => {
+              const server = getExtensionServer(extension);
+              if (!server) {
+                return null;
+              }
+
+              return (
+                <ExtensionAdvancedDetails
+                  server={server}
+                  onUpdate={(updates) =>
+                    updateMcpServerById(server.id, updates)
+                  }
+                />
+              );
+            }}
+            getMoreInfoContent={(extension) => (
+              <RegistryDataViewer entry={extension.registryEntry} />
+            )}
+          />
+        </TabsContent>
+
+        <TabsContent value="custom" className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h4 className="text-sm font-medium">Custom Extensions</h4>
+            <Button size="sm" onClick={() => setShowAddDialog(true)}>
+              <PlusIcon className="size-4" />
+              Add Custom
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+
+          {customServers.length === 0 ? (
+            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
+              No custom extensions yet. Use Add Custom to create one.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {customServers.map((server) => {
+                const linkedExtension = extensionByServerId.get(server.id);
+                const uninstallTarget =
+                  linkedExtension ?? toCustomExtension(server);
+
+                return (
+                  <ExtensionListRow
+                    key={server.id}
+                    title={server.name || "Custom Extension"}
+                    description={
+                      server.type === "stdio" ? server.command : server.url
+                    }
+                    version="custom"
+                    badges={["custom", server.type]}
+                    installed
+                    onUninstall={() =>
+                      handleExtensionUninstallClick(uninstallTarget)
+                    }
+                    advancedContent={
+                      <ExtensionAdvancedDetails
+                        server={server}
+                        onUpdate={(updates) =>
+                          updateMcpServerById(server.id, updates)
+                        }
+                      />
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       <AddServerDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onAddServer={handleAddServer}
-      />
-
-      <DeleteServerDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
       />
 
       <InstallExtensionDialog

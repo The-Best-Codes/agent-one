@@ -45,6 +45,7 @@ export interface McpRegistryExtension {
   updatedAt?: string;
   install?: McpRegistryInstallTemplate;
   searchText: string;
+  registryEntry: MCPRegistryEntry;
 }
 
 export interface RegistryInstallSubmission {
@@ -506,6 +507,7 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
       ),
       install: installTemplate,
       searchText: "",
+      registryEntry: entry,
     };
 
     return {

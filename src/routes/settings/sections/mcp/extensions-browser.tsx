@@ -1,14 +1,11 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ExternalLinkIcon, Trash2Icon } from "lucide-react";
+import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
 
 import {
   getMcpRegistryExtensions,
   type McpRegistryExtension,
 } from "@/assets/mcp-registry/mcp-registry";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -18,107 +15,26 @@ import {
 } from "@/components/ui/command";
 import { commandScore } from "@/lib/command-score";
 
+import { ExtensionListRow } from "./extension-list-row";
+
 const ESTIMATED_EXTENSION_ITEM_HEIGHT = 148;
 
 interface ExtensionsBrowserProps {
+  filter?: "all" | "installed";
   isInstalled: (extension: McpRegistryExtension) => boolean;
   onInstallClick: (extension: McpRegistryExtension) => void;
   onUninstallClick: (extension: McpRegistryExtension) => void;
-}
-
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) {
-    return "EX";
-  }
-  if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
-  }
-  return `${words[0][0]}${words[1][0]}`.toUpperCase();
-}
-
-function ExtensionRow({
-  extension,
-  installed,
-  onInstall,
-  onUninstall,
-}: {
-  extension: McpRegistryExtension;
-  installed: boolean;
-  onInstall: () => void;
-  onUninstall: () => void;
-}) {
-  return (
-    <div className="flex w-full items-start gap-3 rounded-md border p-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <p className="flex min-w-0 items-center gap-2 truncate text-lg font-medium">
-            <Avatar className="size-6">
-              <AvatarImage
-                src={extension.iconUrl}
-                alt={`${extension.displayName} icon`}
-              />
-              <AvatarFallback className="text-[0.7em]">
-                {getInitials(extension.displayName)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="truncate">{extension.displayName}</span>
-          </p>
-          <Badge variant="outline">v{extension.version}</Badge>
-        </div>
-
-        <p className="text-muted-foreground line-clamp-2 text-xs">
-          {extension.description}
-        </p>
-
-        <div className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-2 text-xs">
-          {(extension.categories.length > 0
-            ? extension.categories
-            : extension.tags
-          )
-            .slice(0, 2)
-            .map((tag) => (
-              <Badge key={`${extension.id}-${tag}`} variant="outline">
-                {tag}
-              </Badge>
-            ))}
-        </div>
-      </div>
-
-      <div className="flex shrink-0 items-center gap-2">
-        {extension.websiteUrl ? (
-          <Button variant="outline" size="sm" asChild>
-            <a href={extension.websiteUrl} target="_blank" rel="noreferrer">
-              <ExternalLinkIcon className="size-4" />
-              Website
-            </a>
-          </Button>
-        ) : null}
-
-        {installed ? (
-          <Button size="sm" variant="destructive" onClick={onUninstall}>
-            <Trash2Icon className="size-4" />
-            Uninstall
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            variant="default"
-            onClick={onInstall}
-            disabled={!extension.install}
-          >
-            {extension.install ? "Install" : "Unsupported"}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
+  getAdvancedContent?: (extension: McpRegistryExtension) => ReactNode;
+  getMoreInfoContent?: (extension: McpRegistryExtension) => ReactNode;
 }
 
 export function ExtensionsBrowser({
+  filter = "all",
   isInstalled,
   onInstallClick,
   onUninstallClick,
+  getAdvancedContent,
+  getMoreInfoContent,
 }: ExtensionsBrowserProps) {
   const [query, setQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
@@ -127,11 +43,17 @@ export function ExtensionsBrowser({
 
   const filteredExtensions = useMemo(() => {
     const normalizedQuery = query.trim();
+
+    const baseExtensions =
+      filter === "installed"
+        ? extensions.filter((extension) => isInstalled(extension))
+        : extensions;
+
     if (!normalizedQuery) {
-      return extensions;
+      return baseExtensions;
     }
 
-    return extensions
+    return baseExtensions
       .map((extension) => ({
         extension,
         score: commandScore(extension.displayName, normalizedQuery, [
@@ -142,7 +64,7 @@ export function ExtensionsBrowser({
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
       .map(({ extension }) => extension);
-  }, [extensions, query]);
+  }, [extensions, filter, isInstalled, query]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
@@ -154,17 +76,8 @@ export function ExtensionsBrowser({
     overscan: 6,
   });
 
-  const totalSize = virtualizer.getTotalSize();
-  const listHeight = Math.min(
-    totalSize || ESTIMATED_EXTENSION_ITEM_HEIGHT,
-    420,
-  );
-
   return (
-    <Command
-      shouldFilter={false}
-      className="border-border rounded-md border bg-transparent"
-    >
+    <Command shouldFilter={false} className="bg-transparent">
       <CommandInput
         value={query}
         onValueChange={setQuery}
@@ -172,12 +85,15 @@ export function ExtensionsBrowser({
       />
       <CommandList
         ref={parentRef}
-        className="rounded-none border-0"
-        style={{ height: listHeight }}
+        className="h-[60vh] max-h-[52rem] min-h-[26rem] rounded-none border-0"
       >
         {filteredExtensions.length === 0 ? (
-          <CommandEmpty className="flex h-full items-center justify-center py-0 text-center">
-            No extensions match your search.
+          <CommandEmpty className="h-full py-3">
+            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
+              {filter === "installed"
+                ? "No installed extensions match your search."
+                : "No extensions match your search."}
+            </div>
           </CommandEmpty>
         ) : (
           <CommandGroup className="p-2">
@@ -206,11 +122,31 @@ export function ExtensionsBrowser({
                     }}
                   >
                     <div className="py-1">
-                      <ExtensionRow
-                        extension={extension}
+                      <ExtensionListRow
+                        title={extension.displayName}
+                        description={extension.description}
+                        version={extension.version}
+                        iconUrl={extension.iconUrl}
+                        websiteUrl={extension.websiteUrl}
+                        badges={
+                          extension.categories.length > 0
+                            ? extension.categories
+                            : extension.tags
+                        }
                         installed={installed}
+                        installSupported={Boolean(extension.install)}
                         onInstall={() => onInstallClick(extension)}
                         onUninstall={() => onUninstallClick(extension)}
+                        advancedContent={
+                          installed && getAdvancedContent
+                            ? getAdvancedContent(extension)
+                            : undefined
+                        }
+                        moreInfoContent={
+                          installed && getMoreInfoContent
+                            ? getMoreInfoContent(extension)
+                            : undefined
+                        }
                       />
                     </div>
                   </div>
