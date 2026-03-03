@@ -54,14 +54,16 @@ export function ExtensionAdvancedDetails({
           <Input
             id={`timeout-${server.id}`}
             type="number"
-            min="1"
+            min="0.1"
             max="300"
-            value={Math.round(server.timeoutMs / 1000)}
-            onChange={(event) =>
+            step="0.1"
+            value={server.timeoutMs / 1000}
+            onChange={(event) => {
+              const seconds = parseFloat(event.target.value);
               onUpdate({
-                timeoutMs: (parseInt(event.target.value) || 30) * 1000,
-              })
-            }
+                timeoutMs: seconds * 1000,
+              });
+            }}
             placeholder="30"
           />
         </div>

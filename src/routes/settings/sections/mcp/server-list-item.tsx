@@ -72,14 +72,16 @@ export function ServerListItem({
               <Input
                 id={`timeout-${server.id}`}
                 type="number"
-                min="1"
+                min="0.1"
                 max="300"
-                value={Math.round(server.timeoutMs / 1000)}
-                onChange={(e) =>
+                step="0.1"
+                value={server.timeoutMs / 1000}
+                onChange={(e) => {
+                  const seconds = parseFloat(e.target.value);
                   onUpdate(index, {
-                    timeoutMs: (parseInt(e.target.value) || 30) * 1000,
-                  })
-                }
+                    timeoutMs: seconds * 1000,
+                  });
+                }}
                 placeholder="30"
               />
             </div>
