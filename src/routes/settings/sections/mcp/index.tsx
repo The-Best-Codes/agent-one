@@ -9,6 +9,7 @@ import {
   type McpRegistryInstallResult,
 } from "@/assets/mcp-registry/mcp-registry";
 import type { MCPRegistryEntry } from "@/assets/mcp-registry/types";
+import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
@@ -430,9 +431,7 @@ export default function McpSection() {
           </div>
 
           {customServers.length === 0 ? (
-            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-              No custom extensions yet. Use Add Custom to create one.
-            </div>
+            <NoCustomExtensions />
           ) : (
             <div className="flex flex-col gap-2">
               {customServers.map((server) => {

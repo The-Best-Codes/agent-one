@@ -1,7 +1,7 @@
-export const NoMcpServers = () => {
+export const NoCustomExtensions = () => {
   return (
     <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-      No MCP servers configured. Click &quot;Add Server&quot; to get started.
+      No custom extensions yet. Click &quot;Add Custom&quot; to create one.
     </div>
   );
 };
