@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+
+import { McpServerConfigForm } from "./mcp-server-config-form";
+import { isMcpServerConfigFormValid } from "./mcp-server-config-form-utils";
 
 interface InstallExtensionDialogProps {
   extension: McpRegistryExtension | null;
@@ -112,11 +114,33 @@ function InstallExtensionDialogBody({
   }
 
   const requiredFields = install.fields.filter((field) => field.required);
+  const detectedConfigurationContent =
+    install.fields.length > 0 ? (
+      <div className="rounded-md border p-3">
+        <p className="mb-3 text-xs font-medium">Detected configuration</p>
+        <div className="flex flex-col gap-3">
+          {install.fields.map((field) => (
+            <InstallFieldInput
+              key={field.id}
+              field={field}
+              value={fieldValues[field.id] || ""}
+              onChange={(value) =>
+                setFieldValues((prev) => ({ ...prev, [field.id]: value }))
+              }
+            />
+          ))}
+        </div>
+      </div>
+    ) : null;
 
   const isFormValid =
-    name.trim() !== "" &&
-    timeoutSec >= 0.1 &&
-    (install.type === "stdio" ? command.trim() !== "" : url.trim() !== "") &&
+    isMcpServerConfigFormValid({
+      type: install.type,
+      name,
+      command,
+      url,
+      timeoutSec,
+    }) &&
     requiredFields.every(
       (field) => (fieldValues[field.id] || "").trim() !== "",
     );
@@ -152,88 +176,43 @@ function InstallExtensionDialogBody({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="grid gap-4 py-2">
-        <div className="grid gap-1.5">
-          <Label htmlFor="extension-server-name">Name</Label>
-          <Input
-            id="extension-server-name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Server name"
-          />
-        </div>
-
-        {install.type === "stdio" ? (
-          <div className="grid gap-1.5">
-            <Label htmlFor="extension-command">Command</Label>
-            <Input
-              id="extension-command"
-              value={command}
-              onChange={(event) => setCommand(event.target.value)}
-              placeholder="npx -y ..."
-            />
-          </div>
-        ) : (
-          <div className="grid gap-1.5">
-            <Label htmlFor="extension-url">URL</Label>
-            <Input
-              id="extension-url"
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-        )}
-
-        {install.fields.length > 0 ? (
-          <div className="rounded-md border p-3">
-            <p className="mb-3 text-xs font-medium">Detected configuration</p>
-            <div className="flex flex-col gap-3">
-              {install.fields.map((field) => (
-                <InstallFieldInput
-                  key={field.id}
-                  field={field}
-                  value={fieldValues[field.id] || ""}
-                  onChange={(value) =>
-                    setFieldValues((prev) => ({ ...prev, [field.id]: value }))
-                  }
-                />
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="grid gap-1.5">
-          <Label htmlFor="extension-timeout">Timeout (seconds)</Label>
-          <Input
-            id="extension-timeout"
-            type="number"
-            min="0.1"
-            max="300"
-            step="0.1"
-            value={timeoutSec}
-            onChange={(event) =>
-              setTimeoutSec(parseFloat(event.target.value) || 30)
-            }
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <Label htmlFor="extension-requires-approval" className="text-sm">
-              Require Approval
-            </Label>
-            <span className="text-muted-foreground text-xs">
-              Ask before running tools from this extension
-            </span>
-          </div>
-          <Switch
-            id="extension-requires-approval"
-            checked={requiresApproval}
-            onCheckedChange={setRequiresApproval}
-          />
-        </div>
-      </div>
+      <McpServerConfigForm
+        idPrefix="install-extension"
+        className="grid gap-4 py-2"
+        values={{
+          type: install.type,
+          name,
+          command,
+          env: {},
+          url,
+          headers: {},
+          timeoutSec,
+          requiresApproval,
+        }}
+        onChange={(updates) => {
+          if (updates.name !== undefined) {
+            setName(updates.name);
+          }
+          if (updates.command !== undefined) {
+            setCommand(updates.command);
+          }
+          if (updates.url !== undefined) {
+            setUrl(updates.url);
+          }
+          if (updates.timeoutSec !== undefined) {
+            setTimeoutSec(updates.timeoutSec);
+          }
+          if (updates.requiresApproval !== undefined) {
+            setRequiresApproval(updates.requiresApproval);
+          }
+        }}
+        showTransportEditors={false}
+        commandPlaceholder="npx -y ..."
+        urlPlaceholder="https://..."
+        approvalDescription="Ask before running tools from this extension"
+        stdioSupplement={detectedConfigurationContent}
+        httpSupplement={detectedConfigurationContent}
+      />
 
       <DialogFooter>
         <Button variant="outline" onClick={() => onOpenChange(false)}>

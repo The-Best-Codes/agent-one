@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { PlusIcon } from "lucide-react";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -41,49 +41,17 @@ function isServerFromRegistry(server: McpServerConfig): boolean {
   return server.id.includes("@");
 }
 
-function toCustomExtension(server: McpServerConfig): McpRegistryExtension {
-  return {
-    id: server.id,
-    registryName: server.name,
-    displayName: server.name || "Custom Extension",
-    description: server.type === "stdio" ? server.command : server.url,
-    version: "custom",
-    categories: ["custom"],
-    tags: [server.type],
-    keywords: [],
-    packageCount: 0,
-    requiredFieldCount: 0,
-    transportTypes: [server.type],
-    searchText: "custom",
-    registryEntry: {
-      server: {
-        $schema: "",
-        name: server.name || "custom",
-        description: "Custom extension",
-        version: "custom",
-      },
-      _meta: {
-        "io.modelcontextprotocol.registry/official": {
-          status: "custom",
-          publishedAt: new Date(),
-          updatedAt: new Date(),
-          isLatest: true,
-        },
-      },
-    },
-  };
-}
-
 export default function McpSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
-  const uniqueId = useId();
 
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedExtension, setSelectedExtension] =
     useState<McpRegistryExtension | null>(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
-  const [extensionToUninstall, setExtensionToUninstall] =
-    useState<McpRegistryExtension | null>(null);
+  const [serverToUninstall, setServerToUninstall] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
 
   const defaultExtensions = useMemo(() => getMcpRegistryExtensions(), []);
@@ -127,7 +95,7 @@ export default function McpSection() {
     const newServer: McpServerConfig =
       serverData.type === "stdio"
         ? {
-            id: `server-${uniqueId}-${crypto.randomUUID()}`,
+            id: crypto.randomUUID(),
             type: "stdio",
             name: serverData.name,
             command: serverData.command!,
@@ -137,7 +105,7 @@ export default function McpSection() {
             requiresApproval: serverData.requiresApproval,
           }
         : {
-            id: `server-${uniqueId}-${crypto.randomUUID()}`,
+            id: crypto.randomUUID(),
             type: "http",
             name: serverData.name,
             url: serverData.url!,
@@ -153,7 +121,7 @@ export default function McpSection() {
   const handleInstallExtension = (installed: McpRegistryInstallResult) => {
     const extensionId = selectedExtension?.id;
     const baseServer = {
-      id: extensionId ?? `server-${uniqueId}-${crypto.randomUUID()}`,
+      id: extensionId ?? crypto.randomUUID(),
       name: installed.name,
       enabled: true,
       timeoutMs: installed.timeoutSec * 1000,
@@ -180,40 +148,53 @@ export default function McpSection() {
   };
 
   const handleExtensionUninstallClick = (extension: McpRegistryExtension) => {
-    setExtensionToUninstall(extension);
+    const targetServer = mcpServers.find((server) =>
+      isServerInstalledFromExtension(server, extension),
+    );
+
+    if (!targetServer) {
+      return;
+    }
+
+    setServerToUninstall({
+      id: targetServer.id,
+      name: targetServer.name || extension.displayName,
+    });
+    setShowUninstallDialog(true);
+  };
+
+  const handleServerUninstallClick = (server: McpServerConfig) => {
+    setServerToUninstall({
+      id: server.id,
+      name: server.name || "Custom Extension",
+    });
     setShowUninstallDialog(true);
   };
 
   const handleConfirmExtensionUninstall = () => {
-    if (!extensionToUninstall) {
+    if (!serverToUninstall) {
       return;
     }
 
-    let removedServerName: string | null = null;
-
     setMcpServers((prev) => {
-      const targetIndex = prev.findIndex((server) =>
-        isServerInstalledFromExtension(server, extensionToUninstall),
+      const targetIndex = prev.findIndex(
+        (server) => server.id === serverToUninstall.id,
       );
 
       if (targetIndex === -1) {
         return prev;
       }
 
-      removedServerName =
-        prev[targetIndex]?.name ?? extensionToUninstall.displayName;
       return prev.filter((_, index) => index !== targetIndex);
     });
 
-    toast.success(
-      `${removedServerName ?? extensionToUninstall.displayName} removed`,
-    );
-    setExtensionToUninstall(null);
+    toast.success(`${serverToUninstall.name} removed`);
+    setServerToUninstall(null);
     setShowUninstallDialog(false);
   };
 
   const handleCancelExtensionUninstall = () => {
-    setExtensionToUninstall(null);
+    setServerToUninstall(null);
     setShowUninstallDialog(false);
   };
 
@@ -238,6 +219,29 @@ export default function McpSection() {
     );
   };
 
+  const renderAdvancedContent = (extension: McpRegistryExtension) => {
+    const server = getExtensionServer(extension);
+    if (!server) {
+      return null;
+    }
+
+    return (
+      <ExtensionAdvancedDetails
+        server={server}
+        onUpdate={(updates) => updateMcpServerById(server.id, updates)}
+      />
+    );
+  };
+
+  const sharedBrowserProps = {
+    isInstalled: isExtensionInstalled,
+    onInstallClick: handleExtensionInstallClick,
+    onUninstallClick: handleExtensionUninstallClick,
+    getAdvancedContent: renderAdvancedContent,
+    getMoreInfoJson: (extension: McpRegistryExtension) =>
+      extension.registryEntry,
+  };
+
   // TODO: Reintroduce MCP parallel load limit in a dedicated runtime/performance settings section.
 
   return (
@@ -253,55 +257,14 @@ export default function McpSection() {
             <TabsTrigger value="custom">Custom</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="all">
-            <ExtensionsBrowser
-              filter="all"
-              isInstalled={isExtensionInstalled}
-              onInstallClick={handleExtensionInstallClick}
-              onUninstallClick={handleExtensionUninstallClick}
-              getAdvancedContent={(extension) => {
-                const server = getExtensionServer(extension);
-                if (!server) {
-                  return null;
-                }
-
-                return (
-                  <ExtensionAdvancedDetails
-                    server={server}
-                    onUpdate={(updates) =>
-                      updateMcpServerById(server.id, updates)
-                    }
-                  />
-                );
-              }}
-              getMoreInfoJson={(extension) => extension.registryEntry}
-            />
-          </TabsContent>
-
-          <TabsContent value="installed">
-            <ExtensionsBrowser
-              filter="installed"
-              isInstalled={isExtensionInstalled}
-              onInstallClick={handleExtensionInstallClick}
-              onUninstallClick={handleExtensionUninstallClick}
-              getAdvancedContent={(extension) => {
-                const server = getExtensionServer(extension);
-                if (!server) {
-                  return null;
-                }
-
-                return (
-                  <ExtensionAdvancedDetails
-                    server={server}
-                    onUpdate={(updates) =>
-                      updateMcpServerById(server.id, updates)
-                    }
-                  />
-                );
-              }}
-              getMoreInfoJson={(extension) => extension.registryEntry}
-            />
-          </TabsContent>
+          {[
+            { value: "all", filter: "all" as const },
+            { value: "installed", filter: "installed" as const },
+          ].map((tab) => (
+            <TabsContent key={tab.value} value={tab.value}>
+              <ExtensionsBrowser filter={tab.filter} {...sharedBrowserProps} />
+            </TabsContent>
+          ))}
 
           <TabsContent value="custom" className="space-y-3">
             <div className="flex items-center justify-between gap-3">
@@ -318,8 +281,6 @@ export default function McpSection() {
               <div className="flex flex-col gap-2">
                 {customServers.map((server) => {
                   const linkedExtension = extensionByServerId.get(server.id);
-                  const uninstallTarget =
-                    linkedExtension ?? toCustomExtension(server);
 
                   return (
                     <ExtensionListRow
@@ -332,7 +293,9 @@ export default function McpSection() {
                       badges={["custom", server.type]}
                       installed
                       onUninstall={() =>
-                        handleExtensionUninstallClick(uninstallTarget)
+                        linkedExtension
+                          ? handleExtensionUninstallClick(linkedExtension)
+                          : handleServerUninstallClick(server)
                       }
                       advancedContent={
                         <ExtensionAdvancedDetails
@@ -364,7 +327,7 @@ export default function McpSection() {
         />
 
         <UninstallExtensionDialog
-          extension={extensionToUninstall}
+          serverName={serverToUninstall?.name ?? null}
           open={showUninstallDialog}
           onOpenChange={setShowUninstallDialog}
           onConfirm={handleConfirmExtensionUninstall}

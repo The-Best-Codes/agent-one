@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
-import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,17 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { type McpServerType } from "@/lib/settings/types";
+
+import { McpServerConfigForm } from "./mcp-server-config-form";
+import { isMcpServerConfigFormValid } from "./mcp-server-config-form-utils";
 
 interface AddServerDialogProps {
   open: boolean;
@@ -55,12 +46,13 @@ export function AddServerDialog({
   const [newServerRequiresApproval, setNewServerRequiresApproval] =
     useState(false);
 
-  const isAddFormValid =
-    newServerName.trim() !== "" &&
-    newServerTimeoutSec >= 0.1 &&
-    (newServerType === "stdio"
-      ? newServerCommand.trim() !== ""
-      : newServerUrl.trim() !== "");
+  const isAddFormValid = isMcpServerConfigFormValid({
+    type: newServerType,
+    name: newServerName,
+    command: newServerCommand,
+    url: newServerUrl,
+    timeoutSec: newServerTimeoutSec,
+  });
 
   const resetAddForm = () => {
     setNewServerType("stdio");
@@ -106,109 +98,48 @@ export function AddServerDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="server-type">Server Type</Label>
-            <Select
-              value={newServerType}
-              onValueChange={(value: McpServerType) => setNewServerType(value)}
-            >
-              <SelectTrigger id="server-type">
-                <SelectValue placeholder="Select server type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="stdio">STDIO (Local)</SelectItem>
-                <SelectItem value="http">HTTP (Remote)</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-muted-foreground text-xs">
-              {newServerType === "stdio"
-                ? "STDIO servers run locally via command line."
-                : "HTTP servers are remote endpoints that support the MCP protocol."}
-            </p>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="server-name">Name</Label>
-            <Input
-              id="server-name"
-              placeholder="e.g., Everything Server"
-              value={newServerName}
-              onChange={(e) => setNewServerName(e.target.value)}
-            />
-          </div>
-
-          {newServerType === "stdio" ? (
-            <>
-              <div className="grid gap-2">
-                <Label htmlFor="server-command">Command</Label>
-                <Input
-                  id="server-command"
-                  placeholder="e.g., npx -y @modelcontextprotocol/server-everything"
-                  value={newServerCommand}
-                  onChange={(e) => setNewServerCommand(e.target.value)}
-                />
-              </div>
-
-              <EnvVarsEditor
-                id="new-server-dialog"
-                env={newServerEnv}
-                onChange={setNewServerEnv}
-                labelClassName="text-sm"
-              />
-            </>
-          ) : (
-            <>
-              <div className="grid gap-2">
-                <Label htmlFor="server-url">URL</Label>
-                <Input
-                  id="server-url"
-                  placeholder="https://mcp.example.com/api"
-                  value={newServerUrl}
-                  onChange={(e) => setNewServerUrl(e.target.value)}
-                />
-              </div>
-
-              <HttpHeadersEditor
-                id="new-server-dialog"
-                headers={newServerHeaders}
-                onChange={setNewServerHeaders}
-                labelClassName="text-sm"
-              />
-            </>
-          )}
-
-          <div className="grid gap-2">
-            <Label htmlFor="server-timeout">Timeout (seconds)</Label>
-            <Input
-              id="server-timeout"
-              type="number"
-              min="0.1"
-              max="300"
-              step="0.1"
-              value={newServerTimeoutSec}
-              onChange={(e) =>
-                setNewServerTimeoutSec(parseFloat(e.target.value))
-              }
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <Label htmlFor="server-approval" className="text-sm">
-                Require Approval
-              </Label>
-              <span className="text-muted-foreground text-xs">
-                Ask for confirmation before running tools from this server
-              </span>
-            </div>
-            <Switch
-              id="server-approval"
-              checked={newServerRequiresApproval}
-              onCheckedChange={setNewServerRequiresApproval}
-            />
-          </div>
-        </div>
+        <McpServerConfigForm
+          idPrefix="new-server-dialog"
+          className="grid gap-4 py-4"
+          showTypeSelector
+          values={{
+            type: newServerType,
+            name: newServerName,
+            command: newServerCommand,
+            env: newServerEnv,
+            url: newServerUrl,
+            headers: newServerHeaders,
+            timeoutSec: newServerTimeoutSec,
+            requiresApproval: newServerRequiresApproval,
+          }}
+          onChange={(updates) => {
+            if (updates.type !== undefined) {
+              setNewServerType(updates.type);
+            }
+            if (updates.name !== undefined) {
+              setNewServerName(updates.name);
+            }
+            if (updates.command !== undefined) {
+              setNewServerCommand(updates.command);
+            }
+            if (updates.env !== undefined) {
+              setNewServerEnv(updates.env);
+            }
+            if (updates.url !== undefined) {
+              setNewServerUrl(updates.url);
+            }
+            if (updates.headers !== undefined) {
+              setNewServerHeaders(updates.headers);
+            }
+            if (updates.timeoutSec !== undefined) {
+              setNewServerTimeoutSec(updates.timeoutSec);
+            }
+            if (updates.requiresApproval !== undefined) {
+              setNewServerRequiresApproval(updates.requiresApproval);
+            }
+          }}
+          namePlaceholder="e.g., Everything Server"
+        />
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancelAdd}>
