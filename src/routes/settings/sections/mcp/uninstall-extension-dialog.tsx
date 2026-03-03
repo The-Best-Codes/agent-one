@@ -1,4 +1,3 @@
-import type { McpRegistryExtension } from "@/assets/mcp-registry/mcp-registry";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface UninstallExtensionDialogProps {
-  extension: McpRegistryExtension | null;
+  serverName: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
@@ -18,13 +17,13 @@ interface UninstallExtensionDialogProps {
 }
 
 export function UninstallExtensionDialog({
-  extension,
+  serverName,
   open,
   onOpenChange,
   onConfirm,
   onCancel,
 }: UninstallExtensionDialogProps) {
-  if (!extension) {
+  if (!serverName) {
     return null;
   }
 
@@ -32,7 +31,7 @@ export function UninstallExtensionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Uninstall {extension.displayName}</DialogTitle>
+          <DialogTitle>Uninstall {serverName}</DialogTitle>
           <DialogDescription>
             Are you sure you want to uninstall this extension? Its MCP server
             configuration will be removed.
