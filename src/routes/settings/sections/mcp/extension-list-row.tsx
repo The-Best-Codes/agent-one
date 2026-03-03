@@ -1,15 +1,18 @@
-import { ExternalLinkIcon, Trash2Icon } from "lucide-react";
+import { ChevronRightIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
@@ -52,6 +55,7 @@ export function ExtensionListRow({
   moreInfoContent,
 }: ExtensionListRowProps) {
   const hasAdvanced = Boolean(advancedContent) || Boolean(moreInfoContent);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   return (
     <div className="flex w-full flex-col gap-3 rounded-md border p-4">
@@ -114,32 +118,35 @@ export function ExtensionListRow({
       </div>
 
       {installed && hasAdvanced ? (
-        <Accordion type="single" collapsible>
-          <AccordionItem
-            value="advanced"
-            className="rounded-md border border-b! px-2"
-          >
-            <AccordionTrigger className="py-2">Advanced</AccordionTrigger>
-            <AccordionContent className="pb-3">
-              <div className="flex flex-col gap-3">
-                {advancedContent}
-                {moreInfoContent ? (
-                  <Accordion type="single" collapsible>
-                    <AccordionItem
-                      value="more-info"
-                      className="rounded-md border border-b! px-2"
-                    >
-                      <AccordionTrigger className="py-2">
-                        More info
-                      </AccordionTrigger>
-                      <AccordionContent>{moreInfoContent}</AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                ) : null}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <Dialog open={advancedOpen} onOpenChange={setAdvancedOpen}>
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
+            >
+              Advanced
+              <ChevronRightIcon className="text-muted-foreground size-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{title} advanced config</DialogTitle>
+              <DialogDescription>
+                Edit advanced settings for this extension.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 py-1">
+              {advancedContent}
+              {moreInfoContent ? (
+                <div className="flex flex-col gap-3 rounded-md border p-3">
+                  <p className="text-sm font-medium">More info</p>
+                  {moreInfoContent}
+                </div>
+              ) : null}
+            </div>
+          </DialogContent>
+        </Dialog>
       ) : null}
     </div>
   );
