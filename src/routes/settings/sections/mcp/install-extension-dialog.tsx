@@ -1,0 +1,272 @@
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+
+import {
+  createMcpServerFromRegistryInstall,
+  type McpRegistryExtension,
+  type McpRegistryInstallResult,
+  type RegistryInstallField,
+} from "@/assets/mcp-registry/mcp-registry";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
+interface InstallExtensionDialogProps {
+  extension: McpRegistryExtension | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onInstall: (server: McpRegistryInstallResult) => void;
+}
+
+function InstallFieldInput({
+  field,
+  value,
+  onChange,
+}: {
+  field: RegistryInstallField;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [showSecret, setShowSecret] = useState(false);
+
+  return (
+    <div className="grid gap-1.5">
+      <Label htmlFor={field.id} className="text-xs">
+        {field.label}
+        {field.required ? " *" : ""}
+      </Label>
+      <div className="flex items-center gap-2">
+        <Input
+          id={field.id}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={field.placeholder || undefined}
+          type={field.secret && !showSecret ? "password" : "text"}
+        />
+        {field.secret ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setShowSecret((prev) => !prev)}
+            title={showSecret ? "Hide value" : "Show value"}
+          >
+            {showSecret ? (
+              <EyeOffIcon className="size-4" />
+            ) : (
+              <EyeIcon className="size-4" />
+            )}
+          </Button>
+        ) : null}
+      </div>
+      {field.description ? (
+        <p className="text-muted-foreground text-xs">{field.description}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function InstallExtensionDialogBody({
+  extension,
+  onOpenChange,
+  onInstall,
+}: {
+  extension: McpRegistryExtension;
+  onOpenChange: (open: boolean) => void;
+  onInstall: (server: McpRegistryInstallResult) => void;
+}) {
+  const install = extension.install;
+  const defaultFieldValues = useMemo(() => {
+    if (!install) {
+      return {};
+    }
+
+    return install.fields.reduce<Record<string, string>>(
+      (accumulator, field) => {
+        accumulator[field.id] = field.defaultValue;
+        return accumulator;
+      },
+      {},
+    );
+  }, [install]);
+
+  const [name, setName] = useState(extension.displayName);
+  const [timeoutSec, setTimeoutSec] = useState(30);
+  const [requiresApproval, setRequiresApproval] = useState(false);
+  const [command, setCommand] = useState(install?.commandTemplate || "");
+  const [url, setUrl] = useState(install?.urlTemplate || "");
+  const [fieldValues, setFieldValues] =
+    useState<Record<string, string>>(defaultFieldValues);
+
+  if (!install) {
+    return null;
+  }
+
+  const requiredFields = install.fields.filter((field) => field.required);
+
+  const isFormValid =
+    name.trim() !== "" &&
+    timeoutSec >= 0.1 &&
+    (install.type === "stdio" ? command.trim() !== "" : url.trim() !== "") &&
+    requiredFields.every(
+      (field) => (fieldValues[field.id] || "").trim() !== "",
+    );
+
+  const handleInstall = () => {
+    if (!isFormValid) {
+      return;
+    }
+
+    const result = createMcpServerFromRegistryInstall(extension, {
+      name: name.trim(),
+      timeoutSec,
+      requiresApproval,
+      fieldValues,
+      command: install.type === "stdio" ? command : undefined,
+      url: install.type === "http" ? url : undefined,
+    });
+
+    if (!result) {
+      return;
+    }
+
+    onInstall(result);
+    onOpenChange(false);
+  };
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>Install {extension.displayName}</DialogTitle>
+        <DialogDescription>
+          Review detected settings and install this MCP extension.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="grid gap-4 py-2">
+        <div className="grid gap-1.5">
+          <Label htmlFor="extension-server-name">Name</Label>
+          <Input
+            id="extension-server-name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Server name"
+          />
+        </div>
+
+        {install.type === "stdio" ? (
+          <div className="grid gap-1.5">
+            <Label htmlFor="extension-command">Command</Label>
+            <Input
+              id="extension-command"
+              value={command}
+              onChange={(event) => setCommand(event.target.value)}
+              placeholder="npx -y ..."
+            />
+          </div>
+        ) : (
+          <div className="grid gap-1.5">
+            <Label htmlFor="extension-url">URL</Label>
+            <Input
+              id="extension-url"
+              value={url}
+              onChange={(event) => setUrl(event.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+        )}
+
+        {install.fields.length > 0 ? (
+          <div className="rounded-md border p-3">
+            <p className="mb-3 text-xs font-medium">Detected configuration</p>
+            <div className="flex flex-col gap-3">
+              {install.fields.map((field) => (
+                <InstallFieldInput
+                  key={field.id}
+                  field={field}
+                  value={fieldValues[field.id] || ""}
+                  onChange={(value) =>
+                    setFieldValues((prev) => ({ ...prev, [field.id]: value }))
+                  }
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="grid gap-1.5">
+          <Label htmlFor="extension-timeout">Timeout (seconds)</Label>
+          <Input
+            id="extension-timeout"
+            type="number"
+            min="0.1"
+            max="300"
+            step="0.1"
+            value={timeoutSec}
+            onChange={(event) =>
+              setTimeoutSec(parseFloat(event.target.value) || 30)
+            }
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <Label htmlFor="extension-requires-approval" className="text-sm">
+              Require Approval
+            </Label>
+            <span className="text-muted-foreground text-xs">
+              Ask before running tools from this extension
+            </span>
+          </div>
+          <Switch
+            id="extension-requires-approval"
+            checked={requiresApproval}
+            onCheckedChange={setRequiresApproval}
+          />
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={() => onOpenChange(false)}>
+          Cancel
+        </Button>
+        <Button onClick={handleInstall} disabled={!isFormValid}>
+          Install
+        </Button>
+      </DialogFooter>
+    </>
+  );
+}
+
+export function InstallExtensionDialog({
+  extension,
+  open,
+  onOpenChange,
+  onInstall,
+}: InstallExtensionDialogProps) {
+  if (!extension) {
+    return null;
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <InstallExtensionDialogBody
+          key={`${extension.id}-${open ? "open" : "closed"}`}
+          extension={extension}
+          onOpenChange={onOpenChange}
+          onInstall={onInstall}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}

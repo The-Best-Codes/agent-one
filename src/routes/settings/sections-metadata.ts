@@ -6,7 +6,7 @@ export const sectionsMetadata = [
   { id: "messages", label: "Messages" },
   { id: "titles", label: "Titles" },
   { id: "tools", label: "Tools" },
-  { id: "mcp", label: "MCP Servers" },
+  { id: "mcp", label: "Extensions" },
   { id: "streaming", label: "Streaming" },
   { id: "about", label: "About" },
 ] as const;

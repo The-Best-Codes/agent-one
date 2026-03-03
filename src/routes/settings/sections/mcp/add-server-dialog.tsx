@@ -100,9 +100,9 @@ export function AddServerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add MCP Server</DialogTitle>
+          <DialogTitle>Add Custom Extension</DialogTitle>
           <DialogDescription>
-            Configure a new MCP server to extend the AI&apos;s capabilities.
+            Configure a custom extension by defining an MCP server.
           </DialogDescription>
         </DialogHeader>
 
@@ -215,7 +215,7 @@ export function AddServerDialog({
             Cancel
           </Button>
           <Button onClick={handleAddServer} disabled={!isAddFormValid}>
-            Add Server
+            Add Custom
           </Button>
         </DialogFooter>
       </DialogContent>

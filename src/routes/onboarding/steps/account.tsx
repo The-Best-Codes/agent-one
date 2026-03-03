@@ -106,7 +106,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="border-border rounded-lg border p-4">
+          <div className="border-border rounded-md border p-4">
             <AuthStatusDisplay />
           </div>
 

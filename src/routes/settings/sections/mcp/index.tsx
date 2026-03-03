@@ -1,70 +1,117 @@
 import { useAtom } from "jotai";
-import { RotateCcwIcon } from "lucide-react";
-import { useId, useState } from "react";
+import { PlusIcon } from "lucide-react";
+import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
 
-import { NoMcpServers } from "@/components/a1/empty-states/no-mcp-servers";
-import { Accordion } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  mcpParallelLoadLimitAtom,
-  mcpServersAtom,
-} from "@/lib/jotai/settings-atoms";
-import { resetSetting } from "@/lib/settings/reset-settings";
-import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
+  getMcpRegistryExtensions,
+  type McpRegistryExtension,
+  type McpRegistryInstallResult,
+} from "@/assets/mcp-registry/mcp-registry";
+import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
+import { type McpServerConfig } from "@/lib/settings/types";
 
 import { AddServerDialog } from "./add-server-dialog";
-import { DeleteServerDialog } from "./delete-server-dialog";
-import { ServerListItem } from "./server-list-item";
+import { ExtensionAdvancedDetails } from "./extension-advanced-details";
+import { ExtensionListRow } from "./extension-list-row";
+import { ExtensionsBrowser } from "./extensions-browser";
+import { InstallExtensionDialog } from "./install-extension-dialog";
+import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
+
+function toRegistryIdFragment(registryName: string): string {
+  return registryName.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+function isServerInstalledFromExtension(
+  server: McpServerConfig,
+  extension: McpRegistryExtension,
+): boolean {
+  const registryIdFragment = toRegistryIdFragment(extension.registryName);
+  return (
+    server.id === extension.id ||
+    server.id.includes(`registry-${registryIdFragment}`)
+  );
+}
+
+function isServerFromRegistry(server: McpServerConfig): boolean {
+  return server.id.includes("@");
+}
+
+function toCustomExtension(server: McpServerConfig): McpRegistryExtension {
+  return {
+    id: server.id,
+    registryName: server.name,
+    displayName: server.name || "Custom Extension",
+    description: server.type === "stdio" ? server.command : server.url,
+    version: "custom",
+    categories: ["custom"],
+    tags: [server.type],
+    keywords: [],
+    packageCount: 0,
+    requiredFieldCount: 0,
+    transportTypes: [server.type],
+    searchText: "custom",
+    registryEntry: {
+      server: {
+        $schema: "",
+        name: server.name || "custom",
+        description: "Custom extension",
+        version: "custom",
+      },
+      _meta: {
+        "io.modelcontextprotocol.registry/official": {
+          status: "custom",
+          publishedAt: new Date(),
+          updatedAt: new Date(),
+          isLatest: true,
+        },
+      },
+    },
+  };
+}
 
 export default function McpSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
-  const [parallelLoadLimit, setParallelLoadLimit] = useAtom(
-    mcpParallelLoadLimitAtom,
-  );
-
   const uniqueId = useId();
 
-  const isParallelLoadLimitDefault =
-    parallelLoadLimit === DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT;
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedExtension, setSelectedExtension] =
+    useState<McpRegistryExtension | null>(null);
+  const [showInstallDialog, setShowInstallDialog] = useState(false);
+  const [extensionToUninstall, setExtensionToUninstall] =
+    useState<McpRegistryExtension | null>(null);
+  const [showUninstallDialog, setShowUninstallDialog] = useState(false);
 
-  const handleResetParallelLoadLimit = () => {
-    resetSetting("MCP_PARALLEL_LOAD_LIMIT");
-  };
+  const defaultExtensions = useMemo(() => getMcpRegistryExtensions(), []);
 
-  const updateMcpServer = (
-    index: number,
+  const extensionByServerId = useMemo(() => {
+    const map = new Map<string, McpRegistryExtension>();
+    for (const extension of defaultExtensions) {
+      map.set(extension.id, extension);
+    }
+    return map;
+  }, [defaultExtensions]);
+
+  const customServers = useMemo(
+    () => mcpServers.filter((server) => !isServerFromRegistry(server)),
+    [mcpServers],
+  );
+
+  const updateMcpServerById = (
+    serverId: string,
     updates: Partial<McpServerConfig>,
   ) => {
     setMcpServers((prev) =>
-      prev.map((server, i) =>
-        i === index ? ({ ...server, ...updates } as McpServerConfig) : server,
+      prev.map((server) =>
+        server.id === serverId
+          ? ({ ...server, ...updates } as McpServerConfig)
+          : server,
       ),
     );
-  };
-
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [serverToDelete, setServerToDelete] = useState<number | null>(null);
-
-  const handleDeleteClick = (index: number) => {
-    setServerToDelete(index);
-    setShowDeleteDialog(true);
-  };
-
-  const confirmDelete = () => {
-    if (serverToDelete !== null) {
-      setMcpServers((prev) => prev.filter((_, i) => i !== serverToDelete));
-    }
-    setServerToDelete(null);
-    setShowDeleteDialog(false);
-  };
-
-  const cancelDelete = () => {
-    setServerToDelete(null);
-    setShowDeleteDialog(false);
   };
 
   const handleAddServer = (serverData: {
@@ -103,88 +150,227 @@ export default function McpSection() {
     setMcpServers((prev) => [newServer, ...prev]);
   };
 
+  const handleInstallExtension = (installed: McpRegistryInstallResult) => {
+    const extensionId = selectedExtension?.id;
+    const baseServer = {
+      id: extensionId ?? `server-${uniqueId}-${crypto.randomUUID()}`,
+      name: installed.name,
+      enabled: true,
+      timeoutMs: installed.timeoutSec * 1000,
+      requiresApproval: installed.requiresApproval,
+    };
+
+    const newServer: McpServerConfig =
+      installed.type === "stdio"
+        ? {
+            ...baseServer,
+            type: "stdio",
+            command: installed.command,
+            env: installed.env,
+          }
+        : {
+            ...baseServer,
+            type: "http",
+            url: installed.url,
+            headers: installed.headers,
+          };
+
+    setMcpServers((prev) => [newServer, ...prev]);
+    toast.success(`${installed.name} installed`);
+  };
+
+  const handleExtensionUninstallClick = (extension: McpRegistryExtension) => {
+    setExtensionToUninstall(extension);
+    setShowUninstallDialog(true);
+  };
+
+  const handleConfirmExtensionUninstall = () => {
+    if (!extensionToUninstall) {
+      return;
+    }
+
+    let removedServerName: string | null = null;
+
+    setMcpServers((prev) => {
+      const targetIndex = prev.findIndex((server) =>
+        isServerInstalledFromExtension(server, extensionToUninstall),
+      );
+
+      if (targetIndex === -1) {
+        return prev;
+      }
+
+      removedServerName =
+        prev[targetIndex]?.name ?? extensionToUninstall.displayName;
+      return prev.filter((_, index) => index !== targetIndex);
+    });
+
+    toast.success(
+      `${removedServerName ?? extensionToUninstall.displayName} removed`,
+    );
+    setExtensionToUninstall(null);
+    setShowUninstallDialog(false);
+  };
+
+  const handleCancelExtensionUninstall = () => {
+    setExtensionToUninstall(null);
+    setShowUninstallDialog(false);
+  };
+
+  const handleExtensionInstallClick = (extension: McpRegistryExtension) => {
+    if (!extension.install) {
+      return;
+    }
+
+    setSelectedExtension(extension);
+    setShowInstallDialog(true);
+  };
+
+  const isExtensionInstalled = (extension: McpRegistryExtension): boolean => {
+    return mcpServers.some((server) =>
+      isServerInstalledFromExtension(server, extension),
+    );
+  };
+
+  const getExtensionServer = (extension: McpRegistryExtension) => {
+    return mcpServers.find((server) =>
+      isServerInstalledFromExtension(server, extension),
+    );
+  };
+
+  // TODO: Reintroduce MCP parallel load limit in a dedicated runtime/performance settings section.
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>MCP Servers</CardTitle>
+        <h3 className="text-base leading-none font-semibold">Extensions</h3>
       </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-1 flex-col items-start">
-            <Label
-              htmlFor="parallel-load-limit"
-              className="text-sm font-medium"
-            >
-              Parallel Load Limit
-            </Label>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Maximum number of MCP servers to load concurrently.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Input
-              id="parallel-load-limit"
-              type="number"
-              min="1"
-              max="20"
-              value={parallelLoadLimit}
-              onChange={(e) =>
-                setParallelLoadLimit(parseInt(e.target.value) || 8)
-              }
-              className="w-20"
+      <CardContent className="flex flex-col gap-4">
+        <Tabs defaultValue="all" className="gap-4">
+          <TabsList>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="installed">Installed</TabsTrigger>
+            <TabsTrigger value="custom">Custom</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all">
+            <ExtensionsBrowser
+              filter="all"
+              isInstalled={isExtensionInstalled}
+              onInstallClick={handleExtensionInstallClick}
+              onUninstallClick={handleExtensionUninstallClick}
+              getAdvancedContent={(extension) => {
+                const server = getExtensionServer(extension);
+                if (!server) {
+                  return null;
+                }
+
+                return (
+                  <ExtensionAdvancedDetails
+                    server={server}
+                    onUpdate={(updates) =>
+                      updateMcpServerById(server.id, updates)
+                    }
+                  />
+                );
+              }}
+              getMoreInfoJson={(extension) => extension.registryEntry}
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleResetParallelLoadLimit}
-              disabled={isParallelLoadLimitDefault}
-              aria-label="Reset to default"
-            >
-              <RotateCcwIcon className="size-4" />
-            </Button>
-          </div>
-        </div>
+          </TabsContent>
 
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Configured Servers</Label>
-          <Button onClick={() => setShowAddDialog(true)} size="sm">
-            Add Server
-          </Button>
-        </div>
+          <TabsContent value="installed">
+            <ExtensionsBrowser
+              filter="installed"
+              isInstalled={isExtensionInstalled}
+              onInstallClick={handleExtensionInstallClick}
+              onUninstallClick={handleExtensionUninstallClick}
+              getAdvancedContent={(extension) => {
+                const server = getExtensionServer(extension);
+                if (!server) {
+                  return null;
+                }
 
-        {mcpServers.length === 0 ? (
-          <NoMcpServers />
-        ) : (
-          <Accordion
-            type="single"
-            collapsible
-            className="border-border w-full rounded-md border"
-          >
-            {mcpServers.map((server, index) => (
-              <ServerListItem
-                key={server.id}
-                server={server}
-                index={index}
-                onUpdate={updateMcpServer}
-                onDelete={handleDeleteClick}
-              />
-            ))}
-          </Accordion>
-        )}
+                return (
+                  <ExtensionAdvancedDetails
+                    server={server}
+                    onUpdate={(updates) =>
+                      updateMcpServerById(server.id, updates)
+                    }
+                  />
+                );
+              }}
+              getMoreInfoJson={(extension) => extension.registryEntry}
+            />
+          </TabsContent>
+
+          <TabsContent value="custom" className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-sm font-medium">Custom Extensions</h4>
+              <Button size="sm" onClick={() => setShowAddDialog(true)}>
+                <PlusIcon className="size-4" />
+                Add Custom
+              </Button>
+            </div>
+
+            {customServers.length === 0 ? (
+              <NoCustomExtensions />
+            ) : (
+              <div className="flex flex-col gap-2">
+                {customServers.map((server) => {
+                  const linkedExtension = extensionByServerId.get(server.id);
+                  const uninstallTarget =
+                    linkedExtension ?? toCustomExtension(server);
+
+                  return (
+                    <ExtensionListRow
+                      key={server.id}
+                      title={server.name || "Custom Extension"}
+                      description={
+                        server.type === "stdio" ? server.command : server.url
+                      }
+                      version="custom"
+                      badges={["custom", server.type]}
+                      installed
+                      onUninstall={() =>
+                        handleExtensionUninstallClick(uninstallTarget)
+                      }
+                      advancedContent={
+                        <ExtensionAdvancedDetails
+                          server={server}
+                          onUpdate={(updates) =>
+                            updateMcpServerById(server.id, updates)
+                          }
+                        />
+                      }
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        <AddServerDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          onAddServer={handleAddServer}
+        />
+
+        <InstallExtensionDialog
+          extension={selectedExtension}
+          open={showInstallDialog}
+          onOpenChange={setShowInstallDialog}
+          onInstall={handleInstallExtension}
+        />
+
+        <UninstallExtensionDialog
+          extension={extensionToUninstall}
+          open={showUninstallDialog}
+          onOpenChange={setShowUninstallDialog}
+          onConfirm={handleConfirmExtensionUninstall}
+          onCancel={handleCancelExtensionUninstall}
+        />
       </CardContent>
-
-      <AddServerDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        onAddServer={handleAddServer}
-      />
-
-      <DeleteServerDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-      />
     </Card>
   );
 }
