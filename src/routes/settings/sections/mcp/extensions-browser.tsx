@@ -83,10 +83,7 @@ export function ExtensionsBrowser({
         onValueChange={setQuery}
         placeholder="Search extensions..."
       />
-      <CommandList
-        ref={parentRef}
-        className="max-h-[75svh] rounded-none border-0"
-      >
+      <CommandList ref={parentRef} className="max-h-96 rounded-none border-0">
         {filteredExtensions.length === 0 ? (
           <CommandEmpty className="h-full py-3">
             <div className="text-muted-foreground rounded-md p-8 text-center text-sm">
