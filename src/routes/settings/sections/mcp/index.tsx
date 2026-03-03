@@ -8,7 +8,6 @@ import {
   type McpRegistryExtension,
   type McpRegistryInstallResult,
 } from "@/assets/mcp-registry/mcp-registry";
-import type { MCPRegistryEntry } from "@/assets/mcp-registry/types";
 import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -73,122 +72,6 @@ function toCustomExtension(server: McpServerConfig): McpRegistryExtension {
       },
     },
   };
-}
-
-function getFieldValue(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-  if (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
-    return String(value);
-  }
-  return JSON.stringify(value);
-}
-
-function RegistryKeyValueList({
-  title,
-  data,
-}: {
-  title: string;
-  data: Record<string, unknown>;
-}) {
-  const entries = Object.entries(data);
-
-  return (
-    <div className="flex flex-col gap-2 rounded-md border p-3">
-      <p className="text-sm font-medium">{title}</p>
-      {entries.length === 0 ? (
-        <p className="text-muted-foreground text-xs">No data available.</p>
-      ) : (
-        <div className="grid gap-1">
-          {entries.map(([key, value]) => (
-            <div
-              key={key}
-              className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-2"
-            >
-              <span className="text-muted-foreground min-w-44 text-xs font-medium break-all">
-                {key}
-              </span>
-              <span className="text-xs break-all">{getFieldValue(value)}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RegistryArrayList({
-  title,
-  items,
-}: {
-  title: string;
-  items: unknown[];
-}) {
-  return (
-    <div className="flex flex-col gap-2 rounded-md border p-3">
-      <p className="text-sm font-medium">{title}</p>
-      {items.length === 0 ? (
-        <p className="text-muted-foreground text-xs">No data available.</p>
-      ) : (
-        <ul className="list-disc pl-5 text-xs">
-          {items.map((item, index) => (
-            <li key={`${title}-${index}`} className="break-all">
-              {getFieldValue(item)}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function RegistryValue({ title, value }: { title: string; value: unknown }) {
-  return (
-    <div className="flex flex-col gap-1 rounded-md border p-3">
-      <p className="text-sm font-medium">{title}</p>
-      <p className="text-xs break-all">{getFieldValue(value)}</p>
-    </div>
-  );
-}
-
-function RegistryDataViewer({ entry }: { entry: MCPRegistryEntry }) {
-  const rows = useMemo(() => {
-    const data: Array<{ key: string; value: unknown }> = [];
-    for (const [key, value] of Object.entries(entry.server)) {
-      data.push({ key: `server.${key}`, value });
-    }
-    for (const [key, value] of Object.entries(entry._meta)) {
-      data.push({ key: `_meta.${key}`, value });
-    }
-    return data;
-  }, [entry]);
-
-  return (
-    <div className="flex flex-col gap-3">
-      {rows.map(({ key, value }) => {
-        if (Array.isArray(value)) {
-          return <RegistryArrayList key={key} title={key} items={value} />;
-        }
-
-        if (value && typeof value === "object") {
-          return (
-            <RegistryKeyValueList
-              key={key}
-              title={key}
-              data={value as Record<string, unknown>}
-            />
-          );
-        }
-
-        return <RegistryValue key={key} title={key} value={value} />;
-      })}
-    </div>
-  );
 }
 
 export default function McpSection() {
@@ -391,9 +274,7 @@ export default function McpSection() {
                   />
                 );
               }}
-              getMoreInfoContent={(extension) => (
-                <RegistryDataViewer entry={extension.registryEntry} />
-              )}
+              getMoreInfoJson={(extension) => extension.registryEntry}
             />
           </TabsContent>
 
@@ -418,9 +299,7 @@ export default function McpSection() {
                   />
                 );
               }}
-              getMoreInfoContent={(extension) => (
-                <RegistryDataViewer entry={extension.registryEntry} />
-              )}
+              getMoreInfoJson={(extension) => extension.registryEntry}
             />
           </TabsContent>
 

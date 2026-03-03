@@ -25,7 +25,7 @@ interface ExtensionsBrowserProps {
   onInstallClick: (extension: McpRegistryExtension) => void;
   onUninstallClick: (extension: McpRegistryExtension) => void;
   getAdvancedContent?: (extension: McpRegistryExtension) => ReactNode;
-  getMoreInfoContent?: (extension: McpRegistryExtension) => ReactNode;
+  getMoreInfoJson?: (extension: McpRegistryExtension) => unknown;
 }
 
 export function ExtensionsBrowser({
@@ -34,7 +34,7 @@ export function ExtensionsBrowser({
   onInstallClick,
   onUninstallClick,
   getAdvancedContent,
-  getMoreInfoContent,
+  getMoreInfoJson,
 }: ExtensionsBrowserProps) {
   const [query, setQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
@@ -142,9 +142,9 @@ export function ExtensionsBrowser({
                             ? getAdvancedContent(extension)
                             : undefined
                         }
-                        moreInfoContent={
-                          installed && getMoreInfoContent
-                            ? getMoreInfoContent(extension)
+                        moreInfoJson={
+                          installed && getMoreInfoJson
+                            ? getMoreInfoJson(extension)
                             : undefined
                         }
                       />

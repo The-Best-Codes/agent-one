@@ -2,6 +2,12 @@ import { ChevronRightIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +43,7 @@ interface ExtensionListRowProps {
   onInstall?: () => void;
   onUninstall?: () => void;
   advancedContent?: ReactNode;
-  moreInfoContent?: ReactNode;
+  moreInfoJson?: unknown;
 }
 
 export function ExtensionListRow({
@@ -52,9 +58,9 @@ export function ExtensionListRow({
   onInstall,
   onUninstall,
   advancedContent,
-  moreInfoContent,
+  moreInfoJson,
 }: ExtensionListRowProps) {
-  const hasAdvanced = Boolean(advancedContent) || Boolean(moreInfoContent);
+  const hasAdvanced = Boolean(advancedContent) || moreInfoJson !== undefined;
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   return (
@@ -138,11 +144,23 @@ export function ExtensionListRow({
             </DialogHeader>
             <div className="flex flex-col gap-4 py-1">
               {advancedContent}
-              {moreInfoContent ? (
-                <div className="flex flex-col gap-3 rounded-md border p-3">
-                  <p className="text-sm font-medium">More info</p>
-                  {moreInfoContent}
-                </div>
+              {moreInfoJson !== undefined ? (
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="rounded-md border px-3"
+                >
+                  <AccordionItem value="more-info" className="border-b-0">
+                    <AccordionTrigger className="py-3">
+                      Debug info
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <pre className="bg-muted overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap">
+                        {JSON.stringify(moreInfoJson, null, 2)}
+                      </pre>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               ) : null}
             </div>
           </DialogContent>
