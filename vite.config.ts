@@ -181,9 +181,16 @@ export default defineConfig(
               const modelListsDir = path
                 .resolve(__dirname, "src/assets/model-lists")
                 .replace(/\\/g, "/");
+              const mcpRegistryDir = path
+                .resolve(__dirname, "src/assets/mcp-registry")
+                .replace(/\\/g, "/");
 
               if (normalizedId.includes(`${modelListsDir}/`)) {
                 return path.parse(id).name;
+              }
+
+              if (normalizedId.includes(`${mcpRegistryDir}/`)) {
+                return "mcpRegistry";
               }
 
               if (normalizedId.includes("/node_modules/")) {
