@@ -126,7 +126,7 @@ export default function NotificationsTestRoute() {
                 <CardTitle>Logs</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-muted/20 max-h-96 overflow-y-auto rounded-lg border p-4">
+                <div className="bg-muted/20 max-h-96 overflow-y-auto rounded-md border p-4">
                   <pre className="font-mono text-xs whitespace-pre-wrap">
                     {logs.join("\n")}
                   </pre>

@@ -32,7 +32,7 @@ export default function TestsRoute() {
               <CardTitle>Available Tests</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
                   <h3 className="font-medium">Notifications</h3>
                   <p className="text-muted-foreground text-sm">
@@ -46,7 +46,7 @@ export default function TestsRoute() {
                   Run Test
                 </Button>
               </div>
-              <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
                   <h3 className="font-medium">Trigger Onboarding</h3>
                   <p className="text-muted-foreground text-sm">

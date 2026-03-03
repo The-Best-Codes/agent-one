@@ -85,11 +85,11 @@ export function ExtensionsBrowser({
       />
       <CommandList
         ref={parentRef}
-        className="h-[60vh] max-h-[52rem] min-h-[26rem] rounded-none border-0"
+        className="max-h-[75svh] rounded-none border-0"
       >
         {filteredExtensions.length === 0 ? (
           <CommandEmpty className="h-full py-3">
-            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
+            <div className="text-muted-foreground rounded-md p-8 text-center text-sm">
               {filter === "installed"
                 ? "No installed extensions match your search."
                 : "No extensions match your search."}
