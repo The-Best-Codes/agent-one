@@ -87,12 +87,15 @@ export const ChatInstance = memo(
         }
 
         const chatMetadata = loadChatMetadata(chatId);
-        const hasUserMessage = chat.messages.some((m) => m.role === "user");
+        const titleMessages = chat.messages.filter(
+          (m) =>
+            (m.role === "user" || m.role === "assistant") &&
+            hasMessageTextContent(m),
+        );
+        const hasUserMessage = titleMessages.some((m) => m.role === "user");
         const needsAssistantMessage =
           titleGenerationSettings.method === "first-assistant-message" &&
-          !chat.messages.some(
-            (m) => m.role === "assistant" && hasMessageTextContent(m),
-          );
+          !titleMessages.some((m) => m.role === "assistant");
 
         if (
           hasUserMessage &&
@@ -103,7 +106,7 @@ export const ChatInstance = memo(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
           saveChatTitleState({ chatId, titleState: "generating" });
-          generateChatTitle(model, chat.messages, titleGenerationSettings)
+          generateChatTitle(model, titleMessages, titleGenerationSettings)
             .then((generatedTitle) => {
               if (chatIds.includes(chatId)) {
                 saveChatTitle({ chatId, title: generatedTitle });
