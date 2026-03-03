@@ -77,7 +77,7 @@ export function ExtensionsBrowser({
   });
 
   return (
-    <Command shouldFilter={false} className="bg-transparent">
+    <Command shouldFilter={false} className="border">
       <CommandInput
         value={query}
         onValueChange={setQuery}

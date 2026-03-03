@@ -11,6 +11,7 @@ import {
 import type { MCPRegistryEntry } from "@/assets/mcp-registry/types";
 import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
@@ -357,137 +358,140 @@ export default function McpSection() {
   // TODO: Reintroduce MCP parallel load limit in a dedicated runtime/performance settings section.
 
   return (
-    <div className="flex flex-col gap-4">
-      <h3 className="text-base font-semibold">Extensions</h3>
+    <Card>
+      <CardHeader>
+        <h3 className="text-base leading-none font-semibold">Extensions</h3>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <Tabs defaultValue="all" className="gap-4">
+          <TabsList>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="installed">Installed</TabsTrigger>
+            <TabsTrigger value="custom">Custom</TabsTrigger>
+          </TabsList>
 
-      <Tabs defaultValue="all" className="gap-4">
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="installed">Installed</TabsTrigger>
-          <TabsTrigger value="custom">Custom</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all">
-          <ExtensionsBrowser
-            filter="all"
-            isInstalled={isExtensionInstalled}
-            onInstallClick={handleExtensionInstallClick}
-            onUninstallClick={handleExtensionUninstallClick}
-            getAdvancedContent={(extension) => {
-              const server = getExtensionServer(extension);
-              if (!server) {
-                return null;
-              }
-
-              return (
-                <ExtensionAdvancedDetails
-                  server={server}
-                  onUpdate={(updates) =>
-                    updateMcpServerById(server.id, updates)
-                  }
-                />
-              );
-            }}
-            getMoreInfoContent={(extension) => (
-              <RegistryDataViewer entry={extension.registryEntry} />
-            )}
-          />
-        </TabsContent>
-
-        <TabsContent value="installed">
-          <ExtensionsBrowser
-            filter="installed"
-            isInstalled={isExtensionInstalled}
-            onInstallClick={handleExtensionInstallClick}
-            onUninstallClick={handleExtensionUninstallClick}
-            getAdvancedContent={(extension) => {
-              const server = getExtensionServer(extension);
-              if (!server) {
-                return null;
-              }
-
-              return (
-                <ExtensionAdvancedDetails
-                  server={server}
-                  onUpdate={(updates) =>
-                    updateMcpServerById(server.id, updates)
-                  }
-                />
-              );
-            }}
-            getMoreInfoContent={(extension) => (
-              <RegistryDataViewer entry={extension.registryEntry} />
-            )}
-          />
-        </TabsContent>
-
-        <TabsContent value="custom" className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <h4 className="text-sm font-medium">Custom Extensions</h4>
-            <Button size="sm" onClick={() => setShowAddDialog(true)}>
-              <PlusIcon className="size-4" />
-              Add Custom
-            </Button>
-          </div>
-
-          {customServers.length === 0 ? (
-            <NoCustomExtensions />
-          ) : (
-            <div className="flex flex-col gap-2">
-              {customServers.map((server) => {
-                const linkedExtension = extensionByServerId.get(server.id);
-                const uninstallTarget =
-                  linkedExtension ?? toCustomExtension(server);
+          <TabsContent value="all">
+            <ExtensionsBrowser
+              filter="all"
+              isInstalled={isExtensionInstalled}
+              onInstallClick={handleExtensionInstallClick}
+              onUninstallClick={handleExtensionUninstallClick}
+              getAdvancedContent={(extension) => {
+                const server = getExtensionServer(extension);
+                if (!server) {
+                  return null;
+                }
 
                 return (
-                  <ExtensionListRow
-                    key={server.id}
-                    title={server.name || "Custom Extension"}
-                    description={
-                      server.type === "stdio" ? server.command : server.url
-                    }
-                    version="custom"
-                    badges={["custom", server.type]}
-                    installed
-                    onUninstall={() =>
-                      handleExtensionUninstallClick(uninstallTarget)
-                    }
-                    advancedContent={
-                      <ExtensionAdvancedDetails
-                        server={server}
-                        onUpdate={(updates) =>
-                          updateMcpServerById(server.id, updates)
-                        }
-                      />
+                  <ExtensionAdvancedDetails
+                    server={server}
+                    onUpdate={(updates) =>
+                      updateMcpServerById(server.id, updates)
                     }
                   />
                 );
-              })}
+              }}
+              getMoreInfoContent={(extension) => (
+                <RegistryDataViewer entry={extension.registryEntry} />
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="installed">
+            <ExtensionsBrowser
+              filter="installed"
+              isInstalled={isExtensionInstalled}
+              onInstallClick={handleExtensionInstallClick}
+              onUninstallClick={handleExtensionUninstallClick}
+              getAdvancedContent={(extension) => {
+                const server = getExtensionServer(extension);
+                if (!server) {
+                  return null;
+                }
+
+                return (
+                  <ExtensionAdvancedDetails
+                    server={server}
+                    onUpdate={(updates) =>
+                      updateMcpServerById(server.id, updates)
+                    }
+                  />
+                );
+              }}
+              getMoreInfoContent={(extension) => (
+                <RegistryDataViewer entry={extension.registryEntry} />
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="custom" className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h4 className="text-sm font-medium">Custom Extensions</h4>
+              <Button size="sm" onClick={() => setShowAddDialog(true)}>
+                <PlusIcon className="size-4" />
+                Add Custom
+              </Button>
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
 
-      <AddServerDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        onAddServer={handleAddServer}
-      />
+            {customServers.length === 0 ? (
+              <NoCustomExtensions />
+            ) : (
+              <div className="flex flex-col gap-2">
+                {customServers.map((server) => {
+                  const linkedExtension = extensionByServerId.get(server.id);
+                  const uninstallTarget =
+                    linkedExtension ?? toCustomExtension(server);
 
-      <InstallExtensionDialog
-        extension={selectedExtension}
-        open={showInstallDialog}
-        onOpenChange={setShowInstallDialog}
-        onInstall={handleInstallExtension}
-      />
+                  return (
+                    <ExtensionListRow
+                      key={server.id}
+                      title={server.name || "Custom Extension"}
+                      description={
+                        server.type === "stdio" ? server.command : server.url
+                      }
+                      version="custom"
+                      badges={["custom", server.type]}
+                      installed
+                      onUninstall={() =>
+                        handleExtensionUninstallClick(uninstallTarget)
+                      }
+                      advancedContent={
+                        <ExtensionAdvancedDetails
+                          server={server}
+                          onUpdate={(updates) =>
+                            updateMcpServerById(server.id, updates)
+                          }
+                        />
+                      }
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
-      <UninstallExtensionDialog
-        extension={extensionToUninstall}
-        open={showUninstallDialog}
-        onOpenChange={setShowUninstallDialog}
-        onConfirm={handleConfirmExtensionUninstall}
-        onCancel={handleCancelExtensionUninstall}
-      />
-    </div>
+        <AddServerDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          onAddServer={handleAddServer}
+        />
+
+        <InstallExtensionDialog
+          extension={selectedExtension}
+          open={showInstallDialog}
+          onOpenChange={setShowInstallDialog}
+          onInstall={handleInstallExtension}
+        />
+
+        <UninstallExtensionDialog
+          extension={extensionToUninstall}
+          open={showUninstallDialog}
+          onOpenChange={setShowUninstallDialog}
+          onConfirm={handleConfirmExtensionUninstall}
+          onCancel={handleCancelExtensionUninstall}
+        />
+      </CardContent>
+    </Card>
   );
 }

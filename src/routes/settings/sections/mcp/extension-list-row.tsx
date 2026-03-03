@@ -115,10 +115,7 @@ export function ExtensionListRow({
 
       {installed && hasAdvanced ? (
         <Accordion type="single" collapsible>
-          <AccordionItem
-            value="advanced"
-            className="border-border rounded-md border px-3"
-          >
+          <AccordionItem value="advanced" className="px-3 last:border-b">
             <AccordionTrigger className="py-3">Advanced</AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-3">
@@ -127,7 +124,7 @@ export function ExtensionListRow({
                   <Accordion type="single" collapsible>
                     <AccordionItem
                       value="more-info"
-                      className="border-border rounded-md border px-3"
+                      className="px-3 last:border-b"
                     >
                       <AccordionTrigger className="py-3">
                         More info
