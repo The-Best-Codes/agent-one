@@ -64,7 +64,7 @@ export function ExtensionListRow({
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   return (
-    <div className="flex w-full flex-col gap-3 rounded-md border p-4">
+    <div className="bg-muted/40 flex w-full flex-col gap-3 rounded-md p-4">
       <div className="flex w-full items-start gap-3">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex min-w-0 items-center gap-2">
