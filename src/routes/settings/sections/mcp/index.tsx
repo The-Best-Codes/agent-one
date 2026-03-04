@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,7 +11,9 @@ import {
 import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { commandScore } from "@/lib/command-score";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
@@ -53,6 +55,8 @@ export default function McpSection() {
     name: string;
   } | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [query, setQuery] = useState("");
 
   const defaultExtensions = useMemo(() => getMcpRegistryExtensions(), []);
 
@@ -68,6 +72,30 @@ export default function McpSection() {
     () => mcpServers.filter((server) => !isServerFromRegistry(server)),
     [mcpServers],
   );
+
+  const filteredCustomServers = useMemo(() => {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) {
+      return customServers;
+    }
+
+    return customServers
+      .map((server) => ({
+        server,
+        score: commandScore(
+          server.name || "Custom Extension",
+          normalizedQuery,
+          [
+            server.id,
+            server.type,
+            server.type === "stdio" ? server.command : server.url,
+          ],
+        ),
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ server }) => server);
+  }, [customServers, query]);
 
   const updateMcpServerById = (
     serverId: string,
@@ -250,19 +278,35 @@ export default function McpSection() {
         <h3 className="text-base leading-none font-semibold">Extensions</h3>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Tabs defaultValue="all" className="gap-4">
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="installed">Installed</TabsTrigger>
-            <TabsTrigger value="custom">Custom</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="group/extensions-search-input relative flex-1">
+              <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search extensions..."
+                aria-label="Search extensions"
+                className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
+              />
+            </div>
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="installed">Installed</TabsTrigger>
+              <TabsTrigger value="custom">Custom</TabsTrigger>
+            </TabsList>
+          </div>
 
           {[
             { value: "all", filter: "all" as const },
             { value: "installed", filter: "installed" as const },
           ].map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
-              <ExtensionsBrowser filter={tab.filter} {...sharedBrowserProps} />
+              <ExtensionsBrowser
+                filter={tab.filter}
+                query={query}
+                {...sharedBrowserProps}
+              />
             </TabsContent>
           ))}
 
@@ -275,11 +319,17 @@ export default function McpSection() {
               </Button>
             </div>
 
-            {customServers.length === 0 ? (
-              <NoCustomExtensions />
+            {filteredCustomServers.length === 0 ? (
+              customServers.length === 0 ? (
+                <NoCustomExtensions />
+              ) : (
+                <div className="text-muted-foreground rounded-md p-8 text-center text-sm">
+                  No custom extensions match your search.
+                </div>
+              )
             ) : (
               <div className="flex flex-col gap-2">
-                {customServers.map((server) => {
+                {filteredCustomServers.map((server) => {
                   const linkedExtension = extensionByServerId.get(server.id);
 
                   return (
