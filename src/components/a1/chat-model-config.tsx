@@ -1,5 +1,6 @@
+import debounce from "lodash.debounce";
 import { InfoIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
@@ -45,8 +46,16 @@ const SliderConfig = ({
 }: SliderConfigProps) => {
   const isUnset = value === undefined;
   const midpoint = (min + max) / 2;
+  const [draggingValue, setDraggingValue] = useState<number | null>(null);
+
+  const displayValue = draggingValue ?? value;
 
   const handleSliderChange = (values: number[]) => {
+    setDraggingValue(values[0]);
+  };
+
+  const handleSliderCommit = (values: number[]) => {
+    setDraggingValue(null);
     onChange(values[0]);
   };
 
@@ -79,7 +88,7 @@ const SliderConfig = ({
               isUnset ? "text-muted-foreground" : "text-foreground",
             )}
           >
-            {isUnset ? "Default" : value}
+            {isUnset ? "Default" : displayValue}
           </span>
           {!isUnset && (
             <Button
@@ -110,8 +119,9 @@ const SliderConfig = ({
           min={min}
           max={max}
           step={step}
-          value={[value]}
+          value={[displayValue!]}
           onValueChange={handleSliderChange}
+          onValueCommit={handleSliderCommit}
         />
       )}
     </div>
@@ -128,43 +138,81 @@ export const ChatModelConfig = ({
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const effectiveOpen = disabled ? false : open;
 
+  const [localInputs, setLocalInputs] = useState({
+    maxTokens: currentModelConfig.maxTokens,
+    topK: currentModelConfig.topK,
+    maxSteps: currentModelConfig.maxSteps,
+    seed: currentModelConfig.seed,
+  });
+
+  const configRef = useRef(currentModelConfig);
+  useEffect(() => {
+    configRef.current = currentModelConfig;
+  }, [currentModelConfig]);
+
+  const debouncedSetModelConfig = useMemo(
+    () =>
+      debounce(
+        (config: Parameters<typeof setModelConfig>[0]) =>
+          setModelConfig(config),
+        300,
+      ),
+    [setModelConfig],
+  );
+
+  useEffect(
+    () => () => debouncedSetModelConfig.cancel(),
+    [debouncedSetModelConfig],
+  );
+
   const handleTemperatureChange = (value: number | undefined) => {
-    setModelConfig({ ...currentModelConfig, temperature: value });
+    setModelConfig({ ...configRef.current, temperature: value });
   };
 
   const handleMaxTokensChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
-    setModelConfig({ ...currentModelConfig, maxTokens: val });
+    setLocalInputs((prev) => ({ ...prev, maxTokens: val }));
+    debouncedSetModelConfig({ ...configRef.current, maxTokens: val });
   };
 
   const handleTopPChange = (value: number | undefined) => {
-    setModelConfig({ ...currentModelConfig, topP: value });
+    setModelConfig({ ...configRef.current, topP: value });
   };
 
   const handleTopKChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
-    setModelConfig({ ...currentModelConfig, topK: val });
+    setLocalInputs((prev) => ({ ...prev, topK: val }));
+    debouncedSetModelConfig({ ...configRef.current, topK: val });
   };
 
   const handleMaxStepsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
-    setModelConfig({ ...currentModelConfig, maxSteps: val });
+    setLocalInputs((prev) => ({ ...prev, maxSteps: val }));
+    debouncedSetModelConfig({ ...configRef.current, maxSteps: val });
   };
 
   const handleFrequencyPenaltyChange = (value: number | undefined) => {
-    setModelConfig({ ...currentModelConfig, frequencyPenalty: value });
+    setModelConfig({ ...configRef.current, frequencyPenalty: value });
   };
 
   const handlePresencePenaltyChange = (value: number | undefined) => {
-    setModelConfig({ ...currentModelConfig, presencePenalty: value });
+    setModelConfig({ ...configRef.current, presencePenalty: value });
   };
 
   const handleSeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value === "" ? undefined : parseInt(e.target.value);
-    setModelConfig({ ...currentModelConfig, seed: val });
+    setLocalInputs((prev) => ({ ...prev, seed: val }));
+    debouncedSetModelConfig({ ...configRef.current, seed: val });
   };
 
   const resetToDefaults = () => {
+    debouncedSetModelConfig.cancel();
+    setLocalInputs({
+      maxTokens: DEFAULT_MODEL_CONFIG.maxTokens,
+      topK: DEFAULT_MODEL_CONFIG.topK,
+      maxSteps: DEFAULT_MODEL_CONFIG.maxSteps,
+      seed: DEFAULT_MODEL_CONFIG.seed,
+    });
     setModelConfig({
       temperature: DEFAULT_MODEL_CONFIG.temperature,
       maxTokens: DEFAULT_MODEL_CONFIG.maxTokens,
@@ -246,7 +294,7 @@ export const ChatModelConfig = ({
           type="number"
           placeholder="Default"
           min={1}
-          value={currentModelConfig.topK ?? ""}
+          value={localInputs.topK ?? ""}
           onChange={handleTopKChange}
         />
       </div>
@@ -292,7 +340,7 @@ export const ChatModelConfig = ({
           placeholder="Default"
           min={0}
           max={1000}
-          value={currentModelConfig.maxSteps ?? ""}
+          value={localInputs.maxSteps ?? ""}
           onChange={handleMaxStepsChange}
         />
       </div>
@@ -314,7 +362,7 @@ export const ChatModelConfig = ({
           id="maxTokens"
           type="number"
           placeholder="Default"
-          value={currentModelConfig.maxTokens ?? ""}
+          value={localInputs.maxTokens ?? ""}
           onChange={handleMaxTokensChange}
         />
       </div>
@@ -337,7 +385,7 @@ export const ChatModelConfig = ({
           id="seed"
           type="number"
           placeholder="Default"
-          value={currentModelConfig.seed ?? ""}
+          value={localInputs.seed ?? ""}
           onChange={handleSeedChange}
         />
       </div>
