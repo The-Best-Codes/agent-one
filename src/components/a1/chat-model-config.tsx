@@ -133,6 +133,11 @@ export const ChatModelConfig = ({
     setModelConfig({ ...currentModelConfig, topK: val });
   };
 
+  const handleMaxStepsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value === "" ? undefined : parseInt(e.target.value);
+    setModelConfig({ ...currentModelConfig, maxSteps: val });
+  };
+
   const handleFrequencyPenaltyChange = (value: number | undefined) => {
     setModelConfig({ ...currentModelConfig, frequencyPenalty: value });
   };
@@ -150,6 +155,7 @@ export const ChatModelConfig = ({
     setModelConfig({
       temperature: DEFAULT_MODEL_CONFIG.temperature,
       maxTokens: DEFAULT_MODEL_CONFIG.maxTokens,
+      maxSteps: DEFAULT_MODEL_CONFIG.maxSteps,
       topP: DEFAULT_MODEL_CONFIG.topP,
       topK: DEFAULT_MODEL_CONFIG.topK,
       frequencyPenalty: DEFAULT_MODEL_CONFIG.frequencyPenalty,
@@ -161,6 +167,7 @@ export const ChatModelConfig = ({
   const isAtDefaults =
     currentModelConfig.temperature === DEFAULT_MODEL_CONFIG.temperature &&
     currentModelConfig.maxTokens === DEFAULT_MODEL_CONFIG.maxTokens &&
+    currentModelConfig.maxSteps === DEFAULT_MODEL_CONFIG.maxSteps &&
     currentModelConfig.topP === DEFAULT_MODEL_CONFIG.topP &&
     currentModelConfig.topK === DEFAULT_MODEL_CONFIG.topK &&
     currentModelConfig.frequencyPenalty ===
@@ -252,6 +259,30 @@ export const ChatModelConfig = ({
         step={0.1}
         onChange={handlePresencePenaltyChange}
       />
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="maxSteps">Max Steps</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs">
+              Maximum number of reasoning/tool steps in one response. Leave
+              empty for no step limit.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Input
+          id="maxSteps"
+          type="number"
+          placeholder="Default"
+          min={0}
+          max={1000}
+          value={currentModelConfig.maxSteps ?? ""}
+          onChange={handleMaxStepsChange}
+        />
+      </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">

@@ -7,6 +7,7 @@ import {
   type LanguageModelUsage,
   smoothStream,
   stepCountIs,
+  type StopCondition,
   streamText,
   type ToolSet,
   type UIMessageChunk,
@@ -165,6 +166,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     await this.getApiKeysLoadedPromise();
     const tools = withAbortAwareToolExecution(await this.getTools());
 
+    const stopWhenCondition: StopCondition<ToolSet> =
+      this.modelConfig.maxSteps === undefined
+        ? () => false
+        : stepCountIs(this.modelConfig.maxSteps);
+
     const result = streamText({
       model: this.model,
       temperature: this.modelConfig.temperature,
@@ -178,7 +184,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       abortSignal: options.abortSignal,
       tools,
       toolChoice: "auto",
-      stopWhen: stepCountIs(20), // TODO: Allow customizing this limit in settings
+      stopWhen: stopWhenCondition,
       // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: this.getSystemPrompt(),
       ...(this.smoothStreamEnabled && {

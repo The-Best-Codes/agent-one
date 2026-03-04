@@ -34,6 +34,7 @@ export interface ModelData {
 export interface ModelConfig {
   temperature?: number;
   maxTokens?: number;
+  maxSteps?: number;
   topP?: number;
   topK?: number;
   frequencyPenalty?: number;
@@ -44,6 +45,7 @@ export interface ModelConfig {
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   temperature: undefined,
   maxTokens: undefined,
+  maxSteps: undefined,
   topP: undefined,
   topK: undefined,
   frequencyPenalty: undefined,
