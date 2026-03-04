@@ -245,6 +245,11 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           if (hasError) {
             return { ...prev, [id]: "error" };
           }
+          if (currentIndicator === "error") {
+            const { [id]: _removed, ...rest } = prev;
+            void _removed;
+            return rest;
+          }
           if (currentIndicator === "loading") {
             if (id === currentChatId) {
               const { [id]: _removed, ...rest } = prev;
@@ -264,7 +269,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     if (currentChatId) {
       setChatStatusIndicators((prev) => {
         const currentIndicator = prev[currentChatId];
-        if (currentIndicator === "unread" || currentIndicator === "error") {
+        if (currentIndicator === "unread") {
           const { [currentChatId]: _removed, ...rest } = prev;
           void _removed;
           return rest;
