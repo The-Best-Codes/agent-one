@@ -483,10 +483,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [addToolApprovalResponse, clearAutoSubmitBlockForCurrentChat],
   );
 
-  const isAutoSubmitBlocked = useCallback((id: string) => {
-    return autoSubmitBlockedRef.current.has(id);
-  }, []);
-
   const wasStreamingRef = useRef(false);
   useEffect(() => {
     if (statusValue.status === "streaming") {
@@ -605,7 +601,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             model={chatModel.model}
             modelConfig={chatConfig}
             initialMessages={initialMessages}
-            isAutoSubmitBlocked={isAutoSubmitBlocked}
             onInstanceUpdate={handleInstanceUpdate}
             onStatusChange={handleStatusChange}
           />

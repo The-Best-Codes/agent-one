@@ -1,10 +1,5 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
-import {
-  type LanguageModel,
-  lastAssistantMessageIsCompleteWithApprovalResponses,
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type UIMessage,
-} from "ai";
+import { type LanguageModel, type UIMessage } from "ai";
 import { useAtomValue } from "jotai";
 import { memo, useEffect } from "react";
 
@@ -31,7 +26,6 @@ export const ChatInstance = memo(
     model,
     modelConfig,
     initialMessages,
-    isAutoSubmitBlocked,
     onInstanceUpdate,
     onStatusChange,
   }: {
@@ -39,7 +33,6 @@ export const ChatInstance = memo(
     model: LanguageModel;
     modelConfig: ModelConfig;
     initialMessages: UIMessage[];
-    isAutoSubmitBlocked: (id: string) => boolean;
     onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
     onStatusChange: (
       id: string,
@@ -63,15 +56,6 @@ export const ChatInstance = memo(
       experimental_throttle: experimentalThrottleEnabled
         ? experimentalThrottleValue
         : undefined,
-      sendAutomaticallyWhen: ({ messages }) => {
-        if (isAutoSubmitBlocked(chatId)) {
-          return false;
-        }
-        return (
-          lastAssistantMessageIsCompleteWithToolCalls({ messages }) ||
-          lastAssistantMessageIsCompleteWithApprovalResponses({ messages })
-        );
-      },
       id: chatId,
       messages: initialMessages,
     });
@@ -148,7 +132,6 @@ export const ChatInstance = memo(
       prevProps.chatId === nextProps.chatId &&
       prevProps.model === nextProps.model &&
       prevProps.initialMessages === nextProps.initialMessages &&
-      prevProps.isAutoSubmitBlocked === nextProps.isAutoSubmitBlocked &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&
       JSON.stringify(prevProps.modelConfig) ===
