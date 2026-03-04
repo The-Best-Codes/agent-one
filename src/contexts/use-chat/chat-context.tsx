@@ -95,7 +95,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     new Set(),
   );
   const loadVersionRef = useRef(0);
-  const autoSubmitBlockedRef = useRef<Set<string>>(new Set());
 
   const isChatLoading = useMemo(() => {
     if (!currentChatId) return false;
@@ -426,67 +425,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     sendMessage,
   } = instanceForFunctions;
 
-  const clearAutoSubmitBlockForCurrentChat = useCallback(() => {
-    if (!currentChatId) {
-      return;
-    }
-    autoSubmitBlockedRef.current.delete(currentChatId);
-  }, [currentChatId]);
-
-  const stopWithAutoSubmitBlock = useCallback(() => {
-    if (currentChatId) {
-      autoSubmitBlockedRef.current.add(currentChatId);
-    }
-    return stop();
-  }, [currentChatId, stop]);
-
-  const sendMessageWithAutoSubmitReset = useCallback(
-    (
-      message: Parameters<typeof sendMessage>[0],
-      options?: Parameters<typeof sendMessage>[1],
-    ) => {
-      clearAutoSubmitBlockForCurrentChat();
-      return sendMessage(message, options);
-    },
-    [clearAutoSubmitBlockForCurrentChat, sendMessage],
-  );
-
-  const regenerateWithAutoSubmitReset = useCallback(
-    (options?: Parameters<typeof regenerate>[0]) => {
-      clearAutoSubmitBlockForCurrentChat();
-      return regenerate(options);
-    },
-    [clearAutoSubmitBlockForCurrentChat, regenerate],
-  );
-
-  const resumeStreamWithAutoSubmitReset = useCallback(
-    (...args: Parameters<typeof resumeStream>) => {
-      clearAutoSubmitBlockForCurrentChat();
-      return resumeStream(...args);
-    },
-    [clearAutoSubmitBlockForCurrentChat, resumeStream],
-  );
-
-  const addToolOutputWithAutoSubmitReset = useCallback(
-    (...args: Parameters<typeof addToolOutput>) => {
-      clearAutoSubmitBlockForCurrentChat();
-      return addToolOutput(...args);
-    },
-    [addToolOutput, clearAutoSubmitBlockForCurrentChat],
-  );
-
-  const addToolApprovalResponseWithAutoSubmitReset = useCallback(
-    (...args: Parameters<typeof addToolApprovalResponse>) => {
-      clearAutoSubmitBlockForCurrentChat();
-      return addToolApprovalResponse(...args);
-    },
-    [addToolApprovalResponse, clearAutoSubmitBlockForCurrentChat],
-  );
-
-  const isAutoSubmitBlocked = useCallback((id: string) => {
-    return autoSubmitBlockedRef.current.has(id);
-  }, []);
-
   const wasStreamingRef = useRef(false);
   useEffect(() => {
     if (statusValue.status === "streaming") {
@@ -546,7 +484,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
     chatInstancesRef.current.forEach((instance, id) => {
       if (!chatIds.includes(id)) {
-        autoSubmitBlockedRef.current.delete(id);
         const { status, stop } = instance;
         if (status === "streaming" || status === "submitted") {
           logger.verbose(`Stopping stream for deleted chat: ${id}`);
@@ -565,27 +502,25 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   const functionsValue = useMemo(
     () => ({
-      sendMessage: isNewChat
-        ? handleNewChatSubmit
-        : sendMessageWithAutoSubmitReset,
-      addToolOutput: addToolOutputWithAutoSubmitReset,
-      addToolApprovalResponse: addToolApprovalResponseWithAutoSubmitReset,
-      regenerate: regenerateWithAutoSubmitReset,
+      sendMessage: isNewChat ? handleNewChatSubmit : sendMessage,
+      addToolOutput,
+      addToolApprovalResponse,
+      regenerate,
       clearError,
-      resumeStream: resumeStreamWithAutoSubmitReset,
-      stop: stopWithAutoSubmitBlock,
+      resumeStream,
+      stop,
       setMessages,
     }),
     [
       isNewChat,
       handleNewChatSubmit,
-      sendMessageWithAutoSubmitReset,
-      addToolOutputWithAutoSubmitReset,
-      addToolApprovalResponseWithAutoSubmitReset,
-      regenerateWithAutoSubmitReset,
+      sendMessage,
+      addToolOutput,
+      addToolApprovalResponse,
+      regenerate,
       clearError,
-      resumeStreamWithAutoSubmitReset,
-      stopWithAutoSubmitBlock,
+      resumeStream,
+      stop,
       setMessages,
     ],
   );
@@ -605,7 +540,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             model={chatModel.model}
             modelConfig={chatConfig}
             initialMessages={initialMessages}
-            isAutoSubmitBlocked={isAutoSubmitBlocked}
             onInstanceUpdate={handleInstanceUpdate}
             onStatusChange={handleStatusChange}
           />
