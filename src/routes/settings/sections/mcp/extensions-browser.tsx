@@ -115,34 +115,32 @@ export function ExtensionsBrowser({
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
                   >
-                    <div className="py-0">
-                      <ExtensionListRow
-                        title={extension.displayName}
-                        description={extension.description}
-                        version={extension.version}
-                        iconUrl={extension.iconUrl}
-                        websiteUrl={extension.websiteUrl}
-                        badges={
-                          extension.categories.length > 0
-                            ? extension.categories
-                            : extension.tags
-                        }
-                        installed={installed}
-                        installSupported={Boolean(extension.install)}
-                        onInstall={() => onInstallClick(extension)}
-                        onUninstall={() => onUninstallClick(extension)}
-                        advancedContent={
-                          installed && getAdvancedContent
-                            ? getAdvancedContent(extension)
-                            : undefined
-                        }
-                        moreInfoJson={
-                          installed && getMoreInfoJson
-                            ? getMoreInfoJson(extension)
-                            : undefined
-                        }
-                      />
-                    </div>
+                    <ExtensionListRow
+                      title={extension.displayName}
+                      description={extension.description}
+                      version={extension.version}
+                      iconUrl={extension.iconUrl}
+                      websiteUrl={extension.websiteUrl}
+                      badges={
+                        extension.categories.length > 0
+                          ? extension.categories
+                          : extension.tags
+                      }
+                      installed={installed}
+                      installSupported={Boolean(extension.install)}
+                      onInstall={() => onInstallClick(extension)}
+                      onUninstall={() => onUninstallClick(extension)}
+                      advancedContent={
+                        installed && getAdvancedContent
+                          ? getAdvancedContent(extension)
+                          : undefined
+                      }
+                      moreInfoJson={
+                        installed && getMoreInfoJson
+                          ? getMoreInfoJson(extension)
+                          : undefined
+                      }
+                    />
                   </div>
                 );
               })}
