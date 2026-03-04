@@ -1,4 +1,9 @@
-import { ChevronRightIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  ExternalLinkIcon,
+  PackageIcon,
+  Trash2Icon,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -19,17 +24,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) {
-    return "EX";
-  }
-  if (words.length === 1) {
-    return words[0].slice(0, 2).toUpperCase();
-  }
-  return `${words[0][0]}${words[1][0]}`.toUpperCase();
-}
 
 interface ExtensionListRowProps {
   title: string;
@@ -71,8 +65,8 @@ export function ExtensionListRow({
             <p className="flex min-w-0 items-center gap-2 truncate text-lg font-medium">
               <Avatar className="size-6">
                 <AvatarImage src={iconUrl} alt={`${title} icon`} />
-                <AvatarFallback className="text-[0.7em]">
-                  {getInitials(title)}
+                <AvatarFallback>
+                  <PackageIcon />
                 </AvatarFallback>
               </Avatar>
               <span className="truncate">{title}</span>
