@@ -1,4 +1,4 @@
-import { InfoIcon, RotateCcwIcon, Settings2Icon, XIcon } from "lucide-react";
+import { InfoIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,10 @@ const SliderConfig = ({
     onChange(undefined);
   };
 
+  const handleSetCustomValue = () => {
+    onChange(midpoint);
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
@@ -72,9 +76,7 @@ const SliderConfig = ({
           <span
             className={cn(
               "text-sm",
-              isUnset
-                ? "text-muted-foreground/60 italic"
-                : "text-muted-foreground",
+              isUnset ? "text-muted-foreground" : "text-foreground",
             )}
           >
             {isUnset ? "Default" : value}
@@ -88,19 +90,30 @@ const SliderConfig = ({
               title={`Reset ${label} config`}
               aria-label={`Reset ${label} config`}
             >
-              <XIcon className="size-3" />
+              <RotateCcwIcon className="size-3" />
             </Button>
           )}
         </div>
       </div>
-      <Slider
-        id={id}
-        min={min}
-        max={max}
-        step={step}
-        value={[isUnset ? midpoint : value]}
-        onValueChange={handleSliderChange}
-      />
+      {isUnset ? (
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-6 w-fit px-2 text-xs"
+          onClick={handleSetCustomValue}
+        >
+          Set custom value
+        </Button>
+      ) : (
+        <Slider
+          id={id}
+          min={min}
+          max={max}
+          step={step}
+          value={[value]}
+          onValueChange={handleSliderChange}
+        />
+      )}
     </div>
   );
 };
