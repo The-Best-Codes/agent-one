@@ -8,7 +8,7 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { type Child, Command } from "@tauri-apps/plugin-shell";
-import type { ToolSet } from "ai";
+import type { Tool, ToolSet } from "ai";
 import { getDefaultStore } from "jotai";
 
 import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
@@ -570,6 +570,54 @@ export function invalidateServerCache(): void {
 const MCP_TOOL_PREFIX = "mcp__";
 const MCP_TOOL_SEPARATOR = "__";
 
+function createAbortError(): Error {
+  const abortError = new Error("The operation was aborted.");
+  abortError.name = "AbortError";
+  return abortError;
+}
+
+function wrapMcpToolWithAbortRace(
+  tool: Tool<unknown, unknown>,
+): Tool<unknown, unknown> {
+  if (!tool.execute) {
+    return tool;
+  }
+
+  return {
+    ...tool,
+    execute: async (input, options) => {
+      const abortSignal = options.abortSignal;
+
+      if (!abortSignal) {
+        return tool.execute!(input, options);
+      }
+
+      if (abortSignal.aborted) {
+        throw createAbortError();
+      }
+
+      let onAbort: (() => void) | undefined;
+      const abortPromise = new Promise<never>((_, reject) => {
+        onAbort = () => {
+          reject(createAbortError());
+        };
+        abortSignal.addEventListener("abort", onAbort, { once: true });
+      });
+
+      try {
+        return await Promise.race([
+          tool.execute!(input, options),
+          abortPromise,
+        ]);
+      } finally {
+        if (onAbort) {
+          abortSignal.removeEventListener("abort", onAbort);
+        }
+      }
+    },
+  };
+}
+
 function slugify(name: string): string {
   return name
     .toLowerCase()
@@ -602,7 +650,7 @@ export function prefixMcpToolNames(
   const prefixed: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
     prefixed[`${MCP_TOOL_PREFIX}${serverSlug}${MCP_TOOL_SEPARATOR}${name}`] =
-      tool;
+      wrapMcpToolWithAbortRace(tool as Tool<unknown, unknown>);
   }
   return prefixed;
 }
