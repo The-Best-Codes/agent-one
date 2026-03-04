@@ -178,7 +178,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       abortSignal: options.abortSignal,
       tools,
       toolChoice: "auto",
-      stopWhen: stepCountIs(20),
+      stopWhen: stepCountIs(20), // TODO: Allow customizing this limit in settings
       // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: this.getSystemPrompt(),
       ...(this.smoothStreamEnabled && {
