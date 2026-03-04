@@ -268,7 +268,7 @@ export default function McpSection() {
 
           <TabsContent value="custom" className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <h4 className="text-sm font-medium">Custom Extensions</h4>
+              <h3 className="text-sm font-medium">Custom Extensions</h3>
               <Button size="sm" onClick={() => setShowAddDialog(true)}>
                 <PlusIcon className="size-4" />
                 Add Custom
