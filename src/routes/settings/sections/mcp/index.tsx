@@ -275,7 +275,7 @@ export default function McpSection() {
   return (
     <Card>
       <CardHeader>
-        <h3 className="text-base leading-none font-semibold">Extensions</h3>
+        <h2 className="text-base leading-none font-semibold">Extensions</h2>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
