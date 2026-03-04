@@ -110,15 +110,12 @@ export function ExtensionsBrowser({
                     key={extension.id}
                     data-index={virtualItem.index}
                     ref={virtualizer.measureElement}
+                    className="absolute top-0 left-0 w-full py-1 first:pt-0 last:pb-0"
                     style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
                   >
-                    <div className="py-1">
+                    <div className="py-0">
                       <ExtensionListRow
                         title={extension.displayName}
                         description={extension.description}
