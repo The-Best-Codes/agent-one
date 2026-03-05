@@ -18,6 +18,7 @@ import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
 import { AddServerDialog } from "./add-server-dialog";
+import { BuiltInExtensionsTab } from "./built-in-extensions-tab";
 import { ExtensionAdvancedDetails } from "./extension-advanced-details";
 import { ExtensionListRow } from "./extension-list-row";
 import { ExtensionsBrowser } from "./extensions-browser";
@@ -296,6 +297,7 @@ export default function McpSection() {
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="installed">Installed</TabsTrigger>
+              <TabsTrigger value="built-in">Built-in</TabsTrigger>
               <TabsTrigger value="custom">Custom</TabsTrigger>
             </TabsList>
           </div>
@@ -312,6 +314,10 @@ export default function McpSection() {
               />
             </TabsContent>
           ))}
+
+          <TabsContent value="built-in">
+            <BuiltInExtensionsTab query={query} />
+          </TabsContent>
 
           <TabsContent value="custom" className="space-y-3">
             <div className="flex items-center justify-between gap-3">

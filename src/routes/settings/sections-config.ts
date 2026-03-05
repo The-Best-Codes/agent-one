@@ -9,7 +9,6 @@ import MessagesSection from "./sections/messages";
 import ProvidersSection from "./sections/providers";
 import StreamingSection from "./sections/streaming";
 import TitlesSection from "./sections/titles";
-import ToolsSection from "./sections/tools";
 import { type SectionId, sectionsMetadata } from "./sections-metadata";
 
 interface SettingsSection {
@@ -26,7 +25,6 @@ const componentMap: Record<SectionId, ComponentType> = {
   editor: EditorSection,
   messages: MessagesSection,
   titles: TitlesSection,
-  tools: ToolsSection,
   mcp: McpSection,
   streaming: StreamingSection,
   about: AboutSection,

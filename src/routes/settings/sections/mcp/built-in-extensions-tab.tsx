@@ -1,5 +1,7 @@
+import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
 import { RotateCcwIcon } from "lucide-react";
+import { useMemo } from "react";
 
 import {
   Accordion,
@@ -8,7 +10,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,21 +22,39 @@ import {
   type ToolId,
 } from "@/lib/settings/types";
 
-const TOOL_NAMES: Record<ToolId, string> = {
-  dateTime: "Date & Time",
-  waitNumberMilliseconds: "Wait Milliseconds",
-  getUrlContent: "Get URL Content",
-  webSearch: "Web Search",
+interface BuiltInExtensionsTabProps {
+  query: string;
+}
+
+const BUILT_IN_EXTENSION_COPY: Record<
+  ToolId,
+  { name: string; description: string; searchTerms: string }
+> = {
+  dateTime: {
+    name: "Current date and time",
+    description: "Check the current date and time",
+    searchTerms: "date time clock timezone",
+  },
+  waitNumberMilliseconds: {
+    name: "Pause",
+    description: "Wait for a short amount of time",
+    searchTerms: "wait delay pause timer milliseconds",
+  },
+  getUrlContent: {
+    name: "Browse",
+    description: "Read content from web pages",
+    searchTerms: "url website fetch read page",
+  },
+  webSearch: {
+    name: "Search the web",
+    description: "Find information online",
+    searchTerms: "search web internet results",
+  },
 };
 
-const TOOL_DESCRIPTIONS: Record<ToolId, string> = {
-  dateTime: "Get the current date and time",
-  waitNumberMilliseconds: "Wait for a specified duration",
-  getUrlContent: "Fetch and extract content from URLs",
-  webSearch: "Search the web for information",
-};
+const TOOL_IDS = Object.keys(BUILT_IN_EXTENSION_COPY) as ToolId[];
 
-export default function ToolsSection() {
+export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
   const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
   const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
 
@@ -45,6 +64,29 @@ export default function ToolsSection() {
       enabledTools: DEFAULT_SETTINGS.ENABLED_TOOLS,
       toolConfigs: DEFAULT_SETTINGS.TOOL_CONFIGS,
     });
+
+  const filteredToolIds = useMemo(() => {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) {
+      return TOOL_IDS;
+    }
+
+    return TOOL_IDS.map((toolId) => {
+      const toolCopy = BUILT_IN_EXTENSION_COPY[toolId];
+
+      return {
+        toolId,
+        score:
+          fuzzysort.single(
+            normalizedQuery,
+            `${toolCopy.name} ${toolCopy.description} ${toolCopy.searchTerms}`,
+          )?.score ?? 0,
+      };
+    })
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ toolId }) => toolId);
+  }, [query]);
 
   const handleResetToolConfigs = () => {
     resetSetting("ENABLED_TOOLS");
@@ -66,35 +108,38 @@ export default function ToolsSection() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <h2 className="leading-none font-semibold">Static Tools</h2>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">Tool Configuration</Label>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Configure which built-in tools are available and their settings.
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleResetToolConfigs}
-            disabled={isToolConfigsDefault}
-            aria-label="Reset to default"
-          >
-            <RotateCcwIcon className="size-4" />
-          </Button>
+    <div className="space-y-3">
+      <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+        <div className="flex flex-1 flex-col items-start">
+          <Label className="text-sm font-medium">
+            Built-in extension settings
+          </Label>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Choose which built-in extensions are available and how they behave.
+          </p>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleResetToolConfigs}
+          disabled={isToolConfigsDefault}
+          aria-label="Reset to default"
+        >
+          <RotateCcwIcon className="size-4" />
+        </Button>
+      </div>
 
+      {filteredToolIds.length === 0 ? (
+        <div className="text-muted-foreground rounded-md p-8 text-center text-sm">
+          No built-in extensions match your search.
+        </div>
+      ) : (
         <Accordion
           type="single"
           collapsible
           className="border-border w-full rounded-md border"
         >
-          {(Object.keys(TOOL_NAMES) as ToolId[]).map((toolId) => (
+          {filteredToolIds.map((toolId) => (
             <AccordionItem key={toolId} value={toolId}>
               <div className="flex items-center gap-3 px-3 [&>h3]:flex-1">
                 <Checkbox
@@ -103,15 +148,15 @@ export default function ToolsSection() {
                   onCheckedChange={(checked) =>
                     updateToolEnabled(toolId, checked as boolean)
                   }
-                  aria-label={`Enable ${TOOL_NAMES[toolId]}`}
+                  aria-label={`Enable ${BUILT_IN_EXTENSION_COPY[toolId].name}`}
                 />
                 <AccordionTrigger className="py-4 hover:no-underline">
                   <div className="flex flex-col items-start text-left">
                     <span className="text-sm font-medium">
-                      {TOOL_NAMES[toolId]}
+                      {BUILT_IN_EXTENSION_COPY[toolId].name}
                     </span>
                     <span className="text-muted-foreground text-xs">
-                      {TOOL_DESCRIPTIONS[toolId]}
+                      {BUILT_IN_EXTENSION_COPY[toolId].description}
                     </span>
                   </div>
                 </AccordionTrigger>
@@ -124,7 +169,7 @@ export default function ToolsSection() {
                         Require Approval
                       </Label>
                       <span className="text-muted-foreground text-xs">
-                        Ask for confirmation before running this tool
+                        Ask for confirmation before running this extension
                       </span>
                     </div>
                     <Switch
@@ -353,7 +398,7 @@ export default function ToolsSection() {
             </AccordionItem>
           ))}
         </Accordion>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }
