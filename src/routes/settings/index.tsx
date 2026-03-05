@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { ArrowLeftIcon, SettingsIcon } from "lucide-react";
+import { ArrowLeftIcon, ListIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
@@ -66,7 +66,7 @@ export default function SettingsRoute() {
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
           <Button variant="outline" size="sm" onClick={handleNavigateBack}>
-            <ArrowLeftIcon className="size-4" />
+            <ArrowLeftIcon />
             Back
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -76,7 +76,7 @@ export default function SettingsRoute() {
                 size="icon"
                 aria-label="Open settings menu"
               >
-                <SettingsIcon className="size-4" />
+                <ListIcon />
               </Button>
             </DrawerTrigger>
             <DrawerContent>
