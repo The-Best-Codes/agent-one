@@ -1,4 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import fuzzysort from "fuzzysort";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import {
   type FC,
@@ -30,7 +31,6 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/chat-loading-delay";
-import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
 interface ModelSelectorProps {
@@ -166,8 +166,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     const query = searchQuery.toLowerCase();
     const scoredModels = modelsWithApiKey
       .map((model) => {
-        const targetString = model.name;
-        const score = commandScore(targetString, query, [model?.id || ""]);
+        const score =
+          fuzzysort.single(query, [model.name, model?.id || ""].join(" "))
+            ?.score ?? 0;
         return { model, score };
       })
       .filter(({ score }) => score > 0);

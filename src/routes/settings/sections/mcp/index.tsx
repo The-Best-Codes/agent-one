@@ -1,3 +1,4 @@
+import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -13,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { commandScore } from "@/lib/command-score";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
@@ -82,15 +82,18 @@ export default function McpSection() {
     return customServers
       .map((server) => ({
         server,
-        score: commandScore(
-          server.name || "Custom Extension",
-          normalizedQuery,
-          [
-            server.id,
-            server.type,
-            server.type === "stdio" ? server.command : server.url,
-          ],
-        ),
+        score:
+          fuzzysort.single(
+            normalizedQuery,
+            [
+              server.name || "Custom Extension",
+              server.id,
+              server.type,
+              server.type === "stdio" ? server.command : server.url,
+            ]
+              .filter(Boolean)
+              .join(" "),
+          )?.score ?? 0,
       }))
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)

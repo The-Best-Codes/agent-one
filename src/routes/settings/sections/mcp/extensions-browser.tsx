@@ -1,4 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
+import fuzzysort from "fuzzysort";
 import type { ReactNode } from "react";
 import { useMemo, useRef } from "react";
 
@@ -7,7 +8,6 @@ import {
   type McpRegistryExtension,
 } from "@/assets/mcp-registry/mcp-registry";
 import { useOverflow } from "@/hooks/use-overflow";
-import { commandScore } from "@/lib/command-score";
 import { cn } from "@/lib/utils";
 
 import { ExtensionListRow } from "./extension-list-row";
@@ -52,10 +52,17 @@ export function ExtensionsBrowser({
     return baseExtensions
       .map((extension) => ({
         extension,
-        score: commandScore(extension.displayName, normalizedQuery, [
-          extension.registryName,
-          extension.searchText,
-        ]),
+        score:
+          fuzzysort.single(
+            normalizedQuery,
+            [
+              extension.displayName,
+              extension.registryName,
+              extension.searchText,
+            ]
+              .filter(Boolean)
+              .join(" "),
+          )?.score ?? 0,
       }))
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
