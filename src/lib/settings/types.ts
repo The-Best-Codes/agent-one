@@ -158,7 +158,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   NOTIFICATION_SETTING: "never",
   ENABLED_TOOLS: {
     dateTime: true,
-    waitNumberMilliseconds: true,
+    waitNumberMilliseconds: false,
     getUrlContent: true,
     webSearch: true,
   },
@@ -174,15 +174,15 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     },
     getUrlContent: {
       requiresApproval: false,
-      maxUrls: 5,
+      maxUrls: 10,
       minUrls: 1,
-      defaultMaxLength: 1000,
+      defaultMaxLength: 5000,
     },
     webSearch: {
       requiresApproval: false,
       maxConcurrent: 3,
       defaultMaxResults: 20,
-      defaultMaxPages: 1,
+      defaultMaxPages: 2,
     },
   },
   MCP_SERVERS: [],
