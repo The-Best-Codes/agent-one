@@ -1,7 +1,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import type { ReactNode } from "react";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import {
   getMcpRegistryExtensions,
@@ -82,6 +82,11 @@ export function ExtensionsBrowser({
     measureElement: (element) => element.getBoundingClientRect().height,
     overscan: 6,
   });
+
+  useEffect(() => {
+    parentRef.current?.scrollTo({ top: 0 });
+    virtualizer.scrollToOffset(0);
+  }, [filter, query, virtualizer]);
 
   return (
     <div
