@@ -74,9 +74,22 @@ export function ExtensionListRow({
             {version ? <Badge variant="outline">v{version}</Badge> : null}
           </div>
 
-          <p className="text-muted-foreground line-clamp-2 text-xs">
-            {description}
-          </p>
+          <div className="flex flex-col">
+            {websiteUrl ? (
+              <a
+                href={websiteUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex max-w-full cursor-pointer items-center gap-1 text-xs text-blue-500 hover:text-blue-600 hover:underline"
+              >
+                <span className="truncate">{websiteUrl}</span>
+                <ExternalLinkIcon className="size-3.5 shrink-0" />
+              </a>
+            ) : null}
+            <p className="text-muted-foreground line-clamp-2 text-xs">
+              {description}
+            </p>
+          </div>
 
           {badges.length > 0 ? (
             <div className="text-muted-foreground flex min-w-0 flex-wrap items-center gap-2 text-xs">
@@ -90,15 +103,6 @@ export function ExtensionListRow({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {websiteUrl ? (
-            <Button variant="outline" size="sm" asChild>
-              <a href={websiteUrl} target="_blank" rel="noreferrer">
-                <ExternalLinkIcon className="size-4" />
-                Website
-              </a>
-            </Button>
-          ) : null}
-
           {installed ? (
             <Button size="sm" variant="destructive" onClick={onUninstall}>
               <Trash2Icon className="size-4" />
