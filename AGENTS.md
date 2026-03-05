@@ -27,6 +27,11 @@
 - As an AI, you should only add comments to the code when absolutely necessary. You should confirm before removing TODOs, TODO comments, or other important comments. The developer's job is to touch up your code, including writing comments, not your job.
 - Follow the project PHILOSOPHY.md (don't forget to read the file).
 
+## Docs
+
+- Don't hesitate to browse the web for documentation.
+- AI SDK docs are in `node_modules/ai/docs`.
+
 ## Installing Dependencies
 
 - Don't manually edit the `package.json` file. Instead, use `npm install` to install dependencies.
