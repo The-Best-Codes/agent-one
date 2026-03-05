@@ -200,6 +200,23 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     measureVirtualizer();
   }, [effectiveOpen]);
 
+  const scrollToTop = useEffectEvent(() => {
+    if (!effectiveOpen) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      parentRef.current?.scrollTo({ top: 0 });
+      virtualizer.scrollToOffset(0);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  });
+
+  useEffect(() => {
+    scrollToTop();
+  }, [effectiveOpen, searchQuery]);
+
   const handleSelect = (modelId: string) => {
     setModel(modelId);
     setOpen(false);
