@@ -283,7 +283,7 @@ export default function McpSection() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="group/extensions-search-input relative flex-1">
               <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
               <Input
@@ -294,7 +294,7 @@ export default function McpSection() {
                 className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
               />
             </div>
-            <TabsList>
+            <TabsList className="w-full justify-start md:w-auto">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="installed">Installed</TabsTrigger>
               <TabsTrigger value="built-in">Built-in</TabsTrigger>
