@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useState } from "react";
+import { type RefObject, useLayoutEffect, useState } from "react";
 
 type OverflowAxis = "x" | "y";
 
@@ -13,7 +13,7 @@ export function useOverflow<T extends HTMLElement>(
 ): boolean {
   const [isOverflowing, setIsOverflowing] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = ref.current;
     if (!element) {
       const timeoutId = window.setTimeout(() => {
@@ -44,7 +44,7 @@ export function useOverflow<T extends HTMLElement>(
       frameId = window.requestAnimationFrame(checkOverflow);
     };
 
-    scheduleCheck();
+    checkOverflow();
 
     const resizeObserver = new ResizeObserver(scheduleCheck);
     resizeObserver.observe(element);
