@@ -328,36 +328,36 @@ export default function McpSection() {
                 </div>
               )
             ) : (
-              <div className="flex flex-col gap-2">
-                {filteredCustomServers.map((server) => {
-                  const linkedExtension = extensionByServerId.get(server.id);
+              <div className="max-h-96 overflow-x-hidden overflow-y-auto pr-2">
+                <div className="flex flex-col gap-2 py-1">
+                  {filteredCustomServers.map((server) => {
+                    const linkedExtension = extensionByServerId.get(server.id);
 
-                  return (
-                    <ExtensionListRow
-                      key={server.id}
-                      title={server.name || "Custom Extension"}
-                      description={
-                        server.type === "stdio" ? server.command : server.url
-                      }
-                      version="custom"
-                      badges={["custom", server.type]}
-                      installed
-                      onUninstall={() =>
-                        linkedExtension
-                          ? handleExtensionUninstallClick(linkedExtension)
-                          : handleServerUninstallClick(server)
-                      }
-                      advancedContent={
-                        <ExtensionAdvancedDetails
-                          server={server}
-                          onUpdate={(updates) =>
-                            updateMcpServerById(server.id, updates)
-                          }
-                        />
-                      }
-                    />
-                  );
-                })}
+                    return (
+                      <ExtensionListRow
+                        key={server.id}
+                        title={server.name || "Custom Extension"}
+                        description={
+                          server.type === "stdio" ? server.command : server.url
+                        }
+                        installed
+                        onUninstall={() =>
+                          linkedExtension
+                            ? handleExtensionUninstallClick(linkedExtension)
+                            : handleServerUninstallClick(server)
+                        }
+                        advancedContent={
+                          <ExtensionAdvancedDetails
+                            server={server}
+                            onUpdate={(updates) =>
+                              updateMcpServerById(server.id, updates)
+                            }
+                          />
+                        }
+                      />
+                    );
+                  })}
+                </div>
               </div>
             )}
           </TabsContent>
