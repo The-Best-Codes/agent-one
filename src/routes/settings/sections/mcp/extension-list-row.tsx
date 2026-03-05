@@ -80,7 +80,7 @@ export function ExtensionListRow({
                 href={websiteUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex max-w-full cursor-pointer items-center gap-1 text-xs text-blue-500 hover:text-blue-600 hover:underline"
+                className="inline-flex max-w-full min-w-0 cursor-pointer items-center gap-1 self-start text-xs text-blue-500 hover:text-blue-600 hover:underline"
               >
                 <span className="truncate">{websiteUrl}</span>
                 <ExternalLinkIcon className="size-3.5 shrink-0" />
