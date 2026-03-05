@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { useOverflow } from "@/hooks/use-overflow";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
@@ -46,7 +47,6 @@ export const VirtualizedChatList = ({
 }: VirtualizedChatListProps) => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isOverflowing, setIsOverflowing] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [chatIds] = useAtom(chatIdsAtom);
@@ -106,27 +106,9 @@ export const VirtualizedChatList = ({
     overscan: 5,
   });
 
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (parentRef.current) {
-        const isOverflowingNow =
-          parentRef.current.scrollHeight > parentRef.current.clientHeight;
-        setIsOverflowing(isOverflowingNow);
-      }
-    };
-
-    const timeoutId = setTimeout(checkOverflow, 0);
-
-    const resizeObserver = new ResizeObserver(checkOverflow);
-    if (parentRef.current) {
-      resizeObserver.observe(parentRef.current);
-    }
-
-    return () => {
-      clearTimeout(timeoutId);
-      resizeObserver.disconnect();
-    };
-  }, [filteredChats.length]);
+  const isOverflowing = useOverflow(parentRef, {
+    watch: `${filteredChats.length}:${chats.length}:${isMetadataLoaded}:${searchQuery}`,
+  });
 
   useEffect(() => {
     if (scrollToActiveChat && activeChatId && virtualizer && !searchQuery) {

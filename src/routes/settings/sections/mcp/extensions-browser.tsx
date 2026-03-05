@@ -6,7 +6,9 @@ import {
   getMcpRegistryExtensions,
   type McpRegistryExtension,
 } from "@/assets/mcp-registry/mcp-registry";
+import { useOverflow } from "@/hooks/use-overflow";
 import { commandScore } from "@/lib/command-score";
+import { cn } from "@/lib/utils";
 
 import { ExtensionListRow } from "./extension-list-row";
 
@@ -60,6 +62,10 @@ export function ExtensionsBrowser({
       .map(({ extension }) => extension);
   }, [extensions, filter, isInstalled, query]);
 
+  const isOverflowing = useOverflow(parentRef, {
+    watch: `${filteredExtensions.length}:${filter}:${query}`,
+  });
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredExtensions.length,
@@ -83,7 +89,7 @@ export function ExtensionsBrowser({
             : "No extensions match your search."}
         </div>
       ) : (
-        <div className="pr-2">
+        <div className={cn(isOverflowing && "pr-2")}>
           <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,
