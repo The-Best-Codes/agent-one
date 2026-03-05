@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface WebSearchInput {
@@ -239,7 +240,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     }
 
     case "output-error": {
-      if (part.errorText === "agent-one::cancelled-by-user") {
+      if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         const input = part.input as WebSearchInput;
         const query = input?.query;
         return (

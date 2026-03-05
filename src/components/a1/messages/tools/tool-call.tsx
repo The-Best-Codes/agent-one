@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
+import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface ToolCallPartProps {
@@ -157,7 +158,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       );
 
     case "output-error":
-      if (part.errorText === "agent-one::cancelled-by-user") {
+      if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-2">
             <XCircleIcon className="text-muted-foreground size-4 shrink-0" />

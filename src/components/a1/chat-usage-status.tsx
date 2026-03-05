@@ -14,7 +14,7 @@ import {
   useChatMetadata,
 } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { CHAT_LOADING_DELAY_MS } from "@/lib/chat-loading-delay";
+import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 

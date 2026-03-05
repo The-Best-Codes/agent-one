@@ -30,7 +30,7 @@ import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { CHAT_LOADING_DELAY_MS } from "@/lib/chat-loading-delay";
+import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface ModelSelectorProps {

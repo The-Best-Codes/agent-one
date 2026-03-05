@@ -17,7 +17,7 @@ import {
   useChatMessages,
   useChatStatus,
 } from "@/contexts/use-chat/chat-hooks";
-import { CHAT_LOADING_DELAY_MS } from "@/lib/chat-loading-delay";
+import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {

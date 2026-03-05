@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface GetUrlContentInput {
@@ -378,7 +379,7 @@ export const MessagePartToolGetUrlContent = ({
     }
 
     case "output-error": {
-      if (part.errorText === "agent-one::cancelled-by-user") {
+      if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         const singleUrl = input?.urls?.[0];
 
         let message: string | React.ReactNode = "Browsing cancelled";

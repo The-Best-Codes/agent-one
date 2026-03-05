@@ -18,6 +18,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
+import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -453,7 +454,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             return {
               ...part,
               state: "output-error",
-              errorText: "agent-one::cancelled-by-user",
+              errorText: TOOL_CANCELLED_BY_USER_SYMBOL,
             } as UIToolInvocation<UITool>;
           }
           return part;

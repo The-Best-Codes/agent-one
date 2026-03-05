@@ -17,6 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -160,7 +161,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       );
 
     case "output-error":
-      if (part.errorText === "agent-one::cancelled-by-user") {
+      if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-1">
             <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
