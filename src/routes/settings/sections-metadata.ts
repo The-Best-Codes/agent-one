@@ -5,7 +5,7 @@ export const sectionsMetadata = [
   { id: "editor", label: "Editor" },
   { id: "messages", label: "Messages" },
   { id: "titles", label: "Titles" },
-  { id: "mcp", label: "Extensions" },
+  { id: "extensions", label: "Extensions" },
   { id: "streaming", label: "Streaming" },
   { id: "about", label: "About" },
 ] as const;

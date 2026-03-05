@@ -44,7 +44,7 @@ function isServerFromRegistry(server: McpServerConfig): boolean {
   return server.id.includes("@");
 }
 
-export default function McpSection() {
+export default function ExtensionsSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
 
   const [showAddDialog, setShowAddDialog] = useState(false);

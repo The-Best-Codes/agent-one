@@ -41,7 +41,7 @@ export const ChatMessageLoading = ({
             {isApiKeysLoading
               ? "Loading API keys..."
               : isMcpLoading
-                ? "Starting MCP servers..."
+                ? "Starting extensions..."
                 : "Thinking..."}
           </span>
         </div>
@@ -64,7 +64,7 @@ export const ChatMessageLoading = ({
               {isApiKeysLoading
                 ? "Loading API keys..."
                 : isMcpLoading
-                  ? "Starting MCP servers..."
+                  ? "Starting extensions..."
                   : "Thinking..."}
             </span>
           </div>

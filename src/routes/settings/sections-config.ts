@@ -4,7 +4,7 @@ import AboutSection from "./sections/about";
 import AccountSection from "./sections/account";
 import AppearanceSection from "./sections/appearance";
 import EditorSection from "./sections/editor";
-import McpSection from "./sections/mcp";
+import ExtensionsSection from "./sections/extensions";
 import MessagesSection from "./sections/messages";
 import ProvidersSection from "./sections/providers";
 import StreamingSection from "./sections/streaming";
@@ -25,7 +25,7 @@ const componentMap: Record<SectionId, ComponentType> = {
   editor: EditorSection,
   messages: MessagesSection,
   titles: TitlesSection,
-  mcp: McpSection,
+  extensions: ExtensionsSection,
   streaming: StreamingSection,
   about: AboutSection,
 };

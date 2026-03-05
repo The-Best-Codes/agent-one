@@ -33,8 +33,7 @@ export function UninstallExtensionDialog({
         <DialogHeader>
           <DialogTitle>Uninstall {serverName}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to uninstall this extension? Its MCP server
-            configuration will be removed.
+            Are you sure you want to uninstall this extension?
           </DialogDescription>
         </DialogHeader>
 
