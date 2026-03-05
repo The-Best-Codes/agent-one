@@ -36,6 +36,9 @@ type ErrorResult = {
 
 type FetchResult = SuccessResult | ErrorResult;
 
+// TODO: Later, consider streaming the tools results to the UI as they come in:
+// https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling#preliminary-tool-results
+
 export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
   tool({
     description: `Fetch and extract content from URLs (${config.minUrls} to ${config.maxUrls} at once). Can return content as markdown or raw text.`,
