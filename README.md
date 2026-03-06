@@ -39,13 +39,13 @@ bun install --no-save oxlint-tsgolint
 Run the linter:
 
 ```bash
-npx oxlint --type-aware
+bunx oxlint --type-aware
 ```
 
 Or without types:
 
 ```bash
-npx oxlint
+bunx oxlint
 ```
 
 ## Build
@@ -77,9 +77,9 @@ See https://tauri.app/plugin/updater/.
 
 ### With Playwright
 
-- `npx -y playwright install` to download browsers
-- `npx -y playwright test` to run all tests in all projects
-- `npx -y playwright test --project="chromium-desktop-light" --project="pixel-7-dark"` to run only fast Chromium tests
+- `bunx -y playwright install` to download browsers
+- `bunx -y playwright test` to run all tests in all projects
+- `bunx -y playwright test --project="chromium-desktop-light" --project="pixel-7-dark"` to run only fast Chromium tests
 
 ---
 

@@ -20,7 +20,7 @@
 - Don't overuse `space-*` classes. When possible, use a flex layout with a gap instead.
 - This project uses shadcn/ui components as a base in `src/components/ui/`. Avoid editing the UI components directly when possible.
 - The UI components are consistent and align with the project's design system. Unless you have a good reason, avoid applying custom classnames or other styling to the UI components when you use them in a file, customize them via props where possible and leave the styling at its default.
-- To add a new UI component, run `npx shadcn@latest add *`. Only add new UI components when necesarry. If the install step fails, ask the user to add the component manually for you.
+- To add a new UI component, run `bunx shadcn@latest add *`. Only add new UI components when necesarry. If the install step fails, ask the user to add the component manually for you.
 
 ## Code Style
 
