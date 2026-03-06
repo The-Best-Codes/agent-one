@@ -5,11 +5,6 @@ on:
     branches:
       - release
   workflow_dispatch:
-    inputs:
-      legacy-peer-deps:
-        description: "Use --legacy-peer-deps for npm ci"
-        type: boolean
-        default: false
 
 jobs:
   release-tauri:
@@ -58,7 +53,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
 
       - name: install frontend dependencies
-        run: npm ci --prefer-offline --no-audit ${{ inputs.legacy-peer-deps == true && '--legacy-peer-deps' || '' }}
+        run: npm ci --prefer-offline --no-audit --legacy-peer-deps
 
       - uses: tauri-apps/tauri-action@73fb865345c54760d875b94642314f8c0c894afa # action-v0.6.1
         env:
