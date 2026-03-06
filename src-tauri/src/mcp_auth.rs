@@ -10,12 +10,13 @@ use rmcp::transport::auth::{
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 use tauri_plugin_opener::OpenerExt;
 use tokio::sync::{oneshot, Mutex};
 
-use crate::keyring::{delete_password, get_password, set_password};
+use crate::keyring::{delete_password, get_password, resolve_agent_db_path, set_password};
 
 pub struct AuthCancellationState(pub Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>);
 const OAUTH_CALLBACK_TIMEOUT_SECS: u64 = 300;
@@ -85,11 +86,12 @@ struct CallbackParams {
 #[derive(Clone)]
 pub struct KeyringCredentialStore {
     server_id: String,
+    db_path: PathBuf,
 }
 
 impl KeyringCredentialStore {
-    pub fn new(server_id: String) -> Self {
-        Self { server_id }
+    pub fn new(server_id: String, db_path: PathBuf) -> Self {
+        Self { server_id, db_path }
     }
 
     fn key(&self) -> String {
@@ -100,7 +102,7 @@ impl KeyringCredentialStore {
 #[async_trait::async_trait]
 impl CredentialStore for KeyringCredentialStore {
     async fn load(&self) -> Result<Option<StoredCredentials>, AuthError> {
-        match get_password(&self.key()).await {
+        match get_password(&self.key(), &self.db_path).await {
             Ok(Some(json)) => {
                 let creds: StoredCredentials = serde_json::from_str(&json)
                     .map_err(|e| AuthError::InternalError(format!("JSON parse error: {}", e)))?;
@@ -115,13 +117,13 @@ impl CredentialStore for KeyringCredentialStore {
         let json = serde_json::to_string(&credentials)
             .map_err(|e| AuthError::InternalError(format!("JSON serialize error: {}", e)))?;
 
-        set_password(&self.key(), &json)
+        set_password(&self.key(), &json, &self.db_path)
             .await
             .map_err(AuthError::InternalError)
     }
 
     async fn clear(&self) -> Result<(), AuthError> {
-        delete_password(&self.key())
+        delete_password(&self.key(), &self.db_path)
             .await
             .map(|_| ())
             .map_err(AuthError::InternalError)
@@ -229,7 +231,8 @@ pub async fn mcp_authenticate(
         .await
         .map_err(|e| e.to_string())?;
 
-    let cred_store = KeyringCredentialStore::new(server_id);
+    let db_path = resolve_agent_db_path(&app)?;
+    let cred_store = KeyringCredentialStore::new(server_id, db_path);
     cred_store
         .save(StoredCredentials {
             client_id,
@@ -260,8 +263,8 @@ pub async fn mcp_cancel_auth(
     Ok(())
 }
 
-async fn try_get_token_with_url(server_id: &str, url: &str) -> Result<String, String> {
-    let cred_store = KeyringCredentialStore::new(server_id.to_string());
+async fn try_get_token_with_url(server_id: &str, url: &str, db_path: PathBuf) -> Result<String, String> {
+    let cred_store = KeyringCredentialStore::new(server_id.to_string(), db_path);
 
     let mut auth_manager = AuthorizationManager::new(url)
         .await
@@ -303,19 +306,25 @@ pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String>
 }
 
 #[tauri::command]
-pub async fn mcp_logout(server_id: String) -> Result<(), String> {
-    let cred_store = KeyringCredentialStore::new(server_id);
+pub async fn mcp_logout(app: tauri::AppHandle, server_id: String) -> Result<(), String> {
+    let db_path = resolve_agent_db_path(&app)?;
+    let cred_store = KeyringCredentialStore::new(server_id, db_path);
     cred_store.clear().await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn mcp_get_token(server_id: String, server_url: String) -> Result<String, String> {
-    let cred_store = KeyringCredentialStore::new(server_id.clone());
+pub async fn mcp_get_token(
+    app: tauri::AppHandle,
+    server_id: String,
+    server_url: String,
+) -> Result<String, String> {
+    let db_path = resolve_agent_db_path(&app)?;
+    let cred_store = KeyringCredentialStore::new(server_id.clone(), db_path.clone());
 
     let loaded = cred_store.load().await.map_err(|e| e.to_string())?;
     if loaded.is_none() {
         return Err("No credentials found. Please login.".to_string());
     }
 
-    try_get_token_with_url(&server_id, &server_url).await
+    try_get_token_with_url(&server_id, &server_url, db_path).await
 }

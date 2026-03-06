@@ -94,6 +94,12 @@ pub fn run() {
                             sql: include_str!("../migrations/0002_add_chat_usage_columns.sql"),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 3,
+                            description: "add_secure_secret_fallback",
+                            sql: include_str!("../migrations/0003_add_secure_secret_fallback.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),
