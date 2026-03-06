@@ -17,20 +17,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@ecf28ddc73e819eb6fa29df6b34ef8921c743461 # v2.1.3
         with:
-          node-version: "23"
-          cache: "npm"
+          bun-version: latest
+        if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
+
+      - name: Cache bun dependencies
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
 
       - name: Install JS dependencies
-        run: npm ci --prefer-offline --no-audit --legacy-peer-deps
+        run: bun install --frozen-lockfile
         if: matrix.test == 'typecheck' || matrix.test == 'lint' || matrix.test == 'format-check' || matrix.test == 'e2e'
 
       - name: Get Playwright version
         id: playwright-version
-        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+        run: echo "version=$(bun -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
         if: matrix.test == 'e2e'
 
       - name: Cache Playwright browsers
@@ -42,11 +52,11 @@ jobs:
         if: matrix.test == 'e2e'
 
       - name: Install Playwright system dependencies
-        run: npx playwright install-deps
+        run: bunx playwright install-deps
         if: matrix.test == 'e2e'
 
       - name: Install Playwright browsers
-        run: npx playwright install
+        run: bunx playwright install
         if: matrix.test == 'e2e' && steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Cache and install Tauri system dependencies
@@ -69,23 +79,23 @@ jobs:
         if: matrix.test == 'rust-check'
 
       - name: Run Type Checking
-        run: npm run typecheck
+        run: bun run typecheck
         if: matrix.test == 'typecheck'
 
       - name: Run Linting
-        run: npm run lint
+        run: bun run lint
         if: matrix.test == 'lint'
 
       - name: Run Format Check
-        run: npm run format:check
+        run: bun run format:check
         if: matrix.test == 'format-check'
 
       - name: Build Project for E2E
-        run: npm run build
+        run: bun run build
         if: matrix.test == 'e2e'
 
       - name: Run E2E Playwright Tests
-        run: npm run test-local:e2e
+        run: bun run test-local:e2e
         env:
           CI: true
         if: matrix.test == 'e2e'
