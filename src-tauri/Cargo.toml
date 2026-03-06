@@ -18,7 +18,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2.10.2", features = [] }
+tauri = { version = "2.10.3", features = [] }
 tauri-plugin-opener = "2.5.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -56,7 +56,7 @@ keyring = { version = "3.6.3", features = [
 tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
 axum = "0.8.8"
 url = "2.5.8"
-rmcp = { version = "0.17.0", features = [
+rmcp = { version = "1.1.0", features = [
     "auth",
     "client",
     "transport-streamable-http-client",
