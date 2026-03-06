@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 
+import { type SectionId, sectionsMetadata } from "./sections-metadata";
 import AboutSection from "./sections/about";
 import AccountSection from "./sections/account";
 import AppearanceSection from "./sections/appearance";
@@ -9,7 +10,6 @@ import MessagesSection from "./sections/messages";
 import ProvidersSection from "./sections/providers";
 import StreamingSection from "./sections/streaming";
 import TitlesSection from "./sections/titles";
-import { type SectionId, sectionsMetadata } from "./sections-metadata";
 
 interface SettingsSection {
   id: string;
