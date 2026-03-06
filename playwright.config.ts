@@ -19,7 +19,7 @@ export default defineConfig({
     screenshot: CI ? "off" : "only-on-failure",
   },
   webServer: {
-    command: `npm run preview -- --port ${PORT}`,
+    command: `bun run preview -- --port ${PORT}`,
     url: BASE_URL,
     reuseExistingServer: true,
     timeout: 120000,

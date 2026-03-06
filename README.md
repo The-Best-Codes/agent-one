@@ -4,6 +4,7 @@
 
 - Node.js
 - npm
+- Bun https://bun.com/
 - Rust & Tauri https://tauri.app/start/prerequisites/
 
 ## Installation
@@ -18,13 +19,13 @@ Install dependencies:
 
 ```bash
 cd agent-one
-npm install
+bun install
 ```
 
 Run the application:
 
 ```bash
-npm run tauri dev
+bun run tauri dev
 ```
 
 ## Linting with OXLint (unstable)
@@ -32,7 +33,7 @@ npm run tauri dev
 Install `oxlint-tsgolint` without saving it to the package.json:
 
 ```bash
-npm install --no-save oxlint-tsgolint
+bun install --no-save oxlint-tsgolint
 ```
 
 Run the linter:
@@ -52,7 +53,7 @@ npx oxlint
 To build the application for production, run the following command:
 
 ```bash
-npm run tauri build
+bun run tauri build
 ```
 
 You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) to build the application. On Windows, in addition to the prerequisites, you will need to install CMake, LLVM, and NASM as well.
@@ -67,10 +68,10 @@ See https://tauri.app/plugin/updater/.
 
 ## Updating Dependencies
 
-- `npm update` and `cargo update` to update dependencies (safe)
+- `bun update` and `cargo update` to update dependencies (safe)
 - `cargo upgrade` to upgrade dependencies to the latest version (unsafe, test for breaking changes)
-- `npx npm-check-updates -u` to update dependencies to the latest version (unsafe, test for breaking changes)
-- `npx actions-up` to update actions in workflows (test manually in a PR)
+- `bunx npm-check-updates -u` to update dependencies to the latest version (unsafe, test for breaking changes)
+- `bunx actions-up` to update actions in workflows (test manually in a PR)
 
 ## Testing
 
