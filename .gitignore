@@ -30,9 +30,6 @@ dist-ssr
 # ESLint cache
 .eslintcache
 
-# Prettier cache
-.prettier-cache
-
 # Playwright
 playwright/.auth/
 test-results/

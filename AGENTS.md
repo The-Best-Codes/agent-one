@@ -5,7 +5,7 @@
 - Run typecheck: `bun run typecheck`
 - Run ESLint: `bun run lint`
 - Run ESLint with fix: `bun run lint -- --fix` (run this to fix import order issues)
-- Format project (Prettier & cargo fmt): `bun run format`
+- Format project (oxfmt & cargo fmt): `bun run format`
 - Run Rust check: `cd src-tauri && cargo check`
 - Run Rust clippy: `cd src-tauri && cargo clippy` (preferred over `cargo check`)
 - Install dependencies: `bun install *` or `cargo add *`
