@@ -164,7 +164,7 @@ export default defineConfig(
             }
           : undefined,
         watch: {
-          ignored: ["**/src-tauri/**", "**/docker/**", "**/tests/**"],
+          ignored: ["**/src-tauri/**", "**/tests/**"],
         },
       },
 

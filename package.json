@@ -19,12 +19,9 @@
     "react-scan": "react-scan localhost:1420",
     "test:unit-test": "vitest run",
     "test:unit-test:ui": "vitest run --ui",
-    "test:docker-down": "docker-compose -f docker/docker-compose.yml down",
-    "test-local:e2e": "playwright test",
-    "test-local:e2e:headed": "playwright test --headed",
-    "test-local:e2e:report": "playwright show-report",
-    "test:e2e": "./scripts/docker-test-runner.sh npm run test-local:e2e",
-    "test:e2e:report": "playwright show-report ./docker/cached/playwright-report"
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",

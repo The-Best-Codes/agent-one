@@ -38,10 +38,6 @@ playwright/.auth/
 test-results/
 playwright-report/
 
-# Docker
-/.docker-cache
-/docker/cached
-
 # Tauri
 /src-tauri/target/
 /src-tauri/gen/schemas
