@@ -51,8 +51,13 @@ export async function mcpLogin(
   const toastId = toast.loading(`Starting OAuth flow for ${serverName}...`, {
     action: {
       label: "Cancel",
-      onClick: async () => {
-        toast.dismiss(toastId);
+      onClick: async (event) => {
+        event.preventDefault();
+        toast.loading("Cancelling OAuth flow...", {
+          id: toastId,
+          action: null,
+          duration: Infinity,
+        });
         try {
           await invoke("mcp_cancel_auth", { serverId });
         } catch (e) {
@@ -78,10 +83,18 @@ export async function mcpLogin(
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    if (typeof e === "string" && e.includes("cancelled by user")) {
-      // no-op
+    if (typeof e === "string" && e.includes("Authorization cancelled")) {
+      toast.error("Login cancelled", {
+        id: toastId,
+        action: null,
+        duration: 10_000,
+      });
     } else {
-      toast.error(`Login failed: ${String(e)}`, { id: toastId, action: null });
+      toast.error(`Login failed: ${String(e)}`, {
+        id: toastId,
+        action: null,
+        duration: 10_000,
+      });
     }
     return false;
   }
