@@ -26,6 +26,17 @@
             "context": 400000,
             "output": 128000
           }
+        },
+        "google/gemini-3.1-flash-lite-preview": {
+          "name": "Gemini 3.1 Flash Lite Preview",
+          "cost": {
+            "input": 0.25,
+            "output": 1.5
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 65000
+          }
         }
       }
     }
