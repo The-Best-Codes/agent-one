@@ -17,6 +17,8 @@ const ESTIMATED_EXTENSION_ITEM_HEIGHT = 148;
 interface ExtensionsBrowserProps {
   filter?: "all" | "installed";
   query: string;
+  showDeviceExtensions: boolean;
+  showOnlineExtensions: boolean;
   isInstalled: (extension: McpRegistryExtension) => boolean;
   onInstallClick: (extension: McpRegistryExtension) => void;
   onUninstallClick: (extension: McpRegistryExtension) => void;
@@ -27,6 +29,8 @@ interface ExtensionsBrowserProps {
 export function ExtensionsBrowser({
   filter = "all",
   query,
+  showDeviceExtensions,
+  showOnlineExtensions,
   isInstalled,
   onInstallClick,
   onUninstallClick,
@@ -40,10 +44,24 @@ export function ExtensionsBrowser({
   const filteredExtensions = useMemo(() => {
     const normalizedQuery = query.trim();
 
+    const transportFilteredExtensions = extensions.filter((extension) => {
+      if (extension.installType === "stdio") {
+        return showDeviceExtensions;
+      }
+
+      if (extension.installType === "http") {
+        return showOnlineExtensions;
+      }
+
+      return showDeviceExtensions || showOnlineExtensions;
+    });
+
     const baseExtensions =
       filter === "installed"
-        ? extensions.filter((extension) => isInstalled(extension))
-        : extensions;
+        ? transportFilteredExtensions.filter((extension) =>
+            isInstalled(extension),
+          )
+        : transportFilteredExtensions;
 
     if (!normalizedQuery) {
       return baseExtensions;
@@ -67,7 +85,14 @@ export function ExtensionsBrowser({
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
       .map(({ extension }) => extension);
-  }, [extensions, filter, isInstalled, query]);
+  }, [
+    extensions,
+    filter,
+    isInstalled,
+    query,
+    showDeviceExtensions,
+    showOnlineExtensions,
+  ]);
 
   const isOverflowing = useOverflow(parentRef, {
     watch: `${filteredExtensions.length}:${filter}:${query}`,
@@ -86,7 +111,7 @@ export function ExtensionsBrowser({
   useEffect(() => {
     parentRef.current?.scrollTo({ top: 0 });
     virtualizer.scrollToOffset(0);
-  }, [filter, query, virtualizer]);
+  }, [filter, query, showDeviceExtensions, showOnlineExtensions, virtualizer]);
 
   return (
     <div

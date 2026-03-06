@@ -1,6 +1,6 @@
 import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { MoreHorizontalIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +12,14 @@ import {
 import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
@@ -58,6 +66,8 @@ export default function ExtensionsSection() {
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [query, setQuery] = useState("");
+  const [showDeviceExtensions, setShowDeviceExtensions] = useState(true);
+  const [showOnlineExtensions, setShowOnlineExtensions] = useState(true);
 
   const defaultExtensions = useMemo(() => getMcpRegistryExtensions(), []);
 
@@ -266,6 +276,8 @@ export default function ExtensionsSection() {
   };
 
   const sharedBrowserProps = {
+    showDeviceExtensions,
+    showOnlineExtensions,
     isInstalled: isExtensionInstalled,
     onInstallClick: handleExtensionInstallClick,
     onUninstallClick: handleExtensionUninstallClick,
@@ -273,6 +285,9 @@ export default function ExtensionsSection() {
     getMoreInfoJson: (extension: McpRegistryExtension) =>
       extension.registryEntry,
   };
+
+  const isTransportFilterDisabled =
+    activeTab === "built-in" || activeTab === "custom";
 
   // TODO: Reintroduce MCP parallel load limit in a dedicated runtime/performance settings section.
 
@@ -294,12 +309,48 @@ export default function ExtensionsSection() {
                 className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
               />
             </div>
-            <TabsList className="w-full justify-start md:w-auto">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="installed">Installed</TabsTrigger>
-              <TabsTrigger value="built-in">Built-in</TabsTrigger>
-              <TabsTrigger value="custom">Custom</TabsTrigger>
-            </TabsList>
+            <div className="flex w-full items-center gap-2 md:w-auto">
+              <TabsList className="flex-1 justify-start md:w-auto">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="installed">Installed</TabsTrigger>
+                <TabsTrigger value="built-in">Built-in</TabsTrigger>
+                <TabsTrigger value="custom">Custom</TabsTrigger>
+              </TabsList>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    className="size-9 shrink-0"
+                    disabled={isTransportFilterDisabled}
+                    aria-label="Filter by connection"
+                  >
+                    <MoreHorizontalIcon className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Filter by connection</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={showDeviceExtensions}
+                    onCheckedChange={(checked) =>
+                      setShowDeviceExtensions(checked === true)
+                    }
+                  >
+                    Runs on this device
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={showOnlineExtensions}
+                    onCheckedChange={(checked) =>
+                      setShowOnlineExtensions(checked === true)
+                    }
+                  >
+                    Connects online
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           {[
