@@ -28,15 +28,15 @@ pub struct StorageResponse {
 }
 
 pub fn resolve_agent_db_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
-    let app_data_dir = app
+    let app_config_dir = app
         .path()
-        .app_data_dir()
-        .map_err(|e| format!("Failed to resolve app data directory: {}", e))?;
+        .app_config_dir()
+        .map_err(|e| format!("Failed to resolve app config directory: {}", e))?;
 
-    std::fs::create_dir_all(&app_data_dir)
-        .map_err(|e| format!("Failed to create app data directory: {}", e))?;
+    std::fs::create_dir_all(&app_config_dir)
+        .map_err(|e| format!("Failed to create app config directory: {}", e))?;
 
-    Ok(app_data_dir.join("agent-one.db"))
+    Ok(app_config_dir.join("agent-one.db"))
 }
 
 async fn open_db_pool(db_path: &Path) -> Result<SqlitePool, String> {
