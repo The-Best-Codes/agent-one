@@ -21,9 +21,7 @@ export const MessagePartReasoning = ({
   const { status } = useChatStatus();
   const isLoading = isBusy && status === "streaming";
 
-  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
-    boolean | undefined
-  >();
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
 
   const accordionValue = "reasoning";
 
@@ -31,9 +29,7 @@ export const MessagePartReasoning = ({
     <Accordion
       type="single"
       collapsible
-      onValueChange={(value) =>
-        setIsMainAccordionOpen(value === accordionValue)
-      }
+      onValueChange={(value) => setIsMainAccordionOpen(value === accordionValue)}
       className="text-foreground flex flex-row bg-transparent p-0 text-sm"
     >
       <AccordionItem

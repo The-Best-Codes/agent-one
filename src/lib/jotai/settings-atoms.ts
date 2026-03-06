@@ -108,21 +108,17 @@ export const regenerateOnSaveAtom = createSettingAtom(
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
 );
 
-export const stopButtonBehaviorAtom =
-  createSettingAtom<StopButtonBehaviorOption>(
-    "STOP_BUTTON_BEHAVIOR",
-    DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR,
-  );
+export const stopButtonBehaviorAtom = createSettingAtom<StopButtonBehaviorOption>(
+  "STOP_BUTTON_BEHAVIOR",
+  DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR,
+);
 
 export const showChatStatusIndicatorAtom = createSettingAtom(
   "SHOW_CHAT_STATUS_INDICATOR",
   DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR,
 );
 
-export const themeAtom = createSettingAtom<ThemeOption>(
-  "THEME",
-  DEFAULT_SETTINGS.THEME,
-);
+export const themeAtom = createSettingAtom<ThemeOption>("THEME", DEFAULT_SETTINGS.THEME);
 
 export const colorThemeAtom = createSettingAtom<ColorThemeOption>(
   "COLOR_THEME",
@@ -134,10 +130,7 @@ export const roundnessAtom = createSettingAtom<RoundnessOption>(
   DEFAULT_SETTINGS.ROUNDNESS,
 );
 
-export const fontAtom = createSettingAtom<FontOption>(
-  "FONT",
-  DEFAULT_SETTINGS.FONT,
-);
+export const fontAtom = createSettingAtom<FontOption>("FONT", DEFAULT_SETTINGS.FONT);
 
 export const textScaleAtom = createSettingAtom<TextScaleOption>(
   "TEXT_SCALE",
@@ -169,21 +162,17 @@ export const mcpParallelLoadLimitAtom = createSettingAtom(
   DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT,
 );
 
-export const userNameAtom = createSettingAtom(
-  "USER_NAME",
-  DEFAULT_SETTINGS.USER_NAME,
-);
+export const userNameAtom = createSettingAtom("USER_NAME", DEFAULT_SETTINGS.USER_NAME);
 
 export const systemPromptAppendixAtom = createSettingAtom(
   "SYSTEM_PROMPT_APPENDIX",
   DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
 );
 
-export const showMessageActionRowAtom =
-  createSettingAtom<MessageActionRowOption>(
-    "SHOW_MESSAGE_ACTION_ROW",
-    DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW,
-  );
+export const showMessageActionRowAtom = createSettingAtom<MessageActionRowOption>(
+  "SHOW_MESSAGE_ACTION_ROW",
+  DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW,
+);
 
 export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(
   "TITLE_GENERATION",

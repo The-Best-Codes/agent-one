@@ -36,10 +36,7 @@ function App() {
           <Route path="/onboarding" element={<OnboardingRoute />} />
           <Route path="/settings" element={<SettingsRoute />} />
           <Route path="/tests" element={<TestsRoute />} />
-          <Route
-            path="/tests/notifications"
-            element={<NotificationsTestRoute />}
-          />
+          <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
           <Route path="*" element={<NotFoundRoute />} />
         </Route>
       </Routes>

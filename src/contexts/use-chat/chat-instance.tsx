@@ -10,10 +10,7 @@ import { memo, useEffect } from "react";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
-import {
-  generateChatTitle,
-  hasMessageTextContent,
-} from "@/lib/ai/title-generator";
+import { generateChatTitle, hasMessageTextContent } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   experimentalThrottleEnabledAtom,
@@ -44,24 +41,16 @@ export const ChatInstance = memo(
       hasError?: boolean,
     ) => void;
   }) => {
-    const experimentalThrottleEnabled = useAtomValue(
-      experimentalThrottleEnabledAtom,
-    );
-    const experimentalThrottleValue = useAtomValue(
-      experimentalThrottleValueAtom,
-    );
+    const experimentalThrottleEnabled = useAtomValue(experimentalThrottleEnabledAtom);
+    const experimentalThrottleValue = useAtomValue(experimentalThrottleValueAtom);
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
-    const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } =
-      usePersistence();
+    const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
     const chatIds = useAtomValue(chatIdsAtom);
 
     const chatModelId = loadChatMetadata(chatId).modelId ?? null;
     const chat = useChat(model, chatModelId, modelConfig, {
-      experimental_throttle: experimentalThrottleEnabled
-        ? experimentalThrottleValue
-        : undefined,
-      sendAutomaticallyWhen:
-        lastAssistantMessageIsCompleteWithApprovalResponses,
+      experimental_throttle: experimentalThrottleEnabled ? experimentalThrottleValue : undefined,
+      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
       id: chatId,
       messages: initialMessages,
     });
@@ -78,20 +67,14 @@ export const ChatInstance = memo(
 
         const chatMetadata = loadChatMetadata(chatId);
         const titleMessages = chat.messages.filter(
-          (m) =>
-            (m.role === "user" || m.role === "assistant") &&
-            hasMessageTextContent(m),
+          (m) => (m.role === "user" || m.role === "assistant") && hasMessageTextContent(m),
         );
         const hasUserMessage = titleMessages.some((m) => m.role === "user");
         const needsAssistantMessage =
           titleGenerationSettings.method === "first-assistant-message" &&
           !titleMessages.some((m) => m.role === "assistant");
 
-        if (
-          hasUserMessage &&
-          !chatMetadata.titleState &&
-          !needsAssistantMessage
-        ) {
+        if (hasUserMessage && !chatMetadata.titleState && !needsAssistantMessage) {
           logger.verbose(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
@@ -140,8 +123,7 @@ export const ChatInstance = memo(
       prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&
-      JSON.stringify(prevProps.modelConfig) ===
-        JSON.stringify(nextProps.modelConfig)
+      JSON.stringify(prevProps.modelConfig) === JSON.stringify(nextProps.modelConfig)
     );
   },
 );

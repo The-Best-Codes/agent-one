@@ -50,9 +50,7 @@ export function McpAuthStatus({
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <InfoIcon className="text-foreground size-5" />
-          <span className="text-foreground text-sm">
-            Enable server to see auth status
-          </span>
+          <span className="text-foreground text-sm">Enable server to see auth status</span>
         </div>
       </div>
     );
@@ -63,9 +61,7 @@ export function McpAuthStatus({
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <ShieldOffIcon className="text-foreground size-5" />
-          <span className="text-foreground text-sm">
-            No authorization required
-          </span>
+          <span className="text-foreground text-sm">No authorization required</span>
         </div>
       </div>
     );
@@ -76,9 +72,7 @@ export function McpAuthStatus({
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <KeyIcon className="text-foreground size-5" />
-          <span className="text-foreground text-sm">
-            Login available for full access
-          </span>
+          <span className="text-foreground text-sm">Login available for full access</span>
         </div>
         <Button size="sm" onClick={handleLogin} disabled={loading}>
           {loading ? <Loader2Icon className="animate-spin" /> : <LogInIcon />}
@@ -93,9 +87,7 @@ export function McpAuthStatus({
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <Loader2Icon className="text-foreground size-5 animate-spin" />
-          <span className="text-foreground text-sm">
-            Checking auth status...
-          </span>
+          <span className="text-foreground text-sm">Checking auth status...</span>
         </div>
       </div>
     );
@@ -117,12 +109,7 @@ export function McpAuthStatus({
         )}
       </div>
       {authState === "logged-in" ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLogout}
-          disabled={loading}
-        >
+        <Button variant="outline" size="sm" onClick={handleLogout} disabled={loading}>
           {loading ? <Loader2Icon className="animate-spin" /> : <LogOutIcon />}
           Logout
         </Button>

@@ -66,9 +66,7 @@ export const VirtualizedChatList = ({
           const chatMetadata = loadChatMetadata(id);
           return {
             id,
-            title: getChatTitle(
-              chatMetadata?.title || `Chat ${id.slice(0, 8)}`,
-            ),
+            title: getChatTitle(chatMetadata?.title || `Chat ${id.slice(0, 8)}`),
             branchOf: chatMetadata?.branchOf,
           };
         } catch (error) {
@@ -93,9 +91,7 @@ export const VirtualizedChatList = ({
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
-    return chats.filter((chat) =>
-      chat.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [chats, searchQuery]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -112,26 +108,17 @@ export const VirtualizedChatList = ({
 
   useEffect(() => {
     if (scrollToActiveChat && activeChatId && virtualizer && !searchQuery) {
-      const activeIndex = filteredChats.findIndex(
-        (chat) => chat.id === activeChatId,
-      );
+      const activeIndex = filteredChats.findIndex((chat) => chat.id === activeChatId);
       if (activeIndex !== -1) {
         virtualizer.scrollToIndex(activeIndex, {
           align: "center",
         });
       }
     }
-  }, [
-    activeChatId,
-    filteredChats,
-    virtualizer,
-    scrollToActiveChat,
-    searchQuery,
-  ]);
+  }, [activeChatId, filteredChats, virtualizer, scrollToActiveChat, searchQuery]);
 
   const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
-  const showNoSearchResults =
-    chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
+  const showNoSearchResults = chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
@@ -158,10 +145,7 @@ export const VirtualizedChatList = ({
         </div>
       </div>
 
-      <div
-        ref={parentRef}
-        className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}
-      >
+      <div ref={parentRef} className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}>
         {!isMetadataLoaded ? (
           <div className="flex flex-col gap-1 pt-1">
             <Skeleton className="h-8 w-full rounded-md" />
@@ -177,9 +161,7 @@ export const VirtualizedChatList = ({
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <InboxIcon className="text-muted-foreground size-16" />
-            <span className="max-w-full min-w-0 truncate">
-              No results for "{searchQuery}"
-            </span>
+            <span className="max-w-full min-w-0 truncate">No results for "{searchQuery}"</span>
           </div>
         ) : (
           <div
@@ -209,9 +191,7 @@ export const VirtualizedChatList = ({
                     id={chat.id}
                     title={chat.title}
                     branchOf={chat.branchOf}
-                    additionalOnChatClickCallback={
-                      additionalOnChatClickCallback
-                    }
+                    additionalOnChatClickCallback={additionalOnChatClickCallback}
                   />
                 </div>
               );

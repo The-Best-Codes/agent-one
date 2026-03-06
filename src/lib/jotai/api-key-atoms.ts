@@ -21,10 +21,7 @@ function createApiKeyAtoms(storageKey: ProviderStorageKey) {
 }
 
 export const apiKeyAtoms = Object.fromEntries(
-  PROVIDER_REGISTRY.map((provider) => [
-    provider.id,
-    createApiKeyAtoms(provider.storageKey),
-  ]),
+  PROVIDER_REGISTRY.map((provider) => [provider.id, createApiKeyAtoms(provider.storageKey)]),
 ) as Record<ProviderId, ReturnType<typeof createApiKeyAtoms>>;
 
 export function getApiKeyAtom(providerId: ProviderId) {
@@ -40,7 +37,5 @@ export function getApiKeyBaseAtom(providerId: ProviderId) {
 }
 
 export const apiKeysLoadingAtom = atom((get) => {
-  return PROVIDER_REGISTRY.some(
-    (p) => get(apiKeyAtoms[p.id].loadableAtom).state === "loading",
-  );
+  return PROVIDER_REGISTRY.some((p) => get(apiKeyAtoms[p.id].loadableAtom).state === "loading");
 });

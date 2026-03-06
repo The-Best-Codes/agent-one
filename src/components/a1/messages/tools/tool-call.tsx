@@ -1,11 +1,5 @@
 import type { ToolUIPart } from "ai";
-import {
-  CheckCircle2Icon,
-  ChevronDownIcon,
-  WrenchIcon,
-  XCircleIcon,
-  XIcon,
-} from "lucide-react";
+import { CheckCircle2Icon, ChevronDownIcon, WrenchIcon, XCircleIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -28,17 +22,12 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
   const callId = part.toolCallId;
   const toolName = stripMcpToolPrefix(part.type.replace("tool-", ""));
   const { addToolApprovalResponse } = useChatFunctions();
-  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
-    boolean | undefined
-  >();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   switch (part.state) {
     case "approval-requested":
       return (
-        <div
-          key={callId}
-          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
-        >
+        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <WrenchIcon className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
@@ -80,9 +69,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">
-            Tool "{toolName}" denied
-          </span>
+          <span className="text-muted-foreground text-sm font-bold">Tool "{toolName}" denied</span>
         </div>
       );
 
@@ -99,18 +86,12 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "approval-responded":
     case "input-available":
       return (
-        <Accordion
-          type="single"
-          collapsible
-          className="bg-secondary my-1 w-full rounded-md"
-        >
+        <Accordion type="single" collapsible className="bg-secondary my-1 w-full rounded-md">
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <XCircleIcon className="text-destructive size-4 shrink-0" />
-                <span className="max-w-2xl truncate">
-                  Running unknown tool "{toolName}"
-                </span>
+                <span className="max-w-2xl truncate">Running unknown tool "{toolName}"</span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="p-2 pt-0">
@@ -129,18 +110,12 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
 
     case "output-available":
       return (
-        <Accordion
-          type="single"
-          collapsible
-          className="bg-secondary my-1 w-full rounded-md"
-        >
+        <Accordion type="single" collapsible className="bg-secondary my-1 w-full rounded-md">
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <XCircleIcon className="text-destructive size-4 shrink-0" />
-                <span className="max-w-2xl truncate">
-                  Unknown tool "{toolName}" finished
-                </span>
+                <span className="max-w-2xl truncate">Unknown tool "{toolName}" finished</span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="p-2 pt-0">
@@ -220,9 +195,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-2">
           <XCircleIcon className="text-destructive size-4 shrink-0" />
-          <span className="text-destructive text-sm font-bold">
-            Unknown tool "{toolName}"
-          </span>
+          <span className="text-destructive text-sm font-bold">Unknown tool "{toolName}"</span>
         </div>
       );
   }

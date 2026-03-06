@@ -1,9 +1,4 @@
-import {
-  ChevronRightIcon,
-  ExternalLinkIcon,
-  PackageIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { ChevronRightIcon, ExternalLinkIcon, PackageIcon, Trash2Icon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -86,9 +81,7 @@ export function ExtensionListRow({
                 <ExternalLinkIcon className="size-3.5 shrink-0" />
               </a>
             ) : null}
-            <p className="text-muted-foreground line-clamp-2 text-xs">
-              {description}
-            </p>
+            <p className="text-muted-foreground line-clamp-2 text-xs">{description}</p>
           </div>
 
           {badges.length > 0 ? (
@@ -109,12 +102,7 @@ export function ExtensionListRow({
               Uninstall
             </Button>
           ) : (
-            <Button
-              size="sm"
-              variant="default"
-              onClick={onInstall}
-              disabled={!installSupported}
-            >
+            <Button size="sm" variant="default" onClick={onInstall} disabled={!installSupported}>
               {installSupported ? "Install" : "Unsupported"}
             </Button>
           )}
@@ -136,22 +124,14 @@ export function ExtensionListRow({
           <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>{title} advanced config</DialogTitle>
-              <DialogDescription>
-                Edit advanced settings for this extension.
-              </DialogDescription>
+              <DialogDescription>Edit advanced settings for this extension.</DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-4 py-1">
               {advancedContent}
               {moreInfoJson !== undefined ? (
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="rounded-md border px-3"
-                >
+                <Accordion type="single" collapsible className="rounded-md border px-3">
                   <AccordionItem value="more-info" className="border-b-0">
-                    <AccordionTrigger className="py-3">
-                      Debug info
-                    </AccordionTrigger>
+                    <AccordionTrigger className="py-3">Debug info</AccordionTrigger>
                     <AccordionContent>
                       <pre className="bg-muted overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap">
                         {JSON.stringify(moreInfoJson, null, 2)}

@@ -93,18 +93,12 @@ export function ModelItemInfo({ model }: ModelItemInfoProps) {
   return (
     <div className="min-w-0 flex-1">
       <p className="truncate text-sm font-medium">{model.name || model.id}</p>
-      {model.name && (
-        <p className="text-muted-foreground truncate text-xs">{model.id}</p>
-      )}
+      {model.name && <p className="text-muted-foreground truncate text-xs">{model.id}</p>}
     </div>
   );
 }
 
-export function AddModelForm({
-  onAdd,
-  onCancel,
-  existingIds,
-}: AddModelFormProps) {
+export function AddModelForm({ onAdd, onCancel, existingIds }: AddModelFormProps) {
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [supportsTools, setSupportsTools] = useState(true);
@@ -141,11 +135,7 @@ export function AddModelForm({
             placeholder="e.g., gpt-5"
             className="mt-1"
           />
-          {isDuplicate && (
-            <p className="text-destructive mt-1 text-xs">
-              Model ID already exists
-            </p>
-          )}
+          {isDuplicate && <p className="text-destructive mt-1 text-xs">Model ID already exists</p>}
         </div>
         <div className="flex-1">
           <Label htmlFor="new-model-name" className="text-xs">
@@ -199,17 +189,9 @@ export function AddModelForm({
 
 const MODEL_ITEM_HEIGHT = 40;
 
-export function ModelList({
-  models,
-  baseUrl,
-  apiKey,
-  headers,
-  onChange,
-}: ModelListProps) {
+export function ModelList({ models, baseUrl, apiKey, headers, onChange }: ModelListProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [fetchState, setFetchState] = useState<
-    "idle" | "fetching" | "success" | "error"
-  >("idle");
+  const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
   const parentRef = useRef<HTMLDivElement>(null);
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -230,19 +212,11 @@ export function ModelList({
   };
 
   const handleToggleTools = (id: string) => {
-    onChange(
-      models.map((m) =>
-        m.id === id ? { ...m, supportsTools: !m.supportsTools } : m,
-      ),
-    );
+    onChange(models.map((m) => (m.id === id ? { ...m, supportsTools: !m.supportsTools } : m)));
   };
 
   const handleToggleImages = (id: string) => {
-    onChange(
-      models.map((m) =>
-        m.id === id ? { ...m, supportsImages: !m.supportsImages } : m,
-      ),
-    );
+    onChange(models.map((m) => (m.id === id ? { ...m, supportsImages: !m.supportsImages } : m)));
   };
 
   const handleFetchModels = async () => {
@@ -251,11 +225,7 @@ export function ModelList({
     setFetchState("fetching");
 
     try {
-      const response: OpenAIModelsResponse = await fetchProviderModels(
-        baseUrl,
-        apiKey,
-        headers,
-      );
+      const response: OpenAIModelsResponse = await fetchProviderModels(baseUrl, apiKey, headers);
 
       const existingIds = new Set(models.map((m) => m.id));
       const newModels: CustomProviderModel[] = response.data

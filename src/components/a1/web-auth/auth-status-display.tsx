@@ -27,9 +27,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
     return (
       <StatusRow
         className={className}
-        icon={
-          <Loader2Icon className="text-muted-foreground size-5 animate-spin" />
-        }
+        icon={<Loader2Icon className="text-muted-foreground size-5 animate-spin" />}
         title="Checking status..."
         description="Please wait while we check your account"
       />
@@ -60,9 +58,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         title="Link this device"
         description={
           <a
-            href={
-              deviceFlow.verificationUriComplete || deviceFlow.verificationUri
-            }
+            href={deviceFlow.verificationUriComplete || deviceFlow.verificationUri}
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-row items-center justify-center gap-1 hover:underline"
@@ -103,12 +99,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         className={className}
         user={user}
         action={
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={signOut}
-            disabled={isSigningOut}
-          >
+          <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
             {isSigningOut && <Loader2Icon className="animate-spin" />}
             Sign out
           </Button>
@@ -140,13 +131,7 @@ interface StatusRowProps {
   className?: string;
 }
 
-function StatusRow({
-  icon,
-  title,
-  description,
-  action,
-  className,
-}: StatusRowProps) {
+function StatusRow({ icon, title, description, action, className }: StatusRowProps) {
   return (
     <div className={cn("flex items-center justify-between gap-4", className)}>
       <div className="flex items-center gap-3">

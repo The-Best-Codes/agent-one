@@ -42,10 +42,7 @@ function isServerInstalledFromExtension(
   extension: McpRegistryExtension,
 ): boolean {
   const registryIdFragment = toRegistryIdFragment(extension.registryName);
-  return (
-    server.id === extension.id ||
-    server.id.includes(`registry-${registryIdFragment}`)
-  );
+  return server.id === extension.id || server.id.includes(`registry-${registryIdFragment}`);
 }
 
 function isServerFromRegistry(server: McpServerConfig): boolean {
@@ -56,8 +53,7 @@ export default function ExtensionsSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
 
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [selectedExtension, setSelectedExtension] =
-    useState<McpRegistryExtension | null>(null);
+  const [selectedExtension, setSelectedExtension] = useState<McpRegistryExtension | null>(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
   const [serverToUninstall, setServerToUninstall] = useState<{
     id: string;
@@ -111,15 +107,10 @@ export default function ExtensionsSection() {
       .map(({ server }) => server);
   }, [customServers, query]);
 
-  const updateMcpServerById = (
-    serverId: string,
-    updates: Partial<McpServerConfig>,
-  ) => {
+  const updateMcpServerById = (serverId: string, updates: Partial<McpServerConfig>) => {
     setMcpServers((prev) =>
       prev.map((server) =>
-        server.id === serverId
-          ? ({ ...server, ...updates } as McpServerConfig)
-          : server,
+        server.id === serverId ? ({ ...server, ...updates } as McpServerConfig) : server,
       ),
     );
   };
@@ -219,9 +210,7 @@ export default function ExtensionsSection() {
     }
 
     setMcpServers((prev) => {
-      const targetIndex = prev.findIndex(
-        (server) => server.id === serverToUninstall.id,
-      );
+      const targetIndex = prev.findIndex((server) => server.id === serverToUninstall.id);
 
       if (targetIndex === -1) {
         return prev;
@@ -250,15 +239,11 @@ export default function ExtensionsSection() {
   };
 
   const isExtensionInstalled = (extension: McpRegistryExtension): boolean => {
-    return mcpServers.some((server) =>
-      isServerInstalledFromExtension(server, extension),
-    );
+    return mcpServers.some((server) => isServerInstalledFromExtension(server, extension));
   };
 
   const getExtensionServer = (extension: McpRegistryExtension) => {
-    return mcpServers.find((server) =>
-      isServerInstalledFromExtension(server, extension),
-    );
+    return mcpServers.find((server) => isServerInstalledFromExtension(server, extension));
   };
 
   const renderAdvancedContent = (extension: McpRegistryExtension) => {
@@ -282,12 +267,10 @@ export default function ExtensionsSection() {
     onInstallClick: handleExtensionInstallClick,
     onUninstallClick: handleExtensionUninstallClick,
     getAdvancedContent: renderAdvancedContent,
-    getMoreInfoJson: (extension: McpRegistryExtension) =>
-      extension.registryEntry,
+    getMoreInfoJson: (extension: McpRegistryExtension) => extension.registryEntry,
   };
 
-  const isTransportFilterDisabled =
-    activeTab === "built-in" || activeTab === "custom";
+  const isTransportFilterDisabled = activeTab === "built-in" || activeTab === "custom";
 
   // TODO: Reintroduce MCP parallel load limit in a dedicated runtime/performance settings section.
 
@@ -334,17 +317,13 @@ export default function ExtensionsSection() {
                   <DropdownMenuSeparator />
                   <DropdownMenuCheckboxItem
                     checked={showDeviceExtensions}
-                    onCheckedChange={(checked) =>
-                      setShowDeviceExtensions(checked === true)
-                    }
+                    onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
                   >
                     Runs on this device
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={showOnlineExtensions}
-                    onCheckedChange={(checked) =>
-                      setShowOnlineExtensions(checked === true)
-                    }
+                    onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
                   >
                     Connects online
                   </DropdownMenuCheckboxItem>
@@ -358,11 +337,7 @@ export default function ExtensionsSection() {
             { value: "installed", filter: "installed" as const },
           ].map((tab) => (
             <TabsContent key={tab.value} value={tab.value}>
-              <ExtensionsBrowser
-                filter={tab.filter}
-                query={query}
-                {...sharedBrowserProps}
-              />
+              <ExtensionsBrowser filter={tab.filter} query={query} {...sharedBrowserProps} />
             </TabsContent>
           ))}
 
@@ -397,9 +372,7 @@ export default function ExtensionsSection() {
                       <ExtensionListRow
                         key={server.id}
                         title={server.name || "Custom Extension"}
-                        description={
-                          server.type === "stdio" ? server.command : server.url
-                        }
+                        description={server.type === "stdio" ? server.command : server.url}
                         installed
                         onUninstall={() =>
                           linkedExtension
@@ -409,9 +382,7 @@ export default function ExtensionsSection() {
                         advancedContent={
                           <ExtensionAdvancedDetails
                             server={server}
-                            onUpdate={(updates) =>
-                              updateMcpServerById(server.id, updates)
-                            }
+                            onUpdate={(updates) => updateMcpServerById(server.id, updates)}
                           />
                         }
                       />

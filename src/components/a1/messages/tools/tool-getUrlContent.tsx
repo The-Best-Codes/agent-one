@@ -146,29 +146,20 @@ const UrlResultDisplay = memo(
 
 UrlResultDisplay.displayName = "UrlResultDisplay";
 
-export const MessagePartToolGetUrlContent = ({
-  part,
-}: GetUrlContentToolPartProps) => {
+export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as GetUrlContentInput;
   const output = part.output as GetUrlContentOutput;
   const { addToolApprovalResponse } = useChatFunctions();
-  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
-    boolean | undefined
-  >();
-  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
-    boolean | undefined
-  >();
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const urlCount = input?.urls?.length || 0;
 
   switch (part.state) {
     case "approval-requested":
       return (
-        <div
-          key={callId}
-          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
-        >
+        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <GlobeIcon className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
@@ -260,9 +251,7 @@ export const MessagePartToolGetUrlContent = ({
           <div>
             <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
-          <span className="text-foreground text-sm font-bold">
-            Browsing URLs...
-          </span>
+          <span className="text-foreground text-sm font-bold">Browsing URLs...</span>
         </div>
       );
 
@@ -318,9 +307,7 @@ export const MessagePartToolGetUrlContent = ({
       const results = output?.results || [];
 
       if (results.length === 1) {
-        return (
-          <UrlResultDisplay key={callId} result={results[0]} input={input} />
-        );
+        return <UrlResultDisplay key={callId} result={results[0]} input={input} />;
       }
 
       const successCount = results.filter((r) => r.success).length;
@@ -405,9 +392,7 @@ export const MessagePartToolGetUrlContent = ({
         return (
           <div key={callId} className="flex items-center gap-1">
             <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {message}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">{message}</span>
           </div>
         );
       }

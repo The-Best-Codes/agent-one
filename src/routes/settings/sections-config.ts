@@ -39,8 +39,6 @@ export const isValidSection = (section: string): boolean => {
   return sections.some((s) => s.id === section);
 };
 
-export const getSectionComponent = (
-  sectionId: string,
-): ComponentType | undefined => {
+export const getSectionComponent = (sectionId: string): ComponentType | undefined => {
   return sections.find((s) => s.id === sectionId)?.component;
 };

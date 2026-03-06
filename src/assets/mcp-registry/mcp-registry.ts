@@ -110,10 +110,7 @@ function extractTemplateVariables(template: string): string[] {
   return Array.from(new Set(Array.from(matches, (match) => match[1])));
 }
 
-function resolveTemplate(
-  template: string,
-  values: Record<string, string>,
-): string {
+function resolveTemplate(template: string, values: Record<string, string>): string {
   return template.replace(/\{([a-zA-Z_][a-zA-Z0-9_-]*)\}/g, (full, key) => {
     const value = values[key];
     return value === undefined ? full : value;
@@ -141,15 +138,10 @@ function normalizeInputField(
     required: Boolean(input?.isRequired),
     secret: Boolean(input?.isSecret),
     defaultValue:
-      asString(input?.value) ??
-      asString(input?.default) ??
-      asString(input?.placeholder) ??
-      "",
+      asString(input?.value) ?? asString(input?.default) ?? asString(input?.placeholder) ?? "",
     placeholder: asString(input?.placeholder),
     choices: Array.isArray(input?.choices)
-      ? input.choices.filter(
-          (choice): choice is string => typeof choice === "string",
-        )
+      ? input.choices.filter((choice): choice is string => typeof choice === "string")
       : undefined,
   };
 }
@@ -172,15 +164,10 @@ function addVariableField(
     required: Boolean(input?.isRequired),
     secret: Boolean(input?.isSecret),
     defaultValue:
-      asString(input?.value) ??
-      asString(input?.default) ??
-      asString(input?.placeholder) ??
-      "",
+      asString(input?.value) ?? asString(input?.default) ?? asString(input?.placeholder) ?? "",
     placeholder: asString(input?.placeholder),
     choices: Array.isArray(input?.choices)
-      ? input.choices.filter(
-          (choice): choice is string => typeof choice === "string",
-        )
+      ? input.choices.filter((choice): choice is string => typeof choice === "string")
       : undefined,
   });
 }
@@ -207,8 +194,7 @@ function toCommandArgumentToken(
     );
   }
 
-  const resolvedValue =
-    value ?? defaultValue ?? (valueHint ? `{${valueHint}}` : undefined);
+  const resolvedValue = value ?? defaultValue ?? (valueHint ? `{${valueHint}}` : undefined);
 
   if (argType === "named") {
     if (!name) return null;
@@ -229,16 +215,13 @@ function buildStdioInstallTemplate(
   server: MCPRegistryEntry["server"],
 ): McpRegistryInstallTemplate | undefined {
   const packages = Array.isArray(server.packages) ? server.packages : [];
-  const pkg = packages.find(
-    (candidate) => candidate.transport?.type === "stdio",
-  );
+  const pkg = packages.find((candidate) => candidate.transport?.type === "stdio");
 
   if (!pkg) {
     return undefined;
   }
 
-  const runtimeHint =
-    asString(pkg.runtimeHint) ?? inferRuntimeHint(asString(pkg.registryType));
+  const runtimeHint = asString(pkg.runtimeHint) ?? inferRuntimeHint(asString(pkg.registryType));
   const identifier = asString(pkg.identifier);
 
   if (!runtimeHint || !identifier) {
@@ -253,21 +236,14 @@ function buildStdioInstallTemplate(
   }
   commandParts.push(identifier);
 
-  const runtimeArguments = Array.isArray(pkg.runtimeArguments)
-    ? pkg.runtimeArguments
-    : [];
-  const packageArguments = Array.isArray(pkg.packageArguments)
-    ? pkg.packageArguments
-    : [];
+  const runtimeArguments = Array.isArray(pkg.runtimeArguments) ? pkg.runtimeArguments : [];
+  const packageArguments = Array.isArray(pkg.packageArguments) ? pkg.packageArguments : [];
 
   for (const argument of [...runtimeArguments, ...packageArguments]) {
     if (!argument || typeof argument !== "object") {
       continue;
     }
-    const token = toCommandArgumentToken(
-      argument as Record<string, unknown>,
-      variableFields,
-    );
+    const token = toCommandArgumentToken(argument as Record<string, unknown>, variableFields);
     if (token) {
       commandParts.push(token);
     }
@@ -289,11 +265,7 @@ function buildStdioInstallTemplate(
     : [];
 
   for (const envVar of environmentVariables) {
-    if (
-      !envVar ||
-      typeof envVar !== "object" ||
-      typeof envVar.name !== "string"
-    ) {
+    if (!envVar || typeof envVar !== "object" || typeof envVar.name !== "string") {
       continue;
     }
 
@@ -335,8 +307,7 @@ function buildHttpInstallTemplate(
 ): McpRegistryInstallTemplate | undefined {
   const remotes = Array.isArray(server.remotes) ? server.remotes : [];
   const remote = remotes.find(
-    (candidate) =>
-      candidate?.type === "streamable-http" || candidate?.type === "sse",
+    (candidate) => candidate?.type === "streamable-http" || candidate?.type === "sse",
   );
 
   if (!remote || !asString(remote.url)) {
@@ -352,9 +323,7 @@ function buildHttpInstallTemplate(
       addVariableField(
         variableFields,
         key,
-        value && typeof value === "object"
-          ? (value as Record<string, unknown>)
-          : undefined,
+        value && typeof value === "object" ? (value as Record<string, unknown>) : undefined,
       );
     }
   }
@@ -370,11 +339,7 @@ function buildHttpInstallTemplate(
 
   const headers = Array.isArray(remote.headers) ? remote.headers : [];
   for (const header of headers) {
-    if (
-      !header ||
-      typeof header !== "object" ||
-      typeof header.name !== "string"
-    ) {
+    if (!header || typeof header !== "object" || typeof header.name !== "string") {
       continue;
     }
 
@@ -445,8 +410,7 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
 
   cachedExtensions = entries.map((entry) => {
     const server = entry.server;
-    const publisherProvided =
-      server._meta?.["io.modelcontextprotocol.registry/publisher-provided"];
+    const publisherProvided = server._meta?.["io.modelcontextprotocol.registry/publisher-provided"];
 
     const categories = Array.from(
       new Set([
@@ -472,10 +436,8 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
       ),
     );
 
-    const displayName =
-      asString(server.title) ?? asString(server.name) ?? "Unnamed Server";
-    const description =
-      asString(server.description) ?? "No description provided.";
+    const displayName = asString(server.title) ?? asString(server.name) ?? "Unnamed Server";
+    const description = asString(server.description) ?? "No description provided.";
     const iconUrl =
       Array.isArray(server.icons) && server.icons.length > 0
         ? asString(server.icons[0]?.src)
@@ -490,21 +452,16 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
       version: server.version,
       websiteUrl: asString(server.websiteUrl),
       iconUrl,
-      publisher:
-        asString(publisherProvided?.publisher) ??
-        asString(publisherProvided?.author),
+      publisher: asString(publisherProvided?.publisher) ?? asString(publisherProvided?.author),
       categories,
       tags,
       license: asString(publisherProvided?.license),
       keywords,
       packageCount: packages.length,
       installType: installTemplate?.type,
-      requiredFieldCount:
-        installTemplate?.fields.filter((field) => field.required).length ?? 0,
+      requiredFieldCount: installTemplate?.fields.filter((field) => field.required).length ?? 0,
       transportTypes,
-      updatedAt: asString(
-        entry._meta?.["io.modelcontextprotocol.registry/official"]?.updatedAt,
-      ),
+      updatedAt: asString(entry._meta?.["io.modelcontextprotocol.registry/official"]?.updatedAt),
       install: installTemplate,
       searchText: "",
       registryEntry: entry,

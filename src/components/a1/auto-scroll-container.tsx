@@ -20,10 +20,7 @@ export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivEl
   scrollableClassName?: string;
   scrollButtonClassName?: string;
   scrollButtonChildren?: ReactNode;
-  scrollButtonProps?: Omit<
-    React.ComponentProps<"button">,
-    "className" | "children" | "onClick"
-  >;
+  scrollButtonProps?: Omit<React.ComponentProps<"button">, "className" | "children" | "onClick">;
   behavior?: "smooth" | "instant";
   /** Scroll behavior for the scroll-to-bottom button. Defaults to "smooth". */
   buttonScrollBehavior?: "smooth" | "instant";
@@ -39,10 +36,7 @@ export type AutoScrollHandle = {
   scrollToBottom: () => void;
 };
 
-export const AutoScrollContainer = forwardRef<
-  AutoScrollHandle,
-  AutoScrollContainerProps
->(
+export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContainerProps>(
   (
     {
       children,
@@ -116,8 +110,7 @@ export const AutoScrollContainer = forwardRef<
               offset = 60;
             } else {
               const slideRange = slideStartDistance - slideEndDistance;
-              const slideProgress =
-                (slideStartDistance - distanceFromBottom) / slideRange;
+              const slideProgress = (slideStartDistance - distanceFromBottom) / slideRange;
               offset = slideProgress * 60;
             }
           }
@@ -189,9 +182,7 @@ export const AutoScrollContainer = forwardRef<
             tabIndex={buttonOffset >= 60 ? -1 : 0}
             {...scrollButtonProps}
           >
-            {scrollButtonChildren || (
-              <ChevronDown data-testid="scroll-to-bottom-icon" />
-            )}
+            {scrollButtonChildren || <ChevronDown data-testid="scroll-to-bottom-icon" />}
           </Button>
         </div>
       </div>

@@ -1,10 +1,6 @@
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import type { ProviderConfig, ProviderId } from "@/lib/jotai/provider-atoms";

@@ -1,10 +1,7 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-import {
-  PROVIDER_REGISTRY,
-  type ProviderId,
-} from "@/lib/ai/providers/registry";
+import { PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
 
 import { customProvidersAtom } from "./custom-provider-atoms";
 import { SETTING_PREFIX } from "./settings-atoms";
@@ -23,23 +20,15 @@ const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
 
 function createProviderConfigAtom(providerId: ProviderId) {
   const key = `${SETTING_PREFIX}PROVIDER_CONFIG_${providerId.toUpperCase()}`;
-  return atomWithStorage<ProviderConfig>(
-    key,
-    DEFAULT_PROVIDER_CONFIG,
-    undefined,
-    {
-      getOnInit: true,
-    },
-  );
+  return atomWithStorage<ProviderConfig>(key, DEFAULT_PROVIDER_CONFIG, undefined, {
+    getOnInit: true,
+  });
 }
 
 type ProviderConfigAtom = ReturnType<typeof createProviderConfigAtom>;
 
 export const providerConfigAtoms = Object.fromEntries(
-  PROVIDER_REGISTRY.map((provider) => [
-    provider.id,
-    createProviderConfigAtom(provider.id),
-  ]),
+  PROVIDER_REGISTRY.map((provider) => [provider.id, createProviderConfigAtom(provider.id)]),
 ) as Record<ProviderId, ProviderConfigAtom>;
 
 export function getProviderConfigAtom(providerId: ProviderId) {

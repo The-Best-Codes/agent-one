@@ -156,9 +156,7 @@ export function McpServerConfigForm({
           <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
             Require Approval
           </Label>
-          <span className="text-muted-foreground text-xs">
-            {approvalDescription}
-          </span>
+          <span className="text-muted-foreground text-xs">{approvalDescription}</span>
         </div>
         <Switch
           id={`${idPrefix}-requires-approval`}

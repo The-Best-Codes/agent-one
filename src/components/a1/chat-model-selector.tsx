@@ -1,14 +1,7 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import {
-  type FC,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type FC, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,11 +13,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
@@ -100,9 +89,7 @@ const ModelList: FC<ModelListProps> = ({
                     {isSelected && <CheckIcon className="size-4" />}
                     <div className="scrollbar-size-xs w-full overflow-x-auto">
                       <div className="flex flex-col whitespace-nowrap">
-                        <span className="text-muted-foreground text-xs">
-                          {model.provider}/
-                        </span>
+                        <span className="text-muted-foreground text-xs">{model.provider}/</span>
                         <span className="font-medium">{model.name}</span>
                       </div>
                     </div>
@@ -166,16 +153,12 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     const query = searchQuery.toLowerCase();
     const scoredModels = modelsWithApiKey
       .map((model) => {
-        const score =
-          fuzzysort.single(query, [model.name, model?.id || ""].join(" "))
-            ?.score ?? 0;
+        const score = fuzzysort.single(query, [model.name, model?.id || ""].join(" "))?.score ?? 0;
         return { model, score };
       })
       .filter(({ score }) => score > 0);
 
-    return scoredModels
-      .sort((a, b) => b.score - a.score)
-      .map(({ model }) => model);
+    return scoredModels.sort((a, b) => b.score - a.score).map(({ model }) => model);
   }, [searchQuery, modelsWithApiKey]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -234,9 +217,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       <div className="min-w-0 flex-1">
         <div className="scrollbar-size-xs w-full overflow-x-auto" tabIndex={0}>
           <div className="w-full text-left whitespace-nowrap">
-            <span className="text-muted-foreground text-xs">
-              {displayedModel.provider}/
-            </span>
+            <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
             <span className="font-medium">{displayedModel.name}</span>
           </div>
         </div>
@@ -252,9 +233,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     </>
   );
 
-  const modelLabel = displayedModel
-    ? `Model: ${displayedModel.name}`
-    : "No model";
+  const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
   if (isApiKeysLoading || shouldShowLoadingSkeleton) {
     return <Skeleton className={cn("h-9 w-full", className)} />;
@@ -274,10 +253,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           {triggerContent}
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className={cn("w-full p-0", popoverClassName)}
-      >
+      <PopoverContent align="start" className={cn("w-full p-0", popoverClassName)}>
         <ModelList
           filteredModels={filteredModels}
           currentModel={currentModel}

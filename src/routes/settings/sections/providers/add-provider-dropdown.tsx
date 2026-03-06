@@ -23,9 +23,7 @@ interface AddProviderDropdownProps {
   onAddProvider: (data: NewProviderData, apiKey: string) => void;
 }
 
-export function AddProviderDropdown({
-  onAddProvider,
-}: AddProviderDropdownProps) {
+export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (

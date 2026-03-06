@@ -25,12 +25,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
@@ -50,12 +45,8 @@ interface DynamicToolPartProps {
 }
 
 export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
-  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
-    boolean | undefined
-  >();
-  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
-    boolean | undefined
-  >();
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
   const toolName = stripMcpToolPrefix(part.toolName);
   const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
@@ -64,10 +55,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
   switch (part.state) {
     case "approval-requested": {
       return (
-        <div
-          key={callId}
-          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
-        >
+        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <WrenchIcon className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
@@ -82,9 +70,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
             >
               <ParametersAccordionItem value="parameters" className="border-0">
                 <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
-                  <span className="text-muted-foreground font-medium">
-                    Parameters
-                  </span>
+                  <span className="text-muted-foreground font-medium">Parameters</span>
                 </ParametersAccordionTrigger>
                 <ParametersAccordionContent className="px-2 pb-2">
                   <pre className="text-muted-foreground overflow-x-auto text-xs">
@@ -130,9 +116,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">
-            "{toolName}" tool denied
-          </span>
+          <span className="text-muted-foreground text-sm font-bold">"{toolName}" tool denied</span>
         </div>
       );
     }
@@ -142,9 +126,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
-          <span className="text-foreground text-sm font-bold">
-            Running "{toolName}" tool...
-          </span>
+          <span className="text-foreground text-sm font-bold">Running "{toolName}" tool...</span>
         </div>
       );
     }
@@ -155,9 +137,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
-          <span className="max-w-2xl truncate">
-            Running "{toolName}" tool...
-          </span>
+          <span className="max-w-2xl truncate">Running "{toolName}" tool...</span>
         </div>
       );
     }
@@ -208,10 +188,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                   "{toolName}" tool failed
                 </span>
               </AccordionTrigger>
-              <AccordionContent
-                renderWhenCollapsed={!isLongOutput}
-                className="p-0 pt-2"
-              >
+              <AccordionContent renderWhenCollapsed={!isLongOutput} className="p-0 pt-2">
                 {isLongOutput ? (
                   <PerformantMarkdown maxHeight="200px" content={outputText} />
                 ) : (
@@ -260,9 +237,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               shouldRotateIcon={true}
               className="items-center justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="max-w-2xl truncate">
-                "{toolName}" tool finished
-              </span>
+              <span className="max-w-2xl truncate">"{toolName}" tool finished</span>
               {isLongOutput && (
                 <TooltipProvider>
                   <Tooltip>
@@ -295,10 +270,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                     <span className="font-medium">Result:</span>
                     <div className="mt-1 rounded bg-transparent p-2">
                       {isLongOutput ? (
-                        <PerformantMarkdown
-                          maxHeight="200px"
-                          content={outputText}
-                        />
+                        <PerformantMarkdown maxHeight="200px" content={outputText} />
                       ) : (
                         <div className="whitespace-pre-wrap">{outputText}</div>
                       )}
@@ -358,9 +330,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="text-destructive max-w-2xl truncate">
-                "{toolName}" tool error
-              </span>
+              <span className="text-destructive max-w-2xl truncate">"{toolName}" tool error</span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="text-destructive/80 text-sm font-normal">

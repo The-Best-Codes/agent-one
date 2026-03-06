@@ -61,8 +61,7 @@ export function HttpHeadersEditor({
   const duplicateKeys = useMemo(() => getDuplicateKeys(draft), [draft]);
   const emptyKeys = hasEmptyKeys(draft);
 
-  const hasChanges =
-    JSON.stringify(toRecord(draft)) !== JSON.stringify(headers);
+  const hasChanges = JSON.stringify(toRecord(draft)) !== JSON.stringify(headers);
   const canSave = hasChanges && !emptyKeys && duplicateKeys.size === 0;
 
   const addEntry = () => {
@@ -70,15 +69,11 @@ export function HttpHeadersEditor({
   };
 
   const updateKey = (index: number, newKey: string) => {
-    setDraft((prev) =>
-      prev.map((entry, i) => (i === index ? [newKey, entry[1]] : entry)),
-    );
+    setDraft((prev) => prev.map((entry, i) => (i === index ? [newKey, entry[1]] : entry)));
   };
 
   const updateValue = (index: number, newValue: string) => {
-    setDraft((prev) =>
-      prev.map((entry, i) => (i === index ? [entry[0], newValue] : entry)),
-    );
+    setDraft((prev) => prev.map((entry, i) => (i === index ? [entry[0], newValue] : entry)));
   };
 
   const removeEntry = (index: number) => {
@@ -168,9 +163,7 @@ export function HttpHeadersEditor({
                   </Button>
                 </div>
                 {isDupe && (
-                  <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    Duplicate header name
-                  </p>
+                  <p className="text-destructive mt-1 ml-0.5 text-xs">Duplicate header name</p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">

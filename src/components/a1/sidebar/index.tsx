@@ -70,9 +70,7 @@ const SidebarContent = ({
           <ChatModelConfig disabled={isChatLoading} />
         </div>
         <Button variant="outline" className="w-full justify-start" asChild>
-          <Link
-            to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
-          >
+          <Link to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
             <SettingsIcon className="size-4" />
             Settings
           </Link>
@@ -137,12 +135,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <TooltipRoot>
         <TooltipTrigger asChild>
           <DrawerTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Expand sidebar"
-              className="size-6"
-            >
+            <Button variant="outline" size="icon" aria-label="Expand sidebar" className="size-6">
               <SidebarIcon />
             </Button>
           </DrawerTrigger>
@@ -154,9 +147,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         className="bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
       >
         <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
-        <DrawerDescription className="sr-only">
-          Mobile chat sidebar content
-        </DrawerDescription>
+        <DrawerDescription className="sr-only">Mobile chat sidebar content</DrawerDescription>
         <SidebarContent
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}
@@ -180,8 +171,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <div
               className={cn(
                 "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
-                !isSidebarSmall &&
-                  "pointer-events-none -translate-x-2 scale-95 opacity-0",
+                !isSidebarSmall && "pointer-events-none -translate-x-2 scale-95 opacity-0",
               )}
               inert={!isCollapsed}
             >
@@ -235,10 +225,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               isSidebarSmall ? "scale-95 opacity-0" : "scale-100 opacity-100",
             )}
           >
-            <SidebarContent
-              activeChatId={activeChatId}
-              handleNewChat={handleNewChat}
-            />
+            <SidebarContent activeChatId={activeChatId} handleNewChat={handleNewChat} />
           </div>
         </aside>
       )}

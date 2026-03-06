@@ -26,9 +26,7 @@ import {
 } from "@/lib/settings/types";
 
 export default function EditorSection() {
-  const [markdownHighlighting, setMarkdownHighlighting] = useAtom(
-    markdownHighlightingAtom,
-  );
+  const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
   const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
@@ -37,8 +35,7 @@ export default function EditorSection() {
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
-  const isRegenerateOnSaveDefault =
-    regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
+  const isRegenerateOnSaveDefault = regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
 
   const handleResetMarkdownHighlighting = () => {
     resetSetting("MARKDOWN_HIGHLIGHTING");
@@ -66,9 +63,9 @@ export default function EditorSection() {
           <div className="flex flex-1 flex-col items-start">
             <Label className="text-sm font-medium">Markdown Highlighting</Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              When enabled, text formatting like **bold**, *italic*, and `code`
-              will be visually highlighted as you type. When disabled, you'll
-              see plain text without any special formatting colors or styles.
+              When enabled, text formatting like **bold**, *italic*, and `code` will be visually
+              highlighted as you type. When disabled, you'll see plain text without any special
+              formatting colors or styles.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -93,8 +90,8 @@ export default function EditorSection() {
           <div className="flex flex-1 flex-col items-start">
             <Label className="text-sm font-medium">Regenerate on Save</Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              If enabled, saving an edit to your message will automatically
-              regenerate the AI response.
+              If enabled, saving an edit to your message will automatically regenerate the AI
+              response.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -127,10 +124,7 @@ export default function EditorSection() {
               value={submitKey}
               onValueChange={(value) => setSubmitKey(value as SubmitKeyOption)}
             >
-              <SelectTrigger
-                className="w-full md:w-fit md:max-w-96"
-                aria-label="Select submit key"
-              >
+              <SelectTrigger className="w-full md:w-fit md:max-w-96" aria-label="Select submit key">
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
@@ -154,16 +148,14 @@ export default function EditorSection() {
           <div className="flex flex-1 flex-col items-start">
             <Label className="text-sm font-medium">Input Style</Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              Choose how the chat input box is displayed. Docked attaches to the
-              bottom, floating adds spacing and rounded corners.
+              Choose how the chat input box is displayed. Docked attaches to the bottom, floating
+              adds spacing and rounded corners.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Select
               value={inputStyle}
-              onValueChange={(value) =>
-                setInputStyle(value as InputStyleOption)
-              }
+              onValueChange={(value) => setInputStyle(value as InputStyleOption)}
             >
               <SelectTrigger
                 className="w-full md:w-fit md:max-w-96"

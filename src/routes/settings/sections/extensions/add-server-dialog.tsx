@@ -29,22 +29,15 @@ interface AddServerDialogProps {
   }) => void;
 }
 
-export function AddServerDialog({
-  open,
-  onOpenChange,
-  onAddServer,
-}: AddServerDialogProps) {
+export function AddServerDialog({ open, onOpenChange, onAddServer }: AddServerDialogProps) {
   const [newServerType, setNewServerType] = useState<McpServerType>("stdio");
   const [newServerName, setNewServerName] = useState("");
   const [newServerCommand, setNewServerCommand] = useState("");
   const [newServerEnv, setNewServerEnv] = useState<Record<string, string>>({});
   const [newServerUrl, setNewServerUrl] = useState("");
-  const [newServerHeaders, setNewServerHeaders] = useState<
-    Record<string, string>
-  >({});
+  const [newServerHeaders, setNewServerHeaders] = useState<Record<string, string>>({});
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
-  const [newServerRequiresApproval, setNewServerRequiresApproval] =
-    useState(false);
+  const [newServerRequiresApproval, setNewServerRequiresApproval] = useState(false);
 
   const isAddFormValid = isMcpServerConfigFormValid({
     type: newServerType,

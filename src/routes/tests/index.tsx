@@ -14,12 +14,7 @@ export default function TestsRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/chat")}
-            className="gap-2"
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate("/chat")} className="gap-2">
             <ArrowLeftIcon className="size-4" />
             Back to Chat
           </Button>
@@ -39,10 +34,7 @@ export default function TestsRoute() {
                     Test notification permissions and sending notifications
                   </p>
                 </div>
-                <Button
-                  onClick={() => navigate("/tests/notifications")}
-                  variant="outline"
-                >
+                <Button onClick={() => navigate("/tests/notifications")} variant="outline">
                   Run Test
                 </Button>
               </div>

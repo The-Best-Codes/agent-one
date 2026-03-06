@@ -5,10 +5,7 @@ import { createHighlighterCore, type HighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 
 import { getLogger } from "../lib/logger";
-import type {
-  HighlightRequest,
-  HighlightResponse,
-} from "../lib/syntax-highlighter/types";
+import type { HighlightRequest, HighlightResponse } from "../lib/syntax-highlighter/types";
 
 let highlighter: HighlighterCore | null = null;
 
@@ -102,11 +99,7 @@ async function loadLanguage(lang: string) {
   }
 }
 
-async function highlightCode(
-  code: string,
-  language: string,
-  theme: "dark-plus" | "light-plus",
-) {
+async function highlightCode(code: string, language: string, theme: "dark-plus" | "light-plus") {
   if (!highlighter) {
     throw new Error("Highlighter not initialized");
   }

@@ -1,8 +1,4 @@
-import {
-  type UIMessage,
-  useChat as useChatSDK,
-  type UseChatOptions,
-} from "@ai-sdk/react";
+import { type UIMessage, useChat as useChatSDK, type UseChatOptions } from "@ai-sdk/react";
 import { type ChatInit, type LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useState } from "react";

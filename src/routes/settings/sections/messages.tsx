@@ -29,31 +29,17 @@ import {
 } from "@/lib/settings/types";
 
 export default function MessagesSection() {
-  const [markdownRendering, setMarkdownRendering] = useAtom(
-    markdownRenderingAtom,
-  );
+  const [markdownRendering, setMarkdownRendering] = useAtom(markdownRenderingAtom);
   const [maxMessageLength, setMaxMessageLength] = useAtom(maxMessageLengthAtom);
-  const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(
-    maxCodeblockCharsAtom,
-  );
-  const [maxToolResultChars, setMaxToolResultChars] = useAtom(
-    maxToolResultCharsAtom,
-  );
-  const [notificationSetting, setNotificationSetting] = useAtom(
-    notificationSettingAtom,
-  );
-  const [showMessageActionRow, setShowMessageActionRow] = useAtom(
-    showMessageActionRowAtom,
-  );
+  const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(maxCodeblockCharsAtom);
+  const [maxToolResultChars, setMaxToolResultChars] = useAtom(maxToolResultCharsAtom);
+  const [notificationSetting, setNotificationSetting] = useAtom(notificationSettingAtom);
+  const [showMessageActionRow, setShowMessageActionRow] = useAtom(showMessageActionRowAtom);
 
-  const isMarkdownRenderingDefault =
-    markdownRendering === DEFAULT_SETTINGS.MARKDOWN_RENDERING;
-  const isMaxMessageLengthDefault =
-    maxMessageLength === DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH;
-  const isMaxCodeblockCharsDefault =
-    maxCodeblockChars === DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS;
-  const isMaxToolResultCharsDefault =
-    maxToolResultChars === DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS;
+  const isMarkdownRenderingDefault = markdownRendering === DEFAULT_SETTINGS.MARKDOWN_RENDERING;
+  const isMaxMessageLengthDefault = maxMessageLength === DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH;
+  const isMaxCodeblockCharsDefault = maxCodeblockChars === DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS;
+  const isMaxToolResultCharsDefault = maxToolResultChars === DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS;
   const isNotificationSettingDefault =
     notificationSetting === DEFAULT_SETTINGS.NOTIFICATION_SETTING;
   const isShowMessageActionRowDefault =
@@ -99,9 +85,7 @@ export default function MessagesSection() {
           <div className="flex items-center gap-2">
             <Select
               value={markdownRendering}
-              onValueChange={(value) =>
-                setMarkdownRendering(value as MarkdownRenderingOption)
-              }
+              onValueChange={(value) => setMarkdownRendering(value as MarkdownRenderingOption)}
             >
               <SelectTrigger
                 className="w-full md:w-fit md:max-w-96"
@@ -112,9 +96,7 @@ export default function MessagesSection() {
               <SelectContent>
                 <SelectItem value="both">All messages</SelectItem>
                 <SelectItem value="user">User messages only</SelectItem>
-                <SelectItem value="assistant">
-                  Assistant messages only
-                </SelectItem>
+                <SelectItem value="assistant">Assistant messages only</SelectItem>
                 <SelectItem value="neither">No messages</SelectItem>
               </SelectContent>
             </Select>
@@ -136,8 +118,7 @@ export default function MessagesSection() {
               Max Message Length
             </Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              Maximum characters before activating performance mode for that
-              message.
+              Maximum characters before activating performance mode for that message.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -147,9 +128,7 @@ export default function MessagesSection() {
               min="1000"
               max="1000000"
               value={maxMessageLength}
-              onChange={(e) =>
-                setMaxMessageLength(parseInt(e.target.value) || 50000)
-              }
+              onChange={(e) => setMaxMessageLength(parseInt(e.target.value) || 50000)}
               className="w-full md:w-32"
             />
             <Button
@@ -166,15 +145,11 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <Label
-              htmlFor="max-codeblock-chars"
-              className="text-sm font-medium"
-            >
+            <Label htmlFor="max-codeblock-chars" className="text-sm font-medium">
               Max Codeblock Characters
             </Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              Maximum characters in code blocks before switching to plain text
-              rendering.
+              Maximum characters in code blocks before switching to plain text rendering.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -184,9 +159,7 @@ export default function MessagesSection() {
               min="1000"
               max="1000000"
               value={maxCodeblockChars}
-              onChange={(e) =>
-                setMaxCodeblockChars(parseInt(e.target.value) || 10000)
-              }
+              onChange={(e) => setMaxCodeblockChars(parseInt(e.target.value) || 10000)}
               className="w-full md:w-32"
             />
             <Button
@@ -203,15 +176,11 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <Label
-              htmlFor="max-tool-result-chars"
-              className="text-sm font-medium"
-            >
+            <Label htmlFor="max-tool-result-chars" className="text-sm font-medium">
               Max Tool Result Characters
             </Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              Maximum characters in tool results before switching to performant
-              rendering.
+              Maximum characters in tool results before switching to performant rendering.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -221,9 +190,7 @@ export default function MessagesSection() {
               min="1000"
               max="1000000"
               value={maxToolResultChars}
-              onChange={(e) =>
-                setMaxToolResultChars(parseInt(e.target.value) || 15000)
-              }
+              onChange={(e) => setMaxToolResultChars(parseInt(e.target.value) || 15000)}
               className="w-full md:w-32"
             />
             <Button
@@ -240,9 +207,7 @@ export default function MessagesSection() {
 
         <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">
-              Completion Notification
-            </Label>
+            <Label className="text-sm font-medium">Completion Notification</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Show notification when AgentOne finishes responding.
             </p>
@@ -250,9 +215,7 @@ export default function MessagesSection() {
           <div className="flex items-center gap-2">
             <Select
               value={notificationSetting}
-              onValueChange={(value) =>
-                setNotificationSetting(value as NotificationOption)
-              }
+              onValueChange={(value) => setNotificationSetting(value as NotificationOption)}
             >
               <SelectTrigger
                 className="w-full md:w-fit md:max-w-96"
@@ -262,9 +225,7 @@ export default function MessagesSection() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="always">Always</SelectItem>
-                <SelectItem value="when-unfocused">
-                  When window unfocused
-                </SelectItem>
+                <SelectItem value="when-unfocused">When window unfocused</SelectItem>
                 <SelectItem value="never">Never</SelectItem>
               </SelectContent>
             </Select>
@@ -290,9 +251,7 @@ export default function MessagesSection() {
           <div className="flex items-center gap-2">
             <Select
               value={showMessageActionRow}
-              onValueChange={(value) =>
-                setShowMessageActionRow(value as MessageActionRowOption)
-              }
+              onValueChange={(value) => setShowMessageActionRow(value as MessageActionRowOption)}
             >
               <SelectTrigger
                 className="w-full md:w-fit md:max-w-96"

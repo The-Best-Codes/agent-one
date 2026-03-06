@@ -27,10 +27,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 }
 
-export async function sendNotificationIfAllowed(
-  title: string,
-  body: string,
-): Promise<boolean> {
+export async function sendNotificationIfAllowed(title: string, body: string): Promise<boolean> {
   try {
     let permissionGranted = await isPermissionGranted();
 

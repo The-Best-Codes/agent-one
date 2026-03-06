@@ -4,26 +4,14 @@ import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
-import {
-  ArrowUpIcon,
-  Loader2Icon,
-  PaperclipIcon,
-  SquareIcon,
-} from "lucide-react";
+import { ArrowUpIcon, Loader2Icon, PaperclipIcon, SquareIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  useChatFunctions,
-  useChatStatus,
-} from "@/contexts/use-chat/chat-hooks";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import useMobileDetection from "@/hooks/use-mobile-detection";
@@ -403,9 +391,7 @@ export const MainChatInput = ({
               isFloating ? "rounded-md" : "rounded-md rounded-b-none",
             )}
           >
-            <p className="text-primary text-lg font-semibold">
-              Drop files or chats to attach
-            </p>
+            <p className="text-primary text-lg font-semibold">Drop files or chats to attach</p>
           </div>
         )}
         <input
@@ -416,9 +402,7 @@ export const MainChatInput = ({
           className="hidden"
           accept="image/*,text/*,video/*,application/pdf,.pdf,.doc,.docx,.txt,.md,.csv,.json,.xml,.html,.css,.js,.ts,.tsx,.jsx,.py,.java,.cpp,.c,.h,.rs,.go,.rb,.php,.swift,.kt"
         />
-        {files && files.length > 0 && (
-          <Attachments files={files} onRemove={handleRemoveFile} />
-        )}
+        {files && files.length > 0 && <Attachments files={files} onRemove={handleRemoveFile} />}
         <div className="grow overflow-hidden">
           <CodeMirror
             autoFocus
@@ -431,9 +415,7 @@ export const MainChatInput = ({
             placeholder="Ask anything..."
             className="bg-transparent text-sm"
             extensions={[
-              ...(markdownHighlighting
-                ? [markdown({ base: markdownLanguage })]
-                : []),
+              ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
               editorTheme,
               EditorView.lineWrapping,
               EditorView.contentAttributes.of({
@@ -515,9 +497,7 @@ export const MainChatInput = ({
                 <Button
                   data-testid="attach-button"
                   type="button"
-                  disabled={
-                    disabled || status !== "ready" || !hasAvailableModels
-                  }
+                  disabled={disabled || status !== "ready" || !hasAvailableModels}
                   size="icon"
                   variant="outline"
                   onClick={() => {
@@ -527,10 +507,7 @@ export const MainChatInput = ({
                   aria-label="Attach files"
                 >
                   {files && files?.length > 0 && (
-                    <Badge
-                      variant="default"
-                      className="absolute -top-2 -right-2 z-10 shadow-md"
-                    >
+                    <Badge variant="default" className="absolute -top-2 -right-2 z-10 shadow-md">
                       {files?.length}
                     </Badge>
                   )}
@@ -564,10 +541,7 @@ export const MainChatInput = ({
                     type="submit"
                     size="icon"
                     disabled={
-                      disabled ||
-                      status !== "ready" ||
-                      (isEmpty && !files) ||
-                      !hasAvailableModels
+                      disabled || status !== "ready" || (isEmpty && !files) || !hasAvailableModels
                     }
                     aria-label="Send message"
                   >

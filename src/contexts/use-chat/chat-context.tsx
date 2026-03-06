@@ -1,14 +1,7 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
 import { useAtom, useSetAtom } from "jotai";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 
 import { ModelContext } from "@/contexts/use-model/model-contexts";
@@ -92,9 +85,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const loadedMessagesRef = useRef<Map<string, UIMessage[]>>(new Map());
-  const [chatMessagesLoaded, setChatMessagesLoaded] = useState<Set<string>>(
-    new Set(),
-  );
+  const [chatMessagesLoaded, setChatMessagesLoaded] = useState<Set<string>>(new Set());
   const loadVersionRef = useRef(0);
 
   const isChatLoading = useMemo(() => {
@@ -197,12 +188,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
         setDefaultModelConfigForNewChats(config);
       }
     },
-    [
-      currentChatId,
-      setDefaultModelConfigForNewChats,
-      forceUpdate,
-      saveChatModelConfig,
-    ],
+    [currentChatId, setDefaultModelConfigForNewChats, forceUpdate, saveChatModelConfig],
   );
 
   const modelContextValue = useMemo(
@@ -212,12 +198,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       currentModelConfig: focusedModelConfig,
       setModelConfig: setModelConfigForContext,
     }),
-    [
-      focusedModel,
-      setModelForContext,
-      focusedModelConfig,
-      setModelConfigForContext,
-    ],
+    [focusedModel, setModelForContext, focusedModelConfig, setModelConfigForContext],
   );
 
   const handleInstanceUpdate = useCallback(
@@ -325,10 +306,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     evictInactiveMessages(newActiveIds);
 
     setActiveChatIds((prev) => {
-      if (
-        prev.size === newActiveIds.size &&
-        [...prev].every((id) => newActiveIds.has(id))
-      ) {
+      if (prev.size === newActiveIds.size && [...prev].every((id) => newActiveIds.has(id))) {
         return prev;
       }
 
@@ -375,11 +353,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const pendingState = location.state?.pendingMessage;
-    if (
-      pendingState &&
-      focusedChatInstance?.status === "ready" &&
-      currentChatId
-    ) {
+    if (pendingState && focusedChatInstance?.status === "ready" && currentChatId) {
       const instance = chatInstancesRef.current.get(currentChatId);
       if (instance?.sendMessage) {
         void navigate(location.pathname, { replace: true, state: {} });
@@ -387,13 +361,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
         void instance.sendMessage(message, options);
       }
     }
-  }, [
-    location.state,
-    location.pathname,
-    navigate,
-    focusedChatInstance?.status,
-    currentChatId,
-  ]);
+  }, [location.state, location.pathname, navigate, focusedChatInstance?.status, currentChatId]);
 
   const currentMessages = focusedChatInstance?.messages ?? defaultChat.messages;
   const prevMessagesRef = useRef<UIMessage[]>(currentMessages);
@@ -415,9 +383,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ],
   );
 
-  const metadataValue = currentChatId
-    ? loadChatMetadata(currentChatId)
-    : DEFAULT_CHAT_METADATA;
+  const metadataValue = currentChatId ? loadChatMetadata(currentChatId) : DEFAULT_CHAT_METADATA;
 
   const instanceForFunctions = focusedChatInstance || defaultChat;
   const {
@@ -447,8 +413,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           if (
             (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
             "state" in part &&
-            (part.state === "input-streaming" ||
-              part.state === "input-available")
+            (part.state === "input-streaming" || part.state === "input-available")
           ) {
             hasChanges = true;
             return {
@@ -499,9 +464,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (currentChatId && !chatIds.includes(currentChatId)) {
-      logger.verbose(
-        `Invalid chat ID detected: ${currentChatId}. Redirecting to /chat`,
-      );
+      logger.verbose(`Invalid chat ID detected: ${currentChatId}. Redirecting to /chat`);
       void navigate("/chat", { replace: true });
     }
   }, [currentChatId, chatIds, navigate, isMetadataLoaded]);

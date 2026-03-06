@@ -8,12 +8,9 @@ const STORAGE_KEY = "agent-one-custom-provider-api-keys";
 
 type CustomProviderApiKeys = Record<string, string>;
 
-const baseAtom = atomWithStorage<CustomProviderApiKeys>(
-  STORAGE_KEY,
-  {},
-  keyringStorage,
-  { getOnInit: true },
-);
+const baseAtom = atomWithStorage<CustomProviderApiKeys>(STORAGE_KEY, {}, keyringStorage, {
+  getOnInit: true,
+});
 
 export const customProviderApiKeysAtom = unwrap(baseAtom, (prev) => prev ?? {});
 export const customProviderApiKeysLoadableAtom = loadable(baseAtom);
@@ -26,12 +23,9 @@ export const setCustomProviderApiKeyAtom = atom(
   },
 );
 
-export const deleteCustomProviderApiKeyAtom = atom(
-  null,
-  async (get, set, providerId: string) => {
-    const current = get(customProviderApiKeysAtom);
-    const { [providerId]: _removed, ...rest } = current;
-    void _removed;
-    await set(baseAtom, rest);
-  },
-);
+export const deleteCustomProviderApiKeyAtom = atom(null, async (get, set, providerId: string) => {
+  const current = get(customProviderApiKeysAtom);
+  const { [providerId]: _removed, ...rest } = current;
+  void _removed;
+  await set(baseAtom, rest);
+});

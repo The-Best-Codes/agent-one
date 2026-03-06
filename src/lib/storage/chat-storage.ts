@@ -15,10 +15,7 @@ async function getDb(): Promise<Database> {
 export const chatStorage = {
   async getItem(key: string): Promise<string | null> {
     const d = await getDb();
-    const rows = await d.select<{ value: string }[]>(
-      "SELECT value FROM kv WHERE key = $1",
-      [key],
-    );
+    const rows = await d.select<{ value: string }[]>("SELECT value FROM kv WHERE key = $1", [key]);
     return rows.length > 0 ? rows[0].value : null;
   },
 

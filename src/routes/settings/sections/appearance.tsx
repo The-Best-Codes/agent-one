@@ -14,12 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  colorThemeAtom,
-  fontAtom,
-  roundnessAtom,
-  textScaleAtom,
-} from "@/lib/jotai/settings-atoms";
+import { colorThemeAtom, fontAtom, roundnessAtom, textScaleAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const roundnessOptions = [
@@ -126,14 +121,9 @@ export default function AppearanceSection() {
               {colorThemeOptions.map((option) => (
                 <Button
                   key={option.value}
-                  onClick={() =>
-                    setColorTheme(option.value as typeof colorTheme)
-                  }
+                  onClick={() => setColorTheme(option.value as typeof colorTheme)}
                   size="icon"
-                  className={cn(
-                    "border-foreground rounded-md border-0",
-                    option.className,
-                  )}
+                  className={cn("border-foreground rounded-md border-0", option.className)}
                   title={option.label}
                 >
                   {colorTheme === option.value && <Check className="size-5" />}
@@ -222,10 +212,7 @@ export default function AppearanceSection() {
               value={textScale}
               onValueChange={(value) => setTextScale(value as typeof textScale)}
             >
-              <SelectTrigger
-                className="w-full md:w-fit md:max-w-96"
-                aria-label="Select text scale"
-              >
+              <SelectTrigger className="w-full md:w-fit md:max-w-96" aria-label="Select text scale">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

@@ -31,9 +31,7 @@ export function useOverflow<T extends HTMLElement>(
           ? element.scrollWidth > element.clientWidth
           : element.scrollHeight > element.clientHeight;
 
-      setIsOverflowing((current) =>
-        current === nextIsOverflowing ? current : nextIsOverflowing,
-      );
+      setIsOverflowing((current) => (current === nextIsOverflowing ? current : nextIsOverflowing));
     };
 
     let frameId: number | null = null;

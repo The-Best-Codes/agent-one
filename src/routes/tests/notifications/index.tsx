@@ -15,22 +15,16 @@ export default function NotificationsTestRoute() {
   const [logs, setLogs] = useState<string[]>([]);
 
   const addLog = (message: string) => {
-    setLogs((prev) => [
-      ...prev,
-      `[${new Date().toLocaleTimeString()}] ${message}`,
-    ]);
+    setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
   };
 
   const checkPermission = async () => {
     addLog("Checking notification permission...");
     try {
       const permissionGranted = await isPermissionGranted();
-      addLog(
-        `Permission check result: ${permissionGranted ? "granted" : "not granted"}`,
-      );
+      addLog(`Permission check result: ${permissionGranted ? "granted" : "not granted"}`);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       addLog(`Permission check failed: ${errorMessage}`);
     }
   };
@@ -41,8 +35,7 @@ export default function NotificationsTestRoute() {
       const permission = await requestPermission();
       addLog(`Permission request result: ${permission}`);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       addLog(`Permission request failed: ${errorMessage}`);
     }
   };
@@ -52,9 +45,7 @@ export default function NotificationsTestRoute() {
     try {
       addLog("Step 1: Checking permission...");
       let permissionGranted = await isPermissionGranted();
-      addLog(
-        `Permission status: ${permissionGranted ? "granted" : "not granted"}`,
-      );
+      addLog(`Permission status: ${permissionGranted ? "granted" : "not granted"}`);
 
       if (!permissionGranted) {
         addLog("Step 2: Requesting permission...");
@@ -75,8 +66,7 @@ export default function NotificationsTestRoute() {
         addLog("Permission not granted - cannot send notification");
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
       addLog(`Notification test failed: ${errorMessage}`);
     }
   };
@@ -85,12 +75,7 @@ export default function NotificationsTestRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/tests")}
-            className="gap-2"
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
             <ArrowLeftIcon className="size-4" />
             Back to Tests
           </Button>
@@ -107,15 +92,10 @@ export default function NotificationsTestRoute() {
                 <Button onClick={checkPermission} variant="outline">
                   Check Permission
                 </Button>
-                <Button
-                  onClick={requestNotificationPermission}
-                  variant="outline"
-                >
+                <Button onClick={requestNotificationPermission} variant="outline">
                   Request Permission
                 </Button>
-                <Button onClick={sendTestNotification}>
-                  Send Test Notification
-                </Button>
+                <Button onClick={sendTestNotification}>Send Test Notification</Button>
               </div>
             </CardContent>
           </Card>
@@ -127,9 +107,7 @@ export default function NotificationsTestRoute() {
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/20 max-h-96 overflow-y-auto rounded-md border p-4">
-                  <pre className="font-mono text-xs whitespace-pre-wrap">
-                    {logs.join("\n")}
-                  </pre>
+                  <pre className="font-mono text-xs whitespace-pre-wrap">{logs.join("\n")}</pre>
                 </div>
               </CardContent>
             </Card>

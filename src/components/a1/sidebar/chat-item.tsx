@@ -1,10 +1,4 @@
-import {
-  DownloadIcon,
-  MoreHorizontalIcon,
-  PencilIcon,
-  SplitIcon,
-  TrashIcon,
-} from "lucide-react";
+import { DownloadIcon, MoreHorizontalIcon, PencilIcon, SplitIcon, TrashIcon } from "lucide-react";
 import { memo, useState } from "react";
 import { Link } from "react-router";
 
@@ -38,13 +32,7 @@ interface ChatItemProps {
 }
 
 export const ChatItem = memo(
-  ({
-    activeChatId,
-    additionalOnChatClickCallback,
-    id,
-    title,
-    branchOf,
-  }: ChatItemProps) => {
+  ({ activeChatId, additionalOnChatClickCallback, id, title, branchOf }: ChatItemProps) => {
     const [showChangeTitleModal, setShowChangeTitleModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
@@ -73,15 +61,9 @@ export const ChatItem = memo(
                 );
                 e.dataTransfer.effectAllowed = "copy";
               }}
-              onClick={() =>
-                additionalOnChatClickCallback &&
-                additionalOnChatClickCallback(id)
-              }
+              onClick={() => additionalOnChatClickCallback && additionalOnChatClickCallback(id)}
             >
-              <Link
-                to={`/chat/${id}`}
-                className="relative block overflow-hidden"
-              >
+              <Link to={`/chat/${id}`} className="relative block overflow-hidden">
                 <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
                   <ChatStatusIndicator chatId={id} />
                   {branchOf && <SplitIcon className="text-foreground size-3" />}

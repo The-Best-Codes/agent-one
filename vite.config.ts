@@ -9,13 +9,7 @@ const host = process.env.TAURI_DEV_HOST;
 const vendorManualChunks = {
   react: ["react", "react-dom", "react-dom/client"],
   reactRouter: ["react-router"],
-  aiMain: [
-    "ai",
-    "@ai-sdk/react",
-    "@ai-sdk/mcp",
-    "@ai-sdk/provider",
-    "@ai-sdk/provider-utils",
-  ],
+  aiMain: ["ai", "@ai-sdk/react", "@ai-sdk/mcp", "@ai-sdk/provider", "@ai-sdk/provider-utils"],
   aiSdkProviders: [
     "@ai-sdk/anthropic",
     "@ai-sdk/cohere",
@@ -106,19 +100,8 @@ const vendorManualChunks = {
     "@tauri-apps/plugin-websocket",
     "@tauri-apps/plugin-window-state",
   ],
-  auth: [
-    "better-auth",
-    "@better-auth/core",
-    "@better-fetch/fetch",
-    "nanostores",
-    "defu",
-  ],
-  stateAndVirtualization: [
-    "jotai",
-    "consola",
-    "@tanstack/virtual-core",
-    "@tanstack/react-virtual",
-  ],
+  auth: ["better-auth", "@better-auth/core", "@better-fetch/fetch", "nanostores", "defu"],
+  stateAndVirtualization: ["jotai", "consola", "@tanstack/virtual-core", "@tanstack/react-virtual"],
 };
 
 export default defineConfig(
@@ -194,14 +177,8 @@ export default defineConfig(
               }
 
               if (normalizedId.includes("/node_modules/")) {
-                for (const [chunkName, packages] of Object.entries(
-                  vendorManualChunks,
-                )) {
-                  if (
-                    packages.some((pkg) =>
-                      normalizedId.includes(`/node_modules/${pkg}/`),
-                    )
-                  ) {
+                for (const [chunkName, packages] of Object.entries(vendorManualChunks)) {
+                  if (packages.some((pkg) => normalizedId.includes(`/node_modules/${pkg}/`))) {
                     return chunkName;
                   }
                 }

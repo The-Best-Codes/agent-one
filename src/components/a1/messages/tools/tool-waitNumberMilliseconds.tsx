@@ -37,9 +37,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
   const callId = part.toolCallId;
   const input = part.input as WaitNumberMillisecondsInput;
   const { addToolApprovalResponse } = useChatFunctions();
-  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
-    boolean | undefined
-  >();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const safeFormatMilliseconds = (milliseconds: number) => {
     try {
@@ -69,15 +67,11 @@ export const MessagePartToolWaitNumberMilliseconds = ({
   switch (part.state) {
     case "approval-requested":
       return (
-        <div
-          key={callId}
-          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
-        >
+        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <ClockIcon className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to wait{" "}
-              {safeFormatMilliseconds(input?.milliseconds)}
+              AgentOne wants to wait {safeFormatMilliseconds(input?.milliseconds)}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -127,9 +121,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           <div>
             <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
-          <span className="text-foreground text-sm font-bold">
-            Waiting a bit...
-          </span>
+          <span className="text-foreground text-sm font-bold">Waiting a bit...</span>
         </div>
       );
 
@@ -165,9 +157,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         return (
           <div key={callId} className="flex items-center gap-1">
             <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              Wait cancelled
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">Wait cancelled</span>
           </div>
         );
       }
@@ -231,5 +221,4 @@ export const MessagePartToolWaitNumberMilliseconds = ({
   }
 };
 
-MessagePartToolWaitNumberMilliseconds.displayName =
-  "MessagePartToolWaitNumberMilliseconds";
+MessagePartToolWaitNumberMilliseconds.displayName = "MessagePartToolWaitNumberMilliseconds";

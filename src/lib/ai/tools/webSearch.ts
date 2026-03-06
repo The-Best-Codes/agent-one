@@ -28,11 +28,7 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
       "Search the web for current information, news, and answers to questions using DuckDuckGo. Returns real-time search results with titles, URLs, and snippets.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
-      query: z
-        .string()
-        .min(1)
-        .max(512)
-        .describe("Search query to find information on the web"),
+      query: z.string().min(1).max(512).describe("Search query to find information on the web"),
       maxResults: z
         .number()
         .min(1)
@@ -44,9 +40,7 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
         .min(1)
         .max(20)
         .default(config.defaultMaxPages)
-        .describe(
-          "Maximum number of search result pages to view (more than 1 may take longer)",
-        ),
+        .describe("Maximum number of search result pages to view (more than 1 may take longer)"),
       timeoutSeconds: z
         .number()
         .min(1)
@@ -72,11 +66,7 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
       const timeoutPromise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
           logger.error("Timeout reached:", timeoutMs);
-          reject(
-            new Error(
-              "Frontend timeout: Search operation exceeded allowed time.",
-            ),
-          );
+          reject(new Error("Frontend timeout: Search operation exceeded allowed time."));
         }, timeoutMs);
 
         abortSignal?.addEventListener(
@@ -120,8 +110,7 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
             success: "Whether the search completed successfully",
             query: "The search query that was executed",
             total_results: "Total number of results found",
-            results:
-              "Array of search results with title, url, snippet, and display_url",
+            results: "Array of search results with title, url, snippet, and display_url",
             search_url: "The DuckDuckGo search URL that was used",
           },
         };

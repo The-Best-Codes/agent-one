@@ -3,11 +3,7 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
-import {
-  getProviderById,
-  PROVIDER_REGISTRY,
-  type ProviderId,
-} from "@/lib/ai/providers/registry";
+import { getProviderById, PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
 import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
   deleteCustomProviderApiKeyAtom,
@@ -61,13 +57,9 @@ export function ProvidersList() {
     provider.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const hasResults =
-    filteredBuiltInProviders.length > 0 || filteredCustomProviders.length > 0;
+  const hasResults = filteredBuiltInProviders.length > 0 || filteredCustomProviders.length > 0;
 
-  const handleAddProvider = (
-    data: Parameters<typeof addCustomProvider>[0],
-    apiKey: string,
-  ) => {
+  const handleAddProvider = (data: Parameters<typeof addCustomProvider>[0], apiKey: string) => {
     const providerId = addCustomProvider(data);
     if (apiKey) {
       void setCustomProviderApiKey(providerId, apiKey);
@@ -92,11 +84,7 @@ export function ProvidersList() {
       </div>
 
       {hasResults ? (
-        <Accordion
-          type="single"
-          collapsible
-          className="border-border w-full rounded-md border"
-        >
+        <Accordion type="single" collapsible className="border-border w-full rounded-md border">
           {filteredCustomProviders.map((provider) => (
             <CustomProviderListItem
               key={provider.id}
@@ -110,9 +98,7 @@ export function ProvidersList() {
           ))}
         </Accordion>
       ) : (
-        <p className="text-muted-foreground py-4 text-center text-sm">
-          No providers found
-        </p>
+        <p className="text-muted-foreground py-4 text-center text-sm">No providers found</p>
       )}
     </div>
   );

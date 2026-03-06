@@ -14,21 +14,12 @@ interface SearchModalProps {
   activeChatId?: string;
 }
 
-export const SearchModal = ({
-  isOpen,
-  onClose,
-  activeChatId,
-}: SearchModalProps) => {
+export const SearchModal = ({ isOpen, onClose, activeChatId }: SearchModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        showCloseButton={false}
-        className="flex h-fit max-w-2xl flex-col p-2"
-      >
+      <DialogContent showCloseButton={false} className="flex h-fit max-w-2xl flex-col p-2">
         <DialogHeader>
-          <DialogTitle className="sr-only flex items-center gap-2">
-            Chat search dialog
-          </DialogTitle>
+          <DialogTitle className="sr-only flex items-center gap-2">Chat search dialog</DialogTitle>
           <DialogDescription className="sr-only">
             Select a conversation to continue
           </DialogDescription>

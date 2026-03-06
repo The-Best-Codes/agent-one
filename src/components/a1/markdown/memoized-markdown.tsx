@@ -37,19 +37,11 @@ function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({
-    block,
-    messageRole,
-  }: {
-    block: MarkdownBlock;
-    messageRole: UIMessage["role"];
-  }) => {
+  ({ block, messageRole }: { block: MarkdownBlock; messageRole: UIMessage["role"] }) => {
     const { type, content, lang } = block;
 
     if (type === "code") {
-      return (
-        <CodeBlock content={content} lang={lang} messageRole={messageRole} />
-      );
+      return <CodeBlock content={content} lang={lang} messageRole={messageRole} />;
     } else {
       // TODO: Allow enabling and disabling remend in settings
       const completedContent = remend(content);
@@ -92,11 +84,7 @@ export const MemoizedMarkdown = memo(
     const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
 
     return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock
-        block={block}
-        messageRole={messageRole}
-        key={`${id}-block_${index}`}
-      />
+      <MemoizedMarkdownBlock block={block} messageRole={messageRole} key={`${id}-block_${index}`} />
     ));
   },
 );

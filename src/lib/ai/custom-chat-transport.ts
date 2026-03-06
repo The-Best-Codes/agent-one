@@ -67,10 +67,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
   updateSmoothStreamEnabled(smoothStreamEnabled: boolean) {
     this.smoothStreamEnabled = smoothStreamEnabled;
-    logger.verbose(
-      "CustomChatTransport smoothStreamEnabled updated to:",
-      smoothStreamEnabled,
-    );
+    logger.verbose("CustomChatTransport smoothStreamEnabled updated to:", smoothStreamEnabled);
   }
 
   updateSystemPrompt(getSystemPrompt: () => string) {
@@ -94,9 +91,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
     if (!this.model) {
-      throw new Error(
-        "Cannot send messages: no model selected. Please select a model first.",
-      );
+      throw new Error("Cannot send messages: no model selected. Please select a model first.");
     }
 
     await this.getApiKeysLoadedPromise();
@@ -127,10 +122,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         experimental_transform: smoothStream(),
       }),
       onError: (error) => {
-        logger.error(
-          "Error occurred in CustomChatTransport streamText:",
-          error,
-        );
+        logger.error("Error occurred in CustomChatTransport streamText:", error);
       },
       onAbort: () => {
         logger.verbose("Stream aborted");
@@ -159,10 +151,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         return metadata;
       },
       onError: (error) => {
-        logger.error(
-          "Error occurred in CustomChatTransport toUIMessageStream:",
-          error,
-        );
+        logger.error("Error occurred in CustomChatTransport toUIMessageStream:", error);
 
         if (error == null) {
           return "Unknown error";

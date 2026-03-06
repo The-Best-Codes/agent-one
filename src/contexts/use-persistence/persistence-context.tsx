@@ -1,18 +1,9 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
 import { useAtom } from "jotai";
-import React, {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  DEFAULT_MODEL_CONFIG,
-  type ModelConfig,
-} from "@/hooks/ai/use-model-catalog";
+import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
@@ -49,10 +40,7 @@ export interface PersistenceContextType {
   loadFullChatData: (id: string) => Promise<ChatData>;
   saveChat: (params: { chatId: string; messages: UIMessage[] }) => void;
   saveChatModel: (params: { chatId: string; modelId: string }) => void;
-  saveChatModelConfig: (params: {
-    chatId: string;
-    modelConfig: ModelConfig;
-  }) => void;
+  saveChatModelConfig: (params: { chatId: string; modelConfig: ModelConfig }) => void;
   saveChatTitleState: (params: {
     chatId: string;
     titleState: "generating" | "generated" | "error";
@@ -82,13 +70,9 @@ const DEFAULT_METADATA: ChatMetadata = {
   totalCostUsd: 0,
 };
 
-export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [, setChatIds] = useAtom(chatIdsAtom);
-  const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(
-    chatUpdateTriggerAtom,
-  );
+  const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
 
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
@@ -186,10 +170,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       }
       return DEFAULT_MODEL_CONFIG;
     } catch (error) {
-      logger.error(
-        "Failed to get new chat model config from localStorage",
-        error,
-      );
+      logger.error("Failed to get new chat model config from localStorage", error);
       return DEFAULT_MODEL_CONFIG;
     }
   }, []);
@@ -198,10 +179,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     try {
       localStorage.setItem(NEW_CHAT_MODEL_CONFIG_KEY, JSON.stringify(config));
     } catch (error) {
-      logger.error(
-        "Failed to save new chat model config to localStorage",
-        error,
-      );
+      logger.error("Failed to save new chat model config to localStorage", error);
     }
   }, []);
 
@@ -266,25 +244,22 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  const loadFullChatData = useCallback(
-    async (id: string): Promise<ChatData> => {
-      try {
-        const [metadata, messages] = await Promise.all([
-          chatStorage.getChatMetadata(id),
-          chatStorage.getChatMessages(id),
-        ]);
-        if (metadata) {
-          return { ...metadata, messages: messages ?? [] };
-        }
-        logger.warn(`No chat found for id: ${id}`);
-        return { messages: [], ...DEFAULT_METADATA };
-      } catch (error) {
-        logger.error(`Failed to load full chat data ${id}`, error);
-        return { messages: [], ...DEFAULT_METADATA };
+  const loadFullChatData = useCallback(async (id: string): Promise<ChatData> => {
+    try {
+      const [metadata, messages] = await Promise.all([
+        chatStorage.getChatMetadata(id),
+        chatStorage.getChatMessages(id),
+      ]);
+      if (metadata) {
+        return { ...metadata, messages: messages ?? [] };
       }
-    },
-    [],
-  );
+      logger.warn(`No chat found for id: ${id}`);
+      return { messages: [], ...DEFAULT_METADATA };
+    } catch (error) {
+      logger.error(`Failed to load full chat data ${id}`, error);
+      return { messages: [], ...DEFAULT_METADATA };
+    }
+  }, []);
 
   const saveChat = useCallback(
     ({ chatId, messages }: { chatId: string; messages: UIMessage[] }) => {
@@ -402,9 +377,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
       try {
         const originalMetadata = getMetadata(originalChatId);
 
-        const branchIndex = messages.findIndex(
-          (m: UIMessage) => m.id === branchFromMessageId,
-        );
+        const branchIndex = messages.findIndex((m: UIMessage) => m.id === branchFromMessageId);
 
         if (branchIndex === -1) {
           throw new Error(
@@ -476,9 +449,5 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({
     chatUpdateTrigger,
   };
 
-  return (
-    <PersistenceContext.Provider value={contextValue}>
-      {children}
-    </PersistenceContext.Provider>
-  );
+  return <PersistenceContext.Provider value={contextValue}>{children}</PersistenceContext.Provider>;
 };

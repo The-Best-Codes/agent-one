@@ -20,9 +20,7 @@ type MessageToolHandlerProps = {
 export const MessageToolHandler = memo(
   ({ part }: MessageToolHandlerProps) => {
     if (!part.type.startsWith("tool-")) {
-      logger.error(
-        `MessagePartToolHandler received a non-tool part type: ${part.type}`,
-      );
+      logger.error(`MessagePartToolHandler received a non-tool part type: ${part.type}`);
       return <MessagePartFallback {...part} />;
     }
 

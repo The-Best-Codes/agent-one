@@ -1,13 +1,6 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useSetAtom } from "jotai";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient, CLIENT_ID, setAuthToken } from "@/lib/auth/auth-client";
 import { getApiKeyBaseAtom } from "@/lib/jotai/api-key-atoms";
@@ -16,21 +9,14 @@ import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
-import {
-  type DeviceFlowState,
-  WebAuthContext,
-  type WebAuthUser,
-} from "./web-auth-contexts";
+import { type DeviceFlowState, WebAuthContext, type WebAuthUser } from "./web-auth-contexts";
 
 const logger = getLogger(import.meta.url);
 
 const TOKEN_KEY = "agent-one-web-auth-token";
-const DEVICE_GRANT_TYPE =
-  "urn:ietf:params:oauth:grant-type:device_code" as const;
+const DEVICE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code" as const;
 
-export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const setAgentOneApiKey = useSetAtom(getApiKeyBaseAtom("agent-one"));
   const setAgentOneConfig = useSetAtom(getProviderConfigAtom("agent-one"));
 
@@ -86,10 +72,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const token = await keyringStorage.getItem<string | null>(
-          TOKEN_KEY,
-          null,
-        );
+        const token = await keyringStorage.getItem<string | null>(TOKEN_KEY, null);
         if (token) {
           const result = await fetchSession(token);
           if (result === "invalid") {
@@ -263,19 +246,8 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({
       cancelSignIn,
       signOut,
     }),
-    [
-      user,
-      isLoading,
-      isSigningIn,
-      isSigningOut,
-      deviceFlow,
-      startSignIn,
-      cancelSignIn,
-      signOut,
-    ],
+    [user, isLoading, isSigningIn, isSigningOut, deviceFlow, startSignIn, cancelSignIn, signOut],
   );
 
-  return (
-    <WebAuthContext.Provider value={value}>{children}</WebAuthContext.Provider>
-  );
+  return <WebAuthContext.Provider value={value}>{children}</WebAuthContext.Provider>;
 };

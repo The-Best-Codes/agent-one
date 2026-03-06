@@ -26,10 +26,7 @@
       let theme = "light";
       let themeFromStorage = localStorage.getItem("agent-one-setting-THEME");
       if (!themeFromStorage) {
-        localStorage.setItem(
-          "agent-one-setting-THEME",
-          JSON.stringify("system"),
-        );
+        localStorage.setItem("agent-one-setting-THEME", JSON.stringify("system"));
         themeFromStorage = JSON.stringify("system");
       }
 
@@ -37,9 +34,7 @@
       if (parsedTheme !== "system") {
         theme = parsedTheme;
       } else {
-        theme = window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       }
 
       document.documentElement.classList.remove("light", "dark");
@@ -50,11 +45,7 @@
       let fontFromStorage = localStorage.getItem("agent-one-setting-FONT");
       let parsedFont = jsonParseCatch(fontFromStorage) || "default";
 
-      document.documentElement.classList.remove(
-        "font-space-grotesk",
-        "font-sans",
-        "font-mono",
-      );
+      document.documentElement.classList.remove("font-space-grotesk", "font-sans", "font-mono");
       if (parsedFont === "default") {
         document.documentElement.classList.add("font-space-grotesk");
       } else if (parsedFont === "system") {

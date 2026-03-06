@@ -16,8 +16,7 @@ export function useProviderState(providerId: ProviderId) {
     apiKey,
     setApiKey,
     config,
-    setConfig: (updates: Partial<ProviderConfig>) =>
-      setConfig((prev) => ({ ...prev, ...updates })),
+    setConfig: (updates: Partial<ProviderConfig>) => setConfig((prev) => ({ ...prev, ...updates })),
     hasEnvKey: hasEnvKey(providerId),
   };
 }

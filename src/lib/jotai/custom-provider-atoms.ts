@@ -21,26 +21,20 @@ export interface CustomProvider {
 
 export type NewCustomProviderData = Omit<CustomProvider, "id" | "enabled">;
 
-export const customProvidersAtom = atomWithStorage<CustomProvider[]>(
-  STORAGE_KEY,
-  [],
-  undefined,
-  { getOnInit: true },
-);
+export const customProvidersAtom = atomWithStorage<CustomProvider[]>(STORAGE_KEY, [], undefined, {
+  getOnInit: true,
+});
 
-export const addCustomProviderAtom = atom(
-  null,
-  (get, set, provider: NewCustomProviderData) => {
-    const existing = get(customProvidersAtom);
-    const newProvider: CustomProvider = {
-      ...provider,
-      id: crypto.randomUUID(),
-      enabled: true,
-    };
-    set(customProvidersAtom, [newProvider, ...existing]);
-    return newProvider.id;
-  },
-);
+export const addCustomProviderAtom = atom(null, (get, set, provider: NewCustomProviderData) => {
+  const existing = get(customProvidersAtom);
+  const newProvider: CustomProvider = {
+    ...provider,
+    id: crypto.randomUUID(),
+    enabled: true,
+  };
+  set(customProvidersAtom, [newProvider, ...existing]);
+  return newProvider.id;
+});
 
 export const updateCustomProviderAtom = atom(
   null,

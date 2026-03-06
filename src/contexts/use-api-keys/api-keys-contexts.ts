@@ -5,6 +5,4 @@ export interface ApiKeysContextType {
   getApiKeysLoadedPromise: () => Promise<void>;
 }
 
-export const ApiKeysContext = createContext<ApiKeysContextType | undefined>(
-  undefined,
-);
+export const ApiKeysContext = createContext<ApiKeysContextType | undefined>(undefined);

@@ -34,9 +34,7 @@ export const useMessageEditing = ({
   const { setMessages, regenerate } = useChatFunctions();
 
   const initialValues = useMemo(() => {
-    return message.parts
-      .filter((p): p is TextUIPart => p.type === "text")
-      .map((p) => p.text);
+    return message.parts.filter((p): p is TextUIPart => p.type === "text").map((p) => p.text);
   }, [message.parts]);
 
   const textValuesRef = useRef<string[]>(initialValues);
@@ -48,10 +46,7 @@ export const useMessageEditing = ({
     match: "all",
   });
 
-  const canEdit = useMemo(
-    () => message.parts.some((p) => p.type === "text"),
-    [message.parts],
-  );
+  const canEdit = useMemo(() => message.parts.some((p) => p.type === "text"), [message.parts]);
 
   useEffect(() => {
     textValuesRef.current = [...initialValues];
@@ -75,9 +70,7 @@ export const useMessageEditing = ({
     (shouldRegenerate?: boolean) => {
       try {
         setMessages((currentMessages) => {
-          const messageIndex = currentMessages.findIndex(
-            (m) => m.id === message.id,
-          );
+          const messageIndex = currentMessages.findIndex((m) => m.id === message.id);
           if (messageIndex === -1) {
             logger.error("Could not find message to edit.");
             return currentMessages;
@@ -86,28 +79,22 @@ export const useMessageEditing = ({
           const updatedMessages = [...currentMessages];
           const originalMessage = updatedMessages[messageIndex];
 
-          const hasOnlyTextParts = originalMessage.parts.every(
-            (p) => p.type === "text",
-          );
-          const hasAnyNonEmptyText = textValuesRef.current.some(
-            (t) => t.trim().length > 0,
-          );
+          const hasOnlyTextParts = originalMessage.parts.every((p) => p.type === "text");
+          const hasAnyNonEmptyText = textValuesRef.current.some((t) => t.trim().length > 0);
 
           if (hasOnlyTextParts && !hasAnyNonEmptyText) {
             return currentMessages;
           }
 
           let idx = 0;
-          const nextParts: UIMessage["parts"] = originalMessage.parts.map(
-            (part) => {
-              if (part.type === "text") {
-                const nextText = textValuesRef.current[idx] ?? "";
-                idx += 1;
-                return { ...part, text: nextText };
-              }
-              return part;
-            },
-          );
+          const nextParts: UIMessage["parts"] = originalMessage.parts.map((part) => {
+            if (part.type === "text") {
+              const nextText = textValuesRef.current[idx] ?? "";
+              idx += 1;
+              return { ...part, text: nextText };
+            }
+            return part;
+          });
 
           updatedMessages[messageIndex] = {
             ...originalMessage,

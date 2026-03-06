@@ -65,11 +65,7 @@ export function SecretInput({
         size="icon"
         title={showValue ? "Hide value" : "Show value"}
       >
-        {showValue ? (
-          <EyeOffIcon className="size-4" />
-        ) : (
-          <EyeIcon className="size-4" />
-        )}
+        {showValue ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
       </Button>
       {showSaveCancel && (
         <>

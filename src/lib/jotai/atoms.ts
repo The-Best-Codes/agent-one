@@ -6,9 +6,7 @@ import { systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
 
 export type ChatStatusIndicator = "loading" | "error" | "unread" | null;
 
-export const chatStatusIndicatorsAtom = atom<
-  Record<string, ChatStatusIndicator>
->({});
+export const chatStatusIndicatorsAtom = atom<Record<string, ChatStatusIndicator>>({});
 
 export const chatIdsAtom = atom<string[]>([]);
 
@@ -21,12 +19,9 @@ export const onboardingCompletedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
-export const syncEnabledAtom = atomWithStorage(
-  "agent-one-sync-enabled",
-  false,
-  undefined,
-  { getOnInit: true },
-);
+export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", false, undefined, {
+  getOnInit: true,
+});
 
 export const hideAgentOneModelsAtom = atomWithStorage(
   "agent-one-hide-agentone-models",

@@ -80,11 +80,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
         {isPreviewMode && PreviewComponent ? (
           <PreviewComponent content={content} />
         ) : (
-          <BestHighlighter
-            lang={lang || "text"}
-            content={content}
-            maxChars={maxCodeblockChars}
-          />
+          <BestHighlighter lang={lang || "text"} content={content} maxChars={maxCodeblockChars} />
         )}
       </div>
     </div>

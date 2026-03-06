@@ -41,8 +41,7 @@ export function AddOpenAICompatibleDialog({
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [models, setModels] = useState<CustomProviderModel[]>([]);
 
-  const isValid =
-    name.trim() !== "" && baseUrl.trim() !== "" && models.length > 0;
+  const isValid = name.trim() !== "" && baseUrl.trim() !== "" && models.length > 0;
 
   const resetForm = () => {
     setName("");
@@ -122,11 +121,7 @@ export function AddOpenAICompatibleDialog({
             />
           </div>
 
-          <HttpHeadersEditor
-            id="new-provider"
-            headers={headers}
-            onChange={setHeaders}
-          />
+          <HttpHeadersEditor id="new-provider" headers={headers} onChange={setHeaders} />
 
           <ModelList
             models={models}

@@ -6,11 +6,7 @@ interface ChatListProps {
   onChatClick?: (id: string) => void;
 }
 
-export const ChatList = ({
-  activeChatId,
-  handleNewChat,
-  onChatClick,
-}: ChatListProps) => {
+export const ChatList = ({ activeChatId, handleNewChat, onChatClick }: ChatListProps) => {
   return (
     <VirtualizedChatList
       activeChatId={activeChatId}

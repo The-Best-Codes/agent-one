@@ -27,6 +27,4 @@ export interface WebAuthContextType {
   signOut: () => Promise<void>;
 }
 
-export const WebAuthContext = createContext<WebAuthContextType | undefined>(
-  undefined,
-);
+export const WebAuthContext = createContext<WebAuthContextType | undefined>(undefined);

@@ -11,11 +11,7 @@ type EditButtonProps = {
   "onClick" | "disabled" | "size" | "variant" | "aria-label" | "children"
 >;
 
-export const EditButton = ({
-  onEdit,
-  className,
-  ...props
-}: EditButtonProps) => {
+export const EditButton = ({ onEdit, className, ...props }: EditButtonProps) => {
   const { status } = useChatStatus();
   const isStreaming = status === "streaming" || status === "submitted";
 

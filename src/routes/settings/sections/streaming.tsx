@@ -17,27 +17,21 @@ import { resetSetting } from "@/lib/settings/reset-settings";
 import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 
 export default function StreamingSection() {
-  const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(
-    smoothStreamEnabledAtom,
-  );
+  const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(smoothStreamEnabledAtom);
   const [experimentalThrottleEnabled, setExperimentalThrottleEnabled] = useAtom(
     experimentalThrottleEnabledAtom,
   );
   const [experimentalThrottleValue, setExperimentalThrottleValue] = useAtom(
     experimentalThrottleValueAtom,
   );
-  const [alwaysShowStopButton, setAlwaysShowStopButton] = useAtom(
-    stopButtonBehaviorAtom,
-  );
+  const [alwaysShowStopButton, setAlwaysShowStopButton] = useAtom(stopButtonBehaviorAtom);
   const [showChatStatusIndicator, setShowChatStatusIndicator] = useAtom(
     showChatStatusIndicatorAtom,
   );
 
-  const isSmoothStreamDefault =
-    smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
+  const isSmoothStreamDefault = smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
   const isExperimentalThrottleEnabledDefault =
-    experimentalThrottleEnabled ===
-    DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED;
+    experimentalThrottleEnabled === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED;
   const isExperimentalThrottleValueDefault =
     experimentalThrottleValue === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE;
   const isAlwaysShowStopButtonDefault =
@@ -134,9 +128,7 @@ export default function StreamingSection() {
             <div className="flex items-center gap-2">
               <Slider
                 value={[experimentalThrottleValue]}
-                onValueChange={(value) =>
-                  setExperimentalThrottleValue(value[0])
-                }
+                onValueChange={(value) => setExperimentalThrottleValue(value[0])}
                 min={0}
                 max={10000}
                 step={10}
@@ -158,9 +150,7 @@ export default function StreamingSection() {
 
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">
-              Always Show Stop Button
-            </Label>
+            <Label className="text-sm font-medium">Always Show Stop Button</Label>
             <p className="text-muted-foreground mt-1 text-sm">
               Show the stop button immediately after submitting a message.
             </p>
@@ -169,9 +159,7 @@ export default function StreamingSection() {
             <Switch
               checked={alwaysShowStopButton === "immediate"}
               onCheckedChange={(checked) =>
-                setAlwaysShowStopButton(
-                  checked ? "immediate" : "at-stopping-point",
-                )
+                setAlwaysShowStopButton(checked ? "immediate" : "at-stopping-point")
               }
               aria-label="Toggle always show stop button"
             />
@@ -189,12 +177,9 @@ export default function StreamingSection() {
 
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">
-              Chat Status Indicators
-            </Label>
+            <Label className="text-sm font-medium">Chat Status Indicators</Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              Show status icons in the sidebar for loading, error, and unread
-              chats.
+              Show status icons in the sidebar for loading, error, and unread chats.
             </p>
           </div>
           <div className="flex items-center gap-2">

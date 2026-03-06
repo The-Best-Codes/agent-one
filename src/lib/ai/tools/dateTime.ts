@@ -21,8 +21,7 @@ export const createDateTimeTool = (config: DateTimeToolConfig) =>
           timezone: "UTC",
           schema: {
             dateTime: "The current date and time in ISO 8601 format (UTC)",
-            formatted:
-              "The current date and time in a human-readable UTC format",
+            formatted: "The current date and time in a human-readable UTC format",
             timezone: "The timezone used (UTC)",
           },
         };

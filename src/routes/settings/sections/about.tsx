@@ -105,8 +105,7 @@ export default function AboutSection() {
       }
     } catch (error) {
       setUpdateStatus("error");
-      const message =
-        error instanceof Error ? error.message : "Failed to check for updates";
+      const message = error instanceof Error ? error.message : "Failed to check for updates";
       logger.error(`Error during update check: ${message}`, error);
     }
   };
@@ -123,9 +122,7 @@ export default function AboutSection() {
         logger.error("Update not found during download attempt.");
         return;
       }
-      logger.verbose(
-        `Confirmed update version ${update.version} for download.`,
-      );
+      logger.verbose(`Confirmed update version ${update.version} for download.`);
 
       await update.downloadAndInstall((event) => {
         switch (event.event) {
@@ -150,8 +147,7 @@ export default function AboutSection() {
       await relaunch();
     } catch (error) {
       setUpdateStatus("error");
-      const message =
-        error instanceof Error ? error.message : "Failed to install update";
+      const message = error instanceof Error ? error.message : "Failed to install update";
       logger.error(`Error during update: ${message}`, error);
     }
   };
@@ -203,9 +199,7 @@ export default function AboutSection() {
         <CardContent className="flex flex-col gap-6">
           <div>
             <p className="text-muted-foreground text-sm">Current Version</p>
-            <p className="text-3xl font-bold tracking-tight">
-              {currentVersion}
-            </p>
+            <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
           </div>
 
           <Separator />
@@ -217,19 +211,14 @@ export default function AboutSection() {
                   {stateDisplay.icon}
                 </div>
                 <div>
-                  <p className="leading-none font-medium">
-                    {stateDisplay.title}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {stateDisplay.description}
-                  </p>
+                  <p className="leading-none font-medium">{stateDisplay.title}</p>
+                  <p className="text-muted-foreground text-sm">{stateDisplay.description}</p>
                 </div>
               </div>
               {getActionButton()}
             </div>
 
-            {(updateStatus === "downloading" ||
-              updateStatus === "installing") && (
+            {(updateStatus === "downloading" || updateStatus === "installing") && (
               <Progress value={updateProgress} />
             )}
           </div>

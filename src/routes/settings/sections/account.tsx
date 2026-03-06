@@ -6,29 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
-import {
-  systemPromptAppendixAtom,
-  userNameAtom,
-} from "@/lib/jotai/settings-atoms";
+import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
 
 const MAX_APPENDIX_CHARS = 2000;
 
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
-  const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
-    systemPromptAppendixAtom,
-  );
+  const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(systemPromptAppendixAtom);
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
-  const [hideAgentOneModels, setHideAgentOneModels] = useAtom(
-    hideAgentOneModelsAtom,
-  );
+  const [hideAgentOneModels, setHideAgentOneModels] = useAtom(hideAgentOneModelsAtom);
   const { user } = useWebAuth();
 
   const handleAppendixChange = (value: string) => {
@@ -49,8 +38,7 @@ export default function AccountSection() {
                 Synchronize my settings
               </Label>
               <p className="text-muted-foreground text-sm">
-                Keep your settings in sync across devices using your AgentOne
-                account.
+                Keep your settings in sync across devices using your AgentOne account.
               </p>
             </div>
             <Tooltip>
@@ -69,10 +57,7 @@ export default function AccountSection() {
           </div>
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <Label
-                htmlFor="hide-agentone-models"
-                className="text-sm font-medium"
-              >
+              <Label htmlFor="hide-agentone-models" className="text-sm font-medium">
                 Hide AgentOne models
               </Label>
               <p className="text-muted-foreground text-sm">
@@ -90,9 +75,7 @@ export default function AccountSection() {
                   />
                 </span>
               </TooltipTrigger>
-              {!user && (
-                <TooltipContent>Sign in to hide AgentOne models</TooltipContent>
-              )}
+              {!user && <TooltipContent>Sign in to hide AgentOne models</TooltipContent>}
             </Tooltip>
           </div>
         </CardContent>
@@ -118,15 +101,12 @@ export default function AccountSection() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="system-prompt-appendix"
-              className="text-sm font-medium"
-            >
+            <Label htmlFor="system-prompt-appendix" className="text-sm font-medium">
               AI Instructions
             </Label>
             <p className="text-muted-foreground text-sm">
-              Add custom instructions that will be appended to the system
-              prompt. These will guide how AgentOne responds to you.
+              Add custom instructions that will be appended to the system prompt. These will guide
+              how AgentOne responds to you.
             </p>
             <div className="relative">
               <Textarea

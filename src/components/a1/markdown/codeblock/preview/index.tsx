@@ -2,10 +2,7 @@ import { useState } from "react";
 
 import { HtmlPreview } from "./html";
 
-const previewRegistry: Record<
-  string,
-  React.ComponentType<{ content: string }>
-> = {
+const previewRegistry: Record<string, React.ComponentType<{ content: string }>> = {
   html: HtmlPreview,
 };
 

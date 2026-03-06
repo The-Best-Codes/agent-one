@@ -1,11 +1,4 @@
-import {
-  EyeIcon,
-  EyeOffIcon,
-  PlusIcon,
-  RotateCcwIcon,
-  SaveIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { EyeIcon, EyeOffIcon, PlusIcon, RotateCcwIcon, SaveIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -78,15 +71,11 @@ export function EnvVarsEditor({
   };
 
   const updateKey = (index: number, newKey: string) => {
-    setDraft((prev) =>
-      prev.map((entry, i) => (i === index ? [newKey, entry[1]] : entry)),
-    );
+    setDraft((prev) => prev.map((entry, i) => (i === index ? [newKey, entry[1]] : entry)));
   };
 
   const updateValue = (index: number, newValue: string) => {
-    setDraft((prev) =>
-      prev.map((entry, i) => (i === index ? [entry[0], newValue] : entry)),
-    );
+    setDraft((prev) => prev.map((entry, i) => (i === index ? [entry[0], newValue] : entry)));
   };
 
   const removeEntry = (index: number) => {
@@ -132,9 +121,7 @@ export function EnvVarsEditor({
   return (
     <div className="rounded-md border p-3">
       <div className="mb-3 flex items-start justify-between gap-2">
-        <Label className={labelClassName || "text-xs"}>
-          Environment Variables
-        </Label>
+        <Label className={labelClassName || "text-xs"}>Environment Variables</Label>
         <div className="flex gap-1.5">
           {hasChanges && (
             <>
@@ -199,11 +186,7 @@ export function EnvVarsEditor({
                     onClick={() => toggleVisibility(idx)}
                     title={isVisible ? "Hide value" : "Show value"}
                   >
-                    {isVisible ? (
-                      <EyeOffIcon className="size-4" />
-                    ) : (
-                      <EyeIcon className="size-4" />
-                    )}
+                    {isVisible ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
                   </Button>
                   <Button
                     type="button"
@@ -215,9 +198,7 @@ export function EnvVarsEditor({
                   </Button>
                 </div>
                 {isDupe && (
-                  <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    Duplicate variable name
-                  </p>
+                  <p className="text-destructive mt-1 ml-0.5 text-xs">Duplicate variable name</p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">

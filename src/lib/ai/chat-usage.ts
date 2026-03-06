@@ -42,9 +42,7 @@ export function getModelCostByChatModelId(
 ): ModelsDevModel["cost"] | undefined {
   if (!chatModelId) return undefined;
 
-  const providerId = PROVIDER_IDS.find((id) =>
-    chatModelId.startsWith(`${id}-`),
-  );
+  const providerId = PROVIDER_IDS.find((id) => chatModelId.startsWith(`${id}-`));
   if (!providerId) return undefined;
   const modelId = chatModelId.slice(providerId.length + 1);
 
@@ -69,24 +67,16 @@ export function calculateCostUsdFromUsage(
     textTokens ?? Math.max(0, fallbackOutputTokens - reasoningTokens);
 
   const inputCost = (inputTokens * (modelCost.input ?? 0)) / TOKENS_PER_MILLION;
-  const cacheReadCost =
-    (cacheReadTokens * (modelCost.cache_read ?? 0)) / TOKENS_PER_MILLION;
-  const cacheWriteCost =
-    (cacheWriteTokens * (modelCost.cache_write ?? 0)) / TOKENS_PER_MILLION;
-  const outputCost =
-    (nonReasoningOutputTokens * (modelCost.output ?? 0)) / TOKENS_PER_MILLION;
+  const cacheReadCost = (cacheReadTokens * (modelCost.cache_read ?? 0)) / TOKENS_PER_MILLION;
+  const cacheWriteCost = (cacheWriteTokens * (modelCost.cache_write ?? 0)) / TOKENS_PER_MILLION;
+  const outputCost = (nonReasoningOutputTokens * (modelCost.output ?? 0)) / TOKENS_PER_MILLION;
   const reasoningCost =
-    (reasoningTokens * (modelCost.reasoning ?? modelCost.output ?? 0)) /
-    TOKENS_PER_MILLION;
+    (reasoningTokens * (modelCost.reasoning ?? modelCost.output ?? 0)) / TOKENS_PER_MILLION;
 
-  return (
-    inputCost + cacheReadCost + cacheWriteCost + outputCost + reasoningCost
-  );
+  return inputCost + cacheReadCost + cacheWriteCost + outputCost + reasoningCost;
 }
 
-export function calculateChatUsageFromMessages(
-  messages: UIMessage[],
-): ChatUsageSummary {
+export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsageSummary {
   let inputTokens = 0;
   let outputTokens = 0;
   let totalCostUsd = 0;

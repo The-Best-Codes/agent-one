@@ -34,15 +34,7 @@ export function ThemeRegistry() {
     root.setAttribute("data-theme", resolvedTheme);
 
     // Handle color theme
-    root.classList.remove(
-      "red",
-      "blue",
-      "yellow",
-      "green",
-      "orange",
-      "rose",
-      "violet",
-    );
+    root.classList.remove("red", "blue", "yellow", "green", "orange", "rose", "violet");
     if (colorTheme && colorTheme !== "default") {
       root.classList.add(colorTheme);
     }
@@ -59,12 +51,7 @@ export function ThemeRegistry() {
     root.setAttribute("data-roundness", roundness || "md");
 
     // Handle font
-    root.classList.remove(
-      "font-space-grotesk",
-      "font-sans",
-      "font-mono",
-      "font-roboto",
-    );
+    root.classList.remove("font-space-grotesk", "font-sans", "font-mono", "font-roboto");
     if (font === "default") {
       root.classList.add("font-space-grotesk");
     } else if (font === "system") {
@@ -76,14 +63,7 @@ export function ThemeRegistry() {
     }
     root.setAttribute("data-font", font || "default");
 
-    root.classList.remove(
-      "text-xs",
-      "text-sm",
-      "text-md",
-      "text-lg",
-      "text-xl",
-      "text-2xl",
-    );
+    root.classList.remove("text-xs", "text-sm", "text-md", "text-lg", "text-xl", "text-2xl");
     root.classList.add(`text-${textScale || "md"}`);
     root.setAttribute("data-text-scale", textScale || "md");
   }, [theme, colorTheme, roundness, font, textScale]);

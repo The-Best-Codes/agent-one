@@ -4,11 +4,7 @@ import { useState } from "react";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -33,17 +33,12 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
   const callId = part.toolCallId;
   const output = part.output as DateTimeOutput;
   const { addToolApprovalResponse } = useChatFunctions();
-  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
-    boolean | undefined
-  >();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   switch (part.state) {
     case "approval-requested":
       return (
-        <div
-          key={callId}
-          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
-        >
+        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
@@ -97,9 +92,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <div>
             <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
-          <span className="text-foreground text-sm font-bold">
-            Checking date and time...
-          </span>
+          <span className="text-foreground text-sm font-bold">Checking date and time...</span>
         </div>
       );
 
@@ -122,9 +115,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Checked date and time ({output?.formatted})
-          </span>
+          <span className="max-w-2xl truncate">Checked date and time ({output?.formatted})</span>
         </div>
       );
 
@@ -191,9 +182,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">
-            Unknown dateTime tool state
-          </span>
+          <span className="text-foreground text-sm font-bold">Unknown dateTime tool state</span>
         </div>
       );
   }

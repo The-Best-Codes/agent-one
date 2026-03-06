@@ -37,10 +37,7 @@ export const SyntaxHighlighter: FC<HighlighterProps> = ({
 
       if (result.error) {
         setError(result.error);
-        logger.error(
-          `Syntax highlighting failed for ${language}:`,
-          result.error,
-        );
+        logger.error(`Syntax highlighting failed for ${language}:`, result.error);
       }
     });
 

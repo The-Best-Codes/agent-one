@@ -18,12 +18,7 @@ interface DeleteChatModalProps {
   chatTitle: string;
 }
 
-export const DeleteChatModal = ({
-  isOpen,
-  onClose,
-  chatId,
-  chatTitle,
-}: DeleteChatModalProps) => {
+export const DeleteChatModal = ({ isOpen, onClose, chatId, chatTitle }: DeleteChatModalProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { deleteChat } = usePersistence();
@@ -42,8 +37,7 @@ export const DeleteChatModal = ({
         <DialogHeader>
           <DialogTitle>Delete Chat</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete "{chatTitle}"? This action cannot be
-            undone.
+            Are you sure you want to delete "{chatTitle}"? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

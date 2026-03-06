@@ -8,9 +8,7 @@ export interface McpServerConfigValidationValues {
   timeoutSec: number;
 }
 
-export function isMcpServerConfigFormValid(
-  values: McpServerConfigValidationValues,
-): boolean {
+export function isMcpServerConfigFormValid(values: McpServerConfigValidationValues): boolean {
   if (!values.name.trim()) {
     return false;
   }
@@ -19,7 +17,5 @@ export function isMcpServerConfigFormValid(
     return false;
   }
 
-  return values.type === "stdio"
-    ? values.command.trim() !== ""
-    : values.url.trim() !== "";
+  return values.type === "stdio" ? values.command.trim() !== "" : values.url.trim() !== "";
 }

@@ -6,18 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -82,12 +74,7 @@ const SliderConfig = ({
           </Tooltip>
         </div>
         <div className="flex items-center gap-1">
-          <span
-            className={cn(
-              "text-sm",
-              isUnset ? "text-muted-foreground" : "text-foreground",
-            )}
-          >
+          <span className={cn("text-sm", isUnset ? "text-muted-foreground" : "text-foreground")}>
             {isUnset ? "Default" : displayValue}
           </span>
           {!isUnset && (
@@ -128,11 +115,7 @@ const SliderConfig = ({
   );
 };
 
-export const ChatModelConfig = ({
-  disabled = false,
-}: {
-  disabled?: boolean;
-}) => {
+export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
@@ -151,19 +134,11 @@ export const ChatModelConfig = ({
   }, [currentModelConfig]);
 
   const debouncedSetModelConfig = useMemo(
-    () =>
-      debounce(
-        (config: Parameters<typeof setModelConfig>[0]) =>
-          setModelConfig(config),
-        300,
-      ),
+    () => debounce((config: Parameters<typeof setModelConfig>[0]) => setModelConfig(config), 300),
     [setModelConfig],
   );
 
-  useEffect(
-    () => () => debouncedSetModelConfig.cancel(),
-    [debouncedSetModelConfig],
-  );
+  useEffect(() => () => debouncedSetModelConfig.cancel(), [debouncedSetModelConfig]);
 
   const handleTemperatureChange = (value: number | undefined) => {
     setModelConfig({ ...configRef.current, temperature: value });
@@ -231,10 +206,8 @@ export const ChatModelConfig = ({
     currentModelConfig.maxSteps === DEFAULT_MODEL_CONFIG.maxSteps &&
     currentModelConfig.topP === DEFAULT_MODEL_CONFIG.topP &&
     currentModelConfig.topK === DEFAULT_MODEL_CONFIG.topK &&
-    currentModelConfig.frequencyPenalty ===
-      DEFAULT_MODEL_CONFIG.frequencyPenalty &&
-    currentModelConfig.presencePenalty ===
-      DEFAULT_MODEL_CONFIG.presencePenalty &&
+    currentModelConfig.frequencyPenalty === DEFAULT_MODEL_CONFIG.frequencyPenalty &&
+    currentModelConfig.presencePenalty === DEFAULT_MODEL_CONFIG.presencePenalty &&
     currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed;
 
   const content = (
@@ -283,9 +256,9 @@ export const ChatModelConfig = ({
               <InfoIcon className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
-              Only sample from the top K options for each subsequent token. Used
-              to remove "long tail" low probability responses. Recommended for
-              advanced use cases only. Leave empty to use model default.
+              Only sample from the top K options for each subsequent token. Used to remove "long
+              tail" low probability responses. Recommended for advanced use cases only. Leave empty
+              to use model default.
             </TooltipContent>
           </Tooltip>
         </div>
@@ -329,8 +302,7 @@ export const ChatModelConfig = ({
               <InfoIcon className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
-              Maximum number of reasoning/tool steps in one response. Leave
-              empty for no step limit.
+              Maximum number of reasoning/tool steps in one response. Leave empty for no step limit.
             </TooltipContent>
           </Tooltip>
         </div>
@@ -353,8 +325,8 @@ export const ChatModelConfig = ({
               <InfoIcon className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
-              Maximum number of tokens (words/sub-words) in the model response.
-              Leave empty to use the model's default limit.
+              Maximum number of tokens (words/sub-words) in the model response. Leave empty to use
+              the model's default limit.
             </TooltipContent>
           </Tooltip>
         </div>
@@ -375,9 +347,8 @@ export const ChatModelConfig = ({
               <InfoIcon className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
-              Integer seed for random sampling. If set and supported by the
-              model, calls will generate deterministic results. Leave empty for
-              random behavior.
+              Integer seed for random sampling. If set and supported by the model, calls will
+              generate deterministic results. Leave empty for random behavior.
             </TooltipContent>
           </Tooltip>
         </div>
@@ -415,9 +386,7 @@ export const ChatModelConfig = ({
       {isDesktop ? (
         <Popover open={effectiveOpen} onOpenChange={setOpen}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent className="max-h-[70vh] w-80 overflow-auto p-4">
-            {content}
-          </PopoverContent>
+          <PopoverContent className="max-h-[70vh] w-80 overflow-auto p-4">{content}</PopoverContent>
         </Popover>
       ) : (
         <Drawer open={effectiveOpen} onOpenChange={setOpen}>

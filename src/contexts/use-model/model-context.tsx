@@ -18,12 +18,8 @@ interface ModelProviderProps {
 }
 
 export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
-  const {
-    getNewChatModelId,
-    saveNewChatModelId,
-    getNewChatModelConfig,
-    saveNewChatModelConfig,
-  } = usePersistence();
+  const { getNewChatModelId, saveNewChatModelId, getNewChatModelConfig, saveNewChatModelConfig } =
+    usePersistence();
   const { getChatModelById, getSmartDefaultChatModel } = useModelCatalog();
 
   const [selectedModelId, setSelectedModelId] = useState<string | undefined>(
@@ -40,11 +36,9 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
     return getSmartDefaultChatModel();
   }, [selectedModelId, getChatModelById, getSmartDefaultChatModel]);
 
-  const [currentModelConfig, setCurrentModelConfig] = useState<ModelConfig>(
-    () => {
-      return getNewChatModelConfig();
-    },
-  );
+  const [currentModelConfig, setCurrentModelConfig] = useState<ModelConfig>(() => {
+    return getNewChatModelConfig();
+  });
 
   const setModel = useCallback(
     (modelId: string) => {
@@ -66,9 +60,7 @@ export const ModelProvider: React.FC<ModelProviderProps> = ({ children }) => {
   );
 
   return (
-    <ModelContext.Provider
-      value={{ currentModel, setModel, currentModelConfig, setModelConfig }}
-    >
+    <ModelContext.Provider value={{ currentModel, setModel, currentModelConfig, setModelConfig }}>
       {children}
     </ModelContext.Provider>
   );

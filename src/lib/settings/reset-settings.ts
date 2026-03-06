@@ -1,10 +1,7 @@
 import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
-import {
-  PROVIDER_REGISTRY,
-  type ProviderStorageKey,
-} from "@/lib/ai/providers/registry";
+import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/registry";
 
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";

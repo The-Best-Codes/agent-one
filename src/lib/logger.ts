@@ -1,7 +1,6 @@
 import { type ConsolaInstance, createConsola, LogLevels } from "consola";
 
-const isNodeJs =
-  typeof process !== "undefined" && process.versions && process.versions.node;
+const isNodeJs = typeof process !== "undefined" && process.versions && process.versions.node;
 
 function getTagFromPathOrUrl(inputPath: string): string {
   if (isNodeJs) {

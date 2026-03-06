@@ -32,9 +32,7 @@ export function UninstallExtensionDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Uninstall {serverName}</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to uninstall this extension?
-          </DialogDescription>
+          <DialogDescription>Are you sure you want to uninstall this extension?</DialogDescription>
         </DialogHeader>
 
         <DialogFooter>

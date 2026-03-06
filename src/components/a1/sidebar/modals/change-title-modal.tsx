@@ -12,12 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitleAI } from "@/lib/ai/title-generator";
@@ -44,8 +39,7 @@ const ChangeTitleForm = ({
 }) => {
   const [title, setTitle] = useState(currentTitle);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { saveChatTitle, loadChatMetadata, loadChatMessages } =
-    usePersistence();
+  const { saveChatTitle, loadChatMetadata, loadChatMessages } = usePersistence();
   const { getModelById } = useModelCatalog();
   const titleGenerationSettings = useAtomValue(titleGenerationAtom);
 
@@ -140,15 +134,9 @@ export const ChangeTitleModal = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Change Chat Title</DialogTitle>
-          <DialogDescription>
-            Enter a new title for this chat conversation.
-          </DialogDescription>
+          <DialogDescription>Enter a new title for this chat conversation.</DialogDescription>
         </DialogHeader>
-        <ChangeTitleForm
-          currentTitle={currentTitle}
-          chatId={chatId}
-          onClose={onClose}
-        />
+        <ChangeTitleForm currentTitle={currentTitle} chatId={chatId} onClose={onClose} />
       </DialogContent>
     </Dialog>
   );

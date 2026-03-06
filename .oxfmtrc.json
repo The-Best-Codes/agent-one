@@ -1,7 +1,6 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "sortTailwindcss": {},
-  "printWidth": 80,
   "sortPackageJson": true,
   "ignorePatterns": [
     "src/assets/fonts/**/*.ttf",

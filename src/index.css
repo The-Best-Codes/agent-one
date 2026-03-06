@@ -551,14 +551,12 @@
 
 @font-face {
   font-family: "Space Grotesk";
-  src: url("assets/fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf")
-    format("truetype");
+  src: url("assets/fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "Roboto";
-  src: url("assets/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf")
-    format("truetype");
+  src: url("assets/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf") format("truetype");
 }
 
 @layer base {

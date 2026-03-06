@@ -127,8 +127,7 @@ const MessagePartsInternal = ({
         case "text": {
           const thisIndex = textIndex++;
           if (isEditing) {
-            const lastTextIndex =
-              initialValues.length > 0 ? initialValues.length - 1 : -1;
+            const lastTextIndex = initialValues.length > 0 ? initialValues.length - 1 : -1;
             return (
               <div
                 key={key}
@@ -197,11 +196,7 @@ const MessagePartsInternal = ({
   const content = (
     <>
       {renderedParts}
-      <ChatMessageLoading
-        mode="inMessage"
-        messageId={message.id}
-        messageRole={message.role}
-      />
+      <ChatMessageLoading mode="inMessage" messageId={message.id} messageRole={message.role} />
     </>
   );
 
@@ -238,11 +233,7 @@ const MessagePartsInternal = ({
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
-                  >
+                  <Button size="sm" variant="default" className="h-6 gap-1 px-1 has-[>svg]:px-1.5">
                     <ChevronDownIcon className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -251,9 +242,7 @@ const MessagePartsInternal = ({
                     <Checkbox
                       id="regenerate-on-save"
                       checked={regenerateOnSave}
-                      onCheckedChange={(checked) =>
-                        setRegenerateOnSave(checked as boolean)
-                      }
+                      onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
                     />
                     <Label
                       htmlFor="regenerate-on-save"

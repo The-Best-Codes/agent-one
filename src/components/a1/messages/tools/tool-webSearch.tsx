@@ -51,22 +51,15 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as WebSearchInput;
   const { addToolApprovalResponse } = useChatFunctions();
-  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<
-    boolean | undefined
-  >();
-  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<
-    boolean | undefined
-  >();
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const query = input?.query || "Unknown query";
 
   switch (part.state) {
     case "approval-requested":
       return (
-        <div
-          key={callId}
-          className="border-border flex w-fit flex-col gap-2 rounded-md border p-2"
-        >
+        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <SearchIcon className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
@@ -118,9 +111,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />{" "}
-          <span className="text-foreground text-sm font-bold">
-            Preparing web search...
-          </span>
+          <span className="text-foreground text-sm font-bold">Preparing web search...</span>
         </div>
       );
 
@@ -203,8 +194,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground text-xs"
                       >
-                        View <span className="italic">"{result.query}"</span> on
-                        DuckDuckGo
+                        View <span className="italic">"{result.query}"</span> on DuckDuckGo
                         <ExternalLinkIcon className="ml-1 inline size-3" />
                       </a>
                     )}
@@ -224,9 +214,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                           {searchResult.display_url}
                         </div>
                         {searchResult.snippet && (
-                          <p className="text-muted-foreground text-xs">
-                            {searchResult.snippet}
-                          </p>
+                          <p className="text-muted-foreground text-xs">{searchResult.snippet}</p>
                         )}
                       </div>
                     </div>
@@ -287,9 +275,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="text-destructive max-w-2xl truncate">
-                Web search error
-              </span>
+              <span className="text-destructive max-w-2xl truncate">Web search error</span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="text-destructive/80 text-sm font-normal">

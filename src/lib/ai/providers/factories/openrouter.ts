@@ -6,10 +6,7 @@ const OPENROUTER_ATTRIBUTION_HEADERS = {
   "X-OpenRouter-Categories": "general-chat",
 } as const;
 
-export function getOpenRouter(
-  apiKey: string,
-  headers?: Record<string, string>,
-) {
+export function getOpenRouter(apiKey: string, headers?: Record<string, string>) {
   return createOpenRouter({
     apiKey: apiKey || "unset",
     headers: {

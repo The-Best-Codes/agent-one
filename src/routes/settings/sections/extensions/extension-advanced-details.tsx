@@ -10,10 +10,7 @@ interface ExtensionAdvancedDetailsProps {
   onUpdate: (updates: Partial<McpServerConfig>) => void;
 }
 
-export function ExtensionAdvancedDetails({
-  server,
-  onUpdate,
-}: ExtensionAdvancedDetailsProps) {
+export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvancedDetailsProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">

@@ -11,11 +11,7 @@ type BranchButtonProps = {
   "onClick" | "disabled" | "size" | "variant" | "aria-label" | "children"
 >;
 
-export const BranchButton = ({
-  onBranch,
-  className,
-  ...props
-}: BranchButtonProps) => {
+export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProps) => {
   const { status } = useChatStatus();
   const isStreaming = status === "streaming" || status === "submitted";
 

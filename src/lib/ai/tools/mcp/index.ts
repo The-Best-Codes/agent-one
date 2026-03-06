@@ -13,17 +13,9 @@ import { getDefaultStore } from "jotai";
 
 import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { getLogger } from "@/lib/logger";
-import {
-  type McpHttpServerConfig,
-  type McpServerConfig,
-} from "@/lib/settings/types";
+import { type McpHttpServerConfig, type McpServerConfig } from "@/lib/settings/types";
 
-import {
-  checkOAuthSupport,
-  isAuthError,
-  promptLoginToast,
-  promptSoftLoginToast,
-} from "./oauth";
+import { checkOAuthSupport, isAuthError, promptLoginToast, promptSoftLoginToast } from "./oauth";
 
 const store = getDefaultStore();
 
@@ -85,15 +77,10 @@ class TauriStdioMCPTransport implements MCPTransport {
         this.onerror?.(err);
       });
 
-      this.commandInstance.on(
-        "close",
-        (data: { code: number | null; signal: number | null }) => {
-          logger.verbose(
-            `MCP Server Closed with code ${data.code} and signal ${data.signal}`,
-          );
-          this.onclose?.();
-        },
-      );
+      this.commandInstance.on("close", (data: { code: number | null; signal: number | null }) => {
+        logger.verbose(`MCP Server Closed with code ${data.code} and signal ${data.signal}`);
+        this.onclose?.();
+      });
 
       this.childProcess = await this.commandInstance.spawn();
       logger.verbose(`MCP Server Spawned with PID: ${this.childProcess.pid}`);
@@ -151,11 +138,7 @@ class TauriHttpMCPTransport implements MCPTransport {
   private serverId: string;
   private token: string | null = null;
 
-  constructor(
-    url: string,
-    headers: Record<string, string> | undefined,
-    serverId: string,
-  ) {
+  constructor(url: string, headers: Record<string, string> | undefined, serverId: string) {
     this.url = url;
     this.headers = headers || {};
     this.serverId = serverId;
@@ -222,10 +205,7 @@ class TauriHttpMCPTransport implements MCPTransport {
       return true;
     } catch (error) {
       this.hasToken = false;
-      logger.verbose(
-        `Failed to refresh OAuth token for ${this.serverId}:`,
-        error,
-      );
+      logger.verbose(`Failed to refresh OAuth token for ${this.serverId}:`, error);
       return false;
     }
   }
@@ -266,9 +246,7 @@ class TauriHttpMCPTransport implements MCPTransport {
         throw new UnauthorizedError();
       }
       const errorText = await response.text();
-      throw new Error(
-        `HTTP error ${response.status}: ${response.statusText} - ${errorText}`,
-      );
+      throw new Error(`HTTP error ${response.status}: ${response.statusText} - ${errorText}`);
     }
 
     const contentType = response.headers.get("content-type") || "";
@@ -439,8 +417,7 @@ async function getMcpClientAndTools(
       Object.keys(tools),
     );
 
-    const hasToken =
-      transport instanceof TauriHttpMCPTransport ? transport.hasToken : false;
+    const hasToken = transport instanceof TauriHttpMCPTransport ? transport.hasToken : false;
 
     signal.removeEventListener("abort", onAbort);
     return { client, tools, transport, hasToken };
@@ -450,9 +427,7 @@ async function getMcpClientAndTools(
   }
 }
 
-export async function getMcpToolsForServer(
-  server: McpServerConfig,
-): Promise<ToolSet> {
+export async function getMcpToolsForServer(server: McpServerConfig): Promise<ToolSet> {
   const configHash = getConfigHash(server);
   const cached = serverCache.get(server.id);
 
@@ -576,9 +551,7 @@ function createAbortError(): Error {
   return abortError;
 }
 
-function wrapMcpToolWithAbortRace(
-  tool: Tool<unknown, unknown>,
-): Tool<unknown, unknown> {
+function wrapMcpToolWithAbortRace(tool: Tool<unknown, unknown>): Tool<unknown, unknown> {
   if (!tool.execute) {
     return tool;
   }
@@ -605,10 +578,7 @@ function wrapMcpToolWithAbortRace(
       });
 
       try {
-        return await Promise.race([
-          tool.execute!(input, options),
-          abortPromise,
-        ]);
+        return await Promise.race([tool.execute!(input, options), abortPromise]);
       } finally {
         if (onAbort) {
           abortSignal.removeEventListener("abort", onAbort);
@@ -626,9 +596,7 @@ function slugify(name: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export function buildMcpServerSlugMap(
-  servers: McpServerConfig[],
-): Map<string, string> {
+export function buildMcpServerSlugMap(servers: McpServerConfig[]): Map<string, string> {
   const slugCounts = new Map<string, number>();
   const slugMap = new Map<string, string>();
 
@@ -643,10 +611,7 @@ export function buildMcpServerSlugMap(
   return slugMap;
 }
 
-export function prefixMcpToolNames(
-  tools: ToolSet,
-  serverSlug: string,
-): ToolSet {
+export function prefixMcpToolNames(tools: ToolSet, serverSlug: string): ToolSet {
   const prefixed: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
     prefixed[`${MCP_TOOL_PREFIX}${serverSlug}${MCP_TOOL_SEPARATOR}${name}`] =

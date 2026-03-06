@@ -1,10 +1,6 @@
 "use client";
 import dedent from "dedent";
-import {
-  ChevronDownIcon,
-  RefreshCwIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
+import { ChevronDownIcon, RefreshCwIcon, TriangleAlertIcon } from "lucide-react";
 import React from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
@@ -40,10 +36,7 @@ interface ErrorBoundaryState {
   copiedStatus: "success" | "error" | null;
 }
 
-class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -91,9 +84,7 @@ class ErrorBoundary extends React.Component<
                     <TriangleAlertIcon />
                     Something went wrong
                   </CardTitle>
-                  <CardDescription>
-                    An error occurred within the main application.
-                  </CardDescription>
+                  <CardDescription>An error occurred within the main application.</CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <CopyButton
@@ -110,9 +101,7 @@ class ErrorBoundary extends React.Component<
               <Alert variant="destructive" className="mb-4">
                 <AlertTitle className="text-lg">Error Message</AlertTitle>
                 <AlertDescription>
-                  {this.state.error
-                    ? this.state.error.toString()
-                    : "Unknown error occurred"}
+                  {this.state.error ? this.state.error.toString() : "Unknown error occurred"}
                 </AlertDescription>
               </Alert>
 

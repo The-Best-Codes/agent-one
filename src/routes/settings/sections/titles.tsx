@@ -14,25 +14,19 @@ import {
 } from "@/components/ui/select";
 import { titleGenerationAtom } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
-import {
-  DEFAULT_SETTINGS,
-  type TitleGenerationMethodOption,
-} from "@/lib/settings/types";
+import { DEFAULT_SETTINGS, type TitleGenerationMethodOption } from "@/lib/settings/types";
 
 export default function TitlesSection() {
   const [titleGeneration, setTitleGeneration] = useAtom(titleGenerationAtom);
 
   const isTitleGenerationDefault =
-    JSON.stringify(titleGeneration) ===
-    JSON.stringify(DEFAULT_SETTINGS.TITLE_GENERATION);
+    JSON.stringify(titleGeneration) === JSON.stringify(DEFAULT_SETTINGS.TITLE_GENERATION);
 
   const handleResetTitleGeneration = () => {
     resetSetting("TITLE_GENERATION");
   };
 
-  const updateTitleGeneration = (
-    updates: Partial<typeof DEFAULT_SETTINGS.TITLE_GENERATION>,
-  ) => {
+  const updateTitleGeneration = (updates: Partial<typeof DEFAULT_SETTINGS.TITLE_GENERATION>) => {
     setTitleGeneration((prev) => ({ ...prev, ...updates }));
   };
 
@@ -76,12 +70,8 @@ export default function TitlesSection() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ai">AI generated</SelectItem>
-              <SelectItem value="first-user-message">
-                First user message
-              </SelectItem>
-              <SelectItem value="first-assistant-message">
-                First assistant message
-              </SelectItem>
+              <SelectItem value="first-user-message">First user message</SelectItem>
+              <SelectItem value="first-assistant-message">First assistant message</SelectItem>
               <SelectItem value="custom">Custom phrase</SelectItem>
             </SelectContent>
           </Select>

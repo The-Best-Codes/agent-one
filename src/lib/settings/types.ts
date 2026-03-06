@@ -59,11 +59,7 @@ export interface McpHttpServerConfig extends McpServerConfigBase {
 
 export type McpServerConfig = McpStdioServerConfig | McpHttpServerConfig;
 
-export type ToolId =
-  | "dateTime"
-  | "waitNumberMilliseconds"
-  | "getUrlContent"
-  | "webSearch";
+export type ToolId = "dateTime" | "waitNumberMilliseconds" | "getUrlContent" | "webSearch";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;

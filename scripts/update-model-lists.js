@@ -6,10 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const outputFile = path.join(
-  __dirname,
-  "../src/assets/model-lists/models-dev.json",
-);
+const outputFile = path.join(__dirname, "../src/assets/model-lists/models-dev.json");
 
 console.log("Fetching models.dev API...");
 const response = await fetch("https://models.dev/api.json");

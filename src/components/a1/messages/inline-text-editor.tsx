@@ -7,10 +7,7 @@ import { useAtomValue } from "jotai";
 import { memo, useRef } from "react";
 
 import { useTheme } from "@/hooks/use-theme";
-import {
-  markdownHighlightingAtom,
-  submitKeyAtom,
-} from "@/lib/jotai/settings-atoms";
+import { markdownHighlightingAtom, submitKeyAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const editorTheme = EditorView.theme({

@@ -29,8 +29,8 @@ export default function ProvidersSection() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="text-muted-foreground text-sm">
-          Configure AI providers and their API keys. Enable or disable providers
-          to control which models appear in the model selector.
+          Configure AI providers and their API keys. Enable or disable providers to control which
+          models appear in the model selector.
         </p>
 
         <ProvidersList />

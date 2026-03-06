@@ -6,10 +6,7 @@ const logger = getLogger(import.meta.url);
 
 class WorkerClient {
   private worker: Worker;
-  private pendingRequests = new Map<
-    string,
-    (response: HighlightResponse) => void
-  >();
+  private pendingRequests = new Map<string, (response: HighlightResponse) => void>();
   private requestIdCounter = 0;
   private isInitialized = false;
 

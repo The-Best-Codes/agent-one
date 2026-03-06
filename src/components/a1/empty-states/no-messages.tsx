@@ -6,23 +6,15 @@ import { userNameAtom } from "@/lib/jotai/settings-atoms";
 const getPhrases = (userName: string) => [
   userName ? `What's on your mind, ${userName}?` : "What's on your mind?",
   userName ? `Where should we begin, ${userName}?` : "Where should we begin?",
-  userName
-    ? `How can I help you today, ${userName}?`
-    : "How can I help you today?",
+  userName ? `How can I help you today, ${userName}?` : "How can I help you today?",
   userName ? `I'm all ears, ${userName}!` : "I'm all ears!",
   userName ? `What can I help with, ${userName}?` : "What can I help with?",
   userName ? `Where should we start, ${userName}?` : "Where should we start?",
   "Ask me anything.",
   "Ready when you are.",
-  userName
-    ? `What's on your mind today, ${userName}?`
-    : "What's on your mind today?",
-  userName
-    ? `What are you working on, ${userName}?`
-    : "What are you working on?",
-  userName
-    ? `What's on the agenda today, ${userName}?`
-    : "What's on the agenda today?",
+  userName ? `What's on your mind today, ${userName}?` : "What's on your mind today?",
+  userName ? `What are you working on, ${userName}?` : "What are you working on?",
+  userName ? `What's on the agenda today, ${userName}?` : "What's on the agenda today?",
   userName ? `How can I help, ${userName}?` : "How can I help?",
   userName ? `What can I do for you, ${userName}?` : "What can I do for you?",
 ];

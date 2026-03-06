@@ -6,9 +6,7 @@ import type { TitleGenerationSettings } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-function calculateMaxOutputTokens(
-  maxTokens?: number | "none",
-): number | undefined {
+function calculateMaxOutputTokens(maxTokens?: number | "none"): number | undefined {
   if (maxTokens === "none") {
     return undefined;
   }
@@ -30,10 +28,7 @@ export function hasMessageTextContent(message: UIMessage): boolean {
   return extractTextFromMessage(message).length > 0;
 }
 
-function extractMessageText(
-  messages: UIMessage[],
-  role: "user" | "assistant",
-): string {
+function extractMessageText(messages: UIMessage[], role: "user" | "assistant"): string {
   const message = messages.find((m) => m.role === role);
   if (!message) return "";
   return extractTextFromMessage(message);
@@ -50,9 +45,7 @@ export async function generateChatTitleAI(
   fallbackPhrase: string,
   maxTokens?: number | "none",
 ): Promise<string> {
-  logger.verbose(
-    `Generating AI title for chat with ${messages.length} messages`,
-  );
+  logger.verbose(`Generating AI title for chat with ${messages.length} messages`);
   try {
     const relevantMessages = messages.slice(0, 2);
 
@@ -128,10 +121,5 @@ export async function generateChatTitle(
     return syncTitle;
   }
 
-  return generateChatTitleAI(
-    model,
-    messages,
-    settings.fallbackPhrase,
-    maxTokens,
-  );
+  return generateChatTitleAI(model, messages, settings.fallbackPhrase, maxTokens);
 }

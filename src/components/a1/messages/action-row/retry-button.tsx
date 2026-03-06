@@ -2,10 +2,7 @@ import { RefreshCcwIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  useChatFunctions,
-  useChatStatus,
-} from "@/contexts/use-chat/chat-hooks";
+import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 
 type RetryButtonProps = {
   messageId: string;
@@ -15,11 +12,7 @@ type RetryButtonProps = {
 >;
 
 // TODO: Disable this button when no models are available (see ../../input/no-model-section.tsx for example)
-export const RetryButton = ({
-  messageId,
-  className,
-  ...props
-}: RetryButtonProps) => {
+export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps) => {
   const { regenerate } = useChatFunctions();
   const { status } = useChatStatus();
 

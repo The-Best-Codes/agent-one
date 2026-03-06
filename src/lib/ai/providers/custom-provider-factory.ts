@@ -38,9 +38,7 @@ export async function fetchProviderModels(
   });
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch models: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
   }
 
   const json = await response.json();

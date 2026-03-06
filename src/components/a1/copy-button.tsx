@@ -8,13 +8,7 @@ import { cn } from "@/lib/utils";
 
 const logger = getLogger(import.meta.url);
 
-type ButtonVariant =
-  | "default"
-  | "destructive"
-  | "outline"
-  | "secondary"
-  | "ghost"
-  | "link";
+type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 
 type CopyButtonProps = {
   text: string;
@@ -25,10 +19,7 @@ type CopyButtonProps = {
     success: ButtonVariant;
     error: ButtonVariant;
   };
-} & Omit<
-  ComponentProps<typeof Button>,
-  "onClick" | "disabled" | "variant" | "children"
->;
+} & Omit<ComponentProps<typeof Button>, "onClick" | "disabled" | "variant" | "children">;
 
 export const CopyButton = ({
   text,
@@ -38,9 +29,7 @@ export const CopyButton = ({
   size,
   ...props
 }: CopyButtonProps) => {
-  const [copyState, setCopyState] = useState<
-    "idle" | "copying" | "success" | "error"
-  >("idle");
+  const [copyState, setCopyState] = useState<"idle" | "copying" | "success" | "error">("idle");
 
   const handleCopy = async () => {
     try {

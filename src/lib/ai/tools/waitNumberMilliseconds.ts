@@ -15,10 +15,7 @@ export const createWaitTool = (config: WaitToolConfig) =>
         .default(Math.min(1000, config.maxMs)),
     }),
     execute: async (input, { abortSignal }) => {
-      const clampedMs = Math.max(
-        config.minMs,
-        Math.min(config.maxMs, input.milliseconds),
-      );
+      const clampedMs = Math.max(config.minMs, Math.min(config.maxMs, input.milliseconds));
 
       await new Promise<void>((resolve, reject) => {
         const timeoutId = setTimeout(resolve, clampedMs);

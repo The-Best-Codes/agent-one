@@ -10,11 +10,7 @@ interface UserProfileDisplayProps {
   className?: string;
 }
 
-export function UserProfileDisplay({
-  user,
-  action,
-  className,
-}: UserProfileDisplayProps) {
+export function UserProfileDisplay({ user, action, className }: UserProfileDisplayProps) {
   const initials = user.name
     .split(" ")
     .map((n) => n[0])

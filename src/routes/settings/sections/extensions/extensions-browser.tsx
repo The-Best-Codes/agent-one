@@ -58,9 +58,7 @@ export function ExtensionsBrowser({
 
     const baseExtensions =
       filter === "installed"
-        ? transportFilteredExtensions.filter((extension) =>
-            isInstalled(extension),
-          )
+        ? transportFilteredExtensions.filter((extension) => isInstalled(extension))
         : transportFilteredExtensions;
 
     if (!normalizedQuery) {
@@ -73,11 +71,7 @@ export function ExtensionsBrowser({
         score:
           fuzzysort.single(
             normalizedQuery,
-            [
-              extension.displayName,
-              extension.registryName,
-              extension.searchText,
-            ]
+            [extension.displayName, extension.registryName, extension.searchText]
               .filter(Boolean)
               .join(" "),
           )?.score ?? 0,
@@ -85,14 +79,7 @@ export function ExtensionsBrowser({
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score)
       .map(({ extension }) => extension);
-  }, [
-    extensions,
-    filter,
-    isInstalled,
-    query,
-    showDeviceExtensions,
-    showOnlineExtensions,
-  ]);
+  }, [extensions, filter, isInstalled, query, showDeviceExtensions, showOnlineExtensions]);
 
   const isOverflowing = useOverflow(parentRef, {
     watch: `${filteredExtensions.length}:${filter}:${query}`,
@@ -154,24 +141,16 @@ export function ExtensionsBrowser({
                     version={extension.version}
                     iconUrl={extension.iconUrl}
                     websiteUrl={extension.websiteUrl}
-                    badges={
-                      extension.categories.length > 0
-                        ? extension.categories
-                        : extension.tags
-                    }
+                    badges={extension.categories.length > 0 ? extension.categories : extension.tags}
                     installed={installed}
                     installSupported={Boolean(extension.install)}
                     onInstall={() => onInstallClick(extension)}
                     onUninstall={() => onUninstallClick(extension)}
                     advancedContent={
-                      installed && getAdvancedContent
-                        ? getAdvancedContent(extension)
-                        : undefined
+                      installed && getAdvancedContent ? getAdvancedContent(extension) : undefined
                     }
                     moreInfoJson={
-                      installed && getMoreInfoJson
-                        ? getMoreInfoJson(extension)
-                        : undefined
+                      installed && getMoreInfoJson ? getMoreInfoJson(extension) : undefined
                     }
                   />
                 </div>

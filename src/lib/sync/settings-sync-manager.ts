@@ -59,9 +59,7 @@ class SettingsSyncManager {
   constructor() {
     this.timestamps = loadTimestamps();
     const keyCount = Object.keys(this.timestamps).length;
-    logger.verbose(
-      `SettingsSyncManager initialized with ${keyCount} tracked timestamps`,
-    );
+    logger.verbose(`SettingsSyncManager initialized with ${keyCount} tracked timestamps`);
 
     const store = getDefaultStore();
     store.sub(syncEnabledAtom, () => {
@@ -119,17 +117,12 @@ class SettingsSyncManager {
     }
 
     try {
-      logger.verbose(
-        `Sending PUT to /api/sync/settings with ${payloadKeyCount} keys`,
-      );
+      logger.verbose(`Sending PUT to /api/sync/settings with ${payloadKeyCount} keys`);
 
-      const { error } = await authClient.$fetch(
-        `${SERVER_URL}/api/sync/settings`,
-        {
-          method: "PUT",
-          body: { settings: payload },
-        },
-      );
+      const { error } = await authClient.$fetch(`${SERVER_URL}/api/sync/settings`, {
+        method: "PUT",
+        body: { settings: payload },
+      });
 
       if (error) {
         throw new Error(`Server returned error: ${JSON.stringify(error)}`);
@@ -139,9 +132,7 @@ class SettingsSyncManager {
     } catch (error) {
       logger.warn("Failed to push settings to server:", error);
       for (const key of keys) this.dirtyKeys.add(key);
-      logger.verbose(
-        `Re-queued ${keys.length} keys for retry, scheduling another push`,
-      );
+      logger.verbose(`Re-queued ${keys.length} keys for retry, scheduling another push`);
       this.debouncedPush();
     }
   }
@@ -164,17 +155,12 @@ class SettingsSyncManager {
 
   private async doPull(): Promise<void> {
     try {
-      const response = await authClient.$fetch(
-        `${SERVER_URL}/api/sync/settings`,
-        {
-          method: "GET",
-        },
-      );
+      const response = await authClient.$fetch(`${SERVER_URL}/api/sync/settings`, {
+        method: "GET",
+      });
 
       if (response.error) {
-        throw new Error(
-          `Server returned error: ${JSON.stringify(response.error)}`,
-        );
+        throw new Error(`Server returned error: ${JSON.stringify(response.error)}`);
       }
 
       const body = response.data as { settings?: ServerSettings } | null;
@@ -185,10 +171,7 @@ class SettingsSyncManager {
       }
 
       const serverKeys = Object.keys(serverSettings);
-      logger.verbose(
-        `Received ${serverKeys.length} settings from server:`,
-        serverKeys,
-      );
+      logger.verbose(`Received ${serverKeys.length} settings from server:`, serverKeys);
 
       let appliedCount = 0;
       let skippedCount = 0;
@@ -207,9 +190,7 @@ class SettingsSyncManager {
               `Applied server value for ${settingKey} (server: ${serverTime}, local: ${localTime ?? "none"})`,
             );
           } else {
-            logger.verbose(
-              `No atom setter registered for ${settingKey}, skipping apply`,
-            );
+            logger.verbose(`No atom setter registered for ${settingKey}, skipping apply`);
           }
           this.timestamps[settingKey] = serverTime;
           appliedCount++;

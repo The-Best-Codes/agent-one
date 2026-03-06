@@ -15,28 +15,22 @@ const useMobileDetection = (options: MobileDetectionOptions): boolean => {
 
   useEffect(() => {
     const checkMobile = () => {
-      const { pointerCoarse, anyHover, userAgent, onTouchStart, match } =
-        options;
+      const { pointerCoarse, anyHover, userAgent, onTouchStart, match } = options;
       const checks: boolean[] = [];
 
       if (pointerCoarse !== undefined) {
-        checks.push(
-          window.matchMedia("(pointer: coarse)").matches === pointerCoarse,
-        );
+        checks.push(window.matchMedia("(pointer: coarse)").matches === pointerCoarse);
       }
 
       if (anyHover !== undefined) {
-        checks.push(
-          window.matchMedia("(any-hover: none)").matches === anyHover,
-        );
+        checks.push(window.matchMedia("(any-hover: none)").matches === anyHover);
       }
 
       if (userAgent !== undefined) {
         const ua = navigator.userAgent.toLowerCase();
         checks.push(
-          /mobile|android|iphone|ipad|ipod|blackberry|windows phone|opera mini/i.test(
-            ua,
-          ) === userAgent,
+          /mobile|android|iphone|ipad|ipod|blackberry|windows phone|opera mini/i.test(ua) ===
+            userAgent,
         );
       }
 

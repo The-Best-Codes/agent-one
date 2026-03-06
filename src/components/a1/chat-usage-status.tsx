@@ -9,10 +9,7 @@ import {
   TooltipRoot,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  useChatLoading,
-  useChatMetadata,
-} from "@/contexts/use-chat/chat-hooks";
+import { useChatLoading, useChatMetadata } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -96,9 +93,8 @@ export const ChatUsageStatus = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                Input tokens are what you send; output tokens are what the model
-                returns. Cost is shown in USD. Edits and deleted messages are
-                not included in these stats.
+                Input tokens are what you send; output tokens are what the model returns. Cost is
+                shown in USD. Edits and deleted messages are not included in these stats.
               </TooltipContent>
             </TooltipRoot>
           </TooltipProvider>

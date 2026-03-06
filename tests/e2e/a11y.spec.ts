@@ -22,15 +22,10 @@ const routes: RouteConfig[] = [
 
 test.describe("Accessibility", () => {
   routes.forEach(({ path, label }) => {
-    test(`${label} has no critical accessibility violations`, async ({
-      page,
-    }) => {
+    test(`${label} has no critical accessibility violations`, async ({ page }) => {
       await page.addInitScript((routePath) => {
         const onboardingCompleted = routePath !== "/onboarding";
-        localStorage.setItem(
-          "agent-one-onboarding-completed",
-          String(onboardingCompleted),
-        );
+        localStorage.setItem("agent-one-onboarding-completed", String(onboardingCompleted));
       }, path);
 
       await page.goto(path);

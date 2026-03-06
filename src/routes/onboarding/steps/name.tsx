@@ -63,9 +63,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
             : "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards duration-500",
         )}
       >
-        <h2 className="text-foreground text-4xl font-bold">
-          Hi, {nameInput.trim()}!
-        </h2>
+        <h2 className="text-foreground text-4xl font-bold">Hi, {nameInput.trim()}!</h2>
       </div>
     );
   }
@@ -81,12 +79,8 @@ export function NameStep({ onSubmit }: NameStepProps) {
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-2xl font-bold">
-            What should I call you?
-          </h2>
-          <p className="text-muted-foreground">
-            Enter your name to personalize your experience.
-          </p>
+          <h2 className="text-foreground text-2xl font-bold">What should I call you?</h2>
+          <p className="text-muted-foreground">Enter your name to personalize your experience.</p>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -102,11 +96,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
               }
             }}
           />
-          <Button
-            onClick={handleSubmit}
-            disabled={!nameInput.trim()}
-            className="w-full"
-          >
+          <Button onClick={handleSubmit} disabled={!nameInput.trim()} className="w-full">
             Continue
           </Button>
         </div>

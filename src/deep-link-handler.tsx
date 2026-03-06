@@ -60,15 +60,11 @@ export function DeepLinkHandler() {
       try {
         const urlObj = new URL(url);
         const deepLinkId =
-          urlObj.hostname !== ""
-            ? urlObj.hostname
-            : urlObj.pathname.replace(/^\/+/, "");
+          urlObj.hostname !== "" ? urlObj.hostname : urlObj.pathname.replace(/^\/+/, "");
 
         const versionParam = urlObj.searchParams.get("v");
         if (versionParam === null) {
-          logger.warn(
-            `Deep link ignored: missing version parameter (v) in URL: ${url}`,
-          );
+          logger.warn(`Deep link ignored: missing version parameter (v) in URL: ${url}`);
           return;
         }
 
@@ -82,9 +78,7 @@ export function DeepLinkHandler() {
 
         const schemaVersion = getDeepLinkVersion(deepLinkId);
         if (schemaVersion === null) {
-          logger.warn(
-            `Deep link ignored: unknown deep link ID "${deepLinkId}" in URL: ${url}`,
-          );
+          logger.warn(`Deep link ignored: unknown deep link ID "${deepLinkId}" in URL: ${url}`);
           return;
         }
 
@@ -103,9 +97,7 @@ export function DeepLinkHandler() {
           if (message) {
             params.set("initialMessage", message);
           }
-          void navigate(
-            `/chat${params.size > 0 ? `?${params.toString()}` : ""}`,
-          );
+          void navigate(`/chat${params.size > 0 ? `?${params.toString()}` : ""}`);
         }
       } catch (error) {
         logger.error("Failed to parse deep link URL:", error);

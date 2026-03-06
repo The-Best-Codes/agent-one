@@ -23,12 +23,7 @@ interface ExportChatModalProps {
   chatTitle: string;
 }
 
-export const ExportChatModal = ({
-  isOpen,
-  onClose,
-  chatId,
-  chatTitle,
-}: ExportChatModalProps) => {
+export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportChatModalProps) => {
   const { loadFullChatData } = usePersistence();
   const handleExportJSON = async () => {
     const chatData = await loadFullChatData(chatId);

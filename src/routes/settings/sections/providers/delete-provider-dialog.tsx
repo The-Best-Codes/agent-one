@@ -29,8 +29,8 @@ export function DeleteProviderDialog({
         <DialogHeader>
           <DialogTitle>Delete Provider</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete &quot;{providerName}&quot;? This
-            action cannot be undone.
+            Are you sure you want to delete &quot;{providerName}&quot;? This action cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
 

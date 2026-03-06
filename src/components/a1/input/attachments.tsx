@@ -9,10 +9,7 @@ interface AttachmentsProps {
   onRemove: (index: number) => void;
 }
 
-export const Attachments: React.FC<AttachmentsProps> = ({
-  files,
-  onRemove,
-}) => {
+export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => {
   const [previews, setPreviews] = useState<{ url: string; type: string }[]>([]);
   const previewUrls = useRef<string[]>([]);
 
@@ -71,10 +68,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
               </div>
             )}
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-              <span
-                className="max-w-36 truncate text-sm font-medium"
-                title={file.name}
-              >
+              <span className="max-w-36 truncate text-sm font-medium" title={file.name}>
                 {file.name}
               </span>
               <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -83,9 +77,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({
                   <>
                     <span>&middot;</span>
                     <span className="truncate">
-                      {file.name.includes("_agent-one_chat")
-                        ? "AgentOne Chat"
-                        : file.type}
+                      {file.name.includes("_agent-one_chat") ? "AgentOne Chat" : file.type}
                     </span>
                   </>
                 )}

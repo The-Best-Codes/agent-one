@@ -71,20 +71,14 @@ export default function SettingsRoute() {
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label="Open settings menu"
-              >
+              <Button variant="outline" size="icon" aria-label="Open settings menu">
                 <ListIcon />
               </Button>
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
                 <DrawerTitle className="mb-2">Settings</DrawerTitle>
-                <DrawerDescription className="sr-only">
-                  List of setting sections
-                </DrawerDescription>
+                <DrawerDescription className="sr-only">List of setting sections</DrawerDescription>
                 <SettingsSidebar
                   activeSection={displayedSection}
                   onSectionChange={(section) => {
@@ -100,17 +94,10 @@ export default function SettingsRoute() {
 
       <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
         <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
-          <ScrollArea
-            type="always"
-            className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64"
-          >
+          <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
             <div className="flex flex-col gap-2">
               <div className="mb-2">
-                <Button
-                  variant="outline"
-                  onClick={handleNavigateBack}
-                  className="w-full"
-                >
+                <Button variant="outline" onClick={handleNavigateBack} className="w-full">
                   <ArrowLeftIcon className="size-4" />
                   Back to Chat
                 </Button>

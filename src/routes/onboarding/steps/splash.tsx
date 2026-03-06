@@ -126,24 +126,19 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
     <div
       className={cn(
         "flex flex-col items-center",
-        isExiting &&
-          "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards duration-500",
+        isExiting && "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards duration-500",
       )}
     >
       <div
         className={cn(
           "grid transition-all duration-1000 ease-in-out",
-          showWelcome
-            ? "grid-rows-[1fr] opacity-100"
-            : "grid-rows-[0fr] opacity-0",
+          showWelcome ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
         )}
         style={{ gridTemplateRows: showWelcome ? "1fr" : "0fr" }}
       >
         <div className="overflow-hidden">
           <div className="flex flex-col items-center gap-2 pb-4 text-center">
-            <h1 className="text-foreground text-4xl font-bold">
-              Welcome to {CONFIG.appName}
-            </h1>
+            <h1 className="text-foreground text-4xl font-bold">Welcome to {CONFIG.appName}</h1>
             <p className="text-muted-foreground text-xl">
               Let's get you set up with a few questions
             </p>

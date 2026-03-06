@@ -14,9 +14,7 @@ type OnboardingStep = "splash" | "name" | "account" | "welcome";
 
 export default function OnboardingRoute() {
   const navigate = useNavigate();
-  const [onboardingCompleted, setOnboardingCompleted] = useAtom(
-    onboardingCompletedAtom,
-  );
+  const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("splash");
   const [userName, setUserName] = useAtom(userNameAtom);
 
@@ -44,19 +42,12 @@ export default function OnboardingRoute() {
   };
 
   return (
-    <main
-      role="main"
-      className="bg-background flex min-h-screen items-center justify-center"
-    >
-      {currentStep === "splash" && (
-        <SplashStep onGetStarted={handleGetStarted} />
-      )}
+    <main role="main" className="bg-background flex min-h-screen items-center justify-center">
+      {currentStep === "splash" && <SplashStep onGetStarted={handleGetStarted} />}
 
       {currentStep === "name" && <NameStep onSubmit={handleNameSubmit} />}
 
-      {currentStep === "account" && (
-        <AccountStep onSubmit={handleAccountComplete} />
-      )}
+      {currentStep === "account" && <AccountStep onSubmit={handleAccountComplete} />}
 
       {currentStep === "welcome" && (
         <WelcomeStep name={userName} onComplete={handleWelcomeComplete} />

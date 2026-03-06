@@ -87,10 +87,7 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
         length: input.urls.length,
       });
 
-      const singleFetch = async (
-        url: string,
-        index: number,
-      ): Promise<FetchResult> => {
+      const singleFetch = async (url: string, index: number): Promise<FetchResult> => {
         try {
           const fixedUrl = fixUrl(url);
           const result = await invoke<UrlContentResponse>("get_url_content", {
@@ -131,9 +128,7 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
       };
 
       try {
-        const fetchPromises = input.urls.map((url, index) =>
-          singleFetch(url, index),
-        );
+        const fetchPromises = input.urls.map((url, index) => singleFetch(url, index));
 
         const timeoutPromise = new Promise<"timeout">((resolve) => {
           timeoutId = setTimeout(() => {
@@ -157,8 +152,7 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
 
         logger.verbose("Processed URL results:", finalResults);
 
-        const allUrlsFailed =
-          finalResults.length > 0 && finalResults.every((r) => !r.success);
+        const allUrlsFailed = finalResults.length > 0 && finalResults.every((r) => !r.success);
 
         if (allUrlsFailed) {
           const errorDetails = finalResults
@@ -179,8 +173,7 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
           schema: {
             success:
               "Indicates if the operation as a whole is considered successful (at least one URL succeeded)",
-            results:
-              "Array of results for each URL, including success, error, or timeout status",
+            results: "Array of results for each URL, including success, error, or timeout status",
           },
         };
       } catch (error) {
@@ -188,10 +181,7 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
           logger.error("The operation was aborted.");
           throw error;
         }
-        logger.error(
-          "An unexpected error occurred while fetching URLs:",
-          error,
-        );
+        logger.error("An unexpected error occurred while fetching URLs:", error);
         return {
           success: false,
           error: `An unexpected error occurred: ${getError(error as Error)}`,

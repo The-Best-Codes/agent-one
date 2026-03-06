@@ -17,10 +17,7 @@ import {
 import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
 import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { customProviderApiKeysAtom } from "@/lib/jotai/custom-provider-api-key-atoms";
-import {
-  type CustomProvider,
-  customProvidersAtom,
-} from "@/lib/jotai/custom-provider-atoms";
+import { type CustomProvider, customProvidersAtom } from "@/lib/jotai/custom-provider-atoms";
 import { providerConfigAtoms } from "@/lib/jotai/provider-atoms";
 
 export interface ModelData {
@@ -99,10 +96,7 @@ function mapModelsDevModels(
   }));
 }
 
-function mapCustomProviderModels(
-  provider: CustomProvider,
-  apiKey: string,
-): ModelData[] {
+function mapCustomProviderModels(provider: CustomProvider, apiKey: string): ModelData[] {
   const instance = createCustomProvider(provider, apiKey);
 
   return provider.models.map((model) => ({
@@ -245,9 +239,10 @@ export function useModelCatalog() {
 
   const providerIsAvailable = useMemo(
     () =>
-      Object.fromEntries(
-        PROVIDER_REGISTRY.map((p) => [p.id, configs[p.id].enabled]),
-      ) as Record<ProviderId, boolean>,
+      Object.fromEntries(PROVIDER_REGISTRY.map((p) => [p.id, configs[p.id].enabled])) as Record<
+        ProviderId,
+        boolean
+      >,
     [configs],
   );
 
@@ -255,10 +250,7 @@ export function useModelCatalog() {
     return Object.fromEntries(
       PROVIDER_REGISTRY.map((p) => [
         p.id,
-        p.factory(
-          getEffectiveApiKey(p.id, apiKeys[p.id]),
-          configs[p.id].headers,
-        ),
+        p.factory(getEffectiveApiKey(p.id, apiKeys[p.id]), configs[p.id].headers),
       ]),
     );
   }, [apiKeys, configs]);
@@ -270,28 +262,19 @@ export function useModelCatalog() {
 
     const customModels = customProviders
       .filter((p) => p.enabled)
-      .flatMap((p) =>
-        mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
-      );
+      .flatMap((p) => mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""));
 
     return [...builtInModels, ...customModels];
   }, [providers, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
-      mapModelsDevModels(
-        p.id,
-        p.label,
-        providers[p.id].languageModel,
-        isChatModel,
-      ),
+      mapModelsDevModels(p.id, p.label, providers[p.id].languageModel, isChatModel),
     );
 
     const customModels = customProviders
       .filter((p) => p.enabled)
-      .flatMap((p) =>
-        mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""),
-      );
+      .flatMap((p) => mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""));
 
     return [...builtInModels, ...customModels];
   }, [providers, customProviders, customProviderApiKeys]);
@@ -300,21 +283,13 @@ export function useModelCatalog() {
     const builtInModels = PROVIDER_REGISTRY.filter(
       (p) => p.id === "google" || p.id === "openrouter",
     ).flatMap((p) =>
-      mapModelsDevModels(
-        p.id,
-        p.label,
-        providers[p.id].languageModel,
-        isImageModel,
-      ),
+      mapModelsDevModels(p.id, p.label, providers[p.id].languageModel, isImageModel),
     );
 
     const customModels = customProviders
       .filter((p) => p.enabled)
       .flatMap((p) => {
-        const instance = createCustomProvider(
-          p,
-          customProviderApiKeys[p.id] ?? "",
-        );
+        const instance = createCustomProvider(p, customProviderApiKeys[p.id] ?? "");
         return p.models
           .filter((m) => m.supportsImages)
           .map((m) => ({
@@ -330,9 +305,7 @@ export function useModelCatalog() {
   }, [providers, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_CHAT_MODELS_WITH_API_KEY = useMemo(() => {
-    const providerIdByLabel = Object.fromEntries(
-      PROVIDER_REGISTRY.map((p) => [p.label, p.id]),
-    );
+    const providerIdByLabel = Object.fromEntries(PROVIDER_REGISTRY.map((p) => [p.label, p.id]));
 
     return AVAILABLE_CHAT_MODELS.filter((model) => {
       if (model.id.startsWith("custom-")) {
@@ -354,8 +327,7 @@ export function useModelCatalog() {
   );
 
   const getChatModelByIdMemoized = useMemo(
-    () => (id: string) =>
-      AVAILABLE_CHAT_MODELS_WITH_API_KEY.find((model) => model.id === id),
+    () => (id: string) => AVAILABLE_CHAT_MODELS_WITH_API_KEY.find((model) => model.id === id),
     [AVAILABLE_CHAT_MODELS_WITH_API_KEY],
   );
 
@@ -380,8 +352,8 @@ export function useModelCatalog() {
           }
         }
 
-        const firstModelFromProvider = AVAILABLE_CHAT_MODELS_WITH_API_KEY.find(
-          (m) => m.id.startsWith(`${providerId}-`),
+        const firstModelFromProvider = AVAILABLE_CHAT_MODELS_WITH_API_KEY.find((m) =>
+          m.id.startsWith(`${providerId}-`),
         );
         if (firstModelFromProvider) {
           return firstModelFromProvider;
@@ -390,11 +362,7 @@ export function useModelCatalog() {
 
       return AVAILABLE_CHAT_MODELS_WITH_API_KEY[0];
     };
-  }, [
-    AVAILABLE_CHAT_MODELS_WITH_API_KEY,
-    providerIsAvailable,
-    getChatModelByIdMemoized,
-  ]);
+  }, [AVAILABLE_CHAT_MODELS_WITH_API_KEY, providerIsAvailable, getChatModelByIdMemoized]);
 
   const hasAvailableModels = AVAILABLE_CHAT_MODELS_WITH_API_KEY.length > 0;
 

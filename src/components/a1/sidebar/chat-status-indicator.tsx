@@ -1,9 +1,5 @@
 import { useAtomValue } from "jotai";
-import {
-  AlertCircleIcon,
-  CircleDotDashedIcon,
-  Loader2Icon,
-} from "lucide-react";
+import { AlertCircleIcon, CircleDotDashedIcon, Loader2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -39,9 +35,7 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
       {activeStatus === "loading" && (
         <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
       )}
-      {activeStatus === "error" && (
-        <AlertCircleIcon className="text-destructive size-4 shrink-0" />
-      )}
+      {activeStatus === "error" && <AlertCircleIcon className="text-destructive size-4 shrink-0" />}
       {activeStatus === "unread" && (
         <CircleDotDashedIcon className="text-foreground size-4 shrink-0" />
       )}
@@ -54,8 +48,9 @@ export const ChatStatusIndicator = ({ chatId }: { chatId: string }) => {
   const chatStatusIndicators = useAtomValue(chatStatusIndicatorsAtom);
   const rawStatus = showStatusIndicator ? chatStatusIndicators[chatId] : null;
 
-  const [displayedStatus, setDisplayedStatus] =
-    useState<ChatStatusIndicatorType>(rawStatus ?? null);
+  const [displayedStatus, setDisplayedStatus] = useState<ChatStatusIndicatorType>(
+    rawStatus ?? null,
+  );
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {

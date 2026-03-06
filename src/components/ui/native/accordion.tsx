@@ -9,16 +9,12 @@ interface AccordionContextValue {
   collapsible?: boolean;
 }
 
-const AccordionContext = React.createContext<AccordionContextValue | null>(
-  null,
-);
+const AccordionContext = React.createContext<AccordionContextValue | null>(null);
 
 const useAccordionContext = () => {
   const context = React.useContext(AccordionContext);
   if (!context) {
-    throw new Error(
-      "Accordion components must be used within an <Accordion> provider",
-    );
+    throw new Error("Accordion components must be used within an <Accordion> provider");
   }
   return context;
 };
@@ -29,15 +25,12 @@ interface AccordionItemContextValue {
   onToggle: () => void;
 }
 
-const AccordionItemContext =
-  React.createContext<AccordionItemContextValue | null>(null);
+const AccordionItemContext = React.createContext<AccordionItemContextValue | null>(null);
 
 const useAccordionItemContext = () => {
   const context = React.useContext(AccordionItemContext);
   if (!context) {
-    throw new Error(
-      "Accordion sub-components must be used within an <AccordionItem> provider",
-    );
+    throw new Error("Accordion sub-components must be used within an <AccordionItem> provider");
   }
   return context;
 };
@@ -59,20 +52,12 @@ function Accordion({
   ...props
 }: AccordionProps) {
   const [internalValue, setInternalValue] = React.useState<string[]>(
-    defaultValue
-      ? Array.isArray(defaultValue)
-        ? defaultValue
-        : [defaultValue]
-      : [],
+    defaultValue ? (Array.isArray(defaultValue) ? defaultValue : [defaultValue]) : [],
   );
 
   const isControlled = valueProp !== undefined;
   const currentValue = React.useMemo(() => {
-    return isControlled
-      ? Array.isArray(valueProp)
-        ? valueProp
-        : [valueProp]
-      : internalValue;
+    return isControlled ? (Array.isArray(valueProp) ? valueProp : [valueProp]) : internalValue;
   }, [isControlled, valueProp, internalValue]);
 
   const handleValueChange = React.useCallback(
@@ -144,10 +129,7 @@ function AccordionItem({ className, value, ...props }: AccordionItemProps) {
     <AccordionItemContext.Provider value={itemContextValue}>
       <details
         data-slot="accordion-item"
-        className={cn(
-          "accordion-details-animated border-b last:border-b-0",
-          className,
-        )}
+        className={cn("accordion-details-animated border-b last:border-b-0", className)}
         open={isOpen}
         {...props}
       />
@@ -198,8 +180,7 @@ function AccordionTrigger({
       }}
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 flex w-full cursor-pointer list-none items-start justify-between gap-4 rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50",
-        shouldRotateIcon &&
-          "[&[data-state=open]>[data-slot='accordion-icon']]:rotate-180",
+        shouldRotateIcon && "[&[data-state=open]>[data-slot='accordion-icon']]:rotate-180",
         className,
       )}
       {...props}
@@ -252,9 +233,7 @@ function AccordionContent({
       className={cn("text-sm", wrapperClassName)}
       {...props}
     >
-      <div className={cn("overflow-hidden pt-0 pb-4", className)}>
-        {children}
-      </div>
+      <div className={cn("overflow-hidden pt-0 pb-4", className)}>{children}</div>
     </div>
   );
 }

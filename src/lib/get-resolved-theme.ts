@@ -12,8 +12,7 @@ export const getResolvedTheme = (rawTheme: string): string => {
 
   if (themeToResolve === "system") {
     if (typeof window !== "undefined") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
       return systemTheme;

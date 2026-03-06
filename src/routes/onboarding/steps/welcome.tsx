@@ -1,9 +1,4 @@
-import {
-  ArrowUpRight,
-  BookOpenIcon,
-  GraduationCapIcon,
-  RocketIcon,
-} from "lucide-react";
+import { ArrowUpRight, BookOpenIcon, GraduationCapIcon, RocketIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";

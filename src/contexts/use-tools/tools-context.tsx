@@ -1,12 +1,6 @@
 import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
-import React, {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import {
   createDateTimeTool,
@@ -45,10 +39,7 @@ interface ToolsProviderProps {
   children: ReactNode;
 }
 
-function applyNeedsApprovalToTools(
-  tools: ToolSet,
-  needsApproval: boolean,
-): ToolSet {
+function applyNeedsApprovalToTools(tools: ToolSet, needsApproval: boolean): ToolSet {
   if (!needsApproval) {
     return tools;
   }
@@ -136,10 +127,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   getMcpToolsForServer(server),
                   new Promise<ToolSet>((_, reject) =>
                     setTimeout(
-                      () =>
-                        reject(
-                          new Error(`Timeout after ${server.timeoutMs}ms`),
-                        ),
+                      () => reject(new Error(`Timeout after ${server.timeoutMs}ms`)),
                       server.timeoutMs,
                     ),
                   ),
@@ -153,8 +141,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   tools: wrappedTools,
                 };
               } catch (error) {
-                const serverTypeLabel =
-                  server.type === "stdio" ? "STDIO" : "HTTP";
+                const serverTypeLabel = server.type === "stdio" ? "STDIO" : "HTTP";
                 logger.error(
                   `Failed to load MCP tools for ${serverTypeLabel} server ${server.name}:`,
                   error,
@@ -169,10 +156,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           );
 
           for (const result of results) {
-            Object.assign(
-              allTools,
-              prefixMcpToolNames(result.tools, result.serverSlug),
-            );
+            Object.assign(allTools, prefixMcpToolNames(result.tools, result.serverSlug));
           }
         }
 
@@ -209,14 +193,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       );
     }
     if (enabledTools.getUrlContent) {
-      filteredStaticTools.getUrlContent = createGetUrlContentTool(
-        toolConfigs.getUrlContent,
-      );
+      filteredStaticTools.getUrlContent = createGetUrlContentTool(toolConfigs.getUrlContent);
     }
     if (enabledTools.webSearch) {
-      filteredStaticTools.webSearch = createWebSearchTool(
-        toolConfigs.webSearch,
-      );
+      filteredStaticTools.webSearch = createWebSearchTool(toolConfigs.webSearch);
     }
 
     if (mcpLoadedRef.current) {

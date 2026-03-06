@@ -62,11 +62,7 @@ function InstallFieldInput({
             onClick={() => setShowSecret((prev) => !prev)}
             title={showSecret ? "Hide value" : "Show value"}
           >
-            {showSecret ? (
-              <EyeOffIcon className="size-4" />
-            ) : (
-              <EyeIcon className="size-4" />
-            )}
+            {showSecret ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
           </Button>
         ) : null}
       </div>
@@ -92,13 +88,10 @@ function InstallExtensionDialogBody({
       return {};
     }
 
-    return install.fields.reduce<Record<string, string>>(
-      (accumulator, field) => {
-        accumulator[field.id] = field.defaultValue;
-        return accumulator;
-      },
-      {},
-    );
+    return install.fields.reduce<Record<string, string>>((accumulator, field) => {
+      accumulator[field.id] = field.defaultValue;
+      return accumulator;
+    }, {});
   }, [install]);
 
   const [name, setName] = useState(extension.displayName);
@@ -106,8 +99,7 @@ function InstallExtensionDialogBody({
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [command, setCommand] = useState(install?.commandTemplate || "");
   const [url, setUrl] = useState(install?.urlTemplate || "");
-  const [fieldValues, setFieldValues] =
-    useState<Record<string, string>>(defaultFieldValues);
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>(defaultFieldValues);
 
   if (!install) {
     return null;
@@ -124,9 +116,7 @@ function InstallExtensionDialogBody({
               key={field.id}
               field={field}
               value={fieldValues[field.id] || ""}
-              onChange={(value) =>
-                setFieldValues((prev) => ({ ...prev, [field.id]: value }))
-              }
+              onChange={(value) => setFieldValues((prev) => ({ ...prev, [field.id]: value }))}
             />
           ))}
         </div>
@@ -140,10 +130,7 @@ function InstallExtensionDialogBody({
       command,
       url,
       timeoutSec,
-    }) &&
-    requiredFields.every(
-      (field) => (fieldValues[field.id] || "").trim() !== "",
-    );
+    }) && requiredFields.every((field) => (fieldValues[field.id] || "").trim() !== "");
 
   const handleInstall = () => {
     if (!isFormValid) {

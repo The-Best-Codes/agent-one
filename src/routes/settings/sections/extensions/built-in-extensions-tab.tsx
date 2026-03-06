@@ -16,11 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { enabledToolsAtom, toolConfigsAtom } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
-import {
-  DEFAULT_SETTINGS,
-  type ToolConfigs,
-  type ToolId,
-} from "@/lib/settings/types";
+import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
 
 interface BuiltInExtensionsTabProps {
   query: string;
@@ -97,10 +93,7 @@ export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
     setEnabledTools((prev) => ({ ...prev, [toolId]: enabled }));
   };
 
-  const updateToolConfig = <T extends ToolId>(
-    toolId: T,
-    updates: Partial<ToolConfigs[T]>,
-  ) => {
+  const updateToolConfig = <T extends ToolId>(toolId: T, updates: Partial<ToolConfigs[T]>) => {
     setToolConfigs((prev) => ({
       ...prev,
       [toolId]: { ...prev[toolId], ...updates },
@@ -111,9 +104,7 @@ export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
     <div className="space-y-3">
       <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
         <div className="flex flex-1 flex-col items-start">
-          <Label className="text-sm font-medium">
-            Built-in extension settings
-          </Label>
+          <Label className="text-sm font-medium">Built-in extension settings</Label>
           <p className="text-muted-foreground mt-1 text-sm">
             Choose which built-in extensions are available and how they behave.
           </p>
@@ -134,20 +125,14 @@ export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
           No built-in extensions match your search.
         </div>
       ) : (
-        <Accordion
-          type="single"
-          collapsible
-          className="border-border w-full rounded-md border"
-        >
+        <Accordion type="single" collapsible className="border-border w-full rounded-md border">
           {filteredToolIds.map((toolId) => (
             <AccordionItem key={toolId} value={toolId}>
               <div className="flex items-center gap-3 px-3 [&>h3]:flex-1">
                 <Checkbox
                   id={`enabled-${toolId}`}
                   checked={enabledTools[toolId]}
-                  onCheckedChange={(checked) =>
-                    updateToolEnabled(toolId, checked as boolean)
-                  }
+                  onCheckedChange={(checked) => updateToolEnabled(toolId, checked as boolean)}
                   aria-label={`Enable ${BUILT_IN_EXTENSION_COPY[toolId].name}`}
                 />
                 <AccordionTrigger className="py-4 hover:no-underline">
@@ -242,10 +227,7 @@ export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
                             updateToolConfig("waitNumberMilliseconds", {
                               maxMs: Math.max(
                                 toolConfigs.waitNumberMilliseconds.minMs,
-                                Math.min(
-                                  parseInt(e.target.value) || 60000,
-                                  600000,
-                                ),
+                                Math.min(parseInt(e.target.value) || 60000, 600000),
                               ),
                             })
                           }
@@ -315,10 +297,7 @@ export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
                             updateToolConfig("getUrlContent", {
                               defaultMaxLength: Math.max(
                                 100,
-                                Math.min(
-                                  parseInt(e.target.value) || 1000,
-                                  50000,
-                                ),
+                                Math.min(parseInt(e.target.value) || 1000, 50000),
                               ),
                             })
                           }

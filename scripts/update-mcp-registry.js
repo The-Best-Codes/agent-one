@@ -6,10 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const outputFile = path.join(
-  __dirname,
-  "../src/assets/mcp-registry/mcp-registry.json",
-);
+const outputFile = path.join(__dirname, "../src/assets/mcp-registry/mcp-registry.json");
 
 const BASE_URL = "https://registry.modelcontextprotocol.io/v0.1/servers";
 const PAGE_LIMIT = 100;
@@ -57,6 +54,4 @@ const servers = await fetchAllServers();
 
 fs.writeFileSync(outputFile, JSON.stringify(servers, null, 2));
 
-console.log(
-  `Successfully wrote ${servers.length} servers to mcp-registry.json`,
-);
+console.log(`Successfully wrote ${servers.length} servers to mcp-registry.json`);

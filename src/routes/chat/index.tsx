@@ -2,21 +2,14 @@ import { Loader2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
-import {
-  AutoScrollContainer,
-  type AutoScrollHandle,
-} from "@/components/a1/auto-scroll-container";
+import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto-scroll-container";
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { ChatUsageStatus } from "@/components/a1/chat-usage-status";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
-import {
-  useChatLoading,
-  useChatMessages,
-  useChatStatus,
-} from "@/contexts/use-chat/chat-hooks";
+import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -67,9 +60,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               scrollableClassName="pr-2 pt-2 h-full"
               scrollButtonClassName="mr-2"
               behavior="instant"
-              buttonScrollBehavior={
-                status === "streaming" ? "instant" : "smooth"
-              }
+              buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
               {messages.length === 0 && <NoMessagesGreeting />}
               {messages.map((message) => (
@@ -77,15 +68,10 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
                   key={message.id}
                   className={cn(
                     "flex",
-                    message.role === "user"
-                      ? "justify-end"
-                      : "mb-1 justify-start last:mb-0",
+                    message.role === "user" ? "justify-end" : "mb-1 justify-start last:mb-0",
                   )}
                 >
-                  <MessageParts
-                    message={message}
-                    isLastMessage={message.id === lastMessageId}
-                  />
+                  <MessageParts message={message} isLastMessage={message.id === lastMessageId} />
                 </div>
               ))}
               {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
