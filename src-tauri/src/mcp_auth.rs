@@ -263,7 +263,11 @@ pub async fn mcp_cancel_auth(
     Ok(())
 }
 
-async fn try_get_token_with_url(server_id: &str, url: &str, db_path: PathBuf) -> Result<String, String> {
+async fn try_get_token_with_url(
+    server_id: &str,
+    url: &str,
+    db_path: PathBuf,
+) -> Result<String, String> {
     let cred_store = KeyringCredentialStore::new(server_id.to_string(), db_path);
 
     let mut auth_manager = AuthorizationManager::new(url)

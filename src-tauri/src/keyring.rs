@@ -7,8 +7,8 @@ use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce};
 use keyring::{Entry, Error as KeyringError};
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use sqlx::SqlitePool;
 use sqlx::Row;
+use sqlx::SqlitePool;
 use tauri::Manager;
 use tokio::task;
 
@@ -110,7 +110,10 @@ async fn upsert_fallback_record(
     Ok(())
 }
 
-async fn delete_fallback_record(db_path: &Path, logical_key: &str) -> Result<Option<String>, String> {
+async fn delete_fallback_record(
+    db_path: &Path,
+    logical_key: &str,
+) -> Result<Option<String>, String> {
     let pool = open_db_pool(db_path).await?;
 
     let row = sqlx::query("SELECT keyring_ref FROM secure_secret_fallback WHERE logical_key = ?")
@@ -133,7 +136,10 @@ async fn delete_fallback_record(db_path: &Path, logical_key: &str) -> Result<Opt
 }
 
 fn fallback_key_ref(logical_key: &str) -> String {
-    format!("agentone-secret-key-v1-{}", URL_SAFE_NO_PAD.encode(logical_key))
+    format!(
+        "agentone-secret-key-v1-{}",
+        URL_SAFE_NO_PAD.encode(logical_key)
+    )
 }
 
 fn encrypt_value(plaintext: &str) -> Result<(String, String, String), String> {
@@ -239,7 +245,11 @@ async fn delete_keyring_password_only(key: &str) -> Result<bool, String> {
     .map_err(|e| format!("Task join error: {}", e))?
 }
 
-async fn load_fallback_value(db_path: &Path, logical_key: &str, keyring_ref: &str) -> Result<String, String> {
+async fn load_fallback_value(
+    db_path: &Path,
+    logical_key: &str,
+    keyring_ref: &str,
+) -> Result<String, String> {
     let record = get_fallback_record(db_path, logical_key)
         .await?
         .ok_or_else(|| "Fallback secret metadata not found in database".to_string())?;
