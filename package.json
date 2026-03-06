@@ -125,7 +125,6 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "@vitest/ui": "^4.0.18",
-    "eslint-plugin-simple-import-sort": "^12.1.1",
     "jsdom": "^28.1.0",
     "oxfmt": "^0.36.0",
     "react-scan": "^0.5.3",
