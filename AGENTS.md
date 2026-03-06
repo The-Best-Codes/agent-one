@@ -2,13 +2,13 @@
 
 ## Useful commands
 
-- Run typecheck: `npm run typecheck`
-- Run ESLint: `npm run lint`
-- Run ESLint with fix: `npm run lint -- --fix` (run this to fix import order issues)
-- Format project (Prettier & cargo fmt): `npm run format`
+- Run typecheck: `bun run typecheck`
+- Run ESLint: `bun run lint`
+- Run ESLint with fix: `bun run lint -- --fix` (run this to fix import order issues)
+- Format project (Prettier & cargo fmt): `bun run format`
 - Run Rust check: `cd src-tauri && cargo check`
 - Run Rust clippy: `cd src-tauri && cargo clippy` (preferred over `cargo check`)
-- Install dependencies: `npm install *` or `cargo add *`
+- Install dependencies: `bun install *` or `cargo add *`
 - Search GitHub issues, PRs, and more for this repo: `gh` commands. Repo is The-Best-Codes/agent-one. Try to use read-only `gh` commands primarily and ask or be wary of using read-write `gh` CLI commands.
 
 ## UI Guidelines
@@ -34,5 +34,5 @@
 
 ## Installing Dependencies
 
-- Don't manually edit the `package.json` file. Instead, use `npm install` to install dependencies.
+- Don't manually edit the `package.json` file. Instead, use `bun install` to install dependencies.
 - Don't manually edit the `Cargo.toml` file. Instead, use `cargo add` to install dependencies.
