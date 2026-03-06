@@ -3,7 +3,8 @@
 ## Prerequisites
 
 - Node.js
-- npm (preferably Bun too: https://bun.com/)
+- npm
+- Bun https://bun.com/
 - Rust & Tauri https://tauri.app/start/prerequisites/
 
 ## Installation
