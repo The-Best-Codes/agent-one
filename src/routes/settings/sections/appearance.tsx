@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { Check } from "lucide-react";
+import { Check, RotateCcwIcon } from "lucide-react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { colorThemeAtom, fontAtom, roundnessAtom, textScaleAtom } from "@/lib/jotai/settings-atoms";
+import {
+  colorThemeAtom,
+  fontAtom,
+  inputStyleAtom,
+  markdownHighlightingAtom,
+  roundnessAtom,
+  textScaleAtom,
+} from "@/lib/jotai/settings-atoms";
+import { resetSetting } from "@/lib/settings/reset-settings";
+import { DEFAULT_SETTINGS, type InputStyleOption } from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
 const roundnessOptions = [
@@ -96,6 +106,20 @@ export default function AppearanceSection() {
   const [font, setFont] = useAtom(fontAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
   const [textScale, setTextScale] = useAtom(textScaleAtom);
+  const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
+  const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
+
+  const isMarkdownHighlightingDefault =
+    markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
+  const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
+
+  const handleResetMarkdownHighlighting = () => {
+    resetSetting("MARKDOWN_HIGHLIGHTING");
+  };
+
+  const handleResetInputStyle = () => {
+    resetSetting("INPUT_STYLE");
+  };
 
   return (
     <Card>
@@ -223,6 +247,66 @@ export default function AppearanceSection() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+        </div>
+
+        <div className="flex flex-row items-center justify-between gap-2">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">Markdown Highlighting</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Show markdown formatting styles while typing in the chat input.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={markdownHighlighting}
+              onCheckedChange={setMarkdownHighlighting}
+              aria-label="Toggle markdown highlighting"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleResetMarkdownHighlighting}
+              disabled={isMarkdownHighlightingDefault}
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">Input Style</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Choose how the chat input box is displayed.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={inputStyle}
+              onValueChange={(value) => setInputStyle(value as InputStyleOption)}
+            >
+              <SelectTrigger
+                className="w-full md:w-fit md:max-w-96"
+                aria-label="Select input style"
+              >
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="docked">Docked</SelectItem>
+                <SelectItem value="floating">Floating</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleResetInputStyle}
+              disabled={isInputStyleDefault}
+              aria-label="Reset to default"
+            >
+              <RotateCcwIcon className="size-4" />
+            </Button>
           </div>
         </div>
       </CardContent>
