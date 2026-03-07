@@ -3,8 +3,8 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
+import { useProviderState } from "@/hooks/use-provider-state";
 import { getProviderById, PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
-import { useProviderState } from "@/lib/hooks/use-provider-state";
 import {
   deleteCustomProviderApiKeyAtom,
   setCustomProviderApiKeyAtom,
