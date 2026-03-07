@@ -8,7 +8,6 @@ import ChatsSection from "./sections/chats";
 import ExtensionsSection from "./sections/extensions";
 import PerformanceSection from "./sections/performance";
 import ProvidersSection from "./sections/providers";
-import StreamingSection from "./sections/streaming";
 
 interface SettingsSection {
   id: string;
@@ -24,7 +23,6 @@ const componentMap: Record<SectionId, ComponentType> = {
   performance: PerformanceSection,
   appearance: AppearanceSection,
   extensions: ExtensionsSection,
-  streaming: StreamingSection,
   about: AboutSection,
 };
 

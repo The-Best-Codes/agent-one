@@ -12,13 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import {
+  experimentalThrottleEnabledAtom,
+  experimentalThrottleValueAtom,
   markdownRenderingAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
+  smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
   titleGenerationAtom,
@@ -39,6 +43,13 @@ export default function ChatsSection() {
   const [showMessageActionRow, setShowMessageActionRow] = useAtom(showMessageActionRowAtom);
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
+  const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(smoothStreamEnabledAtom);
+  const [experimentalThrottleEnabled, setExperimentalThrottleEnabled] = useAtom(
+    experimentalThrottleEnabledAtom,
+  );
+  const [experimentalThrottleValue, setExperimentalThrottleValue] = useAtom(
+    experimentalThrottleValueAtom,
+  );
   const [alwaysShowStopButton, setAlwaysShowStopButton] = useAtom(stopButtonBehaviorAtom);
   const [showChatStatusIndicator, setShowChatStatusIndicator] = useAtom(
     showChatStatusIndicatorAtom,
@@ -52,6 +63,11 @@ export default function ChatsSection() {
     showMessageActionRow === DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW;
   const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
   const isRegenerateOnSaveDefault = regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
+  const isSmoothStreamDefault = smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
+  const isExperimentalThrottleEnabledDefault =
+    experimentalThrottleEnabled === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED;
+  const isExperimentalThrottleValueDefault =
+    experimentalThrottleValue === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE;
   const isAlwaysShowStopButtonDefault =
     alwaysShowStopButton === DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR;
   const isShowChatStatusIndicatorDefault =
@@ -67,7 +83,7 @@ export default function ChatsSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Chats</CardTitle>
+          <CardTitle>Chat Behavior</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
@@ -295,8 +311,98 @@ export default function ChatsSection() {
 
       <Card>
         <CardHeader>
+          <CardTitle>Streaming Experience</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex flex-row items-center justify-between gap-2">
+            <div className="flex flex-1 flex-col items-start">
+              <Label className="text-sm font-medium">Smooth Stream</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Enable smooth streaming for a more fluid typing experience.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={smoothStreamEnabled}
+                onCheckedChange={setSmoothStreamEnabled}
+                aria-label="Toggle smooth stream"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => resetSetting("SMOOTH_STREAM_ENABLED")}
+                disabled={isSmoothStreamDefault}
+                aria-label="Reset to default"
+              >
+                <RotateCcwIcon className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-row items-center justify-between gap-2">
+            <div className="flex flex-1 flex-col items-start">
+              <Label className="text-sm font-medium">Experimental Throttle</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Enable throttling to control streaming speed.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={experimentalThrottleEnabled}
+                onCheckedChange={setExperimentalThrottleEnabled}
+                aria-label="Toggle experimental throttle"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => resetSetting("EXPERIMENTAL_THROTTLE_ENABLED")}
+                disabled={isExperimentalThrottleEnabledDefault}
+                aria-label="Reset to default"
+              >
+                <RotateCcwIcon className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          {experimentalThrottleEnabled && (
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium tabular-nums">
+                  Throttle Value: {experimentalThrottleValue}ms
+                </Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Adjust the throttle delay from 0ms to 10,000ms.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Slider
+                  value={[experimentalThrottleValue]}
+                  onValueChange={(value) => setExperimentalThrottleValue(value[0])}
+                  min={0}
+                  max={10000}
+                  step={10}
+                  className="flex-1"
+                  aria-label="Throttle value"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => resetSetting("EXPERIMENTAL_THROTTLE_VALUE")}
+                  disabled={isExperimentalThrottleValueDefault}
+                  aria-label="Reset to default"
+                >
+                  <RotateCcwIcon className="size-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Title Generation</CardTitle>
+            <CardTitle>Chat Titles</CardTitle>
             <Button
               variant="ghost"
               size="icon"
