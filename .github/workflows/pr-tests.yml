@@ -103,7 +103,8 @@ jobs:
       - name: Check for E2E marker in current commit
         id: marker
         run: |
-          if git log --format=%B -1 HEAD | grep -Fq '[e2e]'; then
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          if git log --format=%B -1 "$HEAD_SHA" | grep -Fq '[e2e]'; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
