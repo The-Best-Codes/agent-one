@@ -95,7 +95,7 @@ jobs:
         if: matrix.test == 'e2e'
 
       - name: Run E2E Playwright Tests
-        run: bun run test-local:e2e
+        run: bun run test:e2e
         env:
           CI: true
         if: matrix.test == 'e2e'
