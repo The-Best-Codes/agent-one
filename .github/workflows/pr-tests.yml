@@ -5,39 +5,8 @@ on:
     branches: [main]
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      tauri_changed: ${{ steps.filter.outputs.tauri_changed }}
-      run_e2e: ${{ steps.filter.outputs.run_e2e }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-
-      - name: Detect changed paths and E2E commit marker
-        id: filter
-        shell: bash
-        run: |
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-
-          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -q '^src-tauri/'; then
-            echo "tauri_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "tauri_changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          if git log --format=%B "$BASE_SHA..$HEAD_SHA" | grep -Fq '[e2e]'; then
-            echo "run_e2e=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run_e2e=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  js-checks:
-    name: Typecheck · Lint · Format
-    needs: changes
+  typecheck:
+    name: Typecheck
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -65,18 +34,10 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
-      - name: Lint
-        run: bun run lint
-
-      - name: Format
-        run: bun run fmt:check
-
-  e2e:
-    name: E2E Tests
-    needs: changes
-    if: needs.changes.outputs.run_e2e == 'true'
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -99,9 +60,81 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Lint
+        run: bun run lint
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@ecf28ddc73e819eb6fa29df6b34ef8921c743461 # v2.1.3
+        with:
+          bun-version: latest
+
+      - name: Cache bun dependencies
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Format
+        run: bun run fmt:check
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Check for E2E marker in current commit
+        id: marker
+        run: |
+          if git log --format=%B -1 HEAD | grep -Fq '[e2e]'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping E2E: current commit does not contain [e2e]"
+          fi
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@ecf28ddc73e819eb6fa29df6b34ef8921c743461 # v2.1.3
+        with:
+          bun-version: latest
+        if: steps.marker.outputs.run == 'true'
+
+      - name: Cache bun dependencies
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+        if: steps.marker.outputs.run == 'true'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+        if: steps.marker.outputs.run == 'true'
+
       - name: Get Playwright version
         id: playwright-version
         run: echo "version=$(bun -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+        if: steps.marker.outputs.run == 'true'
 
       - name: Cache Playwright browsers
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
@@ -109,25 +142,29 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+        if: steps.marker.outputs.run == 'true'
 
       - name: Install Playwright system dependencies
         run: bunx playwright install-deps
+        if: steps.marker.outputs.run == 'true'
 
       - name: Install Playwright browsers
         run: bunx playwright install
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        if: steps.marker.outputs.run == 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
 
       - name: Build
         run: bun run build
+        if: steps.marker.outputs.run == 'true'
 
       - name: Run Playwright tests
         run: bun run test:e2e
         env:
           CI: true
+        if: steps.marker.outputs.run == 'true'
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        if: always()
+        if: always() && steps.marker.outputs.run == 'true'
         with:
           name: playwright-report
           path: playwright-report/
@@ -135,38 +172,54 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        if: always()
+        if: always() && steps.marker.outputs.run == 'true'
         with:
           name: test-results
           path: test-results/
           retention-days: 1
 
-  rust-checks:
+  rust-clippy:
     name: Rust Clippy
-    needs: changes
-    if: needs.changes.outputs.tauri_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Check for Tauri changes
+        id: changes
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -q '^src-tauri/'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping: no changes in src-tauri/"
+          fi
 
       - name: Install system dependencies
         uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # v1.6.0
         with:
           packages: libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
           version: 1.1
+        if: steps.changes.outputs.run == 'true'
 
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: stable
           components: clippy
+        if: steps.changes.outputs.run == 'true'
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
         with:
           workspaces: "src-tauri -> target"
+        if: steps.changes.outputs.run == 'true'
 
       - name: Run Clippy
         run: cd src-tauri && cargo clippy
+        if: steps.changes.outputs.run == 'true'
