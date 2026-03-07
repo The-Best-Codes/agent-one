@@ -93,5 +93,3 @@ Copyright © 2026 bestcodes.dev
 All rights reserved.
 
 This code is proprietary and confidential. No license is granted to use, copy, modify, distribute, or create derivative works of this software except with explicit written permission from the copyright holder.
-
-rmme
