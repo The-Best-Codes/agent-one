@@ -2,12 +2,7 @@ import type { UIMessage } from "ai";
 import { useAtom } from "jotai";
 
 import { CopyButton } from "@/components/a1/copy-button";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipContent, Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { showMessageActionRowAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -43,56 +38,54 @@ export const MessageActionRow = ({
         },
       )}
     >
-      <TooltipProvider>
-        <TooltipRoot>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <CopyButton
+              className="size-6"
+              variants={{
+                idle: "secondary",
+                copying: "secondary",
+                success: "secondary",
+                error: "secondary",
+              }}
+              text={contentToCopy}
+            />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>Copy message</TooltipContent>
+      </Tooltip>
+
+      {onBranch && messageRole === "assistant" && (
+        <Tooltip>
           <TooltipTrigger asChild>
             <div>
-              <CopyButton
-                className="size-6"
-                variants={{
-                  idle: "secondary",
-                  copying: "secondary",
-                  success: "secondary",
-                  error: "secondary",
-                }}
-                text={contentToCopy}
-              />
+              <BranchButton onBranch={onBranch} className="size-6" />
             </div>
           </TooltipTrigger>
-          <TooltipContent>Copy message</TooltipContent>
-        </TooltipRoot>
-
-        {onBranch && messageRole === "assistant" && (
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <div>
-                <BranchButton onBranch={onBranch} className="size-6" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Branch conversation</TooltipContent>
-          </TooltipRoot>
-        )}
-        {messageRole === "assistant" && (
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <div>
-                <RetryButton messageId={messageId} className="size-6" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Regenerate response</TooltipContent>
-          </TooltipRoot>
-        )}
-        {onEdit && (
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <div>
-                <EditButton onEdit={onEdit} className="size-6" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>Edit message</TooltipContent>
-          </TooltipRoot>
-        )}
-      </TooltipProvider>
+          <TooltipContent>Branch conversation</TooltipContent>
+        </Tooltip>
+      )}
+      {messageRole === "assistant" && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <RetryButton messageId={messageId} className="size-6" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>Regenerate response</TooltipContent>
+        </Tooltip>
+      )}
+      {onEdit && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <EditButton onEdit={onEdit} className="size-6" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>Edit message</TooltipContent>
+        </Tooltip>
+      )}
     </div>
   );
 };

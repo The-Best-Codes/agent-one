@@ -13,12 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipContent, Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -116,7 +111,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   };
 
   const sidebarButton = isDesktop ? (
-    <TooltipRoot>
+    <Tooltip>
       <TooltipTrigger asChild>
         <Button
           variant="outline"
@@ -129,10 +124,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
         </Button>
       </TooltipTrigger>
       <TooltipContent>{toggleTooltip}</TooltipContent>
-    </TooltipRoot>
+    </Tooltip>
   ) : (
     <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <TooltipRoot>
+      <Tooltip>
         <TooltipTrigger asChild>
           <DrawerTrigger asChild>
             <Button variant="outline" size="icon" aria-label="Expand sidebar" className="size-6">
@@ -141,7 +136,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           </DrawerTrigger>
         </TooltipTrigger>
         <TooltipContent>{toggleTooltip}</TooltipContent>
-      </TooltipRoot>
+      </Tooltip>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
@@ -166,45 +161,43 @@ export const Sidebar = ({ className }: SidebarProps) => {
             !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
           )}
         >
-          <TooltipProvider>
-            {sidebarButton}
-            <div
-              className={cn(
-                "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
-                !isSidebarSmall && "pointer-events-none -translate-x-2 scale-95 opacity-0",
-              )}
-              inert={!isCollapsed}
-            >
-              <TooltipRoot>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleSearchClick}
-                    aria-label="Search chats"
-                    className="size-6"
-                  >
-                    <SearchIcon />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Search chats</TooltipContent>
-              </TooltipRoot>
-              <TooltipRoot>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleNewChat}
-                    aria-label="New chat"
-                    className="size-6"
-                  >
-                    <PlusIcon />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>New chat</TooltipContent>
-              </TooltipRoot>
-            </div>
-          </TooltipProvider>
+          {sidebarButton}
+          <div
+            className={cn(
+              "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
+              !isSidebarSmall && "pointer-events-none -translate-x-2 scale-95 opacity-0",
+            )}
+            inert={!isCollapsed}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleSearchClick}
+                  aria-label="Search chats"
+                  className="size-6"
+                >
+                  <SearchIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Search chats</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleNewChat}
+                  aria-label="New chat"
+                  className="size-6"
+                >
+                  <PlusIcon />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>New chat</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
 
