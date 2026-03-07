@@ -81,6 +81,10 @@ See https://tauri.app/plugin/updater/.
 - `bunx -y playwright test` to run all tests in all projects
 - `bunx -y playwright test --project="chromium-desktop-light" --project="pixel-7-dark"` to run only fast Chromium tests
 
+## PR Tests
+
+- To run e2e tests on a commit in your PR, add `[e2e]` to the commit message.
+
 ---
 
 Copyright © 2026 bestcodes.dev
