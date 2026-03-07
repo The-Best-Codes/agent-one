@@ -17,12 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipContent, Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -113,31 +108,29 @@ const UrlResultDisplay = memo(
           </a>
         </span>
         <div className="flex items-center gap-1">
-          <TooltipProvider>
-            {isRawContent && (
-              <TooltipRoot>
-                <TooltipTrigger asChild>
-                  <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
-                </TooltipTrigger>
-                <TooltipContent>Fetched raw content</TooltipContent>
-              </TooltipRoot>
-            )}
-            <TooltipRoot>
+          {isRawContent && (
+            <Tooltip>
               <TooltipTrigger asChild>
-                <div
-                  className={cn(
-                    "size-2 shrink-0 rounded-full",
-                    result.truncated ? "bg-yellow-500" : "bg-green-500",
-                  )}
-                />
+                <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
               </TooltipTrigger>
-              <TooltipContent>
-                {result.truncated
-                  ? `Truncated to ${input.maxLength || "unknown"} characters`
-                  : `${result.length || "All"} characters processed`}
-              </TooltipContent>
-            </TooltipRoot>
-          </TooltipProvider>
+              <TooltipContent>Fetched raw content</TooltipContent>
+            </Tooltip>
+          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={cn(
+                  "size-2 shrink-0 rounded-full",
+                  result.truncated ? "bg-yellow-500" : "bg-green-500",
+                )}
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              {result.truncated
+                ? `Truncated to ${input.maxLength || "unknown"} characters`
+                : `${result.length || "All"} characters processed`}
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     );
