@@ -4,12 +4,10 @@ import { type SectionId, sectionsMetadata } from "./sections-metadata";
 import AboutSection from "./sections/about";
 import AccountSection from "./sections/account";
 import AppearanceSection from "./sections/appearance";
-import EditorSection from "./sections/editor";
+import ChatsSection from "./sections/chats";
 import ExtensionsSection from "./sections/extensions";
-import MessagesSection from "./sections/messages";
+import PerformanceSection from "./sections/performance";
 import ProvidersSection from "./sections/providers";
-import StreamingSection from "./sections/streaming";
-import TitlesSection from "./sections/titles";
 
 interface SettingsSection {
   id: string;
@@ -21,12 +19,10 @@ interface SettingsSection {
 const componentMap: Record<SectionId, ComponentType> = {
   account: AccountSection,
   providers: ProvidersSection,
+  chats: ChatsSection,
+  performance: PerformanceSection,
   appearance: AppearanceSection,
-  editor: EditorSection,
-  messages: MessagesSection,
-  titles: TitlesSection,
   extensions: ExtensionsSection,
-  streaming: StreamingSection,
   about: AboutSection,
 };
 

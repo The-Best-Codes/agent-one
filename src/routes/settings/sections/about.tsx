@@ -194,7 +194,7 @@ export default function AboutSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>About AgentOne</CardTitle>
+          <CardTitle>Help &amp; Updates</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div>

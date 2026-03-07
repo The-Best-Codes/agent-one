@@ -28,7 +28,7 @@ export default function AccountSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>AgentOne Account</CardTitle>
+          <CardTitle>Sync &amp; Access</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <AuthStatusDisplay />
@@ -82,7 +82,7 @@ export default function AccountSection() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
+          <CardTitle>Profile &amp; Instructions</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">

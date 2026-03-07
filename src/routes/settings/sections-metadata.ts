@@ -1,13 +1,11 @@
 export const sectionsMetadata = [
   { id: "account", label: "Account" },
-  { id: "providers", label: "Providers" },
   { id: "appearance", label: "Appearance" },
-  { id: "editor", label: "Editor" },
-  { id: "messages", label: "Messages" },
-  { id: "titles", label: "Titles" },
+  { id: "chats", label: "Chats" },
   { id: "extensions", label: "Extensions" },
-  { id: "streaming", label: "Streaming" },
-  { id: "about", label: "About" },
+  { id: "performance", label: "Performance" },
+  { id: "providers", label: "Providers" },
+  { id: "about", label: "Help & Updates" },
 ] as const;
 
 export type SectionId = (typeof sectionsMetadata)[number]["id"];

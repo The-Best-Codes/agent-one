@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { Check } from "lucide-react";
+import { Check, RotateCcwIcon } from "lucide-react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { colorThemeAtom, fontAtom, roundnessAtom, textScaleAtom } from "@/lib/jotai/settings-atoms";
+import {
+  colorThemeAtom,
+  fontAtom,
+  inputStyleAtom,
+  markdownHighlightingAtom,
+  roundnessAtom,
+  textScaleAtom,
+} from "@/lib/jotai/settings-atoms";
+import { resetSetting } from "@/lib/settings/reset-settings";
+import { DEFAULT_SETTINGS, type InputStyleOption } from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
 const roundnessOptions = [
@@ -96,136 +106,222 @@ export default function AppearanceSection() {
   const [font, setFont] = useAtom(fontAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
   const [textScale, setTextScale] = useAtom(textScaleAtom);
+  const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
+  const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
+
+  const isMarkdownHighlightingDefault =
+    markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
+  const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
+
+  const handleResetMarkdownHighlighting = () => {
+    resetSetting("MARKDOWN_HIGHLIGHTING");
+  };
+
+  const handleResetInputStyle = () => {
+    resetSetting("INPUT_STYLE");
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Appearance</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-6">
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-col items-start">
-            <Label className="text-sm font-medium">Theme</Label>
-          </div>
-          <ThemeToggle className="md:max-w-64" />
-        </div>
-
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-col items-start">
-            <Label className="text-sm font-medium">Color Theme</Label>
-          </div>
-          {/* TODO: Scroll to active color selection on load */}
-          <ScrollArea className="max-w-full md:max-w-64">
-            <ScrollBar className="w-full" orientation="horizontal" />
-            <div className="flex flex-row flex-nowrap gap-2">
-              {colorThemeOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  onClick={() => setColorTheme(option.value as typeof colorTheme)}
-                  size="icon"
-                  className={cn("border-foreground rounded-md border-0", option.className)}
-                  title={option.label}
-                >
-                  {colorTheme === option.value && <Check className="size-5" />}
-                </Button>
-              ))}
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>General Look and Feel</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-col items-start">
+              <Label className="text-sm font-medium">Theme</Label>
             </div>
-          </ScrollArea>
-        </div>
-
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-col items-start">
-            <Label className="text-sm font-medium">Font</Label>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Choose the font for the application.
-            </p>
+            <ThemeToggle className="md:max-w-64" />
           </div>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            value={font}
-            onValueChange={(value) => {
-              if (value) {
-                setFont(value as typeof font);
-              }
-            }}
-            aria-label="Select font"
-            className="w-full min-w-64 md:w-fit"
-          >
-            {fontOptions.map((option) => (
-              <ToggleGroupItem
-                key={option.value}
-                value={option.value}
-                aria-label={option.label}
-                className={option.className}
-              >
-                {option.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
 
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-col items-start">
-            <Label className="text-sm font-medium">Roundness</Label>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Adjust the corner radius of UI elements.
-            </p>
-          </div>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            value={roundness}
-            onValueChange={(value) => {
-              if (value) {
-                setRoundness(value as typeof roundness);
-              }
-            }}
-            aria-label="Select roundness"
-            className="w-full md:w-fit"
-            size="lg"
-          >
-            {roundnessOptions.map((option) => (
-              <ToggleGroupItem
-                key={option.value}
-                value={option.value}
-                aria-label={option.label}
-                title={option.label}
-                size="lg"
-                className="size-16"
-              >
-                <div className={cn("bg-primary size-10", option.radius)} />
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
-
-        <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-          <div className="flex flex-col items-start">
-            <Label className="text-sm font-medium">Text Scale</Label>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Adjust the text size throughout the application.
-            </p>
-          </div>
-          <div className="w-full md:max-w-64">
-            <Select
-              value={textScale}
-              onValueChange={(value) => setTextScale(value as typeof textScale)}
-            >
-              <SelectTrigger className="w-full md:w-fit md:max-w-96" aria-label="Select text scale">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {textScaleOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-col items-start">
+              <Label className="text-sm font-medium">Color Theme</Label>
+            </div>
+            {/* TODO: Scroll to active color selection on load */}
+            <ScrollArea className="max-w-full md:max-w-64">
+              <ScrollBar className="w-full" orientation="horizontal" />
+              <div className="flex flex-row flex-nowrap gap-2">
+                {colorThemeOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    onClick={() => setColorTheme(option.value as typeof colorTheme)}
+                    size="icon"
+                    className={cn("border-foreground rounded-md border-0", option.className)}
+                    title={option.label}
+                  >
+                    {colorTheme === option.value && <Check className="size-5" />}
+                  </Button>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            </ScrollArea>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-col items-start">
+              <Label className="text-sm font-medium">Font</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Choose the font for the application.
+              </p>
+            </div>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={font}
+              onValueChange={(value) => {
+                if (value) {
+                  setFont(value as typeof font);
+                }
+              }}
+              aria-label="Select font"
+              className="w-full min-w-64 md:w-fit"
+            >
+              {fontOptions.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  aria-label={option.label}
+                  className={option.className}
+                >
+                  {option.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-col items-start">
+              <Label className="text-sm font-medium">Roundness</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Adjust the corner radius of UI elements.
+              </p>
+            </div>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={roundness}
+              onValueChange={(value) => {
+                if (value) {
+                  setRoundness(value as typeof roundness);
+                }
+              }}
+              aria-label="Select roundness"
+              className="w-full md:w-fit"
+              size="lg"
+            >
+              {roundnessOptions.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  aria-label={option.label}
+                  title={option.label}
+                  size="lg"
+                  className="size-16"
+                >
+                  <div className={cn("bg-primary size-10", option.radius)} />
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-col items-start">
+              <Label className="text-sm font-medium">Text Scale</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Adjust the text size throughout the application.
+              </p>
+            </div>
+            <div className="w-full md:max-w-64">
+              <Select
+                value={textScale}
+                onValueChange={(value) => setTextScale(value as typeof textScale)}
+              >
+                <SelectTrigger
+                  className="w-full md:w-fit md:max-w-96"
+                  aria-label="Select text scale"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {textScaleOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Chat Appearance</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex flex-row items-center justify-between gap-2">
+            <div className="flex flex-1 flex-col items-start">
+              <Label className="text-sm font-medium">Markdown Highlighting</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Show markdown formatting styles while typing in the chat input.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={markdownHighlighting}
+                onCheckedChange={setMarkdownHighlighting}
+                aria-label="Toggle markdown highlighting"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleResetMarkdownHighlighting}
+                disabled={isMarkdownHighlightingDefault}
+                aria-label="Reset to default"
+              >
+                <RotateCcwIcon className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-1 flex-col items-start">
+              <Label className="text-sm font-medium">Input Style</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Choose how the chat input box is displayed.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select
+                value={inputStyle}
+                onValueChange={(value) => setInputStyle(value as InputStyleOption)}
+              >
+                <SelectTrigger
+                  className="w-full md:w-fit md:max-w-96"
+                  aria-label="Select input style"
+                >
+                  <SelectValue placeholder="Select style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="docked">Docked</SelectItem>
+                  <SelectItem value="floating">Floating</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleResetInputStyle}
+                disabled={isInputStyleDefault}
+                aria-label="Reset to default"
+              >
+                <RotateCcwIcon className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

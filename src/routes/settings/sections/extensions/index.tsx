@@ -1,6 +1,6 @@
 import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
-import { MoreHorizontalIcon, PlusIcon, SearchIcon } from "lucide-react";
+import { FilterIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -272,8 +272,6 @@ export default function ExtensionsSection() {
 
   const isTransportFilterDisabled = activeTab === "built-in" || activeTab === "custom";
 
-  // TODO: Reintroduce MCP parallel load limit in a dedicated runtime/performance settings section.
-
   return (
     <Card>
       <CardHeader>
@@ -305,11 +303,10 @@ export default function ExtensionsSection() {
                   <Button
                     size="icon"
                     variant="outline"
-                    className="size-9 shrink-0"
                     disabled={isTransportFilterDisabled}
                     aria-label="Filter by connection"
                   >
-                    <MoreHorizontalIcon className="size-4" />
+                    <FilterIcon />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

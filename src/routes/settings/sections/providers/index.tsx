@@ -11,7 +11,7 @@ export default function ProvidersSection() {
     return (
       <Card>
         <CardHeader>
-          <h2 className="leading-none font-semibold">Providers</h2>
+          <h2 className="leading-none font-semibold">Provider Connections</h2>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Skeleton className="h-12 w-full" />
@@ -25,7 +25,7 @@ export default function ProvidersSection() {
   return (
     <Card>
       <CardHeader>
-        <h2 className="leading-none font-semibold">Providers</h2>
+        <h2 className="leading-none font-semibold">Provider Connections</h2>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="text-muted-foreground text-sm">
