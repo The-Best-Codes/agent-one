@@ -5,7 +5,42 @@ on:
     branches: [main]
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      tauri_changed: ${{ steps.filter.outputs.tauri_changed }}
+      run_e2e: ${{ steps.filter.outputs.run_e2e }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed paths and E2E commit marker
+        id: filter
+        shell: bash
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          if git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -q '^src-tauri/'; then
+            echo "tauri_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tauri_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if git log --format=%B "$BASE_SHA..$HEAD_SHA" | grep -Fq '[e2e]'; then
+            echo "run_e2e=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_e2e=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
+    needs: changes
+    if: >-
+      (matrix.test != 'rust-check' && matrix.test != 'e2e') ||
+      (matrix.test == 'rust-check' && needs.changes.outputs.tauri_changed == 'true') ||
+      (matrix.test == 'e2e' && needs.changes.outputs.run_e2e == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
