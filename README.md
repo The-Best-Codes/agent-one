@@ -83,7 +83,7 @@ See https://tauri.app/plugin/updater/.
 
 ## PR Tests
 
-- To run e2e tests on a commit in your PR, add `[e2e]` to the commit message.
+- To run E2E tests on a commit in your PR, add `[e2e]` to the commit message. E2E tests will only run if the _current_ commit message contains `[e2e]`, even previous commit messages also contain `[e2e]`.
 - Rust checks will only run if `src-tauri/` has changed.
 
 ---
