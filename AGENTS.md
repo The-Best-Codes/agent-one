@@ -31,6 +31,7 @@
 
 - Don't hesitate to browse the web for documentation.
 - AI SDK docs are in `node_modules/ai/docs`.
+- If you run ESLint and it returns warnings or errors that mention documentation URLs, ALWAYS fetch the documentation URLs first before attempting to resolve the issue so that you resolve it in alignment with the latest documentation.
 
 ## Installing Dependencies
 
