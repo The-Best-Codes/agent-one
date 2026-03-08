@@ -42,7 +42,7 @@
       "nvidia/Llama-3.3-70B-Instruct-FP8": {
         "id": "nvidia/Llama-3.3-70B-Instruct-FP8",
         "name": "Llama 3.3 70B",
-        "tool_call": true,
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -56,11 +56,10 @@
       "microsoft/Phi-4-multimodal-instruct": {
         "id": "microsoft/Phi-4-multimodal-instruct",
         "name": "Phi-4 15B",
-        "tool_call": true,
+        "tool_call": false,
         "modalities": {
           "output": [
-            "text",
-            "image"
+            "text"
           ]
         },
         "cost": {
@@ -185,7 +184,7 @@
       "mistralai/Magistral-Small-2509": {
         "id": "mistralai/Magistral-Small-2509",
         "name": "Magistral Small 1.2 24B",
-        "tool_call": true,
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
@@ -369,6 +368,140 @@
         "cost": {
           "input": 0.3,
           "output": 0.9
+        }
+      }
+    }
+  },
+  "alibaba-coding-plan": {
+    "id": "alibaba-coding-plan",
+    "name": "Alibaba Coding Plan",
+    "models": {
+      "glm-5": {
+        "id": "glm-5",
+        "name": "GLM-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "MiniMax-M2.5": {
+        "id": "MiniMax-M2.5",
+        "name": "MiniMax-M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3-coder-next": {
+        "id": "qwen3-coder-next",
+        "name": "Qwen3 Coder Next",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3-max-2026-01-23": {
+        "id": "qwen3-max-2026-01-23",
+        "name": "Qwen3 Max",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "glm-4.7": {
+        "id": "glm-4.7",
+        "name": "GLM-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3.5-plus": {
+        "id": "qwen3.5-plus",
+        "name": "Qwen3.5 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3-coder-plus": {
+        "id": "qwen3-coder-plus",
+        "name": "Qwen3 Coder Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
         }
       }
     }
@@ -749,6 +882,22 @@
           "output": 0.4,
           "cache_read": 0.03,
           "cache_write": 1
+        }
+      },
+      "google/gemini-3.1-pro-preview": {
+        "id": "google/gemini-3.1-pro-preview",
+        "name": "Gemini 3.1 Pro Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 12,
+          "cache_read": 0.2,
+          "cache_write": 4.5
         }
       },
       "google/gemini-3-pro-preview": {
@@ -1156,9 +1305,23 @@
           "cache_read": 0.12
         }
       },
+      "openai/gpt-5.2-pro": {
+        "id": "openai/gpt-5.2-pro",
+        "name": "GPT-5.2-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 21,
+          "output": 168
+        }
+      },
       "minimax/minimax-m2.5-lightning": {
         "id": "minimax/minimax-m2.5-lightning",
-        "name": "MiniMax: MiniMax M2.5 highspeed",
+        "name": "MiniMax M2.5 highspeed",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -1988,9 +2151,9 @@
           "output": 0
         }
       },
-      "minimaxai/minimax-m2": {
-        "id": "minimaxai/minimax-m2",
-        "name": "MiniMax-M2",
+      "minimaxai/minimax-m2.5": {
+        "id": "minimaxai/minimax-m2.5",
+        "name": "MiniMax-M2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -3452,6 +3615,21 @@
           "output": 0.4
         }
       },
+      "zai-org/GLM-4.6": {
+        "id": "zai-org/GLM-4.6",
+        "name": "GLM-4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.43,
+          "output": 1.74,
+          "cache_read": 0.08
+        }
+      },
       "zai-org/GLM-4.7": {
         "id": "zai-org/GLM-4.7",
         "name": "GLM-4.7",
@@ -3467,6 +3645,20 @@
           "cache_read": 0.08
         }
       },
+      "zai-org/GLM-4.6V": {
+        "id": "zai-org/GLM-4.6V",
+        "name": "GLM-4.6V",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 0.9
+        }
+      },
       "zai-org/GLM-4.5": {
         "id": "zai-org/GLM-4.5",
         "name": "GLM-4.5",
@@ -3479,6 +3671,37 @@
         "cost": {
           "input": 0.6,
           "output": 2.2
+        }
+      },
+      "zai-org/GLM-5": {
+        "id": "zai-org/GLM-5",
+        "name": "GLM-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.8,
+          "output": 2.56,
+          "cache_read": 0.16
+        }
+      },
+      "MiniMaxAI/MiniMax-M2.5": {
+        "id": "MiniMaxAI/MiniMax-M2.5",
+        "name": "MiniMax M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.27,
+          "output": 0.95,
+          "cache_read": 0.03,
+          "cache_write": 0.375
         }
       },
       "MiniMaxAI/MiniMax-M2": {
@@ -3551,6 +3774,21 @@
         "cost": {
           "input": 0.5,
           "output": 2
+        }
+      },
+      "moonshotai/Kimi-K2-Instruct-0905": {
+        "id": "moonshotai/Kimi-K2-Instruct-0905",
+        "name": "Kimi K2 0905",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 2,
+          "cache_read": 0.15
         }
       },
       "moonshotai/Kimi-K2.5": {
@@ -3933,8 +4171,9 @@
           ]
         },
         "cost": {
-          "input": 0.07,
-          "output": 0.21
+          "input": 0.1,
+          "output": 0.3,
+          "cache_read": 0.01
         }
       }
     }
@@ -5217,6 +5456,16 @@
           ]
         }
       },
+      "doubao-seed-2.0-pro": {
+        "id": "doubao-seed-2.0-pro",
+        "name": "Doubao Seed 2.0 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "gemini-2.5-flash": {
         "id": "gemini-2.5-flash",
         "name": "Gemini 2.5 Flash",
@@ -5240,6 +5489,16 @@
       "doubao-seed-1.6": {
         "id": "doubao-seed-1.6",
         "name": "Doubao-Seed 1.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "doubao-seed-2.0-mini": {
+        "id": "doubao-seed-2.0-mini",
+        "name": "Doubao Seed 2.0 Mini",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -5328,6 +5587,16 @@
           ]
         }
       },
+      "qwen3.5-397b-a17b": {
+        "id": "qwen3.5-397b-a17b",
+        "name": "Qwen3.5 397B A17B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "gemini-2.5-flash-lite": {
         "id": "gemini-2.5-flash-lite",
         "name": "Gemini 2.5 Flash Lite",
@@ -5378,6 +5647,16 @@
           ]
         }
       },
+      "qwen3-30b-a3b-instruct-2507": {
+        "id": "qwen3-30b-a3b-instruct-2507",
+        "name": "Qwen3 30b A3b Instruct 2507",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "qwen2.5-vl-72b-instruct": {
         "id": "qwen2.5-vl-72b-instruct",
         "name": "Qwen 2.5 VL 72B Instruct",
@@ -5391,6 +5670,16 @@
       "qwen3-235b-a22b": {
         "id": "qwen3-235b-a22b",
         "name": "Qwen 3 235B A22B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "doubao-seed-2.0-lite": {
+        "id": "doubao-seed-2.0-lite",
+        "name": "Doubao Seed 2.0 Lite",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -5441,6 +5730,36 @@
       "doubao-seed-1.6-flash": {
         "id": "doubao-seed-1.6-flash",
         "name": "Doubao-Seed 1.6 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "qwen3-vl-30b-a3b-thinking": {
+        "id": "qwen3-vl-30b-a3b-thinking",
+        "name": "Qwen3-Vl 30b A3b Thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "doubao-seed-2.0-code": {
+        "id": "doubao-seed-2.0-code",
+        "name": "Doubao Seed 2.0 Code",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "qwen3-30b-a3b-thinking-2507": {
+        "id": "qwen3-30b-a3b-thinking-2507",
+        "name": "Qwen3 30b A3b Thinking 2507",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -5568,6 +5887,26 @@
           ]
         }
       },
+      "xiaomi/mimo-v2-flash": {
+        "id": "xiaomi/mimo-v2-flash",
+        "name": "Xiaomi/Mimo-V2-Flash",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "stepfun/step-3.5-flash": {
+        "id": "stepfun/step-3.5-flash",
+        "name": "Stepfun/Step-3.5 Flash",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "deepseek/deepseek-v3.2-exp-thinking": {
         "id": "deepseek/deepseek-v3.2-exp-thinking",
         "name": "DeepSeek/DeepSeek-V3.2-Exp-Thinking",
@@ -5638,6 +5977,16 @@
           ]
         }
       },
+      "moonshotai/kimi-k2.5": {
+        "id": "moonshotai/kimi-k2.5",
+        "name": "Moonshotai/Kimi-K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "moonshotai/kimi-k2-thinking": {
         "id": "moonshotai/kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
@@ -5651,6 +6000,16 @@
       "z-ai/autoglm-phone-9b": {
         "id": "z-ai/autoglm-phone-9b",
         "name": "Z-Ai/Autoglm Phone 9b",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "z-ai/glm-5": {
+        "id": "z-ai/glm-5",
+        "name": "Z-Ai/GLM 5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -5681,6 +6040,16 @@
       "stepfun-ai/gelab-zero-4b-preview": {
         "id": "stepfun-ai/gelab-zero-4b-preview",
         "name": "Stepfun-Ai/Gelab Zero 4b Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "meituan/longcat-flash-lite": {
+        "id": "meituan/longcat-flash-lite",
+        "name": "Meituan/Longcat-Flash-Lite",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -5788,6 +6157,16 @@
           ]
         }
       },
+      "minimax/minimax-m2.5-highspeed": {
+        "id": "minimax/minimax-m2.5-highspeed",
+        "name": "Minimax/Minimax-M2.5 Highspeed",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
       "minimax/minimax-m2.1": {
         "id": "minimax/minimax-m2.1",
         "name": "Minimax/Minimax-M2.1",
@@ -5801,6 +6180,16 @@
       "minimax/minimax-m2": {
         "id": "minimax/minimax-m2",
         "name": "Minimax/Minimax-M2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        }
+      },
+      "minimax/minimax-m2.5": {
+        "id": "minimax/minimax-m2.5",
+        "name": "Minimax/Minimax-M2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -6057,16 +6446,6 @@
       "minimax-m2.5": {
         "id": "minimax-m2.5",
         "name": "minimax-m2.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
-      "gemini-3-pro-preview": {
-        "id": "gemini-3-pro-preview",
-        "name": "gemini-3-pro-preview",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -7061,6 +7440,21 @@
           "cache_read": 0.28
         }
       },
+      "openai/gpt-5.4": {
+        "id": "openai/gpt-5.4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25
+        }
+      },
       "openai/gpt-5.1-codex": {
         "id": "openai/gpt-5.1-codex",
         "name": "GPT-5.1 Codex",
@@ -7432,6 +7826,21 @@
     "id": "inception",
     "name": "Inception",
     "models": {
+      "mercury-2": {
+        "id": "mercury-2",
+        "name": "Mercury 2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        }
+      },
       "mercury": {
         "id": "mercury",
         "name": "Mercury",
@@ -7446,6 +7855,21 @@
           "output": 1,
           "cache_read": 0.25,
           "cache_write": 1
+        }
+      },
+      "mercury-edit": {
+        "id": "mercury-edit",
+        "name": "Mercury Edit",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
         }
       },
       "mercury-coder": {
@@ -9134,6 +9558,21 @@
           "cache_read": 0.107
         }
       },
+      "gpt-5.3-codex-spark": {
+        "id": "gpt-5.3-codex-spark",
+        "name": "GPT-5.3 Codex Spark",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.75,
+          "output": 14,
+          "cache_read": 0.175
+        }
+      },
       "qwen3-coder": {
         "id": "qwen3-coder",
         "name": "Qwen3 Coder",
@@ -9296,6 +9735,36 @@
           "input": 0.4,
           "output": 2.5,
           "cache_read": 0.4
+        }
+      },
+      "gpt-5.4": {
+        "id": "gpt-5.4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25
+        }
+      },
+      "gpt-5.4-pro": {
+        "id": "gpt-5.4-pro",
+        "name": "GPT-5.4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180,
+          "cache_read": 30
         }
       },
       "claude-haiku-4-5": {
@@ -9621,6 +10090,21 @@
           ]
         }
       },
+      "google/gemini-3.1-pro": {
+        "id": "google/gemini-3.1-pro",
+        "name": "Gemini-3.1-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 12,
+          "cache_read": 0.2
+        }
+      },
       "google/lyria": {
         "id": "google/lyria",
         "name": "Lyria",
@@ -9814,6 +10298,20 @@
           "output": 0.21
         }
       },
+      "google/gemini-3.1-flash-lite": {
+        "id": "google/gemini-3.1-flash-lite",
+        "name": "Gemini-3.1-Flash-Lite",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 1.5
+        }
+      },
       "google/gemini-3-pro": {
         "id": "google/gemini-3-pro",
         "name": "Gemini-3-Pro",
@@ -9896,6 +10394,21 @@
           "output": [
             "text"
           ]
+        }
+      },
+      "openai/gpt-5.3-codex": {
+        "id": "openai/gpt-5.3-codex",
+        "name": "GPT-5.3-Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.6,
+          "output": 13,
+          "cache_read": 0.16
         }
       },
       "openai/gpt-5-codex": {
@@ -12412,6 +12925,124 @@
       }
     }
   },
+  "alibaba-coding-plan-cn": {
+    "id": "alibaba-coding-plan-cn",
+    "name": "Alibaba Coding Plan (China)",
+    "models": {
+      "glm-5": {
+        "id": "glm-5",
+        "name": "GLM-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3-coder-next": {
+        "id": "qwen3-coder-next",
+        "name": "Qwen3 Coder Next",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3-max-2026-01-23": {
+        "id": "qwen3-max-2026-01-23",
+        "name": "Qwen3 Max",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "glm-4.7": {
+        "id": "glm-4.7",
+        "name": "GLM-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3.5-plus": {
+        "id": "qwen3.5-plus",
+        "name": "Qwen3.5 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      },
+      "qwen3-coder-plus": {
+        "id": "qwen3-coder-plus",
+        "name": "Qwen3 Coder Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        }
+      }
+    }
+  },
   "minimax-cn": {
     "id": "minimax-cn",
     "name": "MiniMax (minimaxi.com)",
@@ -14517,6 +15148,20 @@
     "id": "cloudflare-workers-ai",
     "name": "Cloudflare Workers AI",
     "models": {
+      "@cf/zai-org/glm-4.7-flash": {
+        "id": "@cf/zai-org/glm-4.7-flash",
+        "name": "GLM-4.7-Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.06,
+          "output": 0.4
+        }
+      },
       "@cf/ibm-granite/granite-4.0-h-micro": {
         "id": "@cf/ibm-granite/granite-4.0-h-micro",
         "name": "IBM Granite 4.0 H Micro",
@@ -15503,6 +16148,20 @@
           "cache_read": 3.5
         }
       },
+      "glm-5": {
+        "id": "glm-5",
+        "name": "GLM-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.88,
+          "output": 2.82
+        }
+      },
       "gpt-5.1-codex-max": {
         "id": "gpt-5.1-codex-max",
         "name": "GPT-5.1-Codex-Max",
@@ -15687,6 +16346,20 @@
           "input": 1.25,
           "output": 10,
           "cache_read": 0.125
+        }
+      },
+      "qwen3-coder-next": {
+        "id": "qwen3-coder-next",
+        "name": "Qwen3 Coder Next",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.55
         }
       },
       "minimax-m2.1": {
@@ -15940,6 +16613,20 @@
           "cache_read": 0.13
         }
       },
+      "minimax-m2.5": {
+        "id": "minimax-m2.5",
+        "name": "MiniMax-M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.29,
+          "output": 1.15
+        }
+      },
       "claude-opus-4-5": {
         "id": "claude-opus-4-5",
         "name": "Claude Opus 4.5",
@@ -15983,6 +16670,20 @@
           "input": 2,
           "output": 12,
           "cache_read": 0.5
+        }
+      },
+      "qwen3.5-plus": {
+        "id": "qwen3.5-plus",
+        "name": "Qwen 3.5 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.11,
+          "output": 0.66
         }
       },
       "claude-sonnet-4-5": {
@@ -16057,6 +16758,20 @@
           "input": 0.27,
           "output": 1.1,
           "cache_read": 0.548
+        }
+      },
+      "coding-glm-5-free": {
+        "id": "coding-glm-5-free",
+        "name": "Coding-GLM-5-Free",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
         }
       },
       "gemini-2.5-pro": {
@@ -16266,7 +16981,7 @@
       },
       "devstral-medium-latest": {
         "id": "devstral-medium-latest",
-        "name": "Devstral 2",
+        "name": "Devstral 2 (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16322,7 +17037,7 @@
       },
       "codestral-latest": {
         "id": "codestral-latest",
-        "name": "Codestral",
+        "name": "Codestral (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16336,7 +17051,7 @@
       },
       "ministral-8b-latest": {
         "id": "ministral-8b-latest",
-        "name": "Ministral 8B",
+        "name": "Ministral 8B (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16378,7 +17093,7 @@
       },
       "ministral-3b-latest": {
         "id": "ministral-3b-latest",
-        "name": "Ministral 3B",
+        "name": "Ministral 3B (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16448,7 +17163,7 @@
       },
       "pixtral-large-latest": {
         "id": "pixtral-large-latest",
-        "name": "Pixtral Large",
+        "name": "Pixtral Large (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16490,7 +17205,7 @@
       },
       "mistral-large-latest": {
         "id": "mistral-large-latest",
-        "name": "Mistral Large",
+        "name": "Mistral Large (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16532,7 +17247,7 @@
       },
       "mistral-small-latest": {
         "id": "mistral-small-latest",
-        "name": "Mistral Small",
+        "name": "Mistral Small (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16560,7 +17275,7 @@
       },
       "mistral-medium-latest": {
         "id": "mistral-medium-latest",
-        "name": "Mistral Medium",
+        "name": "Mistral Medium (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16588,7 +17303,7 @@
       },
       "magistral-medium-latest": {
         "id": "magistral-medium-latest",
-        "name": "Magistral Medium",
+        "name": "Magistral Medium (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16606,16 +17321,6 @@
     "id": "abacus",
     "name": "Abacus",
     "models": {
-      "gemini-2.0-pro-exp-02-05": {
-        "id": "gemini-2.0-pro-exp-02-05",
-        "name": "Gemini 2.0 Pro Exp",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        }
-      },
       "gpt-4o-2024-11-20": {
         "id": "gpt-4o-2024-11-20",
         "name": "GPT-4o (2024-11-20)",
@@ -16627,6 +17332,34 @@
         },
         "cost": {
           "input": 2.5,
+          "output": 10
+        }
+      },
+      "gpt-5.3-codex": {
+        "id": "gpt-5.3-codex",
+        "name": "GPT-5.3 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.75,
+          "output": 14
+        }
+      },
+      "gpt-5-codex": {
+        "id": "gpt-5-codex",
+        "name": "GPT-5 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.25,
           "output": 10
         }
       },
@@ -16658,6 +17391,20 @@
           "output": 0.6
         }
       },
+      "gpt-5.1-codex-max": {
+        "id": "gpt-5.1-codex-max",
+        "name": "GPT-5.1 Codex Max",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.25,
+          "output": 10
+        }
+      },
       "gpt-5.2-chat-latest": {
         "id": "gpt-5.2-chat-latest",
         "name": "GPT-5.2 Chat Latest",
@@ -16668,8 +17415,8 @@
           ]
         },
         "cost": {
-          "input": 1.5,
-          "output": 12
+          "input": 1.75,
+          "output": 14
         }
       },
       "grok-4-0709": {
@@ -16686,6 +17433,34 @@
           "output": 15
         }
       },
+      "gpt-5.2-codex": {
+        "id": "gpt-5.2-codex",
+        "name": "GPT-5.2 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.75,
+          "output": 14
+        }
+      },
+      "claude-opus-4-6": {
+        "id": "claude-opus-4-6",
+        "name": "Claude Opus 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25
+        }
+      },
       "grok-code-fast-1": {
         "id": "grok-code-fast-1",
         "name": "Grok Code Fast 1",
@@ -16700,6 +17475,20 @@
           "output": 1.5
         }
       },
+      "claude-sonnet-4-6": {
+        "id": "claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15
+        }
+      },
       "gemini-2.5-flash": {
         "id": "gemini-2.5-flash",
         "name": "Gemini 2.5 Flash",
@@ -16712,6 +17501,20 @@
         "cost": {
           "input": 0.3,
           "output": 2.5
+        }
+      },
+      "gpt-5.3-codex-xhigh": {
+        "id": "gpt-5.3-codex-xhigh",
+        "name": "GPT-5.3 Codex XHigh",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.75,
+          "output": 14
         }
       },
       "grok-4-1-fast-non-reasoning": {
@@ -16742,9 +17545,9 @@
           "output": 10
         }
       },
-      "gemini-2.0-flash-001": {
-        "id": "gemini-2.0-flash-001",
-        "name": "Gemini 2.0 Flash",
+      "gemini-3.1-flash-lite-preview": {
+        "id": "gemini-3.1-flash-lite-preview",
+        "name": "Gemini 3.1 Flash Lite Preview",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -16752,8 +17555,8 @@
           ]
         },
         "cost": {
-          "input": 0.1,
-          "output": 0.4
+          "input": 0.25,
+          "output": 1.5
         }
       },
       "o3": {
@@ -16840,6 +17643,20 @@
           "output": 14
         }
       },
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 3
+        }
+      },
       "gpt-4.1": {
         "id": "gpt-4.1",
         "name": "GPT-4.1",
@@ -16865,7 +17682,21 @@
         },
         "cost": {
           "input": 20,
-          "output": 80
+          "output": 40
+        }
+      },
+      "gemini-3.1-pro-preview": {
+        "id": "gemini-3.1-pro-preview",
+        "name": "Gemini 3.1 Pro Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 12
         }
       },
       "claude-3-7-sonnet-20250219": {
@@ -16980,6 +17811,20 @@
           "output": 0.79
         }
       },
+      "gpt-5.1-codex": {
+        "id": "gpt-5.1-codex",
+        "name": "GPT-5.1 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.25,
+          "output": 10
+        }
+      },
       "route-llm": {
         "id": "route-llm",
         "name": "Route LLM",
@@ -16990,8 +17835,8 @@
           ]
         },
         "cost": {
-          "input": 0.5,
-          "output": 1.5
+          "input": 3,
+          "output": 15
         }
       },
       "gemini-3-pro-preview": {
@@ -17006,6 +17851,20 @@
         "cost": {
           "input": 2,
           "output": 12
+        }
+      },
+      "gpt-5.3-chat-latest": {
+        "id": "gpt-5.3-chat-latest",
+        "name": "GPT-5.3 Chat Latest",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.75,
+          "output": 14
         }
       },
       "o3-mini": {
@@ -17134,6 +17993,20 @@
           "output": 0.4
         }
       },
+      "zai-org/glm-5": {
+        "id": "zai-org/glm-5",
+        "name": "GLM-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3.2
+        }
+      },
       "zai-org/glm-4.5": {
         "id": "zai-org/glm-4.5",
         "name": "GLM-4.5",
@@ -17172,8 +18045,8 @@
           ]
         },
         "cost": {
-          "input": 0.7,
-          "output": 2.5
+          "input": 0.6,
+          "output": 2.2
         }
       },
       "deepseek-ai/DeepSeek-R1": {
@@ -17228,8 +18101,8 @@
           ]
         },
         "cost": {
-          "input": 0.14,
-          "output": 0.28
+          "input": 0.55,
+          "output": 1.66
         }
       },
       "meta-llama/Meta-Llama-3.1-8B-Instruct": {
@@ -17272,20 +18145,6 @@
         "cost": {
           "input": 0.14,
           "output": 0.59
-        }
-      },
-      "meta-llama/Meta-Llama-3.1-70B-Instruct": {
-        "id": "meta-llama/Meta-Llama-3.1-70B-Instruct",
-        "name": "Llama 3.1 70B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.4,
-          "output": 0.4
         }
       },
       "Qwen/QwQ-32B": {
@@ -19615,6 +20474,51 @@
           "output": 0
         }
       },
+      "inception/mercury-2": {
+        "id": "inception/mercury-2",
+        "name": "Mercury 2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        }
+      },
+      "inception/mercury": {
+        "id": "inception/mercury",
+        "name": "Mercury",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        }
+      },
+      "inception/mercury-coder": {
+        "id": "inception/mercury-coder",
+        "name": "Mercury Coder",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        }
+      },
       "thudm/glm-z1-32b:free": {
         "id": "thudm/glm-z1-32b:free",
         "name": "GLM Z1 32B (free)",
@@ -19955,6 +20859,20 @@
       "openrouter/sherlock-dash-alpha": {
         "id": "openrouter/sherlock-dash-alpha",
         "name": "Sherlock Dash Alpha",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "openrouter/free": {
+        "id": "openrouter/free",
+        "name": "Free Models Router",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -21366,6 +22284,21 @@
           "output": 2
         }
       },
+      "openai/gpt-5.3-codex": {
+        "id": "openai/gpt-5.3-codex",
+        "name": "GPT-5.3-Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.75,
+          "output": 14,
+          "cache_read": 0.175
+        }
+      },
       "openai/gpt-5-codex": {
         "id": "openai/gpt-5-codex",
         "name": "GPT-5 Codex",
@@ -21644,6 +22577,41 @@
           "input": 0.4,
           "output": 1.6,
           "cache_read": 0.1
+        }
+      },
+      "openai/gpt-5.4": {
+        "id": "openai/gpt-5.4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25,
+          "context_over_200k": {
+            "input": 5,
+            "output": 22.5,
+            "cache_read": 0.5
+          }
+        }
+      },
+      "openai/gpt-5.4-pro": {
+        "id": "openai/gpt-5.4-pro",
+        "name": "GPT-5.4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180,
+          "cache_read": 30
         }
       },
       "openai/gpt-oss-safeguard-20b": {
@@ -23812,6 +24780,20 @@
     "id": "github-copilot",
     "name": "GitHub Copilot",
     "models": {
+      "gpt-5.3-codex": {
+        "id": "gpt-5.3-codex",
+        "name": "GPT-5.3-Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        }
+      },
       "gpt-5.1-codex-max": {
         "id": "gpt-5.1-codex-max",
         "name": "GPT-5.1-Codex-max",
@@ -23983,6 +24965,20 @@
       "gpt-5": {
         "id": "gpt-5",
         "name": "GPT-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "gpt-5.4": {
+        "id": "gpt-5.4",
+        "name": "GPT-5.4",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -24864,6 +25860,42 @@
           "input_audio": 1
         }
       },
+      "gemini-3.1-flash-image-preview": {
+        "id": "gemini-3.1-flash-image-preview",
+        "name": "Gemini 3.1 Flash Image (Preview)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 60
+        }
+      },
+      "gemini-3.1-flash-lite-preview": {
+        "id": "gemini-3.1-flash-lite-preview",
+        "name": "Gemini 3.1 Flash Lite Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 3,
+          "cache_read": 0.05,
+          "context_over_200k": {
+            "input": 0.25,
+            "output": 1.5,
+            "cache_read": 0.025,
+            "cache_write": 1
+          }
+        }
+      },
       "gemini-live-2.5-flash": {
         "id": "gemini-live-2.5-flash",
         "name": "Gemini Live 2.5 Flash",
@@ -25532,6 +26564,21 @@
           "cache_write": 3.75
         }
       },
+      "sonar-deep-research": {
+        "id": "sonar-deep-research",
+        "name": "sonar-deep-research",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 8,
+          "reasoning": 3
+        }
+      },
       "anthropic--claude-4.6-sonnet": {
         "id": "anthropic--claude-4.6-sonnet",
         "name": "anthropic--claude-4.6-sonnet",
@@ -25939,6 +26986,20 @@
           "output": 0.2
         }
       },
+      "openai-gpt-4o-2024-11-20": {
+        "id": "openai-gpt-4o-2024-11-20",
+        "name": "GPT-4o",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3.125,
+          "output": 12.5
+        }
+      },
       "claude-opus-45": {
         "id": "claude-opus-45",
         "name": "Claude Opus 4.5",
@@ -26046,15 +27107,15 @@
           ]
         },
         "cost": {
-          "input": 3.75,
-          "output": 18.75,
-          "cache_read": 0.375,
-          "cache_write": 4.69,
+          "input": 3.6,
+          "output": 18,
+          "cache_read": 0.36,
+          "cache_write": 4.5,
           "context_over_200k": {
-            "input": 6,
-            "output": 25,
-            "cache_read": 0.6,
-            "cache_write": 7.5
+            "input": 7.2,
+            "output": 27,
+            "cache_read": 0.72,
+            "cache_write": 9
           }
         }
       },
@@ -26213,9 +27274,9 @@
           ]
         },
         "cost": {
-          "input": 0.5,
-          "output": 1.25,
-          "cache_read": 0.125
+          "input": 0.25,
+          "output": 0.625,
+          "cache_read": 0.0625
         }
       },
       "openai-gpt-52": {
@@ -26231,6 +27292,21 @@
           "input": 2.19,
           "output": 17.5,
           "cache_read": 0.219
+        }
+      },
+      "openai-gpt-54": {
+        "id": "openai-gpt-54",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3.13,
+          "output": 18.8,
+          "cache_read": 0.313
         }
       },
       "deepseek-v3.2": {
@@ -26267,6 +27343,21 @@
             "output": 22.5,
             "cache_read": 0.5
           }
+        }
+      },
+      "openai-gpt-4o-mini-2024-07-18": {
+        "id": "openai-gpt-4o-mini-2024-07-18",
+        "name": "GPT-4o Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1875,
+          "output": 0.75,
+          "cache_read": 0.09375
         }
       },
       "llama-3.3-70b": {
@@ -26339,6 +27430,21 @@
           "input": 0.4,
           "output": 1.6,
           "cache_read": 0.04
+        }
+      },
+      "qwen3-5-35b-a3b": {
+        "id": "qwen3-5-35b-a3b",
+        "name": "Qwen 3.5 35B A3B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3125,
+          "output": 1.25,
+          "cache_read": 0.15625
         }
       },
       "qwen3-235b-a22b-thinking-2507": {
@@ -26708,10 +27814,103 @@
       }
     }
   },
+  "drun": {
+    "id": "drun",
+    "name": "D.Run (China)",
+    "models": {
+      "public/deepseek-v3": {
+        "id": "public/deepseek-v3",
+        "name": "DeepSeek V3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.28,
+          "output": 1.1
+        }
+      },
+      "public/deepseek-r1": {
+        "id": "public/deepseek-r1",
+        "name": "DeepSeek R1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.55,
+          "output": 2.2
+        }
+      },
+      "public/minimax-m25": {
+        "id": "public/minimax-m25",
+        "name": "MiniMax M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.29,
+          "output": 1.16
+        }
+      }
+    }
+  },
   "firmware": {
     "id": "firmware",
     "name": "Firmware",
     "models": {
+      "gpt-5.3-codex": {
+        "id": "gpt-5.3-codex",
+        "name": "GPT-5.3 Codex",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.75,
+          "output": 14,
+          "cache_read": 0.175
+        }
+      },
+      "gpt-5-4": {
+        "id": "gpt-5-4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25
+        }
+      },
+      "glm-5": {
+        "id": "glm-5",
+        "name": "GLM-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3.2,
+          "cache_read": 0.2
+        }
+      },
       "claude-opus-4-6": {
         "id": "claude-opus-4-6",
         "name": "Claude Opus 4.6",
@@ -26726,6 +27925,36 @@
           "output": 25,
           "cache_read": 0.5,
           "cache_write": 6.25
+        }
+      },
+      "grok-code-fast-1": {
+        "id": "grok-code-fast-1",
+        "name": "Grok 4.1 Fast (Reasoning)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.5,
+          "cache_read": 0.02
+        }
+      },
+      "grok-4-1-fast-reasoning": {
+        "id": "grok-4-1-fast-reasoning",
+        "name": "Grok 4.1 Fast (Reasoning)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 0.5,
+          "cache_read": 0.05
         }
       },
       "claude-sonnet-4-6": {
@@ -26759,6 +27988,36 @@
           "cache_read": 0.075
         }
       },
+      "grok-4-1-fast-non-reasoning": {
+        "id": "grok-4-1-fast-non-reasoning",
+        "name": "Grok 4.1 Fast (Non-Reasoning)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 0.5,
+          "cache_read": 0.05
+        }
+      },
+      "deepseek-v3-2": {
+        "id": "deepseek-v3-2",
+        "name": "DeepSeek v3.2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.58,
+          "output": 1.68,
+          "cache_read": 0.28
+        }
+      },
       "gemini-3-flash-preview": {
         "id": "gemini-3-flash-preview",
         "name": "Gemini 3 Flash Preview",
@@ -26788,9 +28047,9 @@
           "output": 0.6
         }
       },
-      "gpt-5.2": {
-        "id": "gpt-5.2",
-        "name": "GPT-5.2",
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi-K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -26798,14 +28057,14 @@
           ]
         },
         "cost": {
-          "input": 1.75,
-          "output": 14,
-          "cache_read": 0.175
+          "input": 0.6,
+          "output": 3,
+          "cache_read": 0.1
         }
       },
-      "gpt-5": {
-        "id": "gpt-5",
-        "name": "GPT-5",
+      "gemini-3-1-pro-preview": {
+        "id": "gemini-3-1-pro-preview",
+        "name": "Gemini 3.1 Pro Preview",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -26813,9 +28072,24 @@
           ]
         },
         "cost": {
-          "input": 1.25,
-          "output": 10,
-          "cache_read": 0.13
+          "input": 2,
+          "output": 12,
+          "cache_read": 0.2
+        }
+      },
+      "minimax-m2-5": {
+        "id": "minimax-m2-5",
+        "name": "MiniMax-M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.03
         }
       },
       "claude-haiku-4-5": {
@@ -27321,6 +28595,20 @@
         "cost": {
           "input": 2.92,
           "output": 2.92
+        }
+      },
+      " MiniMaxAI/MiniMax-M2.5": {
+        "id": " MiniMaxAI/MiniMax-M2.5",
+        "name": "MiniMax-M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2
         }
       }
     }
@@ -31035,7 +32323,7 @@
       },
       "mistral/codestral": {
         "id": "mistral/codestral",
-        "name": "Codestral",
+        "name": "Codestral (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -31063,7 +32351,7 @@
       },
       "mistral/mistral-small": {
         "id": "mistral/mistral-small",
-        "name": "Mistral Small",
+        "name": "Mistral Small (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -31077,7 +32365,7 @@
       },
       "mistral/ministral-8b": {
         "id": "mistral/ministral-8b",
-        "name": "Ministral 8B",
+        "name": "Ministral 8B (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -31091,7 +32379,7 @@
       },
       "mistral/pixtral-large": {
         "id": "mistral/pixtral-large",
-        "name": "Pixtral Large",
+        "name": "Pixtral Large (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -31133,7 +32421,7 @@
       },
       "mistral/magistral-medium": {
         "id": "mistral/magistral-medium",
-        "name": "Magistral Medium",
+        "name": "Magistral Medium (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -31147,7 +32435,7 @@
       },
       "mistral/ministral-3b": {
         "id": "mistral/ministral-3b",
-        "name": "Ministral 3B",
+        "name": "Ministral 3B (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -31447,6 +32735,21 @@
           "output": [
             "image"
           ]
+        }
+      },
+      "google/gemini-3.1-flash-image-preview": {
+        "id": "google/gemini-3.1-flash-image-preview",
+        "name": "Gemini 3.1 Flash Image Preview (Nano Banana 2)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 60
         }
       },
       "google/text-multilingual-embedding-002": {
@@ -33460,6 +34763,26 @@
           "cache_read": 0.1
         }
       },
+      "gpt-5.4": {
+        "id": "gpt-5.4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25,
+          "context_over_200k": {
+            "input": 5,
+            "output": 22.5,
+            "cache_read": 0.5
+          }
+        }
+      },
       "o1-preview": {
         "id": "o1-preview",
         "name": "o1-preview",
@@ -33473,6 +34796,24 @@
           "input": 15,
           "output": 60,
           "cache_read": 7.5
+        }
+      },
+      "gpt-5.4-pro": {
+        "id": "gpt-5.4-pro",
+        "name": "GPT-5.4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180,
+          "context_over_200k": {
+            "input": 60,
+            "output": 270
+          }
         }
       },
       "o1-pro": {
@@ -36653,6 +37994,21 @@
           "output": 0
         }
       },
+      "inception/mercury-2": {
+        "id": "inception/mercury-2",
+        "name": "Inception: Mercury 2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        }
+      },
       "inception/mercury": {
         "id": "inception/mercury",
         "name": "Inception: Mercury",
@@ -36665,6 +38021,21 @@
         "cost": {
           "input": 0.25,
           "output": 1
+        }
+      },
+      "inception/mercury-edit": {
+        "id": "inception/mercury-edit",
+        "name": "Inception: Mercury Edit",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
         }
       },
       "inception/mercury-coder": {
@@ -42148,20 +43519,6 @@
           "output": 2.646
         }
       },
-      "glm-4p7": {
-        "id": "glm-4p7",
-        "name": "GLM 4.7",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.45,
-          "output": 2.23
-        }
-      },
       "qwen3-next-80b-a3b-thinking": {
         "id": "qwen3-next-80b-a3b-thinking",
         "name": "Qwen3 Next 80B A3B Thinking",
@@ -42190,22 +43547,8 @@
           "output": 1.984
         }
       },
-      "minimax-m2p1": {
-        "id": "minimax-m2p1",
-        "name": "MiniMax-M2.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.34,
-          "output": 1.34
-        }
-      },
-      "glm-4p5-air": {
-        "id": "glm-4p5-air",
+      "glm-4.5-air": {
+        "id": "glm-4.5-air",
         "name": "GLM 4.5 Air",
         "tool_call": true,
         "modalities": {
@@ -42216,6 +43559,34 @@
         "cost": {
           "input": 0.22,
           "output": 1.34
+        }
+      },
+      "glm-4.5": {
+        "id": "glm-4.5",
+        "name": "GLM 4.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.67,
+          "output": 2.46
+        }
+      },
+      "glm-4.7-flash": {
+        "id": "glm-4.7-flash",
+        "name": "GLM-4.7-Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.09,
+          "output": 0.53
         }
       },
       "qwen3-32b": {
@@ -42230,6 +43601,20 @@
         "cost": {
           "input": 0.099,
           "output": 0.33
+        }
+      },
+      "minimax-m2.1": {
+        "id": "minimax-m2.1",
+        "name": "MiniMax-M2.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.34,
+          "output": 1.34
         }
       },
       "devstral-small-2512": {
@@ -42288,6 +43673,20 @@
           "output": 0
         }
       },
+      "kimi-k2.5": {
+        "id": "kimi-k2.5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.55,
+          "output": 2.76
+        }
+      },
       "deepseek-v3-0324": {
         "id": "deepseek-v3-0324",
         "name": "DeepSeek V3 0324",
@@ -42344,6 +43743,20 @@
           "output": 0
         }
       },
+      "glm-4.7": {
+        "id": "glm-4.7",
+        "name": "GLM 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.45,
+          "output": 2.23
+        }
+      },
       "kimi-k2-thinking": {
         "id": "kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
@@ -42356,20 +43769,6 @@
         "cost": {
           "input": 0.656,
           "output": 2.731
-        }
-      },
-      "glm-4p5": {
-        "id": "glm-4p5",
-        "name": "GLM 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.67,
-          "output": 2.46
         }
       },
       "minimax-m2": {
@@ -42829,6 +44228,20 @@
         "cost": {
           "input": 0.574,
           "output": 1.721
+        }
+      },
+      "glm-5": {
+        "id": "glm-5",
+        "name": "GLM-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.86,
+          "output": 3.15
         }
       },
       "qwen2-5-coder-7b-instruct": {
@@ -43364,6 +44777,21 @@
           "output": 0.775
         }
       },
+      "qwen3.5-flash": {
+        "id": "qwen3.5-flash",
+        "name": "Qwen3.5 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.172,
+          "output": 1.72,
+          "reasoning": 1.72
+        }
+      },
       "qwen2-5-math-7b-instruct": {
         "id": "qwen2-5-math-7b-instruct",
         "name": "Qwen2.5-Math 7B Instruct",
@@ -43490,6 +44918,20 @@
           "input": 0.115,
           "output": 0.287,
           "reasoning": 1.147
+        }
+      },
+      "minimax-m2.5": {
+        "id": "minimax-m2.5",
+        "name": "MiniMax-M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2
         }
       },
       "qwen2-5-32b-instruct": {
@@ -43708,6 +45150,91 @@
         "cost": {
           "input": 1,
           "output": 5
+        }
+      },
+      "kimi/kimi-k2.5": {
+        "id": "kimi/kimi-k2.5",
+        "name": "kimi/kimi-k2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 3,
+          "cache_read": 0.1
+        }
+      },
+      "siliconflow/deepseek-r1-0528": {
+        "id": "siliconflow/deepseek-r1-0528",
+        "name": "siliconflow/deepseek-r1-0528",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 2.18
+        }
+      },
+      "siliconflow/deepseek-v3-0324": {
+        "id": "siliconflow/deepseek-v3-0324",
+        "name": "siliconflow/deepseek-v3-0324",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 1
+        }
+      },
+      "siliconflow/deepseek-v3.1-terminus": {
+        "id": "siliconflow/deepseek-v3.1-terminus",
+        "name": "siliconflow/deepseek-v3.1-terminus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.27,
+          "output": 1
+        }
+      },
+      "siliconflow/deepseek-v3.2": {
+        "id": "siliconflow/deepseek-v3.2",
+        "name": "siliconflow/deepseek-v3.2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.27,
+          "output": 0.42
+        }
+      },
+      "MiniMax/MiniMax-M2.5": {
+        "id": "MiniMax/MiniMax-M2.5",
+        "name": "MiniMax M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.301,
+          "output": 1.205
         }
       }
     }
