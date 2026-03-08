@@ -63,12 +63,7 @@ const ModelList: FC<ModelListProps> = ({
               {group.models.map((model) => {
                 const isSelected = currentModel?.id === model.id;
                 return (
-                  <CommandItem
-                    key={model.id}
-                    value={model.id}
-                    onSelect={() => onSelect(model.id)}
-                    className={cn(isSelected && "border-border bg-accent border")}
-                  >
+                  <CommandItem key={model.id} value={model.id} onSelect={() => onSelect(model.id)}>
                     <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
                       {isSelected && <CheckIcon className="size-4" />}
                       <div className="scrollbar-size-xs w-full overflow-x-auto">
