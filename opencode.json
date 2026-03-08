@@ -16,17 +16,6 @@
         "baseURL": "https://openrouter.ai/api/v1"
       },
       "models": {
-        "gpt-5.3-codex": {
-          "name": "GPT 5.3 Codex",
-          "cost": {
-            "input": 1.75,
-            "output": 14.0
-          },
-          "limit": {
-            "context": 400000,
-            "output": 128000
-          }
-        },
         "google/gemini-3.1-flash-lite-preview": {
           "name": "Gemini 3.1 Flash Lite Preview",
           "cost": {
