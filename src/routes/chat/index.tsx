@@ -20,6 +20,21 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const [searchParams] = useSearchParams();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
   const [delayPassed, setDelayPassed] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  useEffect(() => {
+    if (isChatLoading) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      setIsInitialLoad(false);
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [isChatLoading]);
 
   useEffect(() => {
     if (!isChatLoading) {
@@ -34,7 +49,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
     };
   }, [isChatLoading]);
 
-  const showSpinner = isChatLoading && delayPassed;
+  const showSpinner = isChatLoading && (isInitialLoad || delayPassed);
 
   const lastMessageId = messages[messages.length - 1]?.id;
   const initialInputValue = searchParams.get("initialMessage") || undefined;
