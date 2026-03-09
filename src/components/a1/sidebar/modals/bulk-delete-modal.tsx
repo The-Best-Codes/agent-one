@@ -19,7 +19,13 @@ interface BulkDeleteModalProps {
   onComplete: () => void;
 }
 
-export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount, onComplete }: BulkDeleteModalProps) => {
+export const BulkDeleteModal = ({
+  isOpen,
+  onClose,
+  chatIds,
+  chatCount,
+  onComplete,
+}: BulkDeleteModalProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { deleteChat } = usePersistence();

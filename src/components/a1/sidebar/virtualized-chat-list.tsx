@@ -176,9 +176,7 @@ export const VirtualizedChatList = ({
               <Button variant="ghost" size="icon" className="size-7" onClick={exitSelectionMode}>
                 <XIcon className="size-4" />
               </Button>
-              <span className="text-muted-foreground text-sm">
-                {selectedChatIds.size} selected
-              </span>
+              <span className="text-muted-foreground text-sm">{selectedChatIds.size} selected</span>
             </div>
             <div className="flex items-center gap-1">
               <Button

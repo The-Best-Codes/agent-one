@@ -24,7 +24,13 @@ interface BulkExportModalProps {
   onComplete: () => void;
 }
 
-export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount, onComplete }: BulkExportModalProps) => {
+export const BulkExportModal = ({
+  isOpen,
+  onClose,
+  chatIds,
+  chatCount,
+  onComplete,
+}: BulkExportModalProps) => {
   const { loadFullChatData } = usePersistence();
 
   const handleExportJSON = async () => {
