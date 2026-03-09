@@ -2,6 +2,7 @@ import { ArrowUpRight, BookOpenIcon, GraduationCapIcon, RocketIcon } from "lucid
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { AGENT_ONE_DOCS_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface WelcomeStepProps {
@@ -54,17 +55,14 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           <GraduationCapIcon className="size-5" />
           Take the Tutorial
         </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="h-14 justify-between px-6 text-lg"
-          disabled={isExiting}
-        >
-          <div className="flex items-center gap-2">
-            <BookOpenIcon className="size-5" />
-            Browse Documentation
-          </div>
-          <ArrowUpRight className="size-5" />
+        <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
+          <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
+            <div className="flex items-center gap-2">
+              <BookOpenIcon className="size-5" />
+              Browse Documentation
+            </div>
+            <ArrowUpRight className="size-5" />
+          </a>
         </Button>
       </div>
     </div>
