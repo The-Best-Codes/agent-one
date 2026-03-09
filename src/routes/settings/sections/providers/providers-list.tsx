@@ -1,8 +1,8 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useState } from "react";
 
+import { Accordion } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
-import { Accordion } from "@/components/ui/native/accordion";
 import { useProviderState } from "@/hooks/use-provider-state";
 import { getProviderById, PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
 import {
@@ -84,7 +84,7 @@ export function ProvidersList() {
       </div>
 
       {hasResults ? (
-        <Accordion type="single" collapsible className="border-border w-full rounded-md border">
+        <Accordion className="border-border w-full rounded-md border">
           {filteredCustomProviders.map((provider) => (
             <CustomProviderListItem
               key={provider.id}
