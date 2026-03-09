@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
-import { InboxIcon, PlusIcon, SearchIcon } from "lucide-react";
+import { DownloadIcon, InboxIcon, PlusIcon, SearchIcon, TrashIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -15,6 +15,7 @@ import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
 import { ChatItem } from "./chat-item";
+import { BulkDeleteModal, BulkExportModal } from "./modals";
 
 const logger = getLogger(import.meta.url);
 
@@ -47,6 +48,10 @@ export const VirtualizedChatList = ({
 }: VirtualizedChatListProps) => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedChatIds, setSelectedChatIds] = useState<Set<string>>(new Set());
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [showBulkExportModal, setShowBulkExportModal] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [chatIds] = useAtom(chatIdsAtom);
@@ -117,13 +122,45 @@ export const VirtualizedChatList = ({
     }
   }, [activeChatId, filteredChats, virtualizer, scrollToActiveChat, searchQuery]);
 
+  const toggleSelection = useCallback((id: string) => {
+    setSelectedChatIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedChatIds.size === filteredChats.length) {
+      setSelectedChatIds(new Set());
+    } else {
+      setSelectedChatIds(new Set(filteredChats.map((c) => c.id)));
+    }
+  }, [filteredChats, selectedChatIds.size]);
+
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedChatIds(new Set());
+  }, []);
+
+  const enterSelectionMode = useCallback((initialId: string) => {
+    setSelectionMode(true);
+    setSelectedChatIds(new Set([initialId]));
+  }, []);
+
   const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
   const showNoSearchResults = chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
+  const allSelected =
+    filteredChats.length > 0 && filteredChats.every((chat) => selectedChatIds.has(chat.id));
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
       <div className={cn("pb-2", showNewChatButton && "flex flex-col gap-2")}>
-        {showNewChatButton && (
+        {showNewChatButton && !selectionMode && (
           <Button
             onClick={() => handleNewChat && handleNewChat()}
             className="w-full justify-start"
@@ -133,16 +170,57 @@ export const VirtualizedChatList = ({
             New Chat
           </Button>
         )}
-        <div className="group/sidebar-search-input relative">
-          <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
-          <Input
-            ref={searchInputRef}
-            placeholder="Search chats..."
-            className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        {selectionMode ? (
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="size-7" onClick={exitSelectionMode}>
+                <XIcon className="size-4" />
+              </Button>
+              <span className="text-muted-foreground text-sm">
+                {selectedChatIds.size} selected
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 flex-1 justify-start"
+                onClick={toggleSelectAll}
+              >
+                {allSelected ? "Deselect All" : "Select All"}
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-7"
+                disabled={selectedChatIds.size === 0}
+                onClick={() => setShowBulkExportModal(true)}
+              >
+                <DownloadIcon className="size-4" />
+              </Button>
+              <Button
+                variant="destructive"
+                size="icon"
+                className="size-7"
+                disabled={selectedChatIds.size === 0}
+                onClick={() => setShowBulkDeleteModal(true)}
+              >
+                <TrashIcon className="size-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="group/sidebar-search-input relative">
+            <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
+            <Input
+              ref={searchInputRef}
+              placeholder="Search chats..."
+              className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        )}
       </div>
 
       <div ref={parentRef} className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}>
@@ -192,6 +270,10 @@ export const VirtualizedChatList = ({
                     title={chat.title}
                     branchOf={chat.branchOf}
                     additionalOnChatClickCallback={additionalOnChatClickCallback}
+                    selectionMode={selectionMode}
+                    isSelected={selectedChatIds.has(chat.id)}
+                    onSelectionToggle={toggleSelection}
+                    onEnterSelectionMode={enterSelectionMode}
                   />
                 </div>
               );
@@ -199,6 +281,21 @@ export const VirtualizedChatList = ({
           </div>
         )}
       </div>
+
+      <BulkDeleteModal
+        isOpen={showBulkDeleteModal}
+        onClose={() => setShowBulkDeleteModal(false)}
+        chatIds={Array.from(selectedChatIds)}
+        chatCount={selectedChatIds.size}
+        onComplete={exitSelectionMode}
+      />
+      <BulkExportModal
+        isOpen={showBulkExportModal}
+        onClose={() => setShowBulkExportModal(false)}
+        chatIds={Array.from(selectedChatIds)}
+        chatCount={selectedChatIds.size}
+        onComplete={exitSelectionMode}
+      />
     </div>
   );
 };
