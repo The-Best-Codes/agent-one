@@ -40,10 +40,12 @@ export const BulkExportModal = ({
       defaultPath: "agent-one-chats-export.json",
       filters: [{ name: "JSON", extensions: ["json"] }],
     });
-    if (filePath) {
-      await writeTextFile(filePath, dataStr);
+    if (!filePath) {
+      return;
     }
+    await writeTextFile(filePath, dataStr);
     onComplete();
+    onClose();
   };
 
   return (
