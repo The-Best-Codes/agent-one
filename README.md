@@ -48,6 +48,14 @@ Or without types:
 bunx oxlint
 ```
 
+## Running react-doctor
+
+Run the react-doctor linter:
+
+```bash
+bunx -y react-doctor@latest .
+```
+
 ## Build
 
 To build the application for production, run the following command:
