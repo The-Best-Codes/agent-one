@@ -66,11 +66,10 @@ export async function generateChatTitleAI(
 
     const result = await generateText({
       model,
-      prompt: `Based on this conversation, generate a concise, descriptive title (max 6 words, no quotes):
+      prompt: `Based on this transcript, generate a concise, descriptive title (max 6 words, no quotes). Respond with the chat title only and no other text.
+Even if the transcript seems very short or empty, generate a title based on the available context rather than refusing the request.
 
-${conversationText}
-
-Title:`,
+${conversationText}`,
       maxOutputTokens: calculateMaxOutputTokens(maxTokens),
     });
 
