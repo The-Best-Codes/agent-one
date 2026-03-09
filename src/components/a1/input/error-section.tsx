@@ -27,19 +27,21 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
       </div>
       <div className="flex flex-row items-center gap-2">
         <TooltipProvider>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => {
-                  void regenerate();
-                  onRetry?.();
-                }}
-                variant="destructive"
-                disabled={!hasAvailableModels}
-              >
-                <RefreshCcwIcon />
-                Retry
-              </Button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  onClick={() => {
+                    void regenerate();
+                    onRetry?.();
+                  }}
+                  variant="destructive"
+                  disabled={!hasAvailableModels}
+                />
+              }
+            >
+              <RefreshCcwIcon />
+              Retry
             </TooltipTrigger>
             <TooltipContent className="max-h-48 max-w-48">
               Discards the last AI message (if any) and retries

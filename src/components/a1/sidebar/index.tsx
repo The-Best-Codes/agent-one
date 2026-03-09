@@ -13,12 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -69,11 +64,13 @@ const SidebarContent = ({
           />
           <ChatModelConfig disabled={isChatLoading} />
         </div>
-        <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
-            <SettingsIcon className="size-4" />
-            Settings
-          </Link>
+        <Button
+          variant="outline"
+          className="w-full justify-start"
+          render={<Link to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`} />}
+        >
+          <SettingsIcon className="size-4" />
+          Settings
         </Button>
       </div>
     </div>
@@ -116,32 +113,43 @@ export const Sidebar = ({ className }: SidebarProps) => {
   };
 
   const sidebarButton = isDesktop ? (
-    <TooltipRoot>
-      <TooltipTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="size-6"
-        >
-          <SidebarIcon />
-        </Button>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="size-6"
+          />
+        }
+      >
+        <SidebarIcon />
       </TooltipTrigger>
       <TooltipContent>{toggleTooltip}</TooltipContent>
-    </TooltipRoot>
+    </Tooltip>
   ) : (
     <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <TooltipRoot>
-        <TooltipTrigger asChild>
-          <DrawerTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Expand sidebar" className="size-6">
-              <SidebarIcon />
-            </Button>
-          </DrawerTrigger>
-        </TooltipTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span>
+              <DrawerTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label="Expand sidebar"
+                  className="size-6"
+                >
+                  <SidebarIcon />
+                </Button>
+              </DrawerTrigger>
+            </span>
+          }
+        />
         <TooltipContent>{toggleTooltip}</TooltipContent>
-      </TooltipRoot>
+      </Tooltip>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
@@ -175,34 +183,38 @@ export const Sidebar = ({ className }: SidebarProps) => {
               )}
               inert={!isCollapsed}
             >
-              <TooltipRoot>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleSearchClick}
-                    aria-label="Search chats"
-                    className="size-6"
-                  >
-                    <SearchIcon />
-                  </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleSearchClick}
+                      aria-label="Search chats"
+                      className="size-6"
+                    />
+                  }
+                >
+                  <SearchIcon />
                 </TooltipTrigger>
                 <TooltipContent>Search chats</TooltipContent>
-              </TooltipRoot>
-              <TooltipRoot>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleNewChat}
-                    aria-label="New chat"
-                    className="size-6"
-                  >
-                    <PlusIcon />
-                  </Button>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleNewChat}
+                      aria-label="New chat"
+                      className="size-6"
+                    />
+                  }
+                >
+                  <PlusIcon />
                 </TooltipTrigger>
                 <TooltipContent>New chat</TooltipContent>
-              </TooltipRoot>
+              </Tooltip>
             </div>
           </TooltipProvider>
         </div>

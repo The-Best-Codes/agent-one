@@ -42,13 +42,15 @@ const SliderConfig = ({
 
   const displayValue = draggingValue ?? value;
 
-  const handleSliderChange = (values: number[]) => {
-    setDraggingValue(values[0]);
+  const handleSliderChange = (value: number | readonly number[]) => {
+    const nextValue = Array.isArray(value) ? value[0] : value;
+    setDraggingValue(nextValue);
   };
 
-  const handleSliderCommit = (values: number[]) => {
+  const handleSliderCommit = (value: number | readonly number[]) => {
+    const nextValue = Array.isArray(value) ? value[0] : value;
     setDraggingValue(null);
-    onChange(values[0]);
+    onChange(nextValue);
   };
 
   const handleClear = () => {
@@ -65,9 +67,9 @@ const SliderConfig = ({
         <div className="flex items-center gap-2">
           <Label htmlFor={id}>{label}</Label>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={<InfoIcon className="text-muted-foreground size-3 cursor-help" />}
+            />
             <TooltipContent side="right" className="max-w-xs">
               {tooltip}
             </TooltipContent>
@@ -108,7 +110,7 @@ const SliderConfig = ({
           step={step}
           value={[displayValue!]}
           onValueChange={handleSliderChange}
-          onValueCommit={handleSliderCommit}
+          onValueCommitted={handleSliderCommit}
         />
       )}
     </div>
@@ -252,9 +254,9 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
         <div className="flex items-center gap-2">
           <Label htmlFor="topK">Top K</Label>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={<InfoIcon className="text-muted-foreground size-3 cursor-help" />}
+            />
             <TooltipContent side="right" className="max-w-xs">
               Only sample from the top K options for each subsequent token. Used to remove "long
               tail" low probability responses. Recommended for advanced use cases only. Leave empty
@@ -298,9 +300,9 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
         <div className="flex items-center gap-2">
           <Label htmlFor="maxSteps">Max Steps</Label>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={<InfoIcon className="text-muted-foreground size-3 cursor-help" />}
+            />
             <TooltipContent side="right" className="max-w-xs">
               Maximum number of reasoning/tool steps in one response. Leave empty for no step limit.
             </TooltipContent>
@@ -321,9 +323,9 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
         <div className="flex items-center gap-2">
           <Label htmlFor="maxTokens">Max Tokens</Label>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={<InfoIcon className="text-muted-foreground size-3 cursor-help" />}
+            />
             <TooltipContent side="right" className="max-w-xs">
               Maximum number of tokens (words/sub-words) in the model response. Leave empty to use
               the model's default limit.
@@ -343,9 +345,9 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
         <div className="flex items-center gap-2">
           <Label htmlFor="seed">Seed</Label>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
+            <TooltipTrigger
+              render={<InfoIcon className="text-muted-foreground size-3 cursor-help" />}
+            />
             <TooltipContent side="right" className="max-w-xs">
               Integer seed for random sampling. If set and supported by the model, calls will
               generate deterministic results. Leave empty for random behavior.
@@ -385,13 +387,13 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
     <>
       {isDesktop ? (
         <Popover open={effectiveOpen} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+          <PopoverTrigger render={trigger} />
           <PopoverContent className="max-h-[70vh] w-80 overflow-auto p-4">{content}</PopoverContent>
         </Popover>
       ) : (
         <Drawer open={effectiveOpen} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent className="max-h-[70vh]" showHandle={false}>
+          <DrawerContent className="max-h-[70vh]">
             <ScrollArea className="max-h-[calc(70vh-2rem)] overflow-auto">
               <div className="p-4">{content}</div>
             </ScrollArea>

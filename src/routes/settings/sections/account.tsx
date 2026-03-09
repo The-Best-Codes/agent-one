@@ -42,15 +42,13 @@ export default function AccountSection() {
               </p>
             </div>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Switch
-                    id="sync-enabled"
-                    checked={syncEnabled}
-                    onCheckedChange={setSyncEnabled}
-                    disabled={!user}
-                  />
-                </span>
+              <TooltipTrigger render={<span />}>
+                <Switch
+                  id="sync-enabled"
+                  checked={syncEnabled}
+                  onCheckedChange={setSyncEnabled}
+                  disabled={!user}
+                />
               </TooltipTrigger>
               {!user && <TooltipContent>Sign in to enable sync</TooltipContent>}
             </Tooltip>
@@ -65,15 +63,13 @@ export default function AccountSection() {
               </p>
             </div>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Switch
-                    id="hide-agentone-models"
-                    checked={hideAgentOneModels}
-                    onCheckedChange={setHideAgentOneModels}
-                    disabled={!user}
-                  />
-                </span>
+              <TooltipTrigger render={<span />}>
+                <Switch
+                  id="hide-agentone-models"
+                  checked={hideAgentOneModels}
+                  onCheckedChange={setHideAgentOneModels}
+                  disabled={!user}
+                />
               </TooltipTrigger>
               {!user && <TooltipContent>Sign in to hide AgentOne models</TooltipContent>}
             </Tooltip>

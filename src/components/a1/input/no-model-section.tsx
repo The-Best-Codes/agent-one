@@ -25,11 +25,9 @@ export const MainInputNoModelSection = () => {
         <span className="text-base">Configure a provider in settings to start chatting.</span>
       </div>
       <div className="flex flex-row items-center gap-2">
-        <Button asChild variant="default">
-          <Link to={settingsPath}>
-            <KeyIcon />
-            Settings
-          </Link>
+        <Button variant="default" render={<Link to={settingsPath} />}>
+          <KeyIcon />
+          Settings
         </Button>
       </div>
     </div>

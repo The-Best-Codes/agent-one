@@ -21,16 +21,16 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
 
   return (
     <ToggleGroup
-      type="single"
       variant="outline"
-      value={theme ?? "system"}
+      value={[theme ?? "system"]}
       onValueChange={(value) => {
-        if (value) {
+        const nextTheme = value[0];
+        if (nextTheme) {
           logger.verbose("Theme changed", {
             from: theme,
-            to: value,
+            to: nextTheme,
           });
-          setTheme(value);
+          setTheme(nextTheme);
         }
       }}
       className={cn("w-full", className)}

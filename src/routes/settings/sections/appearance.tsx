@@ -166,12 +166,12 @@ export default function AppearanceSection() {
               </p>
             </div>
             <ToggleGroup
-              type="single"
               variant="outline"
-              value={font}
+              value={[font]}
               onValueChange={(value) => {
-                if (value) {
-                  setFont(value as typeof font);
+                const nextFont = value[0];
+                if (nextFont) {
+                  setFont(nextFont as typeof font);
                 }
               }}
               aria-label="Select font"
@@ -198,12 +198,12 @@ export default function AppearanceSection() {
               </p>
             </div>
             <ToggleGroup
-              type="single"
               variant="outline"
-              value={roundness}
+              value={[roundness]}
               onValueChange={(value) => {
-                if (value) {
-                  setRoundness(value as typeof roundness);
+                const nextRoundness = value[0];
+                if (nextRoundness) {
+                  setRoundness(nextRoundness as typeof roundness);
                 }
               }}
               aria-label="Select roundness"

@@ -94,7 +94,7 @@ export default function SettingsRoute() {
 
       <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
         <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
-          <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
+          <ScrollArea className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
             <div className="flex flex-col gap-2">
               <div className="mb-2">
                 <Button variant="outline" onClick={handleNavigateBack} className="w-full">
@@ -109,7 +109,7 @@ export default function SettingsRoute() {
             </div>
           </ScrollArea>
 
-          <ScrollArea type="always" className="flex-1 md:min-h-0">
+          <ScrollArea className="flex-1 md:min-h-0">
             <div
               role="tabpanel"
               tabIndex={0}

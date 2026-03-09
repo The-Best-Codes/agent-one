@@ -16,11 +16,11 @@ export default function SettingsSidebar({
 }: SettingsSidebarProps) {
   return (
     <ToggleGroup
-      type="single"
-      value={activeSection}
+      value={[activeSection]}
       onValueChange={(value) => {
-        if (value) {
-          onSectionChange(value);
+        const nextSection = value[0];
+        if (nextSection) {
+          onSectionChange(nextSection);
         }
       }}
       orientation="vertical"

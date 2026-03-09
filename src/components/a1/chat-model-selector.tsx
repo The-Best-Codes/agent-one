@@ -206,17 +206,19 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   return isDesktop ? (
     <Popover open={effectiveOpen} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          aria-haspopup="listbox"
-          aria-expanded={effectiveOpen}
-          className={cn("w-full justify-between", className)}
-          aria-label={modelLabel}
-          disabled={effectiveDisabled}
-        >
-          {triggerContent}
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            aria-haspopup="listbox"
+            aria-expanded={effectiveOpen}
+            className={cn("w-full justify-between", className)}
+            aria-label={modelLabel}
+            disabled={effectiveDisabled}
+          />
+        }
+      >
+        {triggerContent}
       </PopoverTrigger>
       <PopoverContent align="start" className={cn("w-full p-0", popoverClassName)}>
         <ModelList
@@ -243,7 +245,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           {triggerContent}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[70vh]" showHandle={false}>
+      <DrawerContent className="max-h-[70vh]">
         <ModelList
           groupedModels={groupedModels}
           currentModel={currentModel}

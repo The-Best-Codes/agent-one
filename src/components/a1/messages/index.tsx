@@ -232,10 +232,16 @@ const MessagePartsInternal = ({
                 Save
               </Button>
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="default" className="h-6 gap-1 px-1 has-[>svg]:px-1.5">
-                    <ChevronDownIcon className="size-4" />
-                  </Button>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
+                    />
+                  }
+                >
+                  <ChevronDownIcon className="size-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <div className="flex items-center gap-2 p-2">

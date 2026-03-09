@@ -299,15 +299,17 @@ export default function ExtensionsSection() {
               </TabsList>
 
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    disabled={isTransportFilterDisabled}
-                    aria-label="Filter by connection"
-                  >
-                    <FilterIcon />
-                  </Button>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      disabled={isTransportFilterDisabled}
+                      aria-label="Filter by connection"
+                    />
+                  }
+                >
+                  <FilterIcon />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Filter by connection</DropdownMenuLabel>

@@ -2,12 +2,6 @@ import { ChevronRightIcon, ExternalLinkIcon, PackageIcon, Trash2Icon } from "luc
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +13,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/native/accordion";
 
 interface ExtensionListRowProps {
   title: string;
@@ -111,15 +111,17 @@ export function ExtensionListRow({
 
       {installed && hasAdvanced ? (
         <Dialog open={advancedOpen} onOpenChange={setAdvancedOpen}>
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
-            >
-              Advanced
-              <ChevronRightIcon className="text-muted-foreground size-4" />
-            </Button>
+          <DialogTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
+              />
+            }
+          >
+            Advanced
+            <ChevronRightIcon className="text-muted-foreground size-4" />
           </DialogTrigger>
           <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>

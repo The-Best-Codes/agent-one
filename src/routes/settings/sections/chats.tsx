@@ -377,7 +377,10 @@ export default function ChatsSection() {
               <div className="flex items-center gap-2">
                 <Slider
                   value={[experimentalThrottleValue]}
-                  onValueChange={(value) => setExperimentalThrottleValue(value[0])}
+                  onValueChange={(value) => {
+                    const nextValue = Array.isArray(value) ? value[0] : value;
+                    setExperimentalThrottleValue(nextValue);
+                  }}
                   min={0}
                   max={10000}
                   step={10}

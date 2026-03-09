@@ -29,11 +29,9 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            Add Provider
-            <ChevronDownIcon className="size-4" />
-          </Button>
+        <DropdownMenuTrigger render={<Button variant="outline" />}>
+          Add Provider
+          <ChevronDownIcon className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onSelect={() => setDialogOpen(true)}>

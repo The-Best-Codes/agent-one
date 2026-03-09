@@ -91,19 +91,21 @@ const ChangeTitleForm = ({
         />
         <TooltipProvider>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                variant="outline"
-                size="icon"
-              >
-                {isGenerating ? (
-                  <Loader2Icon className="size-4 animate-spin" />
-                ) : (
-                  <SparklesIcon className="size-4" />
-                )}
-              </Button>
+            <TooltipTrigger
+              render={
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isGenerating}
+                  variant="outline"
+                  size="icon"
+                />
+              }
+            >
+              {isGenerating ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <SparklesIcon className="size-4" />
+              )}
             </TooltipTrigger>
             <TooltipContent>
               <p>Generate title using AI</p>

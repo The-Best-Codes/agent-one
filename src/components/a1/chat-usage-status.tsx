@@ -3,12 +3,7 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatLoading, useChatMetadata } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
@@ -62,9 +57,9 @@ export const ChatUsageStatus = () => {
           </>
         ) : (
           <TooltipProvider>
-            <TooltipRoot>
-              <TooltipTrigger asChild>
-                <div className="flex cursor-help items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger render={<div className="flex cursor-help items-center gap-2" />}>
+                <>
                   <span>
                     In{" "}
                     <NumberFlow
@@ -90,13 +85,13 @@ export const ChatUsageStatus = () => {
                       className="text-foreground"
                     />
                   </span>
-                </div>
+                </>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
                 Input tokens are what you send; output tokens are what the model returns. Cost is
                 shown in USD. Edits and deleted messages are not included in these stats.
               </TooltipContent>
-            </TooltipRoot>
+            </Tooltip>
           </TooltipProvider>
         )}
       </div>

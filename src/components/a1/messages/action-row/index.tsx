@@ -2,12 +2,7 @@ import type { UIMessage } from "ai";
 import { useAtom } from "jotai";
 
 import { CopyButton } from "@/components/a1/copy-button";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { showMessageActionRowAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -44,9 +39,9 @@ export const MessageActionRow = ({
       )}
     >
       <TooltipProvider>
-        <TooltipRoot>
-          <TooltipTrigger asChild>
-            <div>
+        <Tooltip>
+          <TooltipTrigger render={<div />}>
+            <>
               <CopyButton
                 className="size-6"
                 variants={{
@@ -57,40 +52,40 @@ export const MessageActionRow = ({
                 }}
                 text={contentToCopy}
               />
-            </div>
+            </>
           </TooltipTrigger>
           <TooltipContent>Copy message</TooltipContent>
-        </TooltipRoot>
+        </Tooltip>
 
         {onBranch && messageRole === "assistant" && (
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <div>
+          <Tooltip>
+            <TooltipTrigger render={<div />}>
+              <>
                 <BranchButton onBranch={onBranch} className="size-6" />
-              </div>
+              </>
             </TooltipTrigger>
             <TooltipContent>Branch conversation</TooltipContent>
-          </TooltipRoot>
+          </Tooltip>
         )}
         {messageRole === "assistant" && (
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <div>
+          <Tooltip>
+            <TooltipTrigger render={<div />}>
+              <>
                 <RetryButton messageId={messageId} className="size-6" />
-              </div>
+              </>
             </TooltipTrigger>
             <TooltipContent>Regenerate response</TooltipContent>
-          </TooltipRoot>
+          </Tooltip>
         )}
         {onEdit && (
-          <TooltipRoot>
-            <TooltipTrigger asChild>
-              <div>
+          <Tooltip>
+            <TooltipTrigger render={<div />}>
+              <>
                 <EditButton onEdit={onEdit} className="size-6" />
-              </div>
+              </>
             </TooltipTrigger>
             <TooltipContent>Edit message</TooltipContent>
-          </TooltipRoot>
+          </Tooltip>
         )}
       </TooltipProvider>
     </div>

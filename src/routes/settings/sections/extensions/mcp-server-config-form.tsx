@@ -63,7 +63,11 @@ export function McpServerConfigForm({
           <Label htmlFor={`${idPrefix}-server-type`}>Server Type</Label>
           <Select
             value={values.type}
-            onValueChange={(value: McpServerType) => onChange({ type: value })}
+            onValueChange={(value) => {
+              if (value) {
+                onChange({ type: value as McpServerType });
+              }
+            }}
           >
             <SelectTrigger id={`${idPrefix}-server-type`}>
               <SelectValue placeholder="Select server type" />

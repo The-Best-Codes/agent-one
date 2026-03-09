@@ -11,13 +11,13 @@ import {
 import { useState } from "react";
 
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
+import { Button } from "@/components/ui/button";
 import {
   Accordion as ParametersAccordion,
   AccordionContent as ParametersAccordionContent,
   AccordionItem as ParametersAccordionItem,
   AccordionTrigger as ParametersAccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/native/accordion";
 import {
   Accordion,
   AccordionContent,
@@ -241,9 +241,9 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               {isLongOutput && (
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="size-2 shrink-0 rounded-full bg-yellow-500" />
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={<div className="size-2 shrink-0 rounded-full bg-yellow-500" />}
+                    />
                     <TooltipContent>
                       Tool result is over {maxToolResultChars} characters
                     </TooltipContent>
@@ -255,9 +255,9 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               renderWhenCollapsed={!isLongOutput}
               className="text-muted-foreground p-0 pt-2 text-xs"
             >
-              <ScrollArea type="always" viewportClassName="max-h-96">
+              <ScrollArea>
                 <ScrollBar orientation="horizontal"></ScrollBar>
-                <div className="flex flex-col gap-2">
+                <div className="flex max-h-96 flex-col gap-2">
                   {part?.input !== null && (
                     <div>
                       <span className="font-medium">Parameters:</span>

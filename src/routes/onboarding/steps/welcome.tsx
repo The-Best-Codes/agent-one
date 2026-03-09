@@ -55,14 +55,17 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           <GraduationCapIcon className="size-5" />
           Take the Tutorial
         </Button>
-        <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
-          <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
-            <div className="flex items-center gap-2">
-              <BookOpenIcon className="size-5" />
-              Browse Documentation
-            </div>
-            <ArrowUpRight className="size-5" />
-          </a>
+        <Button
+          variant="outline"
+          size="lg"
+          className="h-14 justify-between px-6 text-lg"
+          render={<a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer" />}
+        >
+          <div className="flex items-center gap-2">
+            <BookOpenIcon className="size-5" />
+            Browse Documentation
+          </div>
+          <ArrowUpRight className="size-5" />
         </Button>
       </div>
     </div>

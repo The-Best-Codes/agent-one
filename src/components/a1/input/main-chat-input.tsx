@@ -493,26 +493,28 @@ export const MainChatInput = ({
         >
           <div className="relative">
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  data-testid="attach-button"
-                  type="button"
-                  disabled={disabled || status !== "ready" || !hasAvailableModels}
-                  size="icon"
-                  variant="outline"
-                  onClick={() => {
-                    fileInputRef.current?.click();
-                  }}
-                  className="relative"
-                  aria-label="Attach files"
-                >
-                  {files && files?.length > 0 && (
-                    <Badge variant="default" className="absolute -top-2 -right-2 z-10 shadow-md">
-                      {files?.length}
-                    </Badge>
-                  )}
-                  <PaperclipIcon />
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button
+                    data-testid="attach-button"
+                    type="button"
+                    disabled={disabled || status !== "ready" || !hasAvailableModels}
+                    size="icon"
+                    variant="outline"
+                    onClick={() => {
+                      fileInputRef.current?.click();
+                    }}
+                    className="relative"
+                    aria-label="Attach files"
+                  />
+                }
+              >
+                {files && files?.length > 0 && (
+                  <Badge variant="default" className="absolute -top-2 -right-2 z-10 shadow-md">
+                    {files?.length}
+                  </Badge>
+                )}
+                <PaperclipIcon />
               </TooltipTrigger>
               <TooltipContent>Attach files to your message</TooltipContent>
             </Tooltip>
@@ -520,37 +522,41 @@ export const MainChatInput = ({
           <div>
             {showStopButton ? (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    size="icon"
-                    onClick={() => stop()}
-                    aria-label="Stop response"
-                  >
-                    <SquareIcon />
-                  </Button>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="destructive"
+                      type="button"
+                      size="icon"
+                      onClick={() => stop()}
+                      aria-label="Stop response"
+                    />
+                  }
+                >
+                  <SquareIcon />
                 </TooltipTrigger>
                 <TooltipContent>Stop the current response</TooltipContent>
               </Tooltip>
             ) : (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    data-testid="send-button"
-                    type="submit"
-                    size="icon"
-                    disabled={
-                      disabled || status !== "ready" || (isEmpty && !files) || !hasAvailableModels
-                    }
-                    aria-label="Send message"
-                  >
-                    {status === "submitted" ? (
-                      <Loader2Icon className="animate-spin" />
-                    ) : (
-                      <ArrowUpIcon />
-                    )}
-                  </Button>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      data-testid="send-button"
+                      type="submit"
+                      size="icon"
+                      disabled={
+                        disabled || status !== "ready" || (isEmpty && !files) || !hasAvailableModels
+                      }
+                      aria-label="Send message"
+                    />
+                  }
+                >
+                  {status === "submitted" ? (
+                    <Loader2Icon className="animate-spin" />
+                  ) : (
+                    <ArrowUpIcon />
+                  )}
                 </TooltipTrigger>
                 <TooltipContent>Send your message</TooltipContent>
               </Tooltip>
