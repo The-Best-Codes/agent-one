@@ -25,6 +25,7 @@ interface BulkExportModalProps {
 
 export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExportModalProps) => {
   const { loadFullChatData } = usePersistence();
+  const chatLabel = chatCount === 1 ? "chat" : "chats";
 
   const handleExportJSON = async () => {
     const chatDataArray = await Promise.all(chatIds.map((chatId) => loadFullChatData(chatId)));
@@ -44,9 +45,11 @@ export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExp
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Export {chatCount} Chats</DialogTitle>
+          <DialogTitle>
+            Export {chatCount} {chatLabel}
+          </DialogTitle>
           <DialogDescription>
-            Export {chatCount} selected chats as a single JSON file.
+            Export {chatCount} selected {chatLabel} as a single JSON file.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">

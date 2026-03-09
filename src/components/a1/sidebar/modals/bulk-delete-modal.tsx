@@ -22,6 +22,7 @@ export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount }: BulkDel
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { deleteChat } = usePersistence();
+  const chatLabel = chatCount === 1 ? "chat" : "chats";
 
   const handleDelete = () => {
     for (const chatId of chatIds) {
@@ -37,9 +38,11 @@ export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount }: BulkDel
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete {chatCount} Chats</DialogTitle>
+          <DialogTitle>
+            Delete {chatCount} {chatLabel}
+          </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete {chatCount} chats? This action cannot be undone.
+            Are you sure you want to delete {chatCount} {chatLabel}? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
