@@ -73,7 +73,7 @@ export const ChatUsageStatus = () => {
               ) : (
                 <TooltipProvider>
                   <TooltipRoot>
-                    <TooltipTrigger asChild>
+                    <TooltipTrigger tabIndex={isCollapsed ? -1 : 0} asChild>
                       <div className="flex cursor-help items-center gap-2">
                         <span>
                           In{" "}
@@ -114,7 +114,7 @@ export const ChatUsageStatus = () => {
         </div>
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
-          className="hover:bg-muted flex shrink-0 cursor-pointer items-center self-stretch px-1 transition-colors"
+          className="hover:text-accent-foreground dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 self-stretch px-0.5 text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
         >
           <ChevronLeft
             className={cn(
