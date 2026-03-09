@@ -94,6 +94,17 @@ export const VirtualizedChatList = ({
     loadChats();
   }, [loadChats, chatIds, chatUpdateTrigger]);
 
+  useEffect(() => {
+    setSelectedChatIds((prev) => {
+      const validIds = new Set(chatIds);
+      const next = new Set(Array.from(prev).filter((id) => validIds.has(id)));
+      if (next.size === prev.size) {
+        return prev;
+      }
+      return next;
+    });
+  }, [chatIds]);
+
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -285,14 +296,12 @@ export const VirtualizedChatList = ({
         onClose={() => setShowBulkDeleteModal(false)}
         chatIds={Array.from(selectedChatIds)}
         chatCount={selectedChatIds.size}
-        onComplete={exitSelectionMode}
       />
       <BulkExportModal
         isOpen={showBulkExportModal}
         onClose={() => setShowBulkExportModal(false)}
         chatIds={Array.from(selectedChatIds)}
         chatCount={selectedChatIds.size}
-        onComplete={exitSelectionMode}
       />
     </div>
   );

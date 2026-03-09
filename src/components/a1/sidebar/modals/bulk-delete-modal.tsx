@@ -16,16 +16,9 @@ interface BulkDeleteModalProps {
   onClose: () => void;
   chatIds: string[];
   chatCount: number;
-  onComplete: () => void;
 }
 
-export const BulkDeleteModal = ({
-  isOpen,
-  onClose,
-  chatIds,
-  chatCount,
-  onComplete,
-}: BulkDeleteModalProps) => {
+export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount }: BulkDeleteModalProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { deleteChat } = usePersistence();
@@ -37,7 +30,6 @@ export const BulkDeleteModal = ({
     if (activeChatId && chatIds.includes(activeChatId)) {
       void navigate("/chat");
     }
-    onComplete();
     onClose();
   };
 

@@ -21,16 +21,9 @@ interface BulkExportModalProps {
   onClose: () => void;
   chatIds: string[];
   chatCount: number;
-  onComplete: () => void;
 }
 
-export const BulkExportModal = ({
-  isOpen,
-  onClose,
-  chatIds,
-  chatCount,
-  onComplete,
-}: BulkExportModalProps) => {
+export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExportModalProps) => {
   const { loadFullChatData } = usePersistence();
 
   const handleExportJSON = async () => {
@@ -44,7 +37,6 @@ export const BulkExportModal = ({
       return;
     }
     await writeTextFile(filePath, dataStr);
-    onComplete();
     onClose();
   };
 
