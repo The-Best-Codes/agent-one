@@ -55,7 +55,7 @@ export const ChatUsageStatus = () => {
         isSidebarSmall ? "ml-24" : "ml-64",
       )}
     >
-      <div className="bg-background border-sidebar-border text-muted-foreground flex items-center overflow-hidden rounded-br-md border-r border-b text-xs whitespace-nowrap md:rounded-md md:border">
+      <div className="bg-background border-sidebar-border text-muted-foreground flex items-center rounded-br-md border-r border-b text-xs whitespace-nowrap md:rounded-md md:border">
         <div
           className={cn(
             "grid transition-all duration-300 ease-in-out",
@@ -73,7 +73,11 @@ export const ChatUsageStatus = () => {
               ) : (
                 <TooltipProvider>
                   <TooltipRoot>
-                    <TooltipTrigger tabIndex={isCollapsed ? -1 : 0} asChild>
+                    <TooltipTrigger
+                      className="focus-visible:border-ring focus-visible:ring-ring/50 outline-none focus-visible:ring-[3px]"
+                      tabIndex={isCollapsed ? -1 : 0}
+                      asChild
+                    >
                       <div className="flex cursor-help items-center gap-2">
                         <span>
                           In{" "}
@@ -114,7 +118,7 @@ export const ChatUsageStatus = () => {
         </div>
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
-          className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch px-0.5 outline-none focus-visible:ring-[3px] disabled:pointer-events-none"
+          className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-md px-0.5 outline-none focus-visible:ring-[3px] disabled:pointer-events-none"
         >
           <ChevronLeft
             className={cn(
