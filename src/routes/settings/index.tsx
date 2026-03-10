@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { ArrowLeftIcon, ListIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,13 @@ export default function SettingsRoute() {
       void navigate("/chat");
     }
   };
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const viewport = contentRef.current?.closest("[data-slot='scroll-area-viewport']");
+    viewport?.scrollTo({ top: 0 });
+  }, [displayedSection]);
 
   const handleSectionChange = (section: string) => {
     setActiveSection(section);
@@ -111,6 +118,7 @@ export default function SettingsRoute() {
 
           <ScrollArea type="always" className="flex-1 md:min-h-0">
             <div
+              ref={contentRef}
               role="tabpanel"
               tabIndex={0}
               className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
