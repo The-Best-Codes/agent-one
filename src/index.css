@@ -609,9 +609,6 @@
       background-position: -200% 0;
     }
   }
-  html {
-    @apply font-sans;
-  }
 }
 
 @utility scrollbar-hidden {
