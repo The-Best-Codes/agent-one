@@ -191,7 +191,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 })
               }
             >
-              <XIcon />
+              <XIcon data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -204,7 +204,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 })
               }
             >
-              <CheckCircle2Icon />
+              <CheckCircle2Icon data-icon="inline-start" />
               Approve
             </Button>
           </div>

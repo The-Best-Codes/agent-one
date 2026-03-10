@@ -85,7 +85,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
                 })
               }
             >
-              <XIcon />
+              <XIcon data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -98,7 +98,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
                 })
               }
             >
-              <CheckCircle2Icon />
+              <CheckCircle2Icon data-icon="inline-start" />
               Approve
             </Button>
           </div>
