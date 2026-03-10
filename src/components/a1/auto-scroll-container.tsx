@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const AT_BOTTOM_THRESHOLD = 10;
+const BUTTON_HIDDEN_OFFSET = 32;
 
 export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
@@ -55,7 +56,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     ref,
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [buttonOffset, setButtonOffset] = useState(60);
+    const [buttonOffset, setButtonOffset] = useState(BUTTON_HIDDEN_OFFSET);
     const isAtBottomRef = useRef(true);
 
     const scrollToBottom = useCallback(
@@ -73,7 +74,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
 
     const handleScrollButtonClick = () => {
       isAtBottomRef.current = true;
-      setButtonOffset(60);
+      setButtonOffset(BUTTON_HIDDEN_OFFSET);
       scrollToBottom(buttonScrollBehavior);
     };
 
@@ -82,7 +83,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       () => ({
         scrollToBottom: () => {
           isAtBottomRef.current = true;
-          setButtonOffset(60);
+          setButtonOffset(BUTTON_HIDDEN_OFFSET);
           scrollToBottom();
         },
       }),
@@ -107,15 +108,15 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         if (hasOverflow) {
           if (distanceFromBottom <= slideStartDistance) {
             if (distanceFromBottom <= slideEndDistance) {
-              offset = 60;
+              offset = BUTTON_HIDDEN_OFFSET;
             } else {
               const slideRange = slideStartDistance - slideEndDistance;
               const slideProgress = (slideStartDistance - distanceFromBottom) / slideRange;
-              offset = slideProgress * 60;
+              offset = slideProgress * BUTTON_HIDDEN_OFFSET;
             }
           }
         } else {
-          offset = 60;
+          offset = BUTTON_HIDDEN_OFFSET;
         }
 
         setButtonOffset(offset);
@@ -124,7 +125,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       const observerCallback = () => {
         if (isAtBottomRef.current) {
           scrollToBottom("instant");
-          setButtonOffset(60);
+          setButtonOffset(BUTTON_HIDDEN_OFFSET);
         } else {
           handleScroll();
         }
@@ -178,8 +179,8 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
             }}
             variant="secondary"
             aria-label="Scroll to bottom"
-            aria-hidden={buttonOffset >= 60}
-            tabIndex={buttonOffset >= 60 ? -1 : 0}
+            aria-hidden={buttonOffset >= BUTTON_HIDDEN_OFFSET}
+            tabIndex={buttonOffset >= BUTTON_HIDDEN_OFFSET ? -1 : 0}
             {...scrollButtonProps}
           >
             {scrollButtonChildren || <ChevronDown data-testid="scroll-to-bottom-icon" />}
