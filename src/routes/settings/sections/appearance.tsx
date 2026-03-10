@@ -9,6 +9,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -244,11 +245,13 @@ export default function AppearanceSection() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {textScaleOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {textScaleOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
@@ -305,8 +308,10 @@ export default function AppearanceSection() {
                   <SelectValue placeholder="Select style" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="docked">Docked</SelectItem>
-                  <SelectItem value="floating">Floating</SelectItem>
+                  <SelectGroup>
+                    <SelectItem value="docked">Docked</SelectItem>
+                    <SelectItem value="floating">Floating</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <Button

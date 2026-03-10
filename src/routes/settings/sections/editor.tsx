@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -128,8 +129,10 @@ export default function EditorSection() {
                 <SelectValue placeholder="Select option" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="enter">Enter</SelectItem>
-                <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
+                <SelectGroup>
+                  <SelectItem value="enter">Enter</SelectItem>
+                  <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
             <Button
@@ -164,8 +167,10 @@ export default function EditorSection() {
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="docked">Docked</SelectItem>
-                <SelectItem value="floating">Floating</SelectItem>
+                <SelectGroup>
+                  <SelectItem value="docked">Docked</SelectItem>
+                  <SelectItem value="floating">Floating</SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
             <Button

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -69,10 +70,12 @@ export default function TitlesSection() {
               <SelectValue placeholder="Select method" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ai">AI generated</SelectItem>
-              <SelectItem value="first-user-message">First user message</SelectItem>
-              <SelectItem value="first-assistant-message">First assistant message</SelectItem>
-              <SelectItem value="custom">Custom phrase</SelectItem>
+              <SelectGroup>
+                <SelectItem value="ai">AI generated</SelectItem>
+                <SelectItem value="first-user-message">First user message</SelectItem>
+                <SelectItem value="first-assistant-message">First assistant message</SelectItem>
+                <SelectItem value="custom">Custom phrase</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>

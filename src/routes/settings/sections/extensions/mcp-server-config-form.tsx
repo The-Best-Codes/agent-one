@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -69,8 +70,10 @@ export function McpServerConfigForm({
               <SelectValue placeholder="Select server type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="stdio">STDIO (Local)</SelectItem>
-              <SelectItem value="http">HTTP (Remote)</SelectItem>
+              <SelectGroup>
+                <SelectItem value="stdio">STDIO (Local)</SelectItem>
+                <SelectItem value="http">HTTP (Remote)</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
           <p className="text-muted-foreground text-xs">
