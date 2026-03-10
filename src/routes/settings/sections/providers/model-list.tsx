@@ -286,7 +286,7 @@ export function ModelList({ models, baseUrl, apiKey, headers, onChange }: ModelL
             onClick={() => setIsAdding(true)}
             disabled={isAdding}
           >
-            <PlusIcon />
+            <PlusIcon data-icon="inline-start" />
             Add
           </Button>
         </div>

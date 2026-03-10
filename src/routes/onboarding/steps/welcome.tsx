@@ -43,7 +43,7 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           onClick={handleLaunch}
           disabled={isExiting}
         >
-          <RocketIcon className="size-5" />
+          <RocketIcon data-icon="inline-start" />
           Launch AgentOne
         </Button>
         <Button
@@ -52,13 +52,13 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           className="h-14 justify-start px-6 text-lg"
           disabled={isExiting}
         >
-          <GraduationCapIcon className="size-5" />
+          <GraduationCapIcon data-icon="inline-start" />
           Take the Tutorial
         </Button>
         <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
           <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
             <div className="flex items-center gap-2">
-              <BookOpenIcon className="size-5" />
+              <BookOpenIcon data-icon="inline-start" />
               Browse Documentation
             </div>
             <ArrowUpRight className="size-5" />

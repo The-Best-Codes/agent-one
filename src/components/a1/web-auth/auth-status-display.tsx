@@ -1,9 +1,10 @@
-import { ExternalLinkIcon, Loader2Icon, LogInIcon } from "lucide-react";
+import { ExternalLinkIcon, LogInIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { UserProfileDisplay } from "@/components/a1/web-auth/user-profile-display";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +28,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
     return (
       <StatusRow
         className={className}
-        icon={<Loader2Icon className="text-muted-foreground size-5 animate-spin" />}
+        icon={<Spinner className="text-muted-foreground" data-icon="inline-start" />}
         title="Checking status..."
         description="Please wait while we check your account"
       />
@@ -38,7 +39,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
     return (
       <StatusRow
         className={className}
-        icon={<Loader2Icon className="text-primary size-5 animate-spin" />}
+        icon={<Spinner className="text-primary" data-icon="inline-start" />}
         title="Signing in..."
         description="Preparing device authorization"
         action={
@@ -54,7 +55,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
     return (
       <StatusRow
         className={className}
-        icon={<Loader2Icon className="text-primary size-5 animate-spin" />}
+        icon={<Spinner className="text-primary" data-icon="inline-start" />}
         title="Link this device"
         description={
           <a
@@ -100,7 +101,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         user={user}
         action={
           <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
-            {isSigningOut && <Loader2Icon className="animate-spin" />}
+            {isSigningOut && <Spinner data-icon="inline-start" />}
             Sign out
           </Button>
         }

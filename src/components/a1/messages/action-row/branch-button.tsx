@@ -25,7 +25,7 @@ export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProp
       aria-label="Branch conversation from this message"
       {...props}
     >
-      <SplitIcon />
+      <SplitIcon data-icon="inline-start" />
     </Button>
   );
 };

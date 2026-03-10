@@ -3,7 +3,6 @@ import {
   CheckCircle2Icon,
   InfoIcon,
   KeyIcon,
-  Loader2Icon,
   LogInIcon,
   LogOutIcon,
   ShieldOffIcon,
@@ -12,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
 import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
@@ -75,7 +75,7 @@ export function McpAuthStatus({
           <span className="text-foreground text-sm">Login available for full access</span>
         </div>
         <Button size="sm" onClick={handleLogin} disabled={loading}>
-          {loading ? <Loader2Icon className="animate-spin" /> : <LogInIcon />}
+          {loading ? <Spinner data-icon="inline-start" /> : <LogInIcon />}
           Login
         </Button>
       </div>
@@ -86,7 +86,7 @@ export function McpAuthStatus({
     return (
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
-          <Loader2Icon className="text-foreground size-5 animate-spin" />
+          <Spinner className="text-foreground" data-icon="inline-start" />
           <span className="text-foreground text-sm">Checking auth status...</span>
         </div>
       </div>
@@ -110,12 +110,12 @@ export function McpAuthStatus({
       </div>
       {authState === "logged-in" ? (
         <Button variant="outline" size="sm" onClick={handleLogout} disabled={loading}>
-          {loading ? <Loader2Icon className="animate-spin" /> : <LogOutIcon />}
+          {loading ? <Spinner data-icon="inline-start" /> : <LogOutIcon />}
           Logout
         </Button>
       ) : (
         <Button size="sm" onClick={handleLogin} disabled={loading}>
-          {loading ? <Loader2Icon className="animate-spin" /> : <LogInIcon />}
+          {loading ? <Spinner data-icon="inline-start" /> : <LogInIcon />}
           Login
         </Button>
       )}

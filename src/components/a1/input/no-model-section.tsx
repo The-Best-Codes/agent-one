@@ -26,8 +26,8 @@ export const MainInputNoModelSection = () => {
       </div>
       <div className="flex flex-row items-center gap-2">
         <Button asChild variant="default">
-          <Link to={settingsPath}>
-            <KeyIcon />
+          <Link to={settingsPath} data-icon="inline-start">
+            <KeyIcon data-icon="inline-start" />
             Settings
           </Link>
         </Button>

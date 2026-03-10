@@ -66,7 +66,11 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
                 className="size-8 bg-[rgb(30,30,30)] text-white hover:bg-[rgb(30,30,30)]"
                 aria-label={isPreviewMode ? "Stop preview" : "Preview code"}
               >
-                {isPreviewMode ? <SquareIcon /> : <PlayIcon />}
+                {isPreviewMode ? (
+                  <SquareIcon data-icon="inline-start" />
+                ) : (
+                  <PlayIcon data-icon="inline-start" />
+                )}
               </Button>
             )}
             <CopyButton

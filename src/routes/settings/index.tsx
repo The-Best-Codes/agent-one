@@ -73,7 +73,7 @@ export default function SettingsRoute() {
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
           <Button variant="outline" size="sm" onClick={handleNavigateBack}>
-            <ArrowLeftIcon />
+            <ArrowLeftIcon data-icon="inline-start" />
             Back
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -105,7 +105,7 @@ export default function SettingsRoute() {
             <div className="flex flex-col gap-2">
               <div className="mb-2">
                 <Button variant="outline" onClick={handleNavigateBack} className="w-full">
-                  <ArrowLeftIcon className="size-4" />
+                  <ArrowLeftIcon data-icon="inline-start" />
                   Back to Chat
                 </Button>
               </div>

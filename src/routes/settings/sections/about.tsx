@@ -5,8 +5,6 @@ import {
   CheckCircle2Icon,
   Download,
   DownloadIcon,
-  Loader2,
-  Loader2Icon,
   RefreshCw,
   RocketIcon,
   ShieldCheckIcon,
@@ -18,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -48,7 +47,7 @@ export default function AboutSection() {
         };
       case "checking":
         return {
-          icon: <Loader2Icon className="text-primary size-5 animate-spin" />,
+          icon: <Spinner className="text-primary" data-icon="inline-start" />,
           title: "Checking for updates...",
           description: "Please wait while we check for the latest version",
         };
@@ -72,7 +71,7 @@ export default function AboutSection() {
         };
       case "installing":
         return {
-          icon: <Loader2Icon className="text-primary size-5 animate-spin" />,
+          icon: <Spinner className="text-primary" data-icon="inline-start" />,
           title: "Installing update...",
           description: "Please wait while we install the update",
         };
@@ -158,28 +157,28 @@ export default function AboutSection() {
       case "up-to-date":
         return (
           <Button onClick={checkForUpdates} variant="outline" size="sm">
-            <RefreshCw className="size-4" />
+            <RefreshCw data-icon="inline-start" />
             Check Now
           </Button>
         );
       case "checking":
         return (
           <Button variant="outline" size="sm" disabled>
-            <Loader2 className="size-4 animate-spin" />
+            <Spinner data-icon="inline-start" />
             Checking...
           </Button>
         );
       case "available":
         return (
           <Button onClick={downloadAndInstallUpdate} size="sm">
-            <Download className="size-4" />
+            <Download data-icon="inline-start" />
             Download &amp; Install
           </Button>
         );
       case "error":
         return (
           <Button onClick={checkForUpdates} variant="outline" size="sm">
-            <RefreshCw className="size-4" />
+            <RefreshCw data-icon="inline-start" />
             Try Again
           </Button>
         );

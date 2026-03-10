@@ -76,7 +76,7 @@ export const ChatItem = memo(
         >
           <Checkbox checked={isSelected} className="pointer-events-none" />
           <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
-            {branchOf && <SplitIcon className="text-foreground size-3" />}
+            {branchOf && <SplitIcon className="text-foreground" data-icon="inline-start" />}
             <span className="min-w-0 truncate">{title}</span>
           </span>
         </Button>
@@ -105,10 +105,14 @@ export const ChatItem = memo(
               }}
               onClick={() => additionalOnChatClickCallback && additionalOnChatClickCallback(id)}
             >
-              <Link to={`/chat/${id}`} className="relative block overflow-hidden">
+              <Link
+                to={`/chat/${id}`}
+                className="relative block overflow-hidden"
+                data-icon="inline-start"
+              >
                 <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
                   <ChatStatusIndicator chatId={id} />
-                  {branchOf && <SplitIcon className="text-foreground size-3" />}
+                  {branchOf && <SplitIcon className="text-foreground" data-icon="inline-start" />}
                   <span className="min-w-0 truncate">{title}</span>
                 </span>
                 <div
@@ -128,7 +132,7 @@ export const ChatItem = memo(
                           e.stopPropagation();
                         }}
                       >
-                        <MoreHorizontalIcon />
+                        <MoreHorizontalIcon data-icon="inline-start" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-auto min-w-max">
@@ -143,7 +147,7 @@ export const ChatItem = memo(
                           setShowChangeTitleModal(true);
                         }}
                       >
-                        <PencilIcon className="size-4" />
+                        <PencilIcon />
                         Change Title
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -157,7 +161,7 @@ export const ChatItem = memo(
                           setShowExportModal(true);
                         }}
                       >
-                        <DownloadIcon className="size-4" />
+                        <DownloadIcon />
                         Export Chat
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -172,7 +176,7 @@ export const ChatItem = memo(
                         }}
                         variant="destructive"
                       >
-                        <TrashIcon className="size-4" />
+                        <TrashIcon />
                         Delete Chat
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -183,7 +187,7 @@ export const ChatItem = memo(
                           onEnterSelectionMode?.(id);
                         }}
                       >
-                        <CheckSquare2Icon className="size-4" />
+                        <CheckSquare2Icon />
                         Select Chat
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -202,7 +206,7 @@ export const ChatItem = memo(
                 setShowChangeTitleModal(true);
               }}
             >
-              <PencilIcon className="size-4" />
+              <PencilIcon />
               Change Title
             </ContextMenuItem>
             <ContextMenuItem
@@ -214,7 +218,7 @@ export const ChatItem = memo(
                 setShowExportModal(true);
               }}
             >
-              <DownloadIcon className="size-4" />
+              <DownloadIcon />
               Export Chat
             </ContextMenuItem>
             <ContextMenuItem
@@ -227,7 +231,7 @@ export const ChatItem = memo(
                 setShowDeleteModal(true);
               }}
             >
-              <TrashIcon className="size-4" />
+              <TrashIcon />
               Delete Chat
             </ContextMenuItem>
             <ContextMenuSeparator />
@@ -236,7 +240,7 @@ export const ChatItem = memo(
                 onEnterSelectionMode?.(id);
               }}
             >
-              <CheckSquare2Icon className="size-4" />
+              <CheckSquare2Icon />
               Select Chat
             </ContextMenuItem>
           </ContextMenuContent>

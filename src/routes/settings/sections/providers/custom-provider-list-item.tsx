@@ -118,7 +118,7 @@ export function CustomProviderListItem({
               onClick={() => setDeleteDialogOpen(true)}
               className="w-fit"
             >
-              <Trash2Icon className="size-4" />
+              <Trash2Icon data-icon="inline-start" />
               Delete Provider
             </Button>
           </div>

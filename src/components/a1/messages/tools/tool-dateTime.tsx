@@ -56,7 +56,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
                 })
               }
             >
-              <XIcon />
+              <XIcon data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -69,7 +69,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
                 })
               }
             >
-              <CheckCircle2Icon />
+              <CheckCircle2Icon data-icon="inline-start" />
               Approve
             </Button>
           </div>

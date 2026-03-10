@@ -60,11 +60,11 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
               </div>
             ) : file.name.includes("_agent-one_chat") ? (
               <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
-                <MessageCircle className="text-muted-foreground size-6" />
+                <MessageCircle className="text-muted-foreground" />
               </div>
             ) : (
               <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
-                <FileIcon className="text-muted-foreground size-6" />
+                <FileIcon className="text-muted-foreground" />
               </div>
             )}
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -91,7 +91,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
               className="size-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
               title="Remove file"
             >
-              <X className="size-3" />
+              <X data-icon="inline-start" />
             </Button>
           </div>
         ))}

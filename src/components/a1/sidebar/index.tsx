@@ -65,8 +65,11 @@ const SidebarContent = ({
           <ChatModelConfig disabled={isChatLoading} />
         </div>
         <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
-            <SettingsIcon className="size-4" />
+          <Link
+            to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
+            data-icon="inline-start"
+          >
+            <SettingsIcon data-icon="inline-start" />
             Settings
           </Link>
         </Button>
@@ -120,7 +123,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="size-6"
         >
-          <SidebarIcon />
+          <SidebarIcon data-icon="inline-start" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>{toggleTooltip}</TooltipContent>
@@ -179,7 +182,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                     aria-label="Search chats"
                     className="size-6"
                   >
-                    <SearchIcon />
+                    <SearchIcon data-icon="inline-start" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Search chats</TooltipContent>
@@ -193,7 +196,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                     aria-label="New chat"
                     className="size-6"
                   >
-                    <PlusIcon />
+                    <PlusIcon data-icon="inline-start" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New chat</TooltipContent>

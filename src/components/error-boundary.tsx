@@ -112,7 +112,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               >
                 <AccordionItem className="p-0" value="details">
                   <AccordionTrigger
-                    icon={<ChevronDownIcon className="size-4" />}
+                    icon={<ChevronDownIcon />}
                     shouldRotateIcon
                     className="flex justify-between p-2 px-1"
                   >
@@ -132,7 +132,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                   Try Again
                 </Button>
                 <Button onClick={this.handleRefresh}>
-                  <RefreshCwIcon />
+                  <RefreshCwIcon data-icon="inline-start" />
                   Reload App
                 </Button>
               </div>

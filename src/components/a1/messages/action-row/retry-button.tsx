@@ -34,7 +34,7 @@ export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps
       aria-label="Regenerate response"
       {...props}
     >
-      <RefreshCcwIcon />
+      <RefreshCcwIcon data-icon="inline-start" />
     </Button>
   );
 };

@@ -133,7 +133,7 @@ export function EnvVarsEditor({
                 disabled={!canSave}
                 title="Save changes"
               >
-                <SaveIcon className="size-4" />
+                <SaveIcon data-icon="inline-start" />
                 Save
               </Button>
               <Button
@@ -143,13 +143,13 @@ export function EnvVarsEditor({
                 onClick={handleRevert}
                 title="Revert changes"
               >
-                <RotateCcwIcon className="size-4" />
+                <RotateCcwIcon data-icon="inline-start" />
                 Revert
               </Button>
             </>
           )}
           <Button type="button" variant="outline" size="sm" onClick={addEntry}>
-            <PlusIcon className="size-4" />
+            <PlusIcon data-icon="inline-start" />
             Add
           </Button>
         </div>
@@ -186,7 +186,11 @@ export function EnvVarsEditor({
                     onClick={() => toggleVisibility(idx)}
                     title={isVisible ? "Hide value" : "Show value"}
                   >
-                    {isVisible ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+                    {isVisible ? (
+                      <EyeOffIcon data-icon="inline-start" />
+                    ) : (
+                      <EyeIcon data-icon="inline-start" />
+                    )}
                   </Button>
                   <Button
                     type="button"
@@ -194,7 +198,7 @@ export function EnvVarsEditor({
                     size="icon"
                     onClick={() => removeEntry(idx)}
                   >
-                    <Trash2Icon className="size-4" />
+                    <Trash2Icon data-icon="inline-start" />
                   </Button>
                 </div>
                 {isDupe && (

@@ -77,7 +77,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 })
               }
             >
-              <XIcon />
+              <XIcon data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -90,7 +90,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 })
               }
             >
-              <CheckCircle2Icon />
+              <CheckCircle2Icon data-icon="inline-start" />
               Approve
             </Button>
           </div>

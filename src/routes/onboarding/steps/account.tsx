@@ -70,7 +70,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
               Finish Setup
             </Button>
             <Button variant="outline" onClick={() => handleViewChange("account")}>
-              <ArrowLeftIcon className="size-4" />
+              <ArrowLeftIcon data-icon="inline-start" />
               Back to account options
             </Button>
           </div>
@@ -106,7 +106,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
           {user && (
             <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
               Continue
-              <ChevronRightIcon />
+              <ChevronRightIcon data-icon="inline-end" />
             </Button>
           )}
 

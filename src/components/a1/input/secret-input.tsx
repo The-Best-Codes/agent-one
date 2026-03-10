@@ -65,7 +65,7 @@ export function SecretInput({
         size="icon"
         title={showValue ? "Hide value" : "Show value"}
       >
-        {showValue ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+        {showValue ? <EyeOffIcon data-icon="inline-start" /> : <EyeIcon data-icon="inline-start" />}
       </Button>
       {showSaveCancel && (
         <>
@@ -77,7 +77,7 @@ export function SecretInput({
             size="icon"
             title="Save"
           >
-            <SaveIcon className="size-4" />
+            <SaveIcon data-icon="inline-start" />
           </Button>
           <Button
             type="button"
@@ -87,7 +87,7 @@ export function SecretInput({
             size="icon"
             title="Cancel changes"
           >
-            <RotateCcwIcon className="size-4" />
+            <RotateCcwIcon data-icon="inline-start" />
           </Button>
         </>
       )}
