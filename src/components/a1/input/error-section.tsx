@@ -1,7 +1,7 @@
 import { RefreshCcwIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
@@ -26,26 +26,24 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
         {displayDescription && <span className="text-base">{displayDescription}</span>}
       </div>
       <div className="flex flex-row items-center gap-2">
-        <TooltipProvider>
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => {
-                  void regenerate();
-                  onRetry?.();
-                }}
-                variant="destructive"
-                disabled={!hasAvailableModels}
-              >
-                <RefreshCcwIcon />
-                Retry
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="max-h-48 max-w-48">
-              Discards the last AI message (if any) and retries
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={() => {
+                void regenerate();
+                onRetry?.();
+              }}
+              variant="destructive"
+              disabled={!hasAvailableModels}
+            >
+              <RefreshCcwIcon />
+              Retry
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="max-h-48 max-w-48">
+            Discards the last AI message (if any) and retries
+          </TooltipContent>
+        </Tooltip>
         <Button title="Ignore error" size="icon" onClick={() => clearError()} variant="outline">
           <XIcon />
         </Button>
