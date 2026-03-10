@@ -89,6 +89,7 @@ See https://tauri.app/plugin/updater/.
 - `bunx -y playwright install` to download browsers
 - `bunx -y playwright test` to run all tests in all projects
 - `bunx -y playwright test --project="chromium-desktop-light" --project="pixel-7-dark"` to run only fast Chromium tests
+- Always run `bun run build` before tests if you've made changes to the codebase
 
 ## PR Tests
 
