@@ -111,6 +111,7 @@ export const ChatUsageStatus = () => {
         </div>
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
+          aria-label={isCollapsed ? "Expand usage stats" : "Collapse usage stats"}
           className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-md px-0.5 outline-none focus-visible:ring-[3px] disabled:pointer-events-none"
         >
           <ChevronLeft
