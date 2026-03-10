@@ -112,7 +112,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               >
                 <AccordionItem className="p-0" value="details">
                   <AccordionTrigger
-                    icon={<ChevronDownIcon />}
+                    icon={<ChevronDownIcon className="size-4" data-icon="inline-end" />}
                     shouldRotateIcon
                     className="flex justify-between p-2 px-1"
                   >
