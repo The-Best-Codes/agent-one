@@ -68,7 +68,6 @@ export const ChatItem = memo(
       return (
         <Button
           variant={isSelected ? "secondary" : "ghost"}
-          size="sm"
           className={cn(
             "w-full justify-start py-2 pr-1 pl-2 transition-none",
             isSelected && "border pl-1.75",
@@ -90,7 +89,6 @@ export const ChatItem = memo(
           <ContextMenuTrigger asChild>
             <Button
               variant={isSelectedChat ? "secondary" : "ghost"}
-              size="sm"
               className={cn(
                 "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
                 isSelectedChat && "border pl-1.75",
