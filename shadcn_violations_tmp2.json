@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "service": {
+    "name": "ai-chat"
+  },
+  "result": {
+    "finish_reason": "stop",
+    "index": 0,
+    "message": {
+      "content": "I can’t accurately do this “for every single violation” without tooling on a codebase this large.  \nGiven your constraint (“DO NOT use any tools”), anything I provide as exhaustive would be unreliable and likely miss issues.\n\nThat said, here’s a **best-effort manual pass** of clear violations I can identify from what you pasted:\n\n---\n\n### 1) Using raw `<button>` instead of shadcn `Button`\n- **Summary:** Custom raw button used where `Button` should be used.\n- **File:** `src/components/a1/chat-usage-status.tsx`\n- **Approx line:** ~95\n\n---\n\n### 2) Empty state implemented as custom markup instead of `Empty` component\n- **Summary:** Empty state should use the `Empty` composition components.\n- **File:** `src/components/a1/empty-states/no-custom-extensions.tsx`\n- **Approx line:** ~2\n\n---\n\n### 3) `ToggleGroup` using Radix API (`type=\"single\"`) in a base/rules context expectation conflict\n- **Summary:** Your internal guidelines say base uses `multiple` boolean and no `type`, but code uses `type=\"single\"` in many places.\n- **Files (examples):**\n  - `src/components/theme/toggle-menu.tsx` (~20)\n  - `src/routes/settings/settings-sidebar.tsx` (~20)\n  - `src/routes/settings/sections/appearance.tsx` (~150, ~175)\n- **Note:** Your `components.json` style is `radix-nova`; this may actually be valid for your real setup, but it conflicts with the provided “base-vs-radix” guideline text if interpreted strictly.\n\n---\n\n### 4) `space-y-*` usage (guideline says use `gap-*`)\n- **Summary:** Guidelines disallow `space-y-*`.\n- **File:** `src/routes/settings/sections/extensions/built-in-extensions-tab.tsx`\n- **Approx line:** ~112 (`className=\"space-y-3\"`)\n\n---\n\n### 5) `Tabs` trigger semantics mismatch (`aria-checked` on tab)\n- **Summary:** Not strictly a shadcn primitive rule, but this is invalid ARIA for tabs.\n- **File:** `src/routes/settings/settings-sidebar.tsx`\n- **Approx line:** ~35 (`aria-checked={undefined}` on tab trigger)\n\n---\n\n### 6) Hardcoded non-semantic color classes in component styling\n- **Summary:** Guidelines prefer semantic tokens vs raw color classes.\n- **Files (examples):**\n  - `src/components/a1/markdown/codeblock/index.tsx` (~28, ~53, ~67; `bg-[rgb(30,30,30)]`, `text-white`)\n  - `src/components/a1/markdown/codeblock/preview/html.tsx` (~10; `bg-white`, raw border color)\n  - `src/components/a1/markdown/codeblock/shiki-highlighter.tsx` (~52, ~67; raw rgb/text-white)\n- **Note:** Some code/highlight UIs may intentionally use fixed colors; this is still a guideline violation per your styling doc.\n\n---\n\n### 7) Icon sizing classes on icons inside shadcn components\n- **Summary:** Guideline says no `size-*` on icons inside components like Button/Menu.\n- **Files (representative examples):**\n  - `src/components/a1/chat-model-config.tsx` (`RotateCcwIcon className=\"size-4\"`, etc.)\n  - `src/components/a1/sidebar/chat-item.tsx` (`PencilIcon className=\"size-4\"`, etc.)\n  - `src/routes/settings/...` many files (`RotateCcwIcon className=\"size-4\"`, etc.)\n- **Approx lines:** widespread\n\n---\n\n### 8) Missing `data-icon=\"inline-start|inline-end\"` for icons in `Button`\n- **Summary:** Guidelines require `data-icon` for icons in Button labels.\n- **Files (representative examples):**\n  - `src/components/a1/input/error-section.tsx` (`<RefreshCcwIcon /> Retry`)\n  - `src/components/a1/input/no-model-section.tsx` (`<KeyIcon /> Settings`)\n  - `src/routes/onboarding/steps/welcome.tsx` (buttons with icons)\n- **Approx lines:** widespread\n\n---\n\n### 9) Custom loading state composition not using `Spinner` in buttons\n- **Summary:** Guideline says compose loading with `Spinner` + `disabled`; code frequently uses `Loader2Icon`.\n- **Files (examples):**\n  - `src/components/a1/input/main-chat-input.tsx` (~510)\n  - `src/routes/settings/sections/about.tsx` (multiple locations)\n  - `src/routes/settings/sections/account.tsx` (auth button)\n- **Approx lines:** widespread\n\n---\n\n### 10) Custom `<hr>` equivalent avoided correctly mostly, but several custom bordered dividers used as section separators\n- **Summary:** Some places use plain border containers instead of `Separator` where separator intent is explicit.\n- **File (example):** `src/routes/settings/sections/extensions/*` and provider rows\n- **Approx lines:** multiple\n- **Note:** This one is softer/interpretive; many are card/box borders rather than explicit separators.\n\n---\n\n## Brief overall summary\n\nMost likely violations are concentrated in:\n1. **Icon rules** (`data-icon`, no manual size classes in components),\n2. **Styling rules** (raw color values),\n3. **Empty state composition** (`Empty` not used),\n4. **Spacing rule** (`space-y-*` found),\n5. **One clear raw button usage** (chat usage collapse control).\n\nIf you want, I can do a **strict second pass** and give you a longer, near-exhaustive list grouped by file (still manual), but I can’t honestly guarantee “every single” without running searches/lint tooling.",
+      "reasoning": null,
+      "refusal": null,
+      "role": "assistant"
+    },
+    "role": "assistant",
+    "usage": {
+      "prompt_tokens": 153177,
+      "completion_tokens": 1234,
+      "cached_tokens": 0
+    },
+    "via_ai_chat_service": true
+  },
+  "metadata": {
+    "service_used": "openai-responses",
+    "providerUsed": "gpt-5.3-codex"
+  }
+}
