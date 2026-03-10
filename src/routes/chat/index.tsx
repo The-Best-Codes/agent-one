@@ -71,8 +71,9 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
           ) : (
             <AutoScrollContainer
               ref={scrollRef}
-              className="max-h-full min-h-0 flex-1 pt-2 pr-0 pb-2 md:pr-2"
+              className="max-h-full min-h-0 flex-1 pt-2 pr-0 pb-2"
               scrollableClassName="pr-2 h-full"
+              overflowingClassName="md:pr-2"
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >

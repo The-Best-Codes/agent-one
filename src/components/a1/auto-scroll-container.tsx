@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useOverflow } from "@/hooks/use-overflow";
 import { cn } from "@/lib/utils";
 
 const AT_BOTTOM_THRESHOLD = 10;
@@ -22,6 +23,7 @@ export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivEl
   scrollButtonClassName?: string;
   scrollButtonChildren?: ReactNode;
   scrollButtonProps?: Omit<React.ComponentProps<"button">, "className" | "children" | "onClick">;
+  overflowingClassName?: string;
   behavior?: "smooth" | "instant";
   /** Scroll behavior for the scroll-to-bottom button. Defaults to "smooth". */
   buttonScrollBehavior?: "smooth" | "instant";
@@ -46,6 +48,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       scrollButtonClassName,
       scrollButtonChildren,
       scrollButtonProps,
+      overflowingClassName,
       behavior = "instant",
       buttonScrollBehavior = "smooth",
       watchResize = false,
@@ -56,6 +59,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     ref,
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const isOverflowing = useOverflow(containerRef);
     const [buttonOffset, setButtonOffset] = useState(BUTTON_HIDDEN_OFFSET);
     const isAtBottomRef = useRef(true);
 
@@ -101,11 +105,10 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
         const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
 
-        const hasOverflow = scrollHeight > clientHeight;
         isAtBottomRef.current = atBottom;
 
         let offset = 0;
-        if (hasOverflow) {
+        if (isOverflowing) {
           if (distanceFromBottom <= slideStartDistance) {
             if (distanceFromBottom <= slideEndDistance) {
               offset = BUTTON_HIDDEN_OFFSET;
@@ -154,7 +157,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         resizeObserver?.disconnect();
         container.removeEventListener("scroll", handleScroll);
       };
-    }, [scrollToBottom, slideEndDistance, slideStartDistance, watchResize]);
+    }, [isOverflowing, scrollToBottom, slideEndDistance, slideStartDistance, watchResize]);
 
     return (
       <div className={cn("relative h-full w-full", className)} {...props}>
@@ -163,7 +166,9 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
           className="h-full w-full overflow-y-auto"
           data-testid="auto-scroll-container-scrollable"
         >
-          <div className={scrollableClassName}>{children}</div>
+          <div className={cn(scrollableClassName, isOverflowing && overflowingClassName)}>
+            {children}
+          </div>
         </div>
         <div className="pointer-events-none absolute right-4 bottom-2 z-10 overflow-hidden">
           <Button
