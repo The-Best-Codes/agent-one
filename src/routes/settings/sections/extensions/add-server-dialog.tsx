@@ -91,48 +91,50 @@ export function AddServerDialog({ open, onOpenChange, onAddServer }: AddServerDi
           </DialogDescription>
         </DialogHeader>
 
-        <McpServerConfigForm
-          idPrefix="new-server-dialog"
-          className="grid gap-4 py-4"
-          showTypeSelector
-          values={{
-            type: newServerType,
-            name: newServerName,
-            command: newServerCommand,
-            env: newServerEnv,
-            url: newServerUrl,
-            headers: newServerHeaders,
-            timeoutSec: newServerTimeoutSec,
-            requiresApproval: newServerRequiresApproval,
-          }}
-          onChange={(updates) => {
-            if (updates.type !== undefined) {
-              setNewServerType(updates.type);
-            }
-            if (updates.name !== undefined) {
-              setNewServerName(updates.name);
-            }
-            if (updates.command !== undefined) {
-              setNewServerCommand(updates.command);
-            }
-            if (updates.env !== undefined) {
-              setNewServerEnv(updates.env);
-            }
-            if (updates.url !== undefined) {
-              setNewServerUrl(updates.url);
-            }
-            if (updates.headers !== undefined) {
-              setNewServerHeaders(updates.headers);
-            }
-            if (updates.timeoutSec !== undefined) {
-              setNewServerTimeoutSec(updates.timeoutSec);
-            }
-            if (updates.requiresApproval !== undefined) {
-              setNewServerRequiresApproval(updates.requiresApproval);
-            }
-          }}
-          namePlaceholder="e.g., Everything Server"
-        />
+        <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+          <McpServerConfigForm
+            idPrefix="new-server-dialog"
+            className="grid gap-4 py-4"
+            showTypeSelector
+            values={{
+              type: newServerType,
+              name: newServerName,
+              command: newServerCommand,
+              env: newServerEnv,
+              url: newServerUrl,
+              headers: newServerHeaders,
+              timeoutSec: newServerTimeoutSec,
+              requiresApproval: newServerRequiresApproval,
+            }}
+            onChange={(updates) => {
+              if (updates.type !== undefined) {
+                setNewServerType(updates.type);
+              }
+              if (updates.name !== undefined) {
+                setNewServerName(updates.name);
+              }
+              if (updates.command !== undefined) {
+                setNewServerCommand(updates.command);
+              }
+              if (updates.env !== undefined) {
+                setNewServerEnv(updates.env);
+              }
+              if (updates.url !== undefined) {
+                setNewServerUrl(updates.url);
+              }
+              if (updates.headers !== undefined) {
+                setNewServerHeaders(updates.headers);
+              }
+              if (updates.timeoutSec !== undefined) {
+                setNewServerTimeoutSec(updates.timeoutSec);
+              }
+              if (updates.requiresApproval !== undefined) {
+                setNewServerRequiresApproval(updates.requiresApproval);
+              }
+            }}
+            namePlaceholder="e.g., Everything Server"
+          />
+        </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancelAdd}>

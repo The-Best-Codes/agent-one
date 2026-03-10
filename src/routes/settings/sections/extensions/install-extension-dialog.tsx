@@ -163,43 +163,45 @@ function InstallExtensionDialogBody({
         </DialogDescription>
       </DialogHeader>
 
-      <McpServerConfigForm
-        idPrefix="install-extension"
-        className="grid gap-4 py-2"
-        values={{
-          type: install.type,
-          name,
-          command,
-          env: {},
-          url,
-          headers: {},
-          timeoutSec,
-          requiresApproval,
-        }}
-        onChange={(updates) => {
-          if (updates.name !== undefined) {
-            setName(updates.name);
-          }
-          if (updates.command !== undefined) {
-            setCommand(updates.command);
-          }
-          if (updates.url !== undefined) {
-            setUrl(updates.url);
-          }
-          if (updates.timeoutSec !== undefined) {
-            setTimeoutSec(updates.timeoutSec);
-          }
-          if (updates.requiresApproval !== undefined) {
-            setRequiresApproval(updates.requiresApproval);
-          }
-        }}
-        showTransportEditors={false}
-        commandPlaceholder="npx -y ..."
-        urlPlaceholder="https://..."
-        approvalDescription="Ask before running tools from this extension"
-        stdioSupplement={detectedConfigurationContent}
-        httpSupplement={detectedConfigurationContent}
-      />
+      <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+        <McpServerConfigForm
+          idPrefix="install-extension"
+          className="grid gap-4 py-2"
+          values={{
+            type: install.type,
+            name,
+            command,
+            env: {},
+            url,
+            headers: {},
+            timeoutSec,
+            requiresApproval,
+          }}
+          onChange={(updates) => {
+            if (updates.name !== undefined) {
+              setName(updates.name);
+            }
+            if (updates.command !== undefined) {
+              setCommand(updates.command);
+            }
+            if (updates.url !== undefined) {
+              setUrl(updates.url);
+            }
+            if (updates.timeoutSec !== undefined) {
+              setTimeoutSec(updates.timeoutSec);
+            }
+            if (updates.requiresApproval !== undefined) {
+              setRequiresApproval(updates.requiresApproval);
+            }
+          }}
+          showTransportEditors={false}
+          commandPlaceholder="npx -y ..."
+          urlPlaceholder="https://..."
+          approvalDescription="Ask before running tools from this extension"
+          stdioSupplement={detectedConfigurationContent}
+          httpSupplement={detectedConfigurationContent}
+        />
+      </div>
 
       <DialogFooter>
         <Button variant="outline" onClick={() => onOpenChange(false)}>

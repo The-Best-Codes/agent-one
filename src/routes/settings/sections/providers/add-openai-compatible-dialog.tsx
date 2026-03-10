@@ -90,46 +90,48 @@ export function AddOpenAICompatibleDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="provider-name">Name</Label>
-            <Input
-              id="provider-name"
-              placeholder="e.g., My Local LLM"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+        <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="provider-name">Name</Label>
+              <Input
+                id="provider-name"
+                placeholder="e.g., My Local LLM"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="provider-base-url">Base URL</Label>
+              <Input
+                id="provider-base-url"
+                placeholder="e.g., http://localhost:1234/v1"
+                value={baseUrl}
+                onChange={(e) => setBaseUrl(e.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="provider-api-key">API Key</Label>
+              <SecretInput
+                id="provider-api-key"
+                value={apiKey}
+                onChange={setApiKey}
+                placeholder="Enter API key if required"
+              />
+            </div>
+
+            <HttpHeadersEditor id="new-provider" headers={headers} onChange={setHeaders} />
+
+            <ModelList
+              models={models}
+              baseUrl={baseUrl.trim()}
+              apiKey={apiKey.trim()}
+              headers={headers}
+              onChange={setModels}
             />
           </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="provider-base-url">Base URL</Label>
-            <Input
-              id="provider-base-url"
-              placeholder="e.g., http://localhost:1234/v1"
-              value={baseUrl}
-              onChange={(e) => setBaseUrl(e.target.value)}
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="provider-api-key">API Key</Label>
-            <SecretInput
-              id="provider-api-key"
-              value={apiKey}
-              onChange={setApiKey}
-              placeholder="Enter API key if required"
-            />
-          </div>
-
-          <HttpHeadersEditor id="new-provider" headers={headers} onChange={setHeaders} />
-
-          <ModelList
-            models={models}
-            baseUrl={baseUrl.trim()}
-            apiKey={apiKey.trim()}
-            headers={headers}
-            onChange={setModels}
-          />
         </div>
 
         <DialogFooter>
