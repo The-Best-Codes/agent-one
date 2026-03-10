@@ -114,7 +114,7 @@ export function ExtensionListRow({
           <DialogTrigger asChild>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
             >
               Advanced
@@ -126,20 +126,22 @@ export function ExtensionListRow({
               <DialogTitle>{title} advanced config</DialogTitle>
               <DialogDescription>Edit advanced settings for this extension.</DialogDescription>
             </DialogHeader>
-            <div className="flex flex-col gap-4 py-1">
-              {advancedContent}
-              {moreInfoJson !== undefined ? (
-                <Accordion type="single" collapsible className="rounded-md border px-3">
-                  <AccordionItem value="more-info" className="border-b-0">
-                    <AccordionTrigger className="py-3">Debug info</AccordionTrigger>
-                    <AccordionContent>
-                      <pre className="bg-muted overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap">
-                        {JSON.stringify(moreInfoJson, null, 2)}
-                      </pre>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              ) : null}
+            <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+              <div className="flex flex-col gap-4 py-1">
+                {advancedContent}
+                {moreInfoJson !== undefined ? (
+                  <Accordion type="single" collapsible className="rounded-md border px-3">
+                    <AccordionItem value="more-info" className="border-b-0">
+                      <AccordionTrigger className="py-3">Debug info</AccordionTrigger>
+                      <AccordionContent>
+                        <pre className="bg-muted overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap">
+                          {JSON.stringify(moreInfoJson, null, 2)}
+                        </pre>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                ) : null}
+              </div>
             </div>
           </DialogContent>
         </Dialog>
