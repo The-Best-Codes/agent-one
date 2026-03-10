@@ -129,7 +129,10 @@ export default function SettingsRoute() {
 
           <div
             ref={contentRef}
-            className={cn("flex-1 overflow-y-auto md:min-h-0", contentOverflowing && "pr-2")}
+            className={cn(
+              "-m-0.5 flex-1 overflow-auto p-0.5 md:min-h-0",
+              contentOverflowing && "pr-2",
+            )}
           >
             <div
               role="tabpanel"
