@@ -70,7 +70,7 @@ export const ChatItem = memo(
           variant={isSelected ? "secondary" : "ghost"}
           className={cn(
             "w-full justify-start py-2 pr-1 pl-2 transition-none",
-            isSelected && "border pl-1.75",
+            isSelected && "border border-border",
           )}
           onClick={() => onSelectionToggle?.(id)}
         >
@@ -91,7 +91,7 @@ export const ChatItem = memo(
               variant={isSelectedChat ? "secondary" : "ghost"}
               className={cn(
                 "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
-                isSelectedChat && "border pl-1.75",
+                isSelectedChat && "border border-border",
               )}
               asChild
               draggable={true}
