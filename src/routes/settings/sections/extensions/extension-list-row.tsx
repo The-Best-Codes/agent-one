@@ -118,7 +118,7 @@ export function ExtensionListRow({
               className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
             >
               Advanced
-              <ChevronRightIcon className="text-muted-foreground" data-icon="inline-start" />
+              <ChevronRightIcon className="text-muted-foreground" data-icon="inline-end" />
             </Button>
           </DialogTrigger>
           <DialogContent>

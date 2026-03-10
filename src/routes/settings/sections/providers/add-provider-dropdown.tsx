@@ -32,12 +32,12 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
         <DropdownMenuTrigger asChild>
           <Button variant="outline">
             Add Provider
-            <ChevronDownIcon data-icon="inline-start" />
+            <ChevronDownIcon data-icon="inline-end" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-auto min-w-max">
           <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-            <PlusIcon />
+            <PlusIcon data-icon="inline-start" />
             OpenAI Compatible
           </DropdownMenuItem>
         </DropdownMenuContent>

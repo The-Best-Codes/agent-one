@@ -106,7 +106,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
           {user && (
             <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
               Continue
-              <ChevronRightIcon data-icon="inline-start" />
+              <ChevronRightIcon data-icon="inline-end" />
             </Button>
           )}
 
