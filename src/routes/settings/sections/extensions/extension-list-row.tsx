@@ -121,7 +121,7 @@ export function ExtensionListRow({
               <ChevronRightIcon className="text-muted-foreground size-4" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>{title} advanced config</DialogTitle>
               <DialogDescription>Edit advanced settings for this extension.</DialogDescription>
