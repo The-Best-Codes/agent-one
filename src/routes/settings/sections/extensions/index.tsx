@@ -309,7 +309,7 @@ export default function ExtensionsSection() {
                     <FilterIcon />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-auto min-w-max">
                   <DropdownMenuLabel>Filter by connection</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuCheckboxItem

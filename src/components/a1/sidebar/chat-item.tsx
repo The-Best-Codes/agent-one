@@ -131,7 +131,7 @@ export const ChatItem = memo(
                         <MoreHorizontalIcon />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-fit">
+                    <DropdownMenuContent align="end" className="w-auto min-w-max">
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.preventDefault();

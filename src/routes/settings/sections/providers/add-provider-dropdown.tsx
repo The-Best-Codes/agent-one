@@ -35,7 +35,7 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
             <ChevronDownIcon className="size-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="w-auto min-w-max">
           <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
             <PlusIcon />
             OpenAI Compatible

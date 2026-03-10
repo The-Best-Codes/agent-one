@@ -237,7 +237,7 @@ const MessagePartsInternal = ({
                     <ChevronDownIcon className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-auto min-w-max">
                   <div className="flex items-center gap-2 p-2">
                     <Checkbox
                       id="regenerate-on-save"
