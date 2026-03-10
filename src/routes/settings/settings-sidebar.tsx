@@ -35,7 +35,7 @@ export default function SettingsSidebar({
           role="tab"
           aria-selected={activeSection === section.id}
           aria-checked={undefined}
-          className="hover:text-foreground h-9 w-full flex-none justify-start rounded-md border-0 px-4 text-left shadow-none transition-none"
+          className="hover:text-foreground h-9 w-full flex-none justify-start rounded-md! border-0 px-4 text-left shadow-none transition-none"
         >
           {section.label}
         </ToggleGroupItem>

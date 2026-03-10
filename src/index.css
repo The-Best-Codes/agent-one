@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/roboto";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
@@ -42,9 +43,8 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-space-grotesk: "Space Grotesk", sans-serif;
-  --font-roboto: "Roboto", sans-serif;
-  --font-sans: "Inter Variable", sans-serif;
+  --font-space-grotesk: "Space Grotesk Variable", sans-serif;
+  --font-roboto: "Roboto Variable", sans-serif;
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
@@ -553,16 +553,6 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.38 0.189 293.745);
-}
-
-@font-face {
-  font-family: "Space Grotesk";
-  src: url("assets/fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: url("assets/fonts/Roboto/Roboto-VariableFont_wdth,wght.ttf") format("truetype");
 }
 
 @layer base {
