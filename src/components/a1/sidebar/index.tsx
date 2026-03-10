@@ -115,7 +115,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <TooltipTrigger asChild>
         <Button
           variant="outline"
-          size="icon"
+          size="icon-sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="size-6"
@@ -130,7 +130,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <DrawerTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Expand sidebar" className="size-6">
+            <Button variant="outline" size="icon-sm" aria-label="Expand sidebar" className="size-6">
               <SidebarIcon />
             </Button>
           </DrawerTrigger>
@@ -174,7 +174,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    size="icon"
+                    size="icon-sm"
                     onClick={handleSearchClick}
                     aria-label="Search chats"
                     className="size-6"
@@ -188,7 +188,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    size="icon"
+                    size="icon-sm"
                     onClick={handleNewChat}
                     aria-label="New chat"
                     className="size-6"

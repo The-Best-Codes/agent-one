@@ -200,7 +200,7 @@ export const VirtualizedChatList = ({
               </Button>
               <Button
                 variant="outline"
-                size="icon"
+                size="icon-sm"
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkExportModal(true)}
@@ -209,7 +209,7 @@ export const VirtualizedChatList = ({
               </Button>
               <Button
                 variant="destructive"
-                size="icon"
+                size="icon-sm"
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkDeleteModal(true)}
