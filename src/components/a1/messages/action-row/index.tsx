@@ -2,12 +2,7 @@ import type { UIMessage } from "ai";
 import { useAtom } from "jotai";
 
 import { CopyButton } from "@/components/a1/copy-button";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { showMessageActionRowAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -43,8 +38,8 @@ export const MessageActionRow = ({
         },
       )}
     >
-      <TooltipProvider>
-        <TooltipRoot>
+      <>
+        <Tooltip>
           <TooltipTrigger asChild>
             <div>
               <CopyButton
@@ -60,39 +55,39 @@ export const MessageActionRow = ({
             </div>
           </TooltipTrigger>
           <TooltipContent>Copy message</TooltipContent>
-        </TooltipRoot>
+        </Tooltip>
 
         {onBranch && messageRole === "assistant" && (
-          <TooltipRoot>
+          <Tooltip>
             <TooltipTrigger asChild>
               <div>
                 <BranchButton onBranch={onBranch} className="size-6" />
               </div>
             </TooltipTrigger>
             <TooltipContent>Branch conversation</TooltipContent>
-          </TooltipRoot>
+          </Tooltip>
         )}
         {messageRole === "assistant" && (
-          <TooltipRoot>
+          <Tooltip>
             <TooltipTrigger asChild>
               <div>
                 <RetryButton messageId={messageId} className="size-6" />
               </div>
             </TooltipTrigger>
             <TooltipContent>Regenerate response</TooltipContent>
-          </TooltipRoot>
+          </Tooltip>
         )}
         {onEdit && (
-          <TooltipRoot>
+          <Tooltip>
             <TooltipTrigger asChild>
               <div>
                 <EditButton onEdit={onEdit} className="size-6" />
               </div>
             </TooltipTrigger>
             <TooltipContent>Edit message</TooltipContent>
-          </TooltipRoot>
+          </Tooltip>
         )}
-      </TooltipProvider>
+      </>
     </div>
   );
 };

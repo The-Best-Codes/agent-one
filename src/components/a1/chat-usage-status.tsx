@@ -4,12 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatLoading, useChatMetadata } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
@@ -71,53 +66,52 @@ export const ChatUsageStatus = () => {
                   <Skeleton className="h-5 w-8" />
                 </>
               ) : (
-                <TooltipProvider>
-                  <TooltipRoot>
-                    <TooltipTrigger
-                      className="focus-visible:border-ring focus-visible:ring-ring/50 outline-none focus-visible:ring-[3px]"
-                      tabIndex={isCollapsed ? -1 : 0}
-                      asChild
-                    >
-                      <div className="flex cursor-help items-center gap-2">
-                        <span>
-                          In{" "}
-                          <NumberFlow
-                            value={Number(displayedMetadata.inputTokens)}
-                            className="text-foreground"
-                          />
-                        </span>
-                        <span>
-                          Out{" "}
-                          <NumberFlow
-                            value={Number(displayedMetadata.outputTokens)}
-                            className="text-foreground"
-                          />
-                        </span>
-                        <span>
-                          Cost{" "}
-                          <NumberFlow
-                            value={Number(displayedMetadata.totalCostUsd)}
-                            format={{
-                              style: "currency",
-                              currency: "USD",
-                            }}
-                            className="text-foreground"
-                          />
-                        </span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      Input tokens are what you send; output tokens are what the model returns. Cost
-                      is shown in USD. Edits and deleted messages are not included in these stats.
-                    </TooltipContent>
-                  </TooltipRoot>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger
+                    className="focus-visible:border-ring focus-visible:ring-ring/50 outline-none focus-visible:ring-[3px]"
+                    tabIndex={isCollapsed ? -1 : 0}
+                    asChild
+                  >
+                    <div className="flex cursor-help items-center gap-2">
+                      <span>
+                        In{" "}
+                        <NumberFlow
+                          value={Number(displayedMetadata.inputTokens)}
+                          className="text-foreground"
+                        />
+                      </span>
+                      <span>
+                        Out{" "}
+                        <NumberFlow
+                          value={Number(displayedMetadata.outputTokens)}
+                          className="text-foreground"
+                        />
+                      </span>
+                      <span>
+                        Cost{" "}
+                        <NumberFlow
+                          value={Number(displayedMetadata.totalCostUsd)}
+                          format={{
+                            style: "currency",
+                            currency: "USD",
+                          }}
+                          className="text-foreground"
+                        />
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    Input tokens are what you send; output tokens are what the model returns. Cost
+                    is shown in USD. Edits and deleted messages are not included in these stats.
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
           </div>
         </div>
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
+          aria-label={isCollapsed ? "Expand usage stats" : "Collapse usage stats"}
           className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-md px-0.5 outline-none focus-visible:ring-[3px] disabled:pointer-events-none"
         >
           <ChevronLeft

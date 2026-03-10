@@ -13,12 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -116,7 +111,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   };
 
   const sidebarButton = isDesktop ? (
-    <TooltipRoot>
+    <Tooltip>
       <TooltipTrigger asChild>
         <Button
           variant="outline"
@@ -129,10 +124,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
         </Button>
       </TooltipTrigger>
       <TooltipContent>{toggleTooltip}</TooltipContent>
-    </TooltipRoot>
+    </Tooltip>
   ) : (
     <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <TooltipRoot>
+      <Tooltip>
         <TooltipTrigger asChild>
           <DrawerTrigger asChild>
             <Button variant="outline" size="icon" aria-label="Expand sidebar" className="size-6">
@@ -141,7 +136,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           </DrawerTrigger>
         </TooltipTrigger>
         <TooltipContent>{toggleTooltip}</TooltipContent>
-      </TooltipRoot>
+      </Tooltip>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
@@ -166,7 +161,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
           )}
         >
-          <TooltipProvider>
+          <>
             {sidebarButton}
             <div
               className={cn(
@@ -175,7 +170,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               )}
               inert={!isCollapsed}
             >
-              <TooltipRoot>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
@@ -188,8 +183,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Search chats</TooltipContent>
-              </TooltipRoot>
-              <TooltipRoot>
+              </Tooltip>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
@@ -202,9 +197,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New chat</TooltipContent>
-              </TooltipRoot>
+              </Tooltip>
             </div>
-          </TooltipProvider>
+          </>
         </div>
       </div>
 

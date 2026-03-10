@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 
 import ErrorBoundary from "@/components/error-boundary";
 import { ThemeRegistry } from "@/components/theme/theme-registry";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ApiKeysProvider } from "@/contexts/use-api-keys/api-keys-context";
 import { ModelProvider } from "@/contexts/use-model/model-context";
 import { PersistenceProvider } from "@/contexts/use-persistence/persistence-context";
@@ -22,7 +23,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <ToolsProvider>
               <ModelProvider>
                 <Suspense fallback={<SuspenseFallback />}>
-                  <App />
+                  <TooltipProvider delayDuration={700}>
+                    <App />
+                  </TooltipProvider>
                 </Suspense>
               </ModelProvider>
             </ToolsProvider>

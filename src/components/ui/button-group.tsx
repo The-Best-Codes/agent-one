@@ -2,9 +2,8 @@ import { type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 
 import { Separator } from "@/components/ui/separator";
+import { buttonGroupVariants } from "@/components/ui/variants/button-group";
 import { cn } from "@/lib/utils";
-
-import { buttonGroupVariants } from "./variants/button-group";
 
 function ButtonGroup({
   className,
@@ -34,7 +33,7 @@ function ButtonGroupText({
   return (
     <Comp
       className={cn(
-        "bg-muted flex items-center gap-2 rounded-md border px-4 text-sm font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+        "flex items-center gap-2 rounded-lg border bg-muted px-2.5 text-sm font-medium [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -52,7 +51,7 @@ function ButtonGroupSeparator({
       data-slot="button-group-separator"
       orientation={orientation}
       className={cn(
-        "bg-input relative m-0! self-stretch data-[orientation=vertical]:h-auto",
+        "relative self-stretch bg-input data-horizontal:mx-px data-horizontal:w-auto data-vertical:my-px data-vertical:h-auto",
         className,
       )}
       {...props}

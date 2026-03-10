@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -105,10 +106,12 @@ export default function ChatsSection() {
                   <SelectValue placeholder="Select option" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="both">All messages</SelectItem>
-                  <SelectItem value="user">User messages only</SelectItem>
-                  <SelectItem value="assistant">Assistant messages only</SelectItem>
-                  <SelectItem value="neither">No messages</SelectItem>
+                  <SelectGroup>
+                    <SelectItem value="both">All messages</SelectItem>
+                    <SelectItem value="user">User messages only</SelectItem>
+                    <SelectItem value="assistant">Assistant messages only</SelectItem>
+                    <SelectItem value="neither">No messages</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <Button
@@ -142,9 +145,11 @@ export default function ChatsSection() {
                   <SelectValue placeholder="Select option" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="always">Always</SelectItem>
-                  <SelectItem value="when-unfocused">When window unfocused</SelectItem>
-                  <SelectItem value="never">Never</SelectItem>
+                  <SelectGroup>
+                    <SelectItem value="always">Always</SelectItem>
+                    <SelectItem value="when-unfocused">When window unfocused</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <Button
@@ -178,9 +183,11 @@ export default function ChatsSection() {
                   <SelectValue placeholder="Select option" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="hover">Show on hover</SelectItem>
-                  <SelectItem value="always">Always show</SelectItem>
-                  <SelectItem value="never">Never show</SelectItem>
+                  <SelectGroup>
+                    <SelectItem value="hover">Show on hover</SelectItem>
+                    <SelectItem value="always">Always show</SelectItem>
+                    <SelectItem value="never">Never show</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <Button
@@ -214,8 +221,10 @@ export default function ChatsSection() {
                   <SelectValue placeholder="Select option" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="enter">Enter</SelectItem>
-                  <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
+                  <SelectGroup>
+                    <SelectItem value="enter">Enter</SelectItem>
+                    <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <Button

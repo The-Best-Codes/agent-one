@@ -17,12 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
-import {
-  TooltipContent,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -113,16 +108,16 @@ const UrlResultDisplay = memo(
           </a>
         </span>
         <div className="flex items-center gap-1">
-          <TooltipProvider>
+          <>
             {isRawContent && (
-              <TooltipRoot>
+              <Tooltip>
                 <TooltipTrigger asChild>
                   <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
                 </TooltipTrigger>
                 <TooltipContent>Fetched raw content</TooltipContent>
-              </TooltipRoot>
+              </Tooltip>
             )}
-            <TooltipRoot>
+            <Tooltip>
               <TooltipTrigger asChild>
                 <div
                   className={cn(
@@ -136,8 +131,8 @@ const UrlResultDisplay = memo(
                   ? `Truncated to ${input.maxLength || "unknown"} characters`
                   : `${result.length || "All"} characters processed`}
               </TooltipContent>
-            </TooltipRoot>
-          </TooltipProvider>
+            </Tooltip>
+          </>
         </div>
       </div>
     );

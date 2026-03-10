@@ -25,7 +25,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
@@ -239,16 +239,14 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
             >
               <span className="max-w-2xl truncate">"{toolName}" tool finished</span>
               {isLongOutput && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="size-2 shrink-0 rounded-full bg-yellow-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Tool result is over {maxToolResultChars} characters
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="size-2 shrink-0 rounded-full bg-yellow-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Tool result is over {maxToolResultChars} characters
+                  </TooltipContent>
+                </Tooltip>
               )}
             </AccordionTrigger>
             <AccordionContent
