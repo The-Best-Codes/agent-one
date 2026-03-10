@@ -112,7 +112,8 @@ export const ChatUsageStatus = () => {
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
           aria-label={isCollapsed ? "Expand usage stats" : "Collapse usage stats"}
-          className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-md px-0.5 outline-none focus-visible:ring-[3px] disabled:pointer-events-none"
+          data-is-collapsed={isCollapsed}
+          className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-br-md px-0.5 transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none md:rounded-r-md md:data-[is-collapsed=true]:rounded-md"
         >
           <ChevronLeft
             className={cn(
