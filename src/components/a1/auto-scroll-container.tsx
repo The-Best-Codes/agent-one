@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const AT_BOTTOM_THRESHOLD = 10;
-const BUTTON_HIDDEN_OFFSET = 32;
+const BUTTON_HIDDEN_OFFSET = 36;
 
 export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
