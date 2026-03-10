@@ -80,7 +80,7 @@ const SliderConfig = ({
           {!isUnset && (
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-xs"
               className="size-5"
               onClick={handleClear}
               title={`Reset ${label} config`}
