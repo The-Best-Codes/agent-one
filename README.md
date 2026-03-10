@@ -80,6 +80,7 @@ See https://tauri.app/plugin/updater/.
 - `cargo upgrade` to upgrade dependencies to the latest version (unsafe, test for breaking changes)
 - `bunx npm-check-updates -u` to update dependencies to the latest version (unsafe, test for breaking changes)
 - `bunx actions-up` to update actions in workflows (test manually in a PR)
+- `bunx --bun shadcn@latest diff` to check for updates to UI components
 
 ## Testing
 
