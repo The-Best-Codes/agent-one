@@ -210,7 +210,7 @@ const MessagePartsInternal = ({
       >
         <div className="flex flex-col">{renderedParts}</div>
 
-        <div className="mt-2 flex items-center justify-end gap-2">
+        <div className="mt-2 flex items-center justify-end gap-1.5">
           <Button
             size="sm"
             variant="outline"
