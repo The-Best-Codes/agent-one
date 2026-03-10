@@ -111,31 +111,9 @@ Here is the comprehensive list of all shadcn/ui guideline violations found in th
 - **`src/routes/settings/sections/about.tsx`** (~Line 129): Uses `<Loader2 className="animate-spin" />` inside Checking Button.
 - **`src/routes/settings/sections/extensions/mcp-auth-status.tsx`** (~Line 66, 91, 95): Uses `<Loader2Icon className="animate-spin" />` inside Login/Logout buttons.
 
-### 7. Custom Loading Skeletons
-
-**Rule:** Use the `Skeleton` component for loading placeholders. Never build custom styled divs with `animate-pulse`.
-
-- **`src/components/a1/chat-message-loading.tsx`** (~Line 31, 40, 58): Uses `<span className="text-muted-foreground animate-pulse">` for loading placeholders instead of `<Skeleton>`.
-
-### 8. Manual Theme Colors (`dark:`)
-
-**Rule:** Use semantic tokens for dark mode support. No manual `dark:` overrides on text or backgrounds.
-
-- **`src/components/a1/chat-usage-status.tsx`** (~Line 100): `dark:hover:bg-accent/50`.
-- **`src/components/a1/input/main-chat-input.tsx`** (~Line 300): `dark:bg-secondary`.
-- **`src/routes/settings/sections/extensions/extension-list-row.tsx`** (~Line 62): `dark:text-blue-400`.
-
-### 9. Validation State Data Attributes
+### 7. Validation State Data Attributes
 
 **Rule:** Validation uses both `data-invalid` / `data-disabled` on the `Field` wrapper, and `aria-invalid` / `disabled` on the control.
 
 - **`src/components/a1/input/env-vars-editor.tsx`** (~Line 130): Applies `aria-invalid={hasError}` to `<Input>` but lacks a surrounding `Field` with `data-invalid`.
 - **`src/components/a1/input/http-headers-editor.tsx`** (~Line 120): Applies `aria-invalid={hasError}` to `<Input>` but lacks a surrounding `Field` with `data-invalid`.
-
-### 10. Manual Z-Index on Overlay Components
-
-**Rule:** Overlays (Dialog, Sheet, Custom Overlays, etc.) handle their own stacking natively. Never add `z-50` or manual `z-*` mapping in application logic.
-
-- **`src/components/a1/chat-usage-status.tsx`** (~Line 34): Manually sets `z-40` on a fixed container.
-- **`src/components/a1/sidebar/index.tsx`** (~Line 171): Manually sets `z-50` on the fixed sidebar top wrapper.
-- **`src/components/a1/input/main-chat-input.tsx`** (~Line 250, 324): Custom overlay layers explicitly using `z-20` and `z-10`.
