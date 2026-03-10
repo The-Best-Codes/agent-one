@@ -160,15 +160,16 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     }, [isOverflowing, scrollToBottom, slideEndDistance, slideStartDistance, watchResize]);
 
     return (
-      <div className={cn("relative h-full w-full", className)} {...props}>
+      <div
+        className={cn("relative h-full w-full", className, isOverflowing && overflowingClassName)}
+        {...props}
+      >
         <div
           ref={containerRef}
           className="h-full w-full overflow-y-auto"
           data-testid="auto-scroll-container-scrollable"
         >
-          <div className={cn(scrollableClassName, isOverflowing && overflowingClassName)}>
-            {children}
-          </div>
+          <div className={scrollableClassName}>{children}</div>
         </div>
         <div className="pointer-events-none absolute right-4 bottom-2 z-10 overflow-hidden">
           <Button
