@@ -98,7 +98,7 @@ export function ExtensionListRow({
         <div className="flex shrink-0 items-center gap-2">
           {installed ? (
             <Button size="sm" variant="destructive" onClick={onUninstall}>
-              <Trash2Icon className="size-4" />
+              <Trash2Icon data-icon="inline-start" />
               Uninstall
             </Button>
           ) : (
@@ -118,7 +118,7 @@ export function ExtensionListRow({
               className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
             >
               Advanced
-              <ChevronRightIcon className="text-muted-foreground size-4" />
+              <ChevronRightIcon className="text-muted-foreground" data-icon="inline-start" />
             </Button>
           </DialogTrigger>
           <DialogContent>

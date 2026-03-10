@@ -82,7 +82,7 @@ export default function EditorSection() {
               disabled={isMarkdownHighlightingDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function EditorSection() {
               disabled={isRegenerateOnSaveDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function EditorSection() {
               disabled={isSubmitKeyDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function EditorSection() {
               disabled={isInputStyleDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>

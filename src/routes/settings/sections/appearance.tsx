@@ -152,7 +152,7 @@ export default function AppearanceSection() {
                     className={cn("border-foreground rounded-md border-0", option.className)}
                     title={option.label}
                   >
-                    {colorTheme === option.value && <Check className="size-5" />}
+                    {colorTheme === option.value && <Check data-icon="inline-start" />}
                   </Button>
                 ))}
               </div>
@@ -284,7 +284,7 @@ export default function AppearanceSection() {
                 disabled={isMarkdownHighlightingDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon className="size-4" />
+                <RotateCcwIcon data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function AppearanceSection() {
                 disabled={isInputStyleDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon className="size-4" />
+                <RotateCcwIcon data-icon="inline-start" />
               </Button>
             </div>
           </div>

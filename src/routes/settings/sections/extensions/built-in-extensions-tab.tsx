@@ -116,7 +116,7 @@ export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
           disabled={isToolConfigsDefault}
           aria-label="Reset to default"
         >
-          <RotateCcwIcon className="size-4" />
+          <RotateCcwIcon data-icon="inline-start" />
         </Button>
       </div>
 

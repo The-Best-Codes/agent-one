@@ -110,7 +110,7 @@ export default function MessagesSection() {
               disabled={isMarkdownRenderingDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function MessagesSection() {
               disabled={isMaxMessageLengthDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -172,7 +172,7 @@ export default function MessagesSection() {
               disabled={isMaxCodeblockCharsDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -203,7 +203,7 @@ export default function MessagesSection() {
               disabled={isMaxToolResultCharsDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function MessagesSection() {
               disabled={isNotificationSettingDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>
@@ -279,7 +279,7 @@ export default function MessagesSection() {
               disabled={isShowMessageActionRowDefault}
               aria-label="Reset to default"
             >
-              <RotateCcwIcon className="size-4" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           </div>
         </div>

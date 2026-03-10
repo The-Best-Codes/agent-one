@@ -32,7 +32,7 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
         <DropdownMenuTrigger asChild>
           <Button variant="outline">
             Add Provider
-            <ChevronDownIcon className="size-4" />
+            <ChevronDownIcon data-icon="inline-start" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-auto min-w-max">

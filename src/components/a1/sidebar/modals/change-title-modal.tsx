@@ -1,5 +1,5 @@
 import { useAtomValue } from "jotai";
-import { Loader2Icon, SparklesIcon } from "lucide-react";
+import { SparklesIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
@@ -92,11 +93,7 @@ const ChangeTitleForm = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button onClick={handleGenerate} disabled={isGenerating} variant="outline" size="icon">
-              {isGenerating ? (
-                <Loader2Icon className="size-4 animate-spin" />
-              ) : (
-                <SparklesIcon className="size-4" />
-              )}
+              {isGenerating ? <Spinner data-icon="inline-start" /> : <SparklesIcon />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>

@@ -43,7 +43,7 @@ export default function TitlesSection() {
             disabled={isTitleGenerationDefault}
             aria-label="Reset all title settings to default"
           >
-            <RotateCcwIcon className="size-4" />
+            <RotateCcwIcon data-icon="inline-start" />
           </Button>
         </div>
       </CardHeader>

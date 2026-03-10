@@ -306,7 +306,7 @@ export default function ExtensionsSection() {
                     disabled={isTransportFilterDisabled}
                     aria-label="Filter by connection"
                   >
-                    <FilterIcon />
+                    <FilterIcon data-icon="inline-start" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
@@ -346,7 +346,7 @@ export default function ExtensionsSection() {
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-sm font-medium">Custom Extensions</h3>
               <Button size="sm" onClick={() => setShowAddDialog(true)}>
-                <PlusIcon className="size-4" />
+                <PlusIcon data-icon="inline-start" />
                 Add Custom
               </Button>
             </div>

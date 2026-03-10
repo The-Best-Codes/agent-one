@@ -52,7 +52,7 @@ export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportCh
             onClick={() => handleExportJSON().catch(logger.error)}
             className="justify-start"
           >
-            <DownloadIcon className="size-4" />
+            <DownloadIcon data-icon="inline-start" />
             Download as JSON
           </Button>
         </div>

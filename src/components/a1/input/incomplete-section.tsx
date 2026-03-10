@@ -38,7 +38,7 @@ export const MainInputIncompleteSection = ({ onRetry }: { onRetry?: () => void }
           variant="default"
           disabled={!hasAvailableModels}
         >
-          <RefreshCcwIcon />
+          <RefreshCcwIcon data-icon="inline-start" />
           Retry
         </Button>
       </div>

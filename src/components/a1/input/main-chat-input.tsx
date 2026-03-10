@@ -4,12 +4,13 @@ import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
-import { ArrowUpIcon, Loader2Icon, PaperclipIcon, SquareIcon } from "lucide-react";
+import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
@@ -546,7 +547,7 @@ export const MainChatInput = ({
                     aria-label="Send message"
                   >
                     {status === "submitted" ? (
-                      <Loader2Icon className="animate-spin" />
+                      <Spinner data-icon="inline-start" />
                     ) : (
                       <ArrowUpIcon />
                     )}

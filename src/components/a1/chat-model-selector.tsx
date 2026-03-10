@@ -65,7 +65,7 @@ const ModelList: FC<ModelListProps> = ({
                 return (
                   <CommandItem key={model.id} value={model.id} onSelect={() => onSelect(model.id)}>
                     <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
-                      {isSelected && <CheckIcon className="size-4" />}
+                      {isSelected && <CheckIcon />}
                       <div className="scrollbar-size-xs w-full overflow-x-auto">
                         <span className="font-medium whitespace-nowrap">{model.name}</span>
                       </div>

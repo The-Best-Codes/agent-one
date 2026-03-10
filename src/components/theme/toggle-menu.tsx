@@ -38,19 +38,19 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
     >
       <ToggleGroupItem value="system" aria-label="System theme">
         <span className="flex items-center gap-1 text-sm">
-          <LaptopIcon className="size-4" />
+          <LaptopIcon data-icon="inline-start" />
           System
         </span>
       </ToggleGroupItem>
       <ToggleGroupItem value="light" aria-label="Light theme">
         <span className="flex items-center gap-1 text-sm">
-          <SunIcon className="size-4" />
+          <SunIcon data-icon="inline-start" />
           Light
         </span>
       </ToggleGroupItem>
       <ToggleGroupItem value="dark" aria-label="Dark theme">
         <span className="flex items-center gap-1 text-sm">
-          <MoonIcon className="size-4" />
+          <MoonIcon data-icon="inline-start" />
           Dark
         </span>
       </ToggleGroupItem>

@@ -15,7 +15,7 @@ export default function TestsRoute() {
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/chat")} className="gap-2">
-            <ArrowLeftIcon className="size-4" />
+            <ArrowLeftIcon data-icon="inline-start" />
             Back to Chat
           </Button>
           <h1 className="text-2xl font-bold">Tests</h1>

@@ -86,7 +86,7 @@ const SliderConfig = ({
               title={`Reset ${label} config`}
               aria-label={`Reset ${label} config`}
             >
-              <RotateCcwIcon className="size-3" />
+              <RotateCcwIcon data-icon="inline-start" />
             </Button>
           )}
         </div>
@@ -221,7 +221,7 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
           onClick={resetToDefaults}
           disabled={isAtDefaults}
         >
-          <RotateCcwIcon className="size-4" />
+          <RotateCcwIcon data-icon="inline-start" />
           <span className="sr-only">Reset all</span>
         </Button>
       </div>
@@ -371,7 +371,7 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
       className="relative"
       disabled={disabled}
     >
-      <Settings2Icon className="size-4" />
+      <Settings2Icon data-icon="inline-start" />
       {!isAtDefaults && (
         <span
           title="Model config has been modified"

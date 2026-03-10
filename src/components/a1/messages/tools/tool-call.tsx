@@ -29,7 +29,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <WrenchIcon className="text-foreground size-4 shrink-0" />
+            <WrenchIcon className="text-foreground" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to run tool "{toolName}"
             </span>
@@ -45,7 +45,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
                 })
               }
             >
-              <XIcon />
+              <XIcon data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -58,7 +58,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
                 })
               }
             >
-              <CheckCircle2Icon />
+              <CheckCircle2Icon data-icon="inline-start" />
               Approve
             </Button>
           </div>
@@ -68,7 +68,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "output-denied":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <XCircleIcon className="text-muted-foreground" />
           <span className="text-muted-foreground text-sm font-bold">Tool "{toolName}" denied</span>
         </div>
       );
@@ -76,7 +76,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-2">
-          <XCircleIcon className="text-destructive size-4 shrink-0" />
+          <XCircleIcon className="text-destructive" />
           <span className="text-destructive text-sm font-bold">
             Running unknown tool "{toolName}"
           </span>
@@ -90,7 +90,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
-                <XCircleIcon className="text-destructive size-4 shrink-0" />
+                <XCircleIcon className="text-destructive" />
                 <span className="max-w-2xl truncate">Running unknown tool "{toolName}"</span>
               </p>
             </AccordionTrigger>
@@ -114,7 +114,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
-                <XCircleIcon className="text-destructive size-4 shrink-0" />
+                <XCircleIcon className="text-destructive" />
                 <span className="max-w-2xl truncate">Unknown tool "{toolName}" finished</span>
               </p>
             </AccordionTrigger>
@@ -136,7 +136,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-2">
-            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+            <XCircleIcon className="text-muted-foreground" />
             <span className="text-muted-foreground text-sm font-bold">
               Tool "{toolName}" cancelled
             </span>
@@ -194,7 +194,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-2">
-          <XCircleIcon className="text-destructive size-4 shrink-0" />
+          <XCircleIcon className="text-destructive" />
           <span className="text-destructive text-sm font-bold">Unknown tool "{toolName}"</span>
         </div>
       );

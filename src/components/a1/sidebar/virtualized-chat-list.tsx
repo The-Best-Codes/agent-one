@@ -177,7 +177,7 @@ export const VirtualizedChatList = ({
             className="w-full justify-start"
             variant="outline"
           >
-            <PlusIcon className="size-4" />
+            <PlusIcon data-icon="inline-start" />
             New Chat
           </Button>
         )}
@@ -185,7 +185,7 @@ export const VirtualizedChatList = ({
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="size-7" onClick={exitSelectionMode}>
-                <XIcon className="size-4" />
+                <XIcon />
               </Button>
               <span className="text-muted-foreground text-sm">{selectedChatIds.size} selected</span>
             </div>
@@ -205,7 +205,7 @@ export const VirtualizedChatList = ({
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkExportModal(true)}
               >
-                <DownloadIcon className="size-4" />
+                <DownloadIcon data-icon="inline-start" />
               </Button>
               <Button
                 variant="destructive"
@@ -214,7 +214,7 @@ export const VirtualizedChatList = ({
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkDeleteModal(true)}
               >
-                <TrashIcon className="size-4" />
+                <TrashIcon data-icon="inline-start" />
               </Button>
             </div>
           </div>

@@ -62,7 +62,11 @@ function InstallFieldInput({
             onClick={() => setShowSecret((prev) => !prev)}
             title={showSecret ? "Hide value" : "Show value"}
           >
-            {showSecret ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
+            {showSecret ? (
+              <EyeOffIcon data-icon="inline-start" />
+            ) : (
+              <EyeIcon data-icon="inline-start" />
+            )}
           </Button>
         ) : null}
       </div>

@@ -25,7 +25,7 @@ export const EditButton = ({ onEdit, className, ...props }: EditButtonProps) => 
       aria-label="Edit message"
       {...props}
     >
-      <PencilIcon />
+      <PencilIcon data-icon="inline-start" />
     </Button>
   );
 };

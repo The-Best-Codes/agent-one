@@ -21,7 +21,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <FileImageIcon className="size-3" />
+              <FileImageIcon />
               <span className="truncate">{file.filename}</span>
             </div>
           </div>
@@ -42,7 +42,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <FileIcon className="size-3" />
+              <FileIcon />
               <span className="truncate">{file.filename} &middot; PDF</span>
             </div>
           </div>
@@ -52,8 +52,8 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
   }
 
   const getFileIcon = () => {
-    if (isText) return <FileTextIcon className="size-5" />;
-    return <FileIcon className="text-muted-foreground size-5" />;
+    if (isText) return <FileTextIcon />;
+    return <FileIcon className="text-muted-foreground" />;
   };
 
   const getFileTypeLabel = () => {

@@ -36,7 +36,7 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
               variant="destructive"
               disabled={!hasAvailableModels}
             >
-              <RefreshCcwIcon />
+              <RefreshCcwIcon data-icon="inline-start" />
               Retry
             </Button>
           </TooltipTrigger>

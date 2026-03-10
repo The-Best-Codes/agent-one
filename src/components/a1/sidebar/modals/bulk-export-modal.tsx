@@ -58,7 +58,7 @@ export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExp
             onClick={() => handleExportJSON().catch(logger.error)}
             className="justify-start"
           >
-            <DownloadIcon className="size-4" />
+            <DownloadIcon data-icon="inline-start" />
             Download as JSON
           </Button>
         </div>

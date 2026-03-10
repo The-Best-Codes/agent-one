@@ -217,7 +217,7 @@ const MessagePartsInternal = ({
             className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
             onClick={handleCancel}
           >
-            <XIcon className="size-4" />
+            <XIcon data-icon="inline-start" />
             Cancel
           </Button>
           {message.role === "user" ? (
@@ -228,13 +228,13 @@ const MessagePartsInternal = ({
                 className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
                 onClick={() => handleSave(regenerateOnSave)}
               >
-                <CheckIcon className="size-4" />
+                <CheckIcon data-icon="inline-start" />
                 Save
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" variant="default" className="h-6 gap-1 px-1 has-[>svg]:px-1.5">
-                    <ChevronDownIcon className="size-4" />
+                    <ChevronDownIcon data-icon="inline-start" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
@@ -261,7 +261,7 @@ const MessagePartsInternal = ({
               className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
               onClick={() => handleSave(false)}
             >
-              <CheckIcon className="size-4" />
+              <CheckIcon data-icon="inline-start" />
               Save
             </Button>
           )}
