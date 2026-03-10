@@ -12,8 +12,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useOverflow } from "@/hooks/use-overflow";
 import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { cn } from "@/lib/utils";
 
 import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
@@ -50,11 +51,15 @@ export default function SettingsRoute() {
     }
   };
 
+  const sidebarRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const sidebarOverflowing = useOverflow(sidebarRef);
+  const contentOverflowing = useOverflow(contentRef, {
+    watch: displayedSection,
+  });
 
   useEffect(() => {
-    const viewport = contentRef.current?.closest("[data-slot='scroll-area-viewport']");
-    viewport?.scrollTo({ top: 0 });
+    contentRef.current?.scrollTo({ top: 0 });
   }, [displayedSection]);
 
   const handleSectionChange = (section: string) => {
@@ -101,7 +106,13 @@ export default function SettingsRoute() {
 
       <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
         <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
-          <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
+          <div
+            ref={sidebarRef}
+            className={cn(
+              "hidden w-48 shrink-0 overflow-y-auto md:flex md:flex-col lg:w-64",
+              sidebarOverflowing && "pr-2",
+            )}
+          >
             <div className="flex flex-col gap-2">
               <div className="mb-2">
                 <Button variant="outline" onClick={handleNavigateBack} className="w-full">
@@ -114,18 +125,20 @@ export default function SettingsRoute() {
                 onSectionChange={handleSectionChange}
               />
             </div>
-          </ScrollArea>
+          </div>
 
-          <ScrollArea type="always" className="flex-1 md:min-h-0">
+          <div
+            ref={contentRef}
+            className={cn("flex-1 overflow-y-auto md:min-h-0", contentOverflowing && "pr-2")}
+          >
             <div
-              ref={contentRef}
               role="tabpanel"
               tabIndex={0}
               className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
             >
               <SettingsContent activeSection={displayedSection} />
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </div>
     </main>
