@@ -51,6 +51,7 @@ export const MessageActionRow = ({
                   error: "secondary",
                 }}
                 text={contentToCopy}
+                size="icon-sm"
               />
             </div>
           </TooltipTrigger>

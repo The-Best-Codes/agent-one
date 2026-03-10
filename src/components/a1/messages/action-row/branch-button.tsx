@@ -20,7 +20,7 @@ export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProp
       onClick={onBranch}
       disabled={isStreaming}
       className={className}
-      size="icon"
+      size="icon-sm"
       variant="secondary"
       aria-label="Branch conversation from this message"
       {...props}
