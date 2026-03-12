@@ -1,6 +1,7 @@
+import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import { type FC, useEffect, useMemo, useRef, useState } from "react";
+import { type FC, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +11,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -29,19 +29,23 @@ interface ModelSelectorProps {
   loading?: boolean;
 }
 
+type VirtualRow = { type: "heading"; provider: string } | { type: "item"; model: ModelData };
+
 interface ModelListProps {
-  groupedModels: Array<{ provider: string; models: ModelData[] }>;
+  rows: VirtualRow[];
   currentModel: ModelData | undefined;
   parentRef: React.RefObject<HTMLDivElement | null>;
+  virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
   onSelect: (modelId: string) => void;
   setSearchQuery: (value: string) => void;
 }
 
 const ModelList: FC<ModelListProps> = ({
-  groupedModels,
+  rows,
   currentModel,
   parentRef,
+  virtualizer,
   searchQuery,
   onSelect,
   setSearchQuery,
@@ -54,29 +58,64 @@ const ModelList: FC<ModelListProps> = ({
       onValueChange={setSearchQuery}
     />
     <CommandList ref={parentRef}>
-      {groupedModels.length === 0 ? (
+      {rows.length === 0 ? (
         <CommandEmpty>No model found.</CommandEmpty>
       ) : (
-        groupedModels.map((group, groupIndex) => (
-          <div key={group.provider}>
-            <CommandGroup heading={group.provider}>
-              {group.models.map((model) => {
-                const isSelected = currentModel?.id === model.id;
+        <CommandGroup>
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const row = rows[virtualItem.index];
+              if (row.type === "heading") {
                 return (
-                  <CommandItem key={model.id} value={model.id} onSelect={() => onSelect(model.id)}>
-                    <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
-                      {isSelected && <CheckIcon />}
-                      <div className="scrollbar-size-xs w-full overflow-x-auto">
-                        <span className="font-medium whitespace-nowrap">{model.name}</span>
-                      </div>
-                    </div>
-                  </CommandItem>
+                  <div
+                    key={virtualItem.key}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                    className="text-muted-foreground px-2 pt-1.5 text-xs font-medium"
+                  >
+                    {row.provider}
+                  </div>
                 );
-              })}
-            </CommandGroup>
-            {groupIndex < groupedModels.length - 1 ? <CommandSeparator /> : null}
+              }
+              const { model } = row;
+              const isSelected = currentModel?.id === model.id;
+              return (
+                <CommandItem
+                  key={virtualItem.key}
+                  value={model.id}
+                  onSelect={() => onSelect(model.id)}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <div className="flex w-full min-w-0 flex-1 items-center justify-center gap-1">
+                    {isSelected && <CheckIcon />}
+                    <div className="scrollbar-size-xs w-full overflow-x-auto">
+                      <span className="font-medium whitespace-nowrap">{model.name}</span>
+                    </div>
+                  </div>
+                </CommandItem>
+              );
+            })}
           </div>
-        ))
+        </CommandGroup>
       )}
     </CommandList>
   </Command>
@@ -139,7 +178,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     return scoredModels.sort((a, b) => b.score - a.score).map(({ model }) => model);
   }, [searchQuery, modelsWithApiKey]);
 
-  const groupedModels = useMemo(() => {
+  const rows = useMemo<VirtualRow[]>(() => {
     const groups = new Map<string, ModelData[]>();
     for (const model of filteredModels) {
       const providerModels = groups.get(model.provider);
@@ -150,19 +189,57 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       }
     }
 
-    return Array.from(groups.entries()).map(([provider, models]) => ({ provider, models }));
+    const result: VirtualRow[] = [];
+    const entries = Array.from(groups.entries());
+    entries.forEach(([provider, models]) => {
+      result.push({ type: "heading", provider });
+      for (const model of models) {
+        result.push({ type: "item", model });
+      }
+    });
+    return result;
   }, [filteredModels]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => {
+      const row = rows[index];
+      if (row.type === "heading") return 24;
+      return 32;
+    },
+    overscan: 10,
+  });
+
+  const measureVirtualizer = useEffectEvent(() => {
+    if (effectiveOpen) {
+      const frame = requestAnimationFrame(() => {
+        virtualizer.measure();
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  });
+
   useEffect(() => {
+    measureVirtualizer();
+  }, [effectiveOpen]);
+
+  const scrollToTop = useEffectEvent(() => {
     if (!effectiveOpen) {
       return;
     }
 
     const frame = requestAnimationFrame(() => {
       parentRef.current?.scrollTo({ top: 0 });
+      virtualizer.scrollToOffset(0);
     });
 
     return () => cancelAnimationFrame(frame);
+  });
+
+  useEffect(() => {
+    scrollToTop();
   }, [effectiveOpen, searchQuery]);
 
   const handleSelect = (modelId: string) => {
@@ -220,9 +297,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       </PopoverTrigger>
       <PopoverContent align="start" className={cn("w-full p-0", popoverClassName)}>
         <ModelList
-          groupedModels={groupedModels}
+          rows={rows}
           currentModel={currentModel}
           parentRef={parentRef}
+          virtualizer={virtualizer}
           searchQuery={searchQuery}
           onSelect={handleSelect}
           setSearchQuery={setSearchQuery}
@@ -245,9 +323,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       </DrawerTrigger>
       <DrawerContent className="max-h-[70vh]" showHandle={false}>
         <ModelList
-          groupedModels={groupedModels}
+          rows={rows}
           currentModel={currentModel}
           parentRef={parentRef}
+          virtualizer={virtualizer}
           searchQuery={searchQuery}
           onSelect={handleSelect}
           setSearchQuery={setSearchQuery}
