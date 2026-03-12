@@ -1,9 +1,11 @@
+/// <reference types="vitest" />
 import path from "path";
 
+import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
-import { defineConfig, ViteUserConfig } from "vitest/config";
+import { defineConfig } from "vite";
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -78,13 +80,14 @@ const vendorManualChunks = {
 };
 
 export default defineConfig(
-  async () =>
+  //newline
+  () =>
+    //newline x2
     ({
       plugins: [
-        react({
-          babel: {
-            plugins: [["babel-plugin-react-compiler", { target: "19" }]],
-          },
+        react(),
+        babel({
+          presets: [reactCompilerPreset({ target: "19" })],
         }),
         tailwindcss(),
         visualizer({
@@ -129,7 +132,7 @@ export default defineConfig(
       },
 
       build: {
-        rollupOptions: {
+        rolldownOptions: {
           output: {
             manualChunks(id: string) {
               // Normalize to POSIX-style paths so checks work on Windows too
@@ -160,5 +163,5 @@ export default defineConfig(
           },
         },
       },
-    }) satisfies ViteUserConfig,
+    }),
 );

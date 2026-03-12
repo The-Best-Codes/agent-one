@@ -103,6 +103,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@rolldown/plugin-babel": "^0.2.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^25.5.0",
