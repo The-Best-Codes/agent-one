@@ -1,4 +1,3 @@
-// Themes
 import themeDarkPlus from "@shikijs/themes/dark-plus";
 import themeLightPlus from "@shikijs/themes/light-plus";
 import { createHighlighterCore, type HighlighterCore } from "shiki/core";
