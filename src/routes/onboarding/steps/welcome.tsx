@@ -1,6 +1,7 @@
 import { ArrowUpRight, BookOpenIcon, GraduationCapIcon, RocketIcon } from "lucide-react";
 import { useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AGENT_ONE_DOCS_URL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -49,9 +50,10 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
         <Button
           variant="outline"
           size="lg"
-          className="h-14 justify-start px-6 text-lg"
-          disabled={isExiting}
+          className="relative h-14 justify-start px-6 text-lg"
+          disabled={true}
         >
+          <Badge className="absolute -top-2 -right-2">Coming Soon!</Badge>
           <GraduationCapIcon data-icon="inline-start" />
           Take the Tutorial
         </Button>

@@ -193,13 +193,13 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
           }
           40% {
             width: 3px;
-            height: 40px;
-            border-radius: 8px;
+            height: 36px;
+            border-radius: 10px;
           }
           100% {
-            width: 124px;
-            height: 40px;
-            border-radius: 8px;
+            width: 100px;
+            height: 36px;
+            border-radius: 10px;
           }
         }
 

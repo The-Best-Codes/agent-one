@@ -57,11 +57,11 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
             </p>
           </div>
 
-          <div className="max-h-[50svh] overflow-y-auto">
+          <div className="max-h-[50svh] overflow-y-auto p-1">
             <ProvidersList />
           </div>
 
-          <div className="mt-2 flex flex-col gap-3">
+          <div className="flex flex-col gap-3">
             <Button
               onClick={handleSubmit}
               disabled={!hasEnabledProvider || isSubmitting}
