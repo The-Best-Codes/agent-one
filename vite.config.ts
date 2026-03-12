@@ -83,6 +83,7 @@ export default defineConfig(() => ({
     react(),
     babel({
       presets: [reactCompilerPreset({ target: "19" })],
+      exclude: [/[\/\\]node_modules[\/\\]/, /[\/\\]src[\/\\]workers[\/\\]/],
     }),
     tailwindcss(),
     visualizer({
