@@ -1,4 +1,3 @@
-/// <reference types="vitest" />
 import path from "path";
 
 import babel from "@rolldown/plugin-babel";
@@ -80,9 +79,7 @@ const vendorManualChunks = {
 };
 
 export default defineConfig(
-  //newline
   () =>
-    //newline x2
     ({
       plugins: [
         react(),
