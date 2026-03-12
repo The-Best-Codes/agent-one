@@ -1,9 +1,10 @@
 import path from "path";
 
+import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
-import { defineConfig, ViteUserConfig } from "vitest/config";
+import { defineConfig } from "vite";
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -77,88 +78,84 @@ const vendorManualChunks = {
   stateAndVirtualization: ["jotai", "consola", "@tanstack/virtual-core", "@tanstack/react-virtual"],
 };
 
-export default defineConfig(
-  async () =>
-    ({
-      plugins: [
-        react({
-          babel: {
-            plugins: [["babel-plugin-react-compiler", { target: "19" }]],
-          },
-        }),
-        tailwindcss(),
-        visualizer({
-          open: false,
-          emitFile: false,
-          filename: "dist/stats.html",
-        }),
-      ],
+export default defineConfig(() => ({
+  plugins: [
+    react(),
+    babel({
+      presets: [reactCompilerPreset({ target: "19" })],
+    }),
+    tailwindcss(),
+    visualizer({
+      open: false,
+      emitFile: false,
+      filename: "dist/stats.html",
+    }),
+  ],
 
-      test: {
-        globals: true,
-        environment: "jsdom",
-        include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-        exclude: ["tests/e2e/**"],
-      },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    exclude: ["tests/e2e/**"],
+  },
 
-      resolve: {
-        alias: {
-          "@": path.resolve(__dirname, "./src"),
-        },
-      },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 
-      clearScreen: false,
-      server: {
-        port: 1420,
-        strictPort: true,
-        host: host || false,
-        hmr: host
-          ? {
-              protocol: "ws",
-              host,
-              port: 1421,
+  clearScreen: false,
+  server: {
+    port: 1420,
+    strictPort: true,
+    host: host || false,
+    hmr: host
+      ? {
+          protocol: "ws",
+          host,
+          port: 1421,
+        }
+      : undefined,
+    watch: {
+      ignored: ["**/src-tauri/**", "**/tests/**"],
+    },
+  },
+
+  worker: {
+    format: "es",
+  },
+
+  build: {
+    rolldownOptions: {
+      output: {
+        manualChunks(id: string) {
+          // Normalize to POSIX-style paths so checks work on Windows too
+          const normalizedId = id.replace(/\\/g, "/");
+          const modelListsDir = path
+            .resolve(__dirname, "src/assets/model-lists")
+            .replace(/\\/g, "/");
+          const mcpRegistryDir = path
+            .resolve(__dirname, "src/assets/mcp-registry")
+            .replace(/\\/g, "/");
+
+          if (normalizedId.includes(`${modelListsDir}/`)) {
+            return path.parse(id).name;
+          }
+
+          if (normalizedId.includes(`${mcpRegistryDir}/`)) {
+            return "mcpRegistry";
+          }
+
+          if (normalizedId.includes("/node_modules/")) {
+            for (const [chunkName, packages] of Object.entries(vendorManualChunks)) {
+              if (packages.some((pkg) => normalizedId.includes(`/node_modules/${pkg}/`))) {
+                return chunkName;
+              }
             }
-          : undefined,
-        watch: {
-          ignored: ["**/src-tauri/**", "**/tests/**"],
+          }
         },
       },
-
-      worker: {
-        format: "es",
-      },
-
-      build: {
-        rollupOptions: {
-          output: {
-            manualChunks(id: string) {
-              // Normalize to POSIX-style paths so checks work on Windows too
-              const normalizedId = id.replace(/\\/g, "/");
-              const modelListsDir = path
-                .resolve(__dirname, "src/assets/model-lists")
-                .replace(/\\/g, "/");
-              const mcpRegistryDir = path
-                .resolve(__dirname, "src/assets/mcp-registry")
-                .replace(/\\/g, "/");
-
-              if (normalizedId.includes(`${modelListsDir}/`)) {
-                return path.parse(id).name;
-              }
-
-              if (normalizedId.includes(`${mcpRegistryDir}/`)) {
-                return "mcpRegistry";
-              }
-
-              if (normalizedId.includes("/node_modules/")) {
-                for (const [chunkName, packages] of Object.entries(vendorManualChunks)) {
-                  if (packages.some((pkg) => normalizedId.includes(`/node_modules/${pkg}/`))) {
-                    return chunkName;
-                  }
-                }
-              }
-            },
-          },
-        },
-      },
-    }) satisfies ViteUserConfig,
-);
+    },
+  },
+}));
