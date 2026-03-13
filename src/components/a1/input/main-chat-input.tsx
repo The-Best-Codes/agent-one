@@ -524,8 +524,7 @@ export const MainChatInput = ({
           <div className="flex items-center gap-2">
             <div className="flex flex-row">
               <ModelSelector
-                disabled={isChatLoading}
-                loading={status === "submitted"}
+                loading={isChatLoading}
                 className="w-60 min-w-0 flex-1 rounded-r-none"
                 popoverClassName="w-60"
               />
