@@ -125,4 +125,12 @@ export const chatStorage = {
     await d.execute("DELETE FROM chat_metadata WHERE id = $1", [id]);
     await d.execute("DELETE FROM chat_messages WHERE id = $1", [id]);
   },
+
+  async bulkDeleteChats(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    const d = await getDb();
+    const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
+    await d.execute(`DELETE FROM chat_metadata WHERE id IN (${placeholders})`, ids);
+    await d.execute(`DELETE FROM chat_messages WHERE id IN (${placeholders})`, ids);
+  },
 };

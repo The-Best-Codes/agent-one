@@ -47,6 +47,8 @@ export interface PersistenceContextType {
   }) => void;
   saveChatTitle: (params: { chatId: string; title: string }) => void;
   deleteChat: (chatId: string) => void;
+  bulkDeleteChats: (chatIds: string[]) => void;
+  bulkExportChats: (chatIds: string[]) => Promise<ChatData[]>;
   branchChat: (params: {
     originalChatId: string;
     branchFromMessageId: string;
@@ -364,6 +366,33 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [setChatIds, setChatUpdateTrigger, removeMetadata, persistChatIds],
   );
 
+  const bulkDeleteChats = useCallback(
+    (chatIds: string[]) => {
+      try {
+        void chatStorage.bulkDeleteChats(chatIds);
+        for (const id of chatIds) {
+          removeMetadata(id);
+        }
+        setChatIds((currentChatIds) => {
+          const next = currentChatIds.filter((id: string) => !chatIds.includes(id));
+          persistChatIds(next);
+          return next;
+        });
+        setChatUpdateTrigger((prev) => prev + 1);
+      } catch (error) {
+        logger.error("Failed to bulk delete chats", error);
+      }
+    },
+    [setChatIds, setChatUpdateTrigger, removeMetadata, persistChatIds],
+  );
+
+  const bulkExportChats = useCallback(
+    async (chatIds: string[]): Promise<ChatData[]> => {
+      return Promise.all(chatIds.map((id) => loadFullChatData(id)));
+    },
+    [loadFullChatData],
+  );
+
   const branchChat = useCallback(
     ({
       originalChatId,
@@ -445,6 +474,8 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     saveChatTitleState,
     saveChatTitle,
     deleteChat,
+    bulkDeleteChats,
+    bulkExportChats,
     branchChat,
     chatUpdateTrigger,
   };

@@ -24,11 +24,11 @@ interface BulkExportModalProps {
 }
 
 export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExportModalProps) => {
-  const { loadFullChatData } = usePersistence();
+  const { bulkExportChats } = usePersistence();
   const chatLabel = chatCount === 1 ? "chat" : "chats";
 
   const handleExportJSON = async () => {
-    const chatDataArray = await Promise.all(chatIds.map((chatId) => loadFullChatData(chatId)));
+    const chatDataArray = await bulkExportChats(chatIds);
     const dataStr = JSON.stringify(chatDataArray, null, 2);
     const filePath = await save({
       defaultPath: "agent-one-chats-export.json",
