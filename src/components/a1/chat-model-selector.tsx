@@ -295,7 +295,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           {triggerContent}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className={cn("w-full p-0", popoverClassName)}>
+      <PopoverContent className={cn("w-full p-0", popoverClassName)}>
         <ModelList
           rows={rows}
           currentModel={currentModel}

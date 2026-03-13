@@ -115,7 +115,13 @@ const SliderConfig = ({
   );
 };
 
-export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) => {
+export const ChatModelConfig = ({
+  disabled = false,
+  triggerClassName,
+}: {
+  disabled?: boolean;
+  triggerClassName?: string;
+}) => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
@@ -368,7 +374,7 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
       variant="outline"
       size="icon"
       aria-label="Model configuration"
-      className="relative"
+      className={cn("relative", triggerClassName)}
       disabled={disabled}
     >
       <Settings2Icon data-icon="inline-start" />
@@ -386,7 +392,7 @@ export const ChatModelConfig = ({ disabled = false }: { disabled?: boolean }) =>
       {isDesktop ? (
         <Popover open={effectiveOpen} onOpenChange={setOpen}>
           <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent className="max-h-[70vh] w-80 overflow-auto p-4">{content}</PopoverContent>
+          <PopoverContent className="max-h-80 w-64 overflow-auto p-4">{content}</PopoverContent>
         </Popover>
       ) : (
         <Drawer open={effectiveOpen} onOpenChange={setOpen}>

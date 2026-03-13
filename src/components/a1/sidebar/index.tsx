@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useNavigate, useParams } from "react-router";
 
-import { ModelSelector } from "@/components/a1/chat-model-selector";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -14,14 +13,12 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useChatLoading } from "@/contexts/use-chat/chat-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
-import { ChatModelConfig } from "../chat-model-config";
 import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 
@@ -40,8 +37,6 @@ const SidebarContent = ({
   handleNewChat: () => void;
   onChatClick?: (id: string) => void;
 }) => {
-  const isChatLoading = useChatLoading();
-
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex flex-row items-center justify-center">
@@ -56,14 +51,6 @@ const SidebarContent = ({
       </div>
 
       <div className="border-sidebar-border flex flex-col gap-2 pt-2">
-        <div className="flex w-full items-center gap-2">
-          <ModelSelector
-            className="max-w-60 min-w-0 flex-1"
-            popoverClassName="w-60 max-w-60"
-            loading={isChatLoading}
-          />
-          <ChatModelConfig disabled={isChatLoading} />
-        </div>
         <Button variant="outline" className="w-full justify-start" asChild>
           <Link
             to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}

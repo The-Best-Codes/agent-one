@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import useMobileDetection from "@/hooks/use-mobile-detection";
@@ -28,6 +28,8 @@ import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
+import { ChatModelConfig } from "../chat-model-config";
+import { ModelSelector } from "../chat-model-selector";
 import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
@@ -73,6 +75,7 @@ export const MainChatInput = ({
   disabled?: boolean;
 }) => {
   const { status } = useChatStatus();
+  const isChatLoading = useChatLoading();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
   const { hasAvailableModels } = useModelCatalog();
@@ -518,7 +521,19 @@ export const MainChatInput = ({
               <TooltipContent>Attach files to your message</TooltipContent>
             </Tooltip>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
+            <div className="flex flex-row">
+              <ModelSelector
+                disabled={isChatLoading}
+                loading={status === "submitted"}
+                className="w-60 min-w-0 flex-1 rounded-r-none"
+                popoverClassName="w-60"
+              />
+              <ChatModelConfig
+                disabled={isChatLoading}
+                triggerClassName="rounded-l-none border-l-0"
+              />
+            </div>
             {showStopButton ? (
               <Tooltip>
                 <TooltipTrigger asChild>
