@@ -16,6 +16,7 @@ import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import useMobileDetection from "@/hooks/use-mobile-detection";
+import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
@@ -79,6 +80,7 @@ export const MainChatInput = ({
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
   const { hasAvailableModels } = useModelCatalog();
+  const hasPendingApproval = usePendingToolApproval();
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
   const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
@@ -138,7 +140,7 @@ export const MainChatInput = ({
 
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
-    if ((currentText.trim() || files) && status === "ready") {
+    if ((currentText.trim() || files) && status === "ready" && !hasPendingApproval) {
       logger.verbose("Submitting message", {
         textLength: currentText.length,
         hasFiles: !!files,
@@ -501,7 +503,9 @@ export const MainChatInput = ({
                 <Button
                   data-testid="attach-button"
                   type="button"
-                  disabled={disabled || status !== "ready" || !hasAvailableModels}
+                  disabled={
+                    disabled || status !== "ready" || !hasAvailableModels || hasPendingApproval
+                  }
                   size="icon"
                   variant="outline"
                   onClick={() => {
@@ -556,7 +560,11 @@ export const MainChatInput = ({
                     type="submit"
                     size="icon"
                     disabled={
-                      disabled || status !== "ready" || (isEmpty && !files) || !hasAvailableModels
+                      disabled ||
+                      status !== "ready" ||
+                      (isEmpty && !files) ||
+                      !hasAvailableModels ||
+                      hasPendingApproval
                     }
                     aria-label="Send message"
                   >
