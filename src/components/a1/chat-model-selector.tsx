@@ -218,6 +218,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     overscan: 10,
   });
 
+  // Read https://react.dev/learn/separating-events-from-effects#extracting-non-reactive-logic-out-of-effects for more info about useEffectEvent
   const measureVirtualizer = useEffectEvent(() => {
     if (effectiveOpen) {
       const frame = requestAnimationFrame(() => {
