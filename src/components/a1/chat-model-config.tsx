@@ -3,11 +3,16 @@ import { InfoIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useModel } from "@/contexts/use-model/model-hooks";
@@ -397,10 +402,11 @@ export const ChatModelConfig = ({
       ) : (
         <Drawer open={effectiveOpen} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent className="max-h-[70vh]" showHandle={false}>
-            <ScrollArea className="max-h-[calc(70vh-2rem)] overflow-auto">
-              <div className="p-4">{content}</div>
-            </ScrollArea>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle className="sr-only">Model Configuration</DrawerTitle>
+            </DrawerHeader>
+            <div className="overflow-y-auto px-4 pb-4">{content}</div>
           </DrawerContent>
         </Drawer>
       )}

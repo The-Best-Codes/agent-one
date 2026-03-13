@@ -12,7 +12,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
@@ -321,16 +327,21 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           {triggerContent}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[70vh]" showHandle={false}>
-        <ModelList
-          rows={rows}
-          currentModel={currentModel}
-          parentRef={parentRef}
-          virtualizer={virtualizer}
-          searchQuery={searchQuery}
-          onSelect={handleSelect}
-          setSearchQuery={setSearchQuery}
-        />
+      <DrawerContent className="bg-popover">
+        <DrawerHeader>
+          <DrawerTitle className="sr-only">Select a model</DrawerTitle>
+        </DrawerHeader>
+        <div className="-mt-2 overflow-y-auto pb-4">
+          <ModelList
+            rows={rows}
+            currentModel={currentModel}
+            parentRef={parentRef}
+            virtualizer={virtualizer}
+            searchQuery={searchQuery}
+            onSelect={handleSelect}
+            setSearchQuery={setSearchQuery}
+          />
+        </div>
       </DrawerContent>
     </Drawer>
   );

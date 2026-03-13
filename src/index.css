@@ -667,21 +667,6 @@
   }
 }
 
-@utility scrollbar-hidden {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-@utility scrollbar-size-sm {
-  &::-webkit-scrollbar {
-    @apply size-1;
-  }
-}
-
 @utility scrollbar-size-xs {
   &::-webkit-scrollbar {
     @apply size-0.5;
