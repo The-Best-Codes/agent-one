@@ -1,13 +1,6 @@
 import type { DynamicToolUIPart } from "ai";
 import { useAtomValue } from "jotai";
-import {
-  CheckCircle2Icon,
-  ChevronDownIcon,
-  Loader2Icon,
-  WrenchIcon,
-  XCircleIcon,
-  XIcon,
-} from "lucide-react";
+import { CheckCircle2Icon, ChevronDownIcon, WrenchIcon, XCircleIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
@@ -25,6 +18,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
@@ -57,7 +51,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <WrenchIcon className="text-foreground" />
+            <WrenchIcon className="text-foreground size-4" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to run "{toolName}" tool
             </span>
@@ -115,7 +109,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
     case "output-denied": {
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground" />
+          <XCircleIcon className="text-muted-foreground size-4" />
           <span className="text-muted-foreground text-sm font-bold">"{toolName}" tool denied</span>
         </div>
       );
@@ -125,7 +119,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
     case "input-streaming": {
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Loader2Icon className="text-foreground animate-spin" />
+          <Spinner className="text-foreground" />
           <span className="text-foreground text-sm font-bold">Running "{toolName}" tool...</span>
         </div>
       );
@@ -136,7 +130,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Loader2Icon className="text-foreground animate-spin" />
+          <Spinner className="text-foreground" />
           <span className="max-w-2xl truncate">Running "{toolName}" tool...</span>
         </div>
       );
@@ -286,7 +280,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="text-muted-foreground" />
+            <XCircleIcon className="text-muted-foreground size-4" />
             <span className="text-muted-foreground text-sm font-bold">
               "{toolName}" tool cancelled
             </span>
@@ -343,7 +337,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
     default: {
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-destructive" />
+          <XCircleIcon className="text-destructive size-4" />
           <span className="text-destructive text-sm font-bold">
             Unknown "{toolName}" tool state
           </span>
