@@ -81,6 +81,7 @@ const vendorManualChunks = {
 export default defineConfig(() => ({
   plugins: [
     react(),
+    // TODO: Investigate why migrating to the new React Compiler is causing the index.js chunk to be much larger
     babel({
       presets: [reactCompilerPreset({ target: "19" })],
       exclude: [/[\/\\]node_modules[\/\\]/, /[\/\\]src[\/\\]workers[\/\\]/],
