@@ -39,6 +39,34 @@ const vendorManualChunks = {
   codemirrorLangs: ["@codemirror/lang-markdown"],
   markdown: ["react-markdown", "remark-breaks", "remark-gfm", "marked"],
   radixUi: [
+    "@radix-ui/react-toggle-group",
+    "@radix-ui/react-roving-focus",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-popper",
+    "@radix-ui/react-popover",
+    "@radix-ui/react-tooltip",
+    "@radix-ui/react-slider",
+    "@radix-ui/react-scroll-area",
+    "@radix-ui/react-switch",
+    "@radix-ui/react-menu",
+    "@radix-ui/react-select",
+    "@radix-ui/react-primitive",
+    "@radix-ui/react-use-controllable-state",
+    "@radix-ui/react-collection",
+    "@radix-ui/react-slot",
+    "@radix-ui/react-direction",
+    "@radix-ui/react-visually-hidden",
+    "@radix-ui/react-accordion",
+    "@radix-ui/react-checkbox",
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-label",
+    "@radix-ui/react-progress",
+    "@radix-ui/react-separator",
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-toggle",
+    "@radix-ui/react-context-menu",
+    "@radix-ui/react-avatar",
+    "@radix-ui/react-use-is-hydrated",
     "radix-ui",
     // cmdk has to go in the Radix chunk or you get import errors in prod
     "cmdk",
@@ -82,6 +110,8 @@ export default defineConfig(() => ({
   plugins: [
     react(),
     // TODO: Investigate why migrating to the new React Compiler is causing the index.js chunk to be much larger
+    // See: https://github.com/vitejs/vite-plugin-react/releases/tag/plugin-react%406.0.0
+    // See also: https://vite.dev/blog/announcing-vite8#vitejs-plugin-react-v6
     babel({
       presets: [reactCompilerPreset({ target: "19" })],
       exclude: [/[\/\\]node_modules[\/\\]/, /[\/\\]src[\/\\]workers[\/\\]/],
