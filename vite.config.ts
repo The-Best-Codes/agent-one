@@ -85,7 +85,7 @@ export default defineConfig(() => ({
     babel({
       presets: [reactCompilerPreset({ target: "19" })],
       exclude: [/[\/\\]node_modules[\/\\]/, /[\/\\]src[\/\\]workers[\/\\]/],
-    } as Parameters<typeof babel>[0]),
+    }),
     tailwindcss(),
     visualizer({
       open: false,
