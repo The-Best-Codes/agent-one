@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatLoading, useChatMetadata } from "@/contexts/use-chat/chat-hooks";
+import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -59,6 +60,7 @@ const CircularProgress = ({
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
   const isChatLoading = useChatLoading();
+  const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
   const [delayPassed, setDelayPassed] = useState(false);
   const [staleMetadata, setStaleMetadata] = useState(metadata);
@@ -91,6 +93,7 @@ export const ChatUsageStatus = () => {
   const inputTokens = Number(displayedMetadata.inputTokens);
   const outputTokens = Number(displayedMetadata.outputTokens);
   const totalTokens = inputTokens + outputTokens;
+  const maxTokens = currentModel?.contextWindow ?? 200000;
 
   return (
     <div
@@ -122,13 +125,12 @@ export const ChatUsageStatus = () => {
                       asChild
                     >
                       <div>
-                        {/* TODO: Use the real max input tokens from the model instead of guessing. */}
-                        <CircularProgress value={totalTokens} max={200000} />
+                        <CircularProgress value={totalTokens} max={maxTokens} />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
                       This chat is currently {totalTokens} tokens long. The model you're using
-                      supports up to {200000} tokens.
+                      supports up to {maxTokens.toLocaleString()} tokens.
                     </TooltipContent>
                   </Tooltip>
 

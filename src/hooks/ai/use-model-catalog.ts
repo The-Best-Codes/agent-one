@@ -26,6 +26,7 @@ export interface ModelData {
   provider: string;
   model: LanguageModel;
   supportsToolUse: boolean;
+  contextWindow?: number;
 }
 
 export interface ModelConfig {
@@ -93,6 +94,7 @@ function mapModelsDevModels(
     provider: providerName,
     model: createModel(model.id),
     supportsToolUse: model.tool_call ?? false,
+    contextWindow: model.limit?.context,
   }));
 }
 
@@ -105,6 +107,8 @@ function mapCustomProviderModels(provider: CustomProvider, apiKey: string): Mode
     provider: provider.name,
     model: instance.languageModel(model.id),
     supportsToolUse: model.supportsTools,
+    // TODO: Support context window and pricing definitions for custom provider's models
+    // When implementing the above, be sure to review ALL model-related files.
   }));
 }
 
