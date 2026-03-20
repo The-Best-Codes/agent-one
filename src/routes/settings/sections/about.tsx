@@ -1,5 +1,3 @@
-import { relaunch } from "@tauri-apps/plugin-process";
-import { check } from "@tauri-apps/plugin-updater";
 import {
   AlertCircleIcon,
   CheckCircle2Icon,
@@ -9,7 +7,6 @@ import {
   RocketIcon,
   ShieldCheckIcon,
 } from "lucide-react";
-import { useState } from "react";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
@@ -17,23 +14,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { getLogger } from "@/lib/logger";
-
-const logger = getLogger(import.meta.url);
-
-type UpdateStatus =
-  | "idle"
-  | "checking"
-  | "up-to-date"
-  | "available"
-  | "downloading"
-  | "installing"
-  | "error";
+import { useUpdate } from "@/contexts/use-update/update-hooks";
 
 export default function AboutSection() {
-  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>("idle");
-  const [updateProgress, setUpdateProgress] = useState(0);
-  const [updateVersion, setUpdateVersion] = useState<string>("");
+  const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
+    useUpdate();
 
   const currentVersion = packageJson.version;
 
@@ -81,73 +66,6 @@ export default function AboutSection() {
           title: "Update failed",
           description: "Something went wrong while checking for updates",
         };
-    }
-  };
-
-  const checkForUpdates = async () => {
-    logger.verbose("Initiating update check.");
-    try {
-      setUpdateStatus("checking");
-
-      const update = await check();
-      logger.verbose(`Update check completed. Update found: ${!!update}.`);
-
-      if (update) {
-        setUpdateVersion(update.version);
-        setUpdateStatus("available");
-        logger.verbose(
-          `Update version ${update.version} available. Setting status to 'available'.`,
-        );
-      } else {
-        setUpdateStatus("up-to-date");
-        logger.verbose("No update available. Setting status to 'up-to-date'.");
-      }
-    } catch (error) {
-      setUpdateStatus("error");
-      const message = error instanceof Error ? error.message : "Failed to check for updates";
-      logger.error(`Error during update check: ${message}`, error);
-    }
-  };
-
-  const downloadAndInstallUpdate = async () => {
-    logger.verbose("Initiating download and install of update.");
-    try {
-      setUpdateStatus("downloading");
-      setUpdateProgress(0);
-
-      const update = await check();
-      if (!update) {
-        setUpdateStatus("error");
-        logger.error("Update not found during download attempt.");
-        return;
-      }
-      logger.verbose(`Confirmed update version ${update.version} for download.`);
-
-      await update.downloadAndInstall((event) => {
-        switch (event.event) {
-          case "Started":
-            setUpdateProgress(0);
-            break;
-          case "Progress":
-            setUpdateProgress((prev) => {
-              const chunkLength = event.data.chunkLength;
-              return Math.min(prev + (chunkLength / 1000) * 100, 100);
-            });
-            break;
-          case "Finished":
-            setUpdateProgress(100);
-            setUpdateStatus("installing");
-            break;
-        }
-      });
-
-      setUpdateStatus("idle");
-      logger.verbose("Update installation complete. Relaunching application.");
-      await relaunch();
-    } catch (error) {
-      setUpdateStatus("error");
-      const message = error instanceof Error ? error.message : "Failed to install update";
-      logger.error(`Error during update: ${message}`, error);
     }
   };
 
