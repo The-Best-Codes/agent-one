@@ -110,6 +110,10 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     [setRemindAfter],
   );
 
+  const dismissDialog = useCallback(() => {
+    setDialogDismissed(true);
+  }, []);
+
   const value = useMemo(
     () => ({
       updateStatus,
@@ -119,6 +123,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       downloadAndInstallUpdate,
       dialogOpen,
       handleRemind,
+      dismissDialog,
     }),
     [
       updateStatus,
@@ -128,6 +133,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       downloadAndInstallUpdate,
       dialogOpen,
       handleRemind,
+      dismissDialog,
     ],
   );
 

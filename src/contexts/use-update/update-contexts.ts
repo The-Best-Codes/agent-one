@@ -17,6 +17,7 @@ export interface UpdateContextType {
   downloadAndInstallUpdate: () => Promise<void>;
   dialogOpen: boolean;
   handleRemind: (days: number) => void;
+  dismissDialog: () => void;
 }
 
 export const UpdateContext = createContext<UpdateContextType | undefined>(undefined);

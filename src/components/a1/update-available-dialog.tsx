@@ -20,7 +20,7 @@ import {
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 
 export function UpdateAvailableDialog() {
-  const { dialogOpen, updateVersion, handleRemind } = useUpdate();
+  const { dialogOpen, updateVersion, handleRemind, dismissDialog } = useUpdate();
   const navigate = useNavigate();
 
   return (
@@ -68,7 +68,7 @@ export function UpdateAvailableDialog() {
           <Button
             size="sm"
             onClick={() => {
-              handleRemind(1);
+              dismissDialog();
               void navigate("/settings?tab=about");
             }}
           >
