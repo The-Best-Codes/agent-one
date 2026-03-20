@@ -102,10 +102,12 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
     "@playwright/test": "^1.58.2",
     "@rolldown/plugin-babel": "^0.2.2",
     "@tailwindcss/typography": "^0.5.19",
     "@tauri-apps/cli": "^2.10.1",
+    "@types/babel__core": "^7.20.5",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
