@@ -285,7 +285,14 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
   if (isApiKeysLoading || shouldShowLoadingSkeleton) {
-    return <Skeleton className={cn("h-8 w-full", className)} />;
+    return (
+      <Skeleton
+        className={cn(
+          "h-8 w-full bg-muted-foreground dark:bg-accent border border-border",
+          className,
+        )}
+      />
+    );
   }
 
   return isDesktop ? (
