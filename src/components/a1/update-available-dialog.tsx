@@ -48,11 +48,11 @@ export function UpdateAvailableDialog() {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <ChevronDownIcon data-icon="inline-start" />
+                <Button variant="outline" size="icon-sm">
+                  <ChevronDownIcon />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuItem onClick={() => handleRemind(3)}>
                   Remind me in 3 days
                 </DropdownMenuItem>
