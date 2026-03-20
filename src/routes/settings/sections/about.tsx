@@ -198,7 +198,7 @@ export default function AboutSection() {
         <CardContent className="flex flex-col gap-6">
           <div>
             <p className="text-muted-foreground text-sm">Current Version</p>
-            <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
+            <p className="text-3xl font-bold tracking-tight">{currentVersion} beta</p>
           </div>
 
           <Separator />
