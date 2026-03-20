@@ -11,6 +11,51 @@ import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 
+const CircularProgress = ({
+  value,
+  max = 100,
+  className,
+}: {
+  value: number;
+  max?: number;
+  className?: string;
+}) => {
+  const radius = 10;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / max) * circumference;
+
+  return (
+    <div className={cn("relative size-5 flex items-center justify-center", className)}>
+      <svg className="absolute inset-0" viewBox="0 0 24 24" fill="none">
+        <circle
+          cx="12"
+          cy="12"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-muted"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r={radius}
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-foreground transition-all duration-200"
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{
+            transform: "rotate(-90deg)",
+            transformOrigin: "12px 12px",
+          }}
+        />
+      </svg>
+    </div>
+  );
+};
+
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
   const isChatLoading = useChatLoading();
@@ -43,6 +88,10 @@ export const ChatUsageStatus = () => {
   const showSkeleton = isChatLoading && delayPassed;
   const displayedMetadata = isChatLoading ? staleMetadata : metadata;
 
+  const inputTokens = Number(displayedMetadata.inputTokens);
+  const outputTokens = Number(displayedMetadata.outputTokens);
+  const totalTokens = inputTokens + outputTokens;
+
   return (
     <div
       className={cn(
@@ -61,34 +110,35 @@ export const ChatUsageStatus = () => {
             <div className="flex items-center gap-2 px-2 py-1.5">
               {showSkeleton ? (
                 <>
+                  <Skeleton className="size-5 rounded-full" />
                   <Skeleton className="h-5 w-12" />
-                  <Skeleton className="h-5 w-12" />
-                  <Skeleton className="h-5 w-8" />
                 </>
               ) : (
-                <Tooltip>
-                  <TooltipTrigger
-                    className="focus-visible:border-ring focus-visible:ring-ring/50 outline-none focus-visible:ring-[3px]"
-                    tabIndex={isCollapsed ? -1 : 0}
-                    asChild
-                  >
-                    <div className="flex cursor-help items-center gap-2">
+                <>
+                  <Tooltip>
+                    <TooltipTrigger
+                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                      tabIndex={isCollapsed ? -1 : 0}
+                      asChild
+                    >
+                      <div>
+                        {/* TODO: Use the real max input tokens from the model instead of guessing. */}
+                        <CircularProgress value={totalTokens} max={200000} />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      This chat is currently {totalTokens} tokens long. The model you're using
+                      supports up to {200000} tokens.
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger
+                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                      tabIndex={isCollapsed ? -1 : 0}
+                      asChild
+                    >
                       <span>
-                        In{" "}
-                        <NumberFlow
-                          value={Number(displayedMetadata.inputTokens)}
-                          className="text-foreground"
-                        />
-                      </span>
-                      <span>
-                        Out{" "}
-                        <NumberFlow
-                          value={Number(displayedMetadata.outputTokens)}
-                          className="text-foreground"
-                        />
-                      </span>
-                      <span>
-                        Cost{" "}
                         <NumberFlow
                           value={Number(displayedMetadata.totalCostUsd)}
                           format={{
@@ -98,13 +148,13 @@ export const ChatUsageStatus = () => {
                           className="text-foreground"
                         />
                       </span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    Input tokens are what you send; output tokens are what the model returns. Cost
-                    is shown in USD. Edits and deleted messages are not included in these stats.
-                  </TooltipContent>
-                </Tooltip>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      Estimated cost of this chat in USD. Edits and deleted messages are not
+                      included in these stats.
+                    </TooltipContent>
+                  </Tooltip>
+                </>
               )}
             </div>
           </div>
