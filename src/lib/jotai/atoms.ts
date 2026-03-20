@@ -30,6 +30,13 @@ export const hideAgentOneModelsAtom = atomWithStorage(
   { getOnInit: true },
 );
 
+export const updateRemindAfterAtom = atomWithStorage<number | null>(
+  "agent-one-update-remind-after",
+  null,
+  undefined,
+  { getOnInit: true },
+);
+
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);

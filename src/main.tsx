@@ -8,6 +8,7 @@ import { ApiKeysProvider } from "@/contexts/use-api-keys/api-keys-context";
 import { ModelProvider } from "@/contexts/use-model/model-context";
 import { PersistenceProvider } from "@/contexts/use-persistence/persistence-context";
 import { ToolsProvider } from "@/contexts/use-tools/tools-context";
+import { UpdateProvider } from "@/contexts/use-update/update-context";
 import { WebAuthProvider } from "@/contexts/use-web-auth/web-auth-context";
 import SuspenseFallback from "@/routes/suspense-fallback";
 
@@ -22,11 +23,13 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
           <ApiKeysProvider>
             <ToolsProvider>
               <ModelProvider>
-                <Suspense fallback={<SuspenseFallback />}>
-                  <TooltipProvider delayDuration={700}>
-                    <App />
-                  </TooltipProvider>
-                </Suspense>
+                <UpdateProvider>
+                  <Suspense fallback={<SuspenseFallback />}>
+                    <TooltipProvider delayDuration={700}>
+                      <App />
+                    </TooltipProvider>
+                  </Suspense>
+                </UpdateProvider>
               </ModelProvider>
             </ToolsProvider>
           </ApiKeysProvider>
