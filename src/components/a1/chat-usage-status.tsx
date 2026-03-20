@@ -14,16 +14,19 @@ import { cn } from "@/lib/utils";
 
 const CircularProgress = ({
   value,
-  max = 100,
+  max,
   className,
+  progressClassName,
 }: {
   value: number;
   max?: number;
   className?: string;
+  progressClassName?: string;
 }) => {
   const radius = 10;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / max) * circumference;
+  const ratio = max ? Math.min(value / max, 1) : 1;
+  const offset = circumference - ratio * circumference;
 
   return (
     <div className={cn("relative size-5 flex items-center justify-center", className)}>
@@ -42,7 +45,7 @@ const CircularProgress = ({
           r={radius}
           stroke="currentColor"
           strokeWidth="2"
-          className="text-foreground transition-all duration-200"
+          className={cn("text-foreground transition-all duration-200", progressClassName)}
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -93,7 +96,8 @@ export const ChatUsageStatus = () => {
   const inputTokens = Number(displayedMetadata.inputTokens);
   const outputTokens = Number(displayedMetadata.outputTokens);
   const totalTokens = inputTokens + outputTokens;
-  const maxTokens = currentModel?.contextWindow ?? 200000;
+  const maxTokens = currentModel?.contextWindow;
+  const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
 
   return (
     <div
@@ -125,12 +129,24 @@ export const ChatUsageStatus = () => {
                       asChild
                     >
                       <div>
-                        <CircularProgress value={totalTokens} max={maxTokens} />
+                        <CircularProgress
+                          value={totalTokens}
+                          max={maxTokens}
+                          progressClassName={
+                            isExceeded
+                              ? "text-destructive"
+                              : maxTokens === undefined
+                                ? "text-yellow-500"
+                                : undefined
+                          }
+                        />
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
-                      This chat is currently {totalTokens} tokens long. The model you're using
-                      supports up to {maxTokens.toLocaleString()} tokens.
+                      This chat is currently {totalTokens} tokens long.{" "}
+                      {maxTokens !== undefined
+                        ? `The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
+                        : "The model you're using supports an unknown number of tokens."}
                     </TooltipContent>
                   </Tooltip>
 
