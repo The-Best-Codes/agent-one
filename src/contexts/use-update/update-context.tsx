@@ -91,7 +91,6 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   useEffect(() => {
     if (hasCheckedRef.current) return;
     hasCheckedRef.current = true;
-    if (dialogDismissed) return;
     const startCheck = async () => {
       await checkForUpdates();
     };
