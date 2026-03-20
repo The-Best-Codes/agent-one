@@ -109,9 +109,6 @@ const vendorManualChunks = {
 export default defineConfig(() => ({
   plugins: [
     react(),
-    // TODO: Investigate why migrating to the new React Compiler is causing the index.js chunk to be much larger
-    // See: https://github.com/vitejs/vite-plugin-react/releases/tag/plugin-react%406.0.0
-    // See also: https://vite.dev/blog/announcing-vite8#vitejs-plugin-react-v6
     babel({
       presets: [reactCompilerPreset({ target: "19" })],
       exclude: [/[\/\\]node_modules[\/\\]/, /[\/\\]src[\/\\]workers[\/\\]/],
