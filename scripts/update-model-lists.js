@@ -64,6 +64,7 @@ for (const [providerId, provider] of Object.entries(data)) {
         output: model.modalities?.output,
       },
       cost: model.cost,
+      limit: model.limit,
     };
   }
 
