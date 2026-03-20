@@ -140,7 +140,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const parentRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 640px)");
-  const { AVAILABLE_CHAT_MODELS_WITH_API_KEY } = useModelCatalog();
+  const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
 
   if (!loading && staleModel !== currentModel) {
@@ -162,7 +162,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     };
   }, [loading]);
 
-  const modelsWithApiKey = AVAILABLE_CHAT_MODELS_WITH_API_KEY;
+  const enabledModels = AVAILABLE_ENABLED_CHAT_MODELS;
   const shouldShowLoadingSkeleton = loading && loadingDelayPassed;
   const effectiveDisabled = disabled || loading;
   const effectiveOpen = effectiveDisabled ? false : open;
@@ -170,11 +170,11 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const filteredModels = useMemo(() => {
     if (!searchQuery.trim()) {
-      return modelsWithApiKey;
+      return enabledModels;
     }
 
     const query = searchQuery.toLowerCase();
-    const scoredModels = modelsWithApiKey
+    const scoredModels = enabledModels
       .map((model) => {
         const score = fuzzysort.single(query, [model.name, model?.id || ""].join(" "))?.score ?? 0;
         return { model, score };
@@ -182,7 +182,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       .filter(({ score }) => score > 0);
 
     return scoredModels.sort((a, b) => b.score - a.score).map(({ model }) => model);
-  }, [searchQuery, modelsWithApiKey]);
+  }, [searchQuery, enabledModels]);
 
   const rows = useMemo<VirtualRow[]>(() => {
     const groups = new Map<string, ModelData[]>();

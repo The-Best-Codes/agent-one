@@ -304,7 +304,7 @@ export function useModelCatalog() {
     return [...builtInModels, ...customModels];
   }, [providers, customProviders, customProviderApiKeys]);
 
-  const AVAILABLE_CHAT_MODELS_WITH_API_KEY = useMemo(() => {
+  const AVAILABLE_ENABLED_CHAT_MODELS = useMemo(() => {
     const providerIdByLabel = Object.fromEntries(PROVIDER_REGISTRY.map((p) => [p.label, p.id]));
 
     return AVAILABLE_CHAT_MODELS.filter((model) => {
@@ -327,13 +327,13 @@ export function useModelCatalog() {
   );
 
   const getChatModelByIdMemoized = useMemo(
-    () => (id: string) => AVAILABLE_CHAT_MODELS_WITH_API_KEY.find((model) => model.id === id),
-    [AVAILABLE_CHAT_MODELS_WITH_API_KEY],
+    () => (id: string) => AVAILABLE_ENABLED_CHAT_MODELS.find((model) => model.id === id),
+    [AVAILABLE_ENABLED_CHAT_MODELS],
   );
 
   const getSmartDefaultChatModel = useMemo(() => {
     return (): ModelData | undefined => {
-      if (AVAILABLE_CHAT_MODELS_WITH_API_KEY.length === 0) {
+      if (AVAILABLE_ENABLED_CHAT_MODELS.length === 0) {
         return undefined;
       }
 
@@ -352,7 +352,7 @@ export function useModelCatalog() {
           }
         }
 
-        const firstModelFromProvider = AVAILABLE_CHAT_MODELS_WITH_API_KEY.find((m) =>
+        const firstModelFromProvider = AVAILABLE_ENABLED_CHAT_MODELS.find((m) =>
           m.id.startsWith(`${providerId}-`),
         );
         if (firstModelFromProvider) {
@@ -360,16 +360,16 @@ export function useModelCatalog() {
         }
       }
 
-      return AVAILABLE_CHAT_MODELS_WITH_API_KEY[0];
+      return AVAILABLE_ENABLED_CHAT_MODELS[0];
     };
-  }, [AVAILABLE_CHAT_MODELS_WITH_API_KEY, providerIsAvailable, getChatModelByIdMemoized]);
+  }, [AVAILABLE_ENABLED_CHAT_MODELS, providerIsAvailable, getChatModelByIdMemoized]);
 
-  const hasAvailableModels = AVAILABLE_CHAT_MODELS_WITH_API_KEY.length > 0;
+  const hasAvailableModels = AVAILABLE_ENABLED_CHAT_MODELS.length > 0;
 
   return {
     AVAILABLE_MODELS,
     AVAILABLE_CHAT_MODELS,
-    AVAILABLE_CHAT_MODELS_WITH_API_KEY,
+    AVAILABLE_ENABLED_CHAT_MODELS,
     AVAILABLE_IMAGE_MODELS,
     getModelById: getModelByIdMemoized,
     getChatModelById: getChatModelByIdMemoized,
