@@ -4,7 +4,6 @@ import {
   type ChatTransport,
   convertToModelMessages,
   type LanguageModel,
-  type LanguageModelUsage,
   smoothStream,
   stepCountIs,
   type StopCondition,
@@ -131,11 +130,11 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     return result.toUIMessageStream({
       messageMetadata: ({ part }) => {
-        if (part.type !== "finish") {
+        if (part.type !== "finish-step") {
           return undefined;
         }
 
-        const usage: LanguageModelUsage = part.totalUsage;
+        const usage = part.usage;
         const inputTokens = usage.inputTokens ?? 0;
         const outputTokens = usage.outputTokens ?? 0;
         const modelCost = getModelCostByChatModelId(this.modelId ?? undefined);

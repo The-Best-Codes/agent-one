@@ -57,7 +57,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   return (
     <main className="flex h-svh" role="main" data-testid="main">
       <Sidebar />
-      <ChatUsageStatus />
+      {chatId && <ChatUsageStatus />}
 
       <div
         className="flex min-w-0 flex-1 flex-col items-center justify-center"
