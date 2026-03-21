@@ -128,6 +128,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       },
     });
 
+    let accumulatedInputTokens = 0;
+    let accumulatedOutputTokens = 0;
+    let accumulatedCostUsd = 0;
+
     return result.toUIMessageStream({
       messageMetadata: ({ part }) => {
         if (part.type !== "finish-step") {
@@ -135,16 +139,18 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         }
 
         const usage = part.usage;
-        const inputTokens = usage.inputTokens ?? 0;
-        const outputTokens = usage.outputTokens ?? 0;
         const modelCost = getModelCostByChatModelId(this.modelId ?? undefined);
-        const totalCostUsd = calculateCostUsdFromUsage(usage, modelCost);
+        const stepCostUsd = calculateCostUsdFromUsage(usage, modelCost);
+
+        accumulatedInputTokens += usage.inputTokens ?? 0;
+        accumulatedOutputTokens += usage.outputTokens ?? 0;
+        accumulatedCostUsd += stepCostUsd;
 
         const metadata: ChatMessageMetadata = {
           modelId: this.modelId ?? undefined,
-          inputTokens,
-          outputTokens,
-          totalCostUsd,
+          inputTokens: accumulatedInputTokens,
+          outputTokens: accumulatedOutputTokens,
+          totalCostUsd: accumulatedCostUsd,
         };
 
         return metadata;
