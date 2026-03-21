@@ -5,9 +5,15 @@ import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useChatLoading, useChatMetadata } from "@/contexts/use-chat/chat-hooks";
+import {
+  useChatLoading,
+  useChatMessages,
+  useChatMetadata,
+  useChatStatus,
+} from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
@@ -62,6 +68,8 @@ const CircularProgress = ({
 
 export const ChatUsageStatus = () => {
   const metadata = useChatMetadata();
+  const messages = useChatMessages();
+  const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
   const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
@@ -93,8 +101,12 @@ export const ChatUsageStatus = () => {
   const showSkeleton = isChatLoading && delayPassed;
   const displayedMetadata = isChatLoading ? staleMetadata : metadata;
 
-  const inputTokens = Number(displayedMetadata.inputTokens);
-  const outputTokens = Number(displayedMetadata.outputTokens);
+  const isStreaming = status === "streaming" || status === "submitted";
+  const liveUsage = isStreaming ? calculateChatUsageFromMessages(messages) : undefined;
+
+  const inputTokens = Number(liveUsage?.inputTokens ?? displayedMetadata.inputTokens);
+  const outputTokens = Number(liveUsage?.outputTokens ?? displayedMetadata.outputTokens);
+  const totalCostUsd = liveUsage?.totalCostUsd ?? Number(displayedMetadata.totalCostUsd);
   const totalTokens = inputTokens + outputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
@@ -158,7 +170,7 @@ export const ChatUsageStatus = () => {
                     >
                       <span>
                         <NumberFlow
-                          value={Number(displayedMetadata.totalCostUsd)}
+                          value={totalCostUsd}
                           format={{
                             style: "currency",
                             currency: "USD",
