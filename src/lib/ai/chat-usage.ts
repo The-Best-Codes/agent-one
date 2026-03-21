@@ -76,6 +76,27 @@ export function calculateCostUsdFromUsage(
   return inputCost + cacheReadCost + cacheWriteCost + outputCost + reasoningCost;
 }
 
+export function getLastAssistantTokens(messages: UIMessage[]): {
+  inputTokens: number;
+  outputTokens: number;
+} {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (message.role !== "assistant") continue;
+
+    const metadata = message.metadata as ChatMessageMetadata | undefined;
+    if (!metadata || typeof metadata !== "object") continue;
+    if (typeof metadata.inputTokens !== "number" || metadata.inputTokens <= 0) continue;
+
+    return {
+      inputTokens: metadata.inputTokens,
+      outputTokens: metadata.outputTokens ?? 0,
+    };
+  }
+
+  return { inputTokens: 0, outputTokens: 0 };
+}
+
 export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsageSummary {
   let inputTokens = 0;
   let outputTokens = 0;

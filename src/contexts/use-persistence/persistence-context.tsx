@@ -4,7 +4,7 @@ import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
-import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
+import { calculateChatUsageFromMessages, getLastAssistantTokens } from "@/lib/ai/chat-usage";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { chatStorage } from "@/lib/storage/chat-storage";
@@ -267,10 +267,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     ({ chatId, messages }: { chatId: string; messages: UIMessage[] }) => {
       try {
         const usage = calculateChatUsageFromMessages(messages);
+        const lastTokens = getLastAssistantTokens(messages);
         const updatedMetadata: ChatMetadata = {
           ...getMetadata(chatId),
-          inputTokens: usage.inputTokens,
-          outputTokens: usage.outputTokens,
+          inputTokens: lastTokens.inputTokens,
+          outputTokens: lastTokens.outputTokens,
           totalCostUsd: usage.totalCostUsd,
         };
 

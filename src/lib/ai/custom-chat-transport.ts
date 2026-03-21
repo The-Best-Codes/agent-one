@@ -128,8 +128,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       },
     });
 
-    let accumulatedInputTokens = 0;
-    let accumulatedOutputTokens = 0;
+    let lastStepInputTokens = 0;
+    let lastStepOutputTokens = 0;
     let accumulatedCostUsd = 0;
 
     return result.toUIMessageStream({
@@ -142,14 +142,14 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
         const modelCost = getModelCostByChatModelId(this.modelId ?? undefined);
         const stepCostUsd = calculateCostUsdFromUsage(usage, modelCost);
 
-        accumulatedInputTokens += usage.inputTokens ?? 0;
-        accumulatedOutputTokens += usage.outputTokens ?? 0;
+        lastStepInputTokens = usage.inputTokens ?? 0;
+        lastStepOutputTokens = usage.outputTokens ?? 0;
         accumulatedCostUsd += stepCostUsd;
 
         const metadata: ChatMessageMetadata = {
           modelId: this.modelId ?? undefined,
-          inputTokens: accumulatedInputTokens,
-          outputTokens: accumulatedOutputTokens,
+          inputTokens: lastStepInputTokens,
+          outputTokens: lastStepOutputTokens,
           totalCostUsd: accumulatedCostUsd,
         };
 

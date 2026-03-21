@@ -13,7 +13,7 @@ import {
 } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { calculateChatUsageFromMessages } from "@/lib/ai/chat-usage";
+import { calculateChatUsageFromMessages, getLastAssistantTokens } from "@/lib/ai/chat-usage";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
@@ -104,10 +104,14 @@ export const ChatUsageStatus = () => {
   const isStreaming = status === "streaming" || status === "submitted";
   const liveUsage = isStreaming ? calculateChatUsageFromMessages(messages) : undefined;
 
-  const inputTokens = Number(liveUsage?.inputTokens ?? displayedMetadata.inputTokens);
-  const outputTokens = Number(liveUsage?.outputTokens ?? displayedMetadata.outputTokens);
   const totalCostUsd = liveUsage?.totalCostUsd ?? Number(displayedMetadata.totalCostUsd);
-  const totalTokens = inputTokens + outputTokens;
+
+  const lastTokens = isStreaming ? getLastAssistantTokens(messages) : undefined;
+  const contextInputTokens = Number(lastTokens?.inputTokens ?? displayedMetadata.inputTokens ?? 0);
+  const contextOutputTokens = Number(
+    lastTokens?.outputTokens ?? displayedMetadata.outputTokens ?? 0,
+  );
+  const totalTokens = contextInputTokens + contextOutputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
 
