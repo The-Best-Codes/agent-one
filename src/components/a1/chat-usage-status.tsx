@@ -79,6 +79,8 @@ export const ChatUsageStatus = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
 
+  const isAgentOneModel = currentModel?.provider === "AgentOne";
+
   if (!isChatLoading && staleMetadata !== metadata) {
     setStaleMetadata(metadata);
   }
@@ -97,6 +99,10 @@ export const ChatUsageStatus = () => {
       setDelayPassed(false);
     };
   }, [isChatLoading]);
+
+  if (isAgentOneModel) {
+    return null;
+  }
 
   const showSkeleton = isChatLoading && delayPassed;
   const displayedMetadata = isChatLoading ? staleMetadata : metadata;
