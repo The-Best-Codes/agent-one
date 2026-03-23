@@ -1,3 +1,4 @@
+import { polarClient } from "@polar-sh/better-auth/client";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 import { deviceAuthorizationClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
@@ -27,7 +28,7 @@ export const authClient = createAuthClient({
       token: () => cachedToken ?? "",
     },
   },
-  plugins: [deviceAuthorizationClient()],
+  plugins: [deviceAuthorizationClient(), polarClient()],
 });
 
 export { CLIENT_ID, SERVER_URL };

@@ -1,30 +1,123 @@
 import { useAtom } from "jotai";
+import { useEffect, useMemo, useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { authClient } from "@/lib/auth/auth-client";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
-import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
-
-const USAGE_PERCENT = 45;
-const USAGE_RESET_DATE = "April 1, 2026";
+import {
+  systemPromptAppendixAtom,
+  userNameAtom,
+} from "@/lib/jotai/settings-atoms";
 
 const MAX_APPENDIX_CHARS = 2000;
+const BILLING_URL = "https://www.agent-one.dev/dashboard/billing";
+const UPGRADE_URL = `${BILLING_URL}?upgrade=pro`;
+
+interface Subscription {
+  id: string;
+  status: string;
+  currentPeriodEnd?: string;
+  product?: {
+    name?: string;
+  };
+}
+
+interface CustomerState {
+  subscriptions?: Subscription[];
+}
 
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
-  const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(systemPromptAppendixAtom);
+  const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(
+    systemPromptAppendixAtom,
+  );
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
-  const [hideAgentOneModels, setHideAgentOneModels] = useAtom(hideAgentOneModelsAtom);
-  const { user } = useWebAuth();
+  const [hideAgentOneModels, setHideAgentOneModels] = useAtom(
+    hideAgentOneModelsAtom,
+  );
+  const { user, isLoading: isAuthLoading } = useWebAuth();
+  const [customerState, setCustomerState] = useState<CustomerState | null>(
+    null,
+  );
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setCustomerState(null);
+      setBillingError(null);
+      setBillingLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadBilling = async () => {
+      setBillingLoading(true);
+      setBillingError(null);
+
+      try {
+        const { data, error } = await authClient.customer.state();
+
+        if (cancelled) return;
+
+        if (error) {
+          setBillingError("Unable to load billing information.");
+          return;
+        }
+
+        setCustomerState((data as CustomerState | null) ?? null);
+      } catch {
+        if (!cancelled) {
+          setBillingError("Unable to load billing information.");
+        }
+      } finally {
+        if (!cancelled) {
+          setBillingLoading(false);
+        }
+      }
+    };
+
+    void loadBilling();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  const activeSubscription = useMemo(
+    () =>
+      customerState?.subscriptions?.find(
+        (subscription) =>
+          subscription.status === "active" ||
+          subscription.status === "trialing",
+      ) ?? null,
+    [customerState],
+  );
+
+  const currentPlanName = activeSubscription?.product?.name ?? "Free";
+  const renewalDate = activeSubscription?.currentPeriodEnd
+    ? new Date(activeSubscription.currentPeriodEnd).toLocaleDateString()
+    : null;
 
   const handleAppendixChange = (value: string) => {
     setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
@@ -34,25 +127,52 @@ export default function AccountSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle>Current Plan</CardTitle>
-            <Badge variant="secondary">Free</Badge>
-          </div>
+          <CardTitle>Current Plan</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Monthly Usage</span>
-              <span className="text-muted-foreground">{USAGE_PERCENT}%</span>
+          {isAuthLoading || billingLoading ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-56" />
             </div>
-            <Progress value={USAGE_PERCENT} />
-            <p className="text-muted-foreground text-xs">Resets {USAGE_RESET_DATE}</p>
-          </div>
+          ) : !user ? (
+            <div className="flex flex-col gap-1">
+              <p className="font-medium">Free</p>
+              <p className="text-muted-foreground text-sm">
+                Sign in to load your current subscription and manage billing.
+              </p>
+            </div>
+          ) : billingError ? (
+            <p className="text-muted-foreground text-sm">{billingError}</p>
+          ) : activeSubscription ? (
+            <div className="flex flex-col gap-1">
+              <p className="font-medium">{currentPlanName}</p>
+              <p className="text-muted-foreground text-sm">
+                {renewalDate
+                  ? `Renews ${renewalDate}.`
+                  : "Your subscription is active."}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <p className="font-medium">Free</p>
+              <p className="text-muted-foreground text-sm">
+                Upgrade to Pro for higher limits and premium features.
+              </p>
+            </div>
+          )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex gap-2">
+          {!billingLoading && user && !billingError && !activeSubscription && (
+            <Button size="sm" asChild>
+              <a href={UPGRADE_URL} target="_blank" rel="noopener noreferrer">
+                Upgrade to Pro
+              </a>
+            </Button>
+          )}
           <Button variant="outline" size="sm" asChild>
-            <a href="https://www.agent-one.dev/dashboard" target="_blank" rel="noopener noreferrer">
-              View Dashboard
+            <a href={BILLING_URL} target="_blank" rel="noopener noreferrer">
+              {activeSubscription ? "Manage Billing" : "View Billing"}
             </a>
           </Button>
         </CardFooter>
@@ -69,7 +189,8 @@ export default function AccountSection() {
                 Synchronize my settings
               </Label>
               <p className="text-muted-foreground text-sm">
-                Keep your settings in sync across devices using your AgentOne account.
+                Keep your settings in sync across devices using your AgentOne
+                account.
               </p>
             </div>
             <Tooltip>
@@ -88,7 +209,10 @@ export default function AccountSection() {
           </div>
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col gap-1">
-              <Label htmlFor="hide-agentone-models" className="text-sm font-medium">
+              <Label
+                htmlFor="hide-agentone-models"
+                className="text-sm font-medium"
+              >
                 Hide AgentOne models
               </Label>
               <p className="text-muted-foreground text-sm">
@@ -106,7 +230,9 @@ export default function AccountSection() {
                   />
                 </span>
               </TooltipTrigger>
-              {!user && <TooltipContent>Sign in to hide AgentOne models</TooltipContent>}
+              {!user && (
+                <TooltipContent>Sign in to hide AgentOne models</TooltipContent>
+              )}
             </Tooltip>
           </div>
         </CardContent>
@@ -132,12 +258,15 @@ export default function AccountSection() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="system-prompt-appendix" className="text-sm font-medium">
+            <Label
+              htmlFor="system-prompt-appendix"
+              className="text-sm font-medium"
+            >
               AI Instructions
             </Label>
             <p className="text-muted-foreground text-sm">
-              Add custom instructions that will be appended to the system prompt. These will guide
-              how AgentOne responds to you.
+              Add custom instructions that will be appended to the system
+              prompt. These will guide how AgentOne responds to you.
             </p>
             <div className="relative">
               <Textarea
