@@ -21,6 +21,7 @@ export type NotificationOption = "always" | "when-unfocused" | "never";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 export type MessageActionRowOption = "hover" | "always" | "never";
 export type InputStyleOption = "docked" | "floating";
+export type CollapsedSidebarLayoutOption = "row" | "column";
 
 export type TitleGenerationMethodOption =
   | "ai"
@@ -123,6 +124,7 @@ export interface DefaultSettings extends ApiKeySettings {
   MCP_PARALLEL_LOAD_LIMIT: number;
   USER_NAME: string;
   SYSTEM_PROMPT_APPENDIX: string;
+  COLLAPSED_SIDEBAR_LAYOUT: CollapsedSidebarLayoutOption;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -185,6 +187,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MCP_PARALLEL_LOAD_LIMIT: 8,
   USER_NAME: "",
   SYSTEM_PROMPT_APPENDIX: "",
+  COLLAPSED_SIDEBAR_LAYOUT: "row",
   AGENT_ONE_API_KEY: "",
   OPENROUTER_API_KEY: "",
   GROQ_API_KEY: "",

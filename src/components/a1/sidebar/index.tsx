@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
@@ -67,6 +68,7 @@ const SidebarContent = ({
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useAtom(sidebarCollapsedAtom);
+  const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -74,7 +76,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
 
   const isSidebarSmall = isCollapsed || !isDesktop;
+  const isColumnLayout = collapsedLayout === "column";
   const toggleTooltip = isCollapsed ? "Open sidebar" : "Close sidebar";
+  const tooltipSide = isColumnLayout && isSidebarSmall ? "right" : undefined;
 
   useHotkeys(kbdRegistry.focusChatSearchCollapsed, () => {
     if (isSidebarSmall) {
@@ -113,7 +117,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           <IconLayoutSidebarFilled data-icon="inline-start" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{toggleTooltip}</TooltipContent>
+      <TooltipContent side={tooltipSide}>{toggleTooltip}</TooltipContent>
     </Tooltip>
   ) : (
     <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -149,47 +153,52 @@ export const Sidebar = ({ className }: SidebarProps) => {
           className={cn(
             "bg-background border-sidebar-border flex items-center gap-1 rounded-none border-0 border-r border-b p-1 transition-[padding,background-color] duration-200 md:rounded-md md:border",
             !isSidebarSmall && "border-transparent bg-transparent pt-0 pl-0",
+            isColumnLayout && "flex-col",
           )}
         >
-          <>
-            {sidebarButton}
-            <div
-              className={cn(
-                "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
-                !isSidebarSmall && "pointer-events-none -translate-x-2 scale-95 opacity-0",
-              )}
-              inert={!isCollapsed}
-            >
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={handleSearchClick}
-                    aria-label="Search chats"
-                    className="size-6"
-                  >
-                    <IconSearch data-icon="inline-start" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Search chats</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={handleNewChat}
-                    aria-label="New chat"
-                    className="size-6"
-                  >
-                    <IconPlus data-icon="inline-start" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>New chat</TooltipContent>
-              </Tooltip>
-            </div>
-          </>
+          {sidebarButton}
+          <div
+            className={cn(
+              "flex translate-x-0 scale-100 items-center gap-1 opacity-100 transition-[opacity,scale,translate] duration-100",
+              !isSidebarSmall &&
+                !isColumnLayout &&
+                "pointer-events-none -translate-x-2 scale-95 opacity-0",
+              !isSidebarSmall &&
+                isColumnLayout &&
+                "pointer-events-none -translate-y-2 scale-95 opacity-0",
+              isColumnLayout && "flex-col",
+            )}
+            inert={!isCollapsed}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={handleSearchClick}
+                  aria-label="Search chats"
+                  className="size-6"
+                >
+                  <IconSearch data-icon="inline-start" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side={tooltipSide}>Search chats</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={handleNewChat}
+                  aria-label="New chat"
+                  className="size-6"
+                >
+                  <IconPlus data-icon="inline-start" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side={tooltipSide}>New chat</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
 

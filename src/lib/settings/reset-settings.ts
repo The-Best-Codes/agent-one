@@ -6,6 +6,7 @@ import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/r
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
+  collapsedSidebarLayoutAtom,
   colorThemeAtom,
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
@@ -65,6 +66,7 @@ export function resetAllSettings(): void {
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
   store.set(titleGenerationAtom, RESET);
+  store.set(collapsedSidebarLayoutAtom, RESET);
 
   for (const provider of PROVIDER_REGISTRY) {
     void store.set(getApiKeyBaseAtom(provider.id), RESET);
@@ -167,6 +169,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "TITLE_GENERATION":
       store.set(titleGenerationAtom, RESET);
+      break;
+    case "COLLAPSED_SIDEBAR_LAYOUT":
+      store.set(collapsedSidebarLayoutAtom, RESET);
       break;
   }
 }

@@ -15,6 +15,7 @@ import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { calculateChatUsageFromMessages, getLastAssistantTokens } from "@/lib/ai/chat-usage";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
+import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 
@@ -73,11 +74,13 @@ export const ChatUsageStatus = () => {
   const isChatLoading = useChatLoading();
   const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
+  const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
   const [delayPassed, setDelayPassed] = useState(false);
   const [staleMetadata, setStaleMetadata] = useState(metadata);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
+  const isColumnLayout = collapsedLayout === "column";
 
   const isAgentOneModel = currentModel?.provider === "AgentOne";
 
@@ -125,7 +128,7 @@ export const ChatUsageStatus = () => {
     <div
       className={cn(
         "fixed top-0 left-0 z-40 -translate-x-2 transition-[margin] duration-200 md:top-2 md:left-2 md:translate-x-0",
-        isSidebarSmall ? "ml-24" : "ml-64",
+        isSidebarSmall ? (isColumnLayout ? "ml-10" : "ml-24") : "ml-64",
       )}
     >
       <div className="bg-background border-sidebar-border text-muted-foreground flex items-center rounded-br-md border-r border-b text-xs whitespace-nowrap md:rounded-md md:border">

@@ -17,6 +17,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
+  collapsedSidebarLayoutAtom,
   colorThemeAtom,
   fontAtom,
   inputStyleAtom,
@@ -25,7 +26,11 @@ import {
   textScaleAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
-import { DEFAULT_SETTINGS, type InputStyleOption } from "@/lib/settings/types";
+import {
+  type CollapsedSidebarLayoutOption,
+  DEFAULT_SETTINGS,
+  type InputStyleOption,
+} from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
 const roundnessOptions = [
@@ -109,10 +114,13 @@ export default function AppearanceSection() {
   const [textScale, setTextScale] = useAtom(textScaleAtom);
   const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
   const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
+  const [collapsedSidebarLayout, setCollapsedSidebarLayout] = useAtom(collapsedSidebarLayoutAtom);
 
   const isMarkdownHighlightingDefault =
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
+  const isCollapsedSidebarLayoutDefault =
+    collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
 
   const handleResetMarkdownHighlighting = () => {
     resetSetting("MARKDOWN_HIGHLIGHTING");
@@ -120,6 +128,10 @@ export default function AppearanceSection() {
 
   const handleResetInputStyle = () => {
     resetSetting("INPUT_STYLE");
+  };
+
+  const handleResetCollapsedSidebarLayout = () => {
+    resetSetting("COLLAPSED_SIDEBAR_LAYOUT");
   };
 
   return (
@@ -319,6 +331,45 @@ export default function AppearanceSection() {
                 size="icon"
                 onClick={handleResetInputStyle}
                 disabled={isInputStyleDefault}
+                aria-label="Reset to default"
+              >
+                <IconRestore data-icon="inline-start" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-1 flex-col items-start">
+              <Label className="text-sm font-medium">Collapsed Sidebar Layout</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Choose whether collapsed sidebar buttons are laid out in a row or column.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select
+                value={collapsedSidebarLayout}
+                onValueChange={(value) =>
+                  setCollapsedSidebarLayout(value as CollapsedSidebarLayoutOption)
+                }
+              >
+                <SelectTrigger
+                  className="w-full md:w-fit md:max-w-96"
+                  aria-label="Select collapsed sidebar layout"
+                >
+                  <SelectValue placeholder="Select layout" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="row">Row</SelectItem>
+                    <SelectItem value="column">Column</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleResetCollapsedSidebarLayout}
+                disabled={isCollapsedSidebarLayoutDefault}
                 aria-label="Reset to default"
               >
                 <IconRestore data-icon="inline-start" />

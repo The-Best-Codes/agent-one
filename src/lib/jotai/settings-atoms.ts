@@ -17,6 +17,7 @@ import {
   type TextScaleOption,
   type ThemeOption,
   type TitleGenerationSettings,
+  type CollapsedSidebarLayoutOption,
   type ToolConfigs,
   type ToolId,
 } from "@/lib/settings/types";
@@ -177,4 +178,9 @@ export const showMessageActionRowAtom = createSettingAtom<MessageActionRowOption
 export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(
   "TITLE_GENERATION",
   DEFAULT_SETTINGS.TITLE_GENERATION,
+);
+
+export const collapsedSidebarLayoutAtom = createSettingAtom<CollapsedSidebarLayoutOption>(
+  "COLLAPSED_SIDEBAR_LAYOUT",
+  DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT,
 );
