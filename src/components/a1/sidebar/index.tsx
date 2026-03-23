@@ -74,7 +74,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const { id: activeChatId } = useParams<{ id: string }>();
 
   const isSidebarSmall = isCollapsed || !isDesktop;
-  const toggleTooltip = isCollapsed ? "Expand sidebar" : "Collapse sidebar";
+  const toggleTooltip = isCollapsed ? "Open sidebar" : "Close sidebar";
 
   useHotkeys(kbdRegistry.focusChatSearchCollapsed, () => {
     if (isSidebarSmall) {
@@ -107,7 +107,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="outline"
           size="icon-sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           className="size-6"
         >
           <IconLayoutSidebarFilled data-icon="inline-start" />
