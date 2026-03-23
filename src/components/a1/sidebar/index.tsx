@@ -1,5 +1,5 @@
+import { IconLayoutSidebarFilled, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { PlusIcon, SearchIcon, SettingsIcon, SidebarIcon } from "lucide-react";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useNavigate, useParams } from "react-router";
@@ -56,7 +56,7 @@ const SidebarContent = ({
             to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
             data-icon="inline-start"
           >
-            <SettingsIcon data-icon="inline-start" />
+            <IconSettings data-icon="inline-start" />
             Settings
           </Link>
         </Button>
@@ -110,7 +110,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="size-6"
         >
-          <SidebarIcon data-icon="inline-start" />
+          <IconLayoutSidebarFilled data-icon="inline-start" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>{toggleTooltip}</TooltipContent>
@@ -121,7 +121,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         <TooltipTrigger asChild>
           <DrawerTrigger asChild>
             <Button variant="outline" size="icon-sm" aria-label="Expand sidebar" className="size-6">
-              <SidebarIcon />
+              <IconLayoutSidebarFilled />
             </Button>
           </DrawerTrigger>
         </TooltipTrigger>
@@ -169,7 +169,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                     aria-label="Search chats"
                     className="size-6"
                   >
-                    <SearchIcon data-icon="inline-start" />
+                    <IconSearch data-icon="inline-start" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Search chats</TooltipContent>
@@ -183,7 +183,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                     aria-label="New chat"
                     className="size-6"
                   >
-                    <PlusIcon data-icon="inline-start" />
+                    <IconPlus data-icon="inline-start" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>New chat</TooltipContent>

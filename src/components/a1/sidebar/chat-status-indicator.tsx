@@ -1,5 +1,5 @@
+import { IconBell, IconExclamationCircle, IconLoader } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
-import { AlertCircleIcon, CircleDotDashedIcon, Loader2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -33,12 +33,12 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
       )}
     >
       {activeStatus === "loading" && (
-        <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+        <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
       )}
-      {activeStatus === "error" && <AlertCircleIcon className="text-destructive size-4 shrink-0" />}
-      {activeStatus === "unread" && (
-        <CircleDotDashedIcon className="text-foreground size-4 shrink-0" />
+      {activeStatus === "error" && (
+        <IconExclamationCircle className="text-destructive size-4 shrink-0" />
       )}
+      {activeStatus === "unread" && <IconBell className="text-foreground size-4 shrink-0" />}
     </div>
   );
 };

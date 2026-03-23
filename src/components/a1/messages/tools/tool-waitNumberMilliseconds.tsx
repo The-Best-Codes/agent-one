@@ -1,12 +1,12 @@
-import type { ToolUIPart } from "ai";
 import {
-  CheckCircle2Icon,
-  ChevronDownIcon,
-  ClockIcon,
-  Loader2Icon,
-  XCircleIcon,
-  XIcon,
-} from "lucide-react";
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconClock,
+  IconLoader,
+  IconX,
+} from "@tabler/icons-react";
+import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <ClockIcon className="text-foreground size-4 shrink-0" />
+            <IconClock className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to wait {safeFormatMilliseconds(input?.milliseconds)}
             </span>
@@ -85,7 +85,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
                 })
               }
             >
-              <XIcon data-icon="inline-start" />
+              <IconX data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -98,7 +98,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
                 })
               }
             >
-              <CheckCircle2Icon data-icon="inline-start" />
+              <IconCircleCheck data-icon="inline-start" />
               Approve
             </Button>
           </div>
@@ -108,7 +108,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     case "output-denied":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
             Wait for {safeFormatMilliseconds(input?.milliseconds)} denied
           </span>
@@ -119,7 +119,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+            <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
           <span className="text-foreground text-sm font-bold">Waiting a bit...</span>
         </div>
@@ -132,7 +132,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
             Waiting {safeFormatMilliseconds(input?.milliseconds)}...
           </span>
@@ -145,7 +145,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <ClockIcon className="text-foreground size-4 shrink-0" />
+          <IconClock className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             Waited {safeFormatMilliseconds(input?.milliseconds)}
           </span>
@@ -156,7 +156,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">Wait cancelled</span>
           </div>
         );
@@ -178,13 +178,13 @@ export const MessagePartToolWaitNumberMilliseconds = ({
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <XCircleIcon
+                  <IconCircleX
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/wait-accordion:scale-0 group-hover/wait-accordion:opacity-0",
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/wait-accordion:scale-100 group-hover/wait-accordion:opacity-100",
                       isErrorAccordionOpen && "scale-100 opacity-100",
@@ -212,10 +212,8 @@ export const MessagePartToolWaitNumberMilliseconds = ({
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <ClockIcon className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">
-            Unknown waitNumberMilliseconds tool state
-          </span>
+          <IconClock className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">Wait tool accessed</span>
         </div>
       );
   }

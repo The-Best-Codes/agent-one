@@ -1,13 +1,13 @@
-import type { ToolUIPart } from "ai";
 import {
-  CheckCircle2Icon,
-  ChevronDownIcon,
-  ExternalLinkIcon,
-  Loader2Icon,
-  SearchIcon,
-  XCircleIcon,
-  XIcon,
-} from "lucide-react";
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconExternalLink,
+  IconLoader,
+  IconSearch,
+  IconX,
+} from "@tabler/icons-react";
+import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <SearchIcon className="text-foreground size-4 shrink-0" />
+            <IconSearch className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to search for "{query}"
             </span>
@@ -77,7 +77,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 })
               }
             >
-              <XIcon data-icon="inline-start" />
+              <IconX data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -90,7 +90,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                 })
               }
             >
-              <CheckCircle2Icon data-icon="inline-start" />
+              <IconCircleCheck data-icon="inline-start" />
               Approve
             </Button>
           </div>
@@ -100,7 +100,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     case "output-denied":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
             Web search for "{query}" denied
           </span>
@@ -110,7 +110,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />{" "}
+          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />{" "}
           <span className="text-foreground text-sm font-bold">Preparing web search...</span>
         </div>
       );
@@ -119,7 +119,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     case "input-available": {
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
-          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate text-sm font-bold">
             Searching online for "{query}"...
           </span>
@@ -136,7 +136,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             key={callId}
             className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
           >
-            <XCircleIcon className="size-4 shrink-0" />{" "}
+            <IconCircleX className="size-4 shrink-0" />{" "}
             <span className="max-w-2xl truncate">
               Web search for "{result.query || "unknown query"}" failed
             </span>
@@ -161,13 +161,13 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <SearchIcon
+                  <IconSearch
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/web-search-accordion:scale-0 group-hover/web-search-accordion:opacity-0",
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/web-search-accordion:scale-100 group-hover/web-search-accordion:opacity-100",
                       isMainAccordionOpen && "scale-100 opacity-100",
@@ -195,7 +195,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                         className="text-muted-foreground hover:text-foreground text-xs"
                       >
                         View <span className="italic">"{result.query}"</span> on DuckDuckGo
-                        <ExternalLinkIcon className="ml-1 inline size-3" />
+                        <IconExternalLink className="ml-1 inline size-3" />
                       </a>
                     )}
                   </div>
@@ -233,7 +233,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         const query = input?.query;
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />{" "}
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />{" "}
             <span className="text-muted-foreground text-sm font-bold">
               {`Web search ${query ? `for "${query}" ` : ""}cancelled`}
             </span>
@@ -257,13 +257,13 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <XCircleIcon
+                  <IconCircleX
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/web-search-accordion:scale-0 group-hover/web-search-accordion:opacity-0",
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/web-search-accordion:scale-100 group-hover/web-search-accordion:opacity-100",
                       isErrorAccordionOpen && "scale-100 opacity-100",
@@ -290,10 +290,8 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <SearchIcon className="text-muted-foreground size-4 shrink-0" />{" "}
-          <span className="text-muted-foreground text-sm font-bold">
-            Unknown web search tool state
-          </span>
+          <IconSearch className="text-muted-foreground size-4 shrink-0" />{" "}
+          <span className="text-muted-foreground text-sm font-bold">Web search accessed</span>
         </div>
       );
   }
