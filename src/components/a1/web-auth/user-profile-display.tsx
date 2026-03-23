@@ -22,7 +22,7 @@ export function UserProfileDisplay({ user, action, className }: UserProfileDispl
     <div className={cn("flex items-center justify-between gap-4", className)}>
       <div className="flex items-center gap-3">
         <Avatar size="lg">
-          <AvatarImage src={user.image ?? undefined} alt={user.name} />
+          <AvatarImage referrerPolicy="no-referrer" src={user.image ?? undefined} alt={user.name} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div>
