@@ -9,7 +9,12 @@ import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
 import { settingsSyncManager } from "@/lib/sync/settings-sync-manager";
 
-import { type DeviceFlowState, WebAuthContext, type WebAuthUser } from "./web-auth-contexts";
+import {
+  type CustomerState,
+  type DeviceFlowState,
+  WebAuthContext,
+  type WebAuthUser,
+} from "./web-auth-contexts";
 
 const logger = getLogger(import.meta.url);
 
@@ -25,6 +30,9 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState | null>(null);
+  const [customerState, setCustomerState] = useState<CustomerState | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
 
@@ -87,6 +95,51 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
     void restoreSession();
   }, [fetchSession]);
+
+  useEffect(() => {
+    if (!user) {
+      setCustomerState(null);
+      setBillingError(null);
+      setBillingLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadBilling = async () => {
+      if (!customerState) {
+        setBillingLoading(true);
+      }
+      setBillingError(null);
+
+      try {
+        const { data, error } = await authClient.customer.state();
+        if (cancelled) return;
+
+        if (error) {
+          setBillingError("Unable to load billing information.");
+          return;
+        }
+
+        setCustomerState((data as CustomerState | null) ?? null);
+      } catch {
+        if (!cancelled) {
+          setBillingError("Unable to load billing information.");
+        }
+      } finally {
+        if (!cancelled) {
+          setBillingLoading(false);
+        }
+      }
+    };
+
+    void loadBilling();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
@@ -242,11 +295,26 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
       isSigningIn,
       isSigningOut,
       deviceFlow,
+      customerState,
+      billingLoading,
+      billingError,
       startSignIn,
       cancelSignIn,
       signOut,
     }),
-    [user, isLoading, isSigningIn, isSigningOut, deviceFlow, startSignIn, cancelSignIn, signOut],
+    [
+      user,
+      isLoading,
+      isSigningIn,
+      isSigningOut,
+      deviceFlow,
+      customerState,
+      billingLoading,
+      billingError,
+      startSignIn,
+      cancelSignIn,
+      signOut,
+    ],
   );
 
   return <WebAuthContext.Provider value={value}>{children}</WebAuthContext.Provider>;

@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import { authClient } from "@/lib/auth/auth-client";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
 
@@ -19,71 +18,18 @@ const MAX_APPENDIX_CHARS = 2000;
 const BILLING_URL = "https://www.agent-one.dev/dashboard/billing";
 const UPGRADE_URL = `${BILLING_URL}?upgrade=pro`;
 
-interface Subscription {
-  id: string;
-  status: string;
-  currentPeriodEnd?: string;
-  product?: {
-    name?: string;
-  };
-}
-
-interface CustomerState {
-  subscriptions?: Subscription[];
-}
-
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(systemPromptAppendixAtom);
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
   const [hideAgentOneModels, setHideAgentOneModels] = useAtom(hideAgentOneModelsAtom);
-  const { user, isLoading: isAuthLoading } = useWebAuth();
-  const [customerState, setCustomerState] = useState<CustomerState | null>(null);
-  const [billingLoading, setBillingLoading] = useState(false);
-  const [billingError, setBillingError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user) {
-      setCustomerState(null);
-      setBillingError(null);
-      setBillingLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-
-    const loadBilling = async () => {
-      setBillingLoading(true);
-      setBillingError(null);
-
-      try {
-        const { data, error } = await authClient.customer.state();
-
-        if (cancelled) return;
-
-        if (error) {
-          setBillingError("Unable to load billing information.");
-          return;
-        }
-
-        setCustomerState((data as CustomerState | null) ?? null);
-      } catch {
-        if (!cancelled) {
-          setBillingError("Unable to load billing information.");
-        }
-      } finally {
-        if (!cancelled) {
-          setBillingLoading(false);
-        }
-      }
-    };
-
-    void loadBilling();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+  const {
+    user,
+    isLoading: isAuthLoading,
+    customerState,
+    billingLoading,
+    billingError,
+  } = useWebAuth();
 
   const activeSubscription = useMemo(
     () =>
@@ -109,7 +55,7 @@ export default function AccountSection() {
           <CardTitle>Current Plan</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          {isAuthLoading || billingLoading ? (
+          {(isAuthLoading || billingLoading) && !customerState ? (
             <div className="flex flex-col gap-2">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-56" />

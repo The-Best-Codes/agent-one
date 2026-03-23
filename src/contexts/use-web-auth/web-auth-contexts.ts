@@ -16,12 +16,28 @@ export interface DeviceFlowState {
   interval: number;
 }
 
+export interface Subscription {
+  id: string;
+  status: string;
+  currentPeriodEnd?: string;
+  product?: {
+    name?: string;
+  };
+}
+
+export interface CustomerState {
+  subscriptions?: Subscription[];
+}
+
 export interface WebAuthContextType {
   user: WebAuthUser | null;
   isLoading: boolean;
   isSigningIn: boolean;
   isSigningOut: boolean;
   deviceFlow: DeviceFlowState | null;
+  customerState: CustomerState | null;
+  billingLoading: boolean;
+  billingError: string | null;
   startSignIn: () => Promise<void>;
   cancelSignIn: () => void;
   signOut: () => Promise<void>;
