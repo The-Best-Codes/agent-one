@@ -21,9 +21,9 @@ export function UserProfileDisplay({ user, action, className }: UserProfileDispl
   return (
     <div className={cn("flex items-center justify-between gap-4", className)}>
       <div className="flex items-center gap-3">
-        <Avatar size="lg" className="rounded-md">
+        <Avatar size="lg">
           <AvatarImage src={user.image ?? undefined} alt={user.name} />
-          <AvatarFallback className="rounded-md">{initials}</AvatarFallback>
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div>
           <p className="leading-none font-medium">{user.name}</p>

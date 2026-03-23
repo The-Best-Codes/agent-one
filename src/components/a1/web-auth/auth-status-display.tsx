@@ -70,7 +70,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         }
         action={
           <>
-            <div className="bg-accent flex flex-row items-center justify-center rounded-md pl-2">
+            <div className="bg-secondary flex flex-row items-center justify-center rounded-md pl-2">
               <span className="font-mono text-sm leading-none font-bold tracking-wider">
                 {deviceFlow.userCode}
               </span>
