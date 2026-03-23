@@ -1,5 +1,6 @@
 import { IconCheck, IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
+import { useCallback } from "react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -116,6 +117,12 @@ export default function AppearanceSection() {
   const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
   const [collapsedSidebarLayout, setCollapsedSidebarLayout] = useAtom(collapsedSidebarLayoutAtom);
 
+  const activeColorRef = useCallback((node: HTMLButtonElement | null) => {
+    if (node) {
+      node.scrollIntoView({ inline: "center", block: "nearest" });
+    }
+  }, []);
+
   const isMarkdownHighlightingDefault =
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
@@ -152,13 +159,13 @@ export default function AppearanceSection() {
             <div className="flex flex-col items-start">
               <Label className="text-sm font-medium">Color Theme</Label>
             </div>
-            {/* TODO: Scroll to active color selection on load */}
             <ScrollArea className="max-w-full md:max-w-64">
               <ScrollBar className="w-full" orientation="horizontal" />
               <div className="flex flex-row flex-nowrap gap-2">
                 {colorThemeOptions.map((option) => (
                   <Button
                     key={option.value}
+                    ref={colorTheme === option.value ? activeColorRef : undefined}
                     onClick={() => setColorTheme(option.value as typeof colorTheme)}
                     size="icon"
                     className={cn("border-foreground rounded-md border-0", option.className)}
