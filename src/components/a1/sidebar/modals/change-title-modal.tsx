@@ -1,5 +1,5 @@
+import { IconSparkles } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
-import { SparklesIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,7 @@ const ChangeTitleForm = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Button onClick={handleGenerate} disabled={isGenerating} variant="outline" size="icon">
-              {isGenerating ? <Spinner data-icon="inline-start" /> : <SparklesIcon />}
+              {isGenerating ? <Spinner /> : <IconSparkles />}
             </Button>
           </TooltipTrigger>
           <TooltipContent>

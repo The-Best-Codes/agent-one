@@ -1,6 +1,6 @@
+import { IconDownload } from "@tabler/icons-react";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { DownloadIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +52,7 @@ export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportCh
             onClick={() => handleExportJSON().catch(logger.error)}
             className="justify-start"
           >
-            <DownloadIcon data-icon="inline-start" />
+            <IconDownload data-icon="inline-start" />
             Download as JSON
           </Button>
         </div>
