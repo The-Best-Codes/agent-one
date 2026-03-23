@@ -78,7 +78,7 @@ const vendorManualChunks = {
     "class-variance-authority",
     "clsx",
     "fast-equals",
-    "lucide-react",
+    "@tabler/icons",
     "@tabler/icons-react",
     "react-hotkeys-hook",
     "lodash.debounce",

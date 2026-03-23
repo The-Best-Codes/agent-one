@@ -1,5 +1,6 @@
 "use client";
-import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
+
+import { IconBrightness, IconMoon, IconSun } from "@tabler/icons-react";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTheme } from "@/hooks/use-theme";
@@ -38,19 +39,19 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
     >
       <ToggleGroupItem value="system" aria-label="System theme">
         <span className="flex items-center gap-1 text-sm">
-          <LaptopIcon data-icon="inline-start" />
+          <IconBrightness data-icon="inline-start" />
           System
         </span>
       </ToggleGroupItem>
       <ToggleGroupItem value="light" aria-label="Light theme">
         <span className="flex items-center gap-1 text-sm">
-          <SunIcon data-icon="inline-start" />
+          <IconSun data-icon="inline-start" />
           Light
         </span>
       </ToggleGroupItem>
       <ToggleGroupItem value="dark" aria-label="Dark theme">
         <span className="flex items-center gap-1 text-sm">
-          <MoonIcon data-icon="inline-start" />
+          <IconMoon data-icon="inline-start" />
           Dark
         </span>
       </ToggleGroupItem>
