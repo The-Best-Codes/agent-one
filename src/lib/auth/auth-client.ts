@@ -19,6 +19,9 @@ export const authClient = createAuthClient({
   baseURL: SERVER_URL,
   fetchOptions: {
     customFetchImpl: tauriFetch,
+    headers: {
+      Origin: SERVER_URL,
+    },
     auth: {
       type: "Bearer",
       token: () => cachedToken ?? "",
