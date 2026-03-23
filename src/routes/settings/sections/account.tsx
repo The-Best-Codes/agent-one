@@ -1,15 +1,21 @@
 import { useAtom } from "jotai";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
+
+const USAGE_PERCENT = 45;
+const USAGE_RESET_DATE = "April 1, 2026";
 
 const MAX_APPENDIX_CHARS = 2000;
 
@@ -26,6 +32,31 @@ export default function AccountSection() {
 
   return (
     <div className="flex flex-col gap-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle>Current Plan</CardTitle>
+            <Badge variant="secondary">Free</Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">Monthly Usage</span>
+              <span className="text-muted-foreground">{USAGE_PERCENT}%</span>
+            </div>
+            <Progress value={USAGE_PERCENT} />
+            <p className="text-muted-foreground text-xs">Resets {USAGE_RESET_DATE}</p>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" size="sm" asChild>
+            <a href="https://www.agent-one.dev/dashboard" target="_blank" rel="noopener noreferrer">
+              View Dashboard
+            </a>
+          </Button>
+        </CardFooter>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>Sync &amp; Access</CardTitle>
