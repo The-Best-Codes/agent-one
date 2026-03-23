@@ -1,4 +1,4 @@
-import { ExternalLinkIcon, LogInIcon } from "lucide-react";
+import { IconExternalLink, IconUser } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
@@ -65,7 +65,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
             className="flex flex-row items-center justify-center gap-1 hover:underline"
           >
             Open Login Form Manually
-            <ExternalLinkIcon className="size-4" />
+            <IconExternalLink className="size-4" />
           </a>
         }
         action={
@@ -112,7 +112,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
   return (
     <StatusRow
       className={className}
-      icon={<LogInIcon className="text-muted-foreground size-5" />}
+      icon={<IconUser className="text-muted-foreground size-5" />}
       title="Not signed in"
       description="Sign in to synchronize your data"
       action={

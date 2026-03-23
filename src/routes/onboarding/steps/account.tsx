@@ -1,5 +1,5 @@
+import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
-import { ArrowLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -70,7 +70,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
               Finish Setup
             </Button>
             <Button variant="outline" onClick={() => handleViewChange("account")}>
-              <ArrowLeftIcon data-icon="inline-start" />
+              <IconArrowLeft data-icon="inline-start" />
               Back to account options
             </Button>
           </div>
@@ -106,7 +106,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
           {user && (
             <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
               Continue
-              <ChevronRightIcon data-icon="inline-end" />
+              <IconArrowRight data-icon="inline-end" />
             </Button>
           )}
 

@@ -1,12 +1,12 @@
-import type { ToolUIPart } from "ai";
 import {
-  CalendarDaysIcon,
-  CheckCircle2Icon,
-  ChevronDownIcon,
-  Loader2Icon,
-  XCircleIcon,
-  XIcon,
-} from "lucide-react";
+  IconCalendar,
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconLoader,
+  IconX,
+} from "@tabler/icons-react";
+import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
+            <IconCalendar className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to check the date and time
             </span>
@@ -56,7 +56,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
                 })
               }
             >
-              <XIcon data-icon="inline-start" />
+              <IconX data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -69,7 +69,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
                 })
               }
             >
-              <CheckCircle2Icon data-icon="inline-start" />
+              <IconCircleCheck data-icon="inline-start" />
               Approve
             </Button>
           </div>
@@ -79,9 +79,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     case "output-denied":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Date and time check denied
+            Time and date check denied
           </span>
         </div>
       );
@@ -90,9 +90,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+            <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
-          <span className="text-foreground text-sm font-bold">Checking date and time...</span>
+          <span className="text-foreground text-sm font-bold">Checking time and date...</span>
         </div>
       );
 
@@ -103,8 +103,8 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
-          <span className="max-w-2xl truncate">Checking date and time...</span>
+          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+          <span className="max-w-2xl truncate">Checking time and date...</span>
         </div>
       );
 
@@ -114,8 +114,8 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">Checked date and time ({output?.formatted})</span>
+          <IconCalendar className="text-foreground size-4 shrink-0" />
+          <span className="max-w-2xl truncate">Checked time and date ({output?.formatted})</span>
         </div>
       );
 
@@ -123,9 +123,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Date and time check cancelled
+              Time and date check cancelled
             </span>
           </div>
         );
@@ -147,13 +147,13 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <XCircleIcon
+                  <IconCircleX
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/date-time-accordion:scale-0 group-hover/date-time-accordion:opacity-0",
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/date-time-accordion:scale-100 group-hover/date-time-accordion:opacity-100",
                       isErrorAccordionOpen && "scale-100 opacity-100",
@@ -166,7 +166,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="text-destructive max-w-2xl truncate">
-                Error getting date and time
+                Error checking time and date
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
@@ -181,8 +181,8 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <CalendarDaysIcon className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Unknown dateTime tool state</span>
+          <IconCalendar className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">Time &amp; date accessed</span>
         </div>
       );
   }

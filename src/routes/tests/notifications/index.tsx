@@ -1,9 +1,9 @@
+import { IconArrowLeft } from "@tabler/icons-react";
 import {
   isPermissionGranted,
   requestPermission,
   sendNotification,
 } from "@tauri-apps/plugin-notification";
-import { ArrowLeftIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -76,7 +76,7 @@ export default function NotificationsTestRoute() {
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
-            <ArrowLeftIcon data-icon="inline-start" />
+            <IconArrowLeft data-icon="inline-start" />
             Back to Tests
           </Button>
           <h1 className="text-2xl font-bold">Notifications Test</h1>

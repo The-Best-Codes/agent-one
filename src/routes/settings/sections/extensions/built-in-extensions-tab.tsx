@@ -1,6 +1,6 @@
+import { IconRestore } from "@tabler/icons-react";
 import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
-import { RotateCcwIcon } from "lucide-react";
 import { useMemo } from "react";
 
 import {
@@ -116,7 +116,7 @@ export function BuiltInExtensionsTab({ query }: BuiltInExtensionsTabProps) {
           disabled={isToolConfigsDefault}
           aria-label="Reset to default"
         >
-          <RotateCcwIcon data-icon="inline-start" />
+          <IconRestore data-icon="inline-start" />
         </Button>
       </div>
 

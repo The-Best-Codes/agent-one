@@ -1,13 +1,13 @@
-import type { ToolUIPart } from "ai";
 import {
-  CheckCircle2Icon,
-  ChevronDownIcon,
-  FileTextIcon,
-  GlobeIcon,
-  Loader2Icon,
-  XCircleIcon,
-  XIcon,
-} from "lucide-react";
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconFileText,
+  IconLoader,
+  IconWorld,
+  IconX,
+} from "@tabler/icons-react";
+import type { ToolUIPart } from "ai";
 import { memo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,7 @@ const UrlResultDisplay = memo(
     if (!result.success) {
       return (
         <div className="flex items-center gap-1">
-          <XCircleIcon className="text-destructive size-4 shrink-0" />
+          <IconCircleX className="text-destructive size-4 shrink-0" />
           <span className="text-destructive max-w-2xl truncate text-sm font-bold">
             Failed to browse{" "}
             <a
@@ -95,7 +95,7 @@ const UrlResultDisplay = memo(
 
     return (
       <div className="flex items-center gap-1">
-        <GlobeIcon className="text-foreground size-4 shrink-0" />
+        <IconWorld className="text-foreground size-4 shrink-0" />
         <span className="text-foreground max-w-2xl truncate text-sm font-bold">
           Browsed{" "}
           <a
@@ -112,7 +112,7 @@ const UrlResultDisplay = memo(
             {isRawContent && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <FileTextIcon className="text-muted-foreground size-4 shrink-0" />
+                  <IconFileText className="text-muted-foreground size-4 shrink-0" />
                 </TooltipTrigger>
                 <TooltipContent>Fetched raw content</TooltipContent>
               </Tooltip>
@@ -156,7 +156,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <GlobeIcon className="text-foreground size-4 shrink-0" />
+            <IconWorld className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to browse
               {urlCount === 1 ? (
@@ -191,7 +191,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 })
               }
             >
-              <XIcon data-icon="inline-start" />
+              <IconX data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -204,7 +204,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 })
               }
             >
-              <CheckCircle2Icon data-icon="inline-start" />
+              <IconCircleCheck data-icon="inline-start" />
               Approve
             </Button>
           </div>
@@ -214,7 +214,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
     case "output-denied":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+          <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
             {urlCount === 1 ? (
               <>
@@ -244,7 +244,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+            <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           </div>
           <span className="text-foreground text-sm font-bold">Browsing URLs...</span>
         </div>
@@ -258,7 +258,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <Loader2Icon className="text-foreground size-4 shrink-0 animate-spin" />
+          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
             {urlCount === 1 ? (
               <>
@@ -288,7 +288,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       if (!output?.success) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="text-destructive size-4 shrink-0" />
+            <IconCircleX className="text-destructive size-4 shrink-0" />
             <span className="text-destructive max-w-2xl truncate text-sm font-bold">
               Failed to browse URLs:{" "}
               <span className="text-destructive/80 font-normal">
@@ -325,13 +325,13 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <GlobeIcon
+                  <IconWorld
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
                       isMainAccordionOpen && "scale-100 opacity-100",
@@ -386,7 +386,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
 
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="text-muted-foreground size-4 shrink-0" />
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">{message}</span>
           </div>
         );
@@ -408,13 +408,13 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <XCircleIcon
+                  <IconCircleX
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
                       isErrorAccordionOpen && "scale-100 opacity-100",
@@ -443,10 +443,8 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <GlobeIcon className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">
-            Unknown getUrlContent tool state
-          </span>
+          <IconWorld className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">Web browsing accessed</span>
         </div>
       );
   }

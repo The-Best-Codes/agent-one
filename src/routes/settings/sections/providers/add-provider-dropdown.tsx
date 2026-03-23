@@ -1,4 +1,4 @@
-import { ChevronDownIcon, PlusIcon } from "lucide-react";
+import { IconChevronDown, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -32,12 +32,12 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
         <DropdownMenuTrigger asChild>
           <Button variant="outline">
             Add Provider
-            <ChevronDownIcon data-icon="inline-end" />
+            <IconChevronDown data-icon="inline-end" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-auto min-w-max">
           <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-            <PlusIcon data-icon="inline-start" />
+            <IconPlus data-icon="inline-start" />
             OpenAI Compatible
           </DropdownMenuItem>
         </DropdownMenuContent>

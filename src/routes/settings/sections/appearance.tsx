@@ -1,5 +1,5 @@
+import { IconCheck, IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { Check, RotateCcwIcon } from "lucide-react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -152,7 +152,7 @@ export default function AppearanceSection() {
                     className={cn("border-foreground rounded-md border-0", option.className)}
                     title={option.label}
                   >
-                    {colorTheme === option.value && <Check data-icon="inline-start" />}
+                    {colorTheme === option.value && <IconCheck data-icon="inline-start" />}
                   </Button>
                 ))}
               </div>
@@ -284,7 +284,7 @@ export default function AppearanceSection() {
                 disabled={isMarkdownHighlightingDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function AppearanceSection() {
                 disabled={isInputStyleDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>

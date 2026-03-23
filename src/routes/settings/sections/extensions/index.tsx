@@ -1,6 +1,6 @@
+import { IconFilter, IconPlus, IconSearch } from "@tabler/icons-react";
 import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
-import { FilterIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -281,7 +281,7 @@ export default function ExtensionsSection() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="group/extensions-search-input relative flex-1">
-              <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
+              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -306,7 +306,7 @@ export default function ExtensionsSection() {
                     disabled={isTransportFilterDisabled}
                     aria-label="Filter by connection"
                   >
-                    <FilterIcon data-icon="inline-start" />
+                    <IconFilter data-icon="inline-start" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
@@ -346,7 +346,7 @@ export default function ExtensionsSection() {
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-sm font-medium">Custom Extensions</h3>
               <Button size="sm" onClick={() => setShowAddDialog(true)}>
-                <PlusIcon data-icon="inline-start" />
+                <IconPlus data-icon="inline-start" />
                 Add Custom
               </Button>
             </div>

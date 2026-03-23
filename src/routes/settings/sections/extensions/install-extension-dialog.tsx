@@ -1,4 +1,4 @@
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { IconEye, IconEyeClosed } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 
 import {
@@ -63,9 +63,9 @@ function InstallFieldInput({
             title={showSecret ? "Hide value" : "Show value"}
           >
             {showSecret ? (
-              <EyeOffIcon data-icon="inline-start" />
+              <IconEyeClosed data-icon="inline-start" />
             ) : (
-              <EyeIcon data-icon="inline-start" />
+              <IconEye data-icon="inline-start" />
             )}
           </Button>
         ) : null}

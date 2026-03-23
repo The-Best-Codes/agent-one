@@ -1,5 +1,5 @@
+import { IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { Trash2Icon } from "lucide-react";
 import { useState } from "react";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
@@ -118,7 +118,7 @@ export function CustomProviderListItem({
               onClick={() => setDeleteDialogOpen(true)}
               className="w-fit"
             >
-              <Trash2Icon data-icon="inline-start" />
+              <IconTrash data-icon="inline-start" />
               Delete Provider
             </Button>
           </div>

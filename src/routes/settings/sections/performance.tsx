@@ -1,5 +1,5 @@
+import { IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { RotateCcwIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +59,7 @@ export default function PerformanceSection() {
                 disabled={isMaxMessageLengthDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function PerformanceSection() {
                 disabled={isMaxCodeblockCharsDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function PerformanceSection() {
                 disabled={isMaxToolResultCharsDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function PerformanceSection() {
                 disabled={isMcpParallelLoadLimitDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>

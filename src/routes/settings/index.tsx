@@ -1,5 +1,5 @@
+import { IconArrowLeft, IconList } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { ArrowLeftIcon, ListIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
@@ -73,13 +73,13 @@ export default function SettingsRoute() {
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
           <Button variant="outline" size="sm" onClick={handleNavigateBack}>
-            <ArrowLeftIcon data-icon="inline-start" />
+            <IconArrowLeft data-icon="inline-start" />
             Back
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Open settings menu">
-                <ListIcon />
+                <IconList />
               </Button>
             </DrawerTrigger>
             <DrawerContent>
@@ -105,7 +105,7 @@ export default function SettingsRoute() {
             <div className="flex flex-col gap-2">
               <div className="mb-2">
                 <Button variant="outline" onClick={handleNavigateBack} className="w-full">
-                  <ArrowLeftIcon data-icon="inline-start" />
+                  <IconArrowLeft data-icon="inline-start" />
                   Back to Chat
                 </Button>
               </div>

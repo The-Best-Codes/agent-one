@@ -1,4 +1,4 @@
-import { Loader2Icon } from "lucide-react";
+import { IconLoader } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
@@ -66,7 +66,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
         <div className="flex h-full w-full max-w-3xl flex-1 flex-col">
           {isChatLoading && showSpinner ? (
             <div className="flex flex-1 items-center justify-center">
-              <Loader2Icon className="text-muted-foreground size-8 animate-spin" />
+              <IconLoader className="text-muted-foreground size-8 animate-spin" />
             </div>
           ) : (
             <AutoScrollContainer

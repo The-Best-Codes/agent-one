@@ -1,6 +1,6 @@
 "use client";
+import { IconAlertTriangle, IconChevronDown, IconRefresh } from "@tabler/icons-react";
 import dedent from "dedent";
-import { ChevronDownIcon, RefreshCwIcon, TriangleAlertIcon } from "lucide-react";
 import React from "react";
 
 import { CopyButton } from "@/components/a1/copy-button";
@@ -81,7 +81,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-destructive flex items-center gap-2 text-xl">
-                    <TriangleAlertIcon />
+                    <IconAlertTriangle />
                     Something went wrong
                   </CardTitle>
                   <CardDescription>An error occurred within the main application.</CardDescription>
@@ -112,7 +112,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               >
                 <AccordionItem className="p-0" value="details">
                   <AccordionTrigger
-                    icon={<ChevronDownIcon className="size-4" data-icon="inline-end" />}
+                    icon={<IconChevronDown className="size-4" data-icon="inline-end" />}
                     shouldRotateIcon
                     className="flex justify-between p-2 px-1"
                   >
@@ -132,7 +132,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                   Try Again
                 </Button>
                 <Button onClick={this.handleRefresh}>
-                  <RefreshCwIcon data-icon="inline-start" />
+                  <IconRefresh data-icon="inline-start" />
                   Reload App
                 </Button>
               </div>

@@ -1,5 +1,5 @@
+import { IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { RotateCcwIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -121,7 +121,7 @@ export default function ChatsSection() {
                 disabled={isMarkdownRenderingDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function ChatsSection() {
                 disabled={isNotificationSettingDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function ChatsSection() {
                 disabled={isShowMessageActionRowDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function ChatsSection() {
                 disabled={isSubmitKeyDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -259,7 +259,7 @@ export default function ChatsSection() {
                 disabled={isRegenerateOnSaveDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -286,7 +286,7 @@ export default function ChatsSection() {
                 disabled={isAlwaysShowStopButtonDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -311,7 +311,7 @@ export default function ChatsSection() {
                 disabled={isShowChatStatusIndicatorDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -343,7 +343,7 @@ export default function ChatsSection() {
                 disabled={isSmoothStreamDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -368,7 +368,7 @@ export default function ChatsSection() {
                 disabled={isExperimentalThrottleEnabledDefault}
                 aria-label="Reset to default"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
               </Button>
             </div>
           </div>
@@ -400,7 +400,7 @@ export default function ChatsSection() {
                   disabled={isExperimentalThrottleValueDefault}
                   aria-label="Reset to default"
                 >
-                  <RotateCcwIcon data-icon="inline-start" />
+                  <IconRestore data-icon="inline-start" />
                 </Button>
               </div>
             </div>
@@ -419,7 +419,7 @@ export default function ChatsSection() {
               disabled={isTitleGenerationDefault}
               aria-label="Reset all title settings to default"
             >
-              <RotateCcwIcon data-icon="inline-start" />
+              <IconRestore data-icon="inline-start" />
             </Button>
           </div>
         </CardHeader>
