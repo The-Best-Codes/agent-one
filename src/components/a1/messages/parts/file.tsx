@@ -1,5 +1,5 @@
+import { IconFile, IconFileText, IconFileTypePdf, IconPolaroid } from "@tabler/icons-react";
 import type { FileUIPart } from "ai";
-import { FileIcon, FileImageIcon, FileTextIcon } from "lucide-react";
 
 export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
   const isImage = file.mediaType?.startsWith("image/");
@@ -21,7 +21,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <FileImageIcon />
+              <IconPolaroid />
               <span className="truncate">{file.filename}</span>
             </div>
           </div>
@@ -42,7 +42,7 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
         {file.filename && (
           <div className="bg-background border-t p-2">
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <FileIcon />
+              <IconFileTypePdf />
               <span className="truncate">{file.filename} &middot; PDF</span>
             </div>
           </div>
@@ -52,8 +52,8 @@ export const MessagePartFile = ({ file }: { file: FileUIPart }) => {
   }
 
   const getFileIcon = () => {
-    if (isText) return <FileTextIcon />;
-    return <FileIcon className="text-muted-foreground" />;
+    if (isText) return <IconFileText />;
+    return <IconFile className="text-muted-foreground" />;
   };
 
   const getFileTypeLabel = () => {

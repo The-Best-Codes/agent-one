@@ -1,6 +1,12 @@
+import {
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconTool,
+  IconX,
+} from "@tabler/icons-react";
 import type { DynamicToolUIPart } from "ai";
 import { useAtomValue } from "jotai";
-import { CheckCircle2Icon, ChevronDownIcon, WrenchIcon, XCircleIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
@@ -51,7 +57,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <WrenchIcon className="text-foreground size-4" />
+            <IconTool className="text-foreground size-4" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to run "{toolName}" tool
             </span>
@@ -85,7 +91,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                 })
               }
             >
-              <XIcon data-icon="inline-start" />
+              <IconX data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -98,7 +104,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                 })
               }
             >
-              <CheckCircle2Icon data-icon="inline-start" />
+              <IconCircleCheck data-icon="inline-start" />
               Approve
             </Button>
           </div>
@@ -109,7 +115,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
     case "output-denied": {
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground size-4" />
+          <IconCircleX className="text-muted-foreground size-4" />
           <span className="text-muted-foreground text-sm font-bold">"{toolName}" tool denied</span>
         </div>
       );
@@ -160,13 +166,13 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               <AccordionTrigger
                 icon={
                   <div className="relative">
-                    <XCircleIcon
+                    <IconCircleX
                       className={cn(
                         "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-error-accordion:scale-0 group-hover/dynamic-tool-error-accordion:opacity-0",
                         isErrorAccordionOpen && "scale-0 opacity-0",
                       )}
                     />
-                    <ChevronDownIcon
+                    <IconChevronDown
                       className={cn(
                         "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-error-accordion:scale-100 group-hover/dynamic-tool-error-accordion:opacity-100",
                         isErrorAccordionOpen && "scale-100 opacity-100",
@@ -213,13 +219,13 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <WrenchIcon
+                  <IconTool
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-accordion:scale-0 group-hover/dynamic-tool-accordion:opacity-0",
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-accordion:scale-100 group-hover/dynamic-tool-accordion:opacity-100",
                       isMainAccordionOpen && "scale-100 opacity-100",
@@ -280,7 +286,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-1">
-            <XCircleIcon className="text-muted-foreground size-4" />
+            <IconCircleX className="text-muted-foreground size-4" />
             <span className="text-muted-foreground text-sm font-bold">
               "{toolName}" tool cancelled
             </span>
@@ -304,13 +310,13 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <XCircleIcon
+                  <IconCircleX
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-error-accordion:scale-0 group-hover/dynamic-tool-error-accordion:opacity-0",
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-error-accordion:scale-100 group-hover/dynamic-tool-error-accordion:opacity-100",
                       isErrorAccordionOpen && "scale-100 opacity-100",
@@ -337,7 +343,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
     default: {
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-destructive size-4" />
+          <IconCircleX className="text-destructive size-4" />
           <span className="text-destructive text-sm font-bold">
             Unknown "{toolName}" tool state
           </span>

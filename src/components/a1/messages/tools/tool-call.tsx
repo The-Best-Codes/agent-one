@@ -1,5 +1,11 @@
+import {
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconTool,
+  IconX,
+} from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
-import { CheckCircle2Icon, ChevronDownIcon, WrenchIcon, XCircleIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -30,7 +36,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <WrenchIcon className="text-foreground size-4" />
+            <IconTool className="text-foreground size-4" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to run tool "{toolName}"
             </span>
@@ -46,7 +52,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
                 })
               }
             >
-              <XIcon data-icon="inline-start" />
+              <IconX data-icon="inline-start" />
               Deny
             </Button>
             <Button
@@ -59,7 +65,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
                 })
               }
             >
-              <CheckCircle2Icon data-icon="inline-start" />
+              <IconCircleCheck data-icon="inline-start" />
               Approve
             </Button>
           </div>
@@ -69,7 +75,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     case "output-denied":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <XCircleIcon className="text-muted-foreground size-4" />
+          <IconCircleX className="text-muted-foreground size-4" />
           <span className="text-muted-foreground text-sm font-bold">Tool "{toolName}" denied</span>
         </div>
       );
@@ -115,7 +121,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <AccordionItem value={callId}>
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
-                <XCircleIcon className="text-destructive" />
+                <IconCircleX className="text-destructive" />
                 <span className="max-w-2xl truncate">Unknown tool "{toolName}" finished</span>
               </p>
             </AccordionTrigger>
@@ -137,7 +143,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-2">
-            <XCircleIcon className="text-muted-foreground size-4" />
+            <IconCircleX className="text-muted-foreground size-4" />
             <span className="text-muted-foreground text-sm font-bold">
               Tool "{toolName}" cancelled
             </span>
@@ -161,13 +167,13 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <XCircleIcon
+                  <IconCircleX
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/tool-call-accordion:scale-0 group-hover/tool-call-accordion:opacity-0",
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
-                  <ChevronDownIcon
+                  <IconChevronDown
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/tool-call-accordion:scale-100 group-hover/tool-call-accordion:opacity-100",
                       isErrorAccordionOpen && "scale-100 opacity-100",
@@ -195,7 +201,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-2">
-          <XCircleIcon className="text-destructive size-4" />
+          <IconCircleX className="text-destructive size-4" />
           <span className="text-destructive text-sm font-bold">Unknown tool "{toolName}"</span>
         </div>
       );

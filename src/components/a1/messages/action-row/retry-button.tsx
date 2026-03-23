@@ -1,4 +1,4 @@
-import { RefreshCcwIcon } from "lucide-react";
+import { IconRefresh } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps
       aria-label="Regenerate response"
       {...props}
     >
-      <RefreshCcwIcon data-icon="inline-start" />
+      <IconRefresh data-icon="inline-start" />
     </Button>
   );
 };

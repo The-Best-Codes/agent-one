@@ -1,4 +1,4 @@
-import { SplitIcon } from "lucide-react";
+import { IconArrowsSplit } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProp
       aria-label="Branch conversation from this message"
       {...props}
     >
-      <SplitIcon data-icon="inline-start" />
+      <IconArrowsSplit data-icon="inline-start" />
     </Button>
   );
 };

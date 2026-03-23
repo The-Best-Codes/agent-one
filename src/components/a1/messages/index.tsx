@@ -1,6 +1,6 @@
+import { IconCheck, IconChevronDown, IconX } from "@tabler/icons-react";
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
 import { useAtom } from "jotai";
-import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import { memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -217,7 +217,7 @@ const MessagePartsInternal = ({
             className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
             onClick={handleCancel}
           >
-            <XIcon data-icon="inline-start" />
+            <IconX data-icon="inline-start" />
             Cancel
           </Button>
           {message.role === "user" ? (
@@ -228,13 +228,13 @@ const MessagePartsInternal = ({
                 className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
                 onClick={() => handleSave(regenerateOnSave)}
               >
-                <CheckIcon data-icon="inline-start" />
+                <IconCheck data-icon="inline-start" />
                 Save
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" variant="default" className="h-6 gap-1 px-1 has-[>svg]:px-1.5">
-                    <ChevronDownIcon data-icon="inline-start" />
+                    <IconChevronDown data-icon="inline-start" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
@@ -261,7 +261,7 @@ const MessagePartsInternal = ({
               className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
               onClick={() => handleSave(false)}
             >
-              <CheckIcon data-icon="inline-start" />
+              <IconCheck data-icon="inline-start" />
               Save
             </Button>
           )}

@@ -1,4 +1,4 @@
-import { PencilIcon } from "lucide-react";
+import { IconEdit } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export const EditButton = ({ onEdit, className, ...props }: EditButtonProps) => 
       aria-label="Edit message"
       {...props}
     >
-      <PencilIcon data-icon="inline-start" />
+      <IconEdit data-icon="inline-start" />
     </Button>
   );
 };

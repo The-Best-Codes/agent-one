@@ -1,6 +1,6 @@
+import { IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
 import type { UIMessage } from "ai";
 import { useAtomValue } from "jotai";
-import { PlayIcon, SquareIcon } from "lucide-react";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { Button } from "@/components/ui/button";
@@ -67,9 +67,9 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
                 aria-label={isPreviewMode ? "Stop preview" : "Preview code"}
               >
                 {isPreviewMode ? (
-                  <SquareIcon data-icon="inline-start" />
+                  <IconPlayerStop data-icon="inline-start" />
                 ) : (
-                  <PlayIcon data-icon="inline-start" />
+                  <IconPlayerPlay data-icon="inline-start" />
                 )}
               </Button>
             )}

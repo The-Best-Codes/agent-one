@@ -1,5 +1,5 @@
+import { IconBrain, IconChevronDown, IconLoader } from "@tabler/icons-react";
 import type { ReasoningUIPart } from "ai";
-import { BrainIcon, ChevronDownIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -43,21 +43,21 @@ export const MessagePartReasoning = ({
           icon={
             <div className="relative">
               {isLoading ? (
-                <Loader2Icon
+                <IconLoader
                   className={cn(
                     "text-foreground absolute inset-0 size-4 shrink-0 animate-spin opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
                     isMainAccordionOpen && "scale-0 opacity-0",
                   )}
                 />
               ) : (
-                <BrainIcon
+                <IconBrain
                   className={cn(
                     "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
                     isMainAccordionOpen && "scale-0 opacity-0",
                   )}
                 />
               )}
-              <ChevronDownIcon
+              <IconChevronDown
                 className={cn(
                   "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-100 group-hover/reasoning-accordion:opacity-100",
                   isMainAccordionOpen && "scale-100 opacity-100",
