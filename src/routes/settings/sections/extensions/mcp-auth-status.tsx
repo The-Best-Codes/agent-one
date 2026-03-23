@@ -1,13 +1,13 @@
-import { useAtomValue } from "jotai";
 import {
-  CheckCircle2Icon,
-  InfoIcon,
-  KeyIcon,
-  LogInIcon,
-  LogOutIcon,
-  ShieldOffIcon,
-  XCircleIcon,
-} from "lucide-react";
+  IconCircleCheck,
+  IconCircleX,
+  IconInfoCircle,
+  IconKey,
+  IconLogin,
+  IconLogout,
+  IconShieldOff,
+} from "@tabler/icons-react";
+import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export function McpAuthStatus({
     return (
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
-          <InfoIcon className="text-foreground size-5" />
+          <IconInfoCircle className="text-foreground size-5" />
           <span className="text-foreground text-sm">Enable server to see auth status</span>
         </div>
       </div>
@@ -60,7 +60,7 @@ export function McpAuthStatus({
     return (
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
-          <ShieldOffIcon className="text-foreground size-5" />
+          <IconShieldOff className="text-foreground size-5" />
           <span className="text-foreground text-sm">No authorization required</span>
         </div>
       </div>
@@ -71,11 +71,11 @@ export function McpAuthStatus({
     return (
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
-          <KeyIcon className="text-foreground size-5" />
+          <IconKey className="text-foreground size-5" />
           <span className="text-foreground text-sm">Login available for full access</span>
         </div>
         <Button size="sm" onClick={handleLogin} disabled={loading}>
-          {loading ? <Spinner data-icon="inline-start" /> : <LogInIcon />}
+          {loading ? <Spinner data-icon="inline-start" /> : <IconLogin />}
           Login
         </Button>
       </div>
@@ -98,24 +98,24 @@ export function McpAuthStatus({
       <div className="flex items-center gap-2">
         {authState === "logged-in" ? (
           <>
-            <CheckCircle2Icon className="text-foreground size-5" />
+            <IconCircleCheck className="text-foreground size-5" />
             <span className="text-sm">Logged in</span>
           </>
         ) : (
           <>
-            <XCircleIcon className="text-foreground size-5" />
+            <IconCircleX className="text-foreground size-5" />
             <span className="text-foreground text-sm">Not logged in</span>
           </>
         )}
       </div>
       {authState === "logged-in" ? (
         <Button variant="outline" size="sm" onClick={handleLogout} disabled={loading}>
-          {loading ? <Spinner data-icon="inline-start" /> : <LogOutIcon />}
+          {loading ? <Spinner data-icon="inline-start" /> : <IconLogout />}
           Logout
         </Button>
       ) : (
         <Button size="sm" onClick={handleLogin} disabled={loading}>
-          {loading ? <Spinner data-icon="inline-start" /> : <LogInIcon />}
+          {loading ? <Spinner data-icon="inline-start" /> : <IconLogin />}
           Login
         </Button>
       )}

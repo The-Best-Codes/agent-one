@@ -1,12 +1,11 @@
 import {
-  AlertCircleIcon,
-  CheckCircle2Icon,
-  Download,
-  DownloadIcon,
-  RefreshCw,
-  RocketIcon,
-  ShieldCheckIcon,
-} from "lucide-react";
+  IconAlertCircle,
+  IconCircleCheck,
+  IconDownload,
+  IconRefresh,
+  IconRocket,
+  IconShieldCheck,
+} from "@tabler/icons-react";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,7 @@ export default function AboutSection() {
     switch (updateStatus) {
       case "idle":
         return {
-          icon: <ShieldCheckIcon className="text-muted-foreground size-5" />,
+          icon: <IconShieldCheck className="text-muted-foreground size-5" />,
           title: "Check for updates",
           description: "Stay up to date with the latest features and bug fixes",
         };
@@ -38,19 +37,19 @@ export default function AboutSection() {
         };
       case "up-to-date":
         return {
-          icon: <CheckCircle2Icon className="size-5" />,
+          icon: <IconCircleCheck className="size-5" />,
           title: "You're up to date",
           description: "AgentOne is running the latest version",
         };
       case "available":
         return {
-          icon: <RocketIcon className="text-primary size-5" />,
+          icon: <IconRocket className="text-primary size-5" />,
           title: `Update available: v${updateVersion}`,
           description: "A new version is ready to install",
         };
       case "downloading":
         return {
-          icon: <DownloadIcon className="text-primary size-5" />,
+          icon: <IconDownload className="text-primary size-5" />,
           title: "Downloading update...",
           description: `${Math.round(updateProgress)}% complete`,
         };
@@ -62,7 +61,7 @@ export default function AboutSection() {
         };
       case "error":
         return {
-          icon: <AlertCircleIcon className="text-destructive size-5" />,
+          icon: <IconAlertCircle className="text-destructive size-5" />,
           title: "Update failed",
           description: "Something went wrong while checking for updates",
         };
@@ -75,7 +74,7 @@ export default function AboutSection() {
       case "up-to-date":
         return (
           <Button onClick={checkForUpdates} variant="outline" size="sm">
-            <RefreshCw data-icon="inline-start" />
+            <IconRefresh data-icon="inline-start" />
             Check Now
           </Button>
         );
@@ -89,14 +88,14 @@ export default function AboutSection() {
       case "available":
         return (
           <Button onClick={downloadAndInstallUpdate} size="sm">
-            <Download data-icon="inline-start" />
+            <IconDownload data-icon="inline-start" />
             Download &amp; Install
           </Button>
         );
       case "error":
         return (
           <Button onClick={checkForUpdates} variant="outline" size="sm">
-            <RefreshCw data-icon="inline-start" />
+            <IconRefresh data-icon="inline-start" />
             Try Again
           </Button>
         );
@@ -124,7 +123,7 @@ export default function AboutSection() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
+                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-full">
                   {stateDisplay.icon}
                 </div>
                 <div>

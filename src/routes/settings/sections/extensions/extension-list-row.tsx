@@ -1,4 +1,4 @@
-import { ChevronRightIcon, ExternalLinkIcon, PackageIcon, Trash2Icon } from "lucide-react";
+import { IconChevronRight, IconExternalLink, IconPackage, IconTrash } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -61,7 +61,7 @@ export function ExtensionListRow({
               <Avatar className="size-6">
                 <AvatarImage src={iconUrl} alt={`${title} icon`} />
                 <AvatarFallback>
-                  <PackageIcon />
+                  <IconPackage />
                 </AvatarFallback>
               </Avatar>
               <span className="truncate">{title}</span>
@@ -78,7 +78,7 @@ export function ExtensionListRow({
                 className="inline-flex max-w-full min-w-0 cursor-pointer items-center gap-1 self-start text-xs text-blue-600 hover:underline dark:text-blue-400"
               >
                 <span className="truncate">{websiteUrl}</span>
-                <ExternalLinkIcon className="size-3.5 shrink-0" />
+                <IconExternalLink className="size-3.5 shrink-0" />
               </a>
             ) : null}
             <p className="text-muted-foreground line-clamp-2 text-xs">{description}</p>
@@ -98,7 +98,7 @@ export function ExtensionListRow({
         <div className="flex shrink-0 items-center gap-2">
           {installed ? (
             <Button size="sm" variant="destructive" onClick={onUninstall}>
-              <Trash2Icon data-icon="inline-start" />
+              <IconTrash data-icon="inline-start" />
               Uninstall
             </Button>
           ) : (
@@ -118,7 +118,7 @@ export function ExtensionListRow({
               className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
             >
               Advanced
-              <ChevronRightIcon className="text-muted-foreground" data-icon="inline-end" />
+              <IconChevronRight className="text-muted-foreground" data-icon="inline-end" />
             </Button>
           </DialogTrigger>
           <DialogContent>

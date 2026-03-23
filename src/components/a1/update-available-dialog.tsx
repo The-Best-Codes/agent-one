@@ -1,4 +1,4 @@
-import { ChevronDownIcon, ClockIcon, DownloadIcon, RocketIcon } from "lucide-react";
+import { IconChevronDown, IconClock, IconDownload, IconRocket } from "@tabler/icons-react";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export function UpdateAvailableDialog() {
       >
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <RocketIcon className="text-primary size-5" />
+            <IconRocket className="text-primary size-5" />
             <DialogTitle>Update Available</DialogTitle>
           </div>
           <DialogDescription>
@@ -43,13 +43,13 @@ export function UpdateAvailableDialog() {
         <DialogFooter>
           <ButtonGroup>
             <Button variant="outline" size="sm" onClick={() => handleRemind(1)}>
-              <ClockIcon data-icon="inline-start" />
+              <IconClock data-icon="inline-start" />
               Remind me in 1 day
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon-sm">
-                  <ChevronDownIcon />
+                  <IconChevronDown />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
@@ -72,7 +72,7 @@ export function UpdateAvailableDialog() {
               void navigate("/settings?tab=about");
             }}
           >
-            <DownloadIcon data-icon="inline-start" />
+            <IconDownload data-icon="inline-start" />
             Update
           </Button>
         </DialogFooter>

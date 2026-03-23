@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpenIcon, GraduationCapIcon, RocketIcon } from "lucide-react";
+import { IconBook, IconExternalLink, IconRocket, IconSchool } from "@tabler/icons-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +44,7 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           onClick={handleLaunch}
           disabled={isExiting}
         >
-          <RocketIcon data-icon="inline-start" />
+          <IconRocket data-icon="inline-start" />
           Launch AgentOne
         </Button>
         <Button
@@ -54,16 +54,16 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           disabled={true}
         >
           <Badge className="absolute -top-2 -right-2">Coming Soon!</Badge>
-          <GraduationCapIcon data-icon="inline-start" />
+          <IconSchool data-icon="inline-start" />
           Take the Tutorial
         </Button>
         <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
           <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
             <div className="flex items-center gap-2">
-              <BookOpenIcon data-icon="inline-start" />
+              <IconBook data-icon="inline-start" />
               Browse Documentation
             </div>
-            <ArrowUpRight className="size-5" />
+            <IconExternalLink className="size-5" />
           </a>
         </Button>
       </div>

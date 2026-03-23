@@ -1,6 +1,13 @@
+import {
+  IconDownload,
+  IconInbox,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+  IconX,
+} from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
-import { DownloadIcon, InboxIcon, PlusIcon, SearchIcon, TrashIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -177,7 +184,7 @@ export const VirtualizedChatList = ({
             className="w-full justify-start"
             variant="outline"
           >
-            <PlusIcon data-icon="inline-start" />
+            <IconPlus data-icon="inline-start" />
             New Chat
           </Button>
         )}
@@ -185,7 +192,7 @@ export const VirtualizedChatList = ({
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-1">
               <Button variant="ghost" size="icon" className="size-7" onClick={exitSelectionMode}>
-                <XIcon />
+                <IconX />
               </Button>
               <span className="text-muted-foreground text-sm">{selectedChatIds.size} selected</span>
             </div>
@@ -205,7 +212,7 @@ export const VirtualizedChatList = ({
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkExportModal(true)}
               >
-                <DownloadIcon data-icon="inline-start" />
+                <IconDownload data-icon="inline-start" />
               </Button>
               <Button
                 variant="destructive"
@@ -214,13 +221,13 @@ export const VirtualizedChatList = ({
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkDeleteModal(true)}
               >
-                <TrashIcon data-icon="inline-start" />
+                <IconTrash data-icon="inline-start" />
               </Button>
             </div>
           </div>
         ) : (
           <div className="group/sidebar-search-input relative">
-            <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
+            <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
             <Input
               ref={searchInputRef}
               placeholder="Search chats..."
@@ -242,12 +249,12 @@ export const VirtualizedChatList = ({
           </div>
         ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
-            <InboxIcon className="text-muted-foreground size-16" />
+            <IconInbox className="text-muted-foreground size-16" />
             <p className="max-w-full min-w-0 truncate">No chats yet</p>
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
-            <InboxIcon className="text-muted-foreground size-16" />
+            <IconInbox className="text-muted-foreground size-16" />
             <span className="max-w-full min-w-0 truncate">No results for "{searchQuery}"</span>
           </div>
         ) : (

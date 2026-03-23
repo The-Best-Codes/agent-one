@@ -1,15 +1,15 @@
-import { useVirtualizer } from "@tanstack/react-virtual";
 import {
-  CheckIcon,
-  CircleXIcon,
-  ImageIcon,
-  Loader2Icon,
-  PlusIcon,
-  SparklesIcon,
-  Trash2Icon,
-  WrenchIcon,
-  XIcon,
-} from "lucide-react";
+  IconCheck,
+  IconCircleX,
+  IconLoader,
+  IconPlus,
+  IconPolaroid,
+  IconSparkles,
+  IconTool,
+  IconTrash,
+  IconX,
+} from "@tabler/icons-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ export function ModelItemControls({
         title="Toggle tool support"
         aria-label="Toggle tool support"
       >
-        <WrenchIcon />
+        <IconTool />
       </Toggle>
 
       <Toggle
@@ -70,7 +70,7 @@ export function ModelItemControls({
         title="Toggle image support"
         aria-label="Toggle image support"
       >
-        <ImageIcon />
+        <IconPolaroid />
       </Toggle>
 
       <Button
@@ -79,7 +79,7 @@ export function ModelItemControls({
         className="size-8"
         onClick={() => onDelete(model.id)}
       >
-        <Trash2Icon />
+        <IconTrash />
       </Button>
     </div>
   );
@@ -159,7 +159,7 @@ export function AddModelForm({ onAdd, onCancel, existingIds }: AddModelFormProps
           onPressedChange={setSupportsTools}
           aria-label="Supports tools"
         >
-          {supportsTools ? <CheckIcon /> : <XIcon />}
+          {supportsTools ? <IconCheck /> : <IconX />}
           Supports Tools
         </Toggle>
 
@@ -170,7 +170,7 @@ export function AddModelForm({ onAdd, onCancel, existingIds }: AddModelFormProps
           onPressedChange={setSupportsImages}
           aria-label="Supports images"
         >
-          {supportsImages ? <CheckIcon /> : <XIcon />}
+          {supportsImages ? <IconCheck /> : <IconX />}
           Supports Images
         </Toggle>
       </div>
@@ -252,13 +252,13 @@ export function ModelList({ models, baseUrl, apiKey, headers, onChange }: ModelL
   const getFetchIcon = () => {
     switch (fetchState) {
       case "idle":
-        return <SparklesIcon />;
+        return <IconSparkles />;
       case "fetching":
-        return <Loader2Icon className="animate-spin" />;
+        return <IconLoader className="animate-spin" />;
       case "success":
-        return <CheckIcon />;
+        return <IconCheck />;
       case "error":
-        return <CircleXIcon />;
+        return <IconCircleX />;
     }
   };
 
@@ -286,7 +286,7 @@ export function ModelList({ models, baseUrl, apiKey, headers, onChange }: ModelL
             onClick={() => setIsAdding(true)}
             disabled={isAdding}
           >
-            <PlusIcon data-icon="inline-start" />
+            <IconPlus data-icon="inline-start" />
             Add
           </Button>
         </div>
