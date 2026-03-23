@@ -6,13 +6,12 @@ import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
@@ -211,56 +210,35 @@ const MessagePartsInternal = ({
         <div className="flex flex-col">{renderedParts}</div>
 
         <div className="mt-2 flex items-center justify-end gap-1.5">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
-            onClick={handleCancel}
-          >
+          <Button size="xs" variant="outline" onClick={handleCancel}>
             <IconX data-icon="inline-start" />
             Cancel
           </Button>
           {message.role === "user" ? (
-            <ButtonGroup className="flex items-center">
-              <Button
-                size="sm"
-                variant="default"
-                className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
-                onClick={() => handleSave(regenerateOnSave)}
-              >
+            <ButtonGroup>
+              <Button size="xs" variant="default" onClick={() => handleSave(regenerateOnSave)}>
                 <IconCheck data-icon="inline-start" />
                 Save
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="default" className="h-6 gap-1 px-1 has-[>svg]:px-1.5">
-                    <IconChevronDown data-icon="inline-start" />
+                  <Button size="icon-xs" variant="default" aria-label="More options">
+                    <IconChevronDown />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
-                  <div className="flex items-center gap-2 p-2">
-                    <Checkbox
-                      id="regenerate-on-save"
-                      checked={regenerateOnSave}
-                      onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
-                    />
-                    <Label
-                      htmlFor="regenerate-on-save"
-                      className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Regenerate when Saved
-                    </Label>
-                  </div>
+                  <DropdownMenuCheckboxItem
+                    id="regenerate-on-save"
+                    checked={regenerateOnSave}
+                    onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
+                  >
+                    Regenerate when Saved
+                  </DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </ButtonGroup>
           ) : (
-            <Button
-              size="sm"
-              variant="default"
-              className="h-6 gap-1 px-1 has-[>svg]:px-1.5"
-              onClick={() => handleSave(false)}
-            >
+            <Button size="xs" variant="default" onClick={() => handleSave(false)}>
               <IconCheck data-icon="inline-start" />
               Save
             </Button>
