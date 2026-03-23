@@ -1,4 +1,4 @@
-import { PlusIcon, RotateCcwIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import { IconDeviceFloppy, IconPlus, IconRestore, IconTrash } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -110,7 +110,7 @@ export function HttpHeadersEditor({
                 disabled={!canSave}
                 title="Save changes"
               >
-                <SaveIcon data-icon="inline-start" />
+                <IconDeviceFloppy data-icon="inline-start" />
                 Save
               </Button>
               <Button
@@ -120,13 +120,13 @@ export function HttpHeadersEditor({
                 onClick={handleRevert}
                 title="Revert changes"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
                 Revert
               </Button>
             </>
           )}
           <Button type="button" variant="outline" size="sm" onClick={addEntry}>
-            <PlusIcon data-icon="inline-start" />
+            <IconPlus data-icon="inline-start" />
             Add
           </Button>
         </div>
@@ -159,7 +159,7 @@ export function HttpHeadersEditor({
                     size="icon"
                     onClick={() => removeEntry(idx)}
                   >
-                    <Trash2Icon data-icon="inline-start" />
+                    <IconTrash data-icon="inline-start" />
                   </Button>
                 </div>
                 {isDupe && (

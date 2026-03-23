@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+// TODO: Remove this component and use secret-input.tsx instead (see other files that use secret-input.tsx)
 import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { Input } from "@/components/ui/input";

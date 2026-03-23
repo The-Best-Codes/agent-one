@@ -1,4 +1,4 @@
-import { RefreshCcwIcon } from "lucide-react";
+import { IconRefresh } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { useChatFunctions, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -38,7 +38,7 @@ export const MainInputIncompleteSection = ({ onRetry }: { onRetry?: () => void }
           variant="default"
           disabled={!hasAvailableModels}
         >
-          <RefreshCcwIcon data-icon="inline-start" />
+          <IconRefresh data-icon="inline-start" />
           Retry
         </Button>
       </div>

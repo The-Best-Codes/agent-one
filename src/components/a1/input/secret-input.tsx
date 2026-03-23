@@ -1,4 +1,4 @@
-import { EyeIcon, EyeOffIcon, RotateCcwIcon, SaveIcon } from "lucide-react";
+import { IconDeviceFloppy, IconEye, IconEyeClosed, IconRestore } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,11 @@ export function SecretInput({
         size="icon"
         title={showValue ? "Hide value" : "Show value"}
       >
-        {showValue ? <EyeOffIcon data-icon="inline-start" /> : <EyeIcon data-icon="inline-start" />}
+        {showValue ? (
+          <IconEyeClosed data-icon="inline-start" />
+        ) : (
+          <IconEye data-icon="inline-start" />
+        )}
       </Button>
       {showSaveCancel && (
         <>
@@ -77,7 +81,7 @@ export function SecretInput({
             size="icon"
             title="Save"
           >
-            <SaveIcon data-icon="inline-start" />
+            <IconDeviceFloppy data-icon="inline-start" />
           </Button>
           <Button
             type="button"
@@ -87,7 +91,7 @@ export function SecretInput({
             size="icon"
             title="Cancel changes"
           >
-            <RotateCcwIcon data-icon="inline-start" />
+            <IconRestore data-icon="inline-start" />
           </Button>
         </>
       )}

@@ -1,4 +1,4 @@
-import { KeyIcon } from "lucide-react";
+import { IconKey } from "@tabler/icons-react";
 import { Link, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export const MainInputNoModelSection = () => {
       <div className="flex flex-row items-center gap-2">
         <Button asChild variant="default">
           <Link to={settingsPath} data-icon="inline-start">
-            <KeyIcon data-icon="inline-start" />
+            <IconKey data-icon="inline-start" />
             Settings
           </Link>
         </Button>

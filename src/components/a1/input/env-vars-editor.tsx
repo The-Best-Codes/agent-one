@@ -1,4 +1,11 @@
-import { EyeIcon, EyeOffIcon, PlusIcon, RotateCcwIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import {
+  IconDeviceFloppy,
+  IconEye,
+  IconEyeClosed,
+  IconPlus,
+  IconRestore,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -133,7 +140,7 @@ export function EnvVarsEditor({
                 disabled={!canSave}
                 title="Save changes"
               >
-                <SaveIcon data-icon="inline-start" />
+                <IconDeviceFloppy data-icon="inline-start" />
                 Save
               </Button>
               <Button
@@ -143,13 +150,13 @@ export function EnvVarsEditor({
                 onClick={handleRevert}
                 title="Revert changes"
               >
-                <RotateCcwIcon data-icon="inline-start" />
+                <IconRestore data-icon="inline-start" />
                 Revert
               </Button>
             </>
           )}
           <Button type="button" variant="outline" size="sm" onClick={addEntry}>
-            <PlusIcon data-icon="inline-start" />
+            <IconPlus data-icon="inline-start" />
             Add
           </Button>
         </div>
@@ -187,9 +194,9 @@ export function EnvVarsEditor({
                     title={isVisible ? "Hide value" : "Show value"}
                   >
                     {isVisible ? (
-                      <EyeOffIcon data-icon="inline-start" />
+                      <IconEyeClosed data-icon="inline-start" />
                     ) : (
-                      <EyeIcon data-icon="inline-start" />
+                      <IconEye data-icon="inline-start" />
                     )}
                   </Button>
                   <Button
@@ -198,7 +205,7 @@ export function EnvVarsEditor({
                     size="icon"
                     onClick={() => removeEntry(idx)}
                   >
-                    <Trash2Icon data-icon="inline-start" />
+                    <IconTrash data-icon="inline-start" />
                   </Button>
                 </div>
                 {isDupe && (

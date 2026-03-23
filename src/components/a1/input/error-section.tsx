@@ -1,4 +1,4 @@
-import { RefreshCcwIcon, XIcon } from "lucide-react";
+import { IconRefresh, IconX } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -36,7 +36,7 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
               variant="destructive"
               disabled={!hasAvailableModels}
             >
-              <RefreshCcwIcon data-icon="inline-start" />
+              <IconRefresh data-icon="inline-start" />
               Retry
             </Button>
           </TooltipTrigger>
@@ -45,7 +45,7 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
           </TooltipContent>
         </Tooltip>
         <Button title="Ignore error" size="icon" onClick={() => clearError()} variant="outline">
-          <XIcon />
+          <IconX />
         </Button>
       </div>
     </div>
