@@ -1,3 +1,4 @@
+import { IconCreditCard, IconRocket } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
 
@@ -89,15 +90,19 @@ export default function AccountSection() {
           {!billingLoading && user && !billingError && !activeSubscription && (
             <Button size="sm" asChild>
               <a href={UPGRADE_URL} target="_blank" rel="noopener noreferrer">
-                Upgrade to Pro
+                <IconRocket data-icon="inline-start" />
+                <span>Upgrade your Plan</span>
               </a>
             </Button>
           )}
-          <Button variant="outline" size="sm" asChild>
-            <a href={BILLING_URL} target="_blank" rel="noopener noreferrer">
-              {activeSubscription ? "Manage Billing" : "View Billing"}
-            </a>
-          </Button>
+          {!billingLoading && user && !billingError && activeSubscription && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={BILLING_URL} target="_blank" rel="noopener noreferrer">
+                <IconCreditCard data-icon="inline-start" />
+                <span>Manage Billing</span>
+              </a>
+            </Button>
+          )}
         </CardFooter>
       </Card>
       <Card>
