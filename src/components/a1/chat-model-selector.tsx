@@ -1,6 +1,6 @@
+import { IconCheck, IconSelector } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
-import { CheckIcon, ChevronsUpDown } from "lucide-react";
 import { type FC, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -112,7 +112,7 @@ const ModelList: FC<ModelListProps> = ({
                   }}
                 >
                   <div className="flex w-full min-w-0 flex-1 items-center justify-center gap-1">
-                    {isSelected && <CheckIcon />}
+                    {isSelected && <IconCheck />}
                     <div className="scrollbar-size-xs w-full overflow-x-auto">
                       <span className="font-medium whitespace-nowrap">{model.name}</span>
                     </div>
@@ -271,14 +271,14 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           </div>
         </div>
       </div>
-      <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+      <IconSelector className="size-4 shrink-0 opacity-50" />
     </>
   ) : (
     <>
       <div className="min-w-0 flex-1">
         <span className="text-muted-foreground">No model selected</span>
       </div>
-      <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+      <IconSelector className="size-4 shrink-0 opacity-50" />
     </>
   );
 

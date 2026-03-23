@@ -1,5 +1,5 @@
+import { IconCopy, IconCopyCheck, IconCopyX } from "@tabler/icons-react";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { CopyCheckIcon, CopyIcon, CopyXIcon } from "lucide-react";
 import { type ComponentProps, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -60,13 +60,13 @@ export const CopyButton = ({
   const getButtonIcon = () => {
     switch (copyState) {
       case "idle":
-        return <CopyIcon />;
+        return <IconCopy />;
       case "copying":
-        return <CopyIcon />;
+        return <IconCopy />;
       case "success":
-        return <CopyCheckIcon />;
+        return <IconCopyCheck />;
       case "error":
-        return <CopyXIcon />;
+        return <IconCopyX />;
     }
   };
 

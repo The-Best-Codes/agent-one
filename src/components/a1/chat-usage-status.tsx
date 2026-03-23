@@ -1,6 +1,6 @@
 import NumberFlow from "@number-flow/react";
+import { IconChevronLeft } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -205,7 +205,7 @@ export const ChatUsageStatus = () => {
           data-is-collapsed={isCollapsed}
           className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-br-md px-0.5 transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none md:rounded-r-md md:data-[is-collapsed=true]:rounded-md"
         >
-          <ChevronLeft
+          <IconChevronLeft
             className={cn(
               "size-3.5 transition-transform duration-300 ease-in-out",
               isCollapsed && "rotate-180",

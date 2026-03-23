@@ -1,5 +1,5 @@
+import { IconAdjustments, IconInfoCircle, IconRestore } from "@tabler/icons-react";
 import debounce from "lodash.debounce";
-import { InfoIcon, RotateCcwIcon, Settings2Icon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,7 @@ const SliderConfig = ({
           <Label htmlFor={id}>{label}</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
               {tooltip}
@@ -91,7 +91,7 @@ const SliderConfig = ({
               title={`Reset ${label} config`}
               aria-label={`Reset ${label} config`}
             >
-              <RotateCcwIcon data-icon="inline-start" />
+              <IconRestore data-icon="inline-start" />
             </Button>
           )}
         </div>
@@ -232,7 +232,7 @@ export const ChatModelConfig = ({
           onClick={resetToDefaults}
           disabled={isAtDefaults}
         >
-          <RotateCcwIcon data-icon="inline-start" />
+          <IconRestore data-icon="inline-start" />
           <span className="sr-only">Reset all</span>
         </Button>
       </div>
@@ -264,7 +264,7 @@ export const ChatModelConfig = ({
           <Label htmlFor="topK">Top K</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
               Only sample from the top K options for each subsequent token. Used to remove "long
@@ -310,7 +310,7 @@ export const ChatModelConfig = ({
           <Label htmlFor="maxSteps">Max Steps</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
               Maximum number of reasoning/tool steps in one response. Leave empty for no step limit.
@@ -333,7 +333,7 @@ export const ChatModelConfig = ({
           <Label htmlFor="maxTokens">Max Tokens</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
               Maximum number of tokens (words/sub-words) in the model response. Leave empty to use
@@ -355,7 +355,7 @@ export const ChatModelConfig = ({
           <Label htmlFor="seed">Seed</Label>
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoIcon className="text-muted-foreground size-3 cursor-help" />
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </TooltipTrigger>
             <TooltipContent side="right" className="max-w-xs">
               Integer seed for random sampling. If set and supported by the model, calls will
@@ -382,7 +382,7 @@ export const ChatModelConfig = ({
       className={cn("relative", triggerClassName)}
       disabled={disabled}
     >
-      <Settings2Icon data-icon="inline-start" />
+      <IconAdjustments data-icon="inline-start" />
       {!isAtDefaults && (
         <span
           title="Model config has been modified"

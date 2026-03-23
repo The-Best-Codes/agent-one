@@ -2,9 +2,9 @@
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
+import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
-import { ArrowUpIcon, PaperclipIcon, SquareIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -519,7 +519,7 @@ export const MainChatInput = ({
                       {files?.length}
                     </Badge>
                   )}
-                  <PaperclipIcon />
+                  <IconPaperclip />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Attach files to your message</TooltipContent>
@@ -547,7 +547,7 @@ export const MainChatInput = ({
                     onClick={() => stop()}
                     aria-label="Stop response"
                   >
-                    <SquareIcon />
+                    <IconPlayerStopFilled />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Stop the current response</TooltipContent>
@@ -571,7 +571,7 @@ export const MainChatInput = ({
                     {status === "submitted" ? (
                       <Spinner data-icon="inline-start" />
                     ) : (
-                      <ArrowUpIcon />
+                      <IconArrowUp />
                     )}
                   </Button>
                 </TooltipTrigger>

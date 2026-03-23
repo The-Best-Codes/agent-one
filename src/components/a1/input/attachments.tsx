@@ -1,4 +1,4 @@
-import { FileIcon, MessageCircle, X } from "lucide-react";
+import { IconFile, IconMessageCircle, IconX } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -60,11 +60,11 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
               </div>
             ) : file.name.includes("_agent-one_chat") ? (
               <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
-                <MessageCircle className="text-muted-foreground" />
+                <IconMessageCircle className="text-muted-foreground" />
               </div>
             ) : (
               <div className="bg-muted/70 relative flex size-12 items-center justify-center rounded-md border">
-                <FileIcon className="text-muted-foreground" />
+                <IconFile className="text-muted-foreground" />
               </div>
             )}
             <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -91,7 +91,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
               className="size-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
               title="Remove file"
             >
-              <X data-icon="inline-start" />
+              <IconX data-icon="inline-start" />
             </Button>
           </div>
         ))}

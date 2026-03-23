@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown } from "lucide-react";
+import { IconChevronDown } from "@tabler/icons-react";
 import {
   forwardRef,
   type ReactNode,
@@ -189,7 +189,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
             tabIndex={buttonOffset >= BUTTON_HIDDEN_OFFSET ? -1 : 0}
             {...scrollButtonProps}
           >
-            {scrollButtonChildren || <ChevronDown data-testid="scroll-to-bottom-icon" />}
+            {scrollButtonChildren || <IconChevronDown data-testid="scroll-to-bottom-icon" />}
           </Button>
         </div>
       </div>
