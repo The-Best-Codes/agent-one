@@ -55,7 +55,7 @@ export const MessageActionRow = ({
               />
             </div>
           </TooltipTrigger>
-          <TooltipContent>Copy message</TooltipContent>
+          <TooltipContent side="bottom">Copy message</TooltipContent>
         </Tooltip>
 
         {onBranch && messageRole === "assistant" && (
@@ -65,7 +65,7 @@ export const MessageActionRow = ({
                 <BranchButton onBranch={onBranch} className="size-6" />
               </div>
             </TooltipTrigger>
-            <TooltipContent>Branch conversation</TooltipContent>
+            <TooltipContent side="bottom">Branch conversation</TooltipContent>
           </Tooltip>
         )}
         {messageRole === "assistant" && (
@@ -75,7 +75,7 @@ export const MessageActionRow = ({
                 <RetryButton messageId={messageId} className="size-6" />
               </div>
             </TooltipTrigger>
-            <TooltipContent>Regenerate response</TooltipContent>
+            <TooltipContent side="bottom">Regenerate response</TooltipContent>
           </Tooltip>
         )}
         {onEdit && (
@@ -85,7 +85,7 @@ export const MessageActionRow = ({
                 <EditButton onEdit={onEdit} className="size-6" />
               </div>
             </TooltipTrigger>
-            <TooltipContent>Edit message</TooltipContent>
+            <TooltipContent side="bottom">Edit message</TooltipContent>
           </Tooltip>
         )}
       </>
