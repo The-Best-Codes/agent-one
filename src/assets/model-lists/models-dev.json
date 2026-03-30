@@ -3,9 +3,9 @@
     "id": "agent-one",
     "name": "AgentOne",
     "models": {
-      "fast": {
-        "id": "agent-one-fast",
-        "name": "Fast",
+      "lite": {
+        "id": "agent-one-lite",
+        "name": "Lite",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -13112,6 +13112,25 @@
           "context": 400000,
           "input": 272000,
           "output": 128000
+        }
+      },
+      "qwen3.6-plus-free": {
+        "id": "qwen3.6-plus-free",
+        "name": "Qwen3.6 Plus Free",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 64000
         }
       },
       "gpt-5.3-codex-spark": {

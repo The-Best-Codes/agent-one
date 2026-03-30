@@ -17,9 +17,9 @@ const agentOneProvider = {
   id: "agent-one",
   name: "AgentOne",
   models: {
-    fast: {
-      id: "agent-one-fast",
-      name: "Fast",
+    lite: {
+      id: "agent-one-lite",
+      name: "Lite",
       tool_call: true,
       modalities: {
         output: ["text"],
