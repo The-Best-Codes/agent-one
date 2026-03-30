@@ -1,4 +1,4 @@
-import { IconCreditCard, IconRocket } from "@tabler/icons-react";
+import { IconCreditCard, IconExternalLink, IconRocket } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
 
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,8 +17,13 @@ import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
 
 const MAX_APPENDIX_CHARS = 2000;
-const BILLING_URL = "https://www.agent-one.dev/dashboard/billing";
+const DASHBOARD_URL = "https://www.agent-one.dev/dashboard";
+const BILLING_URL = `${DASHBOARD_URL}/billing`;
 const UPGRADE_URL = `${BILLING_URL}?upgrade=pro`;
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat().format(Math.round(value));
+}
 
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
@@ -45,6 +51,15 @@ export default function AccountSection() {
     ? new Date(activeSubscription.currentPeriodEnd).toLocaleDateString()
     : null;
 
+  const usageSummary = useMemo(() => {
+    const meters = customerState?.activeMeters;
+    if (!meters?.length) return null;
+    const credited = meters.reduce((sum, m) => sum + m.creditedUnits, 0);
+    const consumed = meters.reduce((sum, m) => sum + m.consumedUnits, 0);
+    const balance = meters.reduce((sum, m) => sum + m.balance, 0);
+    return { credited, consumed, remaining: Math.max(balance, 0) };
+  }, [customerState]);
+
   const handleAppendixChange = (value: string) => {
     setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
   };
@@ -53,7 +68,7 @@ export default function AccountSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Current Plan</CardTitle>
+          <CardTitle>Plan &amp; Usage</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {(isAuthLoading || billingLoading) && !customerState ? (
@@ -70,20 +85,47 @@ export default function AccountSection() {
             </div>
           ) : billingError ? (
             <p className="text-muted-foreground text-sm">{billingError}</p>
-          ) : activeSubscription ? (
-            <div className="flex flex-col gap-1">
-              <p className="font-medium">{currentPlanName}</p>
-              <p className="text-muted-foreground text-sm">
-                {renewalDate ? `Renews ${renewalDate}.` : "Your subscription is active."}
-              </p>
-            </div>
           ) : (
-            <div className="flex flex-col gap-1">
-              <p className="font-medium">Free</p>
-              <p className="text-muted-foreground text-sm">
-                Upgrade to Pro for higher limits and premium features.
-              </p>
-            </div>
+            <>
+              <div className="flex flex-col gap-1">
+                <p className="font-medium">{currentPlanName}</p>
+                {activeSubscription ? (
+                  <p className="text-muted-foreground text-sm">
+                    {renewalDate ? `Renews ${renewalDate}.` : "Your subscription is active."}
+                  </p>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    Upgrade to Pro for higher limits and premium features.
+                  </p>
+                )}
+              </div>
+              {usageSummary ? (
+                <>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Credits used</span>
+                    <span className="text-muted-foreground">
+                      {formatNumber(usageSummary.consumed)} / {formatNumber(usageSummary.credited)}
+                      {" · "}
+                      {usageSummary.credited > 0
+                        ? `${Math.round((usageSummary.consumed / usageSummary.credited) * 100)}%`
+                        : "0%"}
+                    </span>
+                  </div>
+                  <Progress
+                    value={
+                      usageSummary.credited > 0
+                        ? Math.min((usageSummary.consumed / usageSummary.credited) * 100, 100)
+                        : 0
+                    }
+                  />
+                  <p className="text-muted-foreground text-sm">
+                    {formatNumber(usageSummary.remaining)} credits remaining this period.
+                  </p>
+                </>
+              ) : (
+                <p className="text-muted-foreground text-sm">No active usage meters.</p>
+              )}
+            </>
           )}
         </CardContent>
         <CardFooter className="flex gap-2">
@@ -100,6 +142,14 @@ export default function AccountSection() {
               <a href={BILLING_URL} target="_blank" rel="noopener noreferrer">
                 <IconCreditCard data-icon="inline-start" />
                 <span>Manage Billing</span>
+              </a>
+            </Button>
+          )}
+          {!billingLoading && user && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
+                <IconExternalLink data-icon="inline-start" />
+                <span>Account Dashboard</span>
               </a>
             </Button>
           )}

@@ -25,8 +25,17 @@ export interface Subscription {
   };
 }
 
+export interface CustomerMeter {
+  id: string;
+  meterId: string;
+  consumedUnits: number;
+  creditedUnits: number;
+  balance: number;
+}
+
 export interface CustomerState {
   subscriptions?: Subscription[];
+  activeMeters?: CustomerMeter[];
 }
 
 export interface WebAuthContextType {
