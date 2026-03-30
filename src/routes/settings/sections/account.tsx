@@ -19,7 +19,7 @@ import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-ato
 const MAX_APPENDIX_CHARS = 2000;
 const DASHBOARD_URL = "https://www.agent-one.dev/dashboard";
 const BILLING_URL = `${DASHBOARD_URL}/billing`;
-const UPGRADE_URL = `${BILLING_URL}?upgrade=pro`;
+const UPGRADE_URL = `${BILLING_URL}?hint=upgrade`;
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat().format(Math.round(value));
