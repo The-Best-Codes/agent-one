@@ -54,7 +54,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
 const PREFERRED_MODELS_BY_PROVIDER: Record<ProviderId, string[]> = {
-  "agent-one": ["agent-one-balanced"],
+  "agent-one": ["agent-one-auto"],
   openrouter: ["openrouter-x-ai/grok-4.1-fast"],
   groq: ["groq-moonshotai/kimi-k2-instruct-0905"],
   google: ["google-gemini-2.5-flash"],

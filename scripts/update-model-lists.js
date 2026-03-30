@@ -18,16 +18,16 @@ const agentOneProvider = {
   name: "AgentOne",
   models: {
     fast: {
-      id: "fast",
+      id: "agent-one-fast",
       name: "Fast",
       tool_call: true,
       modalities: {
         output: ["text"],
       },
     },
-    balanced: {
-      id: "balanced",
-      name: "Balanced",
+    auto: {
+      id: "agent-one-auto",
+      name: "Auto",
       tool_call: true,
       modalities: {
         output: ["text"],
