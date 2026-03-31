@@ -233,20 +233,18 @@ pub async fn mcp_authenticate(
 
     let db_path = resolve_agent_db_path(&app)?;
     let cred_store = KeyringCredentialStore::new(server_id, db_path);
-    cred_store
-        .save(StoredCredentials {
-            client_id,
-            token_response,
-            granted_scopes: Vec::new(),
-            token_received_at: Some(
-                std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .map(|d| d.as_secs())
-                    .unwrap_or(0),
-            ),
-        })
-        .await
-        .map_err(|e| e.to_string())?;
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let creds: StoredCredentials = serde_json::from_value(serde_json::json!({
+        "client_id": client_id,
+        "token_response": token_response,
+        "granted_scopes": [],
+        "token_received_at": now,
+    }))
+    .map_err(|e| e.to_string())?;
+    cred_store.save(creds).await.map_err(|e| e.to_string())?;
 
     Ok("Authentication successful".to_string())
 }
