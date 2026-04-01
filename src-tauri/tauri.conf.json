@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "AgentOne",
-  "version": "0.0.8",
-  "identifier": "com.agent-one",
+  "version": "0.0.9",
+  "identifier": "dev.agent-one",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
