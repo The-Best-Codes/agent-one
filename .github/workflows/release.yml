@@ -77,3 +77,43 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
           updaterJsonPreferNsis: true
+
+      - name: Upload .deb artifact for snap build
+        if: matrix.platform == 'ubuntu-22.04'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: deb-artifact
+          path: src-tauri/target/release/bundle/deb/*.deb
+
+  build-snap:
+    needs: release-tauri
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Download .deb artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: deb-artifact
+
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+
+      - name: Build snap
+        run: |
+          mkdir -p snap
+          cp distribution/snap/snapcraft.yaml snap/snapcraft.yaml
+          snapcraft pack --destructive-mode --verbose
+
+      - name: Get release tag
+        id: get_tag
+        run: |
+          VERSION=$(cat .version 2>/dev/null || grep -oP '"version":\s*"\K[^"]+' src-tauri/tauri.conf.json)
+          echo "tag=agent-one-v${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload snap to release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ steps.get_tag.outputs.tag }}" *.snap --clobber

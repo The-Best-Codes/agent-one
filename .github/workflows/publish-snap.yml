@@ -1,0 +1,53 @@
+name: Publish to Snap Store
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. agent-one-v0.0.0)"
+        required: true
+        type: string
+
+jobs:
+  publish-snap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download .snap from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+
+          SNAP_ASSET=$(gh release view "$TAG" --repo ${{ github.repository }} --json assets --jq '.assets[].name' | grep '\.snap$' | head -n1)
+          if [ -z "$SNAP_ASSET" ]; then
+            echo "ERROR: No .snap asset found in release $TAG. Aborting."
+            exit 1
+          fi
+          echo "Found snap: $SNAP_ASSET"
+
+          gh release download "$TAG" \
+            --repo ${{ github.repository }} \
+            --pattern "$SNAP_ASSET" \
+            --dir .
+
+      - name: Install snapcraft
+        run: sudo snap install snapcraft --classic
+
+      - name: Upload snap to Snap Store
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: snapcraft upload --release=stable *.snap

@@ -74,6 +74,14 @@ You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) 
 
 See https://tauri.app/plugin/updater/.
 
+### Snapcraft
+
+Snapcraft updates should happen automatically. If the token expires, log in to snapcraft and run this command to get a new secret:
+
+```bash
+snapcraft export-login --snaps=agent-one --channels=stable -
+```
+
 ## Updating Dependencies
 
 - `bun update` and `cargo update` to update dependencies (safe)
