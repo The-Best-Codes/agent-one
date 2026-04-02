@@ -13,7 +13,7 @@ jobs:
       - name: Trigger ISR revalidation
         run: |
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-            "https://www.agent-one.dev/api/revalidate" \
+            "https://www.agent-one.dev/api/download/latest/revalidate" \
             -H "Authorization: Bearer ${{ secrets.REVALIDATION_SECRET }}")
 
           if [ "$RESPONSE" = "200" ]; then
