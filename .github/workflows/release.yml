@@ -5,9 +5,16 @@ on:
     branches:
       - release
   workflow_dispatch:
+    inputs:
+      snap-only:
+        description: "Skip full build and only rebuild the snap (requires a previous deb artifact or release .deb)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   release-tauri:
+    if: ${{ !inputs.snap-only }}
     permissions:
       contents: write
     strategy:
@@ -87,16 +94,40 @@ jobs:
 
   build-snap:
     needs: release-tauri
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Get version and release tag
+        id: get_tag
+        run: |
+          VERSION=$(head -n1 .version | tr -d '[:space:]')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=agent-one-v${VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Download .deb artifact
+        id: artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        continue-on-error: true
         with:
           name: deb-artifact
+
+      - name: Fall back to .deb from release
+        if: steps.artifact.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.get_tag.outputs.tag }}"
+          echo "Artifact not found, downloading .deb from release $TAG..."
+          DEB_ASSET=$(gh release view "$TAG" --repo ${{ github.repository }} --json assets --jq '.assets[].name' | grep '_amd64\.deb$' | grep -v '\.sig$' | head -n1)
+          if [ -z "$DEB_ASSET" ]; then
+            echo "ERROR: No amd64 .deb found in release $TAG"
+            exit 1
+          fi
+          gh release download "$TAG" --repo ${{ github.repository }} --pattern "$DEB_ASSET" --dir .
 
       - name: Install snapcraft
         run: sudo snap install snapcraft --classic
@@ -106,12 +137,6 @@ jobs:
           mkdir -p snap
           cp distribution/snap/snapcraft.yaml snap/snapcraft.yaml
           sudo snapcraft pack --destructive-mode --verbose
-
-      - name: Get release tag
-        id: get_tag
-        run: |
-          VERSION=$(cat .version 2>/dev/null || grep -oP '"version":\s*"\K[^"]+' src-tauri/tauri.conf.json)
-          echo "tag=agent-one-v${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Upload snap to release assets
         env:
