@@ -205,9 +205,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
       {isDesktop && (
         <aside
           className={cn(
-            "bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width] duration-200",
+            "bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width,padding] duration-200",
             isSidebarSmall
-              ? "pointer-events-none w-0 -translate-x-full opacity-0"
+              ? "pointer-events-none w-0 p-0 border-0 -translate-x-full opacity-0"
               : "w-64 translate-x-0 opacity-100",
             className,
           )}
