@@ -15,7 +15,7 @@ layout:
 apps:
   agent-one:
     command: usr/bin/agent-one
-    desktop: usr/share/applications/agent-one.desktop
+    desktop: usr/share/applications/AgentOne.desktop
     extensions: [gnome]
     plugs:
       - network
@@ -49,11 +49,16 @@ parts:
     source: .
     override-build: |
       set -eu
-      # The .deb is placed in the source dir by the CI workflow before running snapcraft
-      dpkg -x *.deb $SNAPCRAFT_PART_INSTALL/
+      # Find the .deb - CI places it in the source root, local builds put it under src-tauri/target
+      DEB_FILE=$(find . -name '*.deb' -print -quit)
+      if [ -z "$DEB_FILE" ]; then
+        echo "ERROR: No .deb file found" >&2
+        exit 1
+      fi
+      dpkg -x "$DEB_FILE" $SNAPCRAFT_PART_INSTALL/
       # Fix desktop file icon path for snap
       sed -i -e "s|Icon=agent-one|Icon=/usr/share/icons/hicolor/32x32/apps/agent-one.png|g" \
-        $SNAPCRAFT_PART_INSTALL/usr/share/applications/agent-one.desktop 2>/dev/null || true
+        $SNAPCRAFT_PART_INSTALL/usr/share/applications/AgentOne.desktop 2>/dev/null || true
     stage-packages:
       - libwebkit2gtk-4.1-0
       - libayatana-appindicator3-1
