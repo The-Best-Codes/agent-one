@@ -22,7 +22,7 @@ const BILLING_URL = `${DASHBOARD_URL}/billing`;
 const UPGRADE_URL = `${BILLING_URL}?hint=upgrade`;
 
 function formatNumber(value: number) {
-  return new Intl.NumberFormat().format(Math.round(value));
+  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(value);
 }
 
 export default function AccountSection() {
@@ -104,10 +104,8 @@ export default function AccountSection() {
                   <div className="flex items-center justify-between text-sm">
                     <span>Credits used</span>
                     <span className="text-muted-foreground">
-                      {formatNumber(usageSummary.consumed)} / {formatNumber(usageSummary.credited)}
-                      {" · "}
                       {usageSummary.credited > 0
-                        ? `${Math.round((usageSummary.consumed / usageSummary.credited) * 100)}%`
+                        ? `${formatNumber((usageSummary.consumed / usageSummary.credited) * 100)}%`
                         : "0%"}
                     </span>
                   </div>
