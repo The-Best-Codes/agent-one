@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -100,26 +101,27 @@ export default function AccountSection() {
                 )}
               </div>
               {usageSummary ? (
-                <>
-                  <div className="flex items-center justify-between text-sm">
+                <Field>
+                  <FieldLabel htmlFor="credits-used">
                     <span>Credits used</span>
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground ml-auto">
                       {usageSummary.credited > 0
                         ? `${formatNumber((usageSummary.consumed / usageSummary.credited) * 100)}%`
                         : "0%"}
                     </span>
-                  </div>
+                  </FieldLabel>
                   <Progress
+                    id="credits-used"
                     value={
                       usageSummary.credited > 0
                         ? Math.min((usageSummary.consumed / usageSummary.credited) * 100, 100)
                         : 0
                     }
                   />
-                  <p className="text-muted-foreground text-sm">
+                  <FieldDescription>
                     {formatNumber(usageSummary.remaining)} credits remaining this period.
-                  </p>
-                </>
+                  </FieldDescription>
+                </Field>
               ) : (
                 <p className="text-muted-foreground text-sm">No active usage meters.</p>
               )}
