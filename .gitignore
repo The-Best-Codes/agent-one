@@ -47,4 +47,5 @@ playwright-report/
 tsconfig.tsbuildinfo
 tsconfig.node.tsbuildinfo
 
+# snapcraft
 *.snap

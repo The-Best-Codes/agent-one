@@ -76,12 +76,12 @@ jobs:
           SHA256="${{ steps.checksum.outputs.sha256 }}"
 
           mkdir -p /tmp/aur
-          cp "aur/agent-one-bin.install" /tmp/aur/agent-one-bin.install
+          cp "distribution/aur/agent-one-bin.install" /tmp/aur/agent-one-bin.install
 
           sed \
             -e "s/^pkgver=.*/pkgver=${VERSION}/" \
             -e "s/sha256sums_x86_64=('SKIP')/sha256sums_x86_64=('${SHA256}')/" \
-            aur/PKGBUILD > /tmp/aur/PKGBUILD
+            distribution/aur/PKGBUILD > /tmp/aur/PKGBUILD
 
           echo "Rendered PKGBUILD:"
           cat /tmp/aur/PKGBUILD
@@ -132,7 +132,7 @@ jobs:
           git diff --cached --stat
 
           if git diff --cached --quiet; then
-            echo "No changes to commit — AUR is already up to date."
+            echo "No changes to commit. AUR is already up to date."
           else
             git commit -m "Update to v${VERSION}"
             git push
