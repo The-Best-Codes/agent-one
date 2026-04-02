@@ -1,0 +1,121 @@
+name: Mirror Release to Public Repo
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Source release tag to mirror (e.g. agent-one-v0.0.0)"
+        required: true
+        type: string
+
+jobs:
+  mirror-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      SOURCE_REPO: The-Best-Codes/agent-one
+      TARGET_REPO: AgentOne-Dev/agent-one-public
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download source release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          mkdir -p /tmp/release-assets
+
+          echo "Fetching release info for $TAG..."
+          ASSET_COUNT=$(gh release view "$TAG" --repo "$SOURCE_REPO" --json assets --jq '.assets | length')
+          echo "Found $ASSET_COUNT asset(s)"
+
+          if [ "$ASSET_COUNT" -eq 0 ]; then
+            echo "ERROR: No assets found in release $TAG"
+            exit 1
+          fi
+
+          gh release download "$TAG" --repo "$SOURCE_REPO" --dir /tmp/release-assets --clobber
+          echo "Downloaded assets:"
+          ls -lh /tmp/release-assets/
+
+      - name: Rewrite latest.json repo references
+        run: |
+          if [ -f /tmp/release-assets/latest.json ]; then
+            echo "Rewriting repo references in latest.json..."
+            sed -i "s|$SOURCE_REPO|$TARGET_REPO|g" /tmp/release-assets/latest.json
+            echo "Updated latest.json:"
+            cat /tmp/release-assets/latest.json
+          else
+            echo "No latest.json found, skipping rewrite"
+          fi
+
+      - name: Fetch source release metadata
+        id: meta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          gh release view "$TAG" --repo "$SOURCE_REPO" --json name,body,isPrerelease > /tmp/release-meta.json
+
+          TITLE=$(jq -r '.name // empty' /tmp/release-meta.json)
+          IS_PRERELEASE=$(jq -r '.isPrerelease' /tmp/release-meta.json)
+
+          # Store body in a file to handle multi-line content
+          jq -r '.body // empty' /tmp/release-meta.json > /tmp/release-notes.md
+
+          echo "title=${TITLE}" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${IS_PRERELEASE}" >> "$GITHUB_OUTPUT"
+          echo "Release: $TITLE (prerelease=$IS_PRERELEASE)"
+
+      - name: Create or update target release and upload assets
+        env:
+          GH_TOKEN: ${{ secrets.MIRROR_RELEASE_TOKEN }}
+        run: |
+          TAG="${{ steps.tag.outputs.tag }}"
+          TITLE="${{ steps.meta.outputs.title }}"
+          IS_PRERELEASE="${{ steps.meta.outputs.is_prerelease }}"
+
+          PRERELEASE_FLAG=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          # Check if the release already exists on the target
+          if gh release view "$TAG" --repo "$TARGET_REPO" --json tagName > /dev/null 2>&1; then
+            echo "Target release $TAG exists, updating..."
+            gh release edit "$TAG" \
+              --repo "$TARGET_REPO" \
+              --title "$TITLE" \
+              --notes-file /tmp/release-notes.md \
+              --latest
+          else
+            echo "Creating target release $TAG..."
+            gh release create "$TAG" \
+              --repo "$TARGET_REPO" \
+              --title "$TITLE" \
+              --notes-file /tmp/release-notes.md \
+              --latest \
+              $PRERELEASE_FLAG
+          fi
+
+          echo "Uploading assets..."
+          gh release upload "$TAG" \
+            /tmp/release-assets/* \
+            --repo "$TARGET_REPO" \
+            --clobber
+
+          echo "Successfully mirrored $TAG to $TARGET_REPO"
