@@ -1,6 +1,6 @@
 # AGENTS.md
 
-## Useful commands
+## Useful Commands
 
 - Run typecheck: `bun run typecheck`
 - Run ESLint: `bun run lint`
