@@ -105,7 +105,7 @@ jobs:
         run: |
           mkdir -p snap
           cp distribution/snap/snapcraft.yaml snap/snapcraft.yaml
-          snapcraft pack --destructive-mode --verbose
+          sudo snapcraft pack --destructive-mode --verbose
 
       - name: Get release tag
         id: get_tag
