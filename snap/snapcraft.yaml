@@ -22,6 +22,19 @@ apps:
       - network-bind
       - home
       - audio-playback
+      - single-instance-plug
+
+slots:
+  single-instance:
+    interface: dbus
+    bus: session
+    name: org.dev_agent_one.SingleInstance
+
+plugs:
+  single-instance-plug:
+    interface: dbus
+    bus: session
+    name: org.dev_agent_one.SingleInstance
 
 package-repositories:
   - type: apt
