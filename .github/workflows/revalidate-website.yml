@@ -1,0 +1,24 @@
+name: Revalidate Website
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  revalidate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger ISR revalidation
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            "https://www.agent-one.dev/api/revalidate" \
+            -H "Authorization: Bearer ${{ secrets.REVALIDATION_SECRET }}")
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "Successfully revalidated website download cache."
+          else
+            echo "Revalidation failed with HTTP $RESPONSE"
+            exit 1
+          fi
