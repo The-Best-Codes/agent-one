@@ -34,7 +34,7 @@ const agentOneProvider = {
       },
     },
     smart: {
-      id: "smart",
+      id: "agent-one-smart",
       name: "Smart",
       tool_call: true,
       modalities: {

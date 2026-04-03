@@ -24,7 +24,7 @@
         }
       },
       "smart": {
-        "id": "smart",
+        "id": "agent-one-smart",
         "name": "Smart",
         "tool_call": true,
         "modalities": {
@@ -1126,6 +1126,22 @@
           "output": 32000
         }
       },
+      "gpt-image-1.5": {
+        "id": "gpt-image-1.5",
+        "name": "gpt-image-1.5",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "limit": {
+          "context": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
       "gpt-4o-mini": {
         "id": "gpt-4o-mini",
         "name": "GPT-4o mini",
@@ -1143,6 +1159,22 @@
         "limit": {
           "context": 128000,
           "output": 16384
+        }
+      },
+      "gpt-image-1-mini": {
+        "id": "gpt-image-1-mini",
+        "name": "gpt-image-1-mini",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "limit": {
+          "context": 0,
+          "input": 0,
+          "output": 0
         }
       },
       "gpt-5.1-codex-max": {
@@ -1379,6 +1411,22 @@
           "output": 8192
         }
       },
+      "chatgpt-image-latest": {
+        "id": "chatgpt-image-latest",
+        "name": "chatgpt-image-latest",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "limit": {
+          "context": 0,
+          "input": 0,
+          "output": 0
+        }
+      },
       "gpt-4o-2024-11-20": {
         "id": "gpt-4o-2024-11-20",
         "name": "GPT-4o (2024-11-20)",
@@ -1531,6 +1579,21 @@
           "context": 400000,
           "input": 272000,
           "output": 128000
+        }
+      },
+      "gpt-image-1": {
+        "id": "gpt-image-1",
+        "name": "gpt-image-1",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
+          ]
+        },
+        "limit": {
+          "context": 0,
+          "input": 0,
+          "output": 0
         }
       },
       "o3-pro": {
@@ -5863,6 +5926,26 @@
           "output": 131072
         }
       },
+      "glm-5v-turbo": {
+        "id": "glm-5v-turbo",
+        "name": "glm-5v-turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "glm-5-turbo": {
         "id": "glm-5-turbo",
         "name": "GLM-5-Turbo",
@@ -6448,26 +6531,6 @@
       "claude-sonnet-4-5": {
         "id": "claude-sonnet-4-5",
         "name": "Claude Sonnet 4.5 (latest)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
-        }
-      },
-      "claude-3-7-sonnet-latest": {
-        "id": "claude-3-7-sonnet-latest",
-        "name": "Claude Sonnet 3.7 (latest)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -9973,6 +10036,26 @@
           "output": 131072
         }
       },
+      "glm-5v-turbo": {
+        "id": "glm-5v-turbo",
+        "name": "glm-5v-turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.2,
+          "output": 4,
+          "cache_read": 0.24,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "glm-5-turbo": {
         "id": "glm-5-turbo",
         "name": "GLM-5-Turbo",
@@ -10974,10 +11057,28 @@
           "output": 128000
         }
       },
+      "openai/gpt-5.3-codex-spark": {
+        "id": "openai/gpt-5.3-codex-spark",
+        "name": "GPT-5.3-Codex-Spark",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
       "openai/gpt-image-1.5": {
         "id": "openai/gpt-image-1.5",
         "name": "gpt-image-1.5",
-        "tool_call": true,
+        "tool_call": false,
         "modalities": {
           "output": [
             "image"
@@ -12792,6 +12893,25 @@
           "context": 150,
           "output": 0
         }
+      },
+      "fireworks-ai/kimi-k2.5-fw": {
+        "id": "fireworks-ai/kimi-k2.5-fw",
+        "name": "Kimi-K2.5-FW",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 262144,
+          "input": 245760,
+          "output": 16384
+        }
       }
     }
   },
@@ -13550,7 +13670,7 @@
           "cache_read": 0
         },
         "limit": {
-          "context": 1000000,
+          "context": 204800,
           "output": 128000
         }
       },
@@ -14014,6 +14134,26 @@
     "id": "zhipuai",
     "name": "Zhipu AI",
     "models": {
+      "glm-5v-turbo": {
+        "id": "glm-5v-turbo",
+        "name": "glm-5v-turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 22,
+          "cache_read": 1.2,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "glm-5": {
         "id": "glm-5",
         "name": "GLM-5",
@@ -18869,6 +19009,24 @@
         "limit": {
           "context": 262144,
           "output": 16384
+        }
+      },
+      "moonshotai/kimi-k2-thinking-maas": {
+        "id": "moonshotai/kimi-k2-thinking-maas",
+        "name": "Kimi K2 Thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 2.5
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
         }
       },
       "meta/llama-3.3-70b-instruct-maas": {
@@ -25563,6 +25721,24 @@
         "limit": {
           "context": 128000,
           "output": 128000
+        }
+      },
+      "glm-5": {
+        "id": "glm-5",
+        "name": "GLM 5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.08,
+          "output": 3.44
+        },
+        "limit": {
+          "context": 202752,
+          "output": 202752
         }
       },
       "glm-4.5-air": {
@@ -35011,6 +35187,26 @@
           "output": 65535
         }
       },
+      "z-ai/glm-5-turbo": {
+        "id": "z-ai/glm-5-turbo",
+        "name": "GLM-5-Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.2,
+          "output": 4,
+          "cache_read": 0.24,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "z-ai/glm-4.5": {
         "id": "z-ai/glm-4.5",
         "name": "GLM 4.5",
@@ -36163,6 +36359,24 @@
           "output": 262144
         }
       },
+      "qwen/qwen3.6-plus-preview:free": {
+        "id": "qwen/qwen3.6-plus-preview:free",
+        "name": "Qwen3.6 Plus Preview (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 65536
+        }
+      },
       "qwen/qwen3-coder:exacto": {
         "id": "qwen/qwen3-coder:exacto",
         "name": "Qwen3 Coder (exacto)",
@@ -36215,6 +36429,24 @@
         "limit": {
           "context": 262144,
           "output": 32768
+        }
+      },
+      "qwen/qwen3.6-plus:free": {
+        "id": "qwen/qwen3.6-plus:free",
+        "name": "Qwen3.6 Plus (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 65536
         }
       },
       "qwen/qwen3-coder-flash": {
@@ -37411,26 +37643,6 @@
           "output": 64000
         }
       },
-      "anthropic/claude-3.5-sonnet": {
-        "id": "anthropic/claude-3.5-sonnet",
-        "name": "Claude 3.5 Sonnet (Retiring Soon)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
-        }
-      },
       "anthropic/claude-sonnet-4.5": {
         "id": "anthropic/claude-sonnet-4.5",
         "name": "Claude Sonnet 4.5",
@@ -37468,7 +37680,7 @@
         },
         "limit": {
           "context": 200000,
-          "output": 64000
+          "output": 32000
         }
       },
       "volcengine/doubao-seed-2.0-lite": {
@@ -38023,26 +38235,6 @@
         "limit": {
           "context": 1050000,
           "output": 65530
-        }
-      },
-      "google/gemini-3-pro-image-preview": {
-        "id": "google/gemini-3-pro-image-preview",
-        "name": "Gemini 3 Pro Image Preview",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 12,
-          "cache_read": 0.2,
-          "cache_write": 4.5
-        },
-        "limit": {
-          "context": 1048000,
-          "output": 64000
         }
       },
       "baidu/ernie-5.0-thinking-preview": {
@@ -45658,6 +45850,25 @@
           "output": 32000
         }
       },
+      "kwaipilot/kat-coder-pro-v2": {
+        "id": "kwaipilot/kat-coder-pro-v2",
+        "name": "Kat Coder Pro V2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.06
+        },
+        "limit": {
+          "context": 256000,
+          "output": 256000
+        }
+      },
       "morph/morph-v3-fast": {
         "id": "morph/morph-v3-fast",
         "name": "Morph v3 Fast",
@@ -46687,6 +46898,24 @@
         "limit": {
           "context": 2000000,
           "output": 30000
+        }
+      },
+      "nvidia/nemotron-3-super-120b-a12b": {
+        "id": "nvidia/nemotron-3-super-120b-a12b",
+        "name": "NVIDIA Nemotron 3 Super 120B A12B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.65
+        },
+        "limit": {
+          "context": 256000,
+          "output": 32000
         }
       },
       "nvidia/nemotron-nano-12b-v2-vl": {
@@ -49233,6 +49462,25 @@
         "limit": {
           "context": 32768,
           "output": 32768
+        }
+      },
+      "hf:Qwen/Qwen3.5-397B-A17B": {
+        "id": "hf:Qwen/Qwen3.5-397B-A17B",
+        "name": "Qwen3.5-97B-A17B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 3,
+          "cache_read": 0.6
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
         }
       },
       "hf:Qwen/Qwen3-235B-A22B-Thinking-2507": {
@@ -53059,6 +53307,54 @@
         "limit": {
           "context": 200000,
           "output": 8192
+        }
+      }
+    }
+  },
+  "the-grid-ai": {
+    "id": "the-grid-ai",
+    "name": "The Grid AI",
+    "models": {
+      "text-standard": {
+        "id": "text-standard",
+        "name": "Text Standard",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16000
+        }
+      },
+      "text-max": {
+        "id": "text-max",
+        "name": "Text Max",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
+      "text-prime": {
+        "id": "text-prime",
+        "name": "Text Prime",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 128000,
+          "output": 30000
         }
       }
     }
@@ -60210,6 +60506,25 @@
           "output": 128000
         }
       },
+      "openai-gpt-54-mini": {
+        "id": "openai-gpt-54-mini",
+        "name": "GPT-5.4 Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.9375,
+          "output": 5.625,
+          "cache_read": 0.09375
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
+      },
       "claude-opus-4-6": {
         "id": "claude-opus-4-6",
         "name": "Claude Opus 4.6",
@@ -60538,24 +60853,6 @@
           "output": 16384
         }
       },
-      "qwen3-4b": {
-        "id": "qwen3-4b",
-        "name": "Venice Small",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.05,
-          "output": 0.15
-        },
-        "limit": {
-          "context": 32000,
-          "output": 4096
-        }
-      },
       "hermes-3-llama-3.1-405b": {
         "id": "hermes-3-llama-3.1-405b",
         "name": "Hermes 3 Llama 3.1 405b",
@@ -60606,24 +60903,6 @@
         "cost": {
           "input": 0.7,
           "output": 2.8
-        },
-        "limit": {
-          "context": 128000,
-          "output": 4096
-        }
-      },
-      "mistral-31-24b": {
-        "id": "mistral-31-24b",
-        "name": "Venice Medium",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.5,
-          "output": 2
         },
         "limit": {
           "context": 128000,
@@ -61046,78 +61325,6 @@
     "id": "vultr",
     "name": "Vultr",
     "models": {
-      "DeepSeek-R1-Distill-Llama-70B": {
-        "id": "DeepSeek-R1-Distill-Llama-70B",
-        "name": "DeepSeek R1 Distill Llama 70B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 2
-        },
-        "limit": {
-          "context": 130000,
-          "output": 4096
-        }
-      },
-      "DeepSeek-R1-Distill-Qwen-32B": {
-        "id": "DeepSeek-R1-Distill-Qwen-32B",
-        "name": "DeepSeek R1 Distill Qwen 32B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.3,
-          "output": 0.3
-        },
-        "limit": {
-          "context": 130000,
-          "output": 4096
-        }
-      },
-      "NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4": {
-        "id": "NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4",
-        "name": "NVIDIA Nemotron 3 Super 120B A12B NVFP4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 0.8
-        },
-        "limit": {
-          "context": 260000,
-          "output": 8192
-        }
-      },
-      "gpt-oss-120b": {
-        "id": "gpt-oss-120b",
-        "name": "GPT OSS 120B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.6
-        },
-        "limit": {
-          "context": 130000,
-          "output": 8192
-        }
-      },
       "Kimi-K2.5": {
         "id": "Kimi-K2.5",
         "name": "Kimi K2 Instruct",
@@ -61187,24 +61394,6 @@
         },
         "limit": {
           "context": 163000,
-          "output": 4096
-        }
-      },
-      "Llama-3_1-Nemotron-Ultra-253B-v1": {
-        "id": "Llama-3_1-Nemotron-Ultra-253B-v1",
-        "name": "Llama 3.1 Nemotron Ultra 253B v1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.55,
-          "output": 1.8
-        },
-        "limit": {
-          "context": 32000,
           "output": 4096
         }
       }
@@ -74789,6 +74978,26 @@
     "id": "zhipuai-coding-plan",
     "name": "Zhipu AI Coding Plan",
     "models": {
+      "glm-5v-turbo": {
+        "id": "glm-5v-turbo",
+        "name": "glm-5v-turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "glm-5.1": {
         "id": "glm-5.1",
         "name": "GLM-5.1",
@@ -75473,6 +75682,30 @@
           "output": 131072
         }
       },
+      "mimo-v2-pro": {
+        "id": "mimo-v2-pro",
+        "name": "MiMo V2 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3,
+          "cache_read": 0.2,
+          "context_over_200k": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.4
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 64000
+        }
+      },
       "glm-5": {
         "id": "glm-5",
         "name": "GLM-5",
@@ -75490,6 +75723,25 @@
         "limit": {
           "context": 204800,
           "output": 131072
+        }
+      },
+      "mimo-v2-omni": {
+        "id": "mimo-v2-omni",
+        "name": "MiMo V2 Omni",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 2,
+          "cache_read": 0.08
+        },
+        "limit": {
+          "context": 262144,
+          "output": 64000
         }
       },
       "minimax-m2.5": {
