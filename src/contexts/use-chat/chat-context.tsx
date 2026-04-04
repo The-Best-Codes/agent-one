@@ -66,6 +66,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const setChatStatusIndicators = useSetAtom(chatStatusIndicatorsAtom);
   const { getModelById } = useModelCatalog();
 
+  // TODO: Should this use useParams from react router instead?
   const currentChatId = useMemo(() => {
     if (location.pathname.startsWith("/chat/")) {
       return params.id;
