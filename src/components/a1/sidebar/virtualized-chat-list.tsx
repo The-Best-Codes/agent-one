@@ -1,8 +1,10 @@
 import {
+  IconDeselect,
   IconDownload,
   IconInbox,
   IconPlus,
   IconSearch,
+  IconSelectAll,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
@@ -203,6 +205,11 @@ export const VirtualizedChatList = ({
                 className="h-7 flex-1 justify-start"
                 onClick={toggleSelectAll}
               >
+                {!allSelected ? (
+                  <IconSelectAll data-icon="inline-start" />
+                ) : (
+                  <IconDeselect data-icon="inline-start" />
+                )}
                 {allSelected ? "Deselect All" : "Select All"}
               </Button>
               <Button
