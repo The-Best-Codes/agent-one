@@ -17,9 +17,13 @@ const handledDeepLinkAtom = atomWithStorage<string | null>(
   { getOnInit: true },
 );
 
-function getDeepLinkVersion(id: string): number | null {
+function getDeepLinkMeta(id: string): { version: number; allowNoVersion: boolean } | null {
   const deepLink = deepLinkSchema.deepLinks.find((dl) => dl.id === id);
-  return deepLink?.version ?? null;
+  if (!deepLink) return null;
+  return {
+    version: deepLink.version,
+    allowNoVersion: "dangerouslyAllowNoVersion" in deepLink && !!deepLink.dangerouslyAllowNoVersion,
+  };
 }
 
 export function DeepLinkHandler() {
@@ -62,31 +66,33 @@ export function DeepLinkHandler() {
         const deepLinkId =
           urlObj.hostname !== "" ? urlObj.hostname : urlObj.pathname.replace(/^\/+/, "");
 
-        const versionParam = urlObj.searchParams.get("v");
-        if (versionParam === null) {
-          logger.warn(`Deep link ignored: missing version parameter (v) in URL: ${url}`);
-          return;
-        }
-
-        const urlVersion = parseInt(versionParam, 10);
-        if (isNaN(urlVersion)) {
-          logger.warn(
-            `Deep link ignored: invalid version parameter (v=${versionParam}) in URL: ${url}`,
-          );
-          return;
-        }
-
-        const schemaVersion = getDeepLinkVersion(deepLinkId);
-        if (schemaVersion === null) {
+        const meta = getDeepLinkMeta(deepLinkId);
+        if (meta === null) {
           logger.warn(`Deep link ignored: unknown deep link ID "${deepLinkId}" in URL: ${url}`);
           return;
         }
 
-        if (urlVersion !== schemaVersion) {
-          logger.warn(
-            `Deep link ignored: version mismatch (url: ${urlVersion}, expected: ${schemaVersion}) for "${deepLinkId}" in URL: ${url}`,
-          );
+        const versionParam = urlObj.searchParams.get("v");
+        if (versionParam === null && !meta.allowNoVersion) {
+          logger.warn(`Deep link ignored: missing version parameter (v) in URL: ${url}`);
           return;
+        }
+
+        if (versionParam !== null) {
+          const urlVersion = parseInt(versionParam, 10);
+          if (isNaN(urlVersion)) {
+            logger.warn(
+              `Deep link ignored: invalid version parameter (v=${versionParam}) in URL: ${url}`,
+            );
+            return;
+          }
+
+          if (urlVersion !== meta.version) {
+            logger.warn(
+              `Deep link ignored: version mismatch (url: ${urlVersion}, expected: ${meta.version}) for "${deepLinkId}" in URL: ${url}`,
+            );
+            return;
+          }
         }
 
         logger.verbose(`Deep link "${deepLinkId}" parsed successfully`);
@@ -98,6 +104,36 @@ export function DeepLinkHandler() {
             params.set("initialMessage", message);
           }
           void navigate(`/chat${params.size > 0 ? `?${params.toString()}` : ""}`);
+        } else if (deepLinkId === "mcp/install") {
+          const name = urlObj.searchParams.get("name");
+          const configParam = urlObj.searchParams.get("config");
+          if (!name || !configParam) {
+            logger.warn("Deep link mcp/install missing required name or config parameter");
+            return;
+          }
+
+          let config: { type?: string; command?: string; args?: string[]; url?: string };
+          try {
+            config = JSON.parse(decodeURIComponent(configParam));
+          } catch {
+            logger.warn("Deep link mcp/install has invalid config JSON");
+            return;
+          }
+
+          const serverType = config.type === "http" ? "http" : "stdio";
+          const params = new URLSearchParams({
+            tab: "extensions",
+            mcpName: name,
+            mcpType: serverType,
+          });
+          if (serverType === "stdio") {
+            const command = [config.command, ...(config.args ?? [])].filter(Boolean).join(" ");
+            if (command) params.set("mcpCommand", command);
+          } else if (config.url) {
+            params.set("mcpUrl", config.url);
+          }
+
+          void navigate(`/settings?${params.toString()}`);
         }
       } catch (error) {
         logger.error("Failed to parse deep link URL:", error);

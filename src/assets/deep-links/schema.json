@@ -3,6 +3,11 @@
     {
       "id": "new-chat",
       "version": 1
+    },
+    {
+      "id": "mcp/install",
+      "version": 1,
+      "dangerouslyAllowNoVersion": true
     }
   ]
 }

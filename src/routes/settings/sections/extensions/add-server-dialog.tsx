@@ -1,5 +1,7 @@
+import { IconAlertTriangle } from "@tabler/icons-react";
 import { useState } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,17 +29,29 @@ interface AddServerDialogProps {
     timeoutSec: number;
     requiresApproval: boolean;
   }) => void;
+  initialValues?: {
+    name: string;
+    type: "stdio" | "http";
+    command?: string;
+    url?: string;
+  } | null;
 }
 
-export function AddServerDialog({ open, onOpenChange, onAddServer }: AddServerDialogProps) {
-  const [newServerType, setNewServerType] = useState<McpServerType>("stdio");
-  const [newServerName, setNewServerName] = useState("");
-  const [newServerCommand, setNewServerCommand] = useState("");
+export function AddServerDialog({
+  open,
+  onOpenChange,
+  onAddServer,
+  initialValues,
+}: AddServerDialogProps) {
+  const [newServerType, setNewServerType] = useState<McpServerType>(initialValues?.type ?? "stdio");
+  const [newServerName, setNewServerName] = useState(initialValues?.name ?? "");
+  const [newServerCommand, setNewServerCommand] = useState(initialValues?.command ?? "");
   const [newServerEnv, setNewServerEnv] = useState<Record<string, string>>({});
-  const [newServerUrl, setNewServerUrl] = useState("");
+  const [newServerUrl, setNewServerUrl] = useState(initialValues?.url ?? "");
   const [newServerHeaders, setNewServerHeaders] = useState<Record<string, string>>({});
   const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
   const [newServerRequiresApproval, setNewServerRequiresApproval] = useState(false);
+  const [isFromDeepLink, setIsFromDeepLink] = useState(!!initialValues);
 
   const isAddFormValid = isMcpServerConfigFormValid({
     type: newServerType,
@@ -56,6 +70,7 @@ export function AddServerDialog({ open, onOpenChange, onAddServer }: AddServerDi
     setNewServerHeaders({});
     setNewServerTimeoutSec(30);
     setNewServerRequiresApproval(false);
+    setIsFromDeepLink(false);
   };
 
   const handleAddServer = () => {
@@ -90,6 +105,16 @@ export function AddServerDialog({ open, onOpenChange, onAddServer }: AddServerDi
             Configure a custom extension by defining an MCP server.
           </DialogDescription>
         </DialogHeader>
+
+        {isFromDeepLink ? (
+          <Alert variant="destructive">
+            <IconAlertTriangle />
+            <AlertTitle>Extension details were auto-filled</AlertTitle>
+            <AlertDescription>
+              Review the details below before installing. Only install extensions you trust.
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
         <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
           <McpServerConfigForm

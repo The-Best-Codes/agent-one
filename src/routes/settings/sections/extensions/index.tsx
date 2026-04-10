@@ -2,6 +2,7 @@ import { IconFilter, IconFlask, IconPlus, IconSearch } from "@tabler/icons-react
 import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import {
@@ -52,8 +53,22 @@ function isServerFromRegistry(server: McpServerConfig): boolean {
 
 export default function ExtensionsSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [showAddDialog, setShowAddDialog] = useState(false);
+  const mcpInstallPrefill = useMemo(() => {
+    const name = searchParams.get("mcpName");
+    const type = searchParams.get("mcpType");
+    if (!name || !type) return null;
+    return {
+      name,
+      type: type as "stdio" | "http",
+      command: searchParams.get("mcpCommand") ?? undefined,
+      url: searchParams.get("mcpUrl") ?? undefined,
+    };
+  }, [searchParams]);
+
+  const [showAddDialog, setShowAddDialog] = useState(!!mcpInstallPrefill);
+  const [addDialogInitialValues, setAddDialogInitialValues] = useState(mcpInstallPrefill);
   const [selectedExtension, setSelectedExtension] = useState<McpRegistryExtension | null>(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
   const [serverToUninstall, setServerToUninstall] = useState<{
@@ -61,7 +76,7 @@ export default function ExtensionsSection() {
     name: string;
   } | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(mcpInstallPrefill ? "custom" : "all");
   const [query, setQuery] = useState("");
   const [showDeviceExtensions, setShowDeviceExtensions] = useState(true);
   const [showOnlineExtensions, setShowOnlineExtensions] = useState(true);
@@ -400,9 +415,25 @@ export default function ExtensionsSection() {
         </Tabs>
 
         <AddServerDialog
+          key={addDialogInitialValues ? "deeplink" : "manual"}
           open={showAddDialog}
-          onOpenChange={setShowAddDialog}
+          onOpenChange={(open) => {
+            setShowAddDialog(open);
+            if (!open) {
+              setAddDialogInitialValues(null);
+              if (mcpInstallPrefill) {
+                setSearchParams((prev) => {
+                  prev.delete("mcpName");
+                  prev.delete("mcpType");
+                  prev.delete("mcpCommand");
+                  prev.delete("mcpUrl");
+                  return prev;
+                });
+              }
+            }
+          }}
           onAddServer={handleAddServer}
+          initialValues={addDialogInitialValues}
         />
 
         <InstallExtensionDialog
