@@ -1,4 +1,4 @@
-import { IconFilter, IconPlus, IconSearch } from "@tabler/icons-react";
+import { IconFilter, IconFlask, IconPlus, IconSearch } from "@tabler/icons-react";
 import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
 import { useMemo, useState } from "react";
@@ -10,6 +10,7 @@ import {
   type McpRegistryInstallResult,
 } from "@/assets/mcp-registry/mcp-registry";
 import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -278,6 +279,13 @@ export default function ExtensionsSection() {
         <h2 className="text-base leading-none font-semibold">Extensions</h2>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        <Alert>
+          <IconFlask />
+          <AlertTitle>Extensions are in beta</AlertTitle>
+          <AlertDescription>
+            Some features may be incomplete or change without notice.
+          </AlertDescription>
+        </Alert>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="group/extensions-search-input relative flex-1">
