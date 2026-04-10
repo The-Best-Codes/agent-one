@@ -204,7 +204,9 @@ export default function AccountSection() {
                   />
                 </span>
               </TooltipTrigger>
-              {!user && <TooltipContent>Sign in to hide AgentOne models</TooltipContent>}
+              {!user && (
+                <TooltipContent>You won't see AgentOne models unless signed-in</TooltipContent>
+              )}
             </Tooltip>
           </div>
         </CardContent>
