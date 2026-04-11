@@ -2,12 +2,6 @@ import type { ReactNode } from "react";
 
 import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -30,7 +24,6 @@ export interface McpServerConfigFormValues {
   headers: Record<string, string>;
   timeoutSec: number;
   requiresApproval: boolean;
-  toolApprovalOverrides?: Record<string, boolean>;
 }
 
 interface McpServerConfigFormProps {
@@ -46,7 +39,7 @@ interface McpServerConfigFormProps {
   approvalDescription?: string;
   stdioSupplement?: ReactNode;
   httpSupplement?: ReactNode;
-  availableTools?: string[];
+  showApprovalControls?: boolean;
 }
 
 export function McpServerConfigForm({
@@ -62,7 +55,7 @@ export function McpServerConfigForm({
   approvalDescription = "Ask for confirmation before running tools from this server",
   stdioSupplement,
   httpSupplement,
-  availableTools = [],
+  showApprovalControls = false,
 }: McpServerConfigFormProps) {
   const isStdio = values.type === "stdio";
 
@@ -163,67 +156,20 @@ export function McpServerConfigForm({
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
-            Require Approval By Default
-          </Label>
-          <span className="text-muted-foreground text-xs">{approvalDescription}</span>
+      {showApprovalControls ? (
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
+              Require Approval By Default
+            </Label>
+            <span className="text-muted-foreground text-xs">{approvalDescription}</span>
+          </div>
+          <Switch
+            id={`${idPrefix}-requires-approval`}
+            checked={values.requiresApproval}
+            onCheckedChange={(requiresApproval) => onChange({ requiresApproval })}
+          />
         </div>
-        <Switch
-          id={`${idPrefix}-requires-approval`}
-          checked={values.requiresApproval}
-          onCheckedChange={(requiresApproval) => onChange({ requiresApproval })}
-        />
-      </div>
-
-      {availableTools.length > 0 ? (
-        <Accordion type="single" collapsible className="rounded-md border px-3">
-          <AccordionItem value="tool-approval" className="border-b-0">
-            <AccordionTrigger className="py-3 text-sm">Per-tool approval</AccordionTrigger>
-            <AccordionContent className="pb-3">
-              <div className="flex flex-col gap-3">
-                {availableTools.map((toolName) => {
-                  const override = values.toolApprovalOverrides?.[toolName];
-                  const requiresApproval = override ?? values.requiresApproval;
-
-                  return (
-                    <div key={toolName} className="flex items-center justify-between gap-3">
-                      <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-sm font-medium">{toolName}</span>
-                        <span className="text-muted-foreground text-xs">
-                          {override === undefined
-                            ? `Using default: ${values.requiresApproval ? "approval required" : "no approval required"}`
-                            : requiresApproval
-                              ? "Approval required"
-                              : "No approval required"}
-                        </span>
-                      </div>
-                      <Switch
-                        checked={requiresApproval}
-                        onCheckedChange={(checked) => {
-                          const nextOverrides = { ...(values.toolApprovalOverrides ?? {}) };
-
-                          if (checked === values.requiresApproval) {
-                            delete nextOverrides[toolName];
-                          } else {
-                            nextOverrides[toolName] = checked;
-                          }
-
-                          onChange({
-                            toolApprovalOverrides:
-                              Object.keys(nextOverrides).length > 0 ? nextOverrides : {},
-                          });
-                        }}
-                        aria-label={`Toggle approval for ${toolName}`}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
       ) : null}
     </div>
   );

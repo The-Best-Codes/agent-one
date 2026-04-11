@@ -1,6 +1,5 @@
-import { IconCircleCheck, IconCircleX, IconInfoCircle } from "@tabler/icons-react";
-
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import { type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 import { cn } from "@/lib/utils";
 
@@ -8,23 +7,43 @@ interface McpServerStatusProps {
   state?: McpServerLoadState;
   disabled?: boolean;
   compact?: boolean;
+  switchId?: string;
+  onEnabledChange?: (enabled: boolean) => void;
 }
 
 function getStatusLabel(status: McpServerLoadState["status"] | undefined): string {
   switch (status) {
     case "disabled":
       return "Disabled";
-    case "starting":
-      return "Starting";
-    case "connecting":
-      return "Connecting";
     case "loaded":
-      return "Loaded";
+    case "starting":
+    case "connecting":
+    case "unknown":
+      return "Enabled";
     case "error":
       return "Error";
-    case "unknown":
     default:
       return "Unknown";
+  }
+}
+
+function getStatusDescription(state?: McpServerLoadState, disabled?: boolean): string {
+  if (disabled) {
+    return "Toggle the switch to enable this server";
+  }
+
+  switch (state?.status) {
+    case "loaded":
+      return state.toolCount === 1 ? "1 tool available" : `${state.toolCount} tools available`;
+    case "starting":
+      return "Starting server";
+    case "connecting":
+      return "Connecting to server";
+    case "error":
+      return state.error ?? "Unable to load tools";
+    case "unknown":
+    default:
+      return "Waiting for server to load";
   }
 }
 
@@ -32,6 +51,8 @@ export function McpServerStatus({
   state,
   disabled = false,
   compact = false,
+  switchId,
+  onEnabledChange,
 }: McpServerStatusProps) {
   const status = disabled ? "disabled" : (state?.status ?? "unknown");
   const label = getStatusLabel(status);
@@ -54,30 +75,23 @@ export function McpServerStatus({
   }
 
   return (
-    <div className="flex items-center justify-between rounded-md border p-3">
+    <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
-        {status === "starting" || status === "connecting" ? (
-          <Spinner className="text-foreground" data-icon="inline-start" />
-        ) : status === "loaded" ? (
-          <IconCircleCheck className="text-foreground size-5" />
-        ) : status === "error" ? (
-          <IconCircleX className="text-foreground size-5" />
-        ) : (
-          <IconInfoCircle className="text-foreground size-5" />
-        )}
         <div className="flex flex-col gap-0.5">
           <span className="text-foreground text-sm">{label}</span>
-          {status === "loaded" ? (
-            <span className="text-muted-foreground text-xs">
-              {state?.toolCount === 1
-                ? "1 tool available"
-                : `${state?.toolCount ?? 0} tools available`}
-            </span>
-          ) : state?.error ? (
-            <span className="text-muted-foreground line-clamp-2 text-xs">{state.error}</span>
-          ) : null}
+          <span className="text-muted-foreground line-clamp-2 text-xs">
+            {getStatusDescription(state, disabled)}
+          </span>
         </div>
       </div>
+      {onEnabledChange ? (
+        <Switch
+          id={switchId}
+          checked={!disabled}
+          onCheckedChange={onEnabledChange}
+          aria-label="Toggle extension"
+        />
+      ) : null}
     </div>
   );
 }
