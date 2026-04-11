@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
+import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
@@ -57,6 +57,7 @@ function isServerFromRegistry(server: McpServerConfig): boolean {
 
 export default function ExtensionsSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
+  const [mcpAuthStates] = useAtom(mcpAuthStatesAtom);
   const [mcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
   const [searchParams, setSearchParams] = useSearchParams();
   const enabledToolCount = useEnabledToolCount();
@@ -229,6 +230,7 @@ export default function ExtensionsSection() {
         installSupported: true,
         enabled: server.enabled,
         loadState: mcpServerLoadStates[server.id],
+        authState: mcpAuthStates[server.id],
         onEnabledChange: (enabled) => updateMcpServerById(server.id, { enabled }),
         onUninstall: () => handleUninstallClick(server.id, server.name || "Custom Extension"),
         advancedContent: (
@@ -262,6 +264,7 @@ export default function ExtensionsSection() {
         badges: extension.categories.length > 0 ? extension.categories : extension.tags,
         enabled: server?.enabled,
         loadState: server ? mcpServerLoadStates[server.id] : undefined,
+        authState: server ? mcpAuthStates[server.id] : undefined,
         onInstall: () => {
           if (extension.install) {
             setSelectedExtension(extension);
@@ -288,6 +291,7 @@ export default function ExtensionsSection() {
     return result;
   }, [
     mcpServers,
+    mcpAuthStates,
     mcpServerLoadStates,
     registryExtensions,
     enabledToolCount,

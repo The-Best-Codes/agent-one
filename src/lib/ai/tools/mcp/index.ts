@@ -487,29 +487,27 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
     return serverCache.get(server.id)?.tools || {};
   } catch (error) {
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
-
-    serverCache.set(server.id, {
-      tools: {},
-      configHash,
-    });
+    let normalizedError = error instanceof Error ? error : new Error("Unknown error");
 
     if (server.type === "http" && isAuthError(error)) {
-      void checkOAuthSupport(server.url).then((supportsOAuth) => {
-        if (supportsOAuth) {
-          store.set(mcpAuthStatesAtom, (prev) => {
-            if (prev[server.id] === "logged-out") return prev;
-            return { ...prev, [server.id]: "logged-out" };
-          });
-          promptLoginToast(server as McpHttpServerConfig);
-        } else {
-          logger.warn(
-            `MCP server ${server.name} returned an auth error but does not appear to support OAuth`,
-          );
-        }
-      });
+      const supportsOAuth = await checkOAuthSupport(server.url);
+
+      if (supportsOAuth) {
+        store.set(mcpAuthStatesAtom, (prev) => {
+          if (prev[server.id] === "logged-out") return prev;
+          return { ...prev, [server.id]: "logged-out" };
+        });
+        promptLoginToast(server as McpHttpServerConfig);
+        normalizedError = new Error("Authentication required. Log in to load tools.");
+      } else {
+        logger.warn(
+          `MCP server ${server.name} returned an auth error but does not appear to support OAuth`,
+        );
+        normalizedError = new Error("Authentication failed while loading tools.");
+      }
     }
 
-    return {};
+    throw normalizedError;
   }
 }
 

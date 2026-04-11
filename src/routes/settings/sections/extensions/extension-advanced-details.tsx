@@ -240,6 +240,8 @@ interface ExtensionAdvancedDetailsProps {
 }
 
 export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvancedDetailsProps) {
+  const authStates = useAtomValue(mcpAuthStatesAtom);
+  const authState = authStates[server.id];
   const loadStates = useAtomValue(mcpServerLoadStatesAtom);
   const loadState = loadStates[server.id];
 
@@ -247,6 +249,7 @@ export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvanced
     <div className="flex flex-col gap-3">
       <McpServerStatus
         state={loadState}
+        authState={authState}
         disabled={!server.enabled}
         switchId={`enabled-${server.id}`}
         onEnabledChange={(checked) => onUpdate({ enabled: checked })}

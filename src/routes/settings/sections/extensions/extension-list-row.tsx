@@ -21,17 +21,30 @@ import {
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
+import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 
 import { McpServerStatus } from "./mcp-server-status";
 
-function getMcpServerStatusTooltip(state?: McpServerLoadState, disabled?: boolean): string {
+function getMcpServerStatusTooltip(
+  state?: McpServerLoadState,
+  authState?: McpAuthState,
+  disabled?: boolean,
+): string {
   if (disabled) {
     return "Disabled";
   }
 
+  if (state?.status === "error" && (authState === "logged-out" || authState === "supports-oauth")) {
+    return authState === "supports-oauth"
+      ? "Login available for full access"
+      : "Authentication required to load tools";
+  }
+
   switch (state?.status) {
     case "loaded":
+      if (state.toolCount === 0) {
+        return "Connected, but no tools are available";
+      }
       return state.toolCount === 1
         ? "Loaded successfully with 1 tool"
         : `Loaded successfully with ${state.toolCount} tools`;
@@ -63,6 +76,7 @@ interface ExtensionListRowProps {
   onUninstall?: () => void;
   enabled?: boolean;
   loadState?: McpServerLoadState;
+  authState?: McpAuthState;
   onEnabledChange?: (enabled: boolean) => void;
   advancedContent?: ReactNode;
   moreInfoJson?: unknown;
@@ -82,6 +96,7 @@ export function ExtensionListRow({
   onUninstall,
   enabled,
   loadState,
+  authState,
   onEnabledChange,
   advancedContent,
   moreInfoJson,
@@ -149,10 +164,17 @@ export function ExtensionListRow({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center">
-                    <McpServerStatus state={loadState} disabled={!enabled} compact />
+                    <McpServerStatus
+                      state={loadState}
+                      authState={authState}
+                      disabled={!enabled}
+                      compact
+                    />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>{getMcpServerStatusTooltip(loadState, !enabled)}</TooltipContent>
+                <TooltipContent>
+                  {getMcpServerStatusTooltip(loadState, authState, !enabled)}
+                </TooltipContent>
               </Tooltip>
               {toolCount !== null ? (
                 <span className="text-muted-foreground text-xs">

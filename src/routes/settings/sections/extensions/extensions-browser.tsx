@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef } from "react";
 
 import { useOverflow } from "@/hooks/use-overflow";
-import { type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
+import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 import { cn } from "@/lib/utils";
 
 import { ExtensionListRow } from "./extension-list-row";
@@ -28,6 +28,7 @@ export interface ExtensionListItem {
   badges?: string[];
   enabled?: boolean;
   loadState?: McpServerLoadState;
+  authState?: McpAuthState;
   onInstall?: () => void;
   onUninstall?: () => void;
   onEnabledChange?: (enabled: boolean) => void;
@@ -146,6 +147,7 @@ export function ExtensionsBrowser({
                     canUninstall={item.canUninstall}
                     enabled={item.enabled}
                     loadState={item.loadState}
+                    authState={item.authState}
                     onInstall={item.onInstall}
                     onUninstall={item.onUninstall}
                     onEnabledChange={item.onEnabledChange}

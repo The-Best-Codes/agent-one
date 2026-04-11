@@ -40,6 +40,22 @@ interface ToolsProviderProps {
   children: ReactNode;
 }
 
+function getServerLoadSignature(server: McpServerConfig): string {
+  if (server.type === "stdio") {
+    return JSON.stringify({
+      type: "stdio",
+      command: server.command,
+      env: server.env,
+    });
+  }
+
+  return JSON.stringify({
+    type: "http",
+    url: server.url,
+    headers: server.headers,
+  });
+}
+
 function applyApprovalConfigToTools(
   tools: ToolSet,
   defaultNeedsApproval: boolean,
@@ -71,6 +87,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const mcpLoadedRef = useRef(false);
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
   const enabledServerIdsRef = useRef<Set<string>>(new Set());
+  const serverLoadSignaturesRef = useRef<Map<string, string>>(new Map());
+  const authStatesRef = useRef<Record<string, (typeof mcpAuthStates)[string]>>({});
   const loadIdRef = useRef(0);
 
   useEffect(() => {
@@ -82,6 +100,12 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     const enabledServers = Array.isArray(mcpServers)
       ? mcpServers.filter((server) => server.enabled)
       : [];
+    const previousEnabledIds = enabledServerIdsRef.current;
+    const previousServerLoadSignatures = serverLoadSignaturesRef.current;
+    const previousAuthStates = authStatesRef.current;
+    const currentServerLoadSignatures = new Map(
+      mcpServers.map((server) => [server.id, getServerLoadSignature(server)]),
+    );
 
     setMcpServerLoadStates((prev) => {
       const next: Record<string, (typeof prev)[string]> = {};
@@ -100,13 +124,15 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     });
 
     const newEnabledIds = new Set(enabledServers.map((server) => server.id));
-    for (const serverId of enabledServerIdsRef.current) {
+    for (const serverId of previousEnabledIds) {
       if (!newEnabledIds.has(serverId)) {
         logger.verbose(`Cleaning up disabled server: ${serverId}`);
         closeServerCache(serverId);
       }
     }
     enabledServerIdsRef.current = newEnabledIds;
+    serverLoadSignaturesRef.current = currentServerLoadSignatures;
+    authStatesRef.current = mcpAuthStates;
 
     if (enabledServers.length === 0) {
       invalidateServerCache();
@@ -132,7 +158,26 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     }
 
     const cachedServers = enabledServers.filter((server) => isServerCached(server));
-    const serversToLoad = enabledServers.filter((server) => !isServerCached(server));
+    const serversToLoad = enabledServers.filter((server) => {
+      if (isServerCached(server)) {
+        return false;
+      }
+
+      if (!previousEnabledIds.has(server.id)) {
+        return true;
+      }
+
+      if (
+        previousServerLoadSignatures.get(server.id) !== currentServerLoadSignatures.get(server.id)
+      ) {
+        return true;
+      }
+
+      return (
+        previousAuthStates[server.id] !== mcpAuthStates[server.id] &&
+        mcpAuthStates[server.id] === "logged-in"
+      );
+    });
 
     const loadId = ++loadIdRef.current;
 
