@@ -39,6 +39,7 @@ interface McpServerConfigFormProps {
   approvalDescription?: string;
   stdioSupplement?: ReactNode;
   httpSupplement?: ReactNode;
+  showApprovalControls?: boolean;
 }
 
 export function McpServerConfigForm({
@@ -54,6 +55,7 @@ export function McpServerConfigForm({
   approvalDescription = "Ask for confirmation before running tools from this server",
   stdioSupplement,
   httpSupplement,
+  showApprovalControls = false,
 }: McpServerConfigFormProps) {
   const isStdio = values.type === "stdio";
 
@@ -154,19 +156,21 @@ export function McpServerConfigForm({
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
-            Require Approval
-          </Label>
-          <span className="text-muted-foreground text-xs">{approvalDescription}</span>
+      {showApprovalControls ? (
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
+              Require Approval By Default
+            </Label>
+            <span className="text-muted-foreground text-xs">{approvalDescription}</span>
+          </div>
+          <Switch
+            id={`${idPrefix}-requires-approval`}
+            checked={values.requiresApproval}
+            onCheckedChange={(requiresApproval) => onChange({ requiresApproval })}
+          />
         </div>
-        <Switch
-          id={`${idPrefix}-requires-approval`}
-          checked={values.requiresApproval}
-          onCheckedChange={(requiresApproval) => onChange({ requiresApproval })}
-        />
-      </div>
+      ) : null}
     </div>
   );
 }

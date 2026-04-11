@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
@@ -53,6 +54,7 @@ function isServerFromRegistry(server: McpServerConfig): boolean {
 
 export default function ExtensionsSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
+  const [mcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const mcpInstallPrefill = useMemo(() => {
@@ -152,6 +154,7 @@ export default function ExtensionsSection() {
             enabled: true,
             timeoutMs: serverData.timeoutSec * 1000,
             requiresApproval: serverData.requiresApproval,
+            toolApprovalOverrides: {},
           }
         : {
             id: crypto.randomUUID(),
@@ -162,6 +165,7 @@ export default function ExtensionsSection() {
             enabled: true,
             timeoutMs: serverData.timeoutSec * 1000,
             requiresApproval: serverData.requiresApproval,
+            toolApprovalOverrides: {},
           };
 
     setMcpServers((prev) => [newServer, ...prev]);
@@ -175,6 +179,7 @@ export default function ExtensionsSection() {
       enabled: true,
       timeoutMs: installed.timeoutSec * 1000,
       requiresApproval: installed.requiresApproval,
+      toolApprovalOverrides: {},
     };
 
     const newServer: McpServerConfig =
@@ -280,8 +285,15 @@ export default function ExtensionsSection() {
     showDeviceExtensions,
     showOnlineExtensions,
     isInstalled: isExtensionInstalled,
+    getServerForExtension: getExtensionServer,
+    getLoadStateForExtension: (extension: McpRegistryExtension) => {
+      const server = getExtensionServer(extension);
+      return server ? mcpServerLoadStates[server.id] : undefined;
+    },
     onInstallClick: handleExtensionInstallClick,
     onUninstallClick: handleExtensionUninstallClick,
+    onEnabledChange: (serverId: string, enabled: boolean) =>
+      updateMcpServerById(serverId, { enabled }),
     getAdvancedContent: renderAdvancedContent,
     getMoreInfoJson: (extension: McpRegistryExtension) => extension.registryEntry,
   };
@@ -394,6 +406,9 @@ export default function ExtensionsSection() {
                         title={server.name || "Custom Extension"}
                         description={server.type === "stdio" ? server.command : server.url}
                         installed
+                        enabled={server.enabled}
+                        loadState={mcpServerLoadStates[server.id]}
+                        onEnabledChange={(enabled) => updateMcpServerById(server.id, { enabled })}
                         onUninstall={() =>
                           linkedExtension
                             ? handleExtensionUninstallClick(linkedExtension)

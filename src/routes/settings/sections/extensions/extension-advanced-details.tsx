@@ -1,9 +1,12 @@
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { useAtomValue } from "jotai";
+
+import { mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
 import { McpAuthStatus } from "./mcp-auth-status";
+import { McpServerApprovalSettings } from "./mcp-server-approval-settings";
 import { McpServerConfigForm } from "./mcp-server-config-form";
+import { McpServerStatus } from "./mcp-server-status";
 
 interface ExtensionAdvancedDetailsProps {
   server: McpServerConfig;
@@ -11,23 +14,30 @@ interface ExtensionAdvancedDetailsProps {
 }
 
 export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvancedDetailsProps) {
+  const loadStates = useAtomValue(mcpServerLoadStatesAtom);
+  const loadState = loadStates[server.id];
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <Label htmlFor={`enabled-${server.id}`} className="text-sm">
-            Enabled
-          </Label>
-          <span className="text-muted-foreground text-xs">
-            Load this extension when tools initialize
-          </span>
-        </div>
-        <Switch
-          id={`enabled-${server.id}`}
-          checked={server.enabled}
-          onCheckedChange={(checked) => onUpdate({ enabled: checked })}
-        />
-      </div>
+      <McpServerStatus
+        state={loadState}
+        disabled={!server.enabled}
+        switchId={`enabled-${server.id}`}
+        onEnabledChange={(checked) => onUpdate({ enabled: checked })}
+      />
+
+      <McpServerApprovalSettings
+        idPrefix={server.id}
+        enabled={server.enabled}
+        requiresApproval={server.requiresApproval}
+        toolApprovalOverrides={server.toolApprovalOverrides}
+        loadState={loadState}
+        approvalDescription="Ask for confirmation before running tools"
+        onRequiresApprovalChange={(requiresApproval) => onUpdate({ requiresApproval })}
+        onToolApprovalOverridesChange={(toolApprovalOverrides) =>
+          onUpdate({ toolApprovalOverrides })
+        }
+      />
 
       <McpServerConfigForm
         idPrefix={server.id}
@@ -60,11 +70,8 @@ export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvanced
           if (updates.timeoutSec !== undefined) {
             onUpdate({ timeoutMs: updates.timeoutSec * 1000 });
           }
-          if (updates.requiresApproval !== undefined) {
-            onUpdate({ requiresApproval: updates.requiresApproval });
-          }
         }}
-        approvalDescription="Ask for confirmation before running tools"
+        showApprovalControls={false}
         httpSupplement={
           server.type === "http" ? (
             <McpAuthStatus server={server} disabled={!server.enabled} />

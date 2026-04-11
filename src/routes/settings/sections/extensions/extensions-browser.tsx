@@ -8,6 +8,8 @@ import {
   type McpRegistryExtension,
 } from "@/assets/mcp-registry/mcp-registry";
 import { useOverflow } from "@/hooks/use-overflow";
+import { type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
+import { type McpServerConfig } from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
 import { ExtensionListRow } from "./extension-list-row";
@@ -20,8 +22,11 @@ interface ExtensionsBrowserProps {
   showDeviceExtensions: boolean;
   showOnlineExtensions: boolean;
   isInstalled: (extension: McpRegistryExtension) => boolean;
+  getServerForExtension?: (extension: McpRegistryExtension) => McpServerConfig | undefined;
+  getLoadStateForExtension?: (extension: McpRegistryExtension) => McpServerLoadState | undefined;
   onInstallClick: (extension: McpRegistryExtension) => void;
   onUninstallClick: (extension: McpRegistryExtension) => void;
+  onEnabledChange?: (serverId: string, enabled: boolean) => void;
   getAdvancedContent?: (extension: McpRegistryExtension) => ReactNode;
   getMoreInfoJson?: (extension: McpRegistryExtension) => unknown;
 }
@@ -32,8 +37,11 @@ export function ExtensionsBrowser({
   showDeviceExtensions,
   showOnlineExtensions,
   isInstalled,
+  getServerForExtension,
+  getLoadStateForExtension,
   onInstallClick,
   onUninstallClick,
+  onEnabledChange,
   getAdvancedContent,
   getMoreInfoJson,
 }: ExtensionsBrowserProps) {
@@ -124,6 +132,7 @@ export function ExtensionsBrowser({
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const extension = filteredExtensions[virtualItem.index];
               const installed = isInstalled(extension);
+              const server = getServerForExtension?.(extension);
 
               return (
                 <div
@@ -144,6 +153,13 @@ export function ExtensionsBrowser({
                     badges={extension.categories.length > 0 ? extension.categories : extension.tags}
                     installed={installed}
                     installSupported={Boolean(extension.install)}
+                    enabled={server?.enabled}
+                    loadState={getLoadStateForExtension?.(extension)}
+                    onEnabledChange={
+                      server && onEnabledChange
+                        ? (enabled) => onEnabledChange(server.id, enabled)
+                        : undefined
+                    }
                     onInstall={() => onInstallClick(extension)}
                     onUninstall={() => onUninstallClick(extension)}
                     advancedContent={

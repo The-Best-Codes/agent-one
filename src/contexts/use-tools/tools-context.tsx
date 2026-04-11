@@ -15,7 +15,7 @@ import {
   invalidateServerCache,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
-import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
+import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
@@ -39,16 +39,16 @@ interface ToolsProviderProps {
   children: ReactNode;
 }
 
-function applyNeedsApprovalToTools(tools: ToolSet, needsApproval: boolean): ToolSet {
-  if (!needsApproval) {
-    return tools;
-  }
-
+function applyApprovalConfigToTools(
+  tools: ToolSet,
+  defaultNeedsApproval: boolean,
+  toolApprovalOverrides: Record<string, boolean> = {},
+): ToolSet {
   const wrappedTools: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
     wrappedTools[name] = {
       ...tool,
-      needsApproval: true,
+      needsApproval: toolApprovalOverrides[name] ?? defaultNeedsApproval,
     } as Tool<unknown, unknown>;
   }
   return wrappedTools;
@@ -60,6 +60,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
   const [toolConfigs] = useAtom(toolConfigsAtom);
   const [mcpAuthStates] = useAtom(mcpAuthStatesAtom);
+  const [, setMcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
 
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
@@ -81,6 +82,22 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       ? mcpServers.filter((server) => server.enabled)
       : [];
 
+    setMcpServerLoadStates((prev) => {
+      const next: Record<string, (typeof prev)[string]> = {};
+
+      for (const server of mcpServers) {
+        const previous = prev[server.id];
+        next[server.id] = {
+          status: server.enabled ? (previous?.status ?? "unknown") : "disabled",
+          toolCount: previous?.toolCount ?? 0,
+          toolNames: previous?.toolNames ?? [],
+          error: server.enabled ? previous?.error : undefined,
+        };
+      }
+
+      return next;
+    });
+
     const newEnabledIds = new Set(enabledServers.map((server) => server.id));
     for (const serverId of enabledServerIdsRef.current) {
       if (!newEnabledIds.has(serverId)) {
@@ -97,6 +114,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       setMcpTools({});
       setMcpLoaded(true);
       setIsMcpLoading(false);
+      setMcpServerLoadStates((prev) => {
+        const next = { ...prev };
+
+        for (const server of mcpServers) {
+          next[server.id] = {
+            status: server.enabled ? "unknown" : "disabled",
+            toolCount: 0,
+            toolNames: [],
+          };
+        }
+
+        return next;
+      });
       return;
     }
 
@@ -106,6 +136,20 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       mcpLoadedRef.current = false;
       setIsMcpLoading(true);
       setMcpLoaded(false);
+      setMcpServerLoadStates((prev) => {
+        const next = { ...prev };
+
+        for (const server of enabledServers) {
+          const previous = prev[server.id];
+          next[server.id] = {
+            status: server.type === "stdio" ? "starting" : "connecting",
+            toolCount: previous?.toolCount ?? 0,
+            toolNames: previous?.toolNames ?? [],
+          };
+        }
+
+        return next;
+      });
 
       try {
         const slugMap = buildMcpServerSlugMap(enabledServers);
@@ -132,12 +176,17 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                     ),
                   ),
                 ]);
-                const wrappedTools = applyNeedsApprovalToTools(
+                const toolNames = Object.keys(tools);
+                const wrappedTools = applyApprovalConfigToTools(
                   tools,
                   server.requiresApproval ?? false,
+                  server.toolApprovalOverrides,
                 );
                 return {
+                  server,
                   serverSlug: slugMap.get(server.id) ?? server.id,
+                  status: "loaded" as const,
+                  toolNames,
                   tools: wrappedTools,
                 };
               } catch (error) {
@@ -148,7 +197,11 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                 );
                 closeServerCache(server.id);
                 return {
+                  server,
                   serverSlug: slugMap.get(server.id) ?? server.id,
+                  error: error instanceof Error ? error.message : "Unknown error",
+                  status: "error" as const,
+                  toolNames: [],
                   tools: {},
                 };
               }
@@ -158,6 +211,29 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           for (const result of results) {
             Object.assign(allTools, prefixMcpToolNames(result.tools, result.serverSlug));
           }
+
+          setMcpServerLoadStates((prev) => {
+            const next = { ...prev };
+
+            for (const result of results) {
+              const previous = prev[result.server.id];
+              next[result.server.id] =
+                result.status === "loaded"
+                  ? {
+                      status: "loaded",
+                      toolCount: result.toolNames.length,
+                      toolNames: result.toolNames,
+                    }
+                  : {
+                      status: "error",
+                      toolCount: previous?.toolCount ?? 0,
+                      toolNames: previous?.toolNames ?? [],
+                      error: result.error,
+                    };
+            }
+
+            return next;
+          });
         }
 
         if (loadId !== loadIdRef.current) return;
@@ -172,6 +248,21 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         mcpLoadedRef.current = true;
         setMcpTools({});
         setMcpLoaded(true);
+        setMcpServerLoadStates((prev) => {
+          const next = { ...prev };
+
+          for (const server of enabledServers) {
+            const previous = prev[server.id];
+            next[server.id] = {
+              status: "error",
+              toolCount: previous?.toolCount ?? 0,
+              toolNames: previous?.toolNames ?? [],
+              error: error instanceof Error ? error.message : "Unknown error",
+            };
+          }
+
+          return next;
+        });
       } finally {
         setIsMcpLoading(false);
       }
@@ -179,7 +270,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
     const promise = loadMcpTools();
     loadingPromiseRef.current = promise;
-  }, [mcpServers, parallelLoadLimit, mcpAuthStates]);
+  }, [mcpServers, parallelLoadLimit, mcpAuthStates, setMcpServerLoadStates]);
 
   const getTools = useCallback(async (): Promise<ToolSet> => {
     const filteredStaticTools: ToolSet = {};
