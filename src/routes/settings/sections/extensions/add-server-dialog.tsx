@@ -1,5 +1,5 @@
 import { IconAlertTriangle } from "@tabler/icons-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { type McpServerType } from "@/lib/settings/types";
 
-import { McpServerConfigForm } from "./mcp-server-config-form";
-import { isMcpServerConfigFormValid } from "./mcp-server-config-form-utils";
+import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";
 
 interface AddServerDialogProps {
   open: boolean;
@@ -43,33 +42,43 @@ export function AddServerDialog({
   onAddServer,
   initialValues,
 }: AddServerDialogProps) {
-  const [newServerType, setNewServerType] = useState<McpServerType>(initialValues?.type ?? "stdio");
-  const [newServerName, setNewServerName] = useState(initialValues?.name ?? "");
-  const [newServerCommand, setNewServerCommand] = useState(initialValues?.command ?? "");
-  const [newServerEnv, setNewServerEnv] = useState<Record<string, string>>({});
-  const [newServerUrl, setNewServerUrl] = useState(initialValues?.url ?? "");
-  const [newServerHeaders, setNewServerHeaders] = useState<Record<string, string>>({});
-  const [newServerTimeoutSec, setNewServerTimeoutSec] = useState(30);
-  const [newServerRequiresApproval, setNewServerRequiresApproval] = useState(false);
+  const [formValues, setFormValues] = useState<McpServerConfigFormValues>({
+    type: initialValues?.type ?? "stdio",
+    name: initialValues?.name ?? "",
+    command: initialValues?.command ?? "",
+    env: {},
+    url: initialValues?.url ?? "",
+    headers: {},
+    timeoutSec: 30,
+    requiresApproval: false,
+  });
   const [isFromDeepLink, setIsFromDeepLink] = useState(!!initialValues);
 
-  const isAddFormValid = isMcpServerConfigFormValid({
-    type: newServerType,
-    name: newServerName,
-    command: newServerCommand,
-    url: newServerUrl,
-    timeoutSec: newServerTimeoutSec,
-  });
+  const isAddFormValid = useMemo(() => {
+    if (!formValues.name.trim()) {
+      return false;
+    }
+
+    if (!Number.isFinite(formValues.timeoutSec) || formValues.timeoutSec < 0.1) {
+      return false;
+    }
+
+    return formValues.type === "stdio"
+      ? formValues.command.trim() !== ""
+      : formValues.url.trim() !== "";
+  }, [formValues]);
 
   const resetAddForm = () => {
-    setNewServerType("stdio");
-    setNewServerName("");
-    setNewServerCommand("");
-    setNewServerEnv({});
-    setNewServerUrl("");
-    setNewServerHeaders({});
-    setNewServerTimeoutSec(30);
-    setNewServerRequiresApproval(false);
+    setFormValues({
+      type: "stdio",
+      name: "",
+      command: "",
+      env: {},
+      url: "",
+      headers: {},
+      timeoutSec: 30,
+      requiresApproval: false,
+    });
     setIsFromDeepLink(false);
   };
 
@@ -77,14 +86,14 @@ export function AddServerDialog({
     if (!isAddFormValid) return;
 
     onAddServer({
-      type: newServerType,
-      name: newServerName.trim(),
-      command: newServerType === "stdio" ? newServerCommand.trim() : undefined,
-      env: newServerType === "stdio" ? newServerEnv : undefined,
-      url: newServerType === "http" ? newServerUrl.trim() : undefined,
-      headers: newServerType === "http" ? newServerHeaders : undefined,
-      timeoutSec: newServerTimeoutSec,
-      requiresApproval: newServerRequiresApproval,
+      type: formValues.type,
+      name: formValues.name.trim(),
+      command: formValues.type === "stdio" ? formValues.command.trim() : undefined,
+      env: formValues.type === "stdio" ? formValues.env : undefined,
+      url: formValues.type === "http" ? formValues.url.trim() : undefined,
+      headers: formValues.type === "http" ? formValues.headers : undefined,
+      timeoutSec: formValues.timeoutSec,
+      requiresApproval: formValues.requiresApproval,
     });
 
     resetAddForm();
@@ -121,42 +130,8 @@ export function AddServerDialog({
             idPrefix="new-server-dialog"
             className="grid gap-4 py-4"
             showTypeSelector
-            values={{
-              type: newServerType,
-              name: newServerName,
-              command: newServerCommand,
-              env: newServerEnv,
-              url: newServerUrl,
-              headers: newServerHeaders,
-              timeoutSec: newServerTimeoutSec,
-              requiresApproval: newServerRequiresApproval,
-            }}
-            onChange={(updates) => {
-              if (updates.type !== undefined) {
-                setNewServerType(updates.type);
-              }
-              if (updates.name !== undefined) {
-                setNewServerName(updates.name);
-              }
-              if (updates.command !== undefined) {
-                setNewServerCommand(updates.command);
-              }
-              if (updates.env !== undefined) {
-                setNewServerEnv(updates.env);
-              }
-              if (updates.url !== undefined) {
-                setNewServerUrl(updates.url);
-              }
-              if (updates.headers !== undefined) {
-                setNewServerHeaders(updates.headers);
-              }
-              if (updates.timeoutSec !== undefined) {
-                setNewServerTimeoutSec(updates.timeoutSec);
-              }
-              if (updates.requiresApproval !== undefined) {
-                setNewServerRequiresApproval(updates.requiresApproval);
-              }
-            }}
+            values={formValues}
+            onChange={(updates) => setFormValues((current) => ({ ...current, ...updates }))}
             namePlaceholder="e.g., Everything Server"
           />
         </div>

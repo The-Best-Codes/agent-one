@@ -19,9 +19,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 
-import { ExtensionRowActions } from "./extension-row-actions";
+import { McpServerStatus } from "./mcp-server-status";
+
+function getMcpServerStatusTooltip(state?: McpServerLoadState, disabled?: boolean): string {
+  if (disabled) {
+    return "Disabled";
+  }
+
+  switch (state?.status) {
+    case "loaded":
+      return state.toolCount === 1
+        ? "Loaded successfully with 1 tool"
+        : `Loaded successfully with ${state.toolCount} tools`;
+    case "error":
+      return state.error ? `Error: ${state.error}` : "Error";
+    case "starting":
+      return "Starting";
+    case "connecting":
+      return "Connecting";
+    case "disabled":
+      return "Disabled";
+    case "unknown":
+    default:
+      return "Unknown";
+  }
+}
 
 interface ExtensionListRowProps {
   title: string;
@@ -62,6 +88,7 @@ export function ExtensionListRow({
 }: ExtensionListRowProps) {
   const hasAdvanced = Boolean(advancedContent) || moreInfoJson !== undefined;
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const toolCount = loadState?.status === "loaded" ? loadState.toolCount : null;
 
   return (
     <div className="bg-muted/40 flex w-full flex-col gap-3 rounded-md p-4 not-dark:border">
@@ -118,11 +145,29 @@ export function ExtensionListRow({
             </Button>
           ) : null}
           {installed && enabled !== undefined && onEnabledChange ? (
-            <ExtensionRowActions
-              enabled={enabled}
-              loadState={loadState}
-              onEnabledChange={onEnabledChange}
-            />
+            <div className="bg-muted dark:bg-input/30 border-border flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] border px-2.5 text-[0.8rem]">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center">
+                    <McpServerStatus state={loadState} disabled={!enabled} compact />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>{getMcpServerStatusTooltip(loadState, !enabled)}</TooltipContent>
+              </Tooltip>
+              {toolCount !== null ? (
+                <span className="text-muted-foreground text-xs">
+                  {toolCount === 1 ? "1 tool" : `${toolCount} tools`}
+                </span>
+              ) : null}
+
+              <Switch
+                size="sm"
+                className="ml-1"
+                checked={enabled}
+                onCheckedChange={onEnabledChange}
+                aria-label="Toggle extension"
+              />
+            </div>
           ) : null}
         </div>
       </div>

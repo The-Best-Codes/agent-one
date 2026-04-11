@@ -19,8 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { McpServerConfigForm } from "./mcp-server-config-form";
-import { isMcpServerConfigFormValid } from "./mcp-server-config-form-utils";
+import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";
 
 interface InstallExtensionDialogProps {
   extension: McpRegistryExtension | null;
@@ -98,11 +97,16 @@ function InstallExtensionDialogBody({
     }, {});
   }, [install]);
 
-  const [name, setName] = useState(extension.displayName);
-  const [timeoutSec, setTimeoutSec] = useState(30);
-  const [requiresApproval, setRequiresApproval] = useState(false);
-  const [command, setCommand] = useState(install?.commandTemplate || "");
-  const [url, setUrl] = useState(install?.urlTemplate || "");
+  const [formValues, setFormValues] = useState<McpServerConfigFormValues>({
+    type: install?.type ?? "stdio",
+    name: extension.displayName,
+    command: install?.commandTemplate || "",
+    env: {},
+    url: install?.urlTemplate || "",
+    headers: {},
+    timeoutSec: 30,
+    requiresApproval: false,
+  });
   const [fieldValues, setFieldValues] = useState<Record<string, string>>(defaultFieldValues);
 
   if (!install) {
@@ -128,13 +132,11 @@ function InstallExtensionDialogBody({
     ) : null;
 
   const isFormValid =
-    isMcpServerConfigFormValid({
-      type: install.type,
-      name,
-      command,
-      url,
-      timeoutSec,
-    }) && requiredFields.every((field) => (fieldValues[field.id] || "").trim() !== "");
+    formValues.name.trim() !== "" &&
+    Number.isFinite(formValues.timeoutSec) &&
+    formValues.timeoutSec >= 0.1 &&
+    (install.type === "stdio" ? formValues.command.trim() !== "" : formValues.url.trim() !== "") &&
+    requiredFields.every((field) => (fieldValues[field.id] || "").trim() !== "");
 
   const handleInstall = () => {
     if (!isFormValid) {
@@ -142,12 +144,12 @@ function InstallExtensionDialogBody({
     }
 
     const result = createMcpServerFromRegistryInstall(extension, {
-      name: name.trim(),
-      timeoutSec,
-      requiresApproval,
+      name: formValues.name.trim(),
+      timeoutSec: formValues.timeoutSec,
+      requiresApproval: formValues.requiresApproval,
       fieldValues,
-      command: install.type === "stdio" ? command : undefined,
-      url: install.type === "http" ? url : undefined,
+      command: install.type === "stdio" ? formValues.command : undefined,
+      url: install.type === "http" ? formValues.url : undefined,
     });
 
     if (!result) {
@@ -171,33 +173,8 @@ function InstallExtensionDialogBody({
         <McpServerConfigForm
           idPrefix="install-extension"
           className="grid gap-4 py-2"
-          values={{
-            type: install.type,
-            name,
-            command,
-            env: {},
-            url,
-            headers: {},
-            timeoutSec,
-            requiresApproval,
-          }}
-          onChange={(updates) => {
-            if (updates.name !== undefined) {
-              setName(updates.name);
-            }
-            if (updates.command !== undefined) {
-              setCommand(updates.command);
-            }
-            if (updates.url !== undefined) {
-              setUrl(updates.url);
-            }
-            if (updates.timeoutSec !== undefined) {
-              setTimeoutSec(updates.timeoutSec);
-            }
-            if (updates.requiresApproval !== undefined) {
-              setRequiresApproval(updates.requiresApproval);
-            }
-          }}
+          values={formValues}
+          onChange={(updates) => setFormValues((current) => ({ ...current, ...updates }))}
           showTransportEditors={false}
           commandPlaceholder="npx -y ..."
           urlPlaceholder="https://..."
