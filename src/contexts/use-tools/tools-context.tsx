@@ -13,6 +13,7 @@ import {
   closeServerCache,
   getMcpToolsForServer,
   invalidateServerCache,
+  isServerCached,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
@@ -130,16 +131,53 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       return;
     }
 
+    const cachedServers = enabledServers.filter((server) => isServerCached(server));
+    const serversToLoad = enabledServers.filter((server) => !isServerCached(server));
+
     const loadId = ++loadIdRef.current;
 
     const loadMcpTools = async () => {
+      const slugMap = buildMcpServerSlugMap(enabledServers);
+
+      const allTools: ToolSet = {};
+
+      for (const server of cachedServers) {
+        try {
+          const tools = await getMcpToolsForServer(server);
+          const wrappedTools = applyApprovalConfigToTools(
+            tools,
+            server.requiresApproval ?? false,
+            server.toolApprovalOverrides,
+          );
+          const serverSlug = slugMap.get(server.id) ?? server.id;
+          Object.assign(allTools, prefixMcpToolNames(wrappedTools, serverSlug));
+        } catch (error) {
+          logger.error(`Failed to load cached MCP tools for ${server.name}:`, error);
+          closeServerCache(server.id);
+        }
+      }
+
+      if (serversToLoad.length === 0) {
+        if (loadId !== loadIdRef.current) return;
+        mcpToolsRef.current = allTools;
+        mcpLoadedRef.current = true;
+        setMcpTools(allTools);
+        setMcpLoaded(true);
+        setIsMcpLoading(false);
+        return;
+      }
+
       mcpLoadedRef.current = false;
       setIsMcpLoading(true);
       setMcpLoaded(false);
+
+      mcpToolsRef.current = allTools;
+      setMcpTools({ ...allTools });
+
       setMcpServerLoadStates((prev) => {
         const next = { ...prev };
 
-        for (const server of enabledServers) {
+        for (const server of serversToLoad) {
           const previous = prev[server.id];
           next[server.id] = {
             status: server.type === "stdio" ? "starting" : "connecting",
@@ -152,14 +190,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       });
 
       try {
-        const slugMap = buildMcpServerSlugMap(enabledServers);
-
         const chunks: McpServerConfig[][] = [];
-        for (let i = 0; i < enabledServers.length; i += parallelLoadLimit) {
-          chunks.push(enabledServers.slice(i, i + parallelLoadLimit));
+        for (let i = 0; i < serversToLoad.length; i += parallelLoadLimit) {
+          chunks.push(serversToLoad.slice(i, i + parallelLoadLimit));
         }
-
-        const allTools: ToolSet = {};
 
         for (const chunk of chunks) {
           if (loadId !== loadIdRef.current) return;

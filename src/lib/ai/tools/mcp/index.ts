@@ -513,6 +513,11 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
   }
 }
 
+export function isServerCached(server: McpServerConfig): boolean {
+  const cached = serverCache.get(server.id);
+  return cached !== undefined && cached.configHash === getConfigHash(server);
+}
+
 export function closeServerCache(serverId: string): void {
   const loading = loadingOperations.get(serverId);
   if (loading) {
