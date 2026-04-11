@@ -17,19 +17,25 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
 import { AddServerDialog } from "./add-server-dialog";
-import { BuiltInExtensionsTab } from "./built-in-extensions-tab";
+import { BuiltInExtensionsConfig } from "./built-in-extensions-config";
+import { BUILT_IN_SEARCH_TEXT, TOOL_IDS, useEnabledToolCount } from "./built-in-extensions-utils";
 import { ExtensionAdvancedDetails } from "./extension-advanced-details";
-import { ExtensionsBrowser, type CustomServerEntry } from "./extensions-browser";
+import {
+  ExtensionsBrowser,
+  type ExtensionListItem,
+  type ExtensionScope,
+} from "./extensions-browser";
 import { InstallExtensionDialog } from "./install-extension-dialog";
 import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
 
@@ -53,6 +59,7 @@ export default function ExtensionsSection() {
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
   const [mcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
   const [searchParams, setSearchParams] = useSearchParams();
+  const enabledToolCount = useEnabledToolCount();
 
   const mcpInstallPrefill = useMemo(() => {
     const name = searchParams.get("mcpName");
@@ -75,25 +82,12 @@ export default function ExtensionsSection() {
     name: string;
   } | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
   const [query, setQuery] = useState("");
+  const [scope, setScope] = useState<ExtensionScope>("all");
   const [showDeviceExtensions, setShowDeviceExtensions] = useState(true);
   const [showOnlineExtensions, setShowOnlineExtensions] = useState(true);
 
-  const defaultExtensions = useMemo(() => getMcpRegistryExtensions(), []);
-
-  const extensionByServerId = useMemo(() => {
-    const map = new Map<string, McpRegistryExtension>();
-    for (const extension of defaultExtensions) {
-      map.set(extension.id, extension);
-    }
-    return map;
-  }, [defaultExtensions]);
-
-  const customServers = useMemo(
-    () => mcpServers.filter((server) => !isServerFromRegistry(server)),
-    [mcpServers],
-  );
+  const registryExtensions = useMemo(() => getMcpRegistryExtensions(), []);
 
   const updateMcpServerById = useCallback(
     (serverId: string, updates: Partial<McpServerConfig>) => {
@@ -174,138 +168,132 @@ export default function ExtensionsSection() {
     toast.success(`${installed.name} installed`);
   };
 
-  const handleExtensionUninstallClick = useCallback(
-    (extension: McpRegistryExtension) => {
-      const targetServer = mcpServers.find((server) =>
-        isServerInstalledFromExtension(server, extension),
-      );
-
-      if (!targetServer) {
-        return;
-      }
-
-      setServerToUninstall({
-        id: targetServer.id,
-        name: targetServer.name || extension.displayName,
-      });
-      setShowUninstallDialog(true);
-    },
-    [mcpServers],
-  );
-
-  const handleServerUninstallClick = useCallback((server: McpServerConfig) => {
-    setServerToUninstall({
-      id: server.id,
-      name: server.name || "Custom Extension",
-    });
+  const handleUninstallClick = useCallback((serverId: string, name: string) => {
+    setServerToUninstall({ id: serverId, name });
     setShowUninstallDialog(true);
   }, []);
 
-  const handleConfirmExtensionUninstall = () => {
-    if (!serverToUninstall) {
-      return;
-    }
+  const handleConfirmUninstall = () => {
+    if (!serverToUninstall) return;
 
-    setMcpServers((prev) => {
-      const targetIndex = prev.findIndex((server) => server.id === serverToUninstall.id);
-
-      if (targetIndex === -1) {
-        return prev;
-      }
-
-      return prev.filter((_, index) => index !== targetIndex);
-    });
-
+    setMcpServers((prev) => prev.filter((server) => server.id !== serverToUninstall.id));
     toast.success(`${serverToUninstall.name} removed`);
     setServerToUninstall(null);
     setShowUninstallDialog(false);
   };
 
-  const handleCancelExtensionUninstall = () => {
+  const handleCancelUninstall = () => {
     setServerToUninstall(null);
     setShowUninstallDialog(false);
   };
 
-  const handleExtensionInstallClick = (extension: McpRegistryExtension) => {
-    if (!extension.install) {
-      return;
+  const items: ExtensionListItem[] = useMemo(() => {
+    const result: ExtensionListItem[] = [];
+
+    // Built-in extensions card
+    const toolCountLabel =
+      enabledToolCount === 1
+        ? "1 tool enabled"
+        : `${enabledToolCount} of ${TOOL_IDS.length} tools enabled`;
+    result.push({
+      id: "built-in",
+      title: "Built-in extensions",
+      description: toolCountLabel,
+      searchText: `built-in extensions ${BUILT_IN_SEARCH_TEXT}`,
+      transportType: "built-in",
+      installed: true,
+      canUninstall: false,
+      installSupported: false,
+      advancedContent: <BuiltInExtensionsConfig />,
+    });
+
+    // Custom servers (non-registry)
+    const customServers = mcpServers.filter((s) => !isServerFromRegistry(s));
+    for (const server of customServers) {
+      const isStdio = server.type === "stdio";
+      result.push({
+        id: `custom-${server.id}`,
+        title: server.name || "Custom Extension",
+        description: isStdio ? server.command : server.url,
+        searchText: [
+          server.name || "Custom Extension",
+          server.id,
+          server.type,
+          isStdio ? server.command : server.url,
+        ]
+          .filter(Boolean)
+          .join(" "),
+        transportType: server.type,
+        installed: true,
+        canUninstall: true,
+        installSupported: true,
+        enabled: server.enabled,
+        loadState: mcpServerLoadStates[server.id],
+        onEnabledChange: (enabled) => updateMcpServerById(server.id, { enabled }),
+        onUninstall: () => handleUninstallClick(server.id, server.name || "Custom Extension"),
+        advancedContent: (
+          <ExtensionAdvancedDetails
+            server={server}
+            onUpdate={(updates) => updateMcpServerById(server.id, updates)}
+          />
+        ),
+      });
     }
 
-    setSelectedExtension(extension);
-    setShowInstallDialog(true);
-  };
+    // Registry extensions
+    for (const extension of registryExtensions) {
+      const server = mcpServers.find((s) => isServerInstalledFromExtension(s, extension));
+      const installed = !!server;
 
-  const isExtensionInstalled = (extension: McpRegistryExtension): boolean => {
-    return mcpServers.some((server) => isServerInstalledFromExtension(server, extension));
-  };
-
-  const getExtensionServer = (extension: McpRegistryExtension) => {
-    return mcpServers.find((server) => isServerInstalledFromExtension(server, extension));
-  };
-
-  const renderAdvancedContent = (extension: McpRegistryExtension) => {
-    const server = getExtensionServer(extension);
-    if (!server) {
-      return null;
-    }
-
-    return (
-      <ExtensionAdvancedDetails
-        server={server}
-        onUpdate={(updates) => updateMcpServerById(server.id, updates)}
-      />
-    );
-  };
-
-  const customServerEntries: CustomServerEntry[] = useMemo(
-    () =>
-      customServers.map((server) => {
-        const linkedExtension = extensionByServerId.get(server.id);
-        return {
-          server,
-          loadState: mcpServerLoadStates[server.id],
-          advancedContent: (
+      result.push({
+        id: extension.id,
+        title: extension.displayName,
+        description: extension.description,
+        searchText: [extension.displayName, extension.registryName, extension.searchText]
+          .filter(Boolean)
+          .join(" "),
+        transportType: extension.installType ?? "stdio",
+        installed,
+        canUninstall: true,
+        installSupported: Boolean(extension.install),
+        version: extension.version,
+        iconUrl: extension.iconUrl,
+        websiteUrl: extension.websiteUrl,
+        badges: extension.categories.length > 0 ? extension.categories : extension.tags,
+        enabled: server?.enabled,
+        loadState: server ? mcpServerLoadStates[server.id] : undefined,
+        onInstall: () => {
+          if (extension.install) {
+            setSelectedExtension(extension);
+            setShowInstallDialog(true);
+          }
+        },
+        onUninstall: server
+          ? () => handleUninstallClick(server.id, server.name || extension.displayName)
+          : undefined,
+        onEnabledChange: server
+          ? (enabled) => updateMcpServerById(server.id, { enabled })
+          : undefined,
+        advancedContent:
+          installed && server ? (
             <ExtensionAdvancedDetails
               server={server}
               onUpdate={(updates) => updateMcpServerById(server.id, updates)}
             />
-          ),
-          onEnabledChange: (enabled: boolean) => updateMcpServerById(server.id, { enabled }),
-          onUninstall: () =>
-            linkedExtension
-              ? handleExtensionUninstallClick(linkedExtension)
-              : handleServerUninstallClick(server),
-        };
-      }),
-    [
-      customServers,
-      mcpServerLoadStates,
-      extensionByServerId,
-      handleExtensionUninstallClick,
-      handleServerUninstallClick,
-      updateMcpServerById,
-    ],
-  );
+          ) : undefined,
+        moreInfoJson: installed ? extension.registryEntry : undefined,
+      });
+    }
 
-  const sharedBrowserProps = {
-    showDeviceExtensions,
-    showOnlineExtensions,
-    isInstalled: isExtensionInstalled,
-    getServerForExtension: getExtensionServer,
-    getLoadStateForExtension: (extension: McpRegistryExtension) => {
-      const server = getExtensionServer(extension);
-      return server ? mcpServerLoadStates[server.id] : undefined;
-    },
-    onInstallClick: handleExtensionInstallClick,
-    onUninstallClick: handleExtensionUninstallClick,
-    onEnabledChange: (serverId: string, enabled: boolean) =>
-      updateMcpServerById(serverId, { enabled }),
-    getAdvancedContent: renderAdvancedContent,
-    getMoreInfoJson: (extension: McpRegistryExtension) => extension.registryEntry,
-    customServers: customServerEntries,
-  };
-
-  const isTransportFilterDisabled = activeTab === "built-in";
+    return result;
+  }, [
+    mcpServers,
+    mcpServerLoadStates,
+    registryExtensions,
+    enabledToolCount,
+    updateMcpServerById,
+    handleUninstallClick,
+  ]);
 
   return (
     <Card>
@@ -320,74 +308,68 @@ export default function ExtensionsSection() {
             Some features may be incomplete or change without notice.
           </AlertDescription>
         </Alert>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div className="group/extensions-search-input relative flex-1">
-              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search extensions..."
-                aria-label="Search extensions"
-                className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
-              />
-            </div>
-            <div className="flex w-full items-center gap-2 md:w-auto">
-              <TabsList className="flex-1 justify-start md:w-auto">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="installed">Installed</TabsTrigger>
-                <TabsTrigger value="built-in">Built-in</TabsTrigger>
-              </TabsList>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    disabled={isTransportFilterDisabled}
-                    aria-label="Filter by connection"
-                  >
-                    <IconFilter data-icon="inline-start" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-auto min-w-max">
-                  <DropdownMenuLabel>Filter by connection</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={showDeviceExtensions}
-                    onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
-                  >
-                    Runs on this device
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={showOnlineExtensions}
-                    onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
-                  >
-                    Connects online
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Button onClick={() => setShowAddDialog(true)}>
-                <IconPlus data-icon="inline-start" />
-                Add Custom
-              </Button>
-            </div>
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="group/extensions-search-input relative flex-1">
+            <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search extensions..."
+              aria-label="Search extensions"
+              className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
+            />
           </div>
+          <div className="flex w-full items-center gap-2 md:w-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="outline" aria-label="Filter extensions">
+                  <IconFilter data-icon="inline-start" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-auto min-w-max">
+                <DropdownMenuLabel>Show</DropdownMenuLabel>
+                <DropdownMenuRadioGroup
+                  value={scope}
+                  onValueChange={(v) => setScope(v as ExtensionScope)}
+                >
+                  <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="installed">Installed</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="built-in">Built-in</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Connection type</DropdownMenuLabel>
+                <DropdownMenuCheckboxItem
+                  checked={showDeviceExtensions}
+                  onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
+                  disabled={scope === "built-in"}
+                >
+                  Runs on this device
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={showOnlineExtensions}
+                  onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
+                  disabled={scope === "built-in"}
+                >
+                  Connects online
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          {[
-            { value: "all", filter: "all" as const },
-            { value: "installed", filter: "installed" as const },
-          ].map((tab) => (
-            <TabsContent key={tab.value} value={tab.value}>
-              <ExtensionsBrowser filter={tab.filter} query={query} {...sharedBrowserProps} />
-            </TabsContent>
-          ))}
+            <Button onClick={() => setShowAddDialog(true)}>
+              <IconPlus data-icon="inline-start" />
+              Add Custom
+            </Button>
+          </div>
+        </div>
 
-          <TabsContent value="built-in">
-            <BuiltInExtensionsTab query={query} />
-          </TabsContent>
-        </Tabs>
+        <ExtensionsBrowser
+          items={items}
+          query={query}
+          scope={scope}
+          showDeviceExtensions={showDeviceExtensions}
+          showOnlineExtensions={showOnlineExtensions}
+        />
 
         <AddServerDialog
           key={addDialogInitialValues ? "deeplink" : "manual"}
@@ -422,8 +404,8 @@ export default function ExtensionsSection() {
           serverName={serverToUninstall?.name ?? null}
           open={showUninstallDialog}
           onOpenChange={setShowUninstallDialog}
-          onConfirm={handleConfirmExtensionUninstall}
-          onCancel={handleCancelExtensionUninstall}
+          onConfirm={handleConfirmUninstall}
+          onCancel={handleCancelUninstall}
         />
       </CardContent>
     </Card>

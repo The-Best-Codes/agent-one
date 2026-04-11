@@ -32,6 +32,7 @@ interface ExtensionListRowProps {
   badges?: string[];
   installed: boolean;
   installSupported?: boolean;
+  canUninstall?: boolean;
   onInstall?: () => void;
   onUninstall?: () => void;
   enabled?: boolean;
@@ -50,6 +51,7 @@ export function ExtensionListRow({
   badges = [],
   installed,
   installSupported = true,
+  canUninstall = true,
   onInstall,
   onUninstall,
   enabled,
@@ -105,16 +107,16 @@ export function ExtensionListRow({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {installed ? (
+          {installed && canUninstall ? (
             <Button size="sm" variant="destructive" onClick={onUninstall}>
               <IconTrash data-icon="inline-start" />
               Uninstall
             </Button>
-          ) : (
+          ) : !installed ? (
             <Button size="sm" variant="default" onClick={onInstall} disabled={!installSupported}>
               {installSupported ? "Install" : "Unsupported"}
             </Button>
-          )}
+          ) : null}
           {installed && enabled !== undefined && onEnabledChange ? (
             <ExtensionRowActions
               enabled={enabled}
