@@ -105,13 +105,6 @@ export function ExtensionListRow({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          {installed && enabled !== undefined && onEnabledChange ? (
-            <ExtensionRowActions
-              enabled={enabled}
-              loadState={loadState}
-              onEnabledChange={onEnabledChange}
-            />
-          ) : null}
           {installed ? (
             <Button size="sm" variant="destructive" onClick={onUninstall}>
               <IconTrash data-icon="inline-start" />
@@ -122,6 +115,13 @@ export function ExtensionListRow({
               {installSupported ? "Install" : "Unsupported"}
             </Button>
           )}
+          {installed && enabled !== undefined && onEnabledChange ? (
+            <ExtensionRowActions
+              enabled={enabled}
+              loadState={loadState}
+              onEnabledChange={onEnabledChange}
+            />
+          ) : null}
         </div>
       </div>
 

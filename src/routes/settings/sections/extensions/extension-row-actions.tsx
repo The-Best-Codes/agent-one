@@ -19,7 +19,7 @@ export function ExtensionRowActions({
   const toolCount = loadState?.status === "loaded" ? loadState.toolCount : null;
 
   return (
-    <div className="bg-background flex items-center gap-3 rounded-md border px-3 py-2">
+    <div className="bg-muted dark:bg-input/30 border-border flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] border px-2.5 text-[0.8rem]">
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center">
@@ -28,17 +28,19 @@ export function ExtensionRowActions({
         </TooltipTrigger>
         <TooltipContent>{getMcpServerStatusTooltip(loadState, !enabled)}</TooltipContent>
       </Tooltip>
-
       {toolCount !== null ? (
         <span className="text-muted-foreground text-xs">
           {toolCount === 1 ? "1 tool" : `${toolCount} tools`}
         </span>
       ) : null}
 
-      <div className="flex items-center gap-2">
-        <span className="text-xs">Enabled</span>
-        <Switch checked={enabled} onCheckedChange={onEnabledChange} aria-label="Toggle extension" />
-      </div>
+      <Switch
+        size="sm"
+        className="ml-1"
+        checked={enabled}
+        onCheckedChange={onEnabledChange}
+        aria-label="Toggle extension"
+      />
     </div>
   );
 }
