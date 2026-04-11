@@ -310,20 +310,25 @@ export default function ExtensionsSection() {
         </Alert>
 
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="group/extensions-search-input relative flex-1">
-            <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search extensions..."
-              aria-label="Search extensions"
-              className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
-            />
-          </div>
-          <div className="flex w-full items-center gap-2 md:w-auto">
+          <div className="flex w-full flex-row gap-0">
+            <div className="group/extensions-search-input relative flex-1">
+              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search extensions..."
+                aria-label="Search extensions"
+                className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
+              />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="outline" aria-label="Filter extensions">
+                <Button
+                  className="rounded-l-none border-l-0"
+                  size="icon"
+                  variant="outline"
+                  aria-label="Filter extensions"
+                >
                   <IconFilter data-icon="inline-start" />
                 </Button>
               </DropdownMenuTrigger>
@@ -355,12 +360,11 @@ export default function ExtensionsSection() {
                 </DropdownMenuCheckboxItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button onClick={() => setShowAddDialog(true)}>
-              <IconPlus data-icon="inline-start" />
-              Add Custom
-            </Button>
           </div>
+          <Button onClick={() => setShowAddDialog(true)}>
+            <IconPlus data-icon="inline-start" />
+            Add Custom
+          </Button>
         </div>
 
         <ExtensionsBrowser
