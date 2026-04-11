@@ -19,6 +19,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
+
+import { ExtensionRowActions } from "./extension-row-actions";
 
 interface ExtensionListRowProps {
   title: string;
@@ -31,6 +34,9 @@ interface ExtensionListRowProps {
   installSupported?: boolean;
   onInstall?: () => void;
   onUninstall?: () => void;
+  enabled?: boolean;
+  loadState?: McpServerLoadState;
+  onEnabledChange?: (enabled: boolean) => void;
   advancedContent?: ReactNode;
   moreInfoJson?: unknown;
 }
@@ -46,6 +52,9 @@ export function ExtensionListRow({
   installSupported = true,
   onInstall,
   onUninstall,
+  enabled,
+  loadState,
+  onEnabledChange,
   advancedContent,
   moreInfoJson,
 }: ExtensionListRowProps) {
@@ -96,6 +105,13 @@ export function ExtensionListRow({
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          {installed && enabled !== undefined && onEnabledChange ? (
+            <ExtensionRowActions
+              enabled={enabled}
+              loadState={loadState}
+              onEnabledChange={onEnabledChange}
+            />
+          ) : null}
           {installed ? (
             <Button size="sm" variant="destructive" onClick={onUninstall}>
               <IconTrash data-icon="inline-start" />

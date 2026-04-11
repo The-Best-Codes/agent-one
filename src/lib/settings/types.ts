@@ -44,6 +44,7 @@ export interface McpServerConfigBase {
   enabled: boolean;
   timeoutMs: number;
   requiresApproval: boolean;
+  toolApprovalOverrides?: Record<string, boolean>;
 }
 
 export interface McpStdioServerConfig extends McpServerConfigBase {
