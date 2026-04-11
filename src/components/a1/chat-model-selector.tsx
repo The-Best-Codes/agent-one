@@ -67,7 +67,7 @@ const ModelList: FC<ModelListProps> = ({
 
   const headingOffsets = useMemo(() => {
     const offsets: { provider: string; offset: number }[] = [];
-    let offset = 0;
+    let offset = 2;
     for (const row of rows) {
       if (row.type === "heading") {
         offsets.push({ provider: row.provider, offset });
