@@ -1,7 +1,6 @@
 import { IconFilter, IconFlask, IconPlus, IconSearch } from "@tabler/icons-react";
-import fuzzysort from "fuzzysort";
 import { useAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 
@@ -10,7 +9,6 @@ import {
   type McpRegistryExtension,
   type McpRegistryInstallResult,
 } from "@/assets/mcp-registry/mcp-registry";
-import { NoCustomExtensions } from "@/components/a1/empty-states/no-custom-extensions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -31,8 +29,7 @@ import { type McpServerConfig } from "@/lib/settings/types";
 import { AddServerDialog } from "./add-server-dialog";
 import { BuiltInExtensionsTab } from "./built-in-extensions-tab";
 import { ExtensionAdvancedDetails } from "./extension-advanced-details";
-import { ExtensionListRow } from "./extension-list-row";
-import { ExtensionsBrowser } from "./extensions-browser";
+import { ExtensionsBrowser, type CustomServerEntry } from "./extensions-browser";
 import { InstallExtensionDialog } from "./install-extension-dialog";
 import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
 
@@ -78,7 +75,7 @@ export default function ExtensionsSection() {
     name: string;
   } | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState(mcpInstallPrefill ? "custom" : "all");
+  const [activeTab, setActiveTab] = useState("all");
   const [query, setQuery] = useState("");
   const [showDeviceExtensions, setShowDeviceExtensions] = useState(true);
   const [showOnlineExtensions, setShowOnlineExtensions] = useState(true);
@@ -98,40 +95,16 @@ export default function ExtensionsSection() {
     [mcpServers],
   );
 
-  const filteredCustomServers = useMemo(() => {
-    const normalizedQuery = query.trim();
-    if (!normalizedQuery) {
-      return customServers;
-    }
-
-    return customServers
-      .map((server) => ({
-        server,
-        score:
-          fuzzysort.single(
-            normalizedQuery,
-            [
-              server.name || "Custom Extension",
-              server.id,
-              server.type,
-              server.type === "stdio" ? server.command : server.url,
-            ]
-              .filter(Boolean)
-              .join(" "),
-          )?.score ?? 0,
-      }))
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map(({ server }) => server);
-  }, [customServers, query]);
-
-  const updateMcpServerById = (serverId: string, updates: Partial<McpServerConfig>) => {
-    setMcpServers((prev) =>
-      prev.map((server) =>
-        server.id === serverId ? ({ ...server, ...updates } as McpServerConfig) : server,
-      ),
-    );
-  };
+  const updateMcpServerById = useCallback(
+    (serverId: string, updates: Partial<McpServerConfig>) => {
+      setMcpServers((prev) =>
+        prev.map((server) =>
+          server.id === serverId ? ({ ...server, ...updates } as McpServerConfig) : server,
+        ),
+      );
+    },
+    [setMcpServers],
+  );
 
   const handleAddServer = (serverData: {
     type: "stdio" | "http";
@@ -201,29 +174,32 @@ export default function ExtensionsSection() {
     toast.success(`${installed.name} installed`);
   };
 
-  const handleExtensionUninstallClick = (extension: McpRegistryExtension) => {
-    const targetServer = mcpServers.find((server) =>
-      isServerInstalledFromExtension(server, extension),
-    );
+  const handleExtensionUninstallClick = useCallback(
+    (extension: McpRegistryExtension) => {
+      const targetServer = mcpServers.find((server) =>
+        isServerInstalledFromExtension(server, extension),
+      );
 
-    if (!targetServer) {
-      return;
-    }
+      if (!targetServer) {
+        return;
+      }
 
-    setServerToUninstall({
-      id: targetServer.id,
-      name: targetServer.name || extension.displayName,
-    });
-    setShowUninstallDialog(true);
-  };
+      setServerToUninstall({
+        id: targetServer.id,
+        name: targetServer.name || extension.displayName,
+      });
+      setShowUninstallDialog(true);
+    },
+    [mcpServers],
+  );
 
-  const handleServerUninstallClick = (server: McpServerConfig) => {
+  const handleServerUninstallClick = useCallback((server: McpServerConfig) => {
     setServerToUninstall({
       id: server.id,
       name: server.name || "Custom Extension",
     });
     setShowUninstallDialog(true);
-  };
+  }, []);
 
   const handleConfirmExtensionUninstall = () => {
     if (!serverToUninstall) {
@@ -281,6 +257,36 @@ export default function ExtensionsSection() {
     );
   };
 
+  const customServerEntries: CustomServerEntry[] = useMemo(
+    () =>
+      customServers.map((server) => {
+        const linkedExtension = extensionByServerId.get(server.id);
+        return {
+          server,
+          loadState: mcpServerLoadStates[server.id],
+          advancedContent: (
+            <ExtensionAdvancedDetails
+              server={server}
+              onUpdate={(updates) => updateMcpServerById(server.id, updates)}
+            />
+          ),
+          onEnabledChange: (enabled: boolean) => updateMcpServerById(server.id, { enabled }),
+          onUninstall: () =>
+            linkedExtension
+              ? handleExtensionUninstallClick(linkedExtension)
+              : handleServerUninstallClick(server),
+        };
+      }),
+    [
+      customServers,
+      mcpServerLoadStates,
+      extensionByServerId,
+      handleExtensionUninstallClick,
+      handleServerUninstallClick,
+      updateMcpServerById,
+    ],
+  );
+
   const sharedBrowserProps = {
     showDeviceExtensions,
     showOnlineExtensions,
@@ -296,9 +302,10 @@ export default function ExtensionsSection() {
       updateMcpServerById(serverId, { enabled }),
     getAdvancedContent: renderAdvancedContent,
     getMoreInfoJson: (extension: McpRegistryExtension) => extension.registryEntry,
+    customServers: customServerEntries,
   };
 
-  const isTransportFilterDisabled = activeTab === "built-in" || activeTab === "custom";
+  const isTransportFilterDisabled = activeTab === "built-in";
 
   return (
     <Card>
@@ -330,7 +337,6 @@ export default function ExtensionsSection() {
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="installed">Installed</TabsTrigger>
                 <TabsTrigger value="built-in">Built-in</TabsTrigger>
-                <TabsTrigger value="custom">Custom</TabsTrigger>
               </TabsList>
 
               <DropdownMenu>
@@ -361,6 +367,11 @@ export default function ExtensionsSection() {
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              <Button onClick={() => setShowAddDialog(true)}>
+                <IconPlus data-icon="inline-start" />
+                Add Custom
+              </Button>
             </div>
           </div>
 
@@ -375,57 +386,6 @@ export default function ExtensionsSection() {
 
           <TabsContent value="built-in">
             <BuiltInExtensionsTab query={query} />
-          </TabsContent>
-
-          <TabsContent value="custom" className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-sm font-medium">Custom Extensions</h3>
-              <Button size="sm" onClick={() => setShowAddDialog(true)}>
-                <IconPlus data-icon="inline-start" />
-                Add Custom
-              </Button>
-            </div>
-
-            {filteredCustomServers.length === 0 ? (
-              customServers.length === 0 ? (
-                <NoCustomExtensions />
-              ) : (
-                <div className="text-muted-foreground rounded-md p-8 text-center text-sm">
-                  No custom extensions match your search.
-                </div>
-              )
-            ) : (
-              <div className="max-h-96 overflow-x-hidden overflow-y-auto pr-2">
-                <div className="flex flex-col gap-2 py-1">
-                  {filteredCustomServers.map((server) => {
-                    const linkedExtension = extensionByServerId.get(server.id);
-
-                    return (
-                      <ExtensionListRow
-                        key={server.id}
-                        title={server.name || "Custom Extension"}
-                        description={server.type === "stdio" ? server.command : server.url}
-                        installed
-                        enabled={server.enabled}
-                        loadState={mcpServerLoadStates[server.id]}
-                        onEnabledChange={(enabled) => updateMcpServerById(server.id, { enabled })}
-                        onUninstall={() =>
-                          linkedExtension
-                            ? handleExtensionUninstallClick(linkedExtension)
-                            : handleServerUninstallClick(server)
-                        }
-                        advancedContent={
-                          <ExtensionAdvancedDetails
-                            server={server}
-                            onUpdate={(updates) => updateMcpServerById(server.id, updates)}
-                          />
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </TabsContent>
         </Tabs>
 
