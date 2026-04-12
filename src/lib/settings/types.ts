@@ -61,7 +61,15 @@ export interface McpHttpServerConfig extends McpServerConfigBase {
 
 export type McpServerConfig = McpStdioServerConfig | McpHttpServerConfig;
 
-export type ToolId = "dateTime" | "waitNumberMilliseconds" | "getUrlContent" | "webSearch";
+export type ToolId =
+  | "dateTime"
+  | "waitNumberMilliseconds"
+  | "getUrlContent"
+  | "webSearch"
+  | "editFile"
+  | "createFile"
+  | "deleteFile"
+  | "listDirectory";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -88,11 +96,31 @@ export interface WebSearchToolConfig {
   defaultMaxPages: number;
 }
 
+export interface EditFileToolConfig {
+  requiresApproval: boolean;
+}
+
+export interface CreateFileToolConfig {
+  requiresApproval: boolean;
+}
+
+export interface DeleteFileToolConfig {
+  requiresApproval: boolean;
+}
+
+export interface ListDirectoryToolConfig {
+  requiresApproval: boolean;
+}
+
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
   getUrlContent: GetUrlContentToolConfig;
   webSearch: WebSearchToolConfig;
+  editFile: EditFileToolConfig;
+  createFile: CreateFileToolConfig;
+  deleteFile: DeleteFileToolConfig;
+  listDirectory: ListDirectoryToolConfig;
 }
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
@@ -160,6 +188,10 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     waitNumberMilliseconds: false,
     getUrlContent: true,
     webSearch: true,
+    editFile: false,
+    createFile: false,
+    deleteFile: false,
+    listDirectory: false,
   },
   TOOL_CONFIGS: {
     dateTime: {
@@ -182,6 +214,18 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       maxConcurrent: 3,
       defaultMaxResults: 20,
       defaultMaxPages: 2,
+    },
+    editFile: {
+      requiresApproval: true,
+    },
+    createFile: {
+      requiresApproval: true,
+    },
+    deleteFile: {
+      requiresApproval: true,
+    },
+    listDirectory: {
+      requiresApproval: false,
     },
   },
   MCP_SERVERS: [],
