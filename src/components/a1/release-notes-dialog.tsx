@@ -1,6 +1,6 @@
 import { IconRocket } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
@@ -23,7 +23,7 @@ export function ReleaseNotesDialog() {
   const currentVersion = packageJson.version;
 
   const releaseNotesData = useMemo(() => {
-    if (lastSeenVersion === currentVersion) {
+    if (lastSeenVersion === null || lastSeenVersion === currentVersion) {
       return null;
     }
 
@@ -34,6 +34,12 @@ export function ReleaseNotesDialog() {
 
     return { content: notes, version: currentVersion };
   }, [lastSeenVersion, currentVersion]);
+
+  useEffect(() => {
+    if (lastSeenVersion === null) {
+      void setLastSeenVersion(currentVersion);
+    }
+  }, [currentVersion, lastSeenVersion, setLastSeenVersion]);
 
   const handleClose = () => {
     void setLastSeenVersion(currentVersion);
