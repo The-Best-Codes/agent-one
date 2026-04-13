@@ -1,4 +1,4 @@
-import { IconBrain, IconChevronDown, IconLoader } from "@tabler/icons-react";
+import { IconBrain, IconChevronDown } from "@tabler/icons-react";
 import type { ReasoningUIPart } from "ai";
 import { useState } from "react";
 
@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { Spinner } from "@/components/ui/spinner";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { cn } from "@/lib/utils";
 
@@ -43,9 +44,9 @@ export const MessagePartReasoning = ({
           icon={
             <div className="relative">
               {isLoading ? (
-                <IconLoader
+                <Spinner
                   className={cn(
-                    "text-foreground absolute inset-0 size-4 shrink-0 animate-spin opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
+                    "text-foreground absolute inset-0 size-4 shrink-0 opacity-100 transition-[opacity,scale] duration-200 group-hover/reasoning-accordion:scale-0 group-hover/reasoning-accordion:opacity-0",
                     isMainAccordionOpen && "scale-0 opacity-0",
                   )}
                 />

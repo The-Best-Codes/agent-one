@@ -1,7 +1,6 @@
 import {
   IconCheck,
   IconCircleX,
-  IconLoader,
   IconPlus,
   IconPolaroid,
   IconSparkles,
@@ -15,6 +14,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { Toggle } from "@/components/ui/toggle";
 import {
   fetchProviderModels,
@@ -254,7 +254,7 @@ export function ModelList({ models, baseUrl, apiKey, headers, onChange }: ModelL
       case "idle":
         return <IconSparkles />;
       case "fetching":
-        return <IconLoader className="animate-spin" />;
+        return <Spinner />;
       case "success":
         return <IconCheck />;
       case "error":

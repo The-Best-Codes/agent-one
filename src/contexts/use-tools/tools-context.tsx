@@ -3,8 +3,12 @@ import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import {
+  createCreateFileTool,
   createDateTimeTool,
+  createDeleteFileTool,
+  createEditFileTool,
   createGetUrlContentTool,
+  createViewFileTool,
   createWaitTool,
   createWebSearchTool,
 } from "@/lib/ai/tools";
@@ -367,6 +371,18 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     }
     if (enabledTools.webSearch) {
       filteredStaticTools.webSearch = createWebSearchTool(toolConfigs.webSearch);
+    }
+    if (enabledTools.editFile) {
+      filteredStaticTools.editFile = createEditFileTool(toolConfigs.editFile);
+    }
+    if (enabledTools.createFile) {
+      filteredStaticTools.createFile = createCreateFileTool(toolConfigs.createFile);
+    }
+    if (enabledTools.deleteFile) {
+      filteredStaticTools.deleteFile = createDeleteFileTool(toolConfigs.deleteFile);
+    }
+    if (enabledTools.viewFile) {
+      filteredStaticTools.viewFile = createViewFileTool(toolConfigs.viewFile);
     }
 
     if (mcpLoadedRef.current) {

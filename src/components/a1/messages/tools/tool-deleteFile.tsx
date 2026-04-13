@@ -1,8 +1,8 @@
 import {
-  IconCalendar,
   IconChevronDown,
   IconCircleCheck,
   IconCircleX,
+  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
@@ -20,29 +20,30 @@ import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-interface DateTimeOutput {
-  dateTime: string;
-  formatted: string;
+interface DeleteFileInput {
+  filePath: string;
 }
 
-interface DateTimeToolPartProps {
+interface DeleteFileToolPartProps {
   part: ToolUIPart;
 }
 
-export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
+export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => {
   const callId = part.toolCallId;
-  const output = part.output as DateTimeOutput;
+  const input = part.input as DeleteFileInput;
   const { addToolApprovalResponse } = useChatFunctions();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
+
+  const filePath = input?.filePath || "unknown file";
 
   switch (part.state) {
     case "approval-requested":
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
-            <IconCalendar className="text-foreground size-4 shrink-0" />
+            <IconTrash className="text-destructive size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to check the date and time
+              AgentOne wants to delete <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -81,7 +82,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Time and date check denied
+            File deletion denied ({filePath})
           </span>
         </div>
       );
@@ -89,10 +90,8 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <div>
-            <Spinner className="text-foreground size-4 shrink-0" />
-          </div>
-          <span className="text-foreground text-sm font-bold">Checking time and date...</span>
+          <Spinner className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">Preparing to delete file...</span>
         </div>
       );
 
@@ -104,7 +103,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">Checking time and date...</span>
+          <span className="max-w-2xl truncate">
+            Deleting <span className="font-mono text-xs">{filePath}</span>...
+          </span>
         </div>
       );
 
@@ -114,8 +115,10 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <IconCalendar className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">Checked time and date ({output?.formatted})</span>
+          <IconTrash className="text-foreground size-4 shrink-0" />
+          <span className="max-w-2xl truncate">
+            Deleted <span className="font-mono text-xs">{filePath}</span>
+          </span>
         </div>
       );
 
@@ -124,9 +127,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              Time and date check cancelled
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">File deletion cancelled</span>
           </div>
         );
       }
@@ -140,7 +141,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <AccordionItem
             value={callId}
             className={cn(
-              "group/date-time-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+              "group/delete-file-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
               isErrorAccordionOpen && "border border-b! p-2",
             )}
           >
@@ -149,13 +150,13 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
                 <div className="relative">
                   <IconCircleX
                     className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/date-time-accordion:scale-0 group-hover/date-time-accordion:opacity-0",
+                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/delete-file-accordion:scale-0 group-hover/delete-file-accordion:opacity-0",
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
                   <IconChevronDown
                     className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/date-time-accordion:scale-100 group-hover/date-time-accordion:opacity-100",
+                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/delete-file-accordion:scale-100 group-hover/delete-file-accordion:opacity-100",
                       isErrorAccordionOpen && "scale-100 opacity-100",
                     )}
                   />
@@ -165,9 +166,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="text-destructive max-w-2xl truncate">
-                Error checking time and date
-              </span>
+              <span className="text-destructive max-w-2xl truncate">Error deleting file</span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="text-destructive/80 text-sm font-normal">
@@ -181,11 +180,11 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
     default:
       return (
         <div key={callId} className="flex items-center gap-1">
-          <IconCalendar className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Time &amp; date accessed</span>
+          <IconTrash className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">File deleted</span>
         </div>
       );
   }
 };
 
-MessagePartToolDateTime.displayName = "MessagePartToolDateTime";
+MessagePartToolDeleteFile.displayName = "MessagePartToolDeleteFile";

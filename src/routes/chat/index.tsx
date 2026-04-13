@@ -1,4 +1,3 @@
-import { IconLoader } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
@@ -9,6 +8,7 @@ import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
 import { MainChatInput } from "@/components/a1/input/main-chat-input";
 import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
+import { Spinner } from "@/components/ui/spinner";
 import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -66,7 +66,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
         <div className="flex h-full w-full max-w-3xl flex-1 flex-col">
           {isChatLoading && showSpinner ? (
             <div className="flex flex-1 items-center justify-center">
-              <IconLoader className="text-muted-foreground size-8 animate-spin" />
+              <Spinner className="text-muted-foreground size-8" />
             </div>
           ) : (
             <AutoScrollContainer

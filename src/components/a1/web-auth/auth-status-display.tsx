@@ -41,7 +41,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         className={className}
         icon={<Spinner className="text-primary" data-icon="inline-start" />}
         title="Signing in..."
-        description="Preparing device authorization"
+        description="Getting you signed in..."
         action={
           <Button variant="secondary" size="sm" onClick={cancelSignIn}>
             Cancel
@@ -56,7 +56,7 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
       <StatusRow
         className={className}
         icon={<Spinner className="text-primary" data-icon="inline-start" />}
-        title="Link this device"
+        title="Link your account"
         description={
           <a
             href={deviceFlow.verificationUriComplete || deviceFlow.verificationUri}

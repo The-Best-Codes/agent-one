@@ -3,7 +3,6 @@ import {
   IconCircleCheck,
   IconCircleX,
   IconFileText,
-  IconLoader,
   IconWorld,
   IconX,
 } from "@tabler/icons-react";
@@ -17,6 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
@@ -244,7 +244,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+            <Spinner className="text-foreground size-4 shrink-0" />
           </div>
           <span className="text-foreground text-sm font-bold">Browsing URLs...</span>
         </div>
@@ -258,7 +258,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+          <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             {urlCount === 1 ? (
               <>

@@ -3,7 +3,6 @@ import {
   IconCircleCheck,
   IconCircleX,
   IconClock,
-  IconLoader,
   IconX,
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
@@ -16,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { getLogger } from "@/lib/logger";
@@ -119,7 +119,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <div>
-            <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+            <Spinner className="text-foreground size-4 shrink-0" />
           </div>
           <span className="text-foreground text-sm font-bold">Waiting a bit...</span>
         </div>
@@ -132,7 +132,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+          <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             Waiting {safeFormatMilliseconds(input?.milliseconds)}...
           </span>

@@ -568,11 +568,7 @@ export const MainChatInput = ({
                     }
                     aria-label="Send message"
                   >
-                    {status === "submitted" ? (
-                      <Spinner data-icon="inline-start" />
-                    ) : (
-                      <IconArrowUp />
-                    )}
+                    {status === "submitted" ? <Spinner /> : <IconArrowUp />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Send your message</TooltipContent>

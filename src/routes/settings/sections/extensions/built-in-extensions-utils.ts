@@ -27,6 +27,26 @@ export const BUILT_IN_TOOLS: Record<
     description: "Find information online",
     searchTerms: "search web internet results",
   },
+  editFile: {
+    name: "Edit file",
+    description: "Edit files by replacing text content",
+    searchTerms: "edit file modify change replace text",
+  },
+  createFile: {
+    name: "Create file",
+    description: "Create new files with content",
+    searchTerms: "create file new write",
+  },
+  deleteFile: {
+    name: "Delete file",
+    description: "Delete files from the filesystem",
+    searchTerms: "delete file remove",
+  },
+  viewFile: {
+    name: "View file",
+    description: "Read and view file contents with smart truncation",
+    searchTerms: "view file read open content",
+  },
 };
 
 export const TOOL_IDS = Object.keys(BUILT_IN_TOOLS) as ToolId[];
