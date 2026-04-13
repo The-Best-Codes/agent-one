@@ -27,7 +27,6 @@ interface ViewFileInput {
 }
 
 interface ViewFileOutput {
-  success: boolean;
   filePath: string;
   content?: string;
   totalLines?: number;
@@ -35,7 +34,6 @@ interface ViewFileOutput {
   truncated?: boolean;
   startLine?: number;
   endLine?: number;
-  error?: string;
 }
 
 interface ViewFileToolPartProps {
@@ -156,18 +154,6 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
       );
 
     case "output-available": {
-      if (!output?.success) {
-        return (
-          <div
-            key={callId}
-            className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
-          >
-            <IconCircleX className="size-4 shrink-0" />
-            <span className="max-w-2xl truncate">Failed to view {filePath}</span>
-          </div>
-        );
-      }
-
       const lineInfo =
         output.truncated && output.startLine != null && output.endLine != null
           ? ` (${output.startLine}-${output.endLine} of ${output.totalLines} lines)`

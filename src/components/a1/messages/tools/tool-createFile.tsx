@@ -22,7 +22,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { useTheme } from "@/hooks/use-theme";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
-import formatBytes from "@/lib/format-bytes";
 import { getLanguageExtension } from "@/lib/syntax-highlighter/language-extensions";
 import { cn } from "@/lib/utils";
 
@@ -33,12 +32,7 @@ interface CreateFileInput {
 }
 
 interface CreateFileOutput {
-  success: boolean;
-  filePath: string;
-  bytesWritten?: number;
   overwritten?: boolean;
-  content?: string;
-  error?: string;
 }
 
 interface CreateFileToolPartProps {
@@ -165,19 +159,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
       );
 
     case "output-available": {
-      if (!output?.success) {
-        return (
-          <div
-            key={callId}
-            className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
-          >
-            <IconCircleX className="size-4 shrink-0" />
-            <span className="max-w-2xl truncate">Failed to create {filePath}</span>
-          </div>
-        );
-      }
-
-      const content = output.content || input?.content;
+      const content = input?.content;
 
       return (
         <Accordion
@@ -217,7 +199,6 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
               <span className="max-w-2xl truncate">
                 {output.overwritten ? "Overwrote" : "Created"}{" "}
                 <span className="font-mono text-xs">{filePath}</span>
-                {output.bytesWritten ? ` (${formatBytes(output.bytesWritten, true)})` : ""}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">

@@ -32,13 +32,6 @@ export const createWaitTool = (config: WaitToolConfig) =>
         );
       });
 
-      return {
-        status: "success",
-        waitedMs: clampedMs,
-        schema: {
-          status: "The wait status (success, aborted)",
-          waitedMs: "The actual number of milliseconds waited",
-        },
-      };
+      return {};
     },
   });

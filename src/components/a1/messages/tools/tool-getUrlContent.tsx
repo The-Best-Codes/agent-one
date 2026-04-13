@@ -30,7 +30,6 @@ interface GetUrlContentInput {
 }
 
 interface UrlResult {
-  success: boolean;
   url: string;
   title?: string;
   content?: string;
@@ -41,10 +40,7 @@ interface UrlResult {
 }
 
 interface GetUrlContentOutput {
-  success: boolean;
   results?: UrlResult[];
-  error?: string;
-  urls?: string[];
 }
 
 interface GetUrlContentToolPartProps {
@@ -72,7 +68,7 @@ const formatUrl = (url: string) => {
 
 const UrlResultDisplay = memo(
   ({ result, input }: { result: UrlResult; input: GetUrlContentInput }) => {
-    if (!result.success) {
+    if (result.error) {
       return (
         <div className="flex items-center gap-1">
           <IconCircleX className="text-destructive size-4 shrink-0" />
@@ -285,28 +281,13 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       );
 
     case "output-available": {
-      if (!output?.success) {
-        return (
-          <div key={callId} className="flex items-center gap-1">
-            <IconCircleX className="text-destructive size-4 shrink-0" />
-            <span className="text-destructive max-w-2xl truncate text-sm font-bold">
-              Failed to browse URLs:{" "}
-              <span className="text-destructive/80 font-normal">
-                {output?.error || "Unknown error"}
-              </span>
-            </span>
-          </div>
-        );
-      }
-
       const results = output?.results || [];
 
       if (results.length === 1) {
         return <UrlResultDisplay key={callId} result={results[0]} input={input} />;
       }
 
-      const successCount = results.filter((r) => r.success).length;
-      const failCount = results.length - successCount;
+      const failCount = results.filter((r) => r.error).length;
 
       return (
         <Accordion

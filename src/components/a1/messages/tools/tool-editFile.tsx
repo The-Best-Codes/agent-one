@@ -33,12 +33,8 @@ interface EditFileInput {
 }
 
 interface EditFileOutput {
-  success: boolean;
   filePath: string;
   linesChanged?: number;
-  oldContent?: string;
-  newContent?: string;
-  error?: string;
 }
 
 interface EditFileToolPartProps {
@@ -182,20 +178,8 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
       );
 
     case "output-available": {
-      if (!output?.success) {
-        return (
-          <div
-            key={callId}
-            className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
-          >
-            <IconCircleX className="size-4 shrink-0" />
-            <span className="max-w-2xl truncate">Failed to edit {filePath}</span>
-          </div>
-        );
-      }
-
-      const oldContent = output.oldContent || input?.oldContent;
-      const newContent = output.newContent || input?.newContent;
+      const oldContent = input?.oldContent;
+      const newContent = input?.newContent;
 
       return (
         <Accordion

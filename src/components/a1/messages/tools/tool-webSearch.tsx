@@ -39,7 +39,6 @@ interface SearchResult {
 }
 
 interface WebSearchResult {
-  success: boolean;
   query?: string;
   total_results?: number;
   results?: SearchResult[];
@@ -129,20 +128,6 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
 
     case "output-available": {
       const result = part.output as WebSearchResult;
-
-      if (!result.success) {
-        return (
-          <div
-            key={callId}
-            className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
-          >
-            <IconCircleX className="size-4 shrink-0" />{" "}
-            <span className="max-w-2xl truncate">
-              Web search for "{result.query || "unknown query"}" failed
-            </span>
-          </div>
-        );
-      }
 
       return (
         <Accordion

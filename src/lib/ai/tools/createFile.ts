@@ -2,7 +2,6 @@ import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getError } from "@/lib/error/get-error";
 import { getLogger } from "@/lib/logger";
 import type { CreateFileToolConfig } from "@/lib/settings/types";
 
@@ -24,67 +23,24 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
     execute: async (input, { abortSignal }) => {
       logger.verbose("Executing createFile tool with input:", input);
 
-      try {
-        abortSignal?.addEventListener(
-          "abort",
-          () => {
-            const abortError = new Error("The create file operation was aborted.");
-            abortError.name = "AbortError";
-            throw abortError;
-          },
-          { once: true },
+      abortSignal?.throwIfAborted();
+
+      const fileExists = await exists(input.filePath);
+
+      abortSignal?.throwIfAborted();
+
+      if (fileExists && !input.overwrite) {
+        throw new Error(
+          "File already exists. Set overwrite to true to overwrite the existing file.",
         );
-
-        const fileExists = await exists(input.filePath);
-
-        if (fileExists && !input.overwrite) {
-          return {
-            success: false,
-            error: "File already exists. Set overwrite to true to overwrite the existing file.",
-            filePath: input.filePath,
-            schema: {
-              success: "Whether the file was created successfully",
-              error: "Error message if the file creation failed",
-              filePath: "The file path that was attempted to be created",
-            },
-          };
-        }
-
-        await writeTextFile(input.filePath, input.content);
-
-        const bytesWritten = new TextEncoder().encode(input.content).length;
-
-        logger.verbose("File created successfully:", input.filePath);
-
-        return {
-          success: true,
-          filePath: input.filePath,
-          bytesWritten,
-          overwritten: fileExists,
-          content: input.content,
-          schema: {
-            success: "Whether the file was created successfully",
-            filePath: "The path of the file that was created",
-            bytesWritten: "The number of bytes written to the file",
-            overwritten: "Whether an existing file was overwritten",
-            content: "The content that was written to the file",
-          },
-        };
-      } catch (error) {
-        if ((error as Error).name === "AbortError") {
-          throw error;
-        }
-        logger.error("Error creating file:", error);
-        return {
-          success: false,
-          error: getError(error as Error),
-          filePath: input.filePath,
-          schema: {
-            success: "Whether the file was created successfully",
-            error: "Error message if the file creation failed",
-            filePath: "The file path that was attempted to be created",
-          },
-        };
       }
+
+      await writeTextFile(input.filePath, input.content);
+
+      logger.verbose("File created successfully:", input.filePath);
+
+      return {
+        overwritten: fileExists,
+      };
     },
   });

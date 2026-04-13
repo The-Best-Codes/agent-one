@@ -15,27 +15,9 @@ export const createDateTimeTool = (config: DateTimeToolConfig) =>
       const now = new Date();
 
       if (config.useUtc) {
-        return {
-          dateTime: now.toISOString(),
-          formatted: now.toUTCString(),
-          timezone: "UTC",
-          schema: {
-            dateTime: "The current date and time in ISO 8601 format (UTC)",
-            formatted: "The current date and time in a human-readable UTC format",
-            timezone: "The timezone used (UTC)",
-          },
-        };
+        return { formatted: now.toUTCString() };
       }
 
-      return {
-        dateTime: now.toISOString(),
-        formatted: now.toLocaleString(),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        schema: {
-          dateTime: "The current date and time in ISO 8601 format",
-          formatted: "The current date and time in a human-readable format",
-          timezone: "The local timezone name",
-        },
-      };
+      return { formatted: now.toLocaleString() };
     },
   });

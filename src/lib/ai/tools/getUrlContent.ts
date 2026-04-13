@@ -2,7 +2,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getError } from "@/lib/error/get-error";
 import { fixUrl } from "@/lib/fix-url";
 import { getLogger } from "@/lib/logger";
 import type { GetUrlContentToolConfig } from "@/lib/settings/types";
@@ -19,7 +18,6 @@ interface UrlContentResponse {
 }
 
 type SuccessResult = {
-  success: true;
   url: string;
   title?: string;
   content: string;
@@ -29,7 +27,6 @@ type SuccessResult = {
 };
 
 type ErrorResult = {
-  success: false;
   error: string;
   url: string;
 };
@@ -88,21 +85,18 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
       });
 
       const singleFetch = async (url: string, index: number): Promise<FetchResult> => {
-        try {
-          const fixedUrl = fixUrl(url);
-          const result = await invoke<UrlContentResponse>("get_url_content", {
-            url: fixedUrl,
-            format: input.format,
-            maxLength: input.maxLength,
-            timeoutSeconds: input.timeoutSeconds,
-            useWebview: input.useWebview,
-            signal: abortSignal,
-          });
-
+        const fixedUrl = fixUrl(url);
+        return invoke<UrlContentResponse>("get_url_content", {
+          url: fixedUrl,
+          format: input.format,
+          maxLength: input.maxLength,
+          timeoutSeconds: input.timeoutSeconds,
+          useWebview: input.useWebview,
+          signal: abortSignal,
+        }).then((result) => {
           logger.verbose("Fetched URL:", result);
 
           const successResult: SuccessResult = {
-            success: true,
             url: result.url,
             title: result.title,
             content: result.content,
@@ -112,88 +106,54 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
           };
           partialResults[index] = successResult;
           return successResult;
-        } catch (error) {
-          logger.error("Error fetching URL:", url, error);
-          if ((error as Error).name === "AbortError") {
-            throw error;
-          }
-          const errorResult: ErrorResult = {
-            success: false,
-            error: getError(error as Error),
-            url,
-          };
-          partialResults[index] = errorResult;
-          return errorResult;
-        }
+        });
       };
 
-      try {
-        const fetchPromises = input.urls.map((url, index) => singleFetch(url, index));
+      const fetchPromises = input.urls.map((url, index) =>
+        singleFetch(url, index).catch((error) => ({
+          error: error instanceof Error ? error.message : String(error),
+          url,
+        })),
+      );
 
-        const timeoutPromise = new Promise<"timeout">((resolve) => {
-          timeoutId = setTimeout(() => {
-            logger.error("Timeout reached:", timeoutMs);
-            resolve("timeout");
-          }, timeoutMs);
-        });
+      const timeoutPromise = new Promise<"timeout">((resolve) => {
+        timeoutId = setTimeout(() => {
+          logger.error("Timeout reached:", timeoutMs);
+          resolve("timeout");
+        }, timeoutMs);
+      });
 
-        await Promise.race([Promise.all(fetchPromises), timeoutPromise]);
+      const raced = await Promise.race([Promise.all(fetchPromises), timeoutPromise]);
 
-        const finalResults: FetchResult[] = input.urls.map((url, index) => {
-          if (partialResults[index]) {
-            return partialResults[index];
-          }
-          return {
-            success: false,
-            error: "Operation timed out before this URL could be fetched.",
-            url: url,
-          };
-        });
-
-        logger.verbose("Processed URL results:", finalResults);
-
-        const allUrlsFailed = finalResults.length > 0 && finalResults.every((r) => !r.success);
-
-        if (allUrlsFailed) {
-          const errorDetails = finalResults
-            .filter((r): r is ErrorResult => !r.success && !!r.error)
-            .map((r) => `${r.url}: ${r.error}`)
-            .join(", ");
-
-          return {
-            success: false,
-            error: `${finalResults.length > 1 ? `All ${finalResults.length} URLs` : `URL`} failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
-            urls: input.urls,
-          };
-        }
-
-        return {
-          success: true,
-          results: finalResults,
-          schema: {
-            success:
-              "Indicates if the operation as a whole is considered successful (at least one URL succeeded)",
-            results: "Array of results for each URL, including success, error, or timeout status",
-          },
-        };
-      } catch (error) {
-        if ((error as Error).name === "AbortError") {
-          logger.error("The operation was aborted.");
-          throw error;
-        }
-        logger.error("An unexpected error occurred while fetching URLs:", error);
-        return {
-          success: false,
-          error: `An unexpected error occurred: ${getError(error as Error)}`,
-          urls: input.urls,
-          schema: {
-            success: "Indicates the operation failed unexpectedly",
-            error: "Error message describing the failure",
-            urls: "The URLs that were attempted to be fetched",
-          },
-        };
-      } finally {
-        if (timeoutId) clearTimeout(timeoutId);
+      if (raced === "timeout") {
+        throw new Error("Operation timed out before the URLs could be fetched.");
       }
+
+      const finalResults: FetchResult[] = input.urls.map(
+        (url, index) =>
+          partialResults[index] ?? {
+            error: "Operation timed out before this URL could be fetched.",
+            url,
+          },
+      );
+
+      logger.verbose("Processed URL results:", finalResults);
+
+      if (timeoutId) clearTimeout(timeoutId);
+
+      if (finalResults.length > 0 && finalResults.every((r) => "error" in r)) {
+        const errorDetails = finalResults
+          .filter((r): r is ErrorResult => "error" in r && !!r.error)
+          .map((r) => `${r.url}: ${r.error}`)
+          .join(", ");
+
+        throw new Error(
+          `${finalResults.length > 1 ? `All ${finalResults.length} URLs` : `URL`} failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
+        );
+      }
+
+      return {
+        results: finalResults,
+      };
     },
   });
