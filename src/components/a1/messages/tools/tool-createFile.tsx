@@ -1,3 +1,5 @@
+import type { Extension } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 import {
   IconChevronDown,
   IconCircleCheck,
@@ -6,8 +8,9 @@ import {
   IconLoader,
   IconX,
 } from "@tabler/icons-react";
+import CodeMirror from "@uiw/react-codemirror";
 import type { ToolUIPart } from "ai";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +19,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useTheme } from "@/hooks/use-theme";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import formatBytes from "@/lib/format-bytes";
+import { getLanguageExtension } from "@/lib/syntax-highlighter/language-extensions";
 import { cn } from "@/lib/utils";
 
 interface CreateFileInput {
@@ -40,29 +45,28 @@ interface CreateFileToolPartProps {
   part: ToolUIPart;
 }
 
-const formatFilePath = (filePath: string) => {
-  const parts = filePath.split("/");
-  if (parts.length <= 3) return filePath;
-  return "…/" + parts.slice(-2).join("/");
-};
+const ContentPreview = memo(({ content, filePath }: { content: string; filePath: string }) => {
+  const { resolvedTheme } = useTheme();
+  const [langExt, setLangExt] = useState<Extension | null>(null);
 
-const ContentPreview = memo(({ content }: { content: string }) => {
-  const lines = content.split("\n");
+  useEffect(() => {
+    getLanguageExtension(filePath).then(setLangExt);
+  }, [filePath]);
 
   return (
-    <ScrollArea type="always" viewportClassName="max-h-72">
-      <div className="font-mono text-xs leading-relaxed">
-        {lines.map((line, index) => (
-          <div key={index} className="flex bg-green-500/10 whitespace-pre text-green-400">
-            <span className="text-muted-foreground/50 w-8 shrink-0 pr-1 text-right select-none">
-              {index + 1}
-            </span>
-            <span className="w-4 shrink-0 text-center select-none">+</span>
-            <span className="min-w-0 flex-1 overflow-hidden">{line}</span>
-          </div>
-        ))}
-      </div>
-    </ScrollArea>
+    <div className="max-h-72 w-full overflow-auto">
+      <CodeMirror
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
+        value={content}
+        className="w-full"
+        extensions={[
+          EditorView.editable.of(false),
+          EditorView.lineWrapping,
+          ...(langExt ? [langExt] : []),
+        ]}
+        readOnly={true}
+      />
+    </div>
   );
 });
 
@@ -89,12 +93,12 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
             <IconFilePlus className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to {input?.overwrite ? "overwrite" : "create"}{" "}
-              <span className="font-mono text-xs">{formatFilePath(filePath)}</span>
+              <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           {input?.content && (
             <div className="border-border overflow-hidden rounded border">
-              <ContentPreview content={input.content} />
+              <ContentPreview content={input.content} filePath={filePath} />
             </div>
           )}
           <div className="flex items-center justify-end gap-2">
@@ -133,7 +137,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            File creation denied ({formatFilePath(filePath)})
+            File creation denied ({filePath})
           </span>
         </div>
       );
@@ -155,7 +159,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
         >
           <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
-            Creating <span className="font-mono text-xs">{formatFilePath(filePath)}</span>...
+            Creating <span className="font-mono text-xs">{filePath}</span>...
           </span>
         </div>
       );
@@ -168,7 +172,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
             className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
           >
             <IconCircleX className="size-4 shrink-0" />
-            <span className="max-w-2xl truncate">Failed to create {formatFilePath(filePath)}</span>
+            <span className="max-w-2xl truncate">Failed to create {filePath}</span>
           </div>
         );
       }
@@ -180,12 +184,12 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           type="single"
           collapsible
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
+          className="text-foreground flex w-full flex-row bg-transparent p-0 text-sm"
         >
           <AccordionItem
             value={callId}
             className={cn(
-              "group/create-file-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+              "group/create-file-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
               isMainAccordionOpen && "border border-b! p-2",
             )}
           >
@@ -212,14 +216,14 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
             >
               <span className="max-w-2xl truncate">
                 {output.overwritten ? "Overwrote" : "Created"}{" "}
-                <span className="font-mono text-xs">{formatFilePath(filePath)}</span>
-                {output.bytesWritten ? ` (${output.bytesWritten.toLocaleString()} bytes)` : ""}
+                <span className="font-mono text-xs">{filePath}</span>
+                {output.bytesWritten ? ` (${formatBytes(output.bytesWritten, true)})` : ""}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               {content ? (
-                <div className="border-border overflow-hidden rounded border">
-                  <ContentPreview content={content} />
+                <div className="border-border w-full overflow-hidden rounded border">
+                  <ContentPreview content={content} filePath={filePath} />
                 </div>
               ) : (
                 <div className="text-muted-foreground text-xs">File created successfully.</div>

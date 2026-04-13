@@ -1,3 +1,6 @@
+import { unifiedMergeView } from "@codemirror/merge";
+import type { Extension } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 import {
   IconChevronDown,
   IconCircleCheck,
@@ -6,8 +9,9 @@ import {
   IconPencil,
   IconX,
 } from "@tabler/icons-react";
+import CodeMirror from "@uiw/react-codemirror";
 import type { ToolUIPart } from "ai";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,9 +20,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useTheme } from "@/hooks/use-theme";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import { getLanguageExtension } from "@/lib/syntax-highlighter/language-extensions";
 import { cn } from "@/lib/utils";
 
 interface EditFileInput {
@@ -40,127 +45,46 @@ interface EditFileToolPartProps {
   part: ToolUIPart;
 }
 
-const formatFilePath = (filePath: string) => {
-  const parts = filePath.split("/");
-  if (parts.length <= 3) return filePath;
-  return "…/" + parts.slice(-2).join("/");
-};
+const DiffView = memo(
+  ({
+    oldContent,
+    newContent,
+    filePath,
+  }: {
+    oldContent: string;
+    newContent: string;
+    filePath: string;
+  }) => {
+    const { resolvedTheme } = useTheme();
+    const [langExt, setLangExt] = useState<Extension | null>(null);
 
-interface DiffLine {
-  type: "added" | "removed" | "context";
-  content: string;
-  oldLineNumber?: number;
-  newLineNumber?: number;
-}
+    useEffect(() => {
+      getLanguageExtension(filePath).then(setLangExt);
+    }, [filePath]);
 
-function computeDiffLines(oldContent: string, newContent: string): DiffLine[] {
-  const oldLines = oldContent.split("\n");
-  const newLines = newContent.split("\n");
-  const lines: DiffLine[] = [];
-
-  const maxContext = 3;
-
-  // Simple diff: find common prefix, differing middle, common suffix
-  let prefixLen = 0;
-  while (
-    prefixLen < oldLines.length &&
-    prefixLen < newLines.length &&
-    oldLines[prefixLen] === newLines[prefixLen]
-  ) {
-    prefixLen++;
-  }
-
-  let oldSuffixStart = oldLines.length;
-  let newSuffixStart = newLines.length;
-  while (
-    oldSuffixStart > prefixLen &&
-    newSuffixStart > prefixLen &&
-    oldLines[oldSuffixStart - 1] === newLines[newSuffixStart - 1]
-  ) {
-    oldSuffixStart--;
-    newSuffixStart--;
-  }
-
-  // Context before changes
-  const contextStart = Math.max(0, prefixLen - maxContext);
-  for (let i = contextStart; i < prefixLen; i++) {
-    lines.push({
-      type: "context",
-      content: oldLines[i],
-      oldLineNumber: i + 1,
-      newLineNumber: i + 1,
-    });
-  }
-
-  // Removed lines
-  for (let i = prefixLen; i < oldSuffixStart; i++) {
-    lines.push({
-      type: "removed",
-      content: oldLines[i],
-      oldLineNumber: i + 1,
-    });
-  }
-
-  // Added lines
-  for (let i = prefixLen; i < newSuffixStart; i++) {
-    lines.push({
-      type: "added",
-      content: newLines[i],
-      newLineNumber: i + 1,
-    });
-  }
-
-  // Context after changes
-  const contextEnd = Math.min(oldLines.length, oldSuffixStart + maxContext);
-  for (let i = oldSuffixStart; i < contextEnd; i++) {
-    const newI = i - oldSuffixStart + newSuffixStart;
-    lines.push({
-      type: "context",
-      content: oldLines[i],
-      oldLineNumber: i + 1,
-      newLineNumber: newI + 1,
-    });
-  }
-
-  return lines;
-}
-
-const DiffView = memo(({ oldContent, newContent }: { oldContent: string; newContent: string }) => {
-  const diffLines = computeDiffLines(oldContent, newContent);
-
-  if (diffLines.length === 0) {
-    return <div className="text-muted-foreground p-2 text-xs italic">No visible changes</div>;
-  }
-
-  return (
-    <ScrollArea type="always" viewportClassName="max-h-72">
-      <div className="font-mono text-xs leading-relaxed">
-        {diffLines.map((line, index) => (
-          <div
-            key={index}
-            className={cn(
-              "flex whitespace-pre",
-              line.type === "removed" && "bg-red-500/10 text-red-400",
-              line.type === "added" && "bg-green-500/10 text-green-400",
-              line.type === "context" && "text-muted-foreground",
-            )}
-          >
-            <span className="text-muted-foreground/50 w-8 shrink-0 pr-1 text-right select-none">
-              {line.oldLineNumber ?? " "}
-            </span>
-            <span className="text-muted-foreground/50 w-8 shrink-0 pr-1 text-right select-none">
-              {line.newLineNumber ?? " "}
-            </span>
-            <span className="w-4 shrink-0 text-center select-none">
-              {line.type === "removed" ? "−" : line.type === "added" ? "+" : " "}
-            </span>
-            <span className="min-w-0 flex-1 overflow-hidden">{line.content}</span>
-          </div>
-        ))}
+    return (
+      <div className="max-h-72 w-full overflow-auto">
+        <CodeMirror
+          theme={resolvedTheme === "dark" ? "dark" : "light"}
+          value={newContent}
+          className="w-full"
+          extensions={[
+            unifiedMergeView({
+              original: oldContent,
+              highlightChanges: true,
+              gutter: true,
+              mergeControls: false,
+              collapseUnchanged: { margin: 3, minSize: 4 },
+            }),
+            EditorView.editable.of(false),
+            ...(langExt ? [langExt] : []),
+          ]}
+          readOnly={true}
+        />
       </div>
-    </ScrollArea>
-  );
-});
+    );
+  },
+);
 
 DiffView.displayName = "DiffView";
 
@@ -184,13 +108,16 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconPencil className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to edit{" "}
-              <span className="font-mono text-xs">{formatFilePath(filePath)}</span>
+              AgentOne wants to edit <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           {input?.oldContent && input?.newContent && (
             <div className="border-border overflow-hidden rounded border">
-              <DiffView oldContent={input.oldContent} newContent={input.newContent} />
+              <DiffView
+                oldContent={input.oldContent}
+                newContent={input.newContent}
+                filePath={filePath}
+              />
             </div>
           )}
           <div className="flex items-center justify-end gap-2">
@@ -228,9 +155,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">
-            Edit denied ({formatFilePath(filePath)})
-          </span>
+          <span className="text-muted-foreground text-sm font-bold">Edit denied ({filePath})</span>
         </div>
       );
 
@@ -251,7 +176,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
         >
           <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
-            Editing <span className="font-mono text-xs">{formatFilePath(filePath)}</span>...
+            Editing <span className="font-mono text-xs">{filePath}</span>...
           </span>
         </div>
       );
@@ -264,7 +189,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
             className="text-destructive flex flex-row items-center gap-1 text-sm font-bold"
           >
             <IconCircleX className="size-4 shrink-0" />
-            <span className="max-w-2xl truncate">Failed to edit {formatFilePath(filePath)}</span>
+            <span className="max-w-2xl truncate">Failed to edit {filePath}</span>
           </div>
         );
       }
@@ -277,12 +202,12 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           type="single"
           collapsible
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
+          className="text-foreground flex w-full flex-row bg-transparent p-0 text-sm"
         >
           <AccordionItem
             value={callId}
             className={cn(
-              "group/edit-file-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+              "group/edit-file-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
               isMainAccordionOpen && "border border-b! p-2",
             )}
           >
@@ -308,14 +233,14 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                Edited <span className="font-mono text-xs">{formatFilePath(filePath)}</span>
+                Edited <span className="font-mono text-xs">{filePath}</span>
                 {output.linesChanged ? ` (${output.linesChanged} lines)` : ""}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               {oldContent && newContent ? (
-                <div className="border-border overflow-hidden rounded border">
-                  <DiffView oldContent={oldContent} newContent={newContent} />
+                <div className="border-border w-full overflow-hidden rounded border">
+                  <DiffView oldContent={oldContent} newContent={newContent} filePath={filePath} />
                 </div>
               ) : (
                 <div className="text-muted-foreground text-xs">File edited successfully.</div>

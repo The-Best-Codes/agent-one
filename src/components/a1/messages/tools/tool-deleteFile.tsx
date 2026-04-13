@@ -28,12 +28,6 @@ interface DeleteFileToolPartProps {
   part: ToolUIPart;
 }
 
-const formatFilePath = (filePath: string) => {
-  const parts = filePath.split("/");
-  if (parts.length <= 3) return filePath;
-  return "…/" + parts.slice(-2).join("/");
-};
-
 export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as DeleteFileInput;
@@ -49,8 +43,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           <div className="flex items-center gap-1">
             <IconTrash className="text-destructive size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to delete{" "}
-              <span className="font-mono text-xs">{formatFilePath(filePath)}</span>
+              AgentOne wants to delete <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -89,7 +82,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            File deletion denied ({formatFilePath(filePath)})
+            File deletion denied ({filePath})
           </span>
         </div>
       );
@@ -111,7 +104,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
         >
           <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
           <span className="max-w-2xl truncate">
-            Deleting <span className="font-mono text-xs">{formatFilePath(filePath)}</span>...
+            Deleting <span className="font-mono text-xs">{filePath}</span>...
           </span>
         </div>
       );
@@ -124,7 +117,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
         >
           <IconTrash className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
-            Deleted <span className="font-mono text-xs">{formatFilePath(filePath)}</span>
+            Deleted <span className="font-mono text-xs">{filePath}</span>
           </span>
         </div>
       );
