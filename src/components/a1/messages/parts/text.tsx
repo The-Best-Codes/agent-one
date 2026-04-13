@@ -20,7 +20,7 @@ export const MessagePartText = ({
   const markdownRendering = useAtomValue(markdownRenderingAtom);
   const shouldUsePerformantRenderer = text.length > maxMessageLength;
 
-  if (!text) return null;
+  if (!text || text.trim() === "") return null;
 
   const shouldRenderMarkdown = (() => {
     const renderingOption = markdownRendering;
