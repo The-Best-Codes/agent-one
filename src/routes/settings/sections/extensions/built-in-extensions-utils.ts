@@ -42,6 +42,11 @@ export const BUILT_IN_TOOLS: Record<
     description: "Delete files from the filesystem",
     searchTerms: "delete file remove",
   },
+  viewFile: {
+    name: "View file",
+    description: "Read and view file contents with smart truncation",
+    searchTerms: "view file read open content",
+  },
 };
 
 export const TOOL_IDS = Object.keys(BUILT_IN_TOOLS) as ToolId[];

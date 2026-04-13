@@ -244,6 +244,29 @@ export function BuiltInExtensionsConfig() {
                   </>
                 )}
 
+                {toolId === "viewFile" && (
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="viewFile-maxchars" className="text-xs">
+                      Default Max Characters
+                    </Label>
+                    <Input
+                      id="viewFile-maxchars"
+                      type="number"
+                      min={100}
+                      max={100000}
+                      value={toolConfigs.viewFile.defaultMaxChars}
+                      onChange={(e) =>
+                        updateToolConfig("viewFile", {
+                          defaultMaxChars: Math.max(
+                            100,
+                            Math.min(parseInt(e.target.value) || 10000, 100000),
+                          ),
+                        })
+                      }
+                    />
+                  </div>
+                )}
+
                 {toolId === "webSearch" && (
                   <>
                     <div className="grid gap-1.5">
