@@ -8,7 +8,6 @@ import {
   createDeleteFileTool,
   createEditFileTool,
   createGetUrlContentTool,
-  createListDirectoryTool,
   createWaitTool,
   createWebSearchTool,
 } from "@/lib/ai/tools";
@@ -380,9 +379,6 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     }
     if (enabledTools.deleteFile) {
       filteredStaticTools.deleteFile = createDeleteFileTool(toolConfigs.deleteFile);
-    }
-    if (enabledTools.listDirectory) {
-      filteredStaticTools.listDirectory = createListDirectoryTool(toolConfigs.listDirectory);
     }
 
     if (mcpLoadedRef.current) {

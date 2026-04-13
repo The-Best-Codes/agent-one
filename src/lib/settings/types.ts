@@ -68,8 +68,7 @@ export type ToolId =
   | "webSearch"
   | "editFile"
   | "createFile"
-  | "deleteFile"
-  | "listDirectory";
+  | "deleteFile";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -108,10 +107,6 @@ export interface DeleteFileToolConfig {
   requiresApproval: boolean;
 }
 
-export interface ListDirectoryToolConfig {
-  requiresApproval: boolean;
-}
-
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
@@ -120,7 +115,6 @@ export interface ToolConfigs {
   editFile: EditFileToolConfig;
   createFile: CreateFileToolConfig;
   deleteFile: DeleteFileToolConfig;
-  listDirectory: ListDirectoryToolConfig;
 }
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
@@ -191,7 +185,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     editFile: false,
     createFile: false,
     deleteFile: false,
-    listDirectory: false,
   },
   TOOL_CONFIGS: {
     dateTime: {
@@ -223,9 +216,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     },
     deleteFile: {
       requiresApproval: true,
-    },
-    listDirectory: {
-      requiresApproval: false,
     },
   },
   MCP_SERVERS: [],

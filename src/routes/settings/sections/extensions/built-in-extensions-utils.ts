@@ -42,11 +42,6 @@ export const BUILT_IN_TOOLS: Record<
     description: "Delete files from the filesystem",
     searchTerms: "delete file remove",
   },
-  listDirectory: {
-    name: "List directory",
-    description: "List files and folders in a directory",
-    searchTerms: "list directory folder files ls",
-  },
 };
 
 export const TOOL_IDS = Object.keys(BUILT_IN_TOOLS) as ToolId[];
