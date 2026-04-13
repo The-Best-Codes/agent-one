@@ -37,6 +37,13 @@ export const updateRemindAfterAtom = atomWithStorage<number | null>(
   { getOnInit: true },
 );
 
+export const releaseNotesLastSeenVersionAtom = atomWithStorage<string | null>(
+  "agent-one-release-notes-last-seen-version",
+  null,
+  undefined,
+  { getOnInit: true },
+);
+
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);

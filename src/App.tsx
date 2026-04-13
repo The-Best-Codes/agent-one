@@ -10,6 +10,7 @@ import SettingsRoute from "@/routes/settings";
 import TestsRoute from "@/routes/tests";
 import NotificationsTestRoute from "@/routes/tests/notifications";
 
+import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
@@ -28,6 +29,7 @@ function App() {
     <BrowserRouter>
       <KbdRegistry />
       <DeepLinkHandler />
+      <ReleaseNotesDialog />
       <UpdateAvailableDialog />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />
       <Routes>
