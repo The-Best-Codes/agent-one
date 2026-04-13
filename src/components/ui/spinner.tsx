@@ -19,6 +19,7 @@ function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
           stroke="currentColor"
           strokeWidth="3"
           strokeLinecap="round"
+          strokeDasharray="0 150"
         >
           <animate
             attributeName="stroke-dasharray"
