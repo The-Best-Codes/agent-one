@@ -5,7 +5,6 @@ import {
   IconCircleCheck,
   IconCircleX,
   IconFilePlus,
-  IconLoader,
   IconX,
 } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
@@ -19,6 +18,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { useTheme } from "@/hooks/use-theme";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
@@ -145,7 +145,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+          <Spinner className="text-foreground size-4 shrink-0" />
           <span className="text-foreground text-sm font-bold">Preparing to create file...</span>
         </div>
       );
@@ -157,7 +157,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+          <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             Creating <span className="font-mono text-xs">{filePath}</span>...
           </span>

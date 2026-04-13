@@ -2,7 +2,6 @@ import {
   IconChevronDown,
   IconCircleCheck,
   IconCircleX,
-  IconLoader,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
@@ -16,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -90,7 +90,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
     case "input-streaming":
       return (
         <div key={callId} className="flex items-center gap-1">
-          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+          <Spinner className="text-foreground size-4 shrink-0" />
           <span className="text-foreground text-sm font-bold">Preparing to delete file...</span>
         </div>
       );
@@ -102,7 +102,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
-          <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
+          <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             Deleting <span className="font-mono text-xs">{filePath}</span>...
           </span>

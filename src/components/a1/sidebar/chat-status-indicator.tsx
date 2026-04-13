@@ -1,7 +1,8 @@
-import { IconBell, IconExclamationCircle, IconLoader } from "@tabler/icons-react";
+import { IconBell, IconExclamationCircle } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 
+import { Spinner } from "@/components/ui/spinner";
 import {
   type ChatStatusIndicator as ChatStatusIndicatorType,
   chatStatusIndicatorsAtom,
@@ -32,9 +33,7 @@ const StatusIcon = ({ status }: { status: ChatStatusIndicatorType }) => {
         isVisible ? "w-4 opacity-100" : "-ml-1.5 w-0 opacity-0",
       )}
     >
-      {activeStatus === "loading" && (
-        <IconLoader className="text-foreground size-4 shrink-0 animate-spin" />
-      )}
+      {activeStatus === "loading" && <Spinner className="text-foreground size-4 shrink-0" />}
       {activeStatus === "error" && (
         <IconExclamationCircle className="text-destructive size-4 shrink-0" />
       )}
