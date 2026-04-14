@@ -1,54 +1,52 @@
 import { cn } from "@/lib/utils";
 
-function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
+const SPINNER_SEGMENTS = Array.from({ length: 12 }, (_, index) => ({
+  angle: index * 30,
+  delay: `${(index - 11) * 100}ms`,
+}));
+
+const SPINNER_KEYFRAMES = `
+  @keyframes spinner-line-fade {
+    0% {
+      opacity: 1;
+    }
+
+    to {
+      opacity: 0.15;
+    }
+  }
+`;
+
+function Spinner({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <svg
+    <div
       role="status"
       aria-label="Loading"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      className={cn("size-4", className)}
+      data-geist-spinner=""
+      data-version="v1"
+      data-slot="spinner"
+      className={cn(
+        "text-muted-foreground relative inline-block size-4 shrink-0 align-middle",
+        className,
+      )}
       {...props}
     >
-      <g>
-        <circle
-          cx="12"
-          cy="12"
-          r="9.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeDasharray="0 150"
-        >
-          <animate
-            attributeName="stroke-dasharray"
-            dur="1.5s"
-            calcMode="spline"
-            values="0 150;42 150;42 150;42 150"
-            keyTimes="0;0.475;0.95;1"
-            keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1"
-            repeatCount="indefinite"
+      <style>{SPINNER_KEYFRAMES}</style>
+      <div className="absolute top-1/2 left-1/2 size-full">
+        {SPINNER_SEGMENTS.map(({ angle, delay }) => (
+          <div
+            key={angle}
+            className="absolute top-[-3.9%] left-[-10%] h-[8%] w-[24%] rounded-xs"
+            style={{
+              animation: "spinner-line-fade var(--animation-duration,1.2s) linear infinite",
+              animationDelay: `var(--animation-delay, ${delay})`,
+              transform: `rotate(${angle}deg) translate(146%)`,
+              background: "var(--spinner-color, currentColor)",
+            }}
           />
-          <animate
-            attributeName="stroke-dashoffset"
-            dur="1.5s"
-            calcMode="spline"
-            values="0;-16;-59;-59"
-            keyTimes="0;0.475;0.95;1"
-            keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1"
-            repeatCount="indefinite"
-          />
-        </circle>
-        <animateTransform
-          attributeName="transform"
-          type="rotate"
-          dur="2s"
-          values="0 12 12;360 12 12"
-          repeatCount="indefinite"
-        />
-      </g>
-    </svg>
+        ))}
+      </div>
+    </div>
   );
 }
 
