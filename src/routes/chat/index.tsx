@@ -51,6 +51,12 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
 
   const showSpinner = isChatLoading && (isInitialLoad || delayPassed);
 
+  useEffect(() => {
+    if (!isChatLoading) {
+      scrollRef.current?.scrollToBottom();
+    }
+  }, [chatId, isChatLoading]);
+
   const lastMessageId = messages[messages.length - 1]?.id;
   const initialInputValue = searchParams.get("initialMessage") || undefined;
 
