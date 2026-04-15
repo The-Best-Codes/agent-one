@@ -1,12 +1,10 @@
 import { IconRocket } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkBreaks from "remark-breaks";
-import remarkGfm from "remark-gfm";
 
 import packageJson from "@/../package.json";
 import { getReleaseNotes } from "@/assets/release-notes";
+import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -61,17 +59,11 @@ export function ReleaseNotesDialog() {
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto">
           <div className="prose prose-sm prose-neutral dark:prose-invert px-1">
-            <ReactMarkdown
-              remarkPlugins={[remarkBreaks, remarkGfm]}
-              components={{
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                a({ node, ...props }) {
-                  return <a {...props} target="_blank" rel="noopener noreferrer" />;
-                },
-              }}
-            >
-              {releaseNotesData.content}
-            </ReactMarkdown>
+            <MemoizedMarkdown
+              content={releaseNotesData.content}
+              id="release-notes"
+              messageRole="assistant"
+            />
           </div>
         </div>
         <DialogFooter>

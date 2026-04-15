@@ -6,6 +6,15 @@ import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import remend from "remend";
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
 import { CodeBlock } from "./codeblock";
 
 type MarkdownBlock = {
@@ -52,6 +61,24 @@ const MemoizedMarkdownBlock = memo(
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             a({ node, ...props }) {
               return <a {...props} target="_blank" rel="noopener noreferrer" />;
+            },
+            table({ ...props }) {
+              return <Table {...props} />;
+            },
+            thead({ ...props }) {
+              return <TableHeader {...props} />;
+            },
+            tbody({ ...props }) {
+              return <TableBody {...props} />;
+            },
+            tr({ ...props }) {
+              return <TableRow {...props} />;
+            },
+            th({ ...props }) {
+              return <TableHead {...props} />;
+            },
+            td({ ...props }) {
+              return <TableCell {...props} />;
             },
           }}
         >
