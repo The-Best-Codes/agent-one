@@ -63,7 +63,13 @@ const MemoizedMarkdownBlock = memo(
               return <a {...props} target="_blank" rel="noopener noreferrer" />;
             },
             table({ ...props }) {
-              return <Table {...props} />;
+              return (
+                <Table
+                  containerClassName="rounded-md border border-border"
+                  className="not-prose"
+                  {...props}
+                />
+              );
             },
             thead({ ...props }) {
               return <TableHeader {...props} />;
