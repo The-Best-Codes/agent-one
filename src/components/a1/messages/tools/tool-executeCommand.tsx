@@ -9,7 +9,7 @@ import {
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 import type { ToolUIPart } from "ai";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -51,7 +51,15 @@ const LIGHT_THEME = {
 };
 
 const TerminalDisplay = memo(
-  ({ output, isRunning }: { output: ExecuteCommandOutput; isRunning: boolean }) => {
+  ({
+    command,
+    output,
+    isRunning,
+  }: {
+    command: string;
+    output: ExecuteCommandOutput;
+    isRunning: boolean;
+  }) => {
     const termRef = useRef<HTMLDivElement>(null);
     const xtermRef = useRef<Terminal | null>(null);
     const fitAddonRef = useRef<FitAddon | null>(null);
@@ -59,9 +67,10 @@ const TerminalDisplay = memo(
       stdout: 0,
       stderr: 0,
     });
+    const wroteCommandRef = useRef(false);
     const { resolvedTheme } = useTheme();
 
-    const initTerminal = useCallback(() => {
+    useEffect(() => {
       if (!termRef.current || xtermRef.current) return;
 
       const theme = resolvedTheme === "dark" ? DARK_THEME : LIGHT_THEME;
@@ -84,17 +93,17 @@ const TerminalDisplay = memo(
 
       xtermRef.current = term;
       fitAddonRef.current = fitAddon;
-    }, [resolvedTheme]);
-
-    useEffect(() => {
-      initTerminal();
 
       return () => {
-        xtermRef.current?.dispose();
+        term.dispose();
         xtermRef.current = null;
         fitAddonRef.current = null;
+        lastWrittenLenRef.current = { stdout: 0, stderr: 0 };
+        wroteCommandRef.current = false;
       };
-    }, [initTerminal]);
+      // Only run once on mount
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
       const term = xtermRef.current;
@@ -108,6 +117,11 @@ const TerminalDisplay = memo(
       const term = xtermRef.current;
       if (!term || !output) return;
 
+      if (!wroteCommandRef.current) {
+        term.write(`\x1b[1;34m❯\x1b[0m \x1b[1m${command}\x1b[0m\r\n`);
+        wroteCommandRef.current = true;
+      }
+
       const prevStdout = lastWrittenLenRef.current.stdout;
       const prevStderr = lastWrittenLenRef.current.stderr;
 
@@ -117,28 +131,40 @@ const TerminalDisplay = memo(
       }
 
       if (output.stderr.length > prevStderr) {
-        term.write(`\x1b[31m${output.stderr.slice(prevStderr)}\x1b[0m`);
+        term.write(output.stderr.slice(prevStderr));
         lastWrittenLenRef.current.stderr = output.stderr.length;
       }
-    }, [output]);
+    }, [output, command]);
 
     useEffect(() => {
       const fitAddon = fitAddonRef.current;
-      if (!fitAddon) return;
+      const container = termRef.current;
+      if (!fitAddon || !container) return;
+
+      let lastWidth = container.clientWidth;
+      let rafId: number | null = null;
 
       const observer = new ResizeObserver(() => {
-        try {
-          fitAddon.fit();
-        } catch {
-          // ignore fit errors during resize
-        }
+        const newWidth = container.clientWidth;
+        if (newWidth === lastWidth || newWidth === 0) return;
+        lastWidth = newWidth;
+
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          try {
+            fitAddon.fit();
+          } catch {
+            // ignore fit errors during resize
+          }
+        });
       });
 
-      if (termRef.current) {
-        observer.observe(termRef.current);
-      }
+      observer.observe(container);
 
-      return () => observer.disconnect();
+      return () => {
+        observer.disconnect();
+        if (rafId) cancelAnimationFrame(rafId);
+      };
     }, []);
 
     return (
@@ -261,70 +287,67 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       const output = part.output as ExecuteCommandOutput;
       const isPreliminary = (part as { preliminary?: boolean }).preliminary === true;
 
-      if (isPreliminary) {
-        return (
-          <div key={callId} className="flex w-full max-w-3xl flex-col gap-1">
-            <div className="flex items-center gap-1">
-              <Spinner className="text-foreground size-4 shrink-0" />
-              <span className="text-foreground text-sm font-bold">
-                Running <code className="text-xs">{truncatedCommand}</code>
-              </span>
-            </div>
-            <TerminalDisplay output={output} isRunning={true} />
-          </div>
-        );
-      }
-
       return (
-        <Accordion
-          type="single"
-          collapsible
-          defaultValue={callId}
-          onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-          className="text-foreground flex w-full flex-row bg-transparent p-0 text-sm"
-        >
-          <AccordionItem
-            value={callId}
-            className={cn(
-              "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
-              isMainAccordionOpen && "border border-b! p-2",
+        <div key={callId} className="flex w-full max-w-3xl flex-col gap-1">
+          <div className="flex items-center gap-1">
+            {isPreliminary ? (
+              <>
+                <Spinner className="text-foreground size-4 shrink-0" />
+                <span className="text-foreground text-sm font-bold">
+                  Running <code className="text-xs">{truncatedCommand}</code>
+                </span>
+              </>
+            ) : (
+              <Accordion
+                type="single"
+                collapsible
+                defaultValue={callId}
+                onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
+                className="text-foreground flex w-full flex-row bg-transparent p-0 text-sm"
+              >
+                <AccordionItem
+                  value={callId}
+                  className={cn(
+                    "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
+                    isMainAccordionOpen && "border border-b! p-2",
+                  )}
+                >
+                  <AccordionTrigger
+                    icon={
+                      <div className="relative">
+                        <IconTerminal2
+                          className={cn(
+                            "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
+                            isMainAccordionOpen && "scale-0 opacity-0",
+                          )}
+                        />
+                        <IconChevronDown
+                          className={cn(
+                            "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
+                            isMainAccordionOpen && "scale-100 opacity-100",
+                          )}
+                        />
+                      </div>
+                    }
+                    iconPosition="left"
+                    shouldRotateIcon={true}
+                    className="justify-start gap-1 p-0 font-bold hover:no-underline"
+                  >
+                    <span className="max-w-2xl truncate">
+                      Ran <code className="text-xs">{truncatedCommand}</code>
+                      {output.exitCode === 0
+                        ? ""
+                        : output.timedOut
+                          ? " (timed out)"
+                          : ` (exit code ${output.exitCode})`}
+                    </span>
+                  </AccordionTrigger>
+                </AccordionItem>
+              </Accordion>
             )}
-          >
-            <AccordionTrigger
-              icon={
-                <div className="relative">
-                  <IconTerminal2
-                    className={cn(
-                      "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
-                      isMainAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
-                  <IconChevronDown
-                    className={cn(
-                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
-                      isMainAccordionOpen && "scale-100 opacity-100",
-                    )}
-                  />
-                </div>
-              }
-              iconPosition="left"
-              shouldRotateIcon={true}
-              className="justify-start gap-1 p-0 font-bold hover:no-underline"
-            >
-              <span className="max-w-2xl truncate">
-                Ran <code className="text-xs">{truncatedCommand}</code>
-                {output.exitCode === 0
-                  ? ""
-                  : output.timedOut
-                    ? " (timed out)"
-                    : ` (exit code ${output.exitCode})`}
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
-              <TerminalDisplay output={output} isRunning={false} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+          </div>
+          <TerminalDisplay command={command} output={output} isRunning={isPreliminary} />
+        </div>
       );
     }
 
