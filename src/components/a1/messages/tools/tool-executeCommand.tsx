@@ -333,6 +333,23 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
 
     case "output-error":
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
+        const output = part.output as ExecuteCommandOutput | undefined;
+        const hasPartialOutput = Boolean(output && (output.stdout || output.stderr));
+
+        if (hasPartialOutput && output) {
+          return (
+            <div key={callId} className="flex w-full max-w-3xl flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+                <span className="text-muted-foreground text-sm font-bold">
+                  Cancelled <code className="text-xs">{truncatedCommand}</code>
+                </span>
+              </div>
+              <TerminalDisplay command={command} output={output} />
+            </div>
+          );
+        }
+
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
