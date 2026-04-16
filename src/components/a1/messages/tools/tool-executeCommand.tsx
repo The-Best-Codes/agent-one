@@ -51,15 +51,7 @@ const LIGHT_THEME = {
 };
 
 const TerminalDisplay = memo(
-  ({
-    command,
-    output,
-    isRunning,
-  }: {
-    command: string;
-    output: ExecuteCommandOutput;
-    isRunning: boolean;
-  }) => {
+  ({ command, output }: { command: string; output: ExecuteCommandOutput }) => {
     const termRef = useRef<HTMLDivElement>(null);
     const xtermRef = useRef<Terminal | null>(null);
     const fitAddonRef = useRef<FitAddon | null>(null);
@@ -174,21 +166,6 @@ const TerminalDisplay = memo(
           className="border-border w-full overflow-hidden rounded border"
           style={{ minHeight: "120px", maxHeight: "400px" }}
         />
-        {isRunning && (
-          <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
-            <Spinner className="size-3" />
-            <span>Running...</span>
-          </div>
-        )}
-        {!isRunning && output.exitCode !== null && (
-          <div className="text-muted-foreground mt-1 text-xs">
-            {output.timedOut
-              ? "Timed out"
-              : output.exitCode === 0
-                ? "Completed successfully"
-                : `Exited with code ${output.exitCode}`}
-          </div>
-        )}
       </div>
     );
   },
@@ -200,7 +177,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const callId = part.toolCallId;
   const input = part.input as ExecuteCommandInput;
   const { addToolApprovalResponse } = useChatFunctions();
-  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState(true);
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const command = input?.command || "unknown command";
@@ -342,11 +319,14 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                           : ` (exit code ${output.exitCode})`}
                     </span>
                   </AccordionTrigger>
+                  <AccordionContent className="p-0 pt-2">
+                    <TerminalDisplay command={command} output={output} />
+                  </AccordionContent>
                 </AccordionItem>
               </Accordion>
             )}
           </div>
-          <TerminalDisplay command={command} output={output} isRunning={isPreliminary} />
+          {isPreliminary && <TerminalDisplay command={command} output={output} />}
         </div>
       );
     }

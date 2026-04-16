@@ -1,5 +1,5 @@
 import { platform } from "@tauri-apps/plugin-os";
-import { Command } from "@tauri-apps/plugin-shell";
+import { type Child, Command } from "@tauri-apps/plugin-shell";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -7,6 +7,12 @@ import { getLogger } from "@/lib/logger";
 import type { ExecuteCommandToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
+
+function createAbortError(): Error {
+  const abortError = new Error("The operation was aborted.");
+  abortError.name = "AbortError";
+  return abortError;
+}
 
 export interface ExecuteCommandOutput {
   stdout: string;
@@ -45,6 +51,9 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       let stdout = "";
       let stderr = "";
       let timedOut = false;
+      let aborted = false;
+      let child: Child | null = null;
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
       type QueueItem =
         | { type: "stdout"; data: string }
@@ -64,12 +73,12 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       };
 
       command.stdout.on("data", (line: string) => {
-        stdout += line + "\n";
+        stdout += line;
         push({ type: "stdout", data: line });
       });
 
       command.stderr.on("data", (line: string) => {
-        stderr += line + "\n";
+        stderr += line;
         push({ type: "stderr", data: line });
       });
 
@@ -88,70 +97,92 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
         push({ type: "done", code: data.code, signal: data.signal });
       });
 
-      const child = await command.spawn();
+      const onAbort = () => {
+        aborted = true;
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        if (child) {
+          void child.kill().catch(() => {});
+        }
+        if (resolveWait) {
+          resolveWait();
+          resolveWait = null;
+        }
+      };
 
-      const timeoutId = setTimeout(() => {
-        timedOut = true;
-        child.kill().catch(() => {});
-      }, timeoutMs);
+      abortSignal?.addEventListener("abort", onAbort, { once: true });
 
-      if (abortSignal) {
-        abortSignal.addEventListener(
-          "abort",
-          () => {
-            clearTimeout(timeoutId);
-            child.kill().catch(() => {});
-            done = true;
-            push({ type: "done", code: null, signal: null });
-          },
-          { once: true },
-        );
-      }
+      try {
+        child = await command.spawn();
 
-      while (!done) {
-        if (queue.length === 0) {
-          await new Promise<void>((resolve) => {
-            resolveWait = resolve;
-          });
+        if (aborted) {
+          void child.kill().catch(() => {});
+          throw createAbortError();
         }
 
-        while (queue.length > 0) {
-          const item = queue.shift()!;
-          if (item.type === "done") {
-            done = true;
-            exitCode = item.code;
-            signal = item.signal;
-            break;
-          }
-          if (item.type === "error") {
-            done = true;
-            break;
+        timeoutId = setTimeout(() => {
+          timedOut = true;
+          void child?.kill().catch(() => {});
+        }, timeoutMs);
+
+        while (!done) {
+          if (aborted) {
+            throw createAbortError();
           }
 
-          yield {
-            stdout,
-            stderr,
-            exitCode: null,
-            signal: null,
-            timedOut: false,
-          } as ExecuteCommandOutput;
+          if (queue.length === 0) {
+            await new Promise<void>((resolve) => {
+              resolveWait = resolve;
+            });
+          }
+
+          while (queue.length > 0) {
+            if (aborted) {
+              throw createAbortError();
+            }
+
+            const item = queue.shift()!;
+            if (item.type === "done") {
+              done = true;
+              exitCode = item.code;
+              signal = item.signal;
+              break;
+            }
+            if (item.type === "error") {
+              done = true;
+              break;
+            }
+
+            yield {
+              stdout,
+              stderr,
+              exitCode: null,
+              signal: null,
+              timedOut: false,
+            } as ExecuteCommandOutput;
+          }
         }
+
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+
+        logger.verbose("Command executed:", {
+          exitCode,
+          stdoutLen: stdout.length,
+          stderrLen: stderr.length,
+        });
+
+        return {
+          stdout,
+          stderr,
+          exitCode,
+          signal,
+          timedOut,
+        } as ExecuteCommandOutput;
+      } finally {
+        abortSignal?.removeEventListener("abort", onAbort);
       }
-
-      clearTimeout(timeoutId);
-
-      logger.verbose("Command executed:", {
-        exitCode,
-        stdoutLen: stdout.length,
-        stderrLen: stderr.length,
-      });
-
-      return {
-        stdout,
-        stderr,
-        exitCode,
-        signal,
-        timedOut,
-      } as ExecuteCommandOutput;
     },
   });
