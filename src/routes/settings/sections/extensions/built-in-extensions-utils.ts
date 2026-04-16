@@ -47,6 +47,11 @@ export const BUILT_IN_TOOLS: Record<
     description: "Read and view file contents with smart truncation",
     searchTerms: "view file read open content",
   },
+  executeCommand: {
+    name: "Run command",
+    description: "Execute terminal commands on your system",
+    searchTerms: "execute command terminal shell bash run script",
+  },
 };
 
 export const TOOL_IDS = Object.keys(BUILT_IN_TOOLS) as ToolId[];

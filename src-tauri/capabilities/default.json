@@ -44,6 +44,16 @@
           "name": "node.cmd",
           "cmd": "node.cmd",
           "args": true
+        },
+        {
+          "name": "sh",
+          "cmd": "sh",
+          "args": true
+        },
+        {
+          "name": "cmd",
+          "cmd": "cmd",
+          "args": true
         }
       ]
     },

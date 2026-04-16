@@ -69,7 +69,8 @@ export type ToolId =
   | "editFile"
   | "createFile"
   | "deleteFile"
-  | "viewFile";
+  | "viewFile"
+  | "executeCommand";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -113,6 +114,11 @@ export interface ViewFileToolConfig {
   defaultMaxChars: number;
 }
 
+export interface ExecuteCommandToolConfig {
+  requiresApproval: boolean;
+  defaultTimeoutMs: number;
+}
+
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
@@ -122,6 +128,7 @@ export interface ToolConfigs {
   createFile: CreateFileToolConfig;
   deleteFile: DeleteFileToolConfig;
   viewFile: ViewFileToolConfig;
+  executeCommand: ExecuteCommandToolConfig;
 }
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
@@ -193,6 +200,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     createFile: true,
     deleteFile: true,
     viewFile: true,
+    executeCommand: true,
   },
   TOOL_CONFIGS: {
     dateTime: {
@@ -228,6 +236,10 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     viewFile: {
       requiresApproval: false,
       defaultMaxChars: 10000,
+    },
+    executeCommand: {
+      requiresApproval: true,
+      defaultTimeoutMs: 120000,
     },
   },
   MCP_SERVERS: [],

@@ -7,6 +7,7 @@ import {
   createDateTimeTool,
   createDeleteFileTool,
   createEditFileTool,
+  createExecuteCommandTool,
   createGetUrlContentTool,
   createViewFileTool,
   createWaitTool,
@@ -383,6 +384,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     }
     if (enabledTools.viewFile) {
       filteredStaticTools.viewFile = createViewFileTool(toolConfigs.viewFile);
+    }
+    if (enabledTools.executeCommand) {
+      filteredStaticTools.executeCommand = createExecuteCommandTool(toolConfigs.executeCommand);
     }
 
     if (mcpLoadedRef.current) {
