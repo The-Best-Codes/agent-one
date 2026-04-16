@@ -34,6 +34,14 @@ interface ExecuteCommandToolPartProps {
   part: ToolUIPart;
 }
 
+const EMPTY_OUTPUT: ExecuteCommandOutput = {
+  stdout: "",
+  stderr: "",
+  exitCode: null,
+  signal: null,
+  timedOut: false,
+};
+
 const DARK_THEME = {
   background: "#1a1a2e",
   foreground: "#e0e0e0",
@@ -177,7 +185,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const callId = part.toolCallId;
   const input = part.input as ExecuteCommandInput;
   const { addToolApprovalResponse } = useChatFunctions();
-  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState(true);
+  const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const command = input?.command || "unknown command";
@@ -261,73 +269,66 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       );
 
     case "output-available": {
-      const output = part.output as ExecuteCommandOutput;
+      const output = (part.output as ExecuteCommandOutput | undefined) ?? EMPTY_OUTPUT;
       const isPreliminary = (part as { preliminary?: boolean }).preliminary === true;
 
       return (
-        <div key={callId} className="flex w-full max-w-3xl flex-col gap-1">
-          <div className="flex items-center gap-1">
-            {isPreliminary ? (
-              <>
-                <Spinner className="text-foreground size-4 shrink-0" />
-                <span className="text-foreground text-sm font-bold">
-                  Running <code className="text-xs">{truncatedCommand}</code>
-                </span>
-              </>
-            ) : (
-              <Accordion
-                type="single"
-                collapsible
-                defaultValue={callId}
-                onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-                className="text-foreground flex w-full flex-row bg-transparent p-0 text-sm"
-              >
-                <AccordionItem
-                  value={callId}
-                  className={cn(
-                    "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
-                    isMainAccordionOpen && "border border-b! p-2",
-                  )}
-                >
-                  <AccordionTrigger
-                    icon={
-                      <div className="relative">
-                        <IconTerminal2
-                          className={cn(
-                            "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
-                            isMainAccordionOpen && "scale-0 opacity-0",
-                          )}
-                        />
-                        <IconChevronDown
-                          className={cn(
-                            "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
-                            isMainAccordionOpen && "scale-100 opacity-100",
-                          )}
-                        />
-                      </div>
-                    }
-                    iconPosition="left"
-                    shouldRotateIcon={true}
-                    className="justify-start gap-1 p-0 font-bold hover:no-underline"
-                  >
-                    <span className="max-w-2xl truncate">
-                      Ran <code className="text-xs">{truncatedCommand}</code>
-                      {output.exitCode === 0
-                        ? ""
-                        : output.timedOut
-                          ? " (timed out)"
-                          : ` (exit code ${output.exitCode})`}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="p-0 pt-2">
-                    <TerminalDisplay command={command} output={output} />
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+        <Accordion
+          key={callId}
+          type="single"
+          collapsible
+          onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
+          className="text-foreground flex w-full max-w-3xl flex-row bg-transparent p-0 text-sm"
+        >
+          <AccordionItem
+            value={callId}
+            className={cn(
+              "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
+              isMainAccordionOpen && "border border-b! p-2",
             )}
-          </div>
-          {isPreliminary && <TerminalDisplay command={command} output={output} />}
-        </div>
+          >
+            <AccordionTrigger
+              icon={
+                <div className="relative">
+                  {isPreliminary ? (
+                    <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
+                  ) : (
+                    <IconTerminal2
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
+                        isMainAccordionOpen && "scale-0 opacity-0",
+                      )}
+                    />
+                  )}
+                  <IconChevronDown
+                    className={cn(
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
+                      isMainAccordionOpen && "scale-100 opacity-100",
+                    )}
+                  />
+                </div>
+              }
+              iconPosition="left"
+              shouldRotateIcon={true}
+              className="justify-start gap-1 p-0 font-bold hover:no-underline"
+            >
+              <span className="max-w-2xl truncate">
+                {isPreliminary ? "Running " : "Ran "}
+                <code className="text-xs">{truncatedCommand}</code>
+                {isPreliminary
+                  ? ""
+                  : output.timedOut
+                    ? " (timed out)"
+                    : output.exitCode && output.exitCode !== 0
+                      ? ` (exit code ${output.exitCode})`
+                      : ""}
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="p-0 pt-2">
+              <TerminalDisplay command={command} output={output} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       );
     }
 
@@ -338,15 +339,50 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
 
         if (hasPartialOutput && output) {
           return (
-            <div key={callId} className="flex w-full max-w-3xl flex-col gap-1">
-              <div className="flex items-center gap-1">
-                <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-                <span className="text-muted-foreground text-sm font-bold">
-                  Cancelled <code className="text-xs">{truncatedCommand}</code>
-                </span>
-              </div>
-              <TerminalDisplay command={command} output={output} />
-            </div>
+            <Accordion
+              key={callId}
+              type="single"
+              collapsible
+              onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
+              className="text-muted-foreground flex w-full max-w-3xl flex-row bg-transparent p-0 text-sm"
+            >
+              <AccordionItem
+                value={callId}
+                className={cn(
+                  "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
+                  isMainAccordionOpen && "border border-b! p-2",
+                )}
+              >
+                <AccordionTrigger
+                  icon={
+                    <div className="relative">
+                      <IconCircleX
+                        className={cn(
+                          "text-muted-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
+                          isMainAccordionOpen && "scale-0 opacity-0",
+                        )}
+                      />
+                      <IconChevronDown
+                        className={cn(
+                          "text-muted-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
+                          isMainAccordionOpen && "scale-100 opacity-100",
+                        )}
+                      />
+                    </div>
+                  }
+                  iconPosition="left"
+                  shouldRotateIcon={true}
+                  className="justify-start gap-1 p-0 font-bold hover:no-underline"
+                >
+                  <span className="max-w-2xl truncate">
+                    Cancelled <code className="text-xs">{truncatedCommand}</code>
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="p-0 pt-2">
+                  <TerminalDisplay command={command} output={output} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           );
         }
 
