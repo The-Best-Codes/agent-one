@@ -73,18 +73,26 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       };
 
       command.stdout.on("data", (line: string) => {
-        stdout += line + "\n";
+        stdout += line;
         push({ type: "stdout", data: line });
       });
 
       command.stderr.on("data", (line: string) => {
-        stderr += line + "\n";
+        stderr += line;
         push({ type: "stderr", data: line });
       });
 
       let done = false;
       let exitCode: number | null = null;
       let signal: number | null = null;
+      let errorMessage: string | null = null;
+
+      const waitForNextQueueItem = () =>
+        new Promise<void>((resolve) => {
+          resolveWait = resolve;
+        });
+
+      const waitForTrailingEvents = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
       command.on("error", (error: string) => {
         push({ type: "error", message: error });
@@ -126,15 +134,20 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           void child?.kill().catch(() => {});
         }, timeoutMs);
 
-        while (!done) {
+        while (!done || queue.length > 0) {
           if (aborted) {
             throw createAbortError();
           }
 
           if (queue.length === 0) {
-            await new Promise<void>((resolve) => {
-              resolveWait = resolve;
-            });
+            if (done) {
+              await waitForTrailingEvents();
+              if (queue.length === 0) {
+                break;
+              }
+            } else {
+              await waitForNextQueueItem();
+            }
           }
 
           while (queue.length > 0) {
@@ -147,11 +160,12 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
               done = true;
               exitCode = item.code;
               signal = item.signal;
-              break;
+              continue;
             }
             if (item.type === "error") {
+              errorMessage = item.message;
               done = true;
-              break;
+              continue;
             }
 
             yield {
@@ -164,8 +178,8 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           }
         }
 
-        if (timeoutId) {
-          clearTimeout(timeoutId);
+        if (errorMessage) {
+          throw new Error(errorMessage);
         }
 
         logger.verbose("Command executed:", {
@@ -182,6 +196,9 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           timedOut,
         } as ExecuteCommandOutput;
       } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
         abortSignal?.removeEventListener("abort", onAbort);
       }
     },
