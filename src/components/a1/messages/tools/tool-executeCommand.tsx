@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
-import { useTheme } from "@/hooks/use-theme";
 import type { ExecuteCommandOutput } from "@/lib/ai/tools/executeCommand";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -42,22 +41,6 @@ const EMPTY_OUTPUT: ExecuteCommandOutput = {
   timedOut: false,
 };
 
-const DARK_THEME = {
-  background: "#1a1a2e",
-  foreground: "#e0e0e0",
-  cursor: "#e0e0e0",
-  cursorAccent: "#1a1a2e",
-  selectionBackground: "#3a3a5e",
-};
-
-const LIGHT_THEME = {
-  background: "#fafafa",
-  foreground: "#1a1a1a",
-  cursor: "#1a1a1a",
-  cursorAccent: "#fafafa",
-  selectionBackground: "#c0c0d0",
-};
-
 const TerminalDisplay = memo(
   ({ command, output }: { command: string; output: ExecuteCommandOutput }) => {
     const termRef = useRef<HTMLDivElement>(null);
@@ -68,18 +51,15 @@ const TerminalDisplay = memo(
       stderr: 0,
     });
     const wroteCommandRef = useRef(false);
-    const { resolvedTheme } = useTheme();
 
     useEffect(() => {
       if (!termRef.current || xtermRef.current) return;
 
-      const theme = resolvedTheme === "dark" ? DARK_THEME : LIGHT_THEME;
       const term = new Terminal({
         convertEol: true,
         fontFamily: "monospace",
         fontSize: 13,
         lineHeight: 1.2,
-        theme,
         cursorBlink: false,
         cursorStyle: "bar",
         disableStdin: true,
@@ -101,17 +81,7 @@ const TerminalDisplay = memo(
         lastWrittenLenRef.current = { stdout: 0, stderr: 0 };
         wroteCommandRef.current = false;
       };
-      // Only run once on mount
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    useEffect(() => {
-      const term = xtermRef.current;
-      if (!term) return;
-
-      const theme = resolvedTheme === "dark" ? DARK_THEME : LIGHT_THEME;
-      term.options.theme = theme;
-    }, [resolvedTheme]);
 
     useEffect(() => {
       const term = xtermRef.current;
@@ -171,8 +141,8 @@ const TerminalDisplay = memo(
       <div className="flex w-full flex-col">
         <div
           ref={termRef}
-          className="border-border w-full overflow-hidden rounded border"
-          style={{ minHeight: "120px", maxHeight: "400px" }}
+          className="border-border w-full overflow-hidden rounded-md border"
+          style={{ height: "400px" }}
         />
       </div>
     );
