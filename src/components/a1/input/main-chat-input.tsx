@@ -106,6 +106,7 @@ export const MainChatInput = ({
       editorViewRef.current?.dispatch({
         selection: { anchor: editorViewRef.current?.state.doc.length },
       });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsEmpty(initialValue.trim().length === 0);
       editorViewRef.current?.focus();
     }

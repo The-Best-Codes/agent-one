@@ -58,6 +58,7 @@ export const ChatStatusIndicator = ({ chatId }: { chatId: string }) => {
         clearTimeout(timerRef.current);
         timerRef.current = null;
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayedStatus(rawStatus);
     } else {
       if (displayedStatus === "loading") {

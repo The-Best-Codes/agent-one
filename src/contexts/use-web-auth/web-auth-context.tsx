@@ -98,6 +98,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCustomerState(null);
       setBillingError(null);
       setBillingLoading(false);

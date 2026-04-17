@@ -116,6 +116,7 @@ const MessagePartsInternal = ({
   const renderedParts = useMemo(() => {
     let textIndex = 0;
 
+    // eslint-disable-next-line react-hooks/refs
     return message.parts.map((part, i) => {
       const key =
         "toolCallId" in part && (part as ToolUIPart).toolCallId
