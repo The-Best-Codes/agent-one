@@ -1,7 +1,10 @@
 import { IconBrain, IconChevronDown } from "@tabler/icons-react";
 import type { ReasoningUIPart } from "ai";
-import { useState } from "react";
+import { useAtomValue } from "jotai";
+import { useId, useState } from "react";
 
+import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
+import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
 import {
   Accordion,
   AccordionContent,
@@ -10,6 +13,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { markdownRenderingAtom, maxMessageLengthAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 export const MessagePartReasoning = ({
@@ -21,6 +25,18 @@ export const MessagePartReasoning = ({
 }) => {
   const { status } = useChatStatus();
   const isLoading = isBusy && status === "streaming";
+  const reactId = useId();
+
+  const maxMessageLength = useAtomValue(maxMessageLengthAtom);
+  const markdownRendering = useAtomValue(markdownRenderingAtom);
+  const shouldUsePerformantRenderer = text.length > maxMessageLength;
+
+  const shouldRenderMarkdown = (() => {
+    if (markdownRendering === "both") return true;
+    if (markdownRendering === "neither") return false;
+    if (markdownRendering === "assistant") return true;
+    return false;
+  })();
 
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
 
@@ -72,8 +88,24 @@ export const MessagePartReasoning = ({
         >
           <span className="max-w-2xl truncate">Reasoning</span>
         </AccordionTrigger>
-        <AccordionContent className="prose dark:prose-invert prose-sm prose-neutral max-h-96 max-w-full overflow-auto p-0 pt-2 text-base">
-          <pre className="w-fit max-w-none">{text}</pre>
+        <AccordionContent
+          className={cn(
+            "max-h-96 max-w-full overflow-auto p-0 pt-2 text-base",
+            shouldRenderMarkdown && "prose dark:prose-invert prose-sm prose-neutral",
+          )}
+        >
+          {shouldUsePerformantRenderer ? (
+            <PerformantMarkdown content={text} />
+          ) : shouldRenderMarkdown ? (
+            <MemoizedMarkdown id={reactId} content={text} messageRole="assistant" />
+          ) : (
+            <pre
+              className="text-base wrap-break-word whitespace-pre-wrap"
+              style={{ fontFamily: "inherit" }}
+            >
+              {text}
+            </pre>
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>
