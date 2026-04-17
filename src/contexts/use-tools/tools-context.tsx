@@ -29,7 +29,7 @@ import {
   toolConfigsAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { type McpServerConfig } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS, type McpServerConfig } from "@/lib/settings/types";
 
 import { ToolsContext } from "./tools-contexts";
 
@@ -386,7 +386,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       filteredStaticTools.viewFile = createViewFileTool(toolConfigs.viewFile);
     }
     if (enabledTools.executeCommand) {
-      filteredStaticTools.executeCommand = createExecuteCommandTool(toolConfigs.executeCommand);
+      filteredStaticTools.executeCommand = createExecuteCommandTool(
+        toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+      );
     }
 
     if (mcpLoadedRef.current) {

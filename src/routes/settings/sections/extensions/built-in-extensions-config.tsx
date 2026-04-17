@@ -277,7 +277,10 @@ export function BuiltInExtensionsConfig() {
                       type="number"
                       min={1000}
                       max={600000}
-                      value={toolConfigs.executeCommand.defaultTimeoutMs}
+                      value={
+                        (toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand)
+                          .defaultTimeoutMs
+                      }
                       onChange={(e) =>
                         updateToolConfig("executeCommand", {
                           defaultTimeoutMs: Math.max(
