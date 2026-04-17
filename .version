@@ -4,6 +4,7 @@
 # package.json
 # src-tauri/tauri.conf.json
 # src-tauri/Cargo.toml
+# distribution/snap/snapcraft.yaml
 # Run:
 # bun install
 # cd src-tauri && cargo generate-lockfile
