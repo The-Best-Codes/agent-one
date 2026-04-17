@@ -1,7 +1,7 @@
 import { IconBrain, IconChevronDown } from "@tabler/icons-react";
 import type { ReasoningUIPart } from "ai";
 import { useAtomValue } from "jotai";
-import { useId, useState } from "react";
+import { useState } from "react";
 
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
@@ -17,15 +17,16 @@ import { markdownRenderingAtom, maxMessageLengthAtom } from "@/lib/jotai/setting
 import { cn } from "@/lib/utils";
 
 export const MessagePartReasoning = ({
+  id,
   text,
   isBusy,
 }: {
+  id: string;
   text: ReasoningUIPart["text"];
   isBusy?: boolean;
 }) => {
   const { status } = useChatStatus();
   const isLoading = isBusy && status === "streaming";
-  const reactId = useId();
 
   const maxMessageLength = useAtomValue(maxMessageLengthAtom);
   const markdownRendering = useAtomValue(markdownRenderingAtom);
@@ -97,7 +98,7 @@ export const MessagePartReasoning = ({
           {shouldUsePerformantRenderer ? (
             <PerformantMarkdown content={text} />
           ) : shouldRenderMarkdown ? (
-            <MemoizedMarkdown id={reactId} content={text} messageRole="assistant" />
+            <MemoizedMarkdown id={id} content={text} messageRole="assistant" />
           ) : (
             <pre
               className="text-base wrap-break-word whitespace-pre-wrap"

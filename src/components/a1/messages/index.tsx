@@ -160,6 +160,7 @@ const MessagePartsInternal = ({
           return (
             <MessagePartReasoning
               key={key}
+              id={message.id}
               text={part.text}
               isBusy={isLastMessage && i === message.parts.length - 1}
             />
