@@ -73,12 +73,12 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       };
 
       command.stdout.on("data", (line: string) => {
-        stdout += line;
+        stdout += line + "\n";
         push({ type: "stdout", data: line });
       });
 
       command.stderr.on("data", (line: string) => {
-        stderr += line;
+        stderr += line + "\n";
         push({ type: "stderr", data: line });
       });
 
