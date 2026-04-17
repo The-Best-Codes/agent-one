@@ -88,7 +88,7 @@ const TerminalDisplay = memo(
       if (!term || !output) return;
 
       if (!wroteCommandRef.current) {
-        term.write(`\x1b[1;34m❯\x1b[0m \x1b[1m${command}\x1b[0m\r\n`);
+        term.write(`$ ${command}\r\n`);
         wroteCommandRef.current = true;
       }
 
@@ -142,7 +142,7 @@ const TerminalDisplay = memo(
         <div
           ref={termRef}
           className="border-border w-full overflow-hidden rounded-md border"
-          style={{ height: "400px" }}
+          style={{ height: "200px" }}
         />
       </div>
     );
