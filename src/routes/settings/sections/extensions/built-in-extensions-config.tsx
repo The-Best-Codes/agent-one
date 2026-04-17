@@ -267,6 +267,32 @@ export function BuiltInExtensionsConfig() {
                   </div>
                 )}
 
+                {toolId === "executeCommand" && (
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="executeCommand-timeout" className="text-xs">
+                      Default Timeout (ms)
+                    </Label>
+                    <Input
+                      id="executeCommand-timeout"
+                      type="number"
+                      min={1000}
+                      max={600000}
+                      value={
+                        (toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand)
+                          .defaultTimeoutMs
+                      }
+                      onChange={(e) =>
+                        updateToolConfig("executeCommand", {
+                          defaultTimeoutMs: Math.max(
+                            1000,
+                            Math.min(parseInt(e.target.value) || 120000, 600000),
+                          ),
+                        })
+                      }
+                    />
+                  </div>
+                )}
+
                 {toolId === "webSearch" && (
                   <>
                     <div className="grid gap-1.5">

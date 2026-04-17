@@ -10,6 +10,7 @@ import { MessagePartToolCreateFile } from "./tools/tool-createFile";
 import { MessagePartToolDateTime } from "./tools/tool-dateTime";
 import { MessagePartToolDeleteFile } from "./tools/tool-deleteFile";
 import { MessagePartToolEditFile } from "./tools/tool-editFile";
+import { MessagePartToolExecuteCommand } from "./tools/tool-executeCommand";
 import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
@@ -45,6 +46,8 @@ export const MessageToolHandler = memo(
         return <MessagePartToolDeleteFile part={part} />;
       case "tool-viewFile":
         return <MessagePartToolViewFile part={part} />;
+      case "tool-executeCommand":
+        return <MessagePartToolExecuteCommand part={part} />;
       default:
         return <MessagePartToolCall part={part as ToolUIPart} />;
     }
