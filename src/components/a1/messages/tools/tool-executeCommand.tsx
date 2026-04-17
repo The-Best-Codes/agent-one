@@ -142,7 +142,7 @@ const TerminalDisplay = memo(
         <div
           ref={termRef}
           className="border-border w-full overflow-hidden rounded-md border"
-          style={{ height: "200px" }}
+          style={{ width: "100%", height: "200px" }}
         />
       </div>
     );
