@@ -53,7 +53,7 @@ export const MessagePartText = ({
         <MemoizedMarkdown id={id} content={text} messageRole={messageRole} />
       ) : (
         <pre
-          className="text-base break-words whitespace-pre-wrap"
+          className="text-base wrap-break-word whitespace-pre-wrap"
           style={{
             fontFamily: "inherit",
           }}
