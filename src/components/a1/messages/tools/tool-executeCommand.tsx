@@ -300,12 +300,14 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                       )}
                     />
                   )}
-                  <IconChevronDown
-                    className={cn(
-                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
-                      isMainAccordionOpen && "scale-100 opacity-100",
-                    )}
-                  />
+                  {!isPreliminary && (
+                    <IconChevronDown
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
+                        isMainAccordionOpen && "scale-100 opacity-100",
+                      )}
+                    />
+                  )}
                 </div>
               }
               iconPosition="left"
