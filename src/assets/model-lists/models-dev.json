@@ -6747,25 +6747,6 @@
           "output": 4096
         }
       },
-      "mercury-coder-small": {
-        "id": "mercury-coder-small",
-        "name": "Mercury Coder Small",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 1
-        },
-        "limit": {
-          "context": 32768,
-          "input": 32768,
-          "output": 16384
-        }
-      },
       "jamba-large-1.7": {
         "id": "jamba-large-1.7",
         "name": "Jamba Large 1.7",
@@ -15689,6 +15670,24 @@
           "output": 8192
         }
       },
+      "deepseek/deepseek-r1": {
+        "id": "deepseek/deepseek-r1",
+        "name": "DeepSeek: R1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.7,
+          "output": 2.5
+        },
+        "limit": {
+          "context": 64000,
+          "output": 16000
+        }
+      },
       "deepseek/deepseek-v3.2-speciale": {
         "id": "deepseek/deepseek-v3.2-speciale",
         "name": "DeepSeek V3.2 Speciale",
@@ -15779,6 +15778,24 @@
           "output": 65536
         }
       },
+      "openrouter/elephant-alpha": {
+        "id": "openrouter/elephant-alpha",
+        "name": "Elephant (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 262144,
+          "output": 32768
+        }
+      },
       "openrouter/free": {
         "id": "openrouter/free",
         "name": "Free Models Router",
@@ -15796,24 +15813,6 @@
           "context": 200000,
           "input": 200000,
           "output": 8000
-        }
-      },
-      "arcee-ai/trinity-mini:free": {
-        "id": "arcee-ai/trinity-mini:free",
-        "name": "Trinity Mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 131072,
-          "output": 131072
         }
       },
       "arcee-ai/trinity-large-thinking": {
@@ -16012,24 +16011,6 @@
         "limit": {
           "context": 131072,
           "output": 131072
-        }
-      },
-      "stepfun/step-3.5-flash:free": {
-        "id": "stepfun/step-3.5-flash:free",
-        "name": "Step 3.5 Flash (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 256000,
-          "output": 256000
         }
       },
       "stepfun/step-3.5-flash": {
@@ -16616,6 +16597,25 @@
           "output": 128000
         }
       },
+      "inception/mercury-edit-2": {
+        "id": "inception/mercury-edit-2",
+        "name": "Mercury Edit 2",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        },
+        "limit": {
+          "context": 128000,
+          "output": 8192
+        }
+      },
       "inception/mercury-2": {
         "id": "inception/mercury-2",
         "name": "Mercury 2",
@@ -16633,44 +16633,6 @@
         "limit": {
           "context": 128000,
           "output": 50000
-        }
-      },
-      "inception/mercury": {
-        "id": "inception/mercury",
-        "name": "Mercury",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 0.75,
-          "cache_read": 0.025
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32000
-        }
-      },
-      "inception/mercury-coder": {
-        "id": "inception/mercury-coder",
-        "name": "Mercury Coder",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 0.75,
-          "cache_read": 0.025
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32000
         }
       },
       "openai/gpt-5.1-codex-max": {
@@ -17684,24 +17646,6 @@
           "output": 8192
         }
       },
-      "qwen/qwen3-coder:free": {
-        "id": "qwen/qwen3-coder:free",
-        "name": "Qwen3 Coder 480B A35B Instruct (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 262144,
-          "output": 66536
-        }
-      },
       "qwen/qwen3.5-flash-02-23": {
         "id": "qwen/qwen3.5-flash-02-23",
         "name": "Qwen: Qwen3.5-Flash",
@@ -17844,42 +17788,6 @@
         "limit": {
           "context": 262000,
           "output": 262000
-        }
-      },
-      "qwen/qwen3-4b:free": {
-        "id": "qwen/qwen3-4b:free",
-        "name": "Qwen3 4B (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 40960,
-          "output": 40960
-        }
-      },
-      "qwen/qwen3-next-80b-a3b-instruct:free": {
-        "id": "qwen/qwen3-next-80b-a3b-instruct:free",
-        "name": "Qwen3 Next 80B A3B Instruct (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 262144,
-          "output": 262144
         }
       },
       "qwen/qwen3-coder-flash": {
@@ -18593,24 +18501,6 @@
           "output": 32768
         }
       },
-      "moonshotai/kimi-k2:free": {
-        "id": "moonshotai/kimi-k2:free",
-        "name": "Kimi K2 (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 32800,
-          "output": 32800
-        }
-      },
       "moonshotai/kimi-k2-thinking": {
         "id": "moonshotai/kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
@@ -18673,6 +18563,32 @@
       "anthropic/claude-opus-4.6": {
         "id": "anthropic/claude-opus-4.6",
         "name": "Claude Opus 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25,
+          "context_over_200k": {
+            "input": 10,
+            "output": 37.5,
+            "cache_read": 1,
+            "cache_write": 12.5
+          }
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
+      "anthropic/claude-opus-4.7": {
+        "id": "anthropic/claude-opus-4.7",
+        "name": "Claude Opus 4.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -19085,6 +19001,25 @@
           "output": 200000
         }
       },
+      "accounts/fireworks/models/minimax-m2p7": {
+        "id": "accounts/fireworks/models/minimax-m2p7",
+        "name": "MiniMax-M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.03
+        },
+        "limit": {
+          "context": 196608,
+          "output": 196608
+        }
+      },
       "accounts/fireworks/models/glm-4p7": {
         "id": "accounts/fireworks/models/glm-4p7",
         "name": "GLM 4.7",
@@ -19385,6 +19320,26 @@
           "output": 64000
         }
       },
+      "qwen3.6-plus": {
+        "id": "qwen3.6-plus",
+        "name": "Qwen3.6 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 3,
+          "cache_read": 0.05,
+          "cache_write": 0.625
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
+        }
+      },
       "glm-5.1": {
         "id": "glm-5.1",
         "name": "GLM-5.1",
@@ -19445,6 +19400,26 @@
         "limit": {
           "context": 1048576,
           "output": 64000
+        }
+      },
+      "qwen3.5-plus": {
+        "id": "qwen3.5-plus",
+        "name": "Qwen3.5 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.2,
+          "cache_read": 0.02,
+          "cache_write": 0.25
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
         }
       }
     }
@@ -20261,6 +20236,25 @@
         "limit": {
           "context": 262144,
           "output": 65536
+        }
+      },
+      "glm-5.1": {
+        "id": "glm-5.1",
+        "name": "GLM-5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.87,
+          "output": 3.48,
+          "cache_read": 0.17
+        },
+        "limit": {
+          "context": 202752,
+          "output": 128000
         }
       },
       "qwen3-omni-flash": {
@@ -23138,6 +23132,25 @@
           "output": 131072
         }
       },
+      "MiniMaxAI/MiniMax-M2.7": {
+        "id": "MiniMaxAI/MiniMax-M2.7",
+        "name": "MiniMax-M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.06
+        },
+        "limit": {
+          "context": 204800,
+          "output": 131072
+        }
+      },
       "MiniMaxAI/MiniMax-M2.1": {
         "id": "MiniMaxAI/MiniMax-M2.1",
         "name": "MiniMax-M2.1",
@@ -24605,6 +24618,26 @@
       "anthropic/claude-opus-4.6": {
         "id": "anthropic/claude-opus-4.6",
         "name": "Claude Opus 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
+      "anthropic/claude-opus-4.7": {
+        "id": "anthropic/claude-opus-4.7",
+        "name": "Claude Opus 4.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -30299,9 +30332,9 @@
     "id": "kilo",
     "name": "Kilo Gateway",
     "models": {
-      "giga-potato": {
-        "id": "giga-potato",
-        "name": "Giga Potato (free)",
+      "rekaai/reka-edge": {
+        "id": "rekaai/reka-edge",
+        "name": "Reka Edge",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -30309,66 +30342,30 @@
           ]
         },
         "cost": {
-          "input": 0,
-          "output": 0
+          "input": 0.1,
+          "output": 0.1
         },
         "limit": {
-          "context": 256000,
-          "output": 32000
+          "context": 16384,
+          "output": 16384
         }
       },
-      "corethink:free": {
-        "id": "corethink:free",
-        "name": "CoreThink (free)",
-        "tool_call": true,
+      "rekaai/reka-flash-3": {
+        "id": "rekaai/reka-flash-3",
+        "name": "Reka Flash 3",
+        "tool_call": false,
         "modalities": {
           "output": [
             "text"
           ]
         },
         "cost": {
-          "input": 0,
-          "output": 0
+          "input": 0.1,
+          "output": 0.2
         },
         "limit": {
-          "context": 78000,
-          "output": 8192
-        }
-      },
-      "giga-potato-thinking": {
-        "id": "giga-potato-thinking",
-        "name": "Giga Potato Thinking (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 256000,
-          "output": 32000
-        }
-      },
-      "morph-warp-grep-v2": {
-        "id": "morph-warp-grep-v2",
-        "name": "Morph: WarpGrep V2",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 256000,
-          "output": 32000
+          "context": 65536,
+          "output": 65536
         }
       },
       "ai21/jamba-large-1.7": {
@@ -30441,42 +30438,6 @@
         "limit": {
           "context": 8000,
           "output": 1024
-        }
-      },
-      "liquid/lfm2-8b-a1b": {
-        "id": "liquid/lfm2-8b-a1b",
-        "name": "LiquidAI: LFM2-8B-A1B",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.01,
-          "output": 0.02
-        },
-        "limit": {
-          "context": 32768,
-          "output": 32768
-        }
-      },
-      "liquid/lfm-2.2-6b": {
-        "id": "liquid/lfm-2.2-6b",
-        "name": "LiquidAI: LFM2-2.6B",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.01,
-          "output": 0.02
-        },
-        "limit": {
-          "context": 32768,
-          "output": 32768
         }
       },
       "liquid/lfm-2-24b-a2b": {
@@ -30846,24 +30807,6 @@
           "output": 32768
         }
       },
-      "openrouter/hunter-alpha": {
-        "id": "openrouter/hunter-alpha",
-        "name": "Hunter Alpha",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 32000
-        }
-      },
       "openrouter/auto": {
         "id": "openrouter/auto",
         "name": "Auto Router",
@@ -30901,9 +30844,9 @@
           "output": 32768
         }
       },
-      "openrouter/healer-alpha": {
-        "id": "openrouter/healer-alpha",
-        "name": "Healer Alpha",
+      "openrouter/elephant-alpha": {
+        "id": "openrouter/elephant-alpha",
+        "name": "Elephant (new)",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -30916,7 +30859,7 @@
         },
         "limit": {
           "context": 262144,
-          "output": 32000
+          "output": 32768
         }
       },
       "openrouter/free": {
@@ -30973,6 +30916,24 @@
           "output": 64000
         }
       },
+      "arcee-ai/trinity-large-thinking": {
+        "id": "arcee-ai/trinity-large-thinking",
+        "name": "Arcee AI: Trinity Large Thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.22,
+          "output": 0.85
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "arcee-ai/spotlight": {
         "id": "arcee-ai/spotlight",
         "name": "Arcee AI: Spotlight",
@@ -30991,6 +30952,24 @@
           "output": 65537
         }
       },
+      "arcee-ai/trinity-large-thinking:free": {
+        "id": "arcee-ai/trinity-large-thinking:free",
+        "name": "Arcee AI: Trinity Large Thinking (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "arcee-ai/maestro-reasoning": {
         "id": "arcee-ai/maestro-reasoning",
         "name": "Arcee AI: Maestro Reasoning",
@@ -31007,24 +30986,6 @@
         "limit": {
           "context": 131072,
           "output": 32000
-        }
-      },
-      "arcee-ai/trinity-large-preview:free": {
-        "id": "arcee-ai/trinity-large-preview:free",
-        "name": "Arcee AI: Trinity Large Preview (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 131000,
-          "output": 26200
         }
       },
       "arcee-ai/coder-large": {
@@ -31097,6 +31058,24 @@
         "limit": {
           "context": 131072,
           "output": 163840
+        }
+      },
+      "bytedance-seed/dola-seed-2.0-pro:free": {
+        "id": "bytedance-seed/dola-seed-2.0-pro:free",
+        "name": "ByteDance Seed: Dola Seed 2.0 Pro (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 256000,
+          "output": 128000
         }
       },
       "bytedance-seed/seed-1.6": {
@@ -31315,42 +31294,6 @@
           "output": 32768
         }
       },
-      "allenai/molmo-2-8b": {
-        "id": "allenai/molmo-2-8b",
-        "name": "AllenAI: Molmo2 8B",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 0.2
-        },
-        "limit": {
-          "context": 36864,
-          "output": 36864
-        }
-      },
-      "allenai/olmo-3-7b-think": {
-        "id": "allenai/olmo-3-7b-think",
-        "name": "AllenAI: Olmo 3 7B Think",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.12,
-          "output": 0.2
-        },
-        "limit": {
-          "context": 65536,
-          "output": 65536
-        }
-      },
       "allenai/olmo-3.1-32b-instruct": {
         "id": "allenai/olmo-3.1-32b-instruct",
         "name": "AllenAI: Olmo 3.1 32B Instruct",
@@ -31367,42 +31310,6 @@
         "limit": {
           "context": 65536,
           "output": 32768
-        }
-      },
-      "allenai/olmo-3.1-32b-think": {
-        "id": "allenai/olmo-3.1-32b-think",
-        "name": "AllenAI: Olmo 3.1 32B Think",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.5
-        },
-        "limit": {
-          "context": 65536,
-          "output": 65536
-        }
-      },
-      "allenai/olmo-3-7b-instruct": {
-        "id": "allenai/olmo-3-7b-instruct",
-        "name": "AllenAI: Olmo 3 7B Instruct",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.1,
-          "output": 0.2
-        },
-        "limit": {
-          "context": 65536,
-          "output": 65536
         }
       },
       "allenai/olmo-3-32b-think": {
@@ -31514,60 +31421,6 @@
           "output": 16384
         }
       },
-      "kilo/auto": {
-        "id": "kilo/auto",
-        "name": "Kilo: Auto",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 5,
-          "output": 25
-        },
-        "limit": {
-          "context": 1000000,
-          "output": 128000
-        }
-      },
-      "kilo/auto-small": {
-        "id": "kilo/auto-small",
-        "name": "Deprecated Kilo Auto Small",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.05,
-          "output": 0.4
-        },
-        "limit": {
-          "context": 400000,
-          "output": 128000
-        }
-      },
-      "kilo/auto-free": {
-        "id": "kilo/auto-free",
-        "name": "Deprecated Kilo Auto Free",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 204800,
-          "output": 131072
-        }
-      },
       "morph/morph-v3-fast": {
         "id": "morph/morph-v3-fast",
         "name": "Morph: Morph V3 Fast",
@@ -31620,24 +31473,6 @@
         "limit": {
           "context": 4096,
           "output": 4096
-        }
-      },
-      "stepfun/step-3.5-flash:free": {
-        "id": "stepfun/step-3.5-flash:free",
-        "name": "StepFun: Step 3.5 Flash (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 256000,
-          "output": 256000
         }
       },
       "stepfun/step-3.5-flash": {
@@ -31929,6 +31764,25 @@
         "limit": {
           "context": 131072,
           "output": 26215
+        }
+      },
+      "mistralai/mistral-small-2603": {
+        "id": "mistralai/mistral-small-2603",
+        "name": "Mistral: Mistral Small 4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6,
+          "cache_read": 0.015
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
         }
       },
       "mistralai/ministral-3b-2512": {
@@ -32238,24 +32092,6 @@
           "output": 26215
         }
       },
-      "meta-llama/llama-3.1-405b": {
-        "id": "meta-llama/llama-3.1-405b",
-        "name": "Meta: Llama 3.1 405B (base)",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 4,
-          "output": 4
-        },
-        "limit": {
-          "context": 32768,
-          "output": 32768
-        }
-      },
       "meta-llama/llama-3.2-1b-instruct": {
         "id": "meta-llama/llama-3.2-1b-instruct",
         "name": "Meta: Llama 3.2 1B Instruct",
@@ -32346,22 +32182,23 @@
           "output": 8000
         }
       },
-      "meta-llama/llama-3.1-405b-instruct": {
-        "id": "meta-llama/llama-3.1-405b-instruct",
-        "name": "Meta: Llama 3.1 405B Instruct",
-        "tool_call": false,
+      "x-ai/grok-4.20": {
+        "id": "x-ai/grok-4.20",
+        "name": "xAI: Grok 4.20",
+        "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
         },
         "cost": {
-          "input": 4,
-          "output": 4
+          "input": 2,
+          "output": 6,
+          "cache_read": 0.2
         },
         "limit": {
-          "context": 131000,
-          "output": 26200
+          "context": 2000000,
+          "output": 2000000
         }
       },
       "x-ai/grok-code-fast-1:optimized:free": {
@@ -32380,24 +32217,6 @@
         "limit": {
           "context": 256000,
           "output": 10000
-        }
-      },
-      "x-ai/grok-4.20-multi-agent-beta": {
-        "id": "x-ai/grok-4.20-multi-agent-beta",
-        "name": "xAI: Grok 4.20 Multi-Agent Beta",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 6
-        },
-        "limit": {
-          "context": 2000000,
-          "output": 32768
         }
       },
       "x-ai/grok-4-fast": {
@@ -32514,24 +32333,6 @@
           "output": 30000
         }
       },
-      "x-ai/grok-4.20-beta": {
-        "id": "x-ai/grok-4.20-beta",
-        "name": "xAI: Grok 4.20 Beta",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 6
-        },
-        "limit": {
-          "context": 2000000,
-          "output": 32768
-        }
-      },
       "x-ai/grok-3-mini-beta": {
         "id": "x-ai/grok-3-mini-beta",
         "name": "xAI: Grok 3 Mini Beta",
@@ -32549,6 +32350,25 @@
         "limit": {
           "context": 131072,
           "output": 26215
+        }
+      },
+      "x-ai/grok-4.20-multi-agent": {
+        "id": "x-ai/grok-4.20-multi-agent",
+        "name": "xAI: Grok 4.20 Multi-Agent",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 6,
+          "cache_read": 0.2
+        },
+        "limit": {
+          "context": 2000000,
+          "output": 2000000
         }
       },
       "x-ai/grok-3": {
@@ -32840,6 +32660,25 @@
           "output": 26215
         }
       },
+      "nvidia/nemotron-3-super-120b-a12b": {
+        "id": "nvidia/nemotron-3-super-120b-a12b",
+        "name": "NVIDIA: Nemotron 3 Super",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1,
+          "output": 0.5,
+          "cache_read": 0.1
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "nvidia/nemotron-3-nano-30b-a3b": {
         "id": "nvidia/nemotron-3-nano-30b-a3b",
         "name": "NVIDIA: Nemotron 3 Nano 30B A3B",
@@ -32856,6 +32695,24 @@
         "limit": {
           "context": 262144,
           "output": 52429
+        }
+      },
+      "nvidia/llama-3.1-nemotron-ultra-253b-v1": {
+        "id": "nvidia/llama-3.1-nemotron-ultra-253b-v1",
+        "name": "NVIDIA: Llama 3.1 Nemotron Ultra 253B v1",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 1.8
+        },
+        "limit": {
+          "context": 131072,
+          "output": 131072
         }
       },
       "nvidia/nemotron-nano-12b-v2-vl": {
@@ -32930,6 +32787,25 @@
           "output": 16384
         }
       },
+      "inception/mercury-edit-2": {
+        "id": "inception/mercury-edit-2",
+        "name": "Mercury Edit 2",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        },
+        "limit": {
+          "context": 128000,
+          "output": 8192
+        }
+      },
       "inception/mercury-2": {
         "id": "inception/mercury-2",
         "name": "Inception: Mercury 2",
@@ -32947,42 +32823,6 @@
         "limit": {
           "context": 128000,
           "output": 50000
-        }
-      },
-      "inception/mercury": {
-        "id": "inception/mercury",
-        "name": "Inception: Mercury",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 0.75
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32000
-        }
-      },
-      "inception/mercury-coder": {
-        "id": "inception/mercury-coder",
-        "name": "Inception: Mercury Coder",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 0.75
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32000
         }
       },
       "openai/gpt-5.1-codex-max": {
@@ -33337,6 +33177,25 @@
           "output": 100000
         }
       },
+      "openai/gpt-5.4-mini": {
+        "id": "openai/gpt-5.4-mini",
+        "name": "OpenAI: GPT-5.4 Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 4.5,
+          "cache_read": 0.075
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
+      },
       "openai/gpt-5.1-chat": {
         "id": "openai/gpt-5.1-chat",
         "name": "OpenAI: GPT-5.1 Chat",
@@ -33373,6 +33232,25 @@
         "limit": {
           "context": 200000,
           "output": 100000
+        }
+      },
+      "openai/gpt-5.4-nano": {
+        "id": "openai/gpt-5.4-nano",
+        "name": "OpenAI: GPT-5.4 Nano",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.25,
+          "cache_read": 0.02
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
         }
       },
       "openai/gpt-5.2-codex": {
@@ -34152,6 +34030,25 @@
           "output": 5120
         }
       },
+      "z-ai/glm-5v-turbo": {
+        "id": "z-ai/glm-5v-turbo",
+        "name": "Z.ai: GLM 5V Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.2,
+          "output": 4,
+          "cache_read": 0.24
+        },
+        "limit": {
+          "context": 202752,
+          "output": 131072
+        }
+      },
       "z-ai/glm-4.7": {
         "id": "z-ai/glm-4.7",
         "name": "Z.ai: GLM 4.7",
@@ -34207,6 +34104,24 @@
           "output": 32768
         }
       },
+      "z-ai/glm-5.1": {
+        "id": "z-ai/glm-5.1",
+        "name": "Z.ai: GLM 5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.26,
+          "output": 3.96
+        },
+        "limit": {
+          "context": 202752,
+          "output": 131072
+        }
+      },
       "z-ai/glm-4.5": {
         "id": "z-ai/glm-4.5",
         "name": "Z.ai: GLM 4.5",
@@ -34243,6 +34158,25 @@
         "limit": {
           "context": 131072,
           "output": 98304
+        }
+      },
+      "z-ai/glm-5-turbo": {
+        "id": "z-ai/glm-5-turbo",
+        "name": "Z.ai: GLM 5 Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.2,
+          "output": 4,
+          "cache_read": 0.24
+        },
+        "limit": {
+          "context": 202752,
+          "output": 131072
         }
       },
       "z-ai/glm-4.5v": {
@@ -34446,6 +34380,25 @@
           "output": 128000
         }
       },
+      "minimax/minimax-m2.7": {
+        "id": "minimax/minimax-m2.7",
+        "name": "MiniMax: MiniMax M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.06
+        },
+        "limit": {
+          "context": 204800,
+          "output": 131072
+        }
+      },
       "minimax/minimax-m2": {
         "id": "minimax/minimax-m2",
         "name": "MiniMax: MiniMax M2",
@@ -34500,25 +34453,6 @@
         "limit": {
           "context": 196608,
           "output": 39322
-        }
-      },
-      "minimax/minimax-m2.5:free": {
-        "id": "minimax/minimax-m2.5:free",
-        "name": "MiniMax: MiniMax M2.5 (free)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0
-        },
-        "limit": {
-          "context": 204800,
-          "output": 131072
         }
       },
       "minimax/minimax-m1": {
@@ -34903,6 +34837,26 @@
         "cost": {
           "input": 0.1,
           "output": 0.4
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 65536
+        }
+      },
+      "qwen/qwen3.6-plus": {
+        "id": "qwen/qwen3.6-plus",
+        "name": "Qwen: Qwen3.6 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.325,
+          "output": 1.95,
+          "cache_read": 0.0325,
+          "cache_write": 0.40625
         },
         "limit": {
           "context": 1000000,
@@ -35296,24 +35250,6 @@
           "output": 52429
         }
       },
-      "qwen/qwen-2.5-vl-7b-instruct": {
-        "id": "qwen/qwen-2.5-vl-7b-instruct",
-        "name": "Qwen: Qwen2.5-VL 7B Instruct",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 0.2
-        },
-        "limit": {
-          "context": 32768,
-          "output": 6554
-        }
-      },
       "qwen/qwen3.5-9b": {
         "id": "qwen/qwen3.5-9b",
         "name": "Qwen: Qwen3.5-9B",
@@ -35459,9 +35395,9 @@
           "output": 4096
         }
       },
-      "kwaipilot/kat-coder-pro": {
-        "id": "kwaipilot/kat-coder-pro",
-        "name": "Kwaipilot: KAT-Coder-Pro V1",
+      "kwaipilot/kat-coder-pro-v2": {
+        "id": "kwaipilot/kat-coder-pro-v2",
+        "name": "Kwaipilot: KAT-Coder-Pro V2",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -35469,13 +35405,13 @@
           ]
         },
         "cost": {
-          "input": 0.207,
-          "output": 0.828,
-          "cache_read": 0.0414
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.06
         },
         "limit": {
           "context": 256000,
-          "output": 128000
+          "output": 80000
         }
       },
       "google/gemini-2.5-pro-preview-05-06": {
@@ -35497,6 +35433,25 @@
         "limit": {
           "context": 1048576,
           "output": 65535
+        }
+      },
+      "google/lyria-3-clip-preview": {
+        "id": "google/lyria-3-clip-preview",
+        "name": "Google: Lyria 3 Clip Preview",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "audio",
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
         }
       },
       "google/gemini-3.1-pro-preview-customtools": {
@@ -35557,6 +35512,25 @@
         "limit": {
           "context": 1048576,
           "output": 8192
+        }
+      },
+      "google/lyria-3-pro-preview": {
+        "id": "google/lyria-3-pro-preview",
+        "name": "Google: Lyria 3 Pro Preview",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "audio",
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
         }
       },
       "google/gemma-3n-e4b-it": {
@@ -35636,27 +35610,6 @@
           "output": 65536
         }
       },
-      "google/gemini-3-pro-preview": {
-        "id": "google/gemini-3-pro-preview",
-        "name": "Google: Gemini 3 Pro Preview",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 12,
-          "reasoning": 12,
-          "cache_read": 0.2,
-          "cache_write": 0.375
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
       "google/gemini-2.5-pro": {
         "id": "google/gemini-2.5-pro",
         "name": "Google: Gemini 2.5 Pro",
@@ -35714,6 +35667,24 @@
         "limit": {
           "context": 65536,
           "output": 32768
+        }
+      },
+      "google/gemma-4-31b-it": {
+        "id": "google/gemma-4-31b-it",
+        "name": "Google: Gemma 4 31B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.4
+        },
+        "limit": {
+          "context": 262144,
+          "output": 131072
         }
       },
       "google/gemini-2.5-flash-image": {
@@ -35868,6 +35839,24 @@
         "limit": {
           "context": 128000,
           "output": 65536
+        }
+      },
+      "google/gemma-4-26b-a4b-it": {
+        "id": "google/gemma-4-26b-a4b-it",
+        "name": "Google: Gemma 4 26B A4B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.12,
+          "output": 0.4
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
         }
       },
       "google/gemini-2.5-flash-lite": {
@@ -36167,6 +36156,26 @@
           "output": 64000
         }
       },
+      "anthropic/claude-opus-4.6-fast": {
+        "id": "anthropic/claude-opus-4.6-fast",
+        "name": "Anthropic: Claude Opus 4.6 (Fast)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 150,
+          "cache_read": 3,
+          "cache_write": 37.5
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "anthropic/claude-3.7-sonnet": {
         "id": "anthropic/claude-3.7-sonnet",
         "name": "Anthropic: Claude 3.7 Sonnet",
@@ -36205,24 +36214,6 @@
         "limit": {
           "context": 1000000,
           "output": 128000
-        }
-      },
-      "anthropic/claude-3.5-sonnet": {
-        "id": "anthropic/claude-3.5-sonnet",
-        "name": "Anthropic: Claude 3.5 Sonnet",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 6,
-          "output": 30
-        },
-        "limit": {
-          "context": 200000,
-          "output": 8192
         }
       },
       "anthropic/claude-sonnet-4": {
@@ -36399,6 +36390,44 @@
         "limit": {
           "context": 131072,
           "output": 32768
+        }
+      },
+      "xiaomi/mimo-v2-omni": {
+        "id": "xiaomi/mimo-v2-omni",
+        "name": "Xiaomi: MiMo-V2-Omni",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 2,
+          "cache_read": 0.08
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
+        }
+      },
+      "xiaomi/mimo-v2-pro": {
+        "id": "xiaomi/mimo-v2-pro",
+        "name": "Xiaomi: MiMo-V2-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3,
+          "cache_read": 0.2
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 131072
         }
       },
       "xiaomi/mimo-v2-flash": {
@@ -38103,6 +38132,26 @@
           "output": 64000
         }
       },
+      "anthropic/claude-opus-4-7": {
+        "id": "anthropic/claude-opus-4-7",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "anthropic/claude-opus-4-1": {
         "id": "anthropic/claude-opus-4-1",
         "name": "Claude Opus 4.1 (latest)",
@@ -39433,6 +39482,26 @@
           "output": 262144
         }
       },
+      "claude-opus-4-7": {
+        "id": "claude-opus-4-7",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "gpt-5-nano": {
         "id": "gpt-5-nano",
         "name": "GPT-5 Nano",
@@ -39550,6 +39619,26 @@
         "limit": {
           "context": 200000,
           "output": 32000
+        }
+      },
+      "qwen3.6-plus": {
+        "id": "qwen3.6-plus",
+        "name": "Qwen3.6 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 3,
+          "cache_read": 0.05,
+          "cache_write": 0.625
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
         }
       },
       "gpt-5.4-mini": {
@@ -40132,6 +40221,26 @@
           "context": 400000,
           "input": 272000,
           "output": 128000
+        }
+      },
+      "qwen3.5-plus": {
+        "id": "qwen3.5-plus",
+        "name": "Qwen3.5 Plus",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.2,
+          "cache_read": 0.02,
+          "cache_write": 0.25
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
         }
       },
       "mimo-v2-pro-free": {
@@ -41357,15 +41466,20 @@
       },
       "novita/kimi-k2.5": {
         "id": "novita/kimi-k2.5",
-        "name": "kimi-k2.5",
+        "name": "Kimi-K2.5",
         "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
         },
+        "cost": {
+          "input": 0.6,
+          "output": 3,
+          "cache_read": 0.1
+        },
         "limit": {
-          "context": 256000,
+          "context": 128000,
           "output": 262144
         }
       },
@@ -41385,12 +41499,17 @@
       },
       "novita/glm-5": {
         "id": "novita/glm-5",
-        "name": "glm-5",
+        "name": "GLM-5",
         "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3.2,
+          "cache_read": 0.2
         },
         "limit": {
           "context": 205000,
@@ -41563,29 +41682,37 @@
       },
       "cerebras/gpt-oss-120b-cs": {
         "id": "cerebras/gpt-oss-120b-cs",
-        "name": "gpt-oss-120b-cs",
+        "name": "GPT-OSS-120B-CS",
         "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
         },
+        "cost": {
+          "input": 0.35,
+          "output": 0.75
+        },
         "limit": {
-          "context": 0,
+          "context": 128000,
           "output": 0
         }
       },
       "cerebras/llama-3.1-8b-cs": {
         "id": "cerebras/llama-3.1-8b-cs",
-        "name": "llama-3.1-8b-cs",
+        "name": "Llama-3.1-8B-CS",
         "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
         },
+        "cost": {
+          "input": 0.1,
+          "output": 0.1
+        },
         "limit": {
-          "context": 0,
+          "context": 128000,
           "output": 0
         }
       },
@@ -41836,7 +41963,7 @@
       },
       "openai/gpt-5.1-codex-max": {
         "id": "openai/gpt-5.1-codex-max",
-        "name": "GPT 5.1 Codex Max",
+        "name": "GPT-5.1-Codex-Max",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -43260,6 +43387,26 @@
         },
         "limit": {
           "context": 983040,
+          "output": 128000
+        }
+      },
+      "anthropic/claude-opus-4.7": {
+        "id": "anthropic/claude-opus-4.7",
+        "name": "Claude-Opus-4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 4.3,
+          "output": 21,
+          "cache_read": 0.43,
+          "cache_write": 5.4
+        },
+        "limit": {
+          "context": 1048576,
           "output": 128000
         }
       },
@@ -46436,6 +46583,26 @@
           "output": 128000
         }
       },
+      "global.anthropic.claude-opus-4-7": {
+        "id": "global.anthropic.claude-opus-4-7",
+        "name": "Claude Opus 4.7 (Global)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "mistral.pixtral-large-2502-v1:0": {
         "id": "mistral.pixtral-large-2502-v1:0",
         "name": "Pixtral Large (25.02)",
@@ -46701,6 +46868,26 @@
           "output": 131072
         }
       },
+      "us.anthropic.claude-opus-4-7": {
+        "id": "us.anthropic.claude-opus-4-7",
+        "name": "Claude Opus 4.7 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "amazon.nova-2-lite-v1:0": {
         "id": "amazon.nova-2-lite-v1:0",
         "name": "Nova 2 Lite",
@@ -46850,6 +47037,26 @@
         "limit": {
           "context": 1000000,
           "output": 64000
+        }
+      },
+      "anthropic.claude-opus-4-7": {
+        "id": "anthropic.claude-opus-4-7",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
         }
       },
       "global.anthropic.claude-opus-4-6-v1": {
@@ -47260,6 +47467,26 @@
         "limit": {
           "context": 128000,
           "output": 4096
+        }
+      },
+      "eu.anthropic.claude-opus-4-7": {
+        "id": "eu.anthropic.claude-opus-4-7",
+        "name": "Claude Opus 4.7 (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
         }
       },
       "minimax.minimax-m2.5": {
@@ -48452,6 +48679,30 @@
           "output": 16384
         }
       },
+      "grok-4-20-multi-agent": {
+        "id": "grok-4-20-multi-agent",
+        "name": "Grok 4.20 Multi-Agent",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.27,
+          "output": 6.8,
+          "cache_read": 0.23,
+          "context_over_200k": {
+            "input": 4.53,
+            "output": 13.6,
+            "cache_read": 0.23
+          }
+        },
+        "limit": {
+          "context": 2000000,
+          "output": 128000
+        }
+      },
       "qwen3-235b-a22b-instruct-2507": {
         "id": "qwen3-235b-a22b-instruct-2507",
         "name": "Qwen 3 235B A22B Instruct 2507",
@@ -48468,6 +48719,25 @@
         "limit": {
           "context": 128000,
           "output": 16384
+        }
+      },
+      "z-ai-glm-5v-turbo": {
+        "id": "z-ai-glm-5v-turbo",
+        "name": "GLM 5V Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.5,
+          "output": 5,
+          "cache_read": 0.3
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32768
         }
       },
       "grok-41-fast": {
@@ -48544,6 +48814,68 @@
         "limit": {
           "context": 256000,
           "output": 65536
+        }
+      },
+      "grok-4-20": {
+        "id": "grok-4-20",
+        "name": "Grok 4.20",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.27,
+          "output": 6.8,
+          "cache_read": 0.23,
+          "context_over_200k": {
+            "input": 4.53,
+            "output": 13.6,
+            "cache_read": 0.23
+          }
+        },
+        "limit": {
+          "context": 2000000,
+          "output": 128000
+        }
+      },
+      "google-gemma-4-26b-a4b-it": {
+        "id": "google-gemma-4-26b-a4b-it",
+        "name": "Google Gemma 4 26B A4B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1625,
+          "output": 0.5
+        },
+        "limit": {
+          "context": 256000,
+          "output": 8192
+        }
+      },
+      "claude-opus-4-7": {
+        "id": "claude-opus-4-7",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 6,
+          "output": 30,
+          "cache_read": 0.6,
+          "cache_write": 7.5
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
         }
       },
       "qwen3-coder-480b-a35b-instruct-turbo": {
@@ -48694,26 +49026,6 @@
           "output": 128000
         }
       },
-      "claude-sonnet-45": {
-        "id": "claude-sonnet-45",
-        "name": "Claude Sonnet 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3.75,
-          "output": 18.75,
-          "cache_read": 0.375,
-          "cache_write": 4.69
-        },
-        "limit": {
-          "context": 198000,
-          "output": 49500
-        }
-      },
       "openai-gpt-52": {
         "id": "openai-gpt-52",
         "name": "GPT-5.2",
@@ -48751,50 +49063,6 @@
           "output": 16384
         }
       },
-      "claude-opus-45": {
-        "id": "claude-opus-45",
-        "name": "Claude Opus 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 6,
-          "output": 30,
-          "cache_read": 0.6,
-          "cache_write": 7.5
-        },
-        "limit": {
-          "context": 198000,
-          "output": 49500
-        }
-      },
-      "grok-4-20-multi-agent-beta": {
-        "id": "grok-4-20-multi-agent-beta",
-        "name": "Grok 4.20 Multi-Agent Beta",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.27,
-          "output": 6.8,
-          "cache_read": 0.23,
-          "context_over_200k": {
-            "input": 4.53,
-            "output": 13.6,
-            "cache_read": 0.23
-          }
-        },
-        "limit": {
-          "context": 2000000,
-          "output": 128000
-        }
-      },
       "minimax-m27": {
         "id": "minimax-m27",
         "name": "MiniMax M2.7",
@@ -48830,25 +49098,6 @@
         "limit": {
           "context": 128000,
           "output": 16384
-        }
-      },
-      "grok-code-fast-1": {
-        "id": "grok-code-fast-1",
-        "name": "Grok Code Fast 1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 1.87,
-          "cache_read": 0.03
-        },
-        "limit": {
-          "context": 256000,
-          "output": 10000
         }
       },
       "qwen3-5-35b-a3b": {
@@ -49036,6 +49285,26 @@
           "output": 16384
         }
       },
+      "claude-opus-4-5": {
+        "id": "claude-opus-4-5",
+        "name": "Claude Opus 4.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 6,
+          "output": 30,
+          "cache_read": 0.6,
+          "cache_write": 7.5
+        },
+        "limit": {
+          "context": 198000,
+          "output": 32768
+        }
+      },
       "qwen3-5-9b": {
         "id": "qwen3-5-9b",
         "name": "Qwen 3.5 9B",
@@ -49076,25 +49345,6 @@
           "output": 128000
         }
       },
-      "aion-labs.aion-2-0": {
-        "id": "aion-labs.aion-2-0",
-        "name": "Aion 2.0",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1,
-          "output": 2,
-          "cache_read": 0.25
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32768
-        }
-      },
       "openai-gpt-54-mini": {
         "id": "openai-gpt-54-mini",
         "name": "GPT-5.4 Mini",
@@ -49112,24 +49362,6 @@
         "limit": {
           "context": 400000,
           "output": 128000
-        }
-      },
-      "google.gemma-4-31b-it": {
-        "id": "google.gemma-4-31b-it",
-        "name": "Google Gemma 4 31B Instruct",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.175,
-          "output": 0.5
-        },
-        "limit": {
-          "context": 256000,
-          "output": 8192
         }
       },
       "minimax-m25": {
@@ -49261,7 +49493,9 @@
           "cache_write": 0.78,
           "context_over_200k": {
             "input": 2.5,
-            "output": 7.5
+            "output": 7.5,
+            "cache_read": 0.0625,
+            "cache_write": 0.78
           }
         },
         "limit": {
@@ -49269,9 +49503,28 @@
           "output": 65536
         }
       },
-      "google.gemma-4-26b-a4b-it": {
-        "id": "google.gemma-4-26b-a4b-it",
-        "name": "Google Gemma 4 26B A4B Instruct",
+      "aion-labs-aion-2-0": {
+        "id": "aion-labs-aion-2-0",
+        "name": "Aion 2.0",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 2,
+          "cache_read": 0.25
+        },
+        "limit": {
+          "context": 128000,
+          "output": 32768
+        }
+      },
+      "claude-sonnet-4-5": {
+        "id": "claude-sonnet-4-5",
+        "name": "Claude Sonnet 4.5",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -49279,12 +49532,14 @@
           ]
         },
         "cost": {
-          "input": 0.1625,
-          "output": 0.5
+          "input": 3.75,
+          "output": 18.75,
+          "cache_read": 0.375,
+          "cache_write": 4.69
         },
         "limit": {
-          "context": 256000,
-          "output": 8192
+          "context": 198000,
+          "output": 64000
         }
       },
       "openai-gpt-4o-2024-11-20": {
@@ -49340,49 +49595,6 @@
         "limit": {
           "context": 256000,
           "output": 65536
-        }
-      },
-      "grok-4-20-beta": {
-        "id": "grok-4-20-beta",
-        "name": "Grok 4.20 Beta",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.27,
-          "output": 6.8,
-          "cache_read": 0.23,
-          "context_over_200k": {
-            "input": 4.53,
-            "output": 13.6,
-            "cache_read": 0.23
-          }
-        },
-        "limit": {
-          "context": 2000000,
-          "output": 128000
-        }
-      },
-      "minimax-m21": {
-        "id": "minimax-m21",
-        "name": "MiniMax M2.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.35,
-          "output": 1.5,
-          "cache_read": 0.04
-        },
-        "limit": {
-          "context": 198000,
-          "output": 32768
         }
       },
       "llama-3.2-3b": {
@@ -49503,6 +49715,43 @@
           "context": 1000000,
           "output": 128000
         }
+      },
+      "z-ai-glm-5-turbo": {
+        "id": "z-ai-glm-5-turbo",
+        "name": "GLM 5 Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.2,
+          "output": 4,
+          "cache_read": 0.24
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32768
+        }
+      },
+      "google-gemma-4-31b-it": {
+        "id": "google-gemma-4-31b-it",
+        "name": "Google Gemma 4 31B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.175,
+          "output": 0.5
+        },
+        "limit": {
+          "context": 256000,
+          "output": 8192
+        }
       }
     }
   },
@@ -49577,9 +49826,9 @@
           ]
         },
         "cost": {
-          "input": 0.27,
-          "output": 1.1,
-          "cache_read": 0.548
+          "input": 0.06,
+          "output": 0.22,
+          "cache_read": 0.01
         },
         "limit": {
           "context": 204800,
@@ -49721,6 +49970,24 @@
         "limit": {
           "context": 262144,
           "output": 262144
+        }
+      },
+      "coding-glm-5.1": {
+        "id": "coding-glm-5.1",
+        "name": "Coding-GLM-5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.06,
+          "output": 0.22
+        },
+        "limit": {
+          "context": 200000,
+          "output": 128000
         }
       },
       "gpt-5-mini": {
@@ -49874,6 +50141,25 @@
           "output": 128000
         }
       },
+      "gpt-5.4-mini": {
+        "id": "gpt-5.4-mini",
+        "name": "GPT-5.4-Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 4.5,
+          "cache_read": 0.075
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
+      },
       "minimax-m2.1": {
         "id": "minimax-m2.1",
         "name": "MiniMax M2.1",
@@ -49890,6 +50176,24 @@
         "limit": {
           "context": 204800,
           "output": 131072
+        }
+      },
+      "glm-5.1": {
+        "id": "glm-5.1",
+        "name": "GLM-5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.84,
+          "output": 3.38
+        },
+        "limit": {
+          "context": 200000,
+          "output": 128000
         }
       },
       "o4-mini": {
@@ -50122,6 +50426,25 @@
         "limit": {
           "context": 262144,
           "output": 65536
+        }
+      },
+      "gpt-5.4": {
+        "id": "gpt-5.4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
         }
       },
       "coding-glm-4.7-free": {
@@ -50661,6 +50984,26 @@
           "output": 65536
         }
       },
+      "claude-opus-4-7": {
+        "id": "claude-opus-4-7",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 200000,
+          "output": 128000
+        }
+      },
       "gpt-5-mini": {
         "id": "gpt-5-mini",
         "name": "GPT-5 Mini",
@@ -50813,26 +51156,6 @@
           "output": 128000
         }
       },
-      "claude-opus-4-5": {
-        "id": "claude-opus-4-5",
-        "name": "Claude Opus 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 5,
-          "output": 25,
-          "cache_read": 0.5,
-          "cache_write": 6.25
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
-        }
-      },
       "claude-opus-4-6": {
         "id": "claude-opus-4-6",
         "name": "Claude Opus 4.6",
@@ -50926,26 +51249,6 @@
         "limit": {
           "context": 128000,
           "output": 16384
-        }
-      },
-      "claude-sonnet-4-5": {
-        "id": "claude-sonnet-4-5",
-        "name": "Claude Sonnet 4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
         }
       },
       "gpt-oss-120b": {
@@ -54493,6 +54796,32 @@
           "context": 1000000,
           "output": 128000
         }
+      },
+      "claude-opus-4-7@default": {
+        "id": "claude-opus-4-7@default",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25,
+          "context_over_200k": {
+            "input": 10,
+            "output": 37.5,
+            "cache_read": 1,
+            "cache_write": 12.5
+          }
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
       }
     }
   },
@@ -55272,6 +55601,25 @@
           "output": 64000
         }
       },
+      "hf:zai-org/GLM-5.1": {
+        "id": "hf:zai-org/GLM-5.1",
+        "name": "GLM 5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3,
+          "cache_read": 1
+        },
+        "limit": {
+          "context": 196608,
+          "output": 65536
+        }
+      },
       "hf:zai-org/GLM-5": {
         "id": "hf:zai-org/GLM-5",
         "name": "GLM-5",
@@ -56015,6 +56363,24 @@
         "limit": {
           "context": 128000,
           "output": 8192
+        }
+      },
+      "minimaxai/minimax-m2.7": {
+        "id": "minimaxai/minimax-m2.7",
+        "name": "MiniMax-M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 204800,
+          "output": 131072
         }
       },
       "minimaxai/minimax-m2.1": {
@@ -56841,9 +57207,9 @@
     "id": "inception",
     "name": "Inception",
     "models": {
-      "mercury-edit": {
-        "id": "mercury-edit",
-        "name": "Mercury Edit",
+      "mercury-edit-2": {
+        "id": "mercury-edit-2",
+        "name": "Mercury Edit 2",
         "tool_call": false,
         "modalities": {
           "output": [
@@ -56877,46 +57243,6 @@
         "limit": {
           "context": 128000,
           "output": 50000
-        }
-      },
-      "mercury": {
-        "id": "mercury",
-        "name": "Mercury",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 1,
-          "cache_read": 0.25,
-          "cache_write": 1
-        },
-        "limit": {
-          "context": 128000,
-          "output": 16384
-        }
-      },
-      "mercury-coder": {
-        "id": "mercury-coder",
-        "name": "Mercury Coder",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.25,
-          "output": 1,
-          "cache_read": 0.25,
-          "cache_write": 1
-        },
-        "limit": {
-          "context": 128000,
-          "output": 16384
         }
       }
     }
@@ -59708,7 +60034,8 @@
         },
         "cost": {
           "input": 1.4,
-          "output": 4.4
+          "output": 4.4,
+          "cache_read": 0.26
         },
         "limit": {
           "context": 202752,
@@ -59726,7 +60053,8 @@
         },
         "cost": {
           "input": 1,
-          "output": 3.2
+          "output": 3.2,
+          "cache_read": 0.5
         },
         "limit": {
           "context": 202752,
@@ -59780,7 +60108,8 @@
         },
         "cost": {
           "input": 0.3,
-          "output": 1.2
+          "output": 1.2,
+          "cache_read": 0.06
         },
         "limit": {
           "context": 196608,
@@ -59991,6 +60320,24 @@
           "output": 400000
         }
       },
+      "minimax-M2.7": {
+        "id": "minimax-M2.7",
+        "name": "MiniMax-M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.47,
+          "output": 1.4
+        },
+        "limit": {
+          "context": 202752,
+          "output": 131072
+        }
+      },
       "gemini-2.5-pro": {
         "id": "gemini-2.5-pro",
         "name": "Gemini 2.5 Pro",
@@ -60061,6 +60408,25 @@
         "limit": {
           "context": 196000,
           "output": 196000
+        }
+      },
+      "glm-5.1": {
+        "id": "glm-5.1",
+        "name": "GLM-5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.31,
+          "output": 4.1,
+          "cache_read": 0.24
+        },
+        "limit": {
+          "context": 204800,
+          "output": 131072
         }
       },
       "glm-4.5": {
@@ -62627,6 +62993,25 @@
           "output": 128000
         }
       },
+      "zai/glm-5.1": {
+        "id": "zai/glm-5.1",
+        "name": "GLM 5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.4,
+          "output": 4.4,
+          "cache_read": 0.26
+        },
+        "limit": {
+          "context": 202752,
+          "output": 202752
+        }
+      },
       "zai/glm-4.6v-flash": {
         "id": "zai/glm-4.6v-flash",
         "name": "GLM-4.6V-Flash",
@@ -63249,6 +63634,25 @@
         "limit": {
           "context": 131072,
           "output": 131072
+        }
+      },
+      "inception/mercury-edit-2": {
+        "id": "inception/mercury-edit-2",
+        "name": "Mercury Edit 2",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 0.75,
+          "cache_read": 0.025
+        },
+        "limit": {
+          "context": 128000,
+          "output": 8192
         }
       },
       "inception/mercury-2": {
@@ -65477,6 +65881,26 @@
       "anthropic/claude-opus-4.6": {
         "id": "anthropic/claude-opus-4.6",
         "name": "Claude Opus 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
+      "anthropic/claude-opus-4.7": {
+        "id": "anthropic/claude-opus-4.7",
+        "name": "Claude Opus 4.7",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -75992,6 +76416,25 @@
           "context": 204800,
           "output": 131072
         }
+      },
+      "MiniMaxAI/MiniMax-M2.7": {
+        "id": "MiniMaxAI/MiniMax-M2.7",
+        "name": "MiniMax-M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.06
+        },
+        "limit": {
+          "context": 202752,
+          "output": 131072
+        }
       }
     }
   },
@@ -76335,6 +76778,26 @@
         "limit": {
           "context": 200000,
           "output": 32000
+        }
+      },
+      "claude-opus-4-7": {
+        "id": "claude-opus-4-7",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
         }
       },
       "claude-3-haiku-20240307": {
@@ -76747,6 +77210,69 @@
         "limit": {
           "context": 202752,
           "output": 98304
+        }
+      }
+    }
+  },
+  "hpc-ai": {
+    "id": "hpc-ai",
+    "name": "HPC-AI",
+    "models": {
+      "zai-org/glm-5.1": {
+        "id": "zai-org/glm-5.1",
+        "name": "GLM 5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.66,
+          "output": 2,
+          "cache_read": 0.12
+        },
+        "limit": {
+          "context": 202000,
+          "output": 202000
+        }
+      },
+      "minimax/minimax-m2.5": {
+        "id": "minimax/minimax-m2.5",
+        "name": "MiniMax M2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.56,
+          "cache_read": 0.014
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 131072
+        }
+      },
+      "moonshotai/kimi-k2.5": {
+        "id": "moonshotai/kimi-k2.5",
+        "name": "Kimi K2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.21,
+          "output": 1,
+          "cache_read": 0.03
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
         }
       }
     }
