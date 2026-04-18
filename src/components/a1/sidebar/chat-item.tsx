@@ -165,7 +165,7 @@ export const ChatItem = memo(
                 </div>
                 <div
                   className={cn(
-                    "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+                    "absolute top-1/2 -translate-y-1/2 right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
                     isDropdownOpen ? "opacity-100" : "",
                   )}
                 >
