@@ -177,7 +177,7 @@ export const VirtualizedChatList = ({
   const virtualizer = useVirtualizer({
     count: filteredChats.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 34,
+    estimateSize: (index) => (filteredChats[index]?.snippet ? 50 : 34),
     measureElement: (el) => el.getBoundingClientRect().height,
     overscan: 5,
   });
@@ -233,6 +233,8 @@ export const VirtualizedChatList = ({
     !isSearching && chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
   const allSelected =
     filteredChats.length > 0 && filteredChats.every((chat) => selectedChatIds.has(chat.id));
+  const showList =
+    isMetadataLoaded && !showNoChatsPlaceholder && !showSearchLoading && !showNoSearchResults;
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
@@ -303,7 +305,14 @@ export const VirtualizedChatList = ({
         )}
       </div>
 
-      <div ref={parentRef} className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}>
+      <div
+        ref={parentRef}
+        className={cn(
+          "flex-1",
+          showList ? "overflow-y-auto" : "overflow-hidden",
+          isOverflowing && showList && "pr-2",
+        )}
+      >
         {!isMetadataLoaded ? (
           <div className="flex flex-col gap-1 pt-1">
             <Skeleton className="h-8 w-full rounded-md" />
@@ -317,8 +326,9 @@ export const VirtualizedChatList = ({
             <p className="max-w-full min-w-0 truncate">No chats yet</p>
           </div>
         ) : showSearchLoading ? (
-          <div className="flex h-full items-center justify-center">
-            <Spinner className="text-muted-foreground size-6" />
+          <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
+            <Spinner className="text-muted-foreground size-16" />
+            <p className="max-w-full min-w-0 truncate">Searching...</p>
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">

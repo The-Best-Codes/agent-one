@@ -110,22 +110,24 @@ export const ChatItem = memo(
             >
               <Link
                 to={`/chat/${id}`}
-                className="relative block overflow-hidden"
+                className="relative overflow-hidden"
                 data-icon="inline-start"
               >
-                <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
-                  <ChatStatusIndicator chatId={id} />
-                  {branchOf && (
-                    <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+                <div className="flex min-w-0 flex-col">
+                  <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
+                    <ChatStatusIndicator chatId={id} />
+                    {branchOf && (
+                      <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+                    )}
+                    <span className="min-w-0 truncate">{title}</span>
+                  </span>
+                  {snippet && (
+                    <span
+                      className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs [&_mark]:bg-yellow-500/30"
+                      dangerouslySetInnerHTML={{ __html: snippet }}
+                    />
                   )}
-                  <span className="min-w-0 truncate">{title}</span>
-                </span>
-                {snippet && (
-                  <span
-                    className="text-muted-foreground mt-0.5 block truncate text-xs [&_mark]:bg-yellow-500/30 [&_mark]:text-foreground"
-                    dangerouslySetInnerHTML={{ __html: snippet }}
-                  />
-                )}
+                </div>
                 <div
                   className={cn(
                     "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
