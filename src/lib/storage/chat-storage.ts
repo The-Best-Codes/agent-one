@@ -192,14 +192,19 @@ export const chatStorage = {
     return (chatCountRow?.count ?? 0) === (ftsCountRow?.count ?? 0);
   },
 
-  async searchChats(query: string): Promise<ChatSearchResult[]> {
+  async searchChats(query: string, rawOperators = false): Promise<ChatSearchResult[]> {
     const d = await getDb();
-    const ftsQuery = query
-      .replace(/"/g, "")
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((term) => `"${term}"*`)
-      .join(" ");
+    let ftsQuery: string;
+    if (rawOperators) {
+      ftsQuery = query.trim();
+    } else {
+      ftsQuery = query
+        .replace(/"/g, "")
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((term) => `"${term}"*`)
+        .join(" ");
+    }
     if (!ftsQuery) return [];
     const rows = await d.select<{ chat_id: string; title: string; snippet: string }[]>(
       `SELECT
