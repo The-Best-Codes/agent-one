@@ -49,7 +49,7 @@ export interface PersistenceContextType {
   deleteChat: (chatId: string) => void;
   bulkDeleteChats: (chatIds: string[]) => void;
   bulkExportChats: (chatIds: string[]) => Promise<ChatData[]>;
-  searchChats: (query: string) => Promise<ChatSearchResult[]>;
+  searchChats: (query: string, rawOperators?: boolean) => Promise<ChatSearchResult[]>;
   branchChat: (params: {
     originalChatId: string;
     branchFromMessageId: string;
@@ -411,9 +411,12 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [loadFullChatData],
   );
 
-  const searchChats = useCallback(async (query: string): Promise<ChatSearchResult[]> => {
-    return chatStorage.searchChats(query);
-  }, []);
+  const searchChats = useCallback(
+    async (query: string, rawOperators?: boolean): Promise<ChatSearchResult[]> => {
+      return chatStorage.searchChats(query, rawOperators);
+    },
+    [],
+  );
 
   const branchChat = useCallback(
     ({
