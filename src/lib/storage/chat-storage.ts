@@ -213,11 +213,14 @@ export const chatStorage = {
        LIMIT 50`,
       [ftsQuery],
     );
-    return rows.map((r) => ({
-      chatId: r.chat_id,
-      title: r.title,
-      snippet: trimSnippetLeft(r.snippet, 2),
-    }));
+    const seen = new Set<string>();
+    const results: ChatSearchResult[] = [];
+    for (const r of rows) {
+      if (seen.has(r.chat_id)) continue;
+      seen.add(r.chat_id);
+      results.push({ chatId: r.chat_id, title: r.title, snippet: trimSnippetLeft(r.snippet, 2) });
+    }
+    return results;
   },
 
   async rebuildFtsIndex(): Promise<void> {
