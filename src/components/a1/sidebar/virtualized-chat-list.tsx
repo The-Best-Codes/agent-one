@@ -65,6 +65,7 @@ export const VirtualizedChatList = ({
   const [showBulkExportModal, setShowBulkExportModal] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const latestSearchQueryRef = useRef("");
   const [chatIds] = useAtom(chatIdsAtom);
 
   useHotkeys(kbdRegistry.focusChatSearch, () => {
@@ -116,12 +117,20 @@ export const VirtualizedChatList = ({
         setIsSearching(true);
         try {
           const results = await searchChats(query);
+          if (latestSearchQueryRef.current !== query) {
+            return;
+          }
           setSearchResults(results);
         } catch (error) {
+          if (latestSearchQueryRef.current !== query) {
+            return;
+          }
           logger.error("Search failed:", error);
           setSearchResults(null);
         } finally {
-          setIsSearching(false);
+          if (latestSearchQueryRef.current === query) {
+            setIsSearching(false);
+          }
         }
       }, 300),
     [searchChats],
@@ -136,6 +145,7 @@ export const VirtualizedChatList = ({
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchQuery(value);
+      latestSearchQueryRef.current = value;
       if (!value.trim()) {
         debouncedSearch.cancel();
         setSearchResults(null);

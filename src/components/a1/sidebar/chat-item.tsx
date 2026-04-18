@@ -6,7 +6,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { memo, useState } from "react";
+import { memo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,42 @@ import { ChatStatusIndicator } from "./chat-status-indicator";
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
 
 const logger = getLogger(import.meta.url);
+const MARK_OPEN = "<mark>";
+const MARK_CLOSE = "</mark>";
+
+function renderSnippet(snippet: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let remaining = snippet;
+  let partIndex = 0;
+
+  while (remaining) {
+    const markStart = remaining.indexOf(MARK_OPEN);
+
+    if (markStart === -1) {
+      parts.push(<span key={`text-${partIndex}`}>{remaining}</span>);
+      break;
+    }
+
+    if (markStart > 0) {
+      parts.push(<span key={`text-${partIndex}`}>{remaining.slice(0, markStart)}</span>);
+      partIndex += 1;
+    }
+
+    remaining = remaining.slice(markStart + MARK_OPEN.length);
+    const markEnd = remaining.indexOf(MARK_CLOSE);
+
+    if (markEnd === -1) {
+      parts.push(<span key={`text-${partIndex}`}>{`${MARK_OPEN}${remaining}`}</span>);
+      break;
+    }
+
+    parts.push(<mark key={`mark-${partIndex}`}>{remaining.slice(0, markEnd)}</mark>);
+    partIndex += 1;
+    remaining = remaining.slice(markEnd + MARK_CLOSE.length);
+  }
+
+  return parts;
+}
 
 interface ChatItemProps {
   activeChatId?: string;
@@ -122,10 +158,9 @@ export const ChatItem = memo(
                     <span className="min-w-0 truncate">{title}</span>
                   </span>
                   {snippet && (
-                    <span
-                      className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs [&_mark]:bg-yellow-500/30"
-                      dangerouslySetInnerHTML={{ __html: snippet }}
-                    />
+                    <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs [&_mark]:bg-yellow-500/30">
+                      {renderSnippet(snippet)}
+                    </span>
                   )}
                 </div>
                 <div

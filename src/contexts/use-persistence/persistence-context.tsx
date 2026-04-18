@@ -127,9 +127,16 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       setChatIds(ids);
       setIsMetadataLoaded(true);
 
-      chatStorage.rebuildFtsIndex().catch((error) => {
-        logger.error("Failed to rebuild FTS index", error);
-      });
+      chatStorage
+        .isFtsIndexConsistent()
+        .then((isConsistent) => {
+          if (isConsistent) return;
+
+          return chatStorage.rebuildFtsIndex();
+        })
+        .catch((error) => {
+          logger.error("Failed to sync FTS index", error);
+        });
     };
 
     void loadInitialData();
@@ -214,6 +221,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       setMetadata(id, metadata);
       persistMetadata(id, metadata);
       persistMessages(id, []);
+      void chatStorage.updateFtsIndex(id, metadata.title, []);
       setChatIds((currentChatIds) => {
         const next = [id, ...currentChatIds];
         persistChatIds(next);
@@ -347,6 +355,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
+        void chatStorage
+          .getChatMessages(chatId)
+          .then((messages) => chatStorage.updateFtsIndex(chatId, title, messages ?? []));
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title ${chatId}`, error);
@@ -443,6 +454,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(newId, newMetadata);
         persistMetadata(newId, newMetadata);
         persistMessages(newId, branchedMessages);
+        void chatStorage.updateFtsIndex(newId, newMetadata.title, branchedMessages);
 
         setChatIds((currentChatIds) => {
           const next = [newId, ...currentChatIds];

@@ -30,6 +30,16 @@ function extractTextFromMessages(messages: UIMessage[]): string {
   return parts.join(" ");
 }
 
+async function replaceFtsEntry(id: string, title: string, content: string): Promise<void> {
+  const d = await getDb();
+  await d.execute("DELETE FROM chat_fts WHERE chat_id = $1", [id]);
+  await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
+    id,
+    title,
+    content,
+  ]);
+}
+
 export const chatStorage = {
   async getItem(key: string): Promise<string | null> {
     const d = await getDb();
@@ -155,14 +165,22 @@ export const chatStorage = {
   },
 
   async updateFtsIndex(id: string, title: string, messages: UIMessage[]): Promise<void> {
-    const d = await getDb();
     const content = extractTextFromMessages(messages);
-    await d.execute("DELETE FROM chat_fts WHERE chat_id = $1", [id]);
-    await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
-      id,
-      title,
-      content,
-    ]);
+    await replaceFtsEntry(id, title, content);
+  },
+
+  async isFtsIndexConsistent(): Promise<boolean> {
+    const d = await getDb();
+    const [chatCountRow] = await d.select<{ count: number }[]>(
+      "SELECT COUNT(*) as count FROM chat_messages",
+      [],
+    );
+    const [ftsCountRow] = await d.select<{ count: number }[]>(
+      "SELECT COUNT(*) as count FROM chat_fts",
+      [],
+    );
+
+    return (chatCountRow?.count ?? 0) === (ftsCountRow?.count ?? 0);
   },
 
   async searchChats(query: string): Promise<ChatSearchResult[]> {
@@ -191,23 +209,30 @@ export const chatStorage = {
 
   async rebuildFtsIndex(): Promise<void> {
     const d = await getDb();
-    await d.execute("DELETE FROM chat_fts", []);
     const rows = await d.select<{ id: string; title: string; messages: string }[]>(
       "SELECT m.id, COALESCE(c.title, 'New chat') as title, m.messages FROM chat_messages m LEFT JOIN chat_metadata c ON c.id = m.id",
       [],
     );
-    for (const row of rows) {
-      try {
-        const messages: UIMessage[] = JSON.parse(row.messages);
-        const content = extractTextFromMessages(messages);
-        await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
-          row.id,
-          row.title,
-          content,
-        ]);
-      } catch {
-        // skip malformed entries
+    await d.execute("BEGIN TRANSACTION", []);
+    try {
+      await d.execute("DELETE FROM chat_fts", []);
+      for (const row of rows) {
+        try {
+          const messages: UIMessage[] = JSON.parse(row.messages);
+          const content = extractTextFromMessages(messages);
+          await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
+            row.id,
+            row.title,
+            content,
+          ]);
+        } catch {
+          // skip malformed entries
+        }
       }
+      await d.execute("COMMIT", []);
+    } catch (error) {
+      await d.execute("ROLLBACK", []);
+      throw error;
     }
   },
 };
