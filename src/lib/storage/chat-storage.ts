@@ -18,6 +18,15 @@ async function getDb(): Promise<Database> {
   return db;
 }
 
+function trimSnippetLeft(snippet: string, maxLeftTokens: number): string {
+  const markIdx = snippet.indexOf("<mark>");
+  if (markIdx <= 0) return snippet;
+  const left = snippet.slice(0, markIdx);
+  const words = left.split(/\s+/).filter(Boolean);
+  if (words.length <= maxLeftTokens) return snippet;
+  return "…" + words.slice(-maxLeftTokens).join(" ") + " " + snippet.slice(markIdx);
+}
+
 function extractTextFromMessages(messages: UIMessage[]): string {
   const parts: string[] = [];
   for (const msg of messages) {
@@ -196,7 +205,7 @@ export const chatStorage = {
       `SELECT
          chat_fts.chat_id,
          chat_metadata.title,
-         snippet(chat_fts, 2, '<mark>', '</mark>', '…', 48) AS snippet
+         snippet(chat_fts, 2, '<mark>', '</mark>', '…', 12) AS snippet
        FROM chat_fts
        JOIN chat_metadata ON chat_metadata.id = chat_fts.chat_id
        WHERE chat_fts MATCH $1
@@ -204,7 +213,11 @@ export const chatStorage = {
        LIMIT 50`,
       [ftsQuery],
     );
-    return rows.map((r) => ({ chatId: r.chat_id, title: r.title, snippet: r.snippet }));
+    return rows.map((r) => ({
+      chatId: r.chat_id,
+      title: r.title,
+      snippet: trimSnippetLeft(r.snippet, 2),
+    }));
   },
 
   async rebuildFtsIndex(): Promise<void> {
