@@ -39,6 +39,7 @@ interface ChatItemProps {
   id: string;
   title: string;
   branchOf?: string;
+  snippet?: string;
   selectionMode?: boolean;
   isSelected?: boolean;
   onSelectionToggle?: (id: string) => void;
@@ -52,6 +53,7 @@ export const ChatItem = memo(
     id,
     title,
     branchOf,
+    snippet,
     selectionMode,
     isSelected,
     onSelectionToggle,
@@ -90,7 +92,8 @@ export const ChatItem = memo(
             <Button
               variant={isSelectedChat ? "secondary" : "ghost"}
               className={cn(
-                "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
+                "group/chat-item w-full justify-between pr-1 pl-2 transition-none",
+                snippet ? "h-auto items-start py-1" : "py-2",
                 isSelectedChat && "border border-border",
               )}
               asChild
@@ -117,6 +120,12 @@ export const ChatItem = memo(
                   )}
                   <span className="min-w-0 truncate">{title}</span>
                 </span>
+                {snippet && (
+                  <span
+                    className="text-muted-foreground mt-0.5 block truncate text-xs [&_mark]:bg-yellow-500/30 [&_mark]:text-foreground"
+                    dangerouslySetInnerHTML={{ __html: snippet }}
+                  />
+                )}
                 <div
                   className={cn(
                     "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",

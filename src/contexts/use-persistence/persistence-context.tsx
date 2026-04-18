@@ -7,7 +7,7 @@ import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-cat
 import { calculateChatUsageFromMessages, getLastAssistantTokens } from "@/lib/ai/chat-usage";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
-import { chatStorage } from "@/lib/storage/chat-storage";
+import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
 
 import { PersistenceContext } from "./persistence-contexts";
 
@@ -49,6 +49,7 @@ export interface PersistenceContextType {
   deleteChat: (chatId: string) => void;
   bulkDeleteChats: (chatIds: string[]) => void;
   bulkExportChats: (chatIds: string[]) => Promise<ChatData[]>;
+  searchChats: (query: string) => Promise<ChatSearchResult[]>;
   branchChat: (params: {
     originalChatId: string;
     branchFromMessageId: string;
@@ -125,6 +126,10 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       metadataCacheRef.current = cache;
       setChatIds(ids);
       setIsMetadataLoaded(true);
+
+      chatStorage.rebuildFtsIndex().catch((error) => {
+        logger.error("Failed to rebuild FTS index", error);
+      });
     };
 
     void loadInitialData();
@@ -278,6 +283,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(chatId, updatedMetadata);
         persistMetadata(chatId, updatedMetadata);
         persistMessages(chatId, messages);
+        void chatStorage.updateFtsIndex(chatId, updatedMetadata.title, messages);
       } catch (error) {
         logger.error(`Failed to save chat ${chatId}`, error);
       }
@@ -394,6 +400,10 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [loadFullChatData],
   );
 
+  const searchChats = useCallback(async (query: string): Promise<ChatSearchResult[]> => {
+    return chatStorage.searchChats(query);
+  }, []);
+
   const branchChat = useCallback(
     ({
       originalChatId,
@@ -477,6 +487,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     deleteChat,
     bulkDeleteChats,
     bulkExportChats,
+    searchChats,
     branchChat,
     chatUpdateTrigger,
   };

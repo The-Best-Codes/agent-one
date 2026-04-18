@@ -10,17 +10,20 @@ import {
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
+import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useOverflow } from "@/hooks/use-overflow";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
+import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
 
 import { ChatItem } from "./chat-item";
@@ -32,11 +35,8 @@ interface ChatListItem {
   id: string;
   title: string;
   branchOf?: string;
+  snippet?: string;
 }
-
-const getChatTitle = (title: string): string => {
-  return title;
-};
 
 interface VirtualizedChatListProps {
   activeChatId?: string;
@@ -57,6 +57,8 @@ export const VirtualizedChatList = ({
 }: VirtualizedChatListProps) => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<ChatSearchResult[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedChatIds, setSelectedChatIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -69,7 +71,7 @@ export const VirtualizedChatList = ({
     searchInputRef.current?.focus();
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
-  const { loadChatMetadata, isMetadataLoaded } = usePersistence();
+  const { loadChatMetadata, isMetadataLoaded, searchChats } = usePersistence();
 
   const loadChats = useCallback(() => {
     if (!isMetadataLoaded) return;
@@ -80,7 +82,7 @@ export const VirtualizedChatList = ({
           const chatMetadata = loadChatMetadata(id);
           return {
             id,
-            title: getChatTitle(chatMetadata?.title || `Chat ${id.slice(0, 8)}`),
+            title: chatMetadata?.title || `Chat ${id.slice(0, 8)}`,
             branchOf: chatMetadata?.branchOf,
           };
         } catch (error) {
@@ -103,6 +105,49 @@ export const VirtualizedChatList = ({
     loadChats();
   }, [loadChats, chatIds, chatUpdateTrigger]);
 
+  const debouncedSearch = useMemo(
+    () =>
+      debounce(async (query: string) => {
+        if (!query.trim()) {
+          setSearchResults(null);
+          setIsSearching(false);
+          return;
+        }
+        setIsSearching(true);
+        try {
+          const results = await searchChats(query);
+          setSearchResults(results);
+        } catch (error) {
+          logger.error("Search failed:", error);
+          setSearchResults(null);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300),
+    [searchChats],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      if (!value.trim()) {
+        debouncedSearch.cancel();
+        setSearchResults(null);
+        setIsSearching(false);
+      } else {
+        setIsSearching(true);
+        debouncedSearch(value);
+      }
+    },
+    [debouncedSearch],
+  );
+
   useEffect(() => {
     setSelectedChatIds((prev) => {
       const validIds = new Set(chatIds);
@@ -116,14 +161,24 @@ export const VirtualizedChatList = ({
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
+    if (searchResults) {
+      const metadataMap = new Map(chats.map((c) => [c.id, c]));
+      return searchResults.map((r) => ({
+        id: r.chatId,
+        title: r.title,
+        branchOf: metadataMap.get(r.chatId)?.branchOf,
+        snippet: r.snippet,
+      }));
+    }
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [chats, searchQuery]);
+  }, [chats, searchQuery, searchResults]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredChats.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 32 + 2, // 32px height + 2px padding
+    estimateSize: () => 34,
+    measureElement: (el) => el.getBoundingClientRect().height,
     overscan: 5,
   });
 
@@ -173,7 +228,9 @@ export const VirtualizedChatList = ({
   }, []);
 
   const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
-  const showNoSearchResults = chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
+  const showSearchLoading = isSearching && filteredChats.length === 0 && searchQuery.trim();
+  const showNoSearchResults =
+    !isSearching && chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
   const allSelected =
     filteredChats.length > 0 && filteredChats.every((chat) => selectedChatIds.has(chat.id));
 
@@ -240,7 +297,7 @@ export const VirtualizedChatList = ({
               placeholder="Search chats..."
               className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
         )}
@@ -258,6 +315,10 @@ export const VirtualizedChatList = ({
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
             <p className="max-w-full min-w-0 truncate">No chats yet</p>
+          </div>
+        ) : showSearchLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <Spinner className="text-muted-foreground size-6" />
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
@@ -277,12 +338,13 @@ export const VirtualizedChatList = ({
               return (
                 <div
                   key={virtualItem.key}
+                  ref={virtualizer.measureElement}
+                  data-index={virtualItem.index}
                   style={{
                     position: "absolute",
                     top: 0,
                     left: 0,
                     width: "100%",
-                    height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
@@ -292,6 +354,7 @@ export const VirtualizedChatList = ({
                     id={chat.id}
                     title={chat.title}
                     branchOf={chat.branchOf}
+                    snippet={chat.snippet}
                     additionalOnChatClickCallback={additionalOnChatClickCallback}
                     selectionMode={selectionMode}
                     isSelected={selectedChatIds.has(chat.id)}
