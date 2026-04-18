@@ -172,16 +172,19 @@ export const VirtualizedChatList = ({
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
     if (searchResults) {
+      const validIds = new Set(chatIds);
       const metadataMap = new Map(chats.map((c) => [c.id, c]));
-      return searchResults.map((r) => ({
-        id: r.chatId,
-        title: r.title,
-        branchOf: metadataMap.get(r.chatId)?.branchOf,
-        snippet: r.snippet,
-      }));
+      return searchResults
+        .filter((r) => validIds.has(r.chatId))
+        .map((r) => ({
+          id: r.chatId,
+          title: r.title,
+          branchOf: metadataMap.get(r.chatId)?.branchOf,
+          snippet: r.snippet,
+        }));
     }
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [chats, searchQuery, searchResults]);
+  }, [chats, searchQuery, searchResults, chatIds]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
