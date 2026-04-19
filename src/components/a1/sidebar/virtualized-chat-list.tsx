@@ -1,4 +1,5 @@
 import {
+  IconChevronDown,
   IconDeselect,
   IconDownload,
   IconInbox,
@@ -15,6 +16,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -59,6 +68,9 @@ export const VirtualizedChatList = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ChatSearchResult[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  // TODO: Use an atom to persist search content and raw operators settings?
+  const [searchContent, setSearchContent] = useState(true);
+  const [rawOperators, setRawOperators] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedChatIds, setSelectedChatIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -108,7 +120,7 @@ export const VirtualizedChatList = ({
 
   const debouncedSearch = useMemo(
     () =>
-      debounce(async (query: string) => {
+      debounce(async (query: string, useRawOperators: boolean) => {
         if (!query.trim()) {
           setSearchResults(null);
           setIsSearching(false);
@@ -116,7 +128,7 @@ export const VirtualizedChatList = ({
         }
         setIsSearching(true);
         try {
-          const results = await searchChats(query);
+          const results = await searchChats(query, useRawOperators);
           if (latestSearchQueryRef.current !== query) {
             return;
           }
@@ -150,13 +162,37 @@ export const VirtualizedChatList = ({
         debouncedSearch.cancel();
         setSearchResults(null);
         setIsSearching(false);
-      } else {
+      } else if (searchContent) {
         setIsSearching(true);
-        debouncedSearch(value);
+        debouncedSearch(value, rawOperators);
       }
     },
-    [debouncedSearch],
+    [debouncedSearch, searchContent, rawOperators],
   );
+
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    if (searchContent) {
+      debouncedSearch.cancel();
+      searchChats(searchQuery, rawOperators)
+        .then((results) => {
+          if (latestSearchQueryRef.current === searchQuery) {
+            setSearchResults(results);
+          }
+        })
+        .catch((error) => {
+          if (latestSearchQueryRef.current === searchQuery) {
+            logger.error("Search failed:", error);
+            setSearchResults(null);
+          }
+        });
+    } else {
+      debouncedSearch.cancel();
+      setSearchResults(null);
+      setIsSearching(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchContent, rawOperators]);
 
   useEffect(() => {
     setSelectedChatIds((prev) => {
@@ -171,6 +207,9 @@ export const VirtualizedChatList = ({
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
+    if (!searchContent) {
+      return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
     if (searchResults) {
       const validIds = new Set(chatIds);
       const metadataMap = new Map(chats.map((c) => [c.id, c]));
@@ -184,7 +223,7 @@ export const VirtualizedChatList = ({
         }));
     }
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [chats, searchQuery, searchResults, chatIds]);
+  }, [chats, searchQuery, searchResults, chatIds, searchContent]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
@@ -305,15 +344,49 @@ export const VirtualizedChatList = ({
             </div>
           </div>
         ) : (
-          <div className="group/sidebar-search-input relative">
-            <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search chats..."
-              className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-            />
+          <div className="flex flex-row">
+            <div className="group/sidebar-search-input relative min-w-0 flex-1">
+              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
+              <Input
+                ref={searchInputRef}
+                placeholder={searchContent ? "Search chats..." : "Search titles..."}
+                className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0 rounded-l-none border-l-0"
+                  aria-label="Search options"
+                >
+                  <IconChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-auto min-w-max">
+                <DropdownMenuLabel>Search mode</DropdownMenuLabel>
+                <DropdownMenuCheckboxItem
+                  checked={searchContent}
+                  onCheckedChange={(checked) => setSearchContent(checked as boolean)}
+                >
+                  Search content
+                </DropdownMenuCheckboxItem>
+                {searchContent && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={rawOperators}
+                      onCheckedChange={(checked) => setRawOperators(checked as boolean)}
+                    >
+                      Raw FTS5 syntax
+                    </DropdownMenuCheckboxItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
