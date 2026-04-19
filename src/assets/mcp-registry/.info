@@ -1,2 +1,2 @@
 OpenAPI schema pulled from https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml (pinned: https://raw.githubusercontent.com/modelcontextprotocol/registry/c5c4b9e8890dd5754bee889b2f1417f4fe3b5ce5/docs/reference/api/openapi.yaml)
-To generate types, run `quicktype -l ts --just-types --prefer-types --prefer-unions --no-enums -t McpRegistryEntry -o src/assets/mcp-registry/types.ts src/assets/mcp-registry/mcp-registry.json`, the `npm run format`.
+To generate types, run `quicktype -l ts --just-types --prefer-types --prefer-unions --no-enums -t McpRegistryEntry -o src/assets/mcp-registry/types.ts src/assets/mcp-registry/mcp-registry.json`, the `bun run format`.
