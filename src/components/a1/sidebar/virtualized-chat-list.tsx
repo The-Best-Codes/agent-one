@@ -1,4 +1,5 @@
 import {
+  IconChevronDown,
   IconDeselect,
   IconDownload,
   IconInbox,
@@ -10,17 +11,28 @@ import {
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
+import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useOverflow } from "@/hooks/use-overflow";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
+import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
 
 import { ChatItem } from "./chat-item";
@@ -32,11 +44,8 @@ interface ChatListItem {
   id: string;
   title: string;
   branchOf?: string;
+  snippet?: string;
 }
-
-const getChatTitle = (title: string): string => {
-  return title;
-};
 
 interface VirtualizedChatListProps {
   activeChatId?: string;
@@ -57,19 +66,25 @@ export const VirtualizedChatList = ({
 }: VirtualizedChatListProps) => {
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<ChatSearchResult[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  // TODO: Use an atom to persist search content and raw operators settings?
+  const [searchContent, setSearchContent] = useState(true);
+  const [rawOperators, setRawOperators] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedChatIds, setSelectedChatIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [showBulkExportModal, setShowBulkExportModal] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const latestSearchQueryRef = useRef("");
   const [chatIds] = useAtom(chatIdsAtom);
 
   useHotkeys(kbdRegistry.focusChatSearch, () => {
     searchInputRef.current?.focus();
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
-  const { loadChatMetadata, isMetadataLoaded } = usePersistence();
+  const { loadChatMetadata, isMetadataLoaded, searchChats } = usePersistence();
 
   const loadChats = useCallback(() => {
     if (!isMetadataLoaded) return;
@@ -80,7 +95,7 @@ export const VirtualizedChatList = ({
           const chatMetadata = loadChatMetadata(id);
           return {
             id,
-            title: getChatTitle(chatMetadata?.title || `Chat ${id.slice(0, 8)}`),
+            title: chatMetadata?.title || `Chat ${id.slice(0, 8)}`,
             branchOf: chatMetadata?.branchOf,
           };
         } catch (error) {
@@ -103,6 +118,71 @@ export const VirtualizedChatList = ({
     loadChats();
   }, [loadChats, chatIds, chatUpdateTrigger]);
 
+  const debouncedSearch = useMemo(
+    () =>
+      debounce(async (query: string, useRawOperators: boolean) => {
+        if (!query.trim()) {
+          setSearchResults(null);
+          setIsSearching(false);
+          return;
+        }
+        setIsSearching(true);
+        try {
+          const results = await searchChats(query, useRawOperators);
+          if (latestSearchQueryRef.current !== query) {
+            return;
+          }
+          setSearchResults(results);
+        } catch (error) {
+          if (latestSearchQueryRef.current !== query) {
+            return;
+          }
+          logger.error("Search failed:", error);
+          setSearchResults(null);
+        } finally {
+          if (latestSearchQueryRef.current === query) {
+            setIsSearching(false);
+          }
+        }
+      }, 300),
+    [searchChats],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      latestSearchQueryRef.current = value;
+      if (!value.trim()) {
+        debouncedSearch.cancel();
+        setSearchResults(null);
+        setIsSearching(false);
+      } else if (searchContent) {
+        setIsSearching(true);
+        debouncedSearch(value, rawOperators);
+      }
+    },
+    [debouncedSearch, searchContent, rawOperators],
+  );
+
+  useEffect(() => {
+    if (!searchQuery.trim()) return;
+    if (searchContent) {
+      setIsSearching(true);
+      debouncedSearch(searchQuery, rawOperators);
+    } else {
+      debouncedSearch.cancel();
+      setSearchResults(null);
+      setIsSearching(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchContent, rawOperators]);
+
   useEffect(() => {
     setSelectedChatIds((prev) => {
       const validIds = new Set(chatIds);
@@ -116,14 +196,30 @@ export const VirtualizedChatList = ({
 
   const filteredChats = useMemo(() => {
     if (!searchQuery.trim()) return chats;
+    if (!searchContent) {
+      return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+    if (searchResults) {
+      const validIds = new Set(chatIds);
+      const metadataMap = new Map(chats.map((c) => [c.id, c]));
+      return searchResults
+        .filter((r) => validIds.has(r.chatId))
+        .map((r) => ({
+          id: r.chatId,
+          title: r.title,
+          branchOf: metadataMap.get(r.chatId)?.branchOf,
+          snippet: r.snippet,
+        }));
+    }
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [chats, searchQuery]);
+  }, [chats, searchQuery, searchResults, chatIds, searchContent]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredChats.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 32 + 2, // 32px height + 2px padding
+    estimateSize: (index) => (filteredChats[index]?.snippet ? 50 : 34),
+    measureElement: (el) => el.getBoundingClientRect().height,
     overscan: 5,
   });
 
@@ -173,9 +269,13 @@ export const VirtualizedChatList = ({
   }, []);
 
   const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
-  const showNoSearchResults = chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
+  const showSearchLoading = isSearching && filteredChats.length === 0 && searchQuery.trim();
+  const showNoSearchResults =
+    !isSearching && chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
   const allSelected =
     filteredChats.length > 0 && filteredChats.every((chat) => selectedChatIds.has(chat.id));
+  const showList =
+    isMetadataLoaded && !showNoChatsPlaceholder && !showSearchLoading && !showNoSearchResults;
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
@@ -233,20 +333,61 @@ export const VirtualizedChatList = ({
             </div>
           </div>
         ) : (
-          <div className="group/sidebar-search-input relative">
-            <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
-            <Input
-              ref={searchInputRef}
-              placeholder="Search chats..."
-              className="bg-background pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div className="flex flex-row">
+            <div className="group/sidebar-search-input relative min-w-0 flex-1">
+              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
+              <Input
+                ref={searchInputRef}
+                placeholder={searchContent ? "Search chats..." : "Search titles..."}
+                className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+              />
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0 rounded-l-none border-l-0"
+                  aria-label="Search options"
+                >
+                  <IconChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-auto min-w-max">
+                <DropdownMenuLabel>Search mode</DropdownMenuLabel>
+                <DropdownMenuCheckboxItem
+                  checked={searchContent}
+                  onCheckedChange={(checked) => setSearchContent(checked as boolean)}
+                >
+                  Search content
+                </DropdownMenuCheckboxItem>
+                {searchContent && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={rawOperators}
+                      onCheckedChange={(checked) => setRawOperators(checked as boolean)}
+                    >
+                      Raw FTS5 syntax
+                    </DropdownMenuCheckboxItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>
 
-      <div ref={parentRef} className={cn("flex-1 overflow-y-auto", isOverflowing && "pr-2")}>
+      <div
+        ref={parentRef}
+        className={cn(
+          "flex-1",
+          showList ? "overflow-y-auto" : "overflow-hidden",
+          isOverflowing && showList && "pr-2",
+        )}
+      >
         {!isMetadataLoaded ? (
           <div className="flex flex-col gap-1 pt-1">
             <Skeleton className="h-8 w-full rounded-md" />
@@ -258,6 +399,11 @@ export const VirtualizedChatList = ({
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
             <p className="max-w-full min-w-0 truncate">No chats yet</p>
+          </div>
+        ) : showSearchLoading ? (
+          <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
+            <Spinner className="text-muted-foreground size-16" />
+            <p className="max-w-full min-w-0 truncate">Searching...</p>
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
@@ -277,12 +423,13 @@ export const VirtualizedChatList = ({
               return (
                 <div
                   key={virtualItem.key}
+                  ref={virtualizer.measureElement}
+                  data-index={virtualItem.index}
                   style={{
                     position: "absolute",
                     top: 0,
                     left: 0,
                     width: "100%",
-                    height: `${virtualItem.size}px`,
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
@@ -292,6 +439,7 @@ export const VirtualizedChatList = ({
                     id={chat.id}
                     title={chat.title}
                     branchOf={chat.branchOf}
+                    snippet={chat.snippet}
                     additionalOnChatClickCallback={additionalOnChatClickCallback}
                     selectionMode={selectionMode}
                     isSelected={selectedChatIds.has(chat.id)}

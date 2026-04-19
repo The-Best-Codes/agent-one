@@ -7,7 +7,7 @@ import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-cat
 import { calculateChatUsageFromMessages, getLastAssistantTokens } from "@/lib/ai/chat-usage";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
-import { chatStorage } from "@/lib/storage/chat-storage";
+import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
 
 import { PersistenceContext } from "./persistence-contexts";
 
@@ -49,6 +49,7 @@ export interface PersistenceContextType {
   deleteChat: (chatId: string) => void;
   bulkDeleteChats: (chatIds: string[]) => void;
   bulkExportChats: (chatIds: string[]) => Promise<ChatData[]>;
+  searchChats: (query: string, rawOperators?: boolean) => Promise<ChatSearchResult[]>;
   branchChat: (params: {
     originalChatId: string;
     branchFromMessageId: string;
@@ -125,6 +126,17 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       metadataCacheRef.current = cache;
       setChatIds(ids);
       setIsMetadataLoaded(true);
+
+      chatStorage
+        .isFtsIndexConsistent()
+        .then((isConsistent) => {
+          if (isConsistent) return;
+
+          return chatStorage.rebuildFtsIndex();
+        })
+        .catch((error) => {
+          logger.error("Failed to sync FTS index", error);
+        });
     };
 
     void loadInitialData();
@@ -209,6 +221,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       setMetadata(id, metadata);
       persistMetadata(id, metadata);
       persistMessages(id, []);
+      void chatStorage.updateFtsIndex(id, metadata.title, []);
       setChatIds((currentChatIds) => {
         const next = [id, ...currentChatIds];
         persistChatIds(next);
@@ -278,6 +291,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(chatId, updatedMetadata);
         persistMetadata(chatId, updatedMetadata);
         persistMessages(chatId, messages);
+        void chatStorage.updateFtsIndex(chatId, updatedMetadata.title, messages);
       } catch (error) {
         logger.error(`Failed to save chat ${chatId}`, error);
       }
@@ -341,6 +355,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
+        void chatStorage.updateFtsTitle(chatId, title);
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title ${chatId}`, error);
@@ -394,6 +409,13 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     [loadFullChatData],
   );
 
+  const searchChats = useCallback(
+    async (query: string, rawOperators?: boolean): Promise<ChatSearchResult[]> => {
+      return chatStorage.searchChats(query, rawOperators);
+    },
+    [],
+  );
+
   const branchChat = useCallback(
     ({
       originalChatId,
@@ -433,6 +455,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(newId, newMetadata);
         persistMetadata(newId, newMetadata);
         persistMessages(newId, branchedMessages);
+        void chatStorage.updateFtsIndex(newId, newMetadata.title, branchedMessages);
 
         setChatIds((currentChatIds) => {
           const next = [newId, ...currentChatIds];
@@ -477,6 +500,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     deleteChat,
     bulkDeleteChats,
     bulkExportChats,
+    searchChats,
     branchChat,
     chatUpdateTrigger,
   };

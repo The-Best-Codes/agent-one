@@ -6,7 +6,7 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { memo, useState } from "react";
+import { memo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,42 @@ import { ChatStatusIndicator } from "./chat-status-indicator";
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
 
 const logger = getLogger(import.meta.url);
+const MARK_OPEN = "<mark>";
+const MARK_CLOSE = "</mark>";
+
+function renderSnippet(snippet: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let remaining = snippet;
+  let partIndex = 0;
+
+  while (remaining) {
+    const markStart = remaining.indexOf(MARK_OPEN);
+
+    if (markStart === -1) {
+      parts.push(<span key={`text-${partIndex}`}>{remaining}</span>);
+      break;
+    }
+
+    if (markStart > 0) {
+      parts.push(<span key={`text-${partIndex}`}>{remaining.slice(0, markStart)}</span>);
+      partIndex += 1;
+    }
+
+    remaining = remaining.slice(markStart + MARK_OPEN.length);
+    const markEnd = remaining.indexOf(MARK_CLOSE);
+
+    if (markEnd === -1) {
+      parts.push(<span key={`text-${partIndex}`}>{`${MARK_OPEN}${remaining}`}</span>);
+      break;
+    }
+
+    parts.push(<mark key={`mark-${partIndex}`}>{remaining.slice(0, markEnd)}</mark>);
+    partIndex += 1;
+    remaining = remaining.slice(markEnd + MARK_CLOSE.length);
+  }
+
+  return parts;
+}
 
 interface ChatItemProps {
   activeChatId?: string;
@@ -39,6 +75,7 @@ interface ChatItemProps {
   id: string;
   title: string;
   branchOf?: string;
+  snippet?: string;
   selectionMode?: boolean;
   isSelected?: boolean;
   onSelectionToggle?: (id: string) => void;
@@ -52,6 +89,7 @@ export const ChatItem = memo(
     id,
     title,
     branchOf,
+    snippet,
     selectionMode,
     isSelected,
     onSelectionToggle,
@@ -90,7 +128,8 @@ export const ChatItem = memo(
             <Button
               variant={isSelectedChat ? "secondary" : "ghost"}
               className={cn(
-                "group/chat-item w-full justify-between py-2 pr-1 pl-2 transition-none",
+                "group/chat-item w-full justify-between pr-1 pl-2 transition-none",
+                snippet ? "h-auto items-start py-1" : "py-2",
                 isSelectedChat && "border border-border",
               )}
               asChild
@@ -107,19 +146,26 @@ export const ChatItem = memo(
             >
               <Link
                 to={`/chat/${id}`}
-                className="relative block overflow-hidden"
+                className="relative overflow-hidden"
                 data-icon="inline-start"
               >
-                <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
-                  <ChatStatusIndicator chatId={id} />
-                  {branchOf && (
-                    <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+                <div className="flex min-w-0 flex-col">
+                  <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
+                    <ChatStatusIndicator chatId={id} />
+                    {branchOf && (
+                      <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+                    )}
+                    <span className="min-w-0 truncate">{title}</span>
+                  </span>
+                  {snippet && (
+                    <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs [&_mark]:bg-yellow-500/30">
+                      {renderSnippet(snippet)}
+                    </span>
                   )}
-                  <span className="min-w-0 truncate">{title}</span>
-                </span>
+                </div>
                 <div
                   className={cn(
-                    "absolute right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
+                    "absolute top-1/2 -translate-y-1/2 right-0 flex size-8 shrink-0 items-center justify-center opacity-0 transition-opacity duration-200 group-hover/chat-item:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100",
                     isDropdownOpen ? "opacity-100" : "",
                   )}
                 >
