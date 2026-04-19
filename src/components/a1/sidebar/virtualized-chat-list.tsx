@@ -173,19 +173,8 @@ export const VirtualizedChatList = ({
   useEffect(() => {
     if (!searchQuery.trim()) return;
     if (searchContent) {
-      debouncedSearch.cancel();
-      searchChats(searchQuery, rawOperators)
-        .then((results) => {
-          if (latestSearchQueryRef.current === searchQuery) {
-            setSearchResults(results);
-          }
-        })
-        .catch((error) => {
-          if (latestSearchQueryRef.current === searchQuery) {
-            logger.error("Search failed:", error);
-            setSearchResults(null);
-          }
-        });
+      setIsSearching(true);
+      debouncedSearch(searchQuery, rawOperators);
     } else {
       debouncedSearch.cancel();
       setSearchResults(null);

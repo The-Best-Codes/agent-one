@@ -355,9 +355,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
-        void chatStorage
-          .getChatMessages(chatId)
-          .then((messages) => chatStorage.updateFtsIndex(chatId, title, messages ?? []));
+        void chatStorage.updateFtsTitle(chatId, title);
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title ${chatId}`, error);

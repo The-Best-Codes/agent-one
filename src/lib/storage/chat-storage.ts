@@ -30,7 +30,7 @@ function trimSnippetLeft(snippet: string, maxLeftTokens: number): string {
 function extractTextFromMessages(messages: UIMessage[]): string {
   const parts: string[] = [];
   for (const msg of messages) {
-    for (const part of msg.parts) {
+    for (const part of msg.parts ?? []) {
       if (part.type === "text" && part.text) {
         parts.push(part.text);
       }
@@ -176,6 +176,11 @@ export const chatStorage = {
   async updateFtsIndex(id: string, title: string, messages: UIMessage[]): Promise<void> {
     const content = extractTextFromMessages(messages);
     await replaceFtsEntry(id, title, content);
+  },
+
+  async updateFtsTitle(id: string, title: string): Promise<void> {
+    const d = await getDb();
+    await d.execute("UPDATE chat_fts SET title = $1 WHERE chat_id = $2", [title, id]);
   },
 
   async isFtsIndexConsistent(): Promise<boolean> {
