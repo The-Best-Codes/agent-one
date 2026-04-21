@@ -230,6 +230,14 @@ export const chatStorage = {
     logger.verbose("Finished chat storage startup maintenance");
   },
 
+  async vacuum(): Promise<void> {
+    logger.verbose("Running VACUUM to reclaim unused space");
+    await enqueueWrite(async (d) => {
+      await d.execute("VACUUM", []);
+    });
+    logger.verbose("VACUUM completed");
+  },
+
   async ensureSearchIndexConsistency(): Promise<void> {
     logger.verbose("Checking chat search index consistency");
     const d = await getDb();

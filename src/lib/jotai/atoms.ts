@@ -44,6 +44,13 @@ export const releaseNotesLastSeenVersionAtom = atomWithStorage<string | null>(
   { getOnInit: true },
 );
 
+export const lastVacuumTimestampAtom = atomWithStorage<number>(
+  "agent-one-last-vacuum-timestamp",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);

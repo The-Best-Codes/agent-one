@@ -5,7 +5,7 @@ import React, { type ReactNode, useCallback, useEffect, useRef, useState } from 
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { calculateChatUsageFromMessages, getLastAssistantTokens } from "@/lib/ai/chat-usage";
-import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
+import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
 
@@ -76,6 +76,7 @@ const DEFAULT_METADATA: ChatMetadata = {
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [, setChatIds] = useAtom(chatIdsAtom);
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
+  const [lastVacuumTimestamp, setLastVacuumTimestamp] = useAtom(lastVacuumTimestampAtom);
 
   const metadataCacheRef = useRef<Map<string, ChatMetadata>>(new Map());
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
@@ -132,6 +133,14 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       void chatStorage
         .performStartupMaintenance()
         .then(() => chatStorage.ensureSearchIndexConsistency())
+        .then(() => {
+          const oneDayMs = 24 * 60 * 60 * 1000;
+          if (Date.now() - lastVacuumTimestamp > oneDayMs) {
+            return chatStorage.vacuum().then(() => {
+              setLastVacuumTimestamp(Date.now());
+            });
+          }
+        })
         .catch((error) => {
           logger.error("Failed to run chat storage startup maintenance", error);
         });
