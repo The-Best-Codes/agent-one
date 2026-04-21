@@ -32,7 +32,6 @@ export const PerformantMarkdown = memo(
     return (
       <div className="overflow-hidden">
         <CodeMirror
-          autoFocus
           theme={resolvedTheme === "dark" ? "dark" : "light"}
           value={content || "No content detected to display"}
           maxHeight={maxHeight || "384px"}
