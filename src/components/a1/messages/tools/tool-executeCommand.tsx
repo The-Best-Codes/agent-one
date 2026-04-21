@@ -1,4 +1,3 @@
-import "@xterm/xterm/css/xterm.css";
 import {
   IconChevronDown,
   IconCircleCheck,
@@ -6,10 +5,9 @@ import {
   IconTerminal2,
   IconX,
 } from "@tabler/icons-react";
-import { FitAddon } from "@xterm/addon-fit";
-import { Terminal } from "@xterm/xterm";
 import type { ToolUIPart } from "ai";
-import { memo, useEffect, useRef, useState } from "react";
+import { FancyAnsi } from "fancy-ansi";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,109 +39,65 @@ const EMPTY_OUTPUT: ExecuteCommandOutput = {
   timedOut: false,
 };
 
+const fancyAnsi = new FancyAnsi();
+
+function applyCarriageReturns(text: string): string {
+  let result = "";
+  let lineBuffer = "";
+
+  for (const char of text) {
+    if (char === "\r") {
+      lineBuffer = "";
+      continue;
+    }
+
+    if (char === "\n") {
+      result += `${lineBuffer}\n`;
+      lineBuffer = "";
+      continue;
+    }
+
+    lineBuffer += char;
+  }
+
+  return result + lineBuffer;
+}
+
+function buildRenderedOutput(command: string, output: ExecuteCommandOutput): string {
+  return applyCarriageReturns(`$ ${command}\n${output.stdout}${output.stderr}`);
+}
+
 const TerminalDisplay = memo(
   ({ command, output }: { command: string; output: ExecuteCommandOutput }) => {
-    const termRef = useRef<HTMLDivElement>(null);
-    const xtermRef = useRef<Terminal | null>(null);
-    const fitAddonRef = useRef<FitAddon | null>(null);
-    const lastWrittenLenRef = useRef<{ stdout: number; stderr: number }>({
-      stdout: 0,
-      stderr: 0,
-    });
-    const wroteCommandRef = useRef(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
+    const renderedOutput = useMemo(() => buildRenderedOutput(command, output), [command, output]);
+    const html = useMemo(() => fancyAnsi.toHtml(renderedOutput), [renderedOutput]);
 
     useEffect(() => {
-      if (!termRef.current || xtermRef.current) return;
+      const container = scrollRef.current;
+      if (!container || !isPinnedToBottom) return;
 
-      const term = new Terminal({
-        convertEol: true,
-        fontFamily: "monospace",
-        fontSize: 13,
-        lineHeight: 1.2,
-        cursorBlink: false,
-        cursorStyle: "bar",
-        disableStdin: true,
-        scrollback: 5000,
-      });
-
-      const fitAddon = new FitAddon();
-      term.loadAddon(fitAddon);
-      term.open(termRef.current);
-      fitAddon.fit();
-
-      xtermRef.current = term;
-      fitAddonRef.current = fitAddon;
-
-      return () => {
-        term.dispose();
-        xtermRef.current = null;
-        fitAddonRef.current = null;
-        lastWrittenLenRef.current = { stdout: 0, stderr: 0 };
-        wroteCommandRef.current = false;
-      };
-    }, []);
-
-    useEffect(() => {
-      const term = xtermRef.current;
-      if (!term || !output) return;
-
-      if (!wroteCommandRef.current) {
-        term.write(`$ ${command}\r\n`);
-        wroteCommandRef.current = true;
-      }
-
-      const prevStdout = lastWrittenLenRef.current.stdout;
-      const prevStderr = lastWrittenLenRef.current.stderr;
-
-      if (output.stdout.length > prevStdout) {
-        term.write(output.stdout.slice(prevStdout));
-        lastWrittenLenRef.current.stdout = output.stdout.length;
-      }
-
-      if (output.stderr.length > prevStderr) {
-        term.write(output.stderr.slice(prevStderr));
-        lastWrittenLenRef.current.stderr = output.stderr.length;
-      }
-    }, [output, command]);
-
-    useEffect(() => {
-      const fitAddon = fitAddonRef.current;
-      const container = termRef.current;
-      if (!fitAddon || !container) return;
-
-      let lastWidth = container.clientWidth;
-      let rafId: number | null = null;
-
-      const observer = new ResizeObserver(() => {
-        const newWidth = container.clientWidth;
-        if (newWidth === lastWidth || newWidth === 0) return;
-        lastWidth = newWidth;
-
-        if (rafId) cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(() => {
-          try {
-            fitAddon.fit();
-          } catch {
-            // ignore fit errors during resize
-          }
-        });
-      });
-
-      observer.observe(container);
-
-      return () => {
-        observer.disconnect();
-        if (rafId) cancelAnimationFrame(rafId);
-      };
-    }, []);
+      container.scrollTop = container.scrollHeight;
+    }, [html, isPinnedToBottom]);
 
     return (
       <div className="flex w-full flex-col">
         <div
-          ref={termRef}
-          className="border-border w-full overflow-hidden rounded-md border"
-          style={{ width: "100%", height: "200px" }}
-        />
+          ref={scrollRef}
+          className="border-border bg-card text-card-foreground w-full overflow-auto rounded-md border"
+          style={{ maxHeight: "20rem" }}
+          onScroll={(event) => {
+            const container = event.currentTarget;
+            const distanceFromBottom =
+              container.scrollHeight - container.scrollTop - container.clientHeight;
+            setIsPinnedToBottom(distanceFromBottom < 24);
+          }}
+        >
+          <pre className="min-w-full p-3 font-mono text-sm leading-5 wrap-break-word whitespace-pre-wrap">
+            <code className="block w-full" dangerouslySetInnerHTML={{ __html: html }} />
+          </pre>
+        </div>
       </div>
     );
   },
