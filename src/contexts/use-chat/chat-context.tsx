@@ -398,14 +398,14 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     sendMessage,
   } = instanceForFunctions;
 
-  const wasStreamingRef = useRef(false);
+  const wasBusyRef = useRef(false);
   useEffect(() => {
-    if (statusValue.status === "streaming") {
-      wasStreamingRef.current = true;
+    if (statusValue.status === "streaming" || statusValue.status === "submitted") {
+      wasBusyRef.current = true;
     }
 
-    if (wasStreamingRef.current && statusValue.status === "ready") {
-      wasStreamingRef.current = false;
+    if (wasBusyRef.current && statusValue.status === "ready") {
+      wasBusyRef.current = false;
 
       const lastMessage = messages[messages.length - 1];
       if (lastMessage?.role === "assistant") {
@@ -414,7 +414,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           if (
             (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
             "state" in part &&
-            (part.state === "input-streaming" ||
+            (part.state === "approval-responded" ||
+              part.state === "input-streaming" ||
               part.state === "input-available" ||
               (part.state === "output-available" &&
                 (part as { preliminary?: boolean }).preliminary === true))
@@ -451,6 +452,10 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           );
         }
       }
+    }
+
+    if (statusValue.status === "error") {
+      wasBusyRef.current = false;
     }
   }, [statusValue.status, messages, setMessages, notificationSetting]);
 
