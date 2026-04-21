@@ -6,8 +6,8 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
-import { FancyAnsi } from "fancy-ansi";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { AnsiHtml } from "fancy-ansi/react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,8 +39,6 @@ const EMPTY_OUTPUT: ExecuteCommandOutput = {
   timedOut: false,
 };
 
-const fancyAnsi = new FancyAnsi();
-
 function applyCarriageReturns(text: string): string {
   let result = "";
   let lineBuffer = "";
@@ -63,47 +61,43 @@ function applyCarriageReturns(text: string): string {
   return result + lineBuffer;
 }
 
-function buildRenderedOutput(command: string, output: ExecuteCommandOutput): string {
-  return applyCarriageReturns(`$ ${command}\n${output.stdout}${output.stderr}`);
-}
+const TerminalDisplay = ({
+  command,
+  output,
+}: {
+  command: string;
+  output: ExecuteCommandOutput;
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
+  const renderedOutput = applyCarriageReturns(`$ ${command}\n${output.stdout}${output.stderr}`);
 
-const TerminalDisplay = memo(
-  ({ command, output }: { command: string; output: ExecuteCommandOutput }) => {
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
-    const renderedOutput = useMemo(() => buildRenderedOutput(command, output), [command, output]);
-    const html = useMemo(() => fancyAnsi.toHtml(renderedOutput), [renderedOutput]);
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container || !isPinnedToBottom) return;
 
-    useEffect(() => {
-      const container = scrollRef.current;
-      if (!container || !isPinnedToBottom) return;
+    container.scrollTop = container.scrollHeight;
+  }, [renderedOutput, isPinnedToBottom]);
 
-      container.scrollTop = container.scrollHeight;
-    }, [html, isPinnedToBottom]);
-
-    return (
-      <div className="flex w-full flex-col">
-        <div
-          ref={scrollRef}
-          className="border-border bg-card text-card-foreground w-full overflow-auto rounded-md border"
-          style={{ maxHeight: "20rem" }}
-          onScroll={(event) => {
-            const container = event.currentTarget;
-            const distanceFromBottom =
-              container.scrollHeight - container.scrollTop - container.clientHeight;
-            setIsPinnedToBottom(distanceFromBottom < 24);
-          }}
-        >
-          <pre className="min-w-full p-3 font-mono text-sm leading-5 wrap-break-word whitespace-pre-wrap">
-            <code className="block w-full" dangerouslySetInnerHTML={{ __html: html }} />
-          </pre>
-        </div>
+  return (
+    <div className="flex w-full flex-col">
+      <div
+        ref={scrollRef}
+        className="border-border bg-card text-card-foreground max-h-80 w-full overflow-auto rounded-md border"
+        onScroll={(event) => {
+          const container = event.currentTarget;
+          const distanceFromBottom =
+            container.scrollHeight - container.scrollTop - container.clientHeight;
+          setIsPinnedToBottom(distanceFromBottom < 24);
+        }}
+      >
+        <pre className="min-w-full p-3 font-mono text-sm leading-5 wrap-break-word whitespace-pre-wrap">
+          <AnsiHtml className="block w-full" text={renderedOutput} />
+        </pre>
       </div>
-    );
-  },
-);
-
-TerminalDisplay.displayName = "TerminalDisplay";
+    </div>
+  );
+};
 
 export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartProps) => {
   const callId = part.toolCallId;
