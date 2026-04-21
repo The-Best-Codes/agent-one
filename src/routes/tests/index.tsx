@@ -40,6 +40,17 @@ export default function TestsRoute() {
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
+                  <h3 className="font-medium">Local Database</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Stress test and benchmark the local chat database with automatic cleanup
+                  </p>
+                </div>
+                <Button onClick={() => navigate("/tests/local-database")} variant="outline">
+                  Run Test
+                </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div>
                   <h3 className="font-medium">Trigger Onboarding</h3>
                   <p className="text-muted-foreground text-sm">
                     Reset onboarding state and restart the onboarding flow

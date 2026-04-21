@@ -8,6 +8,7 @@ import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
 import SettingsRoute from "@/routes/settings";
 import TestsRoute from "@/routes/tests";
+import LocalDatabaseTestRoute from "@/routes/tests/local-database";
 import NotificationsTestRoute from "@/routes/tests/notifications";
 
 import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
@@ -40,6 +41,7 @@ function App() {
           <Route path="/onboarding" element={<OnboardingRoute />} />
           <Route path="/settings" element={<SettingsRoute />} />
           <Route path="/tests" element={<TestsRoute />} />
+          <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
           <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
           <Route path="*" element={<NotFoundRoute />} />
         </Route>
