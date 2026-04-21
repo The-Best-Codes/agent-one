@@ -188,7 +188,7 @@ export const ChatUsageStatus = () => {
                             style: "currency",
                             currency: "USD",
                           }}
-                          className="text-foreground"
+                          className="text-foreground tabular-nums"
                         />
                       </span>
                     </TooltipTrigger>

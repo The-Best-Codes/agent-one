@@ -72,7 +72,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
                 {file.name}
               </span>
               <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                <span>{formatBytes(file.size)}</span>
+                <span className="tabular-nums">{formatBytes(file.size)}</span>
                 {file.type && (
                   <>
                     <span>&middot;</span>

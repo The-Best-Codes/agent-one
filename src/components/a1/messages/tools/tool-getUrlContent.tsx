@@ -324,7 +324,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="max-w-2xl truncate">
+              <span className="max-w-2xl truncate tabular-nums">
                 Browsed {results.length} URL{results.length !== 1 ? "s" : ""}
                 {failCount > 0 && ` (${failCount} failed)`}
               </span>
