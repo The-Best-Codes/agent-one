@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
-import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
+import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ interface ToolCallPartProps {
 
 export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
   const callId = part.toolCallId;
-  const toolName = stripMcpToolPrefix(part.type.replace("tool-", ""));
+  const toolName = getToolDisplayName(part.type.replace("tool-", ""), part.title);
   const { addToolApprovalResponse } = useChatFunctions();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 

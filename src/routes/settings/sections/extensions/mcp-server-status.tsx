@@ -37,7 +37,7 @@ function getStatusLabel(
     case "connecting":
       return "Loading...";
     case "unknown":
-      return "Wait";
+      return "Loading...";
     case "error":
       return "Error";
     default:

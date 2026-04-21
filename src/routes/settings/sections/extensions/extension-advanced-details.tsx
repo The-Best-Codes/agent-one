@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { mcpCheckAuth, mcpLogin, mcpLogout } from "@/lib/ai/tools/mcp/oauth";
 import {
   mcpAuthStatesAtom,
@@ -145,7 +146,7 @@ function McpServerApprovalSettings({
   onRequiresApprovalChange: (requiresApproval: boolean) => void;
   onToolApprovalOverridesChange: (overrides: Record<string, boolean>) => void;
 }) {
-  const availableTools = loadState?.toolNames ?? [];
+  const availableTools = loadState?.tools ?? [];
 
   return (
     <div className="flex flex-col gap-3">
@@ -191,14 +192,16 @@ function McpServerApprovalSettings({
                   This server does not currently expose any tools.
                 </span>
               ) : (
-                availableTools.map((toolName) => {
+                availableTools.map((tool) => {
+                  const toolName = tool.name;
+                  const toolDisplayName = getToolDisplayName(tool.name, tool.title);
                   const override = toolApprovalOverrides?.[toolName];
                   const toolRequiresApproval = override ?? requiresApproval;
 
                   return (
                     <div key={toolName} className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 flex-col">
-                        <span className="truncate text-sm font-medium">{toolName}</span>
+                        <span className="truncate text-sm font-medium">{toolDisplayName}</span>
                         <span className="text-muted-foreground text-xs">
                           {override === undefined
                             ? `Using default: ${requiresApproval ? "approval required" : "no approval required"}`
@@ -220,7 +223,7 @@ function McpServerApprovalSettings({
 
                           onToolApprovalOverridesChange(nextOverrides);
                         }}
-                        aria-label={`Toggle approval for ${toolName}`}
+                        aria-label={`Toggle approval for ${toolDisplayName}`}
                       />
                     </div>
                   );

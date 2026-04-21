@@ -15,7 +15,7 @@ import {
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
-import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
+import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -101,9 +101,10 @@ const MessagePartsInternal = ({
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
         } else if (part.type.startsWith("tool-")) {
-          return `[Tool: ${stripMcpToolPrefix(part.type.replace("tool-", ""))}]`;
+          const toolPart = part as ToolUIPart;
+          return `[Tool: ${getToolDisplayName(toolPart.type.replace("tool-", ""), toolPart.title)}]`;
         } else if (part.type === "dynamic-tool") {
-          return `[Dynamic Tool: ${stripMcpToolPrefix(part.toolName)}]`;
+          return `[Dynamic Tool: ${getToolDisplayName(part.toolName, part.title)}]`;
         } else if (part.type === "step-start") {
           return null; // Nothing for now
         }

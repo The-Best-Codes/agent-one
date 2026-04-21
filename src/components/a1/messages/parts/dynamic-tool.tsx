@@ -27,7 +27,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
-import { stripMcpToolPrefix } from "@/lib/ai/tools/mcp";
+import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
@@ -48,7 +48,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
-  const toolName = stripMcpToolPrefix(part.toolName);
+  const toolName = getToolDisplayName(part.toolName, part.title);
   const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
   const { addToolApprovalResponse } = useChatFunctions();
 

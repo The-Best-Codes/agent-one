@@ -16,12 +16,14 @@ import {
 import {
   buildMcpServerSlugMap,
   closeServerCache,
+  getToolDisplayName,
   getMcpToolsForServer,
   invalidateServerCache,
   isServerCached,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
+import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import {
   enabledToolsAtom,
   mcpParallelLoadLimitAtom,
@@ -121,6 +123,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           status: server.enabled ? (previous?.status ?? "unknown") : "disabled",
           toolCount: previous?.toolCount ?? 0,
           toolNames: previous?.toolNames ?? [],
+          tools: previous?.tools ?? [],
           error: server.enabled ? previous?.error : undefined,
         };
       }
@@ -154,6 +157,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
             status: server.enabled ? "unknown" : "disabled",
             toolCount: 0,
             toolNames: [],
+            tools: [],
           };
         }
 
@@ -233,6 +237,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
             status: server.type === "stdio" ? "starting" : "connecting",
             toolCount: previous?.toolCount ?? 0,
             toolNames: previous?.toolNames ?? [],
+            tools: previous?.tools ?? [],
           };
         }
 
@@ -260,7 +265,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                     ),
                   ),
                 ]);
-                const toolNames = Object.keys(tools);
+                const toolEntries = Object.entries(tools);
+                const toolDisplayNames = toolEntries.map(([name, tool]) =>
+                  getToolDisplayName(name, tool.title),
+                );
+                const toolInfo: McpServerToolInfo[] = toolEntries.map(([name, tool]) => ({
+                  name,
+                  title: tool.title,
+                }));
                 const wrappedTools = applyApprovalConfigToTools(
                   tools,
                   server.requiresApproval ?? false,
@@ -270,7 +282,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   server,
                   serverSlug: slugMap.get(server.id) ?? server.id,
                   status: "loaded" as const,
-                  toolNames,
+                  toolNames: toolDisplayNames,
+                  toolInfo,
                   tools: wrappedTools,
                 };
               } catch (error) {
@@ -286,6 +299,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   error: error instanceof Error ? error.message : "Unknown error",
                   status: "error" as const,
                   toolNames: [],
+                  toolInfo: [],
                   tools: {},
                 };
               }
@@ -307,11 +321,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                       status: "loaded",
                       toolCount: result.toolNames.length,
                       toolNames: result.toolNames,
+                      tools: result.toolInfo,
                     }
                   : {
                       status: "error",
                       toolCount: previous?.toolCount ?? 0,
                       toolNames: previous?.toolNames ?? [],
+                      tools: previous?.tools ?? [],
                       error: result.error,
                     };
             }
@@ -341,6 +357,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
               status: "error",
               toolCount: previous?.toolCount ?? 0,
               toolNames: previous?.toolNames ?? [],
+              tools: previous?.tools ?? [],
               error: error instanceof Error ? error.message : "Unknown error",
             };
           }

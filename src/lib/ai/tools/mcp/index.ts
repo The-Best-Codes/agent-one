@@ -634,3 +634,7 @@ export function stripMcpToolPrefix(toolName: string): string {
   }
   return withoutPrefix.slice(separatorIndex + MCP_TOOL_SEPARATOR.length);
 }
+
+export function getToolDisplayName(toolName: string, title?: string): string {
+  return title || stripMcpToolPrefix(toolName);
+}

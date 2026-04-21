@@ -11,10 +11,16 @@ export type McpServerLoadStatus =
   | "loaded"
   | "error";
 
+export interface McpServerToolInfo {
+  name: string;
+  title?: string;
+}
+
 export interface McpServerLoadState {
   status: McpServerLoadStatus;
   toolCount: number;
   toolNames: string[];
+  tools?: McpServerToolInfo[];
   error?: string;
 }
 
