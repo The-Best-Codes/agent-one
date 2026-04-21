@@ -5,7 +5,7 @@ import {
   type UIMessage,
 } from "ai";
 import { useAtomValue } from "jotai";
-import { memo, useEffect } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
@@ -46,11 +46,26 @@ export const ChatInstance = memo(
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
     const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
     const chatIds = useAtomValue(chatIdsAtom);
+    const suppressAutoSubmitAfterAbortRef = useRef(false);
+
+    const sendAutomaticallyWhen = useCallback(({ messages }: { messages: UIMessage[] }) => {
+      if (suppressAutoSubmitAfterAbortRef.current) {
+        suppressAutoSubmitAfterAbortRef.current = false;
+        return false;
+      }
+
+      return lastAssistantMessageIsCompleteWithApprovalResponses({ messages });
+    }, []);
 
     const chatModelId = loadChatMetadata(chatId).modelId ?? null;
     const chat = useChat(model, chatModelId, modelConfig, {
       experimental_throttle: experimentalThrottleEnabled ? experimentalThrottleValue : undefined,
-      sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+      sendAutomaticallyWhen,
+      onFinish: ({ isAbort }) => {
+        if (isAbort) {
+          suppressAutoSubmitAfterAbortRef.current = true;
+        }
+      },
       id: chatId,
       messages: initialMessages,
     });
