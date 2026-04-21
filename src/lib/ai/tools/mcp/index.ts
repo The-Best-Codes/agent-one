@@ -16,6 +16,7 @@ import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig, type McpServerConfig } from "@/lib/settings/types";
 
 import { checkOAuthSupport, isAuthError, promptLoginToast, promptSoftLoginToast } from "./oauth";
+import { parseMcpStdioCommand } from "./parse-command";
 
 const store = getDefaultStore();
 
@@ -54,13 +55,11 @@ class TauriStdioMCPTransport implements MCPTransport {
 
   async start(): Promise<void> {
     try {
-      const parts = this.command.split(" ");
-      const cmd = parts[0];
-      const args = parts.slice(1);
+      const { program, args } = parseMcpStdioCommand(this.command);
 
       const options: { env?: Record<string, string> } =
         Object.keys(this.env).length > 0 ? { env: this.env } : {};
-      this.commandInstance = Command.create(cmd, args, options);
+      this.commandInstance = Command.create(program, args, options);
 
       this.commandInstance.stdout.on("data", (line: string) => {
         this.readBuffer += line;

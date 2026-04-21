@@ -113,7 +113,7 @@ export default defineConfig(() => ({
     react(),
     babel({
       presets: [reactCompilerPreset({ target: "19" })],
-      exclude: [/[\/\\]node_modules[\/\\]/, /[\/\\]src[\/\\]workers[\/\\]/],
+      exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]workers[/\\]/],
     }),
     tailwindcss(),
     visualizer({
@@ -126,7 +126,10 @@ export default defineConfig(() => ({
   test: {
     globals: true,
     environment: "jsdom",
-    include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "tests/unit-tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+    ],
     exclude: ["tests/e2e/**"],
   },
 
