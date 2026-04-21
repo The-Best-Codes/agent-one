@@ -81,7 +81,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [isMetadataLoaded, setIsMetadataLoaded] = useState(false);
 
   const persistChatIds = useCallback((ids: string[]) => {
-    void chatStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids));
+    void chatStorage.setItem(CHAT_IDS_KEY, JSON.stringify(ids)).catch((error) => {
+      logger.error("Failed to persist chat IDs", error);
+    });
   }, []);
 
   useEffect(() => {
@@ -198,11 +200,15 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, []);
 
   const persistMetadata = useCallback((id: string, metadata: ChatMetadata) => {
-    void chatStorage.setChatMetadata(id, metadata);
+    void chatStorage.setChatMetadata(id, metadata).catch((error) => {
+      logger.error(`Failed to persist chat metadata ${id}`, error);
+    });
   }, []);
 
   const persistMessages = useCallback((id: string, messages: UIMessage[]) => {
-    void chatStorage.setChatMessages(id, messages);
+    void chatStorage.setChatMessages(id, messages).catch((error) => {
+      logger.error(`Failed to persist chat messages ${id}`, error);
+    });
   }, []);
 
   const createChat = useCallback(
@@ -221,7 +227,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       setMetadata(id, metadata);
       persistMetadata(id, metadata);
       persistMessages(id, []);
-      void chatStorage.updateFtsIndex(id, metadata.title, []);
+      void chatStorage.updateFtsIndex(id, metadata.title, []).catch((error) => {
+        logger.error(`Failed to update FTS index ${id}`, error);
+      });
       setChatIds((currentChatIds) => {
         const next = [id, ...currentChatIds];
         persistChatIds(next);
@@ -291,7 +299,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(chatId, updatedMetadata);
         persistMetadata(chatId, updatedMetadata);
         persistMessages(chatId, messages);
-        void chatStorage.updateFtsIndex(chatId, updatedMetadata.title, messages);
+        void chatStorage.updateFtsIndex(chatId, updatedMetadata.title, messages).catch((error) => {
+          logger.error(`Failed to update FTS index ${chatId}`, error);
+        });
       } catch (error) {
         logger.error(`Failed to save chat ${chatId}`, error);
       }
@@ -355,7 +365,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         };
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
-        void chatStorage.updateFtsTitle(chatId, title);
+        void chatStorage.updateFtsTitle(chatId, title).catch((error) => {
+          logger.error(`Failed to update FTS title ${chatId}`, error);
+        });
         setChatUpdateTrigger((prev) => prev + 1);
       } catch (error) {
         logger.error(`Failed to save chat title ${chatId}`, error);
@@ -367,7 +379,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const deleteChat = useCallback(
     (chatId: string) => {
       try {
-        void chatStorage.deleteChat(chatId);
+        void chatStorage.deleteChat(chatId).catch((error) => {
+          logger.error(`Failed to delete chat ${chatId}`, error);
+        });
         removeMetadata(chatId);
         setChatIds((currentChatIds) => {
           const next = currentChatIds.filter((id: string) => id !== chatId);
@@ -385,7 +399,9 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   const bulkDeleteChats = useCallback(
     (chatIds: string[]) => {
       try {
-        void chatStorage.bulkDeleteChats(chatIds);
+        void chatStorage.bulkDeleteChats(chatIds).catch((error) => {
+          logger.error("Failed to bulk delete chats from storage", error);
+        });
         for (const id of chatIds) {
           removeMetadata(id);
         }
@@ -455,7 +471,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(newId, newMetadata);
         persistMetadata(newId, newMetadata);
         persistMessages(newId, branchedMessages);
-        void chatStorage.updateFtsIndex(newId, newMetadata.title, branchedMessages);
+        void chatStorage
+          .updateFtsIndex(newId, newMetadata.title, branchedMessages)
+          .catch((error) => {
+            logger.error(`Failed to update FTS index ${newId}`, error);
+          });
 
         setChatIds((currentChatIds) => {
           const next = [newId, ...currentChatIds];

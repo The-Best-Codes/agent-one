@@ -2,6 +2,7 @@ import Database from "@tauri-apps/plugin-sql";
 import type { UIMessage } from "ai";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
+import { getLogger } from "@/lib/logger";
 
 export interface ChatSearchResult {
   chatId: string;
@@ -9,13 +10,42 @@ export interface ChatSearchResult {
   snippet: string;
 }
 
+const logger = getLogger(import.meta.url);
+
 let db: Database | null = null;
+let dbPromise: Promise<Database> | null = null;
+let writeQueue: Promise<void> = Promise.resolve();
 
 async function getDb(): Promise<Database> {
-  if (!db) {
-    db = await Database.load("sqlite:agent-one.db");
+  if (db) {
+    return db;
   }
-  return db;
+
+  if (!dbPromise) {
+    dbPromise = (async () => {
+      const instance = await Database.load("sqlite:agent-one.db");
+      await instance.execute("PRAGMA busy_timeout = 5000", []);
+      await instance.execute("PRAGMA journal_mode = WAL", []);
+      db = instance;
+      return instance;
+    })().catch((error) => {
+      dbPromise = null;
+      throw error;
+    });
+  }
+
+  return dbPromise;
+}
+
+async function enqueueWrite<T>(operation: (database: Database) => Promise<T>): Promise<T> {
+  const next = writeQueue.then(async () => operation(await getDb()));
+  writeQueue = next.then(
+    () => undefined,
+    (error) => {
+      logger.error("Chat storage write failed", error);
+    },
+  );
+  return next;
 }
 
 function trimSnippetLeft(snippet: string, maxLeftTokens: number): string {
@@ -39,8 +69,12 @@ function extractTextFromMessages(messages: UIMessage[]): string {
   return parts.join(" ");
 }
 
-async function replaceFtsEntry(id: string, title: string, content: string): Promise<void> {
-  const d = await getDb();
+async function replaceFtsEntry(
+  d: Database,
+  id: string,
+  title: string,
+  content: string,
+): Promise<void> {
   await d.execute("DELETE FROM chat_fts WHERE chat_id = $1", [id]);
   await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
     id,
@@ -57,16 +91,16 @@ export const chatStorage = {
   },
 
   async setItem(key: string, value: string): Promise<void> {
-    const d = await getDb();
-    await d.execute(
-      "INSERT INTO kv (key, value) VALUES ($1, $2) ON CONFLICT(key) DO UPDATE SET value = $2",
-      [key, value],
+    await enqueueWrite((d) =>
+      d.execute(
+        "INSERT INTO kv (key, value) VALUES ($1, $2) ON CONFLICT(key) DO UPDATE SET value = $2",
+        [key, value],
+      ),
     );
   },
 
   async removeItem(key: string): Promise<void> {
-    const d = await getDb();
-    await d.execute("DELETE FROM kv WHERE key = $1", [key]);
+    await enqueueWrite((d) => d.execute("DELETE FROM kv WHERE key = $1", [key]));
   },
 
   async getChatMetadata(id: string): Promise<ChatMetadata | null> {
@@ -101,40 +135,41 @@ export const chatStorage = {
   },
 
   async setChatMetadata(id: string, metadata: ChatMetadata): Promise<void> {
-    const d = await getDb();
-    await d.execute(
-      `INSERT INTO chat_metadata (
-         id,
-         title,
-         title_state,
-         model_id,
-         model_config,
-         branch_of,
-         input_tokens,
-         output_tokens,
-         total_cost_usd
-       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       ON CONFLICT(id) DO UPDATE SET
-         title = $2,
-         title_state = $3,
-         model_id = $4,
-         model_config = $5,
-         branch_of = $6,
-         input_tokens = $7,
-         output_tokens = $8,
-         total_cost_usd = $9`,
-      [
-        id,
-        metadata.title,
-        metadata.titleState ?? null,
-        metadata.modelId ?? null,
-        metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null,
-        metadata.branchOf ?? null,
-        metadata.inputTokens ?? null,
-        metadata.outputTokens ?? null,
-        metadata.totalCostUsd ?? null,
-      ],
+    await enqueueWrite((d) =>
+      d.execute(
+        `INSERT INTO chat_metadata (
+           id,
+           title,
+           title_state,
+           model_id,
+           model_config,
+           branch_of,
+           input_tokens,
+           output_tokens,
+           total_cost_usd
+         )
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         ON CONFLICT(id) DO UPDATE SET
+           title = $2,
+           title_state = $3,
+           model_id = $4,
+           model_config = $5,
+           branch_of = $6,
+           input_tokens = $7,
+           output_tokens = $8,
+           total_cost_usd = $9`,
+        [
+          id,
+          metadata.title,
+          metadata.titleState ?? null,
+          metadata.modelId ?? null,
+          metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null,
+          metadata.branchOf ?? null,
+          metadata.inputTokens ?? null,
+          metadata.outputTokens ?? null,
+          metadata.totalCostUsd ?? null,
+        ],
+      ),
     );
   },
 
@@ -149,38 +184,42 @@ export const chatStorage = {
   },
 
   async setChatMessages(id: string, messages: UIMessage[]): Promise<void> {
-    const d = await getDb();
-    await d.execute(
-      `INSERT INTO chat_messages (id, messages) VALUES ($1, $2)
-       ON CONFLICT(id) DO UPDATE SET messages = $2`,
-      [id, JSON.stringify(messages)],
+    await enqueueWrite((d) =>
+      d.execute(
+        `INSERT INTO chat_messages (id, messages) VALUES ($1, $2)
+         ON CONFLICT(id) DO UPDATE SET messages = $2`,
+        [id, JSON.stringify(messages)],
+      ),
     );
   },
 
   async deleteChat(id: string): Promise<void> {
-    const d = await getDb();
-    await d.execute("DELETE FROM chat_metadata WHERE id = $1", [id]);
-    await d.execute("DELETE FROM chat_messages WHERE id = $1", [id]);
-    await d.execute("DELETE FROM chat_fts WHERE chat_id = $1", [id]);
+    await enqueueWrite(async (d) => {
+      await d.execute("DELETE FROM chat_metadata WHERE id = $1", [id]);
+      await d.execute("DELETE FROM chat_messages WHERE id = $1", [id]);
+      await d.execute("DELETE FROM chat_fts WHERE chat_id = $1", [id]);
+    });
   },
 
   async bulkDeleteChats(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
-    const d = await getDb();
     const placeholders = ids.map((_, i) => `$${i + 1}`).join(", ");
-    await d.execute(`DELETE FROM chat_metadata WHERE id IN (${placeholders})`, ids);
-    await d.execute(`DELETE FROM chat_messages WHERE id IN (${placeholders})`, ids);
-    await d.execute(`DELETE FROM chat_fts WHERE chat_id IN (${placeholders})`, ids);
+    await enqueueWrite(async (d) => {
+      await d.execute(`DELETE FROM chat_metadata WHERE id IN (${placeholders})`, ids);
+      await d.execute(`DELETE FROM chat_messages WHERE id IN (${placeholders})`, ids);
+      await d.execute(`DELETE FROM chat_fts WHERE chat_id IN (${placeholders})`, ids);
+    });
   },
 
   async updateFtsIndex(id: string, title: string, messages: UIMessage[]): Promise<void> {
     const content = extractTextFromMessages(messages);
-    await replaceFtsEntry(id, title, content);
+    await enqueueWrite((d) => replaceFtsEntry(d, id, title, content));
   },
 
   async updateFtsTitle(id: string, title: string): Promise<void> {
-    const d = await getDb();
-    await d.execute("UPDATE chat_fts SET title = $1 WHERE chat_id = $2", [title, id]);
+    await enqueueWrite((d) =>
+      d.execute("UPDATE chat_fts SET title = $1 WHERE chat_id = $2", [title, id]),
+    );
   },
 
   async isFtsIndexConsistent(): Promise<boolean> {
@@ -234,31 +273,32 @@ export const chatStorage = {
   },
 
   async rebuildFtsIndex(): Promise<void> {
-    const d = await getDb();
-    const rows = await d.select<{ id: string; title: string; messages: string }[]>(
-      "SELECT m.id, COALESCE(c.title, 'New chat') as title, m.messages FROM chat_messages m LEFT JOIN chat_metadata c ON c.id = m.id",
-      [],
-    );
-    await d.execute("BEGIN TRANSACTION", []);
-    try {
-      await d.execute("DELETE FROM chat_fts", []);
-      for (const row of rows) {
-        try {
-          const messages: UIMessage[] = JSON.parse(row.messages);
-          const content = extractTextFromMessages(messages);
-          await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
-            row.id,
-            row.title,
-            content,
-          ]);
-        } catch {
-          // skip malformed entries
+    await enqueueWrite(async (d) => {
+      const rows = await d.select<{ id: string; title: string; messages: string }[]>(
+        "SELECT m.id, COALESCE(c.title, 'New chat') as title, m.messages FROM chat_messages m LEFT JOIN chat_metadata c ON c.id = m.id",
+        [],
+      );
+      await d.execute("BEGIN TRANSACTION", []);
+      try {
+        await d.execute("DELETE FROM chat_fts", []);
+        for (const row of rows) {
+          try {
+            const messages: UIMessage[] = JSON.parse(row.messages);
+            const content = extractTextFromMessages(messages);
+            await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
+              row.id,
+              row.title,
+              content,
+            ]);
+          } catch {
+            // skip malformed entries
+          }
         }
+        await d.execute("COMMIT", []);
+      } catch (error) {
+        await d.execute("ROLLBACK", []);
+        throw error;
       }
-      await d.execute("COMMIT", []);
-    } catch (error) {
-      await d.execute("ROLLBACK", []);
-      throw error;
-    }
+    });
   },
 };
