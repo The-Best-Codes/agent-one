@@ -3,7 +3,6 @@ import { useAtomValue } from "jotai";
 
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { markdownRenderingAtom, maxMessageLengthAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
@@ -40,13 +39,6 @@ export const MessagePartText = ({
     >
       {shouldUsePerformantRenderer ? (
         <>
-          <Alert variant="destructive" className="mb-2">
-            <AlertTitle>Performance Alert</AlertTitle>
-            <AlertDescription>
-              This message is longer than {maxMessageLength.toLocaleString()} characters. Syntax
-              highlighting and markdown rendering are disabled.
-            </AlertDescription>
-          </Alert>
           <PerformantMarkdown content={text} />
         </>
       ) : shouldRenderMarkdown ? (
