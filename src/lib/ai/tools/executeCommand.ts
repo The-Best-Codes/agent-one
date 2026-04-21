@@ -3,16 +3,11 @@ import { type Child, Command } from "@tauri-apps/plugin-shell";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { createAbortError, raceWithAbort } from "@/lib/ai/tools/abort";
 import { getLogger } from "@/lib/logger";
 import type { ExecuteCommandToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
-
-function createAbortError(): Error {
-  const abortError = new Error("The operation was aborted.");
-  abortError.name = "AbortError";
-  return abortError;
-}
 
 export interface ExecuteCommandOutput {
   stdout: string;
@@ -122,7 +117,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       abortSignal?.addEventListener("abort", onAbort, { once: true });
 
       try {
-        child = await command.spawn();
+        child = await raceWithAbort(command.spawn(), abortSignal);
 
         if (aborted) {
           void child.kill().catch(() => {});
@@ -141,12 +136,12 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
 
           if (queue.length === 0) {
             if (done) {
-              await waitForTrailingEvents();
+              await raceWithAbort(waitForTrailingEvents(), abortSignal);
               if (queue.length === 0) {
                 break;
               }
             } else {
-              await waitForNextQueueItem();
+              await raceWithAbort(waitForNextQueueItem(), abortSignal);
             }
           }
 
