@@ -373,6 +373,43 @@ function createTransport(server: McpServerConfig): MCPTransport {
   }
 }
 
+async function getPaginatedMcpTools(client: MCPClient, signal: AbortSignal): Promise<ToolSet> {
+  if (signal.aborted) {
+    throw new Error("Operation aborted");
+  }
+
+  const firstPage = await client.listTools({ options: { signal } });
+  const allToolDefinitions = [...firstPage.tools];
+  const seenCursors = new Set<string>();
+  let cursor = firstPage.nextCursor;
+
+  while (cursor) {
+    if (signal.aborted) {
+      throw new Error("Operation aborted");
+    }
+
+    if (seenCursors.has(cursor)) {
+      throw new Error("MCP server returned a duplicate pagination cursor while listing tools.");
+    }
+
+    seenCursors.add(cursor);
+
+    const page = await client.listTools({
+      params: { cursor },
+      options: { signal },
+    });
+
+    allToolDefinitions.push(...page.tools);
+    cursor = page.nextCursor;
+  }
+
+  return client.toolsFromDefinitions({
+    ...firstPage,
+    tools: allToolDefinitions,
+    nextCursor: undefined,
+  });
+}
+
 async function getMcpClientAndTools(
   server: McpServerConfig,
   signal: AbortSignal,
@@ -404,7 +441,7 @@ async function getMcpClientAndTools(
       throw new Error("Operation aborted");
     }
 
-    const tools = await client.tools();
+    const tools = await getPaginatedMcpTools(client, signal);
 
     if (signal.aborted) {
       await transport.close();
