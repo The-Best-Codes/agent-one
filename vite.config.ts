@@ -34,6 +34,7 @@ const vendorManualChunks = {
     "@codemirror/state",
     "@codemirror/language",
     "@codemirror/commands",
+    "@codemirror/merge",
   ],
   codemirrorReact: ["@uiw/react-codemirror"],
   codemirrorLangs: ["@codemirror/lang-markdown"],
@@ -84,6 +85,10 @@ const vendorManualChunks = {
     "lodash.debounce",
     "dedent",
     "remend",
+    "fancy-ansi",
+    "fuzzysort",
+    "@number-flow/react",
+    "number-flow",
   ],
   tauri: [
     "@tauri-apps/api",
