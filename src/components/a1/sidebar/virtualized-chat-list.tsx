@@ -218,7 +218,7 @@ export const VirtualizedChatList = ({
   const virtualizer = useVirtualizer({
     count: filteredChats.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => (filteredChats[index]?.snippet ? 50 : 34),
+    estimateSize: (index) => (filteredChats[index]?.snippet ? 48 : 34),
     measureElement: (el) => el.getBoundingClientRect().height,
     overscan: 5,
   });
