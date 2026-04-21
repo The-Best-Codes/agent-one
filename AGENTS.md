@@ -40,5 +40,6 @@ If you are an AI agent, please follow the instructions in this file to ensure yo
 
 - Don't hesitate to browse the web for documentation.
 - AI SDK docs are in `node_modules/ai/docs`.
+- MCP (Model Context Protocol, referred to as an "Extension" in the app) docs are in `.agents/docs/modelcontextprotocol.io/llms-full.txt`.
 - General documentation for miscellaneous topics can be found in `.agents/docs/`.
 - If you run ESLint and it returns warnings or errors that mention documentation URLs, ALWAYS fetch the documentation URLs first before attempting to resolve the issue so that you resolve it in alignment with the latest documentation.
