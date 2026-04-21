@@ -25,9 +25,9 @@ export type Server = {
   remotes?: Remote[];
   repository?: Repository;
   websiteUrl?: string;
+  _meta?: ServerMeta;
   icons?: Icon[];
   packages?: Package[];
-  _meta?: ServerMeta;
 };
 
 export type ServerMeta = {
@@ -35,6 +35,8 @@ export type ServerMeta = {
 };
 
 export type IoModelcontextprotocolRegistryPublisherProvided = {
+  connect?: string;
+  docs?: string;
   documentation?: string;
   examples?: ExampleElement[];
   keywords?: string[];
@@ -56,6 +58,13 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   auth?: Auth;
   mcp_endpoint?: string;
   service?: string;
+  authentication?: AuthenticationClass | string;
+  openapi?: string;
+  protocolVersion?: Date;
+  quotasManifest?: string;
+  resources?: string[];
+  skills?: Skill[];
+  subscribe?: boolean;
   logo?: string;
   privacy_policy?: string;
   support_url?: string;
@@ -67,7 +76,6 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   build_info?: BuildInfoClass;
   capabilities?: string[] | CapabilitiesClass | string;
   tags?: string[];
-  authentication?: AuthenticationClass | string;
   promptCount?: number;
   resourceCount?: number;
   toolCount?: number;
@@ -75,6 +83,7 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   features?: string[] | FeaturesClass;
   spec?: string;
   x402?: string;
+  toolHints?: ToolHint[];
   contactEmail?: string;
   author?: string;
   issues?: string;
@@ -86,6 +95,8 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   installationMethods?: InstallationMethod[];
   toolCategories?: ToolCategories;
   channel?: string;
+  deployment?: Deployment;
+  requires?: string;
   priority?: number | string;
   stack?: string[];
   status?: string;
@@ -187,7 +198,14 @@ export type CapabilitiesClass = {
   search_types?: string[];
   sparse_embedding_providers?: string[];
   vector_store_providers?: string[];
-  tools?: ToolClass[];
+  backtesting?: boolean;
+  optionsGreeks?: boolean;
+  orderPlacement?: boolean;
+  orderPlacementSelfHostedOnly?: boolean;
+  paperTrading?: boolean;
+  riskGuardChecks?: number;
+  telegramAlerts?: boolean;
+  tools?: ToolClass[] | number;
 };
 
 export type ToolClass = {
@@ -205,6 +223,11 @@ export type Contact = {
   email: string;
   name: string;
   url: string;
+};
+
+export type Deployment = {
+  egressIp: string;
+  region: string;
 };
 
 export type Discovery = {
@@ -362,6 +385,12 @@ export type RateLimit = {
   windowSeconds: number;
 };
 
+export type Skill = {
+  canonical: string;
+  description: string;
+  name: string;
+};
+
 export type Support = {
   email: string;
   url: string;
@@ -378,6 +407,12 @@ export type ToolCategories = {
   search: string[];
   system: string[];
   utilities: string[];
+};
+
+export type ToolHint = {
+  description: string;
+  exampleQuery: string;
+  name: string;
 };
 
 export type Variants = {
@@ -425,20 +460,21 @@ export type EnvironmentVariable = {
 
 export type EnvironmentVariableVariables = {
   weather_choices?: AgentID;
-  api_key?: ApifyToken;
-  TRILO_PAT?: ApifyToken;
-  token?: ApifyToken;
-  INFOBIP_API_KEY?: ApifyToken;
-  CATHEDRAL_API_KEY?: ApifyToken;
-  YUOR_MCP_TOKEN?: ApifyToken;
-  BRIGHTSEC_API_KEY?: ApifyToken;
-  FIRSTDATA_API_KEY?: ApifyToken;
-  indicate_api_key?: ApifyToken;
+  perspective_token?: ApifyAPIToken;
+  api_key?: ApifyAPIToken;
+  TRILO_PAT?: ApifyAPIToken;
+  token?: ApifyAPIToken;
+  INFOBIP_API_KEY?: ApifyAPIToken;
+  CATHEDRAL_API_KEY?: ApifyAPIToken;
+  YUOR_MCP_TOKEN?: ApifyAPIToken;
+  BRIGHTSEC_API_KEY?: ApifyAPIToken;
+  FIRSTDATA_API_KEY?: ApifyAPIToken;
+  indicate_api_key?: ApifyAPIToken;
   NETDATA_CLOUD_API_TOKEN?: SgpDirectoryAPIKey;
-  mcp_access_token?: ApifyToken;
+  mcp_access_token?: ApifyAPIToken;
 };
 
-export type ApifyToken = {
+export type ApifyAPIToken = {
   description?: string;
   isRequired?: boolean;
   format?: string;
@@ -474,7 +510,7 @@ export type PackageArgument = {
 
 export type PackageArgumentVariables = {
   region?: HapiFQDN;
-  workingDirectory?: ApifyToken;
+  workingDirectory?: ApifyAPIToken;
   toolFilter?: ToolFilter;
 };
 
@@ -484,7 +520,6 @@ export type HapiFQDN = {
   default?: string;
   format?: string;
   isSecret?: boolean;
-  choices?: string[];
   placeholder?: string;
 };
 
@@ -513,18 +548,18 @@ export type RuntimeArgumentVariables = {
   workspace?: AgentID;
   host_port?: HostPort;
   network?: HostPort;
-  api_key?: ApifyToken;
+  api_key?: ApifyAPIToken;
   models_path?: HapiFQDN;
   encoder_file?: HapiFQDN;
   decoder_file?: HapiFQDN;
   tokens_file?: HapiFQDN;
-  token?: ApifyToken;
-  config_path?: ApifyToken;
-  data_path?: ApifyToken;
-  workspace_path?: ApifyToken;
+  token?: ApifyAPIToken;
+  config_path?: ApifyAPIToken;
+  data_path?: ApifyAPIToken;
+  workspace_path?: ApifyAPIToken;
   gid?: HapiFQDN;
   uid?: HapiFQDN;
-  xdg_runtime_dir?: ApifyToken;
+  xdg_runtime_dir?: ApifyAPIToken;
   group?: APIKey;
   user?: APIKey;
   hostPath?: APIKey;
@@ -533,8 +568,8 @@ export type RuntimeArgumentVariables = {
   address?: Address;
   enabled?: Address;
   source_path?: HapiFQDN;
-  client_id?: ApifyToken;
-  client_secret?: ApifyToken;
+  client_id?: ApifyAPIToken;
+  client_secret?: ApifyAPIToken;
   customer_id?: CustomerID;
   vanity_domain?: CustomerID;
 };
@@ -574,48 +609,67 @@ export type Remote = {
 export type RemoteVariables = {
   HAPI_FQDN?: HapiFQDN;
   HAPI_PORT?: HapiFQDN;
-  api_key?: ApifyToken;
+  api_key?: ApifyAPIToken;
   project_slug?: AgentID;
   instance?: HapiFQDN;
-  baseUrl?: ApifyToken;
+  baseUrl?: ApifyAPIToken;
   "server-name"?: AgentID;
-  env?: HapiFQDN;
+  env?: DateStyle;
   tenant_id?: AgentID;
   agent_id?: AgentID;
   apiKey?: HapiFQDN;
-  region?: HapiFQDN;
-  qovery_token?: ApifyToken;
+  region?: DateStyle;
+  qovery_token?: ApifyAPIToken;
   host?: HapiFQDN;
   SGP_DIRECTORY_API_KEY?: SgpDirectoryAPIKey;
-  token?: ApifyToken;
-  AUTH_TOKEN?: ApifyToken;
-  prior_api_key?: ApifyToken;
-  arquestra_token?: ApifyToken;
+  token?: ApifyAPIToken;
+  AUTH_TOKEN?: ApifyAPIToken;
+  prior_api_key?: ApifyAPIToken;
+  arquestra_token?: ApifyAPIToken;
   supabase_project_ref?: AgentID;
+  APIFY_API_TOKEN?: ApifyAPIToken;
   server_host?: AgentID;
   API_KEY?: APIKey;
-  SKYVERN_API_KEY?: ApifyToken;
+  SKYVERN_API_KEY?: ApifyAPIToken;
   PROJECT_REF?: APIKey;
   company_code?: APIKey;
-  BILT_API_KEY?: ApifyToken;
+  BILT_API_KEY?: ApifyAPIToken;
   site_key?: AgentID;
   oauth_client_id?: OauthClientID;
-  oauth_client_secret?: ApifyToken;
-  APIFY_TOKEN?: ApifyToken;
+  oauth_client_secret?: ApifyAPIToken;
+  APIFY_TOKEN?: ApifyAPIToken;
+  dateStyle?: DateStyle;
+  includeCoordinates?: HapiFQDN;
+  mapLanguage?: DateStyle;
+  temperatureUnit?: DateStyle;
+  port?: Port;
   marmot_host?: AgentID;
   plexus_host?: APIKey;
   your_mcp_server_host?: AgentID;
   sourcegraph_hostname?: AgentID;
   lobster_id?: AgentID;
   endpoint?: AgentID;
-  key_id?: ApifyToken;
-  key_secret?: ApifyToken;
-  api_token?: ApifyToken;
+  key_id?: ApifyAPIToken;
+  key_secret?: ApifyAPIToken;
+  api_token?: ApifyAPIToken;
+};
+
+export type DateStyle = {
+  description: string;
+  default: string;
+  choices: string[];
+  isRequired?: boolean;
 };
 
 export type OauthClientID = {
   description: string;
   value: string;
+};
+
+export type Port = {
+  description: string;
+  default: string;
+  placeholder: string;
 };
 
 export type Repository = {
