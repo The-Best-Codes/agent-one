@@ -222,7 +222,16 @@ export const chatStorage = {
     );
   },
 
-  async isFtsIndexConsistent(): Promise<boolean> {
+  async performStartupMaintenance(): Promise<void> {
+    logger.verbose("Starting chat storage startup maintenance");
+    await enqueueWrite(async (d) => {
+      await d.execute("PRAGMA optimize", []);
+    });
+    logger.verbose("Finished chat storage startup maintenance");
+  },
+
+  async ensureSearchIndexConsistency(): Promise<void> {
+    logger.verbose("Checking chat search index consistency");
     const d = await getDb();
     const [chatCountRow] = await d.select<{ count: number }[]>(
       "SELECT COUNT(*) as count FROM chat_messages",
@@ -232,8 +241,64 @@ export const chatStorage = {
       "SELECT COUNT(*) as count FROM chat_fts",
       [],
     );
+    const [missingFtsRow] = await d.select<{ count: number }[]>(
+      `SELECT COUNT(*) as count
+       FROM chat_messages m
+       LEFT JOIN chat_fts f ON f.chat_id = m.id
+       WHERE f.chat_id IS NULL`,
+      [],
+    );
+    const [staleFtsRow] = await d.select<{ count: number }[]>(
+      `SELECT COUNT(*) as count
+       FROM chat_fts f
+       LEFT JOIN chat_messages m ON m.id = f.chat_id
+       WHERE m.id IS NULL`,
+      [],
+    );
+    const [duplicateFtsRow] = await d.select<{ count: number }[]>(
+      `SELECT COUNT(*) as count
+       FROM (
+         SELECT chat_id
+         FROM chat_fts
+         GROUP BY chat_id
+         HAVING COUNT(*) > 1
+       )`,
+      [],
+    );
 
-    return (chatCountRow?.count ?? 0) === (ftsCountRow?.count ?? 0);
+    const chatCount = chatCountRow?.count ?? 0;
+    const ftsCount = ftsCountRow?.count ?? 0;
+    const missingFtsCount = missingFtsRow?.count ?? 0;
+    const staleFtsCount = staleFtsRow?.count ?? 0;
+    const duplicateFtsCount = duplicateFtsRow?.count ?? 0;
+
+    logger.verbose("Chat search index consistency stats:", {
+      chatCount,
+      ftsCount,
+      missingFtsCount,
+      staleFtsCount,
+      duplicateFtsCount,
+    });
+
+    if (
+      chatCount === ftsCount &&
+      missingFtsCount === 0 &&
+      staleFtsCount === 0 &&
+      duplicateFtsCount === 0
+    ) {
+      logger.verbose("Chat search index is consistent");
+      return;
+    }
+
+    logger.warn("Chat search index is inconsistent, rebuilding", {
+      chatCount,
+      ftsCount,
+      missingFtsCount,
+      staleFtsCount,
+      duplicateFtsCount,
+    });
+    await chatStorage.rebuildFtsIndex();
+    logger.verbose("Finished rebuilding inconsistent chat search index");
   },
 
   async searchChats(query: string, rawOperators = false): Promise<ChatSearchResult[]> {
@@ -273,11 +338,13 @@ export const chatStorage = {
   },
 
   async rebuildFtsIndex(): Promise<void> {
+    logger.verbose("Rebuilding chat search index");
     await enqueueWrite(async (d) => {
       const rows = await d.select<{ id: string; title: string; messages: string }[]>(
         "SELECT m.id, COALESCE(c.title, 'New chat') as title, m.messages FROM chat_messages m LEFT JOIN chat_metadata c ON c.id = m.id",
         [],
       );
+      let malformedEntries = 0;
       await d.execute("DELETE FROM chat_fts", []);
       for (const row of rows) {
         try {
@@ -289,9 +356,15 @@ export const chatStorage = {
             content,
           ]);
         } catch {
+          malformedEntries += 1;
           // skip malformed entries
         }
       }
+
+      logger.verbose("Finished rebuilding chat search index", {
+        indexedChats: rows.length - malformedEntries,
+        malformedEntries,
+      });
     });
   },
 };

@@ -129,15 +129,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
       setChatIds(ids);
       setIsMetadataLoaded(true);
 
-      chatStorage
-        .isFtsIndexConsistent()
-        .then((isConsistent) => {
-          if (isConsistent) return;
-
-          return chatStorage.rebuildFtsIndex();
-        })
+      void chatStorage
+        .performStartupMaintenance()
+        .then(() => chatStorage.ensureSearchIndexConsistency())
         .catch((error) => {
-          logger.error("Failed to sync FTS index", error);
+          logger.error("Failed to run chat storage startup maintenance", error);
         });
     };
 
