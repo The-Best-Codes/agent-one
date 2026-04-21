@@ -2,6 +2,7 @@ import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { raceWithAbort } from "@/lib/ai/tools/abort";
 import { getLogger } from "@/lib/logger";
 import type { CreateFileToolConfig } from "@/lib/settings/types";
 
@@ -25,7 +26,7 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const fileExists = await exists(input.filePath);
+      const fileExists = await raceWithAbort(exists(input.filePath), abortSignal);
 
       abortSignal?.throwIfAborted();
 
@@ -35,7 +36,7 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
         );
       }
 
-      await writeTextFile(input.filePath, input.content);
+      await raceWithAbort(writeTextFile(input.filePath, input.content), abortSignal);
 
       logger.verbose("File created successfully:", input.filePath);
 

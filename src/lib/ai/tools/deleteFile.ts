@@ -2,6 +2,7 @@ import { exists, remove } from "@tauri-apps/plugin-fs";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { raceWithAbort } from "@/lib/ai/tools/abort";
 import { getLogger } from "@/lib/logger";
 import type { DeleteFileToolConfig } from "@/lib/settings/types";
 
@@ -19,7 +20,7 @@ export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const fileExists = await exists(input.filePath);
+      const fileExists = await raceWithAbort(exists(input.filePath), abortSignal);
 
       abortSignal?.throwIfAborted();
 
@@ -27,7 +28,7 @@ export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
         throw new Error("File does not exist.");
       }
 
-      await remove(input.filePath);
+      await raceWithAbort(remove(input.filePath), abortSignal);
 
       logger.verbose("File deleted successfully:", input.filePath);
 

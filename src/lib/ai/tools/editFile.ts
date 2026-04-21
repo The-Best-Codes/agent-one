@@ -2,6 +2,7 @@ import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { raceWithAbort } from "@/lib/ai/tools/abort";
 import { getLogger } from "@/lib/logger";
 import type { EditFileToolConfig } from "@/lib/settings/types";
 
@@ -22,7 +23,7 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const fileContent = await readTextFile(input.filePath);
+      const fileContent = await raceWithAbort(readTextFile(input.filePath), abortSignal);
 
       abortSignal?.throwIfAborted();
 
@@ -31,7 +32,7 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
       }
 
       const updatedContent = fileContent.replace(input.oldContent, input.newContent);
-      await writeTextFile(input.filePath, updatedContent);
+      await raceWithAbort(writeTextFile(input.filePath, updatedContent), abortSignal);
 
       logger.verbose("File edited successfully:", input.filePath);
 

@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { raceWithAbort } from "@/lib/ai/tools/abort";
 import { getLogger } from "@/lib/logger";
 import type { WebSearchToolConfig } from "@/lib/settings/types";
 
@@ -56,6 +57,8 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
         ),
     }),
     execute: async (input, { abortSignal }) => {
+      abortSignal?.throwIfAborted();
+
       const timeoutMs = (input.timeoutSeconds || 5) * 1000;
 
       logger.verbose("Executing webSearch tool with input:", input);
@@ -69,31 +72,35 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
         }, timeoutMs);
       });
 
-      const searchPromise = invoke<WebSearchResponse>("web_search", {
-        query: input.query,
-        maxResults: input.maxResults,
-        maxPages: input.maxPages,
-        timeoutSeconds: input.timeoutSeconds,
-        useWebview: input.useWebview,
-        signal: abortSignal,
-      });
+      try {
+        const searchPromise = raceWithAbort(
+          invoke<WebSearchResponse>("web_search", {
+            query: input.query,
+            maxResults: input.maxResults,
+            maxPages: input.maxPages,
+            timeoutSeconds: input.timeoutSeconds,
+            useWebview: input.useWebview,
+          }),
+          abortSignal,
+        );
 
-      const result = await Promise.race([searchPromise, timeoutPromise]);
+        const result = await Promise.race([searchPromise, timeoutPromise]);
 
-      logger.verbose("Search completed:", result);
+        logger.verbose("Search completed:", result);
 
-      if (timeoutId) clearTimeout(timeoutId);
-
-      return {
-        query: result.query,
-        total_results: result.total_results,
-        results: result.results.map((r) => ({
-          title: r.title,
-          url: r.url,
-          snippet: r.snippet,
-          display_url: r.display_url,
-        })),
-        search_url: result.search_url,
-      };
+        return {
+          query: result.query,
+          total_results: result.total_results,
+          results: result.results.map((r) => ({
+            title: r.title,
+            url: r.url,
+            snippet: r.snippet,
+            display_url: r.display_url,
+          })),
+          search_url: result.search_url,
+        };
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+      }
     },
   });

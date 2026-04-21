@@ -2,6 +2,7 @@ import { readTextFile } from "@tauri-apps/plugin-fs";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { raceWithAbort } from "@/lib/ai/tools/abort";
 import { getLogger } from "@/lib/logger";
 import type { ViewFileToolConfig } from "@/lib/settings/types";
 
@@ -26,7 +27,7 @@ export const createViewFileTool = (config: ViewFileToolConfig) =>
 
       abortSignal?.throwIfAborted();
 
-      const fileContent = await readTextFile(input.filePath);
+      const fileContent = await raceWithAbort(readTextFile(input.filePath), abortSignal);
       const allLines = fileContent.split("\n");
       const totalLines = allLines.length;
       const totalChars = fileContent.length;

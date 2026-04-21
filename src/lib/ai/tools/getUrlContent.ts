@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { raceWithAbort } from "@/lib/ai/tools/abort";
 import { fixUrl } from "@/lib/fix-url";
 import { getLogger } from "@/lib/logger";
 import type { GetUrlContentToolConfig } from "@/lib/settings/types";
@@ -74,6 +75,8 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
         ),
     }),
     execute: async (input, { abortSignal }) => {
+      abortSignal?.throwIfAborted();
+
       const timeoutMs = (input.timeoutSeconds || 5) * 1000;
 
       logger.verbose("Executing getUrlContent tool with input:", input);
@@ -86,14 +89,16 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
 
       const singleFetch = async (url: string, index: number): Promise<FetchResult> => {
         const fixedUrl = fixUrl(url);
-        return invoke<UrlContentResponse>("get_url_content", {
-          url: fixedUrl,
-          format: input.format,
-          maxLength: input.maxLength,
-          timeoutSeconds: input.timeoutSeconds,
-          useWebview: input.useWebview,
-          signal: abortSignal,
-        }).then((result) => {
+        return raceWithAbort(
+          invoke<UrlContentResponse>("get_url_content", {
+            url: fixedUrl,
+            format: input.format,
+            maxLength: input.maxLength,
+            timeoutSeconds: input.timeoutSeconds,
+            useWebview: input.useWebview,
+          }),
+          abortSignal,
+        ).then((result) => {
           logger.verbose("Fetched URL:", result);
 
           const successResult: SuccessResult = {
@@ -109,51 +114,59 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
         });
       };
 
-      const fetchPromises = input.urls.map((url, index) =>
-        singleFetch(url, index).catch((error) => ({
-          error: error instanceof Error ? error.message : String(error),
-          url,
-        })),
-      );
+      try {
+        const fetchPromises = input.urls.map((url, index) =>
+          singleFetch(url, index).catch((error) => {
+            if (error instanceof Error && error.name === "AbortError") {
+              throw error;
+            }
 
-      const timeoutPromise = new Promise<"timeout">((resolve) => {
-        timeoutId = setTimeout(() => {
-          logger.error("Timeout reached:", timeoutMs);
-          resolve("timeout");
-        }, timeoutMs);
-      });
-
-      const raced = await Promise.race([Promise.all(fetchPromises), timeoutPromise]);
-
-      if (raced === "timeout") {
-        throw new Error("Operation timed out before the URLs could be fetched.");
-      }
-
-      const finalResults: FetchResult[] = input.urls.map(
-        (url, index) =>
-          partialResults[index] ?? {
-            error: "Operation timed out before this URL could be fetched.",
-            url,
-          },
-      );
-
-      logger.verbose("Processed URL results:", finalResults);
-
-      if (timeoutId) clearTimeout(timeoutId);
-
-      if (finalResults.length > 0 && finalResults.every((r) => "error" in r)) {
-        const errorDetails = finalResults
-          .filter((r): r is ErrorResult => "error" in r && !!r.error)
-          .map((r) => `${r.url}: ${r.error}`)
-          .join(", ");
-
-        throw new Error(
-          `${finalResults.length > 1 ? `All ${finalResults.length} URLs` : `URL`} failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
+            return {
+              error: error instanceof Error ? error.message : String(error),
+              url,
+            };
+          }),
         );
-      }
 
-      return {
-        results: finalResults,
-      };
+        const timeoutPromise = new Promise<"timeout">((resolve) => {
+          timeoutId = setTimeout(() => {
+            logger.error("Timeout reached:", timeoutMs);
+            resolve("timeout");
+          }, timeoutMs);
+        });
+
+        const raced = await Promise.race([Promise.all(fetchPromises), timeoutPromise]);
+
+        if (raced === "timeout") {
+          throw new Error("Operation timed out before the URLs could be fetched.");
+        }
+
+        const finalResults: FetchResult[] = input.urls.map(
+          (url, index) =>
+            partialResults[index] ?? {
+              error: "Operation timed out before this URL could be fetched.",
+              url,
+            },
+        );
+
+        logger.verbose("Processed URL results:", finalResults);
+
+        if (finalResults.length > 0 && finalResults.every((r) => "error" in r)) {
+          const errorDetails = finalResults
+            .filter((r): r is ErrorResult => "error" in r && !!r.error)
+            .map((r) => `${r.url}: ${r.error}`)
+            .join(", ");
+
+          throw new Error(
+            `${finalResults.length > 1 ? `All ${finalResults.length} URLs` : `URL`} failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
+          );
+        }
+
+        return {
+          results: finalResults,
+        };
+      } finally {
+        if (timeoutId) clearTimeout(timeoutId);
+      }
     },
   });
