@@ -107,7 +107,7 @@ export const ChatItem = memo(
         <Button
           variant={isSelected ? "secondary" : "ghost"}
           className={cn(
-            "w-full justify-start py-2 pr-1 pl-2 transition-none",
+            "w-full justify-start py-2 pr-1 pl-2 mb-0.5 transition-none",
             isSelected && "border border-border",
           )}
           onClick={() => onSelectionToggle?.(id)}
