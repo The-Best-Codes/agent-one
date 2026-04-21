@@ -278,26 +278,19 @@ export const chatStorage = {
         "SELECT m.id, COALESCE(c.title, 'New chat') as title, m.messages FROM chat_messages m LEFT JOIN chat_metadata c ON c.id = m.id",
         [],
       );
-      await d.execute("BEGIN TRANSACTION", []);
-      try {
-        await d.execute("DELETE FROM chat_fts", []);
-        for (const row of rows) {
-          try {
-            const messages: UIMessage[] = JSON.parse(row.messages);
-            const content = extractTextFromMessages(messages);
-            await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
-              row.id,
-              row.title,
-              content,
-            ]);
-          } catch {
-            // skip malformed entries
-          }
+      await d.execute("DELETE FROM chat_fts", []);
+      for (const row of rows) {
+        try {
+          const messages: UIMessage[] = JSON.parse(row.messages);
+          const content = extractTextFromMessages(messages);
+          await d.execute("INSERT INTO chat_fts (chat_id, title, content) VALUES ($1, $2, $3)", [
+            row.id,
+            row.title,
+            content,
+          ]);
+        } catch {
+          // skip malformed entries
         }
-        await d.execute("COMMIT", []);
-      } catch (error) {
-        await d.execute("ROLLBACK", []);
-        throw error;
       }
     });
   },
