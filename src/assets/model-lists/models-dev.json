@@ -129,6 +129,24 @@
           "output": 65536
         }
       },
+      "grok-4.20-multi-agent-beta-0309": {
+        "id": "grok-4.20-multi-agent-beta-0309",
+        "name": "grok-4.20-multi-agent-beta-0309",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 6
+        },
+        "limit": {
+          "context": 2000000,
+          "output": 30000
+        }
+      },
       "kimi-k2-0905-preview": {
         "id": "kimi-k2-0905-preview",
         "name": "kimi-k2-0905-preview",
@@ -145,6 +163,24 @@
         "limit": {
           "context": 262144,
           "output": 262144
+        }
+      },
+      "claude-haiku-4-5": {
+        "id": "claude-haiku-4-5",
+        "name": "claude-haiku-4-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 5
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
         }
       },
       "claude-opus-4-5-20251101": {
@@ -201,6 +237,24 @@
           "output": 65536
         }
       },
+      "glm-5v-turbo": {
+        "id": "glm-5v-turbo",
+        "name": "glm-5v-turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.72,
+          "output": 3.2
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "mistral-large-2512": {
         "id": "mistral-large-2512",
         "name": "mistral-large-2512",
@@ -235,6 +289,24 @@
         "limit": {
           "context": 200000,
           "output": 131072
+        }
+      },
+      "claude-3-5-haiku-20241022": {
+        "id": "claude-3-5-haiku-20241022",
+        "name": "claude-3-5-haiku-20241022",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.8,
+          "output": 4
+        },
+        "limit": {
+          "context": 200000,
+          "output": 8192
         }
       },
       "doubao-seed-1-8-251215": {
@@ -273,6 +345,24 @@
           "output": 16384
         }
       },
+      "glm-5": {
+        "id": "glm-5",
+        "name": "glm-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 2.6
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "deepseek-chat": {
         "id": "deepseek-chat",
         "name": "Deepseek-Chat",
@@ -309,6 +399,24 @@
           "output": 128000
         }
       },
+      "claude-sonnet-4-6": {
+        "id": "claude-sonnet-4-6",
+        "name": "claude-sonnet-4-6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
+        }
+      },
       "gpt-5-thinking": {
         "id": "gpt-5-thinking",
         "name": "gpt-5-thinking",
@@ -325,6 +433,24 @@
         "limit": {
           "context": 400000,
           "output": 128000
+        }
+      },
+      "glm-4.7-flashx": {
+        "id": "glm-4.7-flashx",
+        "name": "glm-4.7-flashx",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.0715,
+          "output": 0.429
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
         }
       },
       "gemini-3-flash-preview": {
@@ -363,6 +489,50 @@
           "output": 32768
         }
       },
+      "grok-4.20-beta-0309-non-reasoning": {
+        "id": "grok-4.20-beta-0309-non-reasoning",
+        "name": "grok-4.20-beta-0309-non-reasoning",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 6
+        },
+        "limit": {
+          "context": 2000000,
+          "output": 30000
+        }
+      },
+      "claude-opus-4-7": {
+        "id": "claude-opus-4-7",
+        "name": "claude-opus-4-7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25,
+          "cache_read": 0.5,
+          "cache_write": 6.25,
+          "context_over_200k": {
+            "input": 10,
+            "output": 37.5,
+            "cache_read": 1,
+            "cache_write": 12.5
+          }
+        },
+        "limit": {
+          "context": 200000,
+          "output": 128000
+        }
+      },
       "gpt-5-mini": {
         "id": "gpt-5-mini",
         "name": "gpt-5-mini",
@@ -397,6 +567,24 @@
         "limit": {
           "context": 1000000,
           "output": 64000
+        }
+      },
+      "MiniMax-M2.7": {
+        "id": "MiniMax-M2.7",
+        "name": "MiniMax-M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2
+        },
+        "limit": {
+          "context": 204800,
+          "output": 131072
         }
       },
       "qwen3-max-2025-09-23": {
@@ -489,6 +677,24 @@
           "output": 30000
         }
       },
+      "claude-3-5-haiku-latest": {
+        "id": "claude-3-5-haiku-latest",
+        "name": "claude-3-5-haiku-latest",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.8,
+          "output": 4
+        },
+        "limit": {
+          "context": 200000,
+          "output": 8192
+        }
+      },
       "claude-opus-4-5-20251101-thinking": {
         "id": "claude-opus-4-5-20251101-thinking",
         "name": "claude-opus-4-5-20251101-thinking",
@@ -525,6 +731,24 @@
           "output": 128000
         }
       },
+      "gpt-5.4-mini": {
+        "id": "gpt-5.4-mini",
+        "name": "gpt-5.4-mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 4.5
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
+      },
       "gemini-3-pro-image-preview": {
         "id": "gemini-3-pro-image-preview",
         "name": "gemini-3-pro-image-preview",
@@ -543,6 +767,24 @@
           "output": 64000
         }
       },
+      "glm-5.1": {
+        "id": "glm-5.1",
+        "name": "glm-5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.86,
+          "output": 3.5
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "qwen-max-latest": {
         "id": "qwen-max-latest",
         "name": "Qwen-Max-Latest",
@@ -559,6 +801,24 @@
         "limit": {
           "context": 131072,
           "output": 8192
+        }
+      },
+      "gpt-5.4-nano": {
+        "id": "gpt-5.4-nano",
+        "name": "gpt-5.4-nano",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.25
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
         }
       },
       "gemini-2.5-flash-image": {
@@ -595,6 +855,24 @@
         "limit": {
           "context": 128000,
           "output": 98304
+        }
+      },
+      "gpt-5.4-mini-2026-03-17": {
+        "id": "gpt-5.4-mini-2026-03-17",
+        "name": "gpt-5.4-mini-2026-03-17",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 4.5
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
         }
       },
       "gemini-2.5-flash": {
@@ -649,6 +927,61 @@
         "limit": {
           "context": 256000,
           "output": 32000
+        }
+      },
+      "gemini-3.1-flash-image-preview": {
+        "id": "gemini-3.1-flash-image-preview",
+        "name": "gemini-3.1-flash-image-preview",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 60
+        },
+        "limit": {
+          "context": 131072,
+          "output": 32768
+        }
+      },
+      "MiniMax-M2.7-highspeed": {
+        "id": "MiniMax-M2.7-highspeed",
+        "name": "MiniMax-M2.7-highspeed",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 4.8
+        },
+        "limit": {
+          "context": 204800,
+          "output": 131072
+        }
+      },
+      "glm-4.5-x": {
+        "id": "glm-4.5-x",
+        "name": "glm-4.5-x",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.143,
+          "output": 2.29
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
         }
       },
       "MiniMax-M2.1": {
@@ -759,6 +1092,42 @@
           "output": 32000
         }
       },
+      "glm-4.5-air": {
+        "id": "glm-4.5-air",
+        "name": "glm-4.5-air",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1143,
+          "output": 0.286
+        },
+        "limit": {
+          "context": 128000,
+          "output": 98304
+        }
+      },
+      "glm-5-turbo": {
+        "id": "glm-5-turbo",
+        "name": "glm-5-turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.72,
+          "output": 3.2
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "qwen3-30b-a3b": {
         "id": "qwen3-30b-a3b",
         "name": "Qwen3-30B-A3B",
@@ -775,6 +1144,24 @@
         "limit": {
           "context": 128000,
           "output": 8192
+        }
+      },
+      "claude-opus-4-5": {
+        "id": "claude-opus-4-5",
+        "name": "claude-opus-4-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
         }
       },
       "glm-4.5v": {
@@ -813,6 +1200,24 @@
           "output": 131072
         }
       },
+      "claude-opus-4-6-thinking": {
+        "id": "claude-opus-4-6-thinking",
+        "name": "claude-opus-4-6-thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "gemini-2.5-flash-preview-09-2025": {
         "id": "gemini-2.5-flash-preview-09-2025",
         "name": "gemini-2.5-flash-preview-09-2025",
@@ -829,6 +1234,24 @@
         "limit": {
           "context": 1000000,
           "output": 65536
+        }
+      },
+      "claude-sonnet-4-6-thinking": {
+        "id": "claude-sonnet-4-6-thinking",
+        "name": "claude-sonnet-4-6-thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
         }
       },
       "glm-4.6v": {
@@ -921,6 +1344,42 @@
           "output": 128000
         }
       },
+      "gpt-5.4-nano-2026-03-17": {
+        "id": "gpt-5.4-nano-2026-03-17",
+        "name": "gpt-5.4-nano-2026-03-17",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.25
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
+      },
+      "claude-sonnet-4-20250514": {
+        "id": "claude-sonnet-4-20250514",
+        "name": "claude-sonnet-4-20250514",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
+        }
+      },
       "qwen3-coder-480b-a35b-instruct": {
         "id": "qwen3-coder-480b-a35b-instruct",
         "name": "qwen3-coder-480b-a35b-instruct",
@@ -937,6 +1396,24 @@
         "limit": {
           "context": 262144,
           "output": 65536
+        }
+      },
+      "claude-opus-4-6": {
+        "id": "claude-opus-4-6",
+        "name": "claude-opus-4-6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 25
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
         }
       },
       "doubao-seed-code-preview-251028": {
@@ -1029,6 +1506,24 @@
           "output": 16384
         }
       },
+      "claude-sonnet-4-5": {
+        "id": "claude-sonnet-4-5",
+        "name": "claude-sonnet-4-5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
+        }
+      },
       "gpt-5": {
         "id": "gpt-5",
         "name": "gpt-5",
@@ -1047,6 +1542,60 @@
           "output": 128000
         }
       },
+      "grok-4.20-beta-0309-reasoning": {
+        "id": "grok-4.20-beta-0309-reasoning",
+        "name": "grok-4.20-beta-0309-reasoning",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 6
+        },
+        "limit": {
+          "context": 2000000,
+          "output": 30000
+        }
+      },
+      "claude-opus-4-20250514": {
+        "id": "claude-opus-4-20250514",
+        "name": "claude-opus-4-20250514",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32000
+        }
+      },
+      "glm-for-coding": {
+        "id": "glm-for-coding",
+        "name": "glm-for-coding",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.086,
+          "output": 0.343
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
+        }
+      },
       "claude-sonnet-4-5-20250929-thinking": {
         "id": "claude-sonnet-4-5-20250929-thinking",
         "name": "claude-sonnet-4-5-20250929-thinking",
@@ -1063,6 +1612,24 @@
         "limit": {
           "context": 200000,
           "output": 64000
+        }
+      },
+      "glm-4.5-airx": {
+        "id": "glm-4.5-airx",
+        "name": "glm-4.5-airx",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.572,
+          "output": 1.714
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
         }
       },
       "gpt-4.1": {
@@ -3898,6 +4465,24 @@
           "output": 16384
         }
       },
+      "qwen-3.6-plus": {
+        "id": "qwen-3.6-plus",
+        "name": "Qwen 3.6 Plus",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.45,
+          "output": 2.7
+        },
+        "limit": {
+          "context": 991800,
+          "output": 65536
+        }
+      },
       "Llama-3.3-70B-ArliAI-RPMax-v1.4": {
         "id": "Llama-3.3-70B-ArliAI-RPMax-v1.4",
         "name": "Llama 3.3 70B RPMax v1.4",
@@ -6481,6 +7066,24 @@
           "output": 65536
         }
       },
+      "qwen3.6-max-preview": {
+        "id": "qwen3.6-max-preview",
+        "name": "Qwen3.6 Max Preview",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.3,
+          "output": 7.8
+        },
+        "limit": {
+          "context": 245800,
+          "output": 65536
+        }
+      },
       "Llama-3.3-70B-Sapphira-0.2": {
         "id": "Llama-3.3-70B-Sapphira-0.2",
         "name": "Llama 3.3 70B Sapphira 0.2",
@@ -6992,6 +7595,24 @@
           "context": 32000,
           "input": 32000,
           "output": 8192
+        }
+      },
+      "alibaba/qwen3.6-flash": {
+        "id": "alibaba/qwen3.6-flash",
+        "name": "Qwen3.6 Flash",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.19,
+          "output": 1.16
+        },
+        "limit": {
+          "context": 991800,
+          "output": 65536
         }
       },
       "inflection/inflection-3-pi": {
@@ -11079,6 +11700,24 @@
           "output": 131072
         }
       },
+      "qwen/Qwen3.6-35B-A3B:thinking": {
+        "id": "qwen/Qwen3.6-35B-A3B:thinking",
+        "name": "Qwen3.6 35B A3B Thinking",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.29,
+          "output": 1.74
+        },
+        "limit": {
+          "context": 262144,
+          "output": 16384
+        }
+      },
       "qwen/qwen3.5-397b-a17b": {
         "id": "qwen/qwen3.5-397b-a17b",
         "name": "Qwen3.5 397B A17B",
@@ -11096,6 +11735,24 @@
           "context": 258048,
           "input": 258048,
           "output": 65536
+        }
+      },
+      "qwen/Qwen3.6-35B-A3B": {
+        "id": "qwen/Qwen3.6-35B-A3B",
+        "name": "Qwen3.6 35B A3B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.29,
+          "output": 1.74
+        },
+        "limit": {
+          "context": 262144,
+          "output": 16384
         }
       },
       "unsloth/gemma-3-1b-it": {
@@ -11438,6 +12095,42 @@
           "context": 256000,
           "input": 256000,
           "output": 16384
+        }
+      },
+      "moonshotai/kimi-k2.6": {
+        "id": "moonshotai/kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.53,
+          "output": 2.73
+        },
+        "limit": {
+          "context": 256000,
+          "output": 65536
+        }
+      },
+      "moonshotai/kimi-k2.6:thinking": {
+        "id": "moonshotai/kimi-k2.6:thinking",
+        "name": "Kimi K2.6 Thinking",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.53,
+          "output": 2.73
+        },
+        "limit": {
+          "context": 256000,
+          "output": 65536
         }
       },
       "moonshotai/Kimi-K2-Instruct-0905": {
@@ -18128,25 +18821,6 @@
           "output": 2000
         }
       },
-      "google/gemini-2.5-pro": {
-        "id": "google/gemini-2.5-pro",
-        "name": "Gemini 2.5 Pro",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.25,
-          "output": 10,
-          "cache_read": 0.31
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
       "google/gemma-2-9b-it": {
         "id": "google/gemma-2-9b-it",
         "name": "Gemma 2 9B",
@@ -18438,6 +19112,25 @@
         "limit": {
           "context": 262144,
           "output": 16384
+        }
+      },
+      "moonshotai/kimi-k2.6": {
+        "id": "moonshotai/kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
         }
       },
       "moonshotai/kimi-k2-0905:exacto": {
@@ -18787,6 +19480,30 @@
           "output": 128000
         }
       },
+      "google/gemini-2.5-pro": {
+        "id": "google/gemini-2.5-pro",
+        "name": "Gemini 2.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.25,
+          "output": 10,
+          "cache_read": 0.125,
+          "context_over_200k": {
+            "input": 2.5,
+            "output": 15,
+            "cache_read": 0.25
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
       "anthropic/claude-opus-4": {
         "id": "anthropic/claude-opus-4",
         "name": "Claude Opus 4",
@@ -18835,7 +19552,7 @@
     "models": {
       "hy3-preview": {
         "id": "hy3-preview",
-        "name": "HY3 Preview",
+        "name": "Hy3 preview",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -18969,6 +19686,25 @@
         "limit": {
           "context": 163840,
           "output": 163840
+        }
+      },
+      "accounts/fireworks/models/kimi-k2p6": {
+        "id": "accounts/fireworks/models/kimi-k2p6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262000,
+          "output": 262000
         }
       },
       "accounts/fireworks/models/kimi-k2-instruct": {
@@ -19182,6 +19918,26 @@
     "id": "kimi-for-coding",
     "name": "Kimi For Coding",
     "models": {
+      "k2p6": {
+        "id": "k2p6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 262144,
+          "output": 32768
+        }
+      },
       "k2p5": {
         "id": "k2p5",
         "name": "Kimi K2.5",
@@ -19383,6 +20139,25 @@
         "limit": {
           "context": 204800,
           "output": 131072
+        }
+      },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Kimi K2.6 (3x limits)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.32,
+          "output": 1.34,
+          "cache_read": 0.054
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
         }
       },
       "minimax-m2.5": {
@@ -23084,6 +23859,25 @@
           "output": 262144
         }
       },
+      "moonshotai/Kimi-K2.6": {
+        "id": "moonshotai/Kimi-K2.6",
+        "name": "Kimi-K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "moonshotai/Kimi-K2-Instruct": {
         "id": "moonshotai/Kimi-K2-Instruct",
         "name": "Kimi-K2-Instruct",
@@ -24580,6 +25374,25 @@
         "limit": {
           "context": 262000,
           "output": 64000
+        }
+      },
+      "moonshotai/kimi-k2.6": {
+        "id": "moonshotai/kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262140,
+          "output": 262140
         }
       },
       "moonshotai/kimi-k2-thinking": {
@@ -28539,6 +29352,42 @@
     "id": "deepinfra",
     "name": "Deep Infra",
     "models": {
+      "Qwen/Qwen3.5-397B-A17B": {
+        "id": "Qwen/Qwen3.5-397B-A17B",
+        "name": "Qwen 3.5 397B A17B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.54,
+          "output": 3.4
+        },
+        "limit": {
+          "context": 262144,
+          "output": 81920
+        }
+      },
+      "Qwen/Qwen3.5-35B-A3B": {
+        "id": "Qwen/Qwen3.5-35B-A3B",
+        "name": "Qwen 3.5 35B A3B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 0.95
+        },
+        "limit": {
+          "context": 262144,
+          "output": 81920
+        }
+      },
       "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo": {
         "id": "Qwen/Qwen3-Coder-480B-A35B-Instruct-Turbo",
         "name": "Qwen3 Coder 480B A35B Instruct Turbo",
@@ -28573,6 +29422,24 @@
         "limit": {
           "context": 262144,
           "output": 66536
+        }
+      },
+      "Qwen/Qwen3.6-35B-A3B": {
+        "id": "Qwen/Qwen3.6-35B-A3B",
+        "name": "Qwen3.6 35B A3B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1
+        },
+        "limit": {
+          "context": 262144,
+          "output": 81920
         }
       },
       "zai-org/GLM-4.7-Flash": {
@@ -35961,6 +36828,25 @@
           "output": 26215
         }
       },
+      "moonshotai/kimi-k2.6": {
+        "id": "moonshotai/kimi-k2.6",
+        "name": "MoonshotAI: Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "moonshotai/kimi-k2": {
         "id": "moonshotai/kimi-k2",
         "name": "MoonshotAI: Kimi K2 0711",
@@ -37622,6 +38508,25 @@
           "input": 0.6,
           "output": 3,
           "cache_read": 0.1
+        },
+        "limit": {
+          "context": 256000,
+          "output": 256000
+        }
+      },
+      "workers-ai/@cf/moonshotai/kimi-k2.6": {
+        "id": "workers-ai/@cf/moonshotai/kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
         },
         "limit": {
           "context": 256000,
@@ -39348,6 +40253,25 @@
     "id": "opencode",
     "name": "OpenCode Zen",
     "models": {
+      "minimax-m2.7": {
+        "id": "minimax-m2.7",
+        "name": "MiniMax M2.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2,
+          "cache_read": 0.06
+        },
+        "limit": {
+          "context": 204800,
+          "output": 131072
+        }
+      },
       "gpt-5.1-codex-max": {
         "id": "gpt-5.1-codex-max",
         "name": "GPT-5.1 Codex Max",
@@ -40023,6 +40947,24 @@
           "output": 131072
         }
       },
+      "ling-2.6-flash-free": {
+        "id": "ling-2.6-flash-free",
+        "name": "Ling 2.6 Flash Free",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 262100,
+          "output": 32800
+        }
+      },
       "gemini-3-pro": {
         "id": "gemini-3-pro",
         "name": "Gemini 3 Pro",
@@ -40044,6 +40986,25 @@
         },
         "limit": {
           "context": 1048576,
+          "output": 65536
+        }
+      },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262144,
           "output": 65536
         }
       },
@@ -45744,6 +46705,20 @@
           "output": 65536
         }
       },
+      "kimi-k2.6:cloud": {
+        "id": "kimi-k2.6:cloud",
+        "name": "kimi-k2.6:cloud",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "nemotron-3-nano:30b": {
         "id": "nemotron-3-nano:30b",
         "name": "nemotron-3-nano:30b",
@@ -46194,26 +47169,6 @@
     "id": "amazon-bedrock",
     "name": "Amazon Bedrock",
     "models": {
-      "anthropic.claude-opus-4-1-20250805-v1:0": {
-        "id": "anthropic.claude-opus-4-1-20250805-v1:0",
-        "name": "Claude Opus 4.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 75,
-          "cache_read": 1.5,
-          "cache_write": 18.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 32000
-        }
-      },
       "anthropic.claude-3-5-sonnet-20241022-v2:0": {
         "id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
         "name": "Claude Sonnet 3.5 v2",
@@ -46342,26 +47297,6 @@
           "output": 4096
         }
       },
-      "anthropic.claude-3-5-sonnet-20240620-v1:0": {
-        "id": "anthropic.claude-3-5-sonnet-20240620-v1:0",
-        "name": "Claude Sonnet 3.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 8192
-        }
-      },
       "mistral.ministral-3-3b-instruct": {
         "id": "mistral.ministral-3-3b-instruct",
         "name": "Ministral 3 3B",
@@ -46396,26 +47331,6 @@
         "limit": {
           "context": 1000000,
           "output": 16384
-        }
-      },
-      "eu.anthropic.claude-sonnet-4-20250514-v1:0": {
-        "id": "eu.anthropic.claude-sonnet-4-20250514-v1:0",
-        "name": "Claude Sonnet 4 (EU)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
         }
       },
       "anthropic.claude-sonnet-4-5-20250929-v1:0": {
@@ -46454,26 +47369,6 @@
         "limit": {
           "context": 256000,
           "output": 8192
-        }
-      },
-      "us.anthropic.claude-opus-4-20250514-v1:0": {
-        "id": "us.anthropic.claude-opus-4-20250514-v1:0",
-        "name": "Claude Opus 4 (US)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 75,
-          "cache_read": 1.5,
-          "cache_write": 18.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 32000
         }
       },
       "global.anthropic.claude-opus-4-5-20251101-v1:0": {
@@ -46724,26 +47619,6 @@
           "output": 64000
         }
       },
-      "anthropic.claude-sonnet-4-6": {
-        "id": "anthropic.claude-sonnet-4-6",
-        "name": "Claude Sonnet 4.6",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 1000000,
-          "output": 64000
-        }
-      },
       "openai.gpt-oss-20b-1:0": {
         "id": "openai.gpt-oss-20b-1:0",
         "name": "gpt-oss-20b",
@@ -46760,26 +47635,6 @@
         "limit": {
           "context": 128000,
           "output": 4096
-        }
-      },
-      "us.anthropic.claude-sonnet-4-20250514-v1:0": {
-        "id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
-        "name": "Claude Sonnet 4 (US)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
         }
       },
       "zai.glm-5": {
@@ -47005,46 +47860,6 @@
           "output": 4096
         }
       },
-      "global.anthropic.claude-sonnet-4-6": {
-        "id": "global.anthropic.claude-sonnet-4-6",
-        "name": "Claude Sonnet 4.6 (Global)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 1000000,
-          "output": 64000
-        }
-      },
-      "us.anthropic.claude-sonnet-4-6": {
-        "id": "us.anthropic.claude-sonnet-4-6",
-        "name": "Claude Sonnet 4.6 (US)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 1000000,
-          "output": 64000
-        }
-      },
       "anthropic.claude-opus-4-7": {
         "id": "anthropic.claude-opus-4-7",
         "name": "Claude Opus 4.7",
@@ -47137,26 +47952,6 @@
         "limit": {
           "context": 3500000,
           "output": 16384
-        }
-      },
-      "us.anthropic.claude-opus-4-1-20250805-v1:0": {
-        "id": "us.anthropic.claude-opus-4-1-20250805-v1:0",
-        "name": "Claude Opus 4.1 (US)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 75,
-          "cache_read": 1.5,
-          "cache_write": 18.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 32000
         }
       },
       "deepseek.v3-v1:0": {
@@ -47305,26 +48100,6 @@
           "output": 4096
         }
       },
-      "global.anthropic.claude-sonnet-4-20250514-v1:0": {
-        "id": "global.anthropic.claude-sonnet-4-20250514-v1:0",
-        "name": "Claude Sonnet 4 (Global)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
-        }
-      },
       "deepseek.r1-v1:0": {
         "id": "deepseek.r1-v1:0",
         "name": "DeepSeek-R1",
@@ -47377,26 +48152,6 @@
         "limit": {
           "context": 128000,
           "output": 4096
-        }
-      },
-      "eu.anthropic.claude-sonnet-4-6": {
-        "id": "eu.anthropic.claude-sonnet-4-6",
-        "name": "Claude Sonnet 4.6 (EU)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 1000000,
-          "output": 64000
         }
       },
       "openai.gpt-oss-120b-1:0": {
@@ -47547,26 +48302,6 @@
           "output": 64000
         }
       },
-      "anthropic.claude-opus-4-20250514-v1:0": {
-        "id": "anthropic.claude-opus-4-20250514-v1:0",
-        "name": "Claude Opus 4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 75,
-          "cache_read": 1.5,
-          "cache_write": 18.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 32000
-        }
-      },
       "eu.anthropic.claude-opus-4-5-20251101-v1:0": {
         "id": "eu.anthropic.claude-opus-4-5-20251101-v1:0",
         "name": "Claude Opus 4.5 (EU)",
@@ -47581,26 +48316,6 @@
           "output": 25,
           "cache_read": 0.5,
           "cache_write": 6.25
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
-        }
-      },
-      "anthropic.claude-sonnet-4-20250514-v1:0": {
-        "id": "anthropic.claude-sonnet-4-20250514-v1:0",
-        "name": "Claude Sonnet 4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
         },
         "limit": {
           "context": 200000,
@@ -47825,6 +48540,46 @@
           "output": 8192
         }
       },
+      "anthropic.claude-opus-4-1-20250805-v1:0": {
+        "id": "anthropic.claude-opus-4-1-20250805-v1:0",
+        "name": "Claude Opus 4.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 75,
+          "cache_read": 1.5,
+          "cache_write": 18.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32000
+        }
+      },
+      "anthropic.claude-3-5-sonnet-20240620-v1:0": {
+        "id": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "name": "Claude Sonnet 3.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 8192
+        }
+      },
       "eu.anthropic.claude-opus-4-6-v1": {
         "id": "eu.anthropic.claude-opus-4-6-v1",
         "name": "Claude Opus 4.6 (EU)",
@@ -47843,6 +48598,126 @@
         "limit": {
           "context": 1000000,
           "output": 128000
+        }
+      },
+      "eu.anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "eu.anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4 (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
+        }
+      },
+      "us.anthropic.claude-opus-4-20250514-v1:0": {
+        "id": "us.anthropic.claude-opus-4-20250514-v1:0",
+        "name": "Claude Opus 4 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 75,
+          "cache_read": 1.5,
+          "cache_write": 18.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32000
+        }
+      },
+      "anthropic.claude-sonnet-4-6": {
+        "id": "anthropic.claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
+        }
+      },
+      "us.anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
+        }
+      },
+      "global.anthropic.claude-sonnet-4-6": {
+        "id": "global.anthropic.claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6 (Global)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
+        }
+      },
+      "us.anthropic.claude-sonnet-4-6": {
+        "id": "us.anthropic.claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
         }
       },
       "global.anthropic.claude-opus-4-6-v1": {
@@ -47883,6 +48758,106 @@
         "limit": {
           "context": 1000000,
           "output": 128000
+        }
+      },
+      "us.anthropic.claude-opus-4-1-20250805-v1:0": {
+        "id": "us.anthropic.claude-opus-4-1-20250805-v1:0",
+        "name": "Claude Opus 4.1 (US)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 75,
+          "cache_read": 1.5,
+          "cache_write": 18.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32000
+        }
+      },
+      "global.anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "global.anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4 (Global)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
+        }
+      },
+      "eu.anthropic.claude-sonnet-4-6": {
+        "id": "eu.anthropic.claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6 (EU)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
+        }
+      },
+      "anthropic.claude-opus-4-20250514-v1:0": {
+        "id": "anthropic.claude-opus-4-20250514-v1:0",
+        "name": "Claude Opus 4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 75,
+          "cache_read": 1.5,
+          "cache_write": 18.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32000
+        }
+      },
+      "anthropic.claude-sonnet-4-20250514-v1:0": {
+        "id": "anthropic.claude-sonnet-4-20250514-v1:0",
+        "name": "Claude Sonnet 4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
         }
       },
       "anthropic.claude-opus-4-6-v1": {
@@ -48721,7 +49696,7 @@
           "context_over_200k": {
             "input": 4.53,
             "output": 13.6,
-            "cache_read": 0.23
+            "cache_read": 0.45
           }
         },
         "limit": {
@@ -48764,6 +49739,24 @@
         "limit": {
           "context": 200000,
           "output": 32768
+        }
+      },
+      "gemma-4-uncensored": {
+        "id": "gemma-4-uncensored",
+        "name": "Gemma 4 Uncensored",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1625,
+          "output": 0.5
+        },
+        "limit": {
+          "context": 256000,
+          "output": 8192
         }
       },
       "grok-41-fast": {
@@ -48858,7 +49851,7 @@
           "context_over_200k": {
             "input": 4.53,
             "output": 13.6,
-            "cache_read": 0.23
+            "cache_read": 0.45
           }
         },
         "limit": {
@@ -49050,6 +50043,24 @@
         "limit": {
           "context": 400000,
           "output": 128000
+        }
+      },
+      "venice-uncensored-1-2": {
+        "id": "venice-uncensored-1-2",
+        "name": "Venice Uncensored 1.2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 0.9
+        },
+        "limit": {
+          "context": 128000,
+          "output": 8192
         }
       },
       "openai-gpt-52": {
@@ -49341,7 +50352,7 @@
           ]
         },
         "cost": {
-          "input": 0.05,
+          "input": 0.1,
           "output": 0.15
         },
         "limit": {
@@ -49701,6 +50712,25 @@
         "limit": {
           "context": 1000000,
           "output": 32768
+        }
+      },
+      "kimi-k2-6": {
+        "id": "kimi-k2-6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.56,
+          "output": 3.5,
+          "cache_read": 0.11
+        },
+        "limit": {
+          "context": 256000,
+          "output": 65536
         }
       },
       "kimi-k2-thinking": {
@@ -51498,6 +52528,25 @@
           "output": 262144
         }
       },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "kimi-k2-thinking-turbo": {
         "id": "kimi-k2-thinking-turbo",
         "name": "Kimi K2 Thinking Turbo",
@@ -51725,44 +52774,6 @@
           "output": 8192
         }
       },
-      "grok-4-fast-non-reasoning": {
-        "id": "grok-4-fast-non-reasoning",
-        "name": "Grok 4 Fast (Non-Reasoning)",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 0.5,
-          "cache_read": 0.05
-        },
-        "limit": {
-          "context": 2000000,
-          "output": 30000
-        }
-      },
-      "grok-3": {
-        "id": "grok-3",
-        "name": "Grok 3",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.75
-        },
-        "limit": {
-          "context": 131072,
-          "output": 8192
-        }
-      },
       "llama-4-maverick-17b-128e-instruct-fp8": {
         "id": "llama-4-maverick-17b-128e-instruct-fp8",
         "name": "Llama 4 Maverick 17B 128E Instruct FP8",
@@ -51820,25 +52831,6 @@
           "output": 128000
         }
       },
-      "gpt-4.1-mini": {
-        "id": "gpt-4.1-mini",
-        "name": "GPT-4.1 mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.4,
-          "output": 1.6,
-          "cache_read": 0.1
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
-        }
-      },
       "kimi-k2-thinking": {
         "id": "kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
@@ -51856,25 +52848,6 @@
         "limit": {
           "context": 262144,
           "output": 262144
-        }
-      },
-      "gpt-4.1": {
-        "id": "gpt-4.1",
-        "name": "GPT-4.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 8,
-          "cache_read": 0.5
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
         }
       },
       "deepseek-r1-0528": {
@@ -52022,24 +52995,6 @@
           "output": 4096
         }
       },
-      "cohere-command-r-plus-08-2024": {
-        "id": "cohere-command-r-plus-08-2024",
-        "name": "Command R+",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.5,
-          "output": 10
-        },
-        "limit": {
-          "context": 128000,
-          "output": 4000
-        }
-      },
       "gpt-3.5-turbo-0613": {
         "id": "gpt-3.5-turbo-0613",
         "name": "GPT-3.5 Turbo 0613",
@@ -52076,43 +53031,6 @@
           "output": 4096
         }
       },
-      "gpt-4o": {
-        "id": "gpt-4o",
-        "name": "GPT-4o",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.5,
-          "output": 10,
-          "cache_read": 1.25
-        },
-        "limit": {
-          "context": 128000,
-          "output": 16384
-        }
-      },
-      "gpt-5-pro": {
-        "id": "gpt-5-pro",
-        "name": "GPT-5 Pro",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 120
-        },
-        "limit": {
-          "context": 400000,
-          "output": 272000
-        }
-      },
       "deepseek-v3.2": {
         "id": "deepseek-v3.2",
         "name": "DeepSeek-V3.2",
@@ -52129,64 +53047,6 @@
         "limit": {
           "context": 128000,
           "output": 128000
-        }
-      },
-      "o3": {
-        "id": "o3",
-        "name": "o3",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 8,
-          "cache_read": 0.5
-        },
-        "limit": {
-          "context": 200000,
-          "output": 100000
-        }
-      },
-      "grok-3-mini": {
-        "id": "grok-3-mini",
-        "name": "Grok 3 Mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.3,
-          "output": 0.5,
-          "reasoning": 0.5,
-          "cache_read": 0.075
-        },
-        "limit": {
-          "context": 131072,
-          "output": 8192
-        }
-      },
-      "gpt-4.1-nano": {
-        "id": "gpt-4.1-nano",
-        "name": "GPT-4.1 nano",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.1,
-          "output": 0.4,
-          "cache_read": 0.03
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
         }
       },
       "phi-3-small-128k-instruct": {
@@ -52336,26 +53196,6 @@
           "output": 4096
         }
       },
-      "grok-4": {
-        "id": "grok-4",
-        "name": "Grok 4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "reasoning": 15,
-          "cache_read": 0.75
-        },
-        "limit": {
-          "context": 256000,
-          "output": 64000
-        }
-      },
       "meta-llama-3.1-70b-instruct": {
         "id": "meta-llama-3.1-70b-instruct",
         "name": "Meta-Llama-3.1-70B-Instruct",
@@ -52426,25 +53266,6 @@
         "limit": {
           "context": 8191,
           "output": 1536
-        }
-      },
-      "o3-mini": {
-        "id": "o3-mini",
-        "name": "o3-mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.1,
-          "output": 4.4,
-          "cache_read": 0.55
-        },
-        "limit": {
-          "context": 200000,
-          "output": 100000
         }
       },
       "gpt-3.5-turbo-1106": {
@@ -52579,25 +53400,6 @@
           "output": 128000
         }
       },
-      "grok-code-fast-1": {
-        "id": "grok-code-fast-1",
-        "name": "Grok Code Fast 1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 1.5,
-          "cache_read": 0.02
-        },
-        "limit": {
-          "context": 256000,
-          "output": 10000
-        }
-      },
       "cohere-embed-v3-multilingual": {
         "id": "cohere-embed-v3-multilingual",
         "name": "Embed v3 Multilingual",
@@ -52709,25 +53511,6 @@
           "output": 128000
         }
       },
-      "o4-mini": {
-        "id": "o4-mini",
-        "name": "o4-mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.1,
-          "output": 4.4,
-          "cache_read": 0.28
-        },
-        "limit": {
-          "context": 200000,
-          "output": 100000
-        }
-      },
       "gpt-4-turbo-vision": {
         "id": "gpt-4-turbo-vision",
         "name": "GPT-4 Turbo Vision",
@@ -52819,43 +53602,6 @@
         "limit": {
           "context": 256000,
           "output": 8000
-        }
-      },
-      "cohere-command-r-08-2024": {
-        "id": "cohere-command-r-08-2024",
-        "name": "Command R",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.6
-        },
-        "limit": {
-          "context": 128000,
-          "output": 4000
-        }
-      },
-      "gpt-4o-mini": {
-        "id": "gpt-4o-mini",
-        "name": "GPT-4o mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.6,
-          "cache_read": 0.08
-        },
-        "limit": {
-          "context": 128000,
-          "output": 16384
         }
       },
       "mistral-large-2411": {
@@ -52965,24 +53711,6 @@
         "limit": {
           "context": 8192,
           "output": 1536
-        }
-      },
-      "gpt-4-turbo": {
-        "id": "gpt-4-turbo",
-        "name": "GPT-4 Turbo",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 10,
-          "output": 30
-        },
-        "limit": {
-          "context": 128000,
-          "output": 4096
         }
       },
       "gpt-5.3-codex": {
@@ -53405,6 +54133,373 @@
         "limit": {
           "context": 128000,
           "output": 128000
+        }
+      },
+      "grok-4-fast-non-reasoning": {
+        "id": "grok-4-fast-non-reasoning",
+        "name": "Grok 4 Fast (Non-Reasoning)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 0.5,
+          "cache_read": 0.05
+        },
+        "limit": {
+          "context": 2000000,
+          "output": 30000
+        }
+      },
+      "grok-3": {
+        "id": "grok-3",
+        "name": "Grok 3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.75
+        },
+        "limit": {
+          "context": 131072,
+          "output": 8192
+        }
+      },
+      "gpt-4.1-mini": {
+        "id": "gpt-4.1-mini",
+        "name": "GPT-4.1 mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 1.6,
+          "cache_read": 0.1
+        },
+        "limit": {
+          "context": 1047576,
+          "output": 32768
+        }
+      },
+      "gpt-4.1": {
+        "id": "gpt-4.1",
+        "name": "GPT-4.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 8,
+          "cache_read": 0.5
+        },
+        "limit": {
+          "context": 1047576,
+          "output": 32768
+        }
+      },
+      "cohere-command-r-plus-08-2024": {
+        "id": "cohere-command-r-plus-08-2024",
+        "name": "Command R+",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 10
+        },
+        "limit": {
+          "context": 128000,
+          "output": 4000
+        }
+      },
+      "gpt-4o": {
+        "id": "gpt-4o",
+        "name": "GPT-4o",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 10,
+          "cache_read": 1.25
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
+      "gpt-5-pro": {
+        "id": "gpt-5-pro",
+        "name": "GPT-5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 120
+        },
+        "limit": {
+          "context": 400000,
+          "output": 272000
+        }
+      },
+      "o3": {
+        "id": "o3",
+        "name": "o3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 8,
+          "cache_read": 0.5
+        },
+        "limit": {
+          "context": 200000,
+          "output": 100000
+        }
+      },
+      "grok-3-mini": {
+        "id": "grok-3-mini",
+        "name": "Grok 3 Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 0.5,
+          "reasoning": 0.5,
+          "cache_read": 0.075
+        },
+        "limit": {
+          "context": 131072,
+          "output": 8192
+        }
+      },
+      "gpt-4.1-nano": {
+        "id": "gpt-4.1-nano",
+        "name": "GPT-4.1 nano",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1,
+          "output": 0.4,
+          "cache_read": 0.03
+        },
+        "limit": {
+          "context": 1047576,
+          "output": 32768
+        }
+      },
+      "grok-4": {
+        "id": "grok-4",
+        "name": "Grok 4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "reasoning": 15,
+          "cache_read": 0.75
+        },
+        "limit": {
+          "context": 256000,
+          "output": 64000
+        }
+      },
+      "o3-mini": {
+        "id": "o3-mini",
+        "name": "o3-mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.1,
+          "output": 4.4,
+          "cache_read": 0.55
+        },
+        "limit": {
+          "context": 200000,
+          "output": 100000
+        }
+      },
+      "grok-code-fast-1": {
+        "id": "grok-code-fast-1",
+        "name": "Grok Code Fast 1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.5,
+          "cache_read": 0.02
+        },
+        "limit": {
+          "context": 256000,
+          "output": 10000
+        }
+      },
+      "o4-mini": {
+        "id": "o4-mini",
+        "name": "o4-mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.1,
+          "output": 4.4,
+          "cache_read": 0.28
+        },
+        "limit": {
+          "context": 200000,
+          "output": 100000
+        }
+      },
+      "cohere-command-r-08-2024": {
+        "id": "cohere-command-r-08-2024",
+        "name": "Command R",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6
+        },
+        "limit": {
+          "context": 128000,
+          "output": 4000
+        }
+      },
+      "gpt-4o-mini": {
+        "id": "gpt-4o-mini",
+        "name": "GPT-4o mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6,
+          "cache_read": 0.08
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
+      "gpt-4-turbo": {
+        "id": "gpt-4-turbo",
+        "name": "GPT-4 Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 10,
+          "output": 30
+        },
+        "limit": {
+          "context": 128000,
+          "output": 4096
+        }
+      }
+    }
+  },
+  "wafer.ai": {
+    "id": "wafer.ai",
+    "name": "Wafer",
+    "models": {
+      "Qwen3.5-397B-A17B": {
+        "id": "Qwen3.5-397B-A17B",
+        "name": "Qwen3.5 397B A17B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
+        }
+      },
+      "GLM-5.1": {
+        "id": "GLM-5.1",
+        "name": "GLM-5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 202752,
+          "output": 131072
         }
       }
     }
@@ -58313,25 +59408,6 @@
           "output": 128000
         }
       },
-      "openai/gpt-5.2-chat": {
-        "id": "openai/gpt-5.2-chat",
-        "name": "GPT-5.2 Chat",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.75,
-          "output": 14,
-          "cache_read": 0.175
-        },
-        "limit": {
-          "context": 128000,
-          "output": 16384
-        }
-      },
       "openai/gpt-5-chat": {
         "id": "openai/gpt-5-chat",
         "name": "GPT-5 Chat (latest)",
@@ -58598,24 +59674,6 @@
           "output": 128000
         }
       },
-      "openai/gpt-5-pro": {
-        "id": "openai/gpt-5-pro",
-        "name": "GPT-5 Pro",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 120
-        },
-        "limit": {
-          "context": 400000,
-          "output": 272000
-        }
-      },
       "openai/gpt-5": {
         "id": "openai/gpt-5",
         "name": "GPT-5",
@@ -58635,25 +59693,6 @@
         "limit": {
           "context": 400000,
           "output": 128000
-        }
-      },
-      "openai/gpt-4.1": {
-        "id": "openai/gpt-4.1",
-        "name": "GPT-4.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 8,
-          "cache_read": 0.5
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
         }
       },
       "openai/gpt-4.1-mini": {
@@ -58820,46 +59859,6 @@
           "output": 64000
         }
       },
-      "anthropic/claude-opus-4-1": {
-        "id": "anthropic/claude-opus-4-1",
-        "name": "Claude Opus 4.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 75,
-          "cache_read": 1.5,
-          "cache_write": 18.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 32000
-        }
-      },
-      "anthropic/claude-sonnet-4": {
-        "id": "anthropic/claude-sonnet-4",
-        "name": "Claude Sonnet 4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
-        },
-        "limit": {
-          "context": 200000,
-          "output": 64000
-        }
-      },
       "anthropic/claude-opus-4-5": {
         "id": "anthropic/claude-opus-4-5",
         "name": "Claude Opus 4.5",
@@ -58926,9 +59925,9 @@
           "output": 128000
         }
       },
-      "anthropic/claude-sonnet-4-5": {
-        "id": "anthropic/claude-sonnet-4-5",
-        "name": "Claude Sonnet 4.5",
+      "openai/gpt-5.2-chat": {
+        "id": "openai/gpt-5.2-chat",
+        "name": "GPT-5.2 Chat",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -58936,14 +59935,13 @@
           ]
         },
         "cost": {
-          "input": 3,
-          "output": 15,
-          "cache_read": 0.3,
-          "cache_write": 3.75
+          "input": 1.75,
+          "output": 14,
+          "cache_read": 0.175
         },
         "limit": {
-          "context": 1000000,
-          "output": 64000
+          "context": 128000,
+          "output": 16384
         }
       },
       "openai/gpt-5.2": {
@@ -58990,6 +59988,43 @@
           "output": 128000
         }
       },
+      "openai/gpt-5-pro": {
+        "id": "openai/gpt-5-pro",
+        "name": "GPT-5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 120
+        },
+        "limit": {
+          "context": 400000,
+          "output": 272000
+        }
+      },
+      "openai/gpt-4.1": {
+        "id": "openai/gpt-4.1",
+        "name": "GPT-4.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 8,
+          "cache_read": 0.5
+        },
+        "limit": {
+          "context": 1047576,
+          "output": 32768
+        }
+      },
       "google/gemini-2.5-pro": {
         "id": "google/gemini-2.5-pro",
         "name": "Gemini 2.5 Pro",
@@ -59003,11 +60038,76 @@
           "input": 1.25,
           "output": 10,
           "cache_read": 0.31,
-          "cache_write": 2.375
+          "cache_write": 2.375,
+          "context_over_200k": {
+            "input": 2.5,
+            "output": 15,
+            "cache_read": 0.25
+          }
         },
         "limit": {
           "context": 1048576,
           "output": 65536
+        }
+      },
+      "anthropic/claude-opus-4-1": {
+        "id": "anthropic/claude-opus-4-1",
+        "name": "Claude Opus 4.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 75,
+          "cache_read": 1.5,
+          "cache_write": 18.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 32000
+        }
+      },
+      "anthropic/claude-sonnet-4": {
+        "id": "anthropic/claude-sonnet-4",
+        "name": "Claude Sonnet 4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 200000,
+          "output": 64000
+        }
+      },
+      "anthropic/claude-sonnet-4-5": {
+        "id": "anthropic/claude-sonnet-4-5",
+        "name": "Claude Sonnet 4.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
         }
       }
     }
@@ -61041,6 +62141,26 @@
         "limit": {
           "context": 198000,
           "output": 198000
+        }
+      },
+      "claude-opus4-7": {
+        "id": "claude-opus4-7",
+        "name": "Claude Opus 4.7",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5.6,
+          "output": 27.99,
+          "cache_read": 0.56,
+          "cache_write": 6.99
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
         }
       },
       "glm-5": {
@@ -66553,7 +67673,7 @@
         "cost": {
           "input": 0.3,
           "output": 2.5,
-          "cache_read": 0.075,
+          "cache_read": 0.03,
           "input_audio": 1
         },
         "limit": {
@@ -66573,7 +67693,12 @@
         "cost": {
           "input": 1.25,
           "output": 10,
-          "cache_read": 0.31
+          "cache_read": 0.125,
+          "context_over_200k": {
+            "input": 2.5,
+            "output": 15,
+            "cache_read": 0.25
+          }
         },
         "limit": {
           "context": 1048576,
@@ -69311,7 +70436,12 @@
         "cost": {
           "input": 1.25,
           "output": 10,
-          "cache_read": 0.31
+          "cache_read": 0.125,
+          "context_over_200k": {
+            "input": 2.5,
+            "output": 15,
+            "cache_read": 0.25
+          }
         },
         "limit": {
           "context": 1048576,
@@ -69657,7 +70787,7 @@
         "cost": {
           "input": 0.3,
           "output": 2.5,
-          "cache_read": 0.075,
+          "cache_read": 0.03,
           "input_audio": 1
         },
         "limit": {
@@ -70776,111 +71906,6 @@
     "id": "google-vertex",
     "name": "Vertex",
     "models": {
-      "gemini-flash-lite-latest": {
-        "id": "gemini-flash-lite-latest",
-        "name": "Gemini Flash-Lite Latest",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.1,
-          "output": 0.4,
-          "cache_read": 0.025
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
-      "gemini-2.5-pro-preview-05-06": {
-        "id": "gemini-2.5-pro-preview-05-06",
-        "name": "Gemini 2.5 Pro Preview 05-06",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.25,
-          "output": 10,
-          "cache_read": 0.31
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
-      "gemini-3.1-pro-preview-customtools": {
-        "id": "gemini-3.1-pro-preview-customtools",
-        "name": "Gemini 3.1 Pro Preview Custom Tools",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 12,
-          "cache_read": 0.2,
-          "context_over_200k": {
-            "input": 4,
-            "output": 18,
-            "cache_read": 0.4
-          }
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
-      "gemini-2.5-flash-lite-preview-09-2025": {
-        "id": "gemini-2.5-flash-lite-preview-09-2025",
-        "name": "Gemini 2.5 Flash Lite Preview 09-25",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.1,
-          "output": 0.4,
-          "cache_read": 0.025
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
-      "gemini-3.1-pro-preview": {
-        "id": "gemini-3.1-pro-preview",
-        "name": "Gemini 3.1 Pro Preview",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 12,
-          "cache_read": 0.2,
-          "context_over_200k": {
-            "input": 4,
-            "output": 18,
-            "cache_read": 0.4
-          }
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
       "gemini-2.0-flash": {
         "id": "gemini-2.0-flash",
         "name": "Gemini 2.0 Flash",
@@ -70898,30 +71923,6 @@
         "limit": {
           "context": 1048576,
           "output": 8192
-        }
-      },
-      "gemini-3-flash-preview": {
-        "id": "gemini-3-flash-preview",
-        "name": "Gemini 3 Flash Preview",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.5,
-          "output": 3,
-          "cache_read": 0.05,
-          "context_over_200k": {
-            "input": 0.5,
-            "output": 3,
-            "cache_read": 0.05
-          }
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
         }
       },
       "gemini-3-pro-preview": {
@@ -70948,43 +71949,6 @@
           "output": 65536
         }
       },
-      "gemini-2.5-flash-preview-05-20": {
-        "id": "gemini-2.5-flash-preview-05-20",
-        "name": "Gemini 2.5 Flash Preview 05-20",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.6,
-          "cache_read": 0.0375
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
-      "gemini-embedding-001": {
-        "id": "gemini-embedding-001",
-        "name": "Gemini Embedding 001",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0
-        },
-        "limit": {
-          "context": 2048,
-          "output": 3072
-        }
-      },
       "gemini-flash-latest": {
         "id": "gemini-flash-latest",
         "name": "Gemini Flash Latest",
@@ -70999,25 +71963,6 @@
           "output": 2.5,
           "cache_read": 0.075,
           "cache_write": 0.383
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
-      "gemini-2.5-pro-preview-06-05": {
-        "id": "gemini-2.5-pro-preview-06-05",
-        "name": "Gemini 2.5 Pro Preview 06-05",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.25,
-          "output": 10,
-          "cache_read": 0.31
         },
         "limit": {
           "context": 1048576,
@@ -71063,25 +72008,6 @@
           "output": 65536
         }
       },
-      "gemini-2.5-flash-preview-04-17": {
-        "id": "gemini-2.5-flash-preview-04-17",
-        "name": "Gemini 2.5 Flash Preview 04-17",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.6,
-          "cache_read": 0.0375
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
       "gemini-2.5-flash-preview-09-2025": {
         "id": "gemini-2.5-flash-preview-09-2025",
         "name": "Gemini 2.5 Flash Preview 09-25",
@@ -71100,43 +72026,6 @@
         "limit": {
           "context": 1048576,
           "output": 65536
-        }
-      },
-      "gemini-2.5-flash-lite": {
-        "id": "gemini-2.5-flash-lite",
-        "name": "Gemini 2.5 Flash Lite",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.1,
-          "output": 0.4,
-          "cache_read": 0.025
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 65536
-        }
-      },
-      "gemini-2.0-flash-lite": {
-        "id": "gemini-2.0-flash-lite",
-        "name": "Gemini 2.0 Flash Lite",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.075,
-          "output": 0.3
-        },
-        "limit": {
-          "context": 1048576,
-          "output": 8192
         }
       },
       "zai-org/glm-5-maas": {
@@ -71321,9 +72210,28 @@
           "output": 262144
         }
       },
-      "gemini-2.5-pro": {
-        "id": "gemini-2.5-pro",
-        "name": "Gemini 2.5 Pro",
+      "gemini-flash-lite-latest": {
+        "id": "gemini-flash-lite-latest",
+        "name": "Gemini Flash-Lite Latest",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1,
+          "output": 0.4,
+          "cache_read": 0.025
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-2.5-pro-preview-05-06": {
+        "id": "gemini-2.5-pro-preview-05-06",
+        "name": "Gemini 2.5 Pro Preview 05-06",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -71338,6 +72246,233 @@
         "limit": {
           "context": 1048576,
           "output": 65536
+        }
+      },
+      "gemini-3.1-pro-preview-customtools": {
+        "id": "gemini-3.1-pro-preview-customtools",
+        "name": "Gemini 3.1 Pro Preview Custom Tools",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 12,
+          "cache_read": 0.2,
+          "context_over_200k": {
+            "input": 4,
+            "output": 18,
+            "cache_read": 0.4
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-2.5-flash-lite-preview-09-2025": {
+        "id": "gemini-2.5-flash-lite-preview-09-2025",
+        "name": "Gemini 2.5 Flash Lite Preview 09-25",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1,
+          "output": 0.4,
+          "cache_read": 0.025
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-3.1-pro-preview": {
+        "id": "gemini-3.1-pro-preview",
+        "name": "Gemini 3.1 Pro Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 12,
+          "cache_read": 0.2,
+          "context_over_200k": {
+            "input": 4,
+            "output": 18,
+            "cache_read": 0.4
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-3-flash-preview": {
+        "id": "gemini-3-flash-preview",
+        "name": "Gemini 3 Flash Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 3,
+          "cache_read": 0.05,
+          "context_over_200k": {
+            "input": 0.5,
+            "output": 3,
+            "cache_read": 0.05
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-2.5-flash-preview-05-20": {
+        "id": "gemini-2.5-flash-preview-05-20",
+        "name": "Gemini 2.5 Flash Preview 05-20",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6,
+          "cache_read": 0.0375
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-embedding-001": {
+        "id": "gemini-embedding-001",
+        "name": "Gemini Embedding 001",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0
+        },
+        "limit": {
+          "context": 2048,
+          "output": 3072
+        }
+      },
+      "gemini-2.5-pro": {
+        "id": "gemini-2.5-pro",
+        "name": "Gemini 2.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.25,
+          "output": 10,
+          "cache_read": 0.125,
+          "context_over_200k": {
+            "input": 2.5,
+            "output": 15,
+            "cache_read": 0.25
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-2.5-pro-preview-06-05": {
+        "id": "gemini-2.5-pro-preview-06-05",
+        "name": "Gemini 2.5 Pro Preview 06-05",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.25,
+          "output": 10,
+          "cache_read": 0.31
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-2.5-flash-preview-04-17": {
+        "id": "gemini-2.5-flash-preview-04-17",
+        "name": "Gemini 2.5 Flash Preview 04-17",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6,
+          "cache_read": 0.0375
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-2.5-flash-lite": {
+        "id": "gemini-2.5-flash-lite",
+        "name": "Gemini 2.5 Flash Lite",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1,
+          "output": 0.4,
+          "cache_read": 0.025
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-2.0-flash-lite": {
+        "id": "gemini-2.0-flash-lite",
+        "name": "Gemini 2.0 Flash Lite",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.075,
+          "output": 0.3
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 8192
         }
       }
     }
@@ -71467,6 +72602,25 @@
           "input": 0.6,
           "output": 3,
           "cache_read": 0.1
+        },
+        "limit": {
+          "context": 256000,
+          "output": 256000
+        }
+      },
+      "@cf/moonshotai/kimi-k2.6": {
+        "id": "@cf/moonshotai/kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
         },
         "limit": {
           "context": 256000,
@@ -71990,25 +73144,6 @@
           "output": 128000
         }
       },
-      "gpt-5.1-codex-max": {
-        "id": "gpt-5.1-codex-max",
-        "name": "GPT-5.1 Codex Max",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.25,
-          "output": 10,
-          "cache_read": 0.125
-        },
-        "limit": {
-          "context": 400000,
-          "output": 128000
-        }
-      },
       "gpt-5.2-chat": {
         "id": "gpt-5.2-chat",
         "name": "GPT-5.2 Chat",
@@ -72472,24 +73607,6 @@
           "output": 128000
         }
       },
-      "gpt-4-turbo": {
-        "id": "gpt-4-turbo",
-        "name": "GPT-4 Turbo",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 10,
-          "output": 30
-        },
-        "limit": {
-          "context": 128000,
-          "output": 4096
-        }
-      },
       "text-embedding-ada-002": {
         "id": "text-embedding-ada-002",
         "name": "text-embedding-ada-002",
@@ -72639,25 +73756,6 @@
           "output": 32000
         }
       },
-      "gpt-4o-mini": {
-        "id": "gpt-4o-mini",
-        "name": "GPT-4o mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.6,
-          "cache_read": 0.08
-        },
-        "limit": {
-          "context": 128000,
-          "output": 16384
-        }
-      },
       "gpt-5.4-mini": {
         "id": "gpt-5.4-mini",
         "name": "GPT-5.4 Mini",
@@ -72676,24 +73774,6 @@
           "context": 400000,
           "input": 272000,
           "output": 128000
-        }
-      },
-      "cohere-command-r-08-2024": {
-        "id": "cohere-command-r-08-2024",
-        "name": "Command R",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.15,
-          "output": 0.6
-        },
-        "limit": {
-          "context": 128000,
-          "output": 4000
         }
       },
       "cohere-command-a": {
@@ -72787,25 +73867,6 @@
         "limit": {
           "context": 128000,
           "output": 4096
-        }
-      },
-      "o4-mini": {
-        "id": "o4-mini",
-        "name": "o4-mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.1,
-          "output": 4.4,
-          "cache_read": 0.28
-        },
-        "limit": {
-          "context": 200000,
-          "output": 100000
         }
       },
       "gpt-5.4-nano": {
@@ -72957,25 +74018,6 @@
           "output": 8192
         }
       },
-      "grok-code-fast-1": {
-        "id": "grok-code-fast-1",
-        "name": "Grok Code Fast 1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 1.5,
-          "cache_read": 0.02
-        },
-        "limit": {
-          "context": 256000,
-          "output": 10000
-        }
-      },
       "gpt-5.1": {
         "id": "gpt-5.1",
         "name": "GPT-5.1",
@@ -73108,25 +74150,6 @@
           "output": 16384
         }
       },
-      "o3-mini": {
-        "id": "o3-mini",
-        "name": "o3-mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.1,
-          "output": 4.4,
-          "cache_read": 0.55
-        },
-        "limit": {
-          "context": 200000,
-          "output": 100000
-        }
-      },
       "text-embedding-3-small": {
         "id": "text-embedding-3-small",
         "name": "text-embedding-3-small",
@@ -73217,26 +74240,6 @@
         "limit": {
           "context": 128000,
           "output": 32768
-        }
-      },
-      "grok-4": {
-        "id": "grok-4",
-        "name": "Grok 4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 15,
-          "reasoning": 15,
-          "cache_read": 0.75
-        },
-        "limit": {
-          "context": 256000,
-          "output": 64000
         }
       },
       "phi-4-mini-reasoning": {
@@ -73430,64 +74433,6 @@
           "output": 4096
         }
       },
-      "gpt-4.1-nano": {
-        "id": "gpt-4.1-nano",
-        "name": "GPT-4.1 nano",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.1,
-          "output": 0.4,
-          "cache_read": 0.03
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
-        }
-      },
-      "grok-3-mini": {
-        "id": "grok-3-mini",
-        "name": "Grok 3 Mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.3,
-          "output": 0.5,
-          "reasoning": 0.5,
-          "cache_read": 0.075
-        },
-        "limit": {
-          "context": 131072,
-          "output": 8192
-        }
-      },
-      "o3": {
-        "id": "o3",
-        "name": "o3",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 8,
-          "cache_read": 0.5
-        },
-        "limit": {
-          "context": 200000,
-          "output": 100000
-        }
-      },
       "deepseek-v3.2": {
         "id": "deepseek-v3.2",
         "name": "DeepSeek-V3.2",
@@ -73504,43 +74449,6 @@
         "limit": {
           "context": 128000,
           "output": 128000
-        }
-      },
-      "gpt-5-pro": {
-        "id": "gpt-5-pro",
-        "name": "GPT-5 Pro",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 15,
-          "output": 120
-        },
-        "limit": {
-          "context": 400000,
-          "output": 272000
-        }
-      },
-      "gpt-4o": {
-        "id": "gpt-4o",
-        "name": "GPT-4o",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.5,
-          "output": 10,
-          "cache_read": 1.25
-        },
-        "limit": {
-          "context": 128000,
-          "output": 16384
         }
       },
       "phi-3-medium-128k-instruct": {
@@ -73577,24 +74485,6 @@
         "limit": {
           "context": 16384,
           "output": 16384
-        }
-      },
-      "cohere-command-r-plus-08-2024": {
-        "id": "cohere-command-r-plus-08-2024",
-        "name": "Command R+",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.5,
-          "output": 10
-        },
-        "limit": {
-          "context": 128000,
-          "output": 4000
         }
       },
       "claude-sonnet-4-5": {
@@ -73762,25 +74652,6 @@
           "output": 163840
         }
       },
-      "gpt-4.1": {
-        "id": "gpt-4.1",
-        "name": "GPT-4.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 8,
-          "cache_read": 0.5
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
-        }
-      },
       "kimi-k2-thinking": {
         "id": "kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
@@ -73798,25 +74669,6 @@
         "limit": {
           "context": 262144,
           "output": 262144
-        }
-      },
-      "gpt-4.1-mini": {
-        "id": "gpt-4.1-mini",
-        "name": "GPT-4.1 mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.4,
-          "output": 1.6,
-          "cache_read": 0.1
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
         }
       },
       "gpt-5.1-codex": {
@@ -73876,6 +74728,326 @@
           "output": 8192
         }
       },
+      "mai-ds-r1": {
+        "id": "mai-ds-r1",
+        "name": "MAI-DS-R1",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.35,
+          "output": 5.4
+        },
+        "limit": {
+          "context": 128000,
+          "output": 8192
+        }
+      },
+      "gpt-5.1-codex-max": {
+        "id": "gpt-5.1-codex-max",
+        "name": "GPT-5.1 Codex Max",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.25,
+          "output": 10,
+          "cache_read": 0.125
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
+      },
+      "gpt-4-turbo": {
+        "id": "gpt-4-turbo",
+        "name": "GPT-4 Turbo",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 10,
+          "output": 30
+        },
+        "limit": {
+          "context": 128000,
+          "output": 4096
+        }
+      },
+      "gpt-4o-mini": {
+        "id": "gpt-4o-mini",
+        "name": "GPT-4o mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6,
+          "cache_read": 0.08
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
+      "cohere-command-r-08-2024": {
+        "id": "cohere-command-r-08-2024",
+        "name": "Command R",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6
+        },
+        "limit": {
+          "context": 128000,
+          "output": 4000
+        }
+      },
+      "o4-mini": {
+        "id": "o4-mini",
+        "name": "o4-mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.1,
+          "output": 4.4,
+          "cache_read": 0.28
+        },
+        "limit": {
+          "context": 200000,
+          "output": 100000
+        }
+      },
+      "grok-code-fast-1": {
+        "id": "grok-code-fast-1",
+        "name": "Grok Code Fast 1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.5,
+          "cache_read": 0.02
+        },
+        "limit": {
+          "context": 256000,
+          "output": 10000
+        }
+      },
+      "o3-mini": {
+        "id": "o3-mini",
+        "name": "o3-mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.1,
+          "output": 4.4,
+          "cache_read": 0.55
+        },
+        "limit": {
+          "context": 200000,
+          "output": 100000
+        }
+      },
+      "grok-4": {
+        "id": "grok-4",
+        "name": "Grok 4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "reasoning": 15,
+          "cache_read": 0.75
+        },
+        "limit": {
+          "context": 256000,
+          "output": 64000
+        }
+      },
+      "gpt-4.1-nano": {
+        "id": "gpt-4.1-nano",
+        "name": "GPT-4.1 nano",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1,
+          "output": 0.4,
+          "cache_read": 0.03
+        },
+        "limit": {
+          "context": 1047576,
+          "output": 32768
+        }
+      },
+      "grok-3-mini": {
+        "id": "grok-3-mini",
+        "name": "Grok 3 Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 0.5,
+          "reasoning": 0.5,
+          "cache_read": 0.075
+        },
+        "limit": {
+          "context": 131072,
+          "output": 8192
+        }
+      },
+      "o3": {
+        "id": "o3",
+        "name": "o3",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 8,
+          "cache_read": 0.5
+        },
+        "limit": {
+          "context": 200000,
+          "output": 100000
+        }
+      },
+      "gpt-5-pro": {
+        "id": "gpt-5-pro",
+        "name": "GPT-5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 15,
+          "output": 120
+        },
+        "limit": {
+          "context": 400000,
+          "output": 272000
+        }
+      },
+      "gpt-4o": {
+        "id": "gpt-4o",
+        "name": "GPT-4o",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 10,
+          "cache_read": 1.25
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
+      "cohere-command-r-plus-08-2024": {
+        "id": "cohere-command-r-plus-08-2024",
+        "name": "Command R+",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 10
+        },
+        "limit": {
+          "context": 128000,
+          "output": 4000
+        }
+      },
+      "gpt-4.1": {
+        "id": "gpt-4.1",
+        "name": "GPT-4.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 8,
+          "cache_read": 0.5
+        },
+        "limit": {
+          "context": 1047576,
+          "output": 32768
+        }
+      },
+      "gpt-4.1-mini": {
+        "id": "gpt-4.1-mini",
+        "name": "GPT-4.1 mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 1.6,
+          "cache_read": 0.1
+        },
+        "limit": {
+          "context": 1047576,
+          "output": 32768
+        }
+      },
       "grok-3": {
         "id": "grok-3",
         "name": "Grok 3",
@@ -73912,24 +75084,6 @@
         "limit": {
           "context": 2000000,
           "output": 30000
-        }
-      },
-      "mai-ds-r1": {
-        "id": "mai-ds-r1",
-        "name": "MAI-DS-R1",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 1.35,
-          "output": 5.4
-        },
-        "limit": {
-          "context": 128000,
-          "output": 8192
         }
       }
     }
@@ -74069,25 +75223,6 @@
           "output": 32768
         }
       },
-      "openai/gpt-4.1": {
-        "id": "openai/gpt-4.1",
-        "name": "GPT-4.1",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2,
-          "output": 8,
-          "cache_read": 0.5
-        },
-        "limit": {
-          "context": 1047576,
-          "output": 32768
-        }
-      },
       "z-ai/glm-5": {
         "id": "z-ai/glm-5",
         "name": "GLM-5",
@@ -74177,6 +75312,25 @@
         },
         "limit": {
           "context": 131072,
+          "output": 32768
+        }
+      },
+      "openai/gpt-4.1": {
+        "id": "openai/gpt-4.1",
+        "name": "GPT-4.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2,
+          "output": 8,
+          "cache_read": 0.5
+        },
+        "limit": {
+          "context": 1047576,
           "output": 32768
         }
       },
@@ -74974,7 +76128,12 @@
         "cost": {
           "input": 1.25,
           "output": 10,
-          "cache_read": 0.31
+          "cache_read": 0.125,
+          "context_over_200k": {
+            "input": 2.5,
+            "output": 15,
+            "cache_read": 0.25
+          }
         },
         "limit": {
           "context": 1048576,
@@ -75104,7 +76263,7 @@
         "cost": {
           "input": 0.3,
           "output": 2.5,
-          "cache_read": 0.075,
+          "cache_read": 0.03,
           "input_audio": 1
         },
         "limit": {
@@ -75476,6 +76635,25 @@
           "output": 262144
         }
       },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "kimi-k2-turbo-preview": {
         "id": "kimi-k2-turbo-preview",
         "name": "Kimi K2 Turbo",
@@ -75549,30 +76727,12 @@
           ]
         },
         "cost": {
-          "input": 0.7,
-          "output": 2.3
+          "input": 0.77,
+          "output": 2.75
         },
         "limit": {
           "context": 128000,
           "output": 8192
-        }
-      },
-      "BAAI/bge-reranker-v2-m3": {
-        "id": "BAAI/bge-reranker-v2-m3",
-        "name": "bge-reranker-v2-m3",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.1,
-          "output": 0.1
-        },
-        "limit": {
-          "context": 512,
-          "output": 512
         }
       },
       "mistralai/Mistral-Small-3.2-24B-Instruct-2506": {
@@ -75585,8 +76745,8 @@
           ]
         },
         "cost": {
-          "input": 0.3,
-          "output": 0.3
+          "input": 0.33,
+          "output": 0.33
         },
         "limit": {
           "context": 32000,
@@ -75603,30 +76763,12 @@
           ]
         },
         "cost": {
-          "input": 0.9,
-          "output": 0.9
+          "input": 0.99,
+          "output": 0.99
         },
         "limit": {
           "context": 128000,
           "output": 8192
-        }
-      },
-      "KBLab/kb-whisper-large": {
-        "id": "KBLab/kb-whisper-large",
-        "name": "KB-Whisper-Large",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 3,
-          "output": 3
-        },
-        "limit": {
-          "context": 480000,
-          "output": 4800
         }
       },
       "openai/gpt-oss-120b": {
@@ -75639,48 +76781,30 @@
           ]
         },
         "cost": {
-          "input": 0.3,
-          "output": 0.9
+          "input": 0.44,
+          "output": 0.99
         },
         "limit": {
           "context": 128000,
           "output": 8192
         }
       },
-      "intfloat/multilingual-e5-large-instruct": {
-        "id": "intfloat/multilingual-e5-large-instruct",
-        "name": "Multilingual-E5-large-instruct",
-        "tool_call": false,
+      "google/gemma-4-31B-it": {
+        "id": "google/gemma-4-31B-it",
+        "name": "Gemma 4 31B Instruct",
+        "tool_call": true,
         "modalities": {
           "output": [
             "text"
           ]
         },
         "cost": {
-          "input": 0.02,
-          "output": 0
+          "input": 0.275,
+          "output": 0.55
         },
         "limit": {
-          "context": 512,
-          "output": 1024
-        }
-      },
-      "intfloat/multilingual-e5-large": {
-        "id": "intfloat/multilingual-e5-large",
-        "name": "Multilingual-E5-large",
-        "tool_call": false,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.02,
-          "output": 0
-        },
-        "limit": {
-          "context": 512,
-          "output": 1024
+          "context": 128000,
+          "output": 8192
         }
       }
     }
@@ -77143,7 +78267,7 @@
     "models": {
       "hy3-preview": {
         "id": "hy3-preview",
-        "name": "HY3 Preview",
+        "name": "Hy3 preview",
         "tool_call": true,
         "modalities": {
           "output": [
