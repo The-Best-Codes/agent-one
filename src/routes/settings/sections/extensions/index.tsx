@@ -74,8 +74,7 @@ export default function ExtensionsSection() {
     };
   }, [searchParams]);
 
-  const [showAddDialog, setShowAddDialog] = useState(!!mcpInstallPrefill);
-  const [addDialogInitialValues, setAddDialogInitialValues] = useState(mcpInstallPrefill);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedExtension, setSelectedExtension] = useState<McpRegistryExtension | null>(null);
   const [showInstallDialog, setShowInstallDialog] = useState(false);
   const [serverToUninstall, setServerToUninstall] = useState<{
@@ -380,25 +379,22 @@ export default function ExtensionsSection() {
         />
 
         <AddServerDialog
-          key={addDialogInitialValues ? "deeplink" : "manual"}
-          open={showAddDialog}
+          key={mcpInstallPrefill ? "deeplink" : "manual"}
+          open={showAddDialog || !!mcpInstallPrefill}
           onOpenChange={(open) => {
             setShowAddDialog(open);
-            if (!open) {
-              setAddDialogInitialValues(null);
-              if (mcpInstallPrefill) {
-                setSearchParams((prev) => {
-                  prev.delete("mcpName");
-                  prev.delete("mcpType");
-                  prev.delete("mcpCommand");
-                  prev.delete("mcpUrl");
-                  return prev;
-                });
-              }
+            if (!open && mcpInstallPrefill) {
+              setSearchParams((prev) => {
+                prev.delete("mcpName");
+                prev.delete("mcpType");
+                prev.delete("mcpCommand");
+                prev.delete("mcpUrl");
+                return prev;
+              });
             }
           }}
           onAddServer={handleAddServer}
-          initialValues={addDialogInitialValues}
+          initialValues={mcpInstallPrefill}
         />
 
         <InstallExtensionDialog
