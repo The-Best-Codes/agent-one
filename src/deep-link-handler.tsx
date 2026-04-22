@@ -63,8 +63,9 @@ export function DeepLinkHandler() {
     const handleDeepLink = (url: string) => {
       try {
         const urlObj = new URL(url);
-        const deepLinkId =
-          urlObj.hostname !== "" ? urlObj.hostname : urlObj.pathname.replace(/^\/+/, "");
+        const deepLinkId = [urlObj.hostname, urlObj.pathname.replace(/^\/+/, "")]
+          .filter(Boolean)
+          .join("/");
 
         const meta = getDeepLinkMeta(deepLinkId);
         if (meta === null) {
