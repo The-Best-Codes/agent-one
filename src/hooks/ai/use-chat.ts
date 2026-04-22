@@ -71,9 +71,36 @@ export function useChat(
   }, [getApiKeysLoadedPromise, transport]);
 
   const chatResult = useChatSDK({
-    transport: transport,
+    transport,
     ...options,
   });
 
-  return chatResult;
+  const syncTransport = useCallback(() => {
+    transport.updateModel(model);
+    transport.updateModelId(modelId);
+    transport.updateModelConfig(modelConfig);
+    transport.updateSmoothStreamEnabled(smoothStreamEnabled);
+  }, [model, modelId, modelConfig, smoothStreamEnabled, transport]);
+
+  const sendMessage = useCallback<typeof chatResult.sendMessage>(
+    async (message, sendOptions) => {
+      syncTransport();
+      return chatResult.sendMessage(message, sendOptions);
+    },
+    [chatResult, syncTransport],
+  );
+
+  const regenerate = useCallback<typeof chatResult.regenerate>(
+    async (regenerateOptions) => {
+      syncTransport();
+      return chatResult.regenerate(regenerateOptions);
+    },
+    [chatResult, syncTransport],
+  );
+
+  return {
+    ...chatResult,
+    sendMessage,
+    regenerate,
+  };
 }

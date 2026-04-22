@@ -112,12 +112,9 @@ export const chatStorage = {
         model_id: string | null;
         model_config: string | null;
         branch_of: string | null;
-        input_tokens: number | null;
-        output_tokens: number | null;
-        total_cost_usd: number | null;
       }[]
     >(
-      "SELECT title, title_state, model_id, model_config, branch_of, input_tokens, output_tokens, total_cost_usd FROM chat_metadata WHERE id = $1",
+      "SELECT title, title_state, model_id, model_config, branch_of FROM chat_metadata WHERE id = $1",
       [id],
     );
     if (rows.length === 0) return null;
@@ -128,9 +125,6 @@ export const chatStorage = {
       modelId: row.model_id ?? undefined,
       modelConfig: row.model_config ? JSON.parse(row.model_config) : undefined,
       branchOf: row.branch_of ?? undefined,
-      inputTokens: row.input_tokens ?? undefined,
-      outputTokens: row.output_tokens ?? undefined,
-      totalCostUsd: row.total_cost_usd ?? undefined,
     };
   },
 
@@ -143,21 +137,15 @@ export const chatStorage = {
            title_state,
            model_id,
            model_config,
-           branch_of,
-           input_tokens,
-           output_tokens,
-           total_cost_usd
+           branch_of
          )
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         VALUES ($1, $2, $3, $4, $5, $6)
          ON CONFLICT(id) DO UPDATE SET
            title = $2,
            title_state = $3,
            model_id = $4,
            model_config = $5,
-           branch_of = $6,
-           input_tokens = $7,
-           output_tokens = $8,
-           total_cost_usd = $9`,
+           branch_of = $6`,
         [
           id,
           metadata.title,
@@ -165,9 +153,6 @@ export const chatStorage = {
           metadata.modelId ?? null,
           metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null,
           metadata.branchOf ?? null,
-          metadata.inputTokens ?? null,
-          metadata.outputTokens ?? null,
-          metadata.totalCostUsd ?? null,
         ],
       ),
     );

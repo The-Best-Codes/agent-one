@@ -146,9 +146,6 @@ export default function LocalDatabaseTestRoute() {
                   title,
                   titleState: "generated",
                   modelId: "benchmark",
-                  inputTokens: messages.length * 180,
-                  outputTokens: messages.length * 260,
-                  totalCostUsd: 0,
                 });
                 await chatStorage.setChatMessages(chatId, messages);
                 await chatStorage.updateFtsIndex(chatId, title, messages);
