@@ -36,9 +36,6 @@ const DEFAULT_CHAT_METADATA: ChatMetadata = {
   modelId: undefined,
   modelConfig: undefined,
   branchOf: undefined,
-  inputTokens: 0,
-  outputTokens: 0,
-  totalCostUsd: 0,
 };
 
 export const MultiChatProvider = ({ children }: { children: ReactNode }) => {

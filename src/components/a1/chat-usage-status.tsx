@@ -1,19 +1,14 @@
 import NumberFlow from "@number-flow/react";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  useChatLoading,
-  useChatMessages,
-  useChatMetadata,
-  useChatStatus,
-} from "@/contexts/use-chat/chat-hooks";
+import { useChatLoading, useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { calculateChatUsageFromMessages, getLastAssistantTokens } from "@/lib/ai/chat-usage";
+import { calculateChatUsageFromMessages, getLastAssistantUsage } from "@/lib/ai/chat-usage";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
@@ -68,25 +63,19 @@ const CircularProgress = ({
 };
 
 export const ChatUsageStatus = () => {
-  const metadata = useChatMetadata();
   const messages = useChatMessages();
-  const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
   const { currentModel } = useModel();
   const [isSidebarCollapsed] = useAtom(sidebarCollapsedAtom);
   const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
   const [delayPassed, setDelayPassed] = useState(false);
-  const [staleMetadata, setStaleMetadata] = useState(metadata);
+  const currentUsage = useMemo(() => calculateChatUsageFromMessages(messages), [messages]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
   const isColumnLayout = collapsedLayout === "column";
 
   const isAgentOneModel = currentModel?.provider === "AgentOne";
-
-  if (!isChatLoading && staleMetadata !== metadata) {
-    setStaleMetadata(metadata);
-  }
 
   useEffect(() => {
     if (!isChatLoading) {
@@ -108,18 +97,11 @@ export const ChatUsageStatus = () => {
   }
 
   const showSkeleton = isChatLoading && delayPassed;
-  const displayedMetadata = isChatLoading ? staleMetadata : metadata;
+  const lastUsage = getLastAssistantUsage(messages);
 
-  const isStreaming = status === "streaming" || status === "submitted";
-  const liveUsage = isStreaming ? calculateChatUsageFromMessages(messages) : undefined;
-
-  const totalCostUsd = liveUsage?.totalCostUsd ?? Number(displayedMetadata.totalCostUsd);
-
-  const lastTokens = isStreaming ? getLastAssistantTokens(messages) : undefined;
-  const contextInputTokens = Number(lastTokens?.inputTokens ?? displayedMetadata.inputTokens ?? 0);
-  const contextOutputTokens = Number(
-    lastTokens?.outputTokens ?? displayedMetadata.outputTokens ?? 0,
-  );
+  const totalCostUsd = currentUsage.totalCostUsd;
+  const contextInputTokens = lastUsage.inputTokens;
+  const contextOutputTokens = lastUsage.outputTokens;
   const totalTokens = contextInputTokens + contextOutputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;

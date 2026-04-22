@@ -14,9 +14,9 @@ import {
 
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import {
-  calculateCostUsdFromUsage,
+  addMessageTokenUsage,
+  createEmptyMessageTokenUsage,
   type ChatMessageMetadata,
-  getModelCostByChatModelId,
 } from "@/lib/ai/chat-usage";
 import { getLogger } from "@/lib/logger";
 
@@ -59,8 +59,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     logger.verbose("CustomChatTransport modelId updated to:", modelId);
   }
 
-  updateModelConfig(config: ModelConfig) {
-    this.modelConfig = config;
+  updateModelConfig(modelConfig: ModelConfig) {
+    this.modelConfig = modelConfig;
     logger.verbose("CustomChatTransport config updated");
   }
 
@@ -89,7 +89,12 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messageId: string | undefined;
     } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
-    if (!this.model) {
+    const model = this.model;
+    const modelId = this.modelId;
+    const modelConfig = this.modelConfig;
+    const smoothStreamEnabled = this.smoothStreamEnabled;
+
+    if (!model) {
       throw new Error("Cannot send messages: no model selected. Please select a model first.");
     }
 
@@ -97,19 +102,17 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const tools = await this.getTools();
 
     const stopWhenCondition: StopCondition<ToolSet> =
-      this.modelConfig.maxSteps === undefined
-        ? () => false
-        : stepCountIs(this.modelConfig.maxSteps);
+      modelConfig.maxSteps === undefined ? () => false : stepCountIs(modelConfig.maxSteps);
 
     const result = streamText({
-      model: this.model,
-      temperature: this.modelConfig.temperature,
-      maxOutputTokens: this.modelConfig.maxTokens,
-      topP: this.modelConfig.topP,
-      topK: this.modelConfig.topK,
-      frequencyPenalty: this.modelConfig.frequencyPenalty,
-      presencePenalty: this.modelConfig.presencePenalty,
-      seed: this.modelConfig.seed,
+      model,
+      temperature: modelConfig.temperature,
+      maxOutputTokens: modelConfig.maxTokens,
+      topP: modelConfig.topP,
+      topK: modelConfig.topK,
+      frequencyPenalty: modelConfig.frequencyPenalty,
+      presencePenalty: modelConfig.presencePenalty,
+      seed: modelConfig.seed,
       messages: await convertToModelMessages(options.messages),
       abortSignal: options.abortSignal,
       tools,
@@ -117,7 +120,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       stopWhen: stopWhenCondition,
       // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       system: this.getSystemPrompt(),
-      ...(this.smoothStreamEnabled && {
+      ...(smoothStreamEnabled && {
         experimental_transform: smoothStream(),
       }),
       onError: (error) => {
@@ -128,9 +131,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       },
     });
 
-    let lastStepInputTokens = 0;
-    let lastStepOutputTokens = 0;
-    let accumulatedCostUsd = 0;
+    let totalUsage = createEmptyMessageTokenUsage();
 
     return result.toUIMessageStream({
       messageMetadata: ({ part }) => {
@@ -138,19 +139,12 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
           return undefined;
         }
 
-        const usage = part.usage;
-        const modelCost = getModelCostByChatModelId(this.modelId ?? undefined);
-        const stepCostUsd = calculateCostUsdFromUsage(usage, modelCost);
-
-        lastStepInputTokens = usage.inputTokens ?? 0;
-        lastStepOutputTokens = usage.outputTokens ?? 0;
-        accumulatedCostUsd += stepCostUsd;
+        totalUsage = addMessageTokenUsage(totalUsage, part.usage);
 
         const metadata: ChatMessageMetadata = {
-          modelId: this.modelId ?? undefined,
-          inputTokens: lastStepInputTokens,
-          outputTokens: lastStepOutputTokens,
-          totalCostUsd: accumulatedCostUsd,
+          modelId: modelId ?? undefined,
+          usage: part.usage,
+          totalUsage,
         };
 
         return metadata;
