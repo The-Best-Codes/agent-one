@@ -348,6 +348,15 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const focusedChatInstance = currentChatId
     ? chatInstancesRef.current.get(currentChatId)
     : undefined;
+  const lastFocusedChatInstanceRef = useRef<UseChatHelpers<UIMessage> | undefined>(undefined);
+
+  if (focusedChatInstance) {
+    lastFocusedChatInstanceRef.current = focusedChatInstance;
+  } else if (!currentChatId) {
+    lastFocusedChatInstanceRef.current = undefined;
+  }
+
+  const stableFocusedChatInstance = focusedChatInstance ?? lastFocusedChatInstanceRef.current;
 
   useEffect(() => {
     const pendingState = location.state?.pendingMessage;
@@ -361,7 +370,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [location.state, location.pathname, navigate, focusedChatInstance?.status, currentChatId]);
 
-  const currentMessages = focusedChatInstance?.messages ?? defaultChat.messages;
+  const currentMessages = currentChatId
+    ? (stableFocusedChatInstance?.messages ?? [])
+    : defaultChat.messages;
   const prevMessagesRef = useRef<UIMessage[]>(currentMessages);
   if (!isChatLoading) {
     prevMessagesRef.current = currentMessages;
@@ -370,12 +381,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   const statusValue = useMemo(
     () => ({
-      status: focusedChatInstance?.status ?? defaultChat.status,
-      error: focusedChatInstance?.error ?? defaultChat.error,
+      status: currentChatId ? (stableFocusedChatInstance?.status ?? "ready") : defaultChat.status,
+      error: currentChatId ? stableFocusedChatInstance?.error : defaultChat.error,
     }),
     [
-      focusedChatInstance?.status,
-      focusedChatInstance?.error,
+      currentChatId,
+      stableFocusedChatInstance?.status,
+      stableFocusedChatInstance?.error,
       defaultChat.status,
       defaultChat.error,
     ],
@@ -383,17 +395,19 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   const metadataValue = currentChatId ? loadChatMetadata(currentChatId) : DEFAULT_CHAT_METADATA;
 
-  const instanceForFunctions = focusedChatInstance || defaultChat;
+  const instanceForFunctions = currentChatId ? stableFocusedChatInstance : defaultChat;
+  const noopAsync = useCallback(async () => {}, []);
+  const noopSetMessages = useCallback<UseChatHelpers<UIMessage>["setMessages"]>(() => {}, []);
   const {
-    addToolOutput,
-    addToolApprovalResponse,
-    regenerate,
-    clearError,
-    resumeStream,
-    stop,
-    setMessages,
-    sendMessage,
-  } = instanceForFunctions;
+    addToolOutput = noopAsync,
+    addToolApprovalResponse = noopAsync,
+    regenerate = noopAsync,
+    clearError = () => {},
+    resumeStream = noopAsync,
+    stop = noopAsync,
+    setMessages = noopSetMessages,
+    sendMessage = noopAsync,
+  } = instanceForFunctions ?? {};
 
   const wasBusyRef = useRef(false);
   useEffect(() => {
@@ -513,6 +527,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             key={id}
             chatId={id}
             model={chatModel.model}
+            modelId={chatModel.id}
             modelConfig={chatConfig}
             initialMessages={initialMessages}
             onInstanceUpdate={handleInstanceUpdate}

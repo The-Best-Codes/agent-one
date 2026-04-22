@@ -25,6 +25,7 @@ export const ChatInstance = memo(
   ({
     chatId,
     model,
+    modelId,
     modelConfig,
     initialMessages,
     onInstanceUpdate,
@@ -32,6 +33,7 @@ export const ChatInstance = memo(
   }: {
     chatId: string;
     model: LanguageModel;
+    modelId: string;
     modelConfig: ModelConfig;
     initialMessages: UIMessage[];
     onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
@@ -57,8 +59,7 @@ export const ChatInstance = memo(
       return lastAssistantMessageIsCompleteWithApprovalResponses({ messages });
     }, []);
 
-    const chatModelId = loadChatMetadata(chatId).modelId ?? null;
-    const chat = useChat(model, chatModelId, modelConfig, {
+    const chat = useChat(model, modelId, modelConfig, {
       experimental_throttle: experimentalThrottleEnabled ? experimentalThrottleValue : undefined,
       sendAutomaticallyWhen,
       onFinish: ({ isAbort }) => {
@@ -135,6 +136,7 @@ export const ChatInstance = memo(
     return (
       prevProps.chatId === nextProps.chatId &&
       prevProps.model === nextProps.model &&
+      prevProps.modelId === nextProps.modelId &&
       prevProps.initialMessages === nextProps.initialMessages &&
       prevProps.onInstanceUpdate === nextProps.onInstanceUpdate &&
       prevProps.onStatusChange === nextProps.onStatusChange &&
