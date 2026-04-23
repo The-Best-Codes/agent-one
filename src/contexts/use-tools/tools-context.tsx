@@ -167,9 +167,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     }
 
     const cachedServers = enabledServers.filter((server) => isServerCached(server));
+    const forceReloadUncachedServers = !mcpLoadedRef.current;
     const serversToLoad = enabledServers.filter((server) => {
       if (isServerCached(server)) {
         return false;
+      }
+
+      if (forceReloadUncachedServers) {
+        return true;
       }
 
       if (!previousEnabledIds.has(server.id)) {
