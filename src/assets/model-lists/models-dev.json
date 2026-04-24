@@ -14443,6 +14443,24 @@
           "output": 65536
         }
       },
+      "Qwen/Qwen3.6-35B-A3B": {
+        "id": "Qwen/Qwen3.6-35B-A3B",
+        "name": "Qwen/Qwen3.6-35B-A3B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.23,
+          "output": 1.86
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
+        }
+      },
       "Qwen/Qwen2.5-72B-Instruct": {
         "id": "Qwen/Qwen2.5-72B-Instruct",
         "name": "Qwen/Qwen2.5-72B-Instruct",
@@ -15344,6 +15362,25 @@
           "output": 262000
         }
       },
+      "Pro/moonshotai/Kimi-K2.6": {
+        "id": "Pro/moonshotai/Kimi-K2.6",
+        "name": "Pro/moonshotai/Kimi-K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262000,
+          "output": 262000
+        }
+      },
       "Pro/moonshotai/Kimi-K2-Instruct-0905": {
         "id": "Pro/moonshotai/Kimi-K2-Instruct-0905",
         "name": "Pro/moonshotai/Kimi-K2-Instruct-0905",
@@ -15372,8 +15409,8 @@
           ]
         },
         "cost": {
-          "input": 0.55,
-          "output": 3
+          "input": 0.45,
+          "output": 2.25
         },
         "limit": {
           "context": 262000,
@@ -16151,6 +16188,44 @@
         "limit": {
           "context": 128000,
           "output": 64000
+        }
+      },
+      "deepseek-v4-flash": {
+        "id": "deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
+        }
+      },
+      "deepseek-v4-pro": {
+        "id": "deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
         }
       }
     }
@@ -17541,9 +17616,9 @@
           ]
         },
         "cost": {
-          "input": 7.5e-7,
-          "output": 0.0000045,
-          "cache_read": 7.5e-8
+          "input": 0.75,
+          "output": 4.5,
+          "cache_read": 0.075
         },
         "limit": {
           "context": 400000,
@@ -17598,9 +17673,9 @@
           ]
         },
         "cost": {
-          "input": 2e-7,
-          "output": 0.00000125,
-          "cache_read": 2e-8
+          "input": 0.2,
+          "output": 1.25,
+          "cache_read": 0.02
         },
         "limit": {
           "context": 400000,
@@ -19455,6 +19530,44 @@
           "output": 65536
         }
       },
+      "deepseek/deepseek-v4-flash": {
+        "id": "deepseek/deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 393216
+        }
+      },
+      "deepseek/deepseek-v4-pro": {
+        "id": "deepseek/deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 393216
+        }
+      },
       "openai/gpt-5.4": {
         "id": "openai/gpt-5.4",
         "name": "GPT-5.4",
@@ -19542,32 +19655,6 @@
         "limit": {
           "context": 200000,
           "output": 8192
-        }
-      }
-    }
-  },
-  "tencent-token-plan": {
-    "id": "tencent-token-plan",
-    "name": "Tencent Token Plan",
-    "models": {
-      "hy3-preview": {
-        "id": "hy3-preview",
-        "name": "Hy3 preview",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 256000,
-          "output": 64000
         }
       }
     }
@@ -20064,6 +20151,30 @@
           "output": 65536
         }
       },
+      "mimo-v2.5-pro": {
+        "id": "mimo-v2.5-pro",
+        "name": "MiMo V2.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3,
+          "cache_read": 0.2,
+          "context_over_200k": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.4
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 128000
+        }
+      },
       "glm-5": {
         "id": "glm-5",
         "name": "GLM-5",
@@ -20099,7 +20210,31 @@
         },
         "limit": {
           "context": 262144,
-          "output": 64000
+          "output": 128000
+        }
+      },
+      "mimo-v2.5": {
+        "id": "mimo-v2.5",
+        "name": "MiMo V2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 2,
+          "cache_read": 0.08,
+          "context_over_200k": {
+            "input": 0.8,
+            "output": 4,
+            "cache_read": 0.16
+          }
+        },
+        "limit": {
+          "context": 262144,
+          "output": 128000
         }
       },
       "qwen3.6-plus": {
@@ -20141,6 +20276,25 @@
           "output": 131072
         }
       },
+      "deepseek-v4-flash": {
+        "id": "deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
+        }
+      },
       "kimi-k2.6": {
         "id": "kimi-k2.6",
         "name": "Kimi K2.6 (3x limits)",
@@ -20158,6 +20312,25 @@
         "limit": {
           "context": 262144,
           "output": 65536
+        }
+      },
+      "deepseek-v4-pro": {
+        "id": "deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
         }
       },
       "minimax-m2.5": {
@@ -20200,7 +20373,7 @@
         },
         "limit": {
           "context": 1048576,
-          "output": 64000
+          "output": 128000
         }
       },
       "qwen3.5-plus": {
@@ -21458,6 +21631,24 @@
         },
         "limit": {
           "context": 65536,
+          "output": 16384
+        }
+      },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Moonshot Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.929,
+          "output": 3.858
+        },
+        "limit": {
+          "context": 262144,
           "output": 16384
         }
       },
@@ -25882,6 +26073,24 @@
           "output": 32000
         }
       },
+      "deepseek/deepseek-r1-distill-qwen-32b": {
+        "id": "deepseek/deepseek-r1-distill-qwen-32b",
+        "name": "DeepSeek R1 Distill Qwen 32B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 0.3
+        },
+        "limit": {
+          "context": 64000,
+          "output": 32000
+        }
+      },
       "deepseek/deepseek-v3.2-exp": {
         "id": "deepseek/deepseek-v3.2-exp",
         "name": "Deepseek V3.2 Exp",
@@ -25956,6 +26165,24 @@
           "output": 16000
         }
       },
+      "deepseek/deepseek-r1-distill-qwen-14b": {
+        "id": "deepseek/deepseek-r1-distill-qwen-14b",
+        "name": "DeepSeek R1 Distill Qwen 14B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.15
+        },
+        "limit": {
+          "context": 32768,
+          "output": 16384
+        }
+      },
       "deepseek/deepseek-r1-0528": {
         "id": "deepseek/deepseek-r1-0528",
         "name": "DeepSeek R1 0528",
@@ -25991,6 +26218,24 @@
         },
         "limit": {
           "context": 131072,
+          "output": 32768
+        }
+      },
+      "inclusionai/ling-2.6-1t": {
+        "id": "inclusionai/ling-2.6-1t",
+        "name": "Ling-2.6-1T",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 262144,
           "output": 32768
         }
       },
@@ -26288,6 +26533,24 @@
         "limit": {
           "context": 131072,
           "output": 120000
+        }
+      },
+      "meta-llama/llama-3.2-3b-instruct": {
+        "id": "meta-llama/llama-3.2-3b-instruct",
+        "name": "Llama 3.2 3B Instruct",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.03,
+          "output": 0.05
+        },
+        "limit": {
+          "context": 32768,
+          "output": 32000
         }
       },
       "meta-llama/llama-3-8b-instruct": {
@@ -27292,6 +27555,24 @@
           "output": 131072
         }
       },
+      "google/gemma-3-12b-it": {
+        "id": "google/gemma-3-12b-it",
+        "name": "Gemma 3 12B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.05,
+          "output": 0.1
+        },
+        "limit": {
+          "context": 131072,
+          "output": 8192
+        }
+      },
       "google/gemma-3-27b-it": {
         "id": "google/gemma-3-27b-it",
         "name": "Gemma 3 27B",
@@ -27377,6 +27658,25 @@
         "cost": {
           "input": 0.6,
           "output": 2.5
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
+      "moonshotai/kimi-k2.6": {
+        "id": "moonshotai/kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
         },
         "limit": {
           "context": 262144,
@@ -28898,6 +29198,24 @@
           "output": 262144
         }
       },
+      "moonshotai/Kimi-K2.6-TEE": {
+        "id": "moonshotai/Kimi-K2.6-TEE",
+        "name": "Kimi K2.6 TEE",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.44,
+          "output": 2
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "moonshotai/Kimi-K2.5-TEE": {
         "id": "moonshotai/Kimi-K2.5-TEE",
         "name": "Kimi K2.5 TEE",
@@ -29788,6 +30106,25 @@
         "limit": {
           "context": 131072,
           "output": 32768
+        }
+      },
+      "moonshotai/Kimi-K2.6": {
+        "id": "moonshotai/Kimi-K2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 3.5,
+          "cache_read": 0.15
+        },
+        "limit": {
+          "context": 262144,
+          "output": 16384
         }
       },
       "moonshotai/Kimi-K2-Instruct": {
@@ -41087,6 +41424,25 @@
           "output": 128000
         }
       },
+      "hy3-preview-free": {
+        "id": "hy3-preview-free",
+        "name": "Hy3 preview Free",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 256000,
+          "output": 64000
+        }
+      },
       "minimax-m2.5": {
         "id": "minimax-m2.5",
         "name": "MiniMax M2.5",
@@ -41247,6 +41603,26 @@
           "output": 128000
         }
       },
+      "gpt-5.5-pro": {
+        "id": "gpt-5.5-pro",
+        "name": "GPT-5.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180,
+          "cache_read": 30
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
+      },
       "kimi-k2-thinking": {
         "id": "kimi-k2-thinking",
         "name": "Kimi K2 Thinking",
@@ -41305,6 +41681,31 @@
           "output": 64000
         }
       },
+      "gpt-5.5": {
+        "id": "gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 30,
+          "cache_read": 0.5,
+          "context_over_200k": {
+            "input": 10,
+            "output": 45,
+            "cache_read": 1
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 920000,
+          "output": 130000
+        }
+      },
       "gpt-5.4": {
         "id": "gpt-5.4",
         "name": "GPT-5.4",
@@ -41317,7 +41718,12 @@
         "cost": {
           "input": 2.5,
           "output": 15,
-          "cache_read": 0.25
+          "cache_read": 0.25,
+          "context_over_200k": {
+            "input": 5,
+            "output": 22.5,
+            "cache_read": 0.5
+          }
         },
         "limit": {
           "context": 1050000,
@@ -43072,6 +43478,25 @@
         "limit": {
           "context": 128000,
           "output": 8192
+        }
+      },
+      "openai/gpt-image-2": {
+        "id": "openai/gpt-image-2",
+        "name": "GPT-Image-2",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 5.0505,
+          "output": 32.3232,
+          "cache_read": 1.2626
+        },
+        "limit": {
+          "context": 0,
+          "output": 0
         }
       },
       "openai/gpt-4-classic-0314": {
@@ -46450,7 +46875,7 @@
         },
         "limit": {
           "context": 262144,
-          "output": 8192
+          "output": 262144
         }
       },
       "gpt-oss:120b": {
@@ -47295,6 +47720,26 @@
         "limit": {
           "context": 128000,
           "output": 4096
+        }
+      },
+      "au.anthropic.claude-opus-4-6-v1": {
+        "id": "au.anthropic.claude-opus-4-6-v1",
+        "name": "AU Anthropic Claude Opus 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 16.5,
+          "output": 82.5,
+          "cache_read": 1.65,
+          "cache_write": 20.625
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
         }
       },
       "mistral.ministral-3-3b-instruct": {
@@ -48358,6 +48803,26 @@
           "output": 256000
         }
       },
+      "au.anthropic.claude-sonnet-4-6": {
+        "id": "au.anthropic.claude-sonnet-4-6",
+        "name": "AU Anthropic Claude Sonnet 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3.3,
+          "output": 16.5,
+          "cache_read": 0.33,
+          "cache_write": 4.125
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "openai.gpt-oss-safeguard-20b": {
         "id": "openai.gpt-oss-safeguard-20b",
         "name": "GPT OSS Safeguard 20B",
@@ -49110,6 +49575,25 @@
         "cost": {
           "input": 0.6,
           "output": 2.5
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
+      "moonshotai/Kimi-K2.6": {
+        "id": "moonshotai/Kimi-K2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
         },
         "limit": {
           "context": 262144,
@@ -50360,6 +50844,24 @@
           "output": 32768
         }
       },
+      "deepseek-v4-flash": {
+        "id": "deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.175,
+          "output": 0.35
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 32768
+        }
+      },
       "openai-gpt-54-pro": {
         "id": "openai-gpt-54-pro",
         "name": "GPT-5.4 Pro",
@@ -50475,6 +50977,24 @@
         "limit": {
           "context": 1000000,
           "output": 128000
+        }
+      },
+      "deepseek-v4-pro": {
+        "id": "deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.175,
+          "output": 4.35
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 32768
         }
       },
       "deepseek-v3.2": {
@@ -50724,9 +51244,9 @@
           ]
         },
         "cost": {
-          "input": 0.56,
-          "output": 3.5,
-          "cache_read": 0.11
+          "input": 0.7448,
+          "output": 4.655,
+          "cache_read": 0.1463
         },
         "limit": {
           "context": 256000,
@@ -52119,7 +52639,7 @@
       },
       "zai-glm-5-1": {
         "id": "zai-glm-5-1",
-        "name": "GLM-5",
+        "name": "Z.AI GLM-5.1",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -52342,6 +52862,25 @@
         "limit": {
           "context": 1000000,
           "output": 64000
+        }
+      },
+      "kimi-k2-6": {
+        "id": "kimi-k2-6",
+        "name": "Kimi-K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 256000,
+          "output": 128000
         }
       },
       "gpt-5-3-codex": {
@@ -58503,6 +59042,31 @@
           "output": 16384
         }
       },
+      "gpt-5.5": {
+        "id": "gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 30,
+          "cache_read": 0.5,
+          "context_over_200k": {
+            "input": 10,
+            "output": 45,
+            "cache_read": 1
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 920000,
+          "output": 130000
+        }
+      },
       "gpt-5-mini": {
         "id": "gpt-5-mini",
         "name": "GPT-5 Mini",
@@ -62488,6 +63052,25 @@
           "output": 131072
         }
       },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.81,
+          "output": 3.54,
+          "cache_read": 0.2
+        },
+        "limit": {
+          "context": 256000,
+          "output": 256000
+        }
+      },
       "qwen3-coder-next": {
         "id": "qwen3-coder-next",
         "name": "Qwen3 Coder Next 80B",
@@ -63882,6 +64465,25 @@
           "output": 262000
         }
       },
+      "moonshotai/Kimi-K2.6": {
+        "id": "moonshotai/Kimi-K2.6",
+        "name": "moonshotai/Kimi-K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262000,
+          "output": 262000
+        }
+      },
       "moonshotai/Kimi-K2-Instruct": {
         "id": "moonshotai/Kimi-K2-Instruct",
         "name": "moonshotai/Kimi-K2-Instruct",
@@ -63928,8 +64530,8 @@
           ]
         },
         "cost": {
-          "input": 0.55,
-          "output": 3
+          "input": 0.45,
+          "output": 2.25
         },
         "limit": {
           "context": 262000,
@@ -64160,6 +64762,26 @@
         "limit": {
           "context": 40960,
           "output": 16384
+        }
+      },
+      "alibaba/qwen-3.6-max-preview": {
+        "id": "alibaba/qwen-3.6-max-preview",
+        "name": "Qwen 3.6 Max Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.3,
+          "output": 7.8,
+          "cache_read": 0.26,
+          "cache_write": 1.625
+        },
+        "limit": {
+          "context": 240000,
+          "output": 64000
         }
       },
       "alibaba/qwen3-next-80b-a3b-thinking": {
@@ -64525,6 +65147,44 @@
         "limit": {
           "context": 163840,
           "output": 128000
+        }
+      },
+      "deepseek/deepseek-v4-flash": {
+        "id": "deepseek/deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
+        }
+      },
+      "deepseek/deepseek-v4-pro": {
+        "id": "deepseek/deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
         }
       },
       "deepseek/deepseek-v3.2": {
@@ -65819,6 +66479,26 @@
           "output": 1536
         }
       },
+      "openai/gpt-5.5": {
+        "id": "openai/gpt-5.5",
+        "name": "GPT 5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 30,
+          "cache_read": 0.5
+        },
+        "limit": {
+          "context": 1000000,
+          "input": 872000,
+          "output": 128000
+        }
+      },
       "openai/gpt-5.3-codex": {
         "id": "openai/gpt-5.3-codex",
         "name": "GPT 5.3 Codex",
@@ -66170,6 +66850,25 @@
         "limit": {
           "context": 131072,
           "output": 131072
+        }
+      },
+      "openai/gpt-5.5-pro": {
+        "id": "openai/gpt-5.5-pro",
+        "name": "GPT 5.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180
+        },
+        "limit": {
+          "context": 1000000,
+          "input": 872000,
+          "output": 128000
         }
       },
       "openai/gpt-3.5-turbo-instruct": {
@@ -67795,6 +68494,25 @@
         "limit": {
           "context": 131072,
           "output": 16384
+        }
+      },
+      "moonshotai/kimi-k2.6": {
+        "id": "moonshotai/kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262000,
+          "output": 262000
         }
       },
       "moonshotai/kimi-k2-thinking": {
@@ -74765,6 +75483,26 @@
           "output": 128000
         }
       },
+      "claude-sonnet-4-6": {
+        "id": "claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 15,
+          "cache_read": 0.3,
+          "cache_write": 3.75
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 64000
+        }
+      },
       "gpt-4-turbo": {
         "id": "gpt-4-turbo",
         "name": "GPT-4 Turbo",
@@ -76401,6 +77139,20 @@
           "output": 8192
         }
       },
+      "gemma-4-26b-a4b-it": {
+        "id": "gemma-4-26b-a4b-it",
+        "name": "Gemma 4 26B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 256000,
+          "output": 8192
+        }
+      },
       "gemini-2.5-flash-lite": {
         "id": "gemini-2.5-flash-lite",
         "name": "Gemini 2.5 Flash Lite",
@@ -76418,20 +77170,6 @@
         "limit": {
           "context": 1048576,
           "output": 65536
-        }
-      },
-      "gemma-4-26b-it": {
-        "id": "gemma-4-26b-it",
-        "name": "Gemma 4 26B",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "limit": {
-          "context": 256000,
-          "output": 8192
         }
       },
       "gemini-2.5-flash-image-preview": {
@@ -78023,6 +78761,25 @@
         "limit": {
           "context": 262144,
           "output": 131072
+        }
+      },
+      "moonshotai/Kimi-K2.6": {
+        "id": "moonshotai/Kimi-K2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.2,
+          "output": 4.5,
+          "cache_read": 0.2
+        },
+        "limit": {
+          "context": 262144,
+          "output": 131000
         }
       },
       "moonshotai/Kimi-K2.5": {
@@ -79630,6 +80387,246 @@
         "limit": {
           "context": 204800,
           "output": 131072
+        }
+      }
+    }
+  },
+  "regolo-ai": {
+    "id": "regolo-ai",
+    "name": "Regolo AI",
+    "models": {
+      "mistral-small3.2": {
+        "id": "mistral-small3.2",
+        "name": "Mistral Small 3.2",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 2.2
+        },
+        "limit": {
+          "context": 120000,
+          "output": 120000
+        }
+      },
+      "qwen3-embedding-8b": {
+        "id": "qwen3-embedding-8b",
+        "name": "Qwen3-Embedding-8B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.1,
+          "output": 0.1
+        },
+        "limit": {
+          "context": 32768,
+          "output": 8192
+        }
+      },
+      "llama-3.3-70b-instruct": {
+        "id": "llama-3.3-70b-instruct",
+        "name": "Llama 3.3 70B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 2.7
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
+      "qwen3-reranker-4b": {
+        "id": "qwen3-reranker-4b",
+        "name": "Qwen3-Reranker-4B",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.12,
+          "output": 0.12
+        },
+        "limit": {
+          "context": 32768,
+          "output": 8192
+        }
+      },
+      "mistral-small-4-119b": {
+        "id": "mistral-small-4-119b",
+        "name": "Mistral Small 4 119B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 3
+        },
+        "limit": {
+          "context": 256000,
+          "output": 16384
+        }
+      },
+      "qwen3.5-122b": {
+        "id": "qwen3.5-122b",
+        "name": "Qwen3.5-122B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.9,
+          "output": 3.6
+        },
+        "limit": {
+          "context": 262144,
+          "output": 16384
+        }
+      },
+      "qwen-image": {
+        "id": "qwen-image",
+        "name": "Qwen-Image",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 2
+        },
+        "limit": {
+          "context": 8192,
+          "output": 4096
+        }
+      },
+      "qwen3-coder-next": {
+        "id": "qwen3-coder-next",
+        "name": "Qwen3-Coder-Next",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 1.2
+        },
+        "limit": {
+          "context": 262144,
+          "output": 16384
+        }
+      },
+      "minimax-m2.5": {
+        "id": "minimax-m2.5",
+        "name": "MiniMax 2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.8,
+          "output": 3.5
+        },
+        "limit": {
+          "context": 190000,
+          "output": 64000
+        }
+      },
+      "gpt-oss-20b": {
+        "id": "gpt-oss-20b",
+        "name": "GPT-OSS-20B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 1.8
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
+      "qwen3.5-9b": {
+        "id": "qwen3.5-9b",
+        "name": "Qwen3.5-9B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.15,
+          "output": 0.6
+        },
+        "limit": {
+          "context": 262144,
+          "output": 8192
+        }
+      },
+      "gpt-oss-120b": {
+        "id": "gpt-oss-120b",
+        "name": "GPT-OSS-120B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 4.2
+        },
+        "limit": {
+          "context": 128000,
+          "output": 16384
+        }
+      },
+      "llama-3.1-8b-instruct": {
+        "id": "llama-3.1-8b-instruct",
+        "name": "Llama 3.1 8B Instruct",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.05,
+          "output": 0.25
+        },
+        "limit": {
+          "context": 120000,
+          "output": 120000
         }
       }
     }
