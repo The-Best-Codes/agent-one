@@ -2,6 +2,7 @@ import {
   IconAlertCircle,
   IconCircleCheck,
   IconDownload,
+  IconExternalLink,
   IconRefresh,
   IconRocket,
   IconShieldCheck,
@@ -110,7 +111,7 @@ export default function AboutSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Help &amp; Updates</CardTitle>
+          <CardTitle>Updates</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div>
@@ -137,6 +138,39 @@ export default function AboutSection() {
             {(updateStatus === "downloading" || updateStatus === "installing") && (
               <Progress value={updateProgress} />
             )}
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Help</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <a
+              target="_blank"
+              href="https://github.com/AgentOne-Dev/agent-one-public/issues/new"
+              className="flex w-fit items-center gap-1 underline"
+            >
+              Report a bug
+              <IconExternalLink className="size-4" />
+            </a>
+            <a
+              target="_blank"
+              href="https://www.agent-one.dev/discord"
+              className="flex w-fit items-center gap-1 underline"
+            >
+              Get help on Discord
+              <IconExternalLink className="size-4" />
+            </a>
+            <a
+              target="_blank"
+              href="https://docs.agent-one.dev/docs"
+              className="flex w-fit items-center gap-1 underline"
+            >
+              Read the docs
+              <IconExternalLink className="size-4" />
+            </a>
           </div>
         </CardContent>
       </Card>
