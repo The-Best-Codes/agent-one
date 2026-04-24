@@ -146,6 +146,7 @@ pub fn run() {
                 tauri::generate_handler![
                     tools::get_url_content,
                     tools::web_search,
+                    utils::is_update_managed_externally,
                     utils::webview_html_callback,
                     utils::list_webviews,
                     utils::force_close_webview,
@@ -165,6 +166,7 @@ pub fn run() {
                 tauri::generate_handler![
                     tools::get_url_content,
                     tools::web_search,
+                    utils::is_update_managed_externally,
                     keyring::storage_get_item,
                     keyring::storage_set_item,
                     keyring::storage_remove_item,

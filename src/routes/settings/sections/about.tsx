@@ -36,6 +36,12 @@ export default function AboutSection() {
           title: "Checking for updates...",
           description: "Please wait while we check for the latest version",
         };
+      case "managed-externally":
+        return {
+          icon: <IconShieldCheck className="text-muted-foreground size-5" />,
+          title: "Automatic updates disabled",
+          description: "Update AgentOne through your software manager instead",
+        };
       case "up-to-date":
         return {
           icon: <IconCircleCheck className="size-5" />,
@@ -86,6 +92,8 @@ export default function AboutSection() {
             Checking...
           </Button>
         );
+      case "managed-externally":
+        return null;
       case "available":
         return (
           <Button onClick={downloadAndInstallUpdate} size="sm">

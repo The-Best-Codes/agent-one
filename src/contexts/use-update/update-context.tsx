@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { check } from "@tauri-apps/plugin-updater";
 import { useAtom } from "jotai";
@@ -26,6 +27,19 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     try {
       setUpdateStatus("checking");
 
+      let managedExternally = false;
+      try {
+        managedExternally = await invoke<boolean>("is_update_managed_externally");
+      } catch (error) {
+        logger.error("Failed to determine whether updates are externally managed.", error);
+      }
+
+      if (managedExternally) {
+        setUpdateStatus("managed-externally");
+        logger.verbose("Updates are managed externally. Skipping built-in updater.");
+        return;
+      }
+
       const update = await check();
       logger.verbose(`Update check completed. Update found: ${!!update}.`);
 
@@ -51,6 +65,19 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     try {
       setUpdateStatus("downloading");
       setUpdateProgress(0);
+
+      let managedExternally = false;
+      try {
+        managedExternally = await invoke<boolean>("is_update_managed_externally");
+      } catch (error) {
+        logger.error("Failed to determine whether updates are externally managed.", error);
+      }
+
+      if (managedExternally) {
+        setUpdateStatus("managed-externally");
+        logger.verbose("Updates are managed externally. Skipping built-in install.");
+        return;
+      }
 
       const update = await check();
       if (!update) {
@@ -95,8 +122,7 @@ export const UpdateProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       await checkForUpdates();
     };
     void startCheck();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checkForUpdates]);
 
   const dialogOpen = updateStatus === "available" && !dialogDismissed;
 
