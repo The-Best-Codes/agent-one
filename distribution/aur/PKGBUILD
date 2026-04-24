@@ -26,4 +26,5 @@ sha256sums_x86_64=('SKIP')
 
 package() {
   tar -xf data.tar.gz -C "${pkgdir}"
+  install -Dm644 /dev/null "${pkgdir}/usr/lib/agent-one/updates-managed-externally"
 }

@@ -3,6 +3,7 @@ import { createContext } from "react";
 export type UpdateStatus =
   | "idle"
   | "checking"
+  | "managed-externally"
   | "up-to-date"
   | "available"
   | "downloading"
