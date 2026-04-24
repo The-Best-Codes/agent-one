@@ -27,10 +27,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
-import {
-  type ToolDisplayLabels,
-  getPendingToolDisplayLabels,
-} from "@/lib/ai/tools/describeNextTool";
+import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
@@ -46,17 +43,16 @@ interface DynamicToolOutput {
 
 interface DynamicToolPartProps {
   part: DynamicToolUIPart;
+  labels?: ToolDisplayLabels | null;
 }
 
-export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
+export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
   const toolName = getToolDisplayName(part.toolName, part.title);
   const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
   const { addToolApprovalResponse } = useChatFunctions();
-
-  const [labels] = useState<ToolDisplayLabels | null>(() => getPendingToolDisplayLabels() ?? null);
 
   switch (part.state) {
     case "approval-requested": {

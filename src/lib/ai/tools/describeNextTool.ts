@@ -7,16 +7,6 @@ export interface ToolDisplayLabels {
   errorTitle?: string;
 }
 
-const pendingLabels = new Map<string, ToolDisplayLabels>();
-
-export function getPendingToolDisplayLabels(): ToolDisplayLabels | undefined {
-  if (pendingLabels.size === 0) return undefined;
-  const firstKey = pendingLabels.keys().next().value!;
-  const labels = pendingLabels.get(firstKey);
-  pendingLabels.delete(firstKey);
-  return labels;
-}
-
 export const createDescribeNextToolTool = () =>
   tool({
     description:
@@ -38,13 +28,7 @@ export const createDescribeNextToolTool = () =>
           'User-friendly error message, e.g. "Couldn\'t search for information about cats"',
         ),
     }),
-    execute: async (input) => {
-      const id = `describe-${Date.now()}-${Math.random()}`;
-      pendingLabels.set(id, {
-        loadingTitle: input.loadingTitle,
-        completedTitle: input.completedTitle,
-        errorTitle: input.errorTitle,
-      });
+    execute: async () => {
       return { success: true };
     },
   });
