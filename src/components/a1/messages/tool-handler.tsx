@@ -30,6 +30,8 @@ export const MessageToolHandler = memo(
     }
 
     switch (part.type) {
+      case "tool-describeNextTool":
+        return null;
       case "tool-dateTime":
         return <MessagePartToolDateTime part={part} />;
       case "tool-waitNumberMilliseconds":

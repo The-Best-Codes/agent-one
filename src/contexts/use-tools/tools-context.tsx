@@ -6,6 +6,7 @@ import {
   createCreateFileTool,
   createDateTimeTool,
   createDeleteFileTool,
+  createDescribeNextToolTool,
   createEditFileTool,
   createExecuteCommandTool,
   createGetUrlContentTool,
@@ -167,9 +168,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     }
 
     const cachedServers = enabledServers.filter((server) => isServerCached(server));
+    const forceReloadUncachedServers = !mcpLoadedRef.current;
     const serversToLoad = enabledServers.filter((server) => {
       if (isServerCached(server)) {
         return false;
+      }
+
+      if (forceReloadUncachedServers) {
+        return true;
       }
 
       if (!previousEnabledIds.has(server.id)) {
@@ -408,20 +414,16 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       );
     }
 
-    if (mcpLoadedRef.current) {
-      return {
-        ...filteredStaticTools,
-        ...mcpToolsRef.current,
-      };
-    }
-
-    if (loadingPromiseRef.current) {
+    if (!mcpLoadedRef.current && loadingPromiseRef.current) {
       await loadingPromiseRef.current;
     }
 
     return {
       ...filteredStaticTools,
       ...mcpToolsRef.current,
+      ...(Object.keys(mcpToolsRef.current).length > 0 && {
+        describeNextTool: createDescribeNextToolTool(),
+      }),
     };
   }, [enabledTools, toolConfigs]);
 

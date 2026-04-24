@@ -27,6 +27,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
@@ -42,9 +43,10 @@ interface DynamicToolOutput {
 
 interface DynamicToolPartProps {
   part: DynamicToolUIPart;
+  labels?: ToolDisplayLabels | null;
 }
 
-export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
+export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
@@ -123,21 +125,23 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
 
     case "approval-responded":
     case "input-streaming": {
+      const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground" />
-          <span className="text-foreground text-sm font-bold">Running "{toolName}" tool...</span>
+          <span className="text-foreground text-sm font-bold">{loadingText}</span>
         </div>
       );
     }
     case "input-available": {
+      const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
       return (
         <div
           key={callId}
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground" />
-          <span className="max-w-2xl truncate">Running "{toolName}" tool...</span>
+          <span className="max-w-2xl truncate">{loadingText}</span>
         </div>
       );
     }
@@ -185,7 +189,7 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
                 className="justify-start gap-1 p-0 font-bold hover:no-underline"
               >
                 <span className="text-destructive max-w-2xl truncate">
-                  "{toolName}" tool failed
+                  {labels?.errorTitle ?? `"${toolName}" tool failed`}
                 </span>
               </AccordionTrigger>
               <AccordionContent renderWhenCollapsed={!isLongOutput} className="p-0 pt-2">
@@ -237,7 +241,9 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               shouldRotateIcon={true}
               className="items-center justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="max-w-2xl truncate">"{toolName}" tool finished</span>
+              <span className="max-w-2xl truncate">
+                {labels?.completedTitle ?? `"${toolName}" tool finished`}
+              </span>
               {isLongOutput && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -328,7 +334,9 @@ export const MessagePartDynamicTool = ({ part }: DynamicToolPartProps) => {
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="text-destructive max-w-2xl truncate">"{toolName}" tool error</span>
+              <span className="text-destructive max-w-2xl truncate">
+                {labels?.errorTitle ?? `"${toolName}" tool error`}
+              </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="text-destructive/80 text-sm font-normal">

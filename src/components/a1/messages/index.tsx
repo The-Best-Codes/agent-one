@@ -15,6 +15,7 @@ import {
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
+import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -100,6 +101,8 @@ const MessagePartsInternal = ({
           return `[Source Document: ${part?.title || "Unnamed document"}, ${part?.filename || "Unnamed file"}]`;
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
+        } else if (part.type === "tool-describeNextTool") {
+          return null;
         } else if (part.type.startsWith("tool-")) {
           const toolPart = part as ToolUIPart;
           return `[Tool: ${getToolDisplayName(toolPart.type.replace("tool-", ""), toolPart.title)}]`;
@@ -170,8 +173,23 @@ const MessagePartsInternal = ({
           return <MessagePartStepStart key={key} />;
         case "file":
           return <MessagePartFile key={key} file={part} />;
-        case "dynamic-tool":
-          return <MessagePartDynamicTool key={key} part={part} />;
+        case "dynamic-tool": {
+          let toolLabels: ToolDisplayLabels | null = null;
+          for (let j = i - 1; j >= 0; j--) {
+            const prev = message.parts[j];
+            if (prev.type === "tool-describeNextTool" && "input" in prev && prev.input) {
+              const inp = prev.input as Record<string, string | undefined>;
+              toolLabels = {
+                loadingTitle: inp.loadingTitle,
+                completedTitle: inp.completedTitle,
+                errorTitle: inp.errorTitle,
+              };
+              break;
+            }
+            if (prev.type === "dynamic-tool" || prev.type.startsWith("tool-")) break;
+          }
+          return <MessagePartDynamicTool key={key} part={part} labels={toolLabels} />;
+        }
         default:
           if (part.type.startsWith("tool-")) {
             return <MessageToolHandler key={key} part={{ ...part }} />; // Using a spread operator to ensure React.memo will get a new instance of part
