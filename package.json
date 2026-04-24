@@ -13,7 +13,6 @@
     "fmt": "oxfmt --write . && cd src-tauri && cargo fmt",
     "fmt:check": "oxfmt --check . && cd src-tauri && cargo fmt --check",
     "spellcheck": "cspell --gitignore .",
-    "react-scan": "react-scan localhost:1420",
     "test:unit-test": "vitest run",
     "test:unit-test:ui": "vitest run --ui",
     "test:e2e": "playwright test",
