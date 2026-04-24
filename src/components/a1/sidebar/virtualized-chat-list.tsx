@@ -164,7 +164,7 @@ export const VirtualizedChatList = ({
         setIsSearching(false);
       } else if (searchContent) {
         setIsSearching(true);
-        debouncedSearch(value, rawOperators);
+        void debouncedSearch(value, rawOperators);
       }
     },
     [debouncedSearch, searchContent, rawOperators],
@@ -174,7 +174,7 @@ export const VirtualizedChatList = ({
     if (!searchQuery.trim()) return;
     if (searchContent) {
       setIsSearching(true);
-      debouncedSearch(searchQuery, rawOperators);
+      void debouncedSearch(searchQuery, rawOperators);
     } else {
       debouncedSearch.cancel();
       setSearchResults(null);

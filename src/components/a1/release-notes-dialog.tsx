@@ -35,12 +35,12 @@ export function ReleaseNotesDialog() {
 
   useEffect(() => {
     if (lastSeenVersion === null) {
-      void setLastSeenVersion(currentVersion);
+      setLastSeenVersion(currentVersion);
     }
   }, [currentVersion, lastSeenVersion, setLastSeenVersion]);
 
   const handleClose = () => {
-    void setLastSeenVersion(currentVersion);
+    setLastSeenVersion(currentVersion);
   };
 
   if (!releaseNotesData) {

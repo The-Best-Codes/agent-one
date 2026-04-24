@@ -213,7 +213,7 @@ function McpServerApprovalSettings({
                       <Switch
                         checked={toolRequiresApproval}
                         onCheckedChange={(checked) => {
-                          const nextOverrides = { ...(toolApprovalOverrides ?? {}) };
+                          const nextOverrides = { ...toolApprovalOverrides };
 
                           if (checked === requiresApproval) {
                             delete nextOverrides[toolName];

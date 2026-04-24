@@ -44,7 +44,7 @@ const ContentPreview = memo(({ content, filePath }: { content: string; filePath:
   const [langExt, setLangExt] = useState<Extension | null>(null);
 
   useEffect(() => {
-    getLanguageExtension(filePath).then(setLangExt);
+    void getLanguageExtension(filePath).then(setLangExt);
   }, [filePath]);
 
   return (

@@ -55,7 +55,7 @@ const DiffView = memo(
     const [langExt, setLangExt] = useState<Extension | null>(null);
 
     useEffect(() => {
-      getLanguageExtension(filePath).then(setLangExt);
+      void getLanguageExtension(filePath).then(setLangExt);
     }, [filePath]);
 
     return (
