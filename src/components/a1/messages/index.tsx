@@ -100,6 +100,8 @@ const MessagePartsInternal = ({
           return `[Source Document: ${part?.title || "Unnamed document"}, ${part?.filename || "Unnamed file"}]`;
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
+        } else if (part.type === "tool-describeNextTool") {
+          return null;
         } else if (part.type.startsWith("tool-")) {
           const toolPart = part as ToolUIPart;
           return `[Tool: ${getToolDisplayName(toolPart.type.replace("tool-", ""), toolPart.title)}]`;

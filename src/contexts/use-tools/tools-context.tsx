@@ -6,6 +6,7 @@ import {
   createCreateFileTool,
   createDateTimeTool,
   createDeleteFileTool,
+  createDescribeNextToolTool,
   createEditFileTool,
   createExecuteCommandTool,
   createGetUrlContentTool,
@@ -413,10 +414,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       );
     }
 
+    const hasMcpTools = () => Object.keys(mcpToolsRef.current).length > 0;
+
     if (mcpLoadedRef.current) {
       return {
         ...filteredStaticTools,
         ...mcpToolsRef.current,
+        ...(hasMcpTools() && { describeNextTool: createDescribeNextToolTool() }),
       };
     }
 
@@ -427,6 +431,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     return {
       ...filteredStaticTools,
       ...mcpToolsRef.current,
+      ...(hasMcpTools() && { describeNextTool: createDescribeNextToolTool() }),
     };
   }, [enabledTools, toolConfigs]);
 
