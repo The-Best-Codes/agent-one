@@ -414,24 +414,16 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       );
     }
 
-    const hasMcpTools = () => Object.keys(mcpToolsRef.current).length > 0;
-
-    if (mcpLoadedRef.current) {
-      return {
-        ...filteredStaticTools,
-        ...mcpToolsRef.current,
-        ...(hasMcpTools() && { describeNextTool: createDescribeNextToolTool() }),
-      };
-    }
-
-    if (loadingPromiseRef.current) {
+    if (!mcpLoadedRef.current && loadingPromiseRef.current) {
       await loadingPromiseRef.current;
     }
 
     return {
       ...filteredStaticTools,
       ...mcpToolsRef.current,
-      ...(hasMcpTools() && { describeNextTool: createDescribeNextToolTool() }),
+      ...(Object.keys(mcpToolsRef.current).length > 0 && {
+        describeNextTool: createDescribeNextToolTool(),
+      }),
     };
   }, [enabledTools, toolConfigs]);
 
