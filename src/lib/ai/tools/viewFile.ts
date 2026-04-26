@@ -11,7 +11,7 @@ const logger = getLogger(import.meta.url);
 export const createViewFileTool = (config: ViewFileToolConfig) =>
   tool({
     description:
-      "View the contents of a file. Supports reading specific line ranges and automatically truncates large files to avoid excessive output. Always pass a real absolute path: do not assume `~` expands to a particular directory (e.g. do not assume it is `/root`). If you need the user's home directory, run a command like `echo $HOME` or `pwd` first to discover the real path instead of guessing.",
+      "View the contents of a file. Supports reading specific line ranges and automatically truncates large files to avoid excessive output. Prefer this tool over shell commands like `cat` for simple file reads. Always pass a real absolute path: do not assume `~` expands to a particular directory (e.g. do not assume it is `/root`). If you need the user's home directory, run a command like `echo $HOME` or `pwd` first to discover the real path instead of guessing.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       filePath: z
