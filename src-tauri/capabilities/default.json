@@ -63,7 +63,7 @@
     "fs:read-all",
     {
       "identifier": "fs:scope",
-      "allow": [{ "path": "**" }]
+      "allow": [{ "path": "**" }, { "path": "**/.*" }, { "path": "**/.*/**" }]
     },
     "dialog:default",
     "clipboard-manager:default",
