@@ -17,7 +17,7 @@ export const createViewFileTool = (config: ViewFileToolConfig) =>
     inputSchema: z.object({
       filePath: z
         .string()
-        .describe("Absolute path to the file to view. `~` is expanded to the home directory."),
+        .describe("Path to the file to view. `~` is expanded to the home directory."),
       maxChars: z.number().optional().describe("Optional override for max characters to return"),
       startLine: z.number().optional().describe("Optional 1-indexed line to start reading from"),
       endLine: z

@@ -18,7 +18,7 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
     inputSchema: z.object({
       filePath: z
         .string()
-        .describe("Absolute path for the file to create. `~` is expanded to the home directory."),
+        .describe("Path for the file to create. `~` is expanded to the home directory."),
       content: z.string().describe("Content to write to the file"),
       overwrite: z
         .boolean()

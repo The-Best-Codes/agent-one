@@ -17,7 +17,7 @@ export const createEditFileTool = (config: EditFileToolConfig) =>
     inputSchema: z.object({
       filePath: z
         .string()
-        .describe("Absolute path to the file to edit. `~` is expanded to the home directory."),
+        .describe("Path to the file to edit. `~` is expanded to the home directory."),
       oldContent: z.string().describe("The exact text content to find and replace"),
       newContent: z.string().describe("The new text content to replace with"),
     }),

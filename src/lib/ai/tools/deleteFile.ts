@@ -16,7 +16,7 @@ export const createDeleteFileTool = (config: DeleteFileToolConfig) =>
     inputSchema: z.object({
       filePath: z
         .string()
-        .describe("Absolute path to the file to delete. `~` is expanded to the home directory."),
+        .describe("Path to the file to delete. `~` is expanded to the home directory."),
     }),
     execute: async (input, { abortSignal }) => {
       logger.verbose("Executing deleteFile tool with input:", input);
