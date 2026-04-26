@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { tool } from "ai";
 import { z } from "zod";
 
-import { raceWithAbort } from "@/lib/ai/tools/abort";
+import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { fixUrl } from "@/lib/fix-url";
 import { getLogger } from "@/lib/logger";
 import type { GetUrlContentToolConfig } from "@/lib/settings/types";
