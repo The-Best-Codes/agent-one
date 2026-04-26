@@ -3,7 +3,7 @@ import { type Child, Command } from "@tauri-apps/plugin-shell";
 import { tool } from "ai";
 import { z } from "zod";
 
-import { createAbortError, raceWithAbort } from "@/lib/ai/tools/abort";
+import { createAbortError, raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { getLogger } from "@/lib/logger";
 import type { ExecuteCommandToolConfig } from "@/lib/settings/types";
 
