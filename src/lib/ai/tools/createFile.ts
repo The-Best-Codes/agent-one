@@ -10,10 +10,15 @@ const logger = getLogger(import.meta.url);
 
 export const createCreateFileTool = (config: CreateFileToolConfig) =>
   tool({
-    description: "Create a new file or overwrite an existing file with the given content.",
+    description:
+      "Create a new file or overwrite an existing file with the given content. Prefer this tool over shell `cat`/`echo`/heredoc redirection for writing files. Always pass a real absolute path: do not assume `~` expands to a particular directory (e.g. do not assume it is `/root`). If you need the user's home directory, run a command like `echo $HOME` or `pwd` first to discover the real path instead of guessing.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
-      filePath: z.string().describe("Absolute path for the file to create"),
+      filePath: z
+        .string()
+        .describe(
+          "Absolute path for the file to create. Do not use `~` or assume the home directory; resolve it first via a shell command if unknown.",
+        ),
       content: z.string().describe("Content to write to the file"),
       overwrite: z
         .boolean()
