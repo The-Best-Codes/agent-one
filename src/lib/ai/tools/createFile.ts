@@ -1,4 +1,5 @@
-import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
+import { dirname } from "@tauri-apps/api/path";
+import { exists, mkdir, writeTextFile } from "@tauri-apps/plugin-fs";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -25,6 +26,13 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
         .default(false)
         .optional()
         .describe("Whether to overwrite if the file already exists"),
+      createParentDirs: z
+        .boolean()
+        .default(true)
+        .optional()
+        .describe(
+          "Whether to create parent directories if they don't already exist. Defaults to true.",
+        ),
     }),
     execute: async (input, { abortSignal }) => {
       logger.verbose("Executing createFile tool with input:", input);
@@ -39,6 +47,23 @@ export const createCreateFileTool = (config: CreateFileToolConfig) =>
         throw new Error(
           "File already exists. Set overwrite to true to overwrite the existing file.",
         );
+      }
+
+      const createParentDirs = input.createParentDirs ?? true;
+
+      if (createParentDirs && !fileExists) {
+        const parentDir = await raceWithAbort(dirname(input.filePath), abortSignal);
+
+        abortSignal?.throwIfAborted();
+
+        const parentExists = await raceWithAbort(exists(parentDir), abortSignal);
+
+        abortSignal?.throwIfAborted();
+
+        if (!parentExists) {
+          await raceWithAbort(mkdir(parentDir, { recursive: true }), abortSignal);
+          abortSignal?.throwIfAborted();
+        }
       }
 
       await raceWithAbort(writeTextFile(input.filePath, input.content), abortSignal);
