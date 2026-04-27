@@ -1,0 +1,4 @@
+{
+  "llms": "https://tauri.app/llms.txt",
+  "llms-full": "https://tauri.app/llms-full.txt"
+}
