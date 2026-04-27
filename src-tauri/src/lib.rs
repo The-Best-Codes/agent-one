@@ -4,6 +4,7 @@ use tauri::{Emitter, Manager};
 
 mod keyring;
 mod mcp_auth;
+mod shell;
 mod tools;
 mod utils;
 
@@ -76,7 +77,6 @@ pub fn run() {
         .plugin(tauri_plugin_websocket::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_shell::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations(
@@ -159,6 +159,9 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    shell::shell_spawn,
+                    shell::shell_write_stdin,
+                    shell::shell_kill,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -176,6 +179,9 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    shell::shell_spawn,
+                    shell::shell_write_stdin,
+                    shell::shell_kill,
                 ]
             }
         })

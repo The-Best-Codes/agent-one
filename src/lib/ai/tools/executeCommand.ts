@@ -1,11 +1,10 @@
-import { platform } from "@tauri-apps/plugin-os";
-import { type Child, Command } from "@tauri-apps/plugin-shell";
 import { tool } from "ai";
 import { z } from "zod";
 
 import { createAbortError, raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { getLogger } from "@/lib/logger";
 import type { ExecuteCommandToolConfig } from "@/lib/settings/types";
+import { spawnCommand } from "@/lib/shell";
 
 const logger = getLogger(import.meta.url);
 
@@ -35,25 +34,17 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       abortSignal?.throwIfAborted();
 
       const timeoutMs = input.timeoutMs ?? config.defaultTimeoutMs;
-      const currentPlatform = platform();
-      const isWindows = currentPlatform === "windows";
-
-      const shellCmd = isWindows ? "cmd" : "sh";
-      const shellArgs = isWindows ? ["/C", input.command] : ["-c", input.command];
-
-      const command = Command.create(shellCmd, shellArgs);
 
       let stdout = "";
       let stderr = "";
       let timedOut = false;
       let aborted = false;
-      let child: Child | null = null;
       let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
       type QueueItem =
         | { type: "stdout"; data: string }
         | { type: "stderr"; data: string }
-        | { type: "done"; code: number | null; signal: number | null }
+        | { type: "done"; code: number | null }
         | { type: "error"; message: string };
 
       const queue: QueueItem[] = [];
@@ -61,26 +52,9 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
 
       const push = (item: QueueItem) => {
         queue.push(item);
-        if (resolveWait) {
-          resolveWait();
-          resolveWait = null;
-        }
+        resolveWait?.();
+        resolveWait = null;
       };
-
-      command.stdout.on("data", (line: string) => {
-        stdout += line;
-        push({ type: "stdout", data: line });
-      });
-
-      command.stderr.on("data", (line: string) => {
-        stderr += line;
-        push({ type: "stderr", data: line });
-      });
-
-      let done = false;
-      let exitCode: number | null = null;
-      let signal: number | null = null;
-      let errorMessage: string | null = null;
 
       const waitForNextQueueItem = () =>
         new Promise<void>((resolve) => {
@@ -89,72 +63,77 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
 
       const waitForTrailingEvents = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-      command.on("error", (error: string) => {
-        push({ type: "error", message: error });
-      });
+      const proc = await raceWithAbort(
+        spawnCommand(
+          { command: input.command },
+          (data) => {
+            stdout += data;
+            push({ type: "stdout", data });
+          },
+          (data) => {
+            stderr += data;
+            push({ type: "stderr", data });
+          },
+        ),
+        abortSignal,
+      );
 
-      command.on("close", (data: { code: number | null; signal: number | null }) => {
-        exitCode = data.code;
-        signal = data.signal;
-        done = true;
-        push({ type: "done", code: data.code, signal: data.signal });
-      });
+      if (aborted) {
+        void proc.kill().catch(() => {});
+        throw createAbortError();
+      }
+
+      let done = false;
+      let exitCode: number | null = null;
+      let errorMessage: string | null = null;
+
+      proc.exited
+        .then(({ code }) => {
+          exitCode = code;
+          done = true;
+          push({ type: "done", code });
+        })
+        .catch((err: unknown) => {
+          errorMessage = err instanceof Error ? err.message : String(err);
+          done = true;
+          push({ type: "error", message: errorMessage! });
+        });
 
       const onAbort = () => {
         aborted = true;
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        if (child) {
-          void child.kill().catch(() => {});
-        }
-        if (resolveWait) {
-          resolveWait();
-          resolveWait = null;
-        }
+        if (timeoutId) clearTimeout(timeoutId);
+        void proc.kill().catch(() => {});
+        resolveWait?.();
+        resolveWait = null;
       };
 
       abortSignal?.addEventListener("abort", onAbort, { once: true });
 
+      timeoutId = setTimeout(() => {
+        timedOut = true;
+        void proc.kill().catch(() => {});
+      }, timeoutMs);
+
       try {
-        child = await raceWithAbort(command.spawn(), abortSignal);
-
-        if (aborted) {
-          void child.kill().catch(() => {});
-          throw createAbortError();
-        }
-
-        timeoutId = setTimeout(() => {
-          timedOut = true;
-          void child?.kill().catch(() => {});
-        }, timeoutMs);
-
         while (!done || queue.length > 0) {
-          if (aborted) {
-            throw createAbortError();
-          }
+          if (aborted) throw createAbortError();
 
           if (queue.length === 0) {
             if (done) {
               await raceWithAbort(waitForTrailingEvents(), abortSignal);
-              if (queue.length === 0) {
-                break;
-              }
+              if (queue.length === 0) break;
             } else {
               await raceWithAbort(waitForNextQueueItem(), abortSignal);
             }
           }
 
           while (queue.length > 0) {
-            if (aborted) {
-              throw createAbortError();
-            }
+            if (aborted) throw createAbortError();
 
             const item = queue.shift()!;
             if (item.type === "done") {
               done = true;
               exitCode = item.code;
-              signal = item.signal;
               continue;
             }
             if (item.type === "error") {
@@ -173,9 +152,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           }
         }
 
-        if (errorMessage) {
-          throw new Error(errorMessage);
-        }
+        if (errorMessage) throw new Error(errorMessage);
 
         logger.verbose("Command executed:", {
           exitCode,
@@ -187,13 +164,11 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           stdout,
           stderr,
           exitCode,
-          signal,
+          signal: null,
           timedOut,
         } as ExecuteCommandOutput;
       } finally {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
+        if (timeoutId) clearTimeout(timeoutId);
         abortSignal?.removeEventListener("abort", onAbort);
       }
     },
