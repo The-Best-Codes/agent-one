@@ -281,6 +281,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
     case "output-available": {
       const outputFromPart = (part.output as ExecuteCommandOutput | undefined) ?? EMPTY_OUTPUT;
       const isPreliminary = (part as { preliminary?: boolean }).preliminary === true;
+      const showSpinnerIcon = isPreliminary || liveState?.status === "skipped-running";
       const output: ExecuteCommandOutput = liveState
         ? {
             stdout: liveState.stdout,
@@ -313,7 +314,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  {isPreliminary || liveState?.status === "skipped-running" ? (
+                  {showSpinnerIcon ? (
                     <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
                   ) : (
                     <IconTerminal2
@@ -323,7 +324,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                       )}
                     />
                   )}
-                  {!isPreliminary && (
+                  {!showSpinnerIcon && (
                     <IconChevronDown
                       className={cn(
                         "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
