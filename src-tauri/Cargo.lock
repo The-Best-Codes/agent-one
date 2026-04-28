@@ -31,7 +31,7 @@ dependencies = [
 
 [[package]]
 name = "agent-one"
-version = "0.0.16"
+version = "0.0.17"
 dependencies = [
  "async-trait",
  "axum",
