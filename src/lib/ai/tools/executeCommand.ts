@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { createAbortError } from "@/lib/ai/tools/utils/abort";
+import { createAbortError, raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { getLogger } from "@/lib/logger";
 import { spawnCommand } from "@/lib/run-command";
 import type { ExecuteCommandToolConfig } from "@/lib/settings/types";
@@ -115,7 +115,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           }
 
           if (queue.length === 0) {
-            await waitForNext();
+            await raceWithAbort(waitForNext(), abortSignal);
           }
 
           while (queue.length > 0) {
