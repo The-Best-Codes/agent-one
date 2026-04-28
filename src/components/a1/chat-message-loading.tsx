@@ -15,11 +15,9 @@ const LoadingIndicator = ({
   isMcpLoading: boolean;
   className?: string;
 }) => {
-  const text = isApiKeysLoading
-    ? "Loading API keys"
-    : isMcpLoading
-      ? "Starting extensions"
-      : "Thinking";
+  let text = "Thinking";
+  if (isMcpLoading) text = "Starting extensions";
+  if (isApiKeysLoading) text = "Booting up";
 
   return (
     <div className={cn("flex items-center gap-1", className)}>
@@ -52,11 +50,7 @@ export const ChatMessageLoading = ({
     }
 
     if (status === "streaming") {
-      return (
-        <div className="justify-end">
-          <span className="animate-caret-blink text-muted-foreground">|</span>
-        </div>
-      );
+      return null;
     }
 
     if (status === "submitted" && lastOverallMessage.role === "assistant") {
