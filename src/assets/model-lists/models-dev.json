@@ -1783,6 +1783,24 @@
           "output": 16384
         }
       },
+      "qwen3.5-122b-a10b": {
+        "id": "qwen3.5-122b-a10b",
+        "name": "Qwen3.5 122B-A10B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 3.2
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
+        }
+      },
       "qwen3-coder-plus": {
         "id": "qwen3-coder-plus",
         "name": "Qwen3 Coder Plus",
@@ -1798,6 +1816,42 @@
         },
         "limit": {
           "context": 1048576,
+          "output": 65536
+        }
+      },
+      "qwen3.6-27b": {
+        "id": "qwen3.6-27b",
+        "name": "Qwen3.6 27B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 3.6
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
+        }
+      },
+      "qwen3.5-27b": {
+        "id": "qwen3.5-27b",
+        "name": "Qwen3.5 27B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.3,
+          "output": 2.4
+        },
+        "limit": {
+          "context": 262144,
           "output": 65536
         }
       },
@@ -1870,8 +1924,7 @@
         },
         "cost": {
           "input": 0.6,
-          "output": 3.6,
-          "reasoning": 3.6
+          "output": 3.6
         },
         "limit": {
           "context": 262144,
@@ -1989,6 +2042,24 @@
         "limit": {
           "context": 1000000,
           "output": 32768
+        }
+      },
+      "qwen3.6-35b-a3b": {
+        "id": "qwen3.6-35b-a3b",
+        "name": "Qwen3.6 35B-A3B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.248,
+          "output": 1.485
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
         }
       },
       "qwen-omni-turbo": {
@@ -2548,6 +2619,24 @@
         "limit": {
           "context": 131072,
           "output": 8192
+        }
+      },
+      "qwen3.5-35b-a3b": {
+        "id": "qwen3.5-35b-a3b",
+        "name": "Qwen3.5 35B-A3B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 2
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
         }
       }
     }
@@ -16162,13 +16251,13 @@
           ]
         },
         "cost": {
-          "input": 0.28,
-          "output": 0.42,
+          "input": 0.14,
+          "output": 0.28,
           "cache_read": 0.028
         },
         "limit": {
-          "context": 131072,
-          "output": 8192
+          "context": 1000000,
+          "output": 384000
         }
       },
       "deepseek-reasoner": {
@@ -16181,13 +16270,13 @@
           ]
         },
         "cost": {
-          "input": 0.28,
-          "output": 0.42,
+          "input": 0.14,
+          "output": 0.28,
           "cache_read": 0.028
         },
         "limit": {
-          "context": 128000,
-          "output": 64000
+          "context": 1000000,
+          "output": 384000
         }
       },
       "deepseek-v4-flash": {
@@ -16544,6 +16633,20 @@
         "limit": {
           "context": 131072,
           "output": 65536
+        }
+      },
+      "openrouter/pareto-code": {
+        "id": "openrouter/pareto-code",
+        "name": "Pareto Code Router",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 200000,
+          "output": 200000
         }
       },
       "openrouter/elephant-alpha": {
@@ -17273,6 +17376,24 @@
         "limit": {
           "context": 262144,
           "output": 262144
+        }
+      },
+      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free": {
+        "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        "name": "Nemotron 3 Nano Omni (free)",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 256000,
+          "output": 65536
         }
       },
       "nvidia/nemotron-3-nano-30b-a3b:free": {
@@ -19006,6 +19127,25 @@
           "output": 65536
         }
       },
+      "google/gemini-3.1-flash-image-preview": {
+        "id": "google/gemini-3.1-flash-image-preview",
+        "name": "Gemini 3.1 Flash Image Preview (Nano Banana 2)",
+        "tool_call": false,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 0.5,
+          "output": 3
+        },
+        "limit": {
+          "context": 65536,
+          "output": 65536
+        }
+      },
       "google/gemma-4-31b-it:free": {
         "id": "google/gemma-4-31b-it:free",
         "name": "Gemma 4 31B (free)",
@@ -19568,6 +19708,31 @@
           "output": 393216
         }
       },
+      "openai/gpt-5.5": {
+        "id": "openai/gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 30,
+          "cache_read": 0.5,
+          "context_over_200k": {
+            "input": 10,
+            "output": 45,
+            "cache_read": 1
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
+      },
       "openai/gpt-5.4": {
         "id": "openai/gpt-5.4",
         "name": "GPT-5.4",
@@ -19586,6 +19751,25 @@
             "output": 22.5,
             "cache_read": 0.5
           }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
+      },
+      "openai/gpt-5.5-pro": {
+        "id": "openai/gpt-5.5-pro",
+        "name": "GPT-5.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180
         },
         "limit": {
           "context": 1050000,
@@ -19655,6 +19839,54 @@
         "limit": {
           "context": 200000,
           "output": 8192
+        }
+      },
+      "xiaomi/mimo-v2.5-pro": {
+        "id": "xiaomi/mimo-v2.5-pro",
+        "name": "MiMo-V2.5-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3,
+          "cache_read": 0.2,
+          "context_over_200k": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.4
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 131072
+        }
+      },
+      "xiaomi/mimo-v2.5": {
+        "id": "xiaomi/mimo-v2.5",
+        "name": "MiMo-V2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 2,
+          "cache_read": 0.08,
+          "context_over_200k": {
+            "input": 0.8,
+            "output": 4,
+            "cache_read": 0.16
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 131072
         }
       }
     }
@@ -19998,6 +20230,25 @@
           "context": 256000,
           "output": 256000
         }
+      },
+      "accounts/fireworks/models/deepseek-v4-pro": {
+        "id": "accounts/fireworks/models/deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.15
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
+        }
       }
     }
   },
@@ -20190,8 +20441,8 @@
           "cache_read": 0.2
         },
         "limit": {
-          "context": 204800,
-          "output": 131072
+          "context": 202752,
+          "output": 32768
         }
       },
       "mimo-v2-omni": {
@@ -20233,7 +20484,7 @@
           }
         },
         "limit": {
-          "context": 262144,
+          "context": 1000000,
           "output": 128000
         }
       },
@@ -20272,8 +20523,8 @@
           "cache_read": 0.26
         },
         "limit": {
-          "context": 204800,
-          "output": 131072
+          "context": 202752,
+          "output": 32768
         }
       },
       "deepseek-v4-flash": {
@@ -20288,7 +20539,7 @@
         "cost": {
           "input": 0.14,
           "output": 0.28,
-          "cache_read": 0.028
+          "cache_read": 0.0028
         },
         "limit": {
           "context": 1000000,
@@ -20326,7 +20577,7 @@
         "cost": {
           "input": 1.74,
           "output": 3.48,
-          "cache_read": 0.145
+          "cache_read": 0.0145
         },
         "limit": {
           "context": 1000000,
@@ -21835,6 +22086,25 @@
           "output": 3072
         }
       },
+      "qwen3.6-max-preview": {
+        "id": "qwen3.6-max-preview",
+        "name": "Qwen3.6 Max Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.32,
+          "output": 7.9,
+          "cache_read": 0.132
+        },
+        "limit": {
+          "context": 245800,
+          "output": 65536
+        }
+      },
       "qwen2-5-omni-7b": {
         "id": "qwen2-5-omni-7b",
         "name": "Qwen2.5-Omni 7B",
@@ -22164,6 +22434,44 @@
         "limit": {
           "context": 1048576,
           "output": 65536
+        }
+      },
+      "deepseek-v4-flash": {
+        "id": "deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
+        }
+      },
+      "deepseek-v4-pro": {
+        "id": "deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
         }
       }
     }
@@ -24178,6 +24486,25 @@
         "limit": {
           "context": 204800,
           "output": 131072
+        }
+      },
+      "deepseek-ai/DeepSeek-V4-Pro": {
+        "id": "deepseek-ai/DeepSeek-V4-Pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 393216
         }
       }
     }
@@ -27045,6 +27372,24 @@
           "output": 65536
         }
       },
+      "qwen/qwen3.6-27b": {
+        "id": "qwen/qwen3.6-27b",
+        "name": "Qwen3.6-27B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.6,
+          "output": 3.6
+        },
+        "limit": {
+          "context": 262144,
+          "output": 65536
+        }
+      },
       "qwen/qwen3.5-27b": {
         "id": "qwen/qwen3.5-27b",
         "name": "Qwen3.5-27B",
@@ -27700,6 +28045,44 @@
           "context": 262144,
           "output": 262144
         }
+      },
+      "deepseek/deepseek-v4-flash": {
+        "id": "deepseek/deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 393216
+        }
+      },
+      "deepseek/deepseek-v4-pro": {
+        "id": "deepseek/deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 393216
+        }
       }
     }
   },
@@ -27707,6 +28090,25 @@
     "id": "xiaomi-token-plan-cn",
     "name": "Xiaomi Token Plan (China)",
     "models": {
+      "mimo-v2.5-pro": {
+        "id": "mimo-v2.5-pro",
+        "name": "MiMo-V2.5-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "mimo-v2-omni": {
         "id": "mimo-v2-omni",
         "name": "MiMo-V2-Omni",
@@ -27723,6 +28125,25 @@
         },
         "limit": {
           "context": 256000,
+          "output": 128000
+        }
+      },
+      "mimo-v2.5": {
+        "id": "mimo-v2.5",
+        "name": "MiMo-V2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 1000000,
           "output": 128000
         }
       },
@@ -28073,6 +28494,26 @@
         "limit": {
           "context": 196608,
           "output": 196608
+        }
+      },
+      "zai-org/GLM-5.1": {
+        "id": "zai-org/GLM-5.1",
+        "name": "GLM-5.1",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.4,
+          "output": 4.4,
+          "cache_read": 0.26,
+          "cache_write": 0
+        },
+        "limit": {
+          "context": 200000,
+          "output": 131072
         }
       }
     }
@@ -30273,6 +30714,25 @@
         "limit": {
           "context": 200000,
           "output": 32000
+        }
+      },
+      "deepseek-ai/DeepSeek-V4-Pro": {
+        "id": "deepseek-ai/DeepSeek-V4-Pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 65536,
+          "output": 65536
         }
       }
     }
@@ -37641,6 +38101,30 @@
           "output": 32768
         }
       },
+      "xiaomi/mimo-v2.5-pro": {
+        "id": "xiaomi/mimo-v2.5-pro",
+        "name": "Xiaomi: MiMo V2.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3,
+          "cache_read": 0.2,
+          "context_over_200k": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.4
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 128000
+        }
+      },
       "xiaomi/mimo-v2-omni": {
         "id": "xiaomi/mimo-v2-omni",
         "name": "Xiaomi: MiMo-V2-Omni",
@@ -37658,6 +38142,30 @@
         "limit": {
           "context": 262144,
           "output": 65536
+        }
+      },
+      "xiaomi/mimo-v2.5": {
+        "id": "xiaomi/mimo-v2.5",
+        "name": "Xiaomi: MiMo-V2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 2,
+          "cache_read": 0.08,
+          "context_over_200k": {
+            "input": 0.8,
+            "output": 4,
+            "cache_read": 0.16
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 131072
         }
       },
       "xiaomi/mimo-v2-pro": {
@@ -39665,6 +40173,31 @@
           "context": 200000,
           "output": 4096
         }
+      },
+      "openai/gpt-5.5": {
+        "id": "openai/gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 30,
+          "cache_read": 0.5,
+          "context_over_200k": {
+            "input": 10,
+            "output": 45,
+            "cache_read": 1
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
       }
     }
   },
@@ -39746,6 +40279,25 @@
           "context": 128000,
           "input": 128000,
           "output": 64000
+        }
+      },
+      "gpt-5.5": {
+        "id": "gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 400000,
+          "input": 272000,
+          "output": 128000
         }
       },
       "gpt-5-mini": {
@@ -40319,6 +40871,44 @@
         },
         "limit": {
           "context": 256000,
+          "output": 128000
+        }
+      },
+      "mimo-v2.5-pro": {
+        "id": "mimo-v2.5-pro",
+        "name": "MiMo-V2.5-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
+      "mimo-v2.5": {
+        "id": "mimo-v2.5",
+        "name": "MiMo-V2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 1000000,
           "output": 128000
         }
       }
@@ -41702,8 +42292,8 @@
         },
         "limit": {
           "context": 1050000,
-          "input": 920000,
-          "output": 130000
+          "input": 922000,
+          "output": 128000
         }
       },
       "gpt-5.4": {
@@ -45104,6 +45694,45 @@
           "context": 0,
           "output": 0
         }
+      },
+      "openai/gpt-5.5": {
+        "id": "openai/gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 4.5455,
+          "output": 27.2727,
+          "cache_read": 0.4545
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
+      },
+      "openai/gpt-5.5-pro": {
+        "id": "openai/gpt-5.5-pro",
+        "name": "GPT-5.5-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text",
+            "image"
+          ]
+        },
+        "cost": {
+          "input": 27.2727,
+          "output": 163.6364
+        },
+        "limit": {
+          "context": 400000,
+          "output": 128000
+        }
       }
     }
   },
@@ -47158,6 +47787,20 @@
           "output": 131072
         }
       },
+      "deepseek-v4-flash": {
+        "id": "deepseek-v4-flash",
+        "name": "deepseek-v4-flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 1048576
+        }
+      },
       "glm-4.6": {
         "id": "glm-4.6",
         "name": "glm-4.6",
@@ -47256,6 +47899,20 @@
           "output": 65536
         }
       },
+      "deepseek-v4-pro": {
+        "id": "deepseek-v4-pro",
+        "name": "deepseek-v4-pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 1048576
+        }
+      },
       "minimax-m2.5": {
         "id": "minimax-m2.5",
         "name": "minimax-m2.5",
@@ -47332,26 +47989,6 @@
     "id": "zai-coding-plan",
     "name": "Z.AI Coding Plan",
     "models": {
-      "glm-5v-turbo": {
-        "id": "glm-5v-turbo",
-        "name": "glm-5v-turbo",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 200000,
-          "output": 131072
-        }
-      },
       "glm-4.7": {
         "id": "glm-4.7",
         "name": "GLM-4.7",
@@ -47369,46 +48006,6 @@
         },
         "limit": {
           "context": 204800,
-          "output": 131072
-        }
-      },
-      "glm-5": {
-        "id": "glm-5",
-        "name": "GLM-5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 204800,
-          "output": 131072
-        }
-      },
-      "glm-4.7-flashx": {
-        "id": "glm-4.7-flashx",
-        "name": "GLM-4.7-FlashX",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.07,
-          "output": 0.4,
-          "cache_read": 0.01,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 200000,
           "output": 131072
         }
       },
@@ -47430,26 +48027,6 @@
         "limit": {
           "context": 200000,
           "output": 131072
-        }
-      },
-      "glm-4.5": {
-        "id": "glm-4.5",
-        "name": "GLM-4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 131072,
-          "output": 98304
         }
       },
       "glm-4.5-air": {
@@ -47475,102 +48052,6 @@
       "glm-5-turbo": {
         "id": "glm-5-turbo",
         "name": "GLM-5-Turbo",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 200000,
-          "output": 131072
-        }
-      },
-      "glm-4.5v": {
-        "id": "glm-4.5v",
-        "name": "GLM-4.5V",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 64000,
-          "output": 16384
-        }
-      },
-      "glm-4.6": {
-        "id": "glm-4.6",
-        "name": "GLM-4.6",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 204800,
-          "output": 131072
-        }
-      },
-      "glm-4.6v": {
-        "id": "glm-4.6v",
-        "name": "GLM-4.6V",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32768
-        }
-      },
-      "glm-4.5-flash": {
-        "id": "glm-4.5-flash",
-        "name": "GLM-4.5-Flash",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 131072,
-          "output": 98304
-        }
-      },
-      "glm-4.7-flash": {
-        "id": "glm-4.7-flash",
-        "name": "GLM-4.7-Flash",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -49653,16 +50134,10 @@
           "context": 204000,
           "output": 204000
         }
-      }
-    }
-  },
-  "zhipuai-coding-plan": {
-    "id": "zhipuai-coding-plan",
-    "name": "Zhipu AI Coding Plan",
-    "models": {
-      "glm-5v-turbo": {
-        "id": "glm-5v-turbo",
-        "name": "glm-5v-turbo",
+      },
+      "deepseek-ai/DeepSeek-V4-Pro": {
+        "id": "deepseek-ai/DeepSeek-V4-Pro",
+        "name": "DeepSeek V4 Pro",
         "tool_call": true,
         "modalities": {
           "output": [
@@ -49670,16 +50145,21 @@
           ]
         },
         "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.15
         },
         "limit": {
-          "context": 200000,
-          "output": 131072
+          "context": 1000000,
+          "output": 384000
         }
-      },
+      }
+    }
+  },
+  "zhipuai-coding-plan": {
+    "id": "zhipuai-coding-plan",
+    "name": "Zhipu AI Coding Plan",
+    "models": {
       "glm-5.1": {
         "id": "glm-5.1",
         "name": "GLM-5.1",
@@ -49698,120 +50178,6 @@
         "limit": {
           "context": 200000,
           "output": 131072
-        }
-      },
-      "glm-4.6v-flash": {
-        "id": "glm-4.6v-flash",
-        "name": "GLM-4.6V-Flash",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32768
-        }
-      },
-      "glm-4.7-flash": {
-        "id": "glm-4.7-flash",
-        "name": "GLM-4.7-Flash",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 200000,
-          "output": 131072
-        }
-      },
-      "glm-4.5-flash": {
-        "id": "glm-4.5-flash",
-        "name": "GLM-4.5-Flash",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 131072,
-          "output": 98304
-        }
-      },
-      "glm-4.6v": {
-        "id": "glm-4.6v",
-        "name": "GLM-4.6V",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 128000,
-          "output": 32768
-        }
-      },
-      "glm-4.6": {
-        "id": "glm-4.6",
-        "name": "GLM-4.6",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 204800,
-          "output": 131072
-        }
-      },
-      "glm-4.5v": {
-        "id": "glm-4.5v",
-        "name": "GLM-4.5V",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0
-        },
-        "limit": {
-          "context": 64000,
-          "output": 16384
         }
       },
       "glm-5-turbo": {
@@ -49852,66 +50218,6 @@
         "limit": {
           "context": 131072,
           "output": 98304
-        }
-      },
-      "glm-4.5": {
-        "id": "glm-4.5",
-        "name": "GLM-4.5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 131072,
-          "output": 98304
-        }
-      },
-      "glm-4.7-flashx": {
-        "id": "glm-4.7-flashx",
-        "name": "GLM-4.7-FlashX",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.07,
-          "output": 0.4,
-          "cache_read": 0.01,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 200000,
-          "output": 131072
-        }
-      },
-      "glm-5": {
-        "id": "glm-5",
-        "name": "GLM-5",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0,
-          "output": 0,
-          "cache_read": 0,
-          "cache_write": 0
-        },
-        "limit": {
-          "context": 204800,
-          "output": 131072
         }
       },
       "glm-4.7": {
@@ -50695,6 +51001,24 @@
           "output": 24000
         }
       },
+      "openai-gpt-55-pro": {
+        "id": "openai-gpt-55-pro",
+        "name": "GPT-5.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 37.5,
+          "output": 225
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
       "openai-gpt-52-codex": {
         "id": "openai-gpt-52-codex",
         "name": "GPT-5.2 Codex",
@@ -50957,6 +51281,48 @@
         "limit": {
           "context": 200000,
           "output": 24000
+        }
+      },
+      "openai-gpt-55": {
+        "id": "openai-gpt-55",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 6.25,
+          "output": 37.5,
+          "cache_read": 0.625,
+          "context_over_200k": {
+            "input": 12.5,
+            "output": 56.25,
+            "cache_read": 1.25
+          }
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 131072
+        }
+      },
+      "qwen3-6-27b": {
+        "id": "qwen3-6-27b",
+        "name": "Qwen3.6 27B",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.325,
+          "output": 3.25
+        },
+        "limit": {
+          "context": 256000,
+          "output": 65536
         }
       },
       "claude-opus-4-6": {
@@ -53189,46 +53555,6 @@
           "output": 32000
         }
       },
-      "gpt-5.4-mini": {
-        "id": "gpt-5.4-mini",
-        "name": "GPT-5.4 Mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.75,
-          "output": 4.5,
-          "cache_read": 0.075
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
-          "output": 128000
-        }
-      },
-      "gpt-5.4-nano": {
-        "id": "gpt-5.4-nano",
-        "name": "GPT-5.4 Nano",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 1.25,
-          "cache_read": 0.02
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
-          "output": 128000
-        }
-      },
       "claude-opus-4-5": {
         "id": "claude-opus-4-5",
         "name": "Claude Opus 4.5",
@@ -53642,26 +53968,6 @@
           "output": 4096
         }
       },
-      "gpt-5.4": {
-        "id": "gpt-5.4",
-        "name": "GPT-5.4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.5,
-          "output": 15,
-          "cache_read": 0.25
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
-          "output": 128000
-        }
-      },
       "gpt-5-codex": {
         "id": "gpt-5-codex",
         "name": "GPT-5-Codex",
@@ -53841,25 +54147,6 @@
         "limit": {
           "context": 128000,
           "output": 16384
-        }
-      },
-      "gpt-5.4-pro": {
-        "id": "gpt-5.4-pro",
-        "name": "GPT-5.4 Pro",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 30,
-          "output": 180
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
-          "output": 128000
         }
       },
       "mistral-small-2503": {
@@ -54674,6 +54961,94 @@
           "output": 128000
         }
       },
+      "gpt-5.4-mini": {
+        "id": "gpt-5.4-mini",
+        "name": "GPT-5.4 Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 4.5,
+          "cache_read": 0.075
+        },
+        "limit": {
+          "context": 400000,
+          "input": 272000,
+          "output": 128000
+        }
+      },
+      "gpt-5.4-nano": {
+        "id": "gpt-5.4-nano",
+        "name": "GPT-5.4 Nano",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.25,
+          "cache_read": 0.02
+        },
+        "limit": {
+          "context": 400000,
+          "input": 272000,
+          "output": 128000
+        }
+      },
+      "gpt-5.4-pro": {
+        "id": "gpt-5.4-pro",
+        "name": "GPT-5.4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180,
+          "context_over_200k": {
+            "input": 60,
+            "output": 270
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
+      },
+      "gpt-5.4": {
+        "id": "gpt-5.4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25,
+          "context_over_200k": {
+            "input": 5,
+            "output": 22.5,
+            "cache_read": 0.5
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
+      },
       "grok-4-fast-non-reasoning": {
         "id": "grok-4-fast-non-reasoning",
         "name": "Grok 4 Fast (Non-Reasoning)",
@@ -54993,6 +55368,56 @@
         "limit": {
           "context": 128000,
           "output": 4096
+        }
+      },
+      "gpt-5.5": {
+        "id": "gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 30,
+          "cache_read": 0.5,
+          "context_over_200k": {
+            "input": 10,
+            "output": 45,
+            "cache_read": 1
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
+      }
+    }
+  },
+  "abliteration-ai": {
+    "id": "abliteration-ai",
+    "name": "abliteration.ai",
+    "models": {
+      "abliterated-model": {
+        "id": "abliterated-model",
+        "name": "Abliterated Model",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 3,
+          "output": 3
+        },
+        "limit": {
+          "context": 150000,
+          "input": 150000,
+          "output": 8192
         }
       }
     }
@@ -57629,6 +58054,24 @@
           "output": 4096
         }
       },
+      "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning": {
+        "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+        "name": "Nemotron 3 Nano Omni",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0
+        },
+        "limit": {
+          "context": 256000,
+          "output": 65536
+        }
+      },
       "nvidia/llama-3.3-nemotron-super-49b-v1": {
         "id": "nvidia/llama-3.3-nemotron-super-49b-v1",
         "name": "Llama 3.3 Nemotron Super 49b V1",
@@ -58710,6 +59153,44 @@
           "context": 262144,
           "output": 262144
         }
+      },
+      "deepseek-ai/deepseek-v4-flash": {
+        "id": "deepseek-ai/deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 393216
+        }
+      },
+      "deepseek-ai/deepseek-v4-pro": {
+        "id": "deepseek-ai/deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 393216
+        }
       }
     }
   },
@@ -59063,8 +59544,8 @@
         },
         "limit": {
           "context": 1050000,
-          "input": 920000,
-          "output": 130000
+          "input": 922000,
+          "output": 128000
         }
       },
       "gpt-5-mini": {
@@ -59828,6 +60309,25 @@
           "context": 0,
           "input": 0,
           "output": 0
+        }
+      },
+      "gpt-5.5-pro": {
+        "id": "gpt-5.5-pro",
+        "name": "GPT-5.5 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
         }
       },
       "gpt-4.1": {
@@ -70860,8 +71360,7 @@
         },
         "cost": {
           "input": 0.6,
-          "output": 3.6,
-          "reasoning": 3.6
+          "output": 3.6
         },
         "limit": {
           "context": 262144,
@@ -71851,6 +72350,25 @@
           "output": 16384
         }
       },
+      "deepseek-v4-flash": {
+        "id": "deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.14,
+          "output": 0.28,
+          "cache_read": 0.028
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
+        }
+      },
       "grok-4": {
         "id": "grok-4",
         "name": "Grok 4",
@@ -71925,6 +72443,25 @@
         "limit": {
           "context": 204800,
           "output": 131072
+        }
+      },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4,
+          "cache_read": 0.16
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
         }
       },
       "glm-4.6v": {
@@ -72119,6 +72656,25 @@
         "limit": {
           "context": 1000000,
           "output": 128000
+        }
+      },
+      "deepseek-v4-pro": {
+        "id": "deepseek-v4-pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1.74,
+          "output": 3.48,
+          "cache_read": 0.145
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 384000
         }
       },
       "gpt-4.1-nano": {
@@ -73003,6 +73559,26 @@
           "input": 0.1,
           "output": 0.4,
           "cache_read": 0.025
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 65536
+        }
+      },
+      "gemini-3.1-flash-lite-preview": {
+        "id": "gemini-3.1-flash-lite-preview",
+        "name": "Gemini 3.1 Flash Lite Preview",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.25,
+          "output": 1.5,
+          "cache_read": 0.025,
+          "cache_write": 1
         },
         "limit": {
           "context": 1048576,
@@ -74474,26 +75050,6 @@
           "output": 32000
         }
       },
-      "gpt-5.4-mini": {
-        "id": "gpt-5.4-mini",
-        "name": "GPT-5.4 Mini",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.75,
-          "output": 4.5,
-          "cache_read": 0.075
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
-          "output": 128000
-        }
-      },
       "cohere-command-a": {
         "id": "cohere-command-a",
         "name": "Command A",
@@ -74585,26 +75141,6 @@
         "limit": {
           "context": 128000,
           "output": 4096
-        }
-      },
-      "gpt-5.4-nano": {
-        "id": "gpt-5.4-nano",
-        "name": "GPT-5.4 Nano",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 0.2,
-          "output": 1.25,
-          "cache_read": 0.02
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
-          "output": 128000
         }
       },
       "gpt-5.2-codex": {
@@ -74813,25 +75349,6 @@
           "output": 32768
         }
       },
-      "gpt-5.4-pro": {
-        "id": "gpt-5.4-pro",
-        "name": "GPT-5.4 Pro",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 30,
-          "output": 180
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
-          "output": 128000
-        }
-      },
       "model-router": {
         "id": "model-router",
         "name": "Model Router",
@@ -75014,6 +75531,24 @@
           "output": 2048
         }
       },
+      "kimi-k2.6": {
+        "id": "kimi-k2.6",
+        "name": "Kimi K2.6",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.95,
+          "output": 4
+        },
+        "limit": {
+          "context": 262144,
+          "output": 262144
+        }
+      },
       "gpt-5-codex": {
         "id": "gpt-5-codex",
         "name": "GPT-5-Codex",
@@ -75030,26 +75565,6 @@
         },
         "limit": {
           "context": 400000,
-          "output": 128000
-        }
-      },
-      "gpt-5.4": {
-        "id": "gpt-5.4",
-        "name": "GPT-5.4",
-        "tool_call": true,
-        "modalities": {
-          "output": [
-            "text"
-          ]
-        },
-        "cost": {
-          "input": 2.5,
-          "output": 15,
-          "cache_read": 0.25
-        },
-        "limit": {
-          "context": 400000,
-          "input": 272000,
           "output": 128000
         }
       },
@@ -75503,6 +76018,31 @@
           "output": 64000
         }
       },
+      "gpt-5.5": {
+        "id": "gpt-5.5",
+        "name": "GPT-5.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 5,
+          "output": 30,
+          "cache_read": 0.5,
+          "context_over_200k": {
+            "input": 10,
+            "output": 45,
+            "cache_read": 1
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
+        }
+      },
       "gpt-4-turbo": {
         "id": "gpt-4-turbo",
         "name": "GPT-4 Turbo",
@@ -75538,6 +76078,26 @@
         "limit": {
           "context": 128000,
           "output": 16384
+        }
+      },
+      "gpt-5.4-mini": {
+        "id": "gpt-5.4-mini",
+        "name": "GPT-5.4 Mini",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.75,
+          "output": 4.5,
+          "cache_read": 0.075
+        },
+        "limit": {
+          "context": 400000,
+          "input": 272000,
+          "output": 128000
         }
       },
       "cohere-command-r-08-2024": {
@@ -75577,6 +76137,26 @@
           "output": 100000
         }
       },
+      "gpt-5.4-nano": {
+        "id": "gpt-5.4-nano",
+        "name": "GPT-5.4 Nano",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.2,
+          "output": 1.25,
+          "cache_read": 0.02
+        },
+        "limit": {
+          "context": 400000,
+          "input": 272000,
+          "output": 128000
+        }
+      },
       "grok-code-fast-1": {
         "id": "grok-code-fast-1",
         "name": "Grok Code Fast 1",
@@ -75594,6 +76174,29 @@
         "limit": {
           "context": 256000,
           "output": 10000
+        }
+      },
+      "gpt-5.4-pro": {
+        "id": "gpt-5.4-pro",
+        "name": "GPT-5.4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 30,
+          "output": 180,
+          "context_over_200k": {
+            "input": 60,
+            "output": 270
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
         }
       },
       "o3-mini": {
@@ -75633,6 +76236,31 @@
         "limit": {
           "context": 256000,
           "output": 64000
+        }
+      },
+      "gpt-5.4": {
+        "id": "gpt-5.4",
+        "name": "GPT-5.4",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.5,
+          "output": 15,
+          "cache_read": 0.25,
+          "context_over_200k": {
+            "input": 5,
+            "output": 22.5,
+            "cache_read": 0.5
+          }
+        },
+        "limit": {
+          "context": 1050000,
+          "input": 922000,
+          "output": 128000
         }
       },
       "gpt-4.1-nano": {
@@ -78727,6 +79355,25 @@
           "output": 131072
         }
       },
+      "deepseek-ai/DeepSeek-V4-Pro": {
+        "id": "deepseek-ai/DeepSeek-V4-Pro",
+        "name": "DeepSeek V4 Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 2.1,
+          "output": 4.4,
+          "cache_read": 0.2
+        },
+        "limit": {
+          "context": 512000,
+          "output": 384000
+        }
+      },
       "openai/gpt-oss-120b": {
         "id": "openai/gpt-oss-120b",
         "name": "GPT OSS 120B",
@@ -80006,6 +80653,30 @@
     "id": "xiaomi",
     "name": "Xiaomi",
     "models": {
+      "mimo-v2.5-pro": {
+        "id": "mimo-v2.5-pro",
+        "name": "MiMo-V2.5-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 1,
+          "output": 3,
+          "cache_read": 0.2,
+          "context_over_200k": {
+            "input": 2,
+            "output": 6,
+            "cache_read": 0.4
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 131072
+        }
+      },
       "mimo-v2-omni": {
         "id": "mimo-v2-omni",
         "name": "MiMo-V2-Omni",
@@ -80023,6 +80694,30 @@
         "limit": {
           "context": 256000,
           "output": 128000
+        }
+      },
+      "mimo-v2.5": {
+        "id": "mimo-v2.5",
+        "name": "MiMo-V2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0.4,
+          "output": 2,
+          "cache_read": 0.08,
+          "context_over_200k": {
+            "input": 0.8,
+            "output": 4,
+            "cache_read": 0.16
+          }
+        },
+        "limit": {
+          "context": 1048576,
+          "output": 131072
         }
       },
       "mimo-v2-pro": {
@@ -80688,6 +81383,44 @@
         },
         "limit": {
           "context": 256000,
+          "output": 128000
+        }
+      },
+      "mimo-v2.5-pro": {
+        "id": "mimo-v2.5-pro",
+        "name": "MiMo-V2.5-Pro",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 1000000,
+          "output": 128000
+        }
+      },
+      "mimo-v2.5": {
+        "id": "mimo-v2.5",
+        "name": "MiMo-V2.5",
+        "tool_call": true,
+        "modalities": {
+          "output": [
+            "text"
+          ]
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cache_read": 0
+        },
+        "limit": {
+          "context": 1000000,
           "output": 128000
         }
       }
