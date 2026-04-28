@@ -119,7 +119,8 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       timeoutMs: z
         .number()
         .optional()
-        .describe("Optional timeout in milliseconds (default: 120000)"),
+        .default(config.defaultTimeoutMs)
+        .describe("Optional timeout in milliseconds"),
     }),
     execute: async function* (input, { abortSignal, toolCallId }) {
       logger.verbose("Executing executeCommand tool with input:", input);
