@@ -14,7 +14,100 @@ export interface ExecuteCommandOutput {
   exitCode: number | null;
   signal: number | null;
   timedOut: boolean;
+  skipped?: boolean;
+  stopped?: boolean;
 }
+
+export type ExecuteCommandLiveStatus = "running" | "skipped-running" | "stopping" | "completed";
+
+export interface ExecuteCommandLiveState {
+  toolCallId: string;
+  startedAt: number;
+  endedAt: number | null;
+  status: ExecuteCommandLiveStatus;
+  stdout: string;
+  stderr: string;
+  exitCode: number | null;
+  signal: number | null;
+  timedOut: boolean;
+  skipRequested: boolean;
+  stopRequested: boolean;
+}
+
+const executeCommandLiveStateMap = new Map<string, ExecuteCommandLiveState>();
+const executeCommandListenersMap = new Map<string, Set<() => void>>();
+const executeCommandKillMap = new Map<string, () => Promise<void>>();
+const executeCommandWakeMap = new Map<string, () => void>();
+
+const getLiveState = (toolCallId: string) => executeCommandLiveStateMap.get(toolCallId);
+
+const emitLiveState = (toolCallId: string) => {
+  const listeners = executeCommandListenersMap.get(toolCallId);
+  if (!listeners) return;
+  for (const listener of listeners) {
+    listener();
+  }
+};
+
+const updateLiveState = (
+  toolCallId: string,
+  updater: (state: ExecuteCommandLiveState) => ExecuteCommandLiveState,
+) => {
+  const current = getLiveState(toolCallId);
+  if (!current) return;
+  executeCommandLiveStateMap.set(toolCallId, updater(current));
+  emitLiveState(toolCallId);
+};
+
+export const getExecuteCommandLiveState = (toolCallId: string) => getLiveState(toolCallId);
+
+export const subscribeExecuteCommandLiveState = (toolCallId: string, listener: () => void) => {
+  const listeners = executeCommandListenersMap.get(toolCallId) ?? new Set<() => void>();
+  listeners.add(listener);
+  executeCommandListenersMap.set(toolCallId, listeners);
+
+  return () => {
+    const currentListeners = executeCommandListenersMap.get(toolCallId);
+    if (!currentListeners) return;
+    currentListeners.delete(listener);
+    if (currentListeners.size === 0) {
+      executeCommandListenersMap.delete(toolCallId);
+    }
+  };
+};
+
+export const skipExecuteCommand = (toolCallId: string) => {
+  updateLiveState(toolCallId, (state) => {
+    if (state.status !== "running") {
+      return state;
+    }
+    return {
+      ...state,
+      status: "skipped-running",
+      skipRequested: true,
+    };
+  });
+  executeCommandWakeMap.get(toolCallId)?.();
+};
+
+export const stopExecuteCommand = (toolCallId: string) => {
+  updateLiveState(toolCallId, (state) => {
+    if (state.status === "completed") {
+      return state;
+    }
+    return {
+      ...state,
+      status: "stopping",
+      stopRequested: true,
+    };
+  });
+
+  const kill = executeCommandKillMap.get(toolCallId);
+  if (kill) {
+    void kill();
+  }
+  executeCommandWakeMap.get(toolCallId)?.();
+};
 
 export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
   tool({
@@ -26,14 +119,31 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       timeoutMs: z
         .number()
         .optional()
-        .describe("Optional timeout in milliseconds (default: 120000)"),
+        .default(config.defaultTimeoutMs)
+        .describe("Optional timeout in milliseconds"),
     }),
-    execute: async function* (input, { abortSignal }) {
+    execute: async function* (input, { abortSignal, toolCallId }) {
       logger.verbose("Executing executeCommand tool with input:", input);
 
       abortSignal?.throwIfAborted();
 
       const timeoutMs = input.timeoutMs ?? config.defaultTimeoutMs;
+
+      const startedAt = Date.now();
+      executeCommandLiveStateMap.set(toolCallId, {
+        toolCallId,
+        startedAt,
+        endedAt: null,
+        status: "running",
+        stdout: "",
+        stderr: "",
+        exitCode: null,
+        signal: null,
+        timedOut: false,
+        skipRequested: false,
+        stopRequested: false,
+      });
+      emitLiveState(toolCallId);
 
       let stdout = "";
       let stderr = "";
@@ -75,13 +185,17 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
         signal: combinedSignal,
         onStdout: (data) => {
           stdout += data;
+          updateLiveState(toolCallId, (state) => ({ ...state, stdout }));
           push({ type: "stdout", data });
         },
         onStderr: (data) => {
           stderr += data;
+          updateLiveState(toolCallId, (state) => ({ ...state, stderr }));
           push({ type: "stderr", data });
         },
       });
+
+      executeCommandKillMap.set(toolCallId, () => handle.kill());
 
       let done = false;
       let exitCode: number | null = null;
@@ -89,6 +203,11 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
 
       const timeoutId = setTimeout(() => {
         timedOut = true;
+        updateLiveState(toolCallId, (state) => ({
+          ...state,
+          timedOut: true,
+          status: state.status === "completed" ? state.status : "stopping",
+        }));
         void handle.kill();
       }, timeoutMs);
 
@@ -100,6 +219,18 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
         .catch(() => {})
         .finally(() => {
           done = true;
+          const endedAt = Date.now();
+          updateLiveState(toolCallId, (state) => ({
+            ...state,
+            endedAt,
+            status: "completed",
+            exitCode,
+            signal,
+            timedOut,
+          }));
+          clearTimeout(timeoutId);
+          executeCommandKillMap.delete(toolCallId);
+          executeCommandWakeMap.delete(toolCallId);
           push({ type: "done" });
         });
 
@@ -108,54 +239,84 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           resolveWait = resolve;
         });
 
-      try {
-        while (!done || queue.length > 0) {
+      executeCommandWakeMap.set(toolCallId, () => {
+        resolveWait?.();
+        resolveWait = null;
+      });
+
+      while (!done || queue.length > 0) {
+        if (combinedSignal.aborted) {
+          throw createAbortError();
+        }
+
+        const liveState = getLiveState(toolCallId);
+        if (liveState?.stopRequested || liveState?.skipRequested) {
+          break;
+        }
+
+        if (queue.length === 0) {
+          await raceWithAbort(waitForNext(), abortSignal);
+        }
+
+        while (queue.length > 0) {
           if (combinedSignal.aborted) {
             throw createAbortError();
           }
 
-          if (queue.length === 0) {
-            await raceWithAbort(waitForNext(), abortSignal);
+          const currentLiveState = getLiveState(toolCallId);
+          if (currentLiveState?.stopRequested || currentLiveState?.skipRequested) {
+            break;
           }
 
-          while (queue.length > 0) {
-            if (combinedSignal.aborted) {
-              throw createAbortError();
-            }
-
-            const item = queue.shift()!;
-            if (item.type === "done") {
-              done = true;
-              continue;
-            }
-
-            yield {
-              stdout,
-              stderr,
-              exitCode: null,
-              signal: null,
-              timedOut: false,
-            } as ExecuteCommandOutput;
+          const item = queue.shift()!;
+          if (item.type === "done") {
+            done = true;
+            continue;
           }
+
+          yield {
+            stdout,
+            stderr,
+            exitCode: null,
+            signal: null,
+            timedOut: false,
+          } as ExecuteCommandOutput;
         }
 
-        await result.catch(() => {});
+        const updatedLiveState = getLiveState(toolCallId);
+        if (updatedLiveState?.stopRequested || updatedLiveState?.skipRequested) {
+          break;
+        }
+      }
 
-        logger.verbose("Command executed:", {
-          exitCode,
-          stdoutLen: stdout.length,
-          stderrLen: stderr.length,
-        });
-
-        return {
+      const finalLiveState = getLiveState(toolCallId);
+      if (finalLiveState?.stopRequested || finalLiveState?.skipRequested) {
+        yield {
           stdout,
           stderr,
-          exitCode,
-          signal,
+          exitCode: null,
+          signal: null,
           timedOut,
+          skipped: finalLiveState.skipRequested,
+          stopped: finalLiveState.stopRequested,
         } as ExecuteCommandOutput;
-      } finally {
-        clearTimeout(timeoutId);
+        return;
       }
+
+      await result.catch(() => {});
+
+      logger.verbose("Command executed:", {
+        exitCode,
+        stdoutLen: stdout.length,
+        stderrLen: stderr.length,
+      });
+
+      yield {
+        stdout,
+        stderr,
+        exitCode,
+        signal,
+        timedOut,
+      } as ExecuteCommandOutput;
     },
   });
