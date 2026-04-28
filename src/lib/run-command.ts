@@ -44,6 +44,7 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
   const cmd = Command.create(program, args, spawnOptions);
 
   let child: Child | null = null;
+  let killed = false;
   let resolveResult!: (result: RunCommandResult) => void;
   let rejectResult!: (err: unknown) => void;
 
@@ -68,12 +69,31 @@ export function spawnCommand(command: string, options: RunCommandOptions = {}): 
     rejectResult(new Error(error));
   });
 
+  const killTree = async (pid: number) => {
+    // Weird and crazy looking commands to kill a process tree (all children and the parent)
+    // Hopefully this doesn't cause any issues later.
+    const isWindows = platform() === "windows";
+    const killCmd = isWindows
+      ? Command.create("cmd", [
+          "/C",
+          `taskkill /T /PID ${pid} & ping -n 2 127.0.0.1 >nul & taskkill /T /F /PID ${pid}`,
+        ])
+      : Command.create("sh", [
+          "-c",
+          `kill_tree() { sig=$1; p=$2; for c in $(pgrep -P "$p" 2>/dev/null); do kill_tree "$sig" "$c"; done; kill -"$sig" "$p" 2>/dev/null; }; kill_tree TERM ${pid}; sleep 0.2; kill_tree KILL ${pid}`,
+        ]);
+    await killCmd.execute().catch((err) => {
+      logger.error("Failed to kill process tree:", err);
+    });
+  };
+
   const kill = async () => {
-    if (child) {
-      await child.kill().catch((err) => {
-        logger.error("Failed to kill child process:", err);
-      });
-    }
+    if (killed || !child) return;
+    killed = true;
+    await killTree(child.pid);
+    await child.kill().catch((err) => {
+      logger.verbose("Failed to kill child process:", err);
+    });
   };
 
   const onAbort = () => {
