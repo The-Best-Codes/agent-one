@@ -118,9 +118,12 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
               size="icon-xs"
               variant="destructive"
               className="size-5 shrink-0"
-              onClick={() => stopExecuteCommand(callId)}
+              onClick={(e) => {
+                e.stopPropagation();
+                stopExecuteCommand(callId);
+              }}
             >
-              <IconPlayerStop className="size-3" />
+              <IconPlayerStop />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="top">Stop command</TooltipContent>
@@ -132,9 +135,12 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
                 size="icon-xs"
                 variant="secondary"
                 className="size-5 shrink-0"
-                onClick={() => skipExecuteCommand(callId)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  skipExecuteCommand(callId);
+                }}
               >
-                <IconPlayerSkipForward className="size-3" />
+                <IconPlayerSkipForward />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
@@ -307,7 +313,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  {isPreliminary ? (
+                  {isPreliminary || liveState?.status === "skipped-running" ? (
                     <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
                   ) : (
                     <IconTerminal2
@@ -339,7 +345,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                     : "Ran "}
                 <code className="text-xs">{truncatedCommand}</code>
                 {liveState?.status === "skipped-running"
-                  ? " (still running in background)"
+                  ? " (backgrounded)"
                   : isPreliminary
                     ? ""
                     : output.timedOut
