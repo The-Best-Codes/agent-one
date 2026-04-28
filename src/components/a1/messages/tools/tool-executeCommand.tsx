@@ -2,12 +2,14 @@ import {
   IconChevronDown,
   IconCircleCheck,
   IconCircleX,
+  IconPlayerSkipForward,
+  IconPlayerStop,
   IconTerminal2,
   IconX,
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { AnsiHtml } from "fancy-ansi/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +20,13 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
-import type { ExecuteCommandOutput } from "@/lib/ai/tools/executeCommand";
+import {
+  getExecuteCommandLiveState,
+  skipExecuteCommand,
+  stopExecuteCommand,
+  subscribeExecuteCommandLiveState,
+  type ExecuteCommandOutput,
+} from "@/lib/ai/tools/executeCommand";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -99,12 +107,64 @@ const TerminalDisplay = ({
   );
 };
 
+const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: boolean }) => {
+  return (
+    <div className="flex items-center gap-1">
+      <Button size="xs" variant="outline" onClick={() => stopExecuteCommand(callId)}>
+        <IconPlayerStop data-icon="inline-start" />
+        Stop
+      </Button>
+      {showSkip && (
+        <Button size="xs" variant="outline" onClick={() => skipExecuteCommand(callId)}>
+          <IconPlayerSkipForward data-icon="inline-start" />
+          Skip
+        </Button>
+      )}
+    </div>
+  );
+};
+
 export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as ExecuteCommandInput;
   const { addToolApprovalResponse } = useChatFunctions();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
+  const [longRunningNow, setLongRunningNow] = useState(() => Date.now());
+
+  const liveState = useSyncExternalStore(
+    (listener) => subscribeExecuteCommandLiveState(callId, listener),
+    () => getExecuteCommandLiveState(callId),
+    () => getExecuteCommandLiveState(callId),
+  );
+
+  useEffect(() => {
+    if (!liveState || liveState.status === "completed") {
+      return;
+    }
+
+    const elapsed = Date.now() - liveState.startedAt;
+    if (elapsed >= 1000) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setLongRunningNow(Date.now());
+    }, 1000 - elapsed);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [liveState]);
+
+  const showLongRunningStop = Boolean(
+    liveState &&
+    liveState.status !== "completed" &&
+    !liveState.timedOut &&
+    longRunningNow - liveState.startedAt >= 1000,
+  );
+  const showLongRunningSkip =
+    showLongRunningStop && liveState?.status === "running" && !liveState?.skipRequested;
 
   const command = input?.command || "unknown command";
   const truncatedCommand = command.length > 80 ? command.slice(0, 80) + "…" : command;
@@ -177,18 +237,36 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div
           key={callId}
-          className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
+          className="text-foreground flex max-w-2xl flex-col gap-1 text-sm font-bold"
         >
-          <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Running <code className="text-xs">{truncatedCommand}</code>...
-          </span>
+          <div className="text-foreground flex flex-row items-center gap-1 text-sm font-bold">
+            <Spinner className="text-foreground size-4 shrink-0" />
+            <span className="max-w-2xl truncate">
+              Running <code className="text-xs">{truncatedCommand}</code>...
+            </span>
+          </div>
+          {showLongRunningStop && (
+            <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
+          )}
         </div>
       );
 
     case "output-available": {
-      const output = (part.output as ExecuteCommandOutput | undefined) ?? EMPTY_OUTPUT;
+      const outputFromPart = (part.output as ExecuteCommandOutput | undefined) ?? EMPTY_OUTPUT;
       const isPreliminary = (part as { preliminary?: boolean }).preliminary === true;
+      const output: ExecuteCommandOutput = liveState
+        ? {
+            stdout: liveState.stdout,
+            stderr: liveState.stderr,
+            exitCode: outputFromPart.exitCode ?? liveState.exitCode,
+            signal: outputFromPart.signal ?? liveState.signal,
+            timedOut: outputFromPart.timedOut || liveState.timedOut,
+            skipped: outputFromPart.skipped ?? liveState.skipRequested,
+            stopped:
+              outputFromPart.stopped ??
+              (liveState.stopRequested && !liveState.skipRequested ? true : undefined),
+          }
+        : outputFromPart;
 
       return (
         <Accordion
@@ -233,19 +311,34 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                {isPreliminary ? "Running " : "Ran "}
+                {liveState?.status === "skipped-running"
+                  ? "Skipped "
+                  : isPreliminary
+                    ? "Running "
+                    : "Ran "}
                 <code className="text-xs">{truncatedCommand}</code>
-                {isPreliminary
-                  ? ""
-                  : output.timedOut
-                    ? " (timed out)"
-                    : output.exitCode && output.exitCode !== 0
-                      ? ` (exit code ${output.exitCode})`
-                      : ""}
+                {liveState?.status === "skipped-running"
+                  ? " (still running in background)"
+                  : isPreliminary
+                    ? ""
+                    : output.timedOut
+                      ? " (timed out)"
+                      : output.stopped
+                        ? " (stopped)"
+                        : output.skipped
+                          ? " (skipped)"
+                          : output.exitCode && output.exitCode !== 0
+                            ? ` (exit code ${output.exitCode})`
+                            : ""}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
-              <TerminalDisplay command={command} output={output} />
+              <div className="flex flex-col gap-2">
+                {showLongRunningStop && (
+                  <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
+                )}
+                <TerminalDisplay command={command} output={output} />
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
