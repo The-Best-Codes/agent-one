@@ -19,6 +19,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import {
   getExecuteCommandLiveState,
@@ -109,18 +110,40 @@ const TerminalDisplay = ({
 
 const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: boolean }) => {
   return (
-    <div className="flex items-center gap-1">
-      <Button size="xs" variant="outline" onClick={() => stopExecuteCommand(callId)}>
-        <IconPlayerStop data-icon="inline-start" />
-        Stop
-      </Button>
-      {showSkip && (
-        <Button size="xs" variant="outline" onClick={() => skipExecuteCommand(callId)}>
-          <IconPlayerSkipForward data-icon="inline-start" />
-          Skip
-        </Button>
-      )}
-    </div>
+    <TooltipProvider>
+      <div className="flex items-center gap-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon-xs"
+              variant="destructive"
+              className="size-5 shrink-0"
+              onClick={() => stopExecuteCommand(callId)}
+            >
+              <IconPlayerStop className="size-3" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">Stop command</TooltipContent>
+        </Tooltip>
+        {showSkip && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon-xs"
+                variant="secondary"
+                className="size-5 shrink-0"
+                onClick={() => skipExecuteCommand(callId)}
+              >
+                <IconPlayerSkipForward className="size-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              Skip command (leave it running in the background)
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </TooltipProvider>
   );
 };
 
@@ -237,14 +260,12 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div
           key={callId}
-          className="text-foreground flex max-w-2xl flex-col gap-1 text-sm font-bold"
+          className="text-foreground flex max-w-2xl flex-row items-center gap-1 text-sm font-bold"
         >
-          <div className="text-foreground flex flex-row items-center gap-1 text-sm font-bold">
-            <Spinner className="text-foreground size-4 shrink-0" />
-            <span className="max-w-2xl truncate">
-              Running <code className="text-xs">{truncatedCommand}</code>...
-            </span>
-          </div>
+          <Spinner className="text-foreground size-4 shrink-0" />
+          <span className="truncate">
+            Running <code className="text-xs">{truncatedCommand}</code>...
+          </span>
           {showLongRunningStop && (
             <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
           )}
@@ -331,12 +352,12 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                             ? ` (exit code ${output.exitCode})`
                             : ""}
               </span>
+              {showLongRunningStop && (
+                <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
+              )}
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="flex flex-col gap-2">
-                {showLongRunningStop && (
-                  <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
-                )}
                 <TerminalDisplay command={command} output={output} />
               </div>
             </AccordionContent>
