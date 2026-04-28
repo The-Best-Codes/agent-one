@@ -7,16 +7,15 @@ import {
 } from "@ai-sdk/mcp";
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import { type Child, Command } from "@tauri-apps/plugin-shell";
 import type { Tool, ToolSet } from "ai";
 import { getDefaultStore } from "jotai";
 
 import { mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { getLogger } from "@/lib/logger";
+import { spawnCommand, type RunCommandHandle } from "@/lib/run-command";
 import { type McpHttpServerConfig, type McpServerConfig } from "@/lib/settings/types";
 
 import { checkOAuthSupport, isAuthError, promptLoginToast, promptSoftLoginToast } from "./oauth";
-import { parseMcpStdioCommand } from "./parse-command";
 
 const store = getDefaultStore();
 
@@ -42,8 +41,7 @@ class TauriStdioMCPTransport implements MCPTransport {
   public onerror?: (error: Error) => void;
   public onmessage?: (message: JSONRPCMessage) => void;
 
-  private childProcess: Child | null = null;
-  private commandInstance: Command<string> | null = null;
+  private handle: RunCommandHandle | null = null;
   private readBuffer = "";
   private command: string;
   private env: Record<string, string>;
@@ -55,34 +53,29 @@ class TauriStdioMCPTransport implements MCPTransport {
 
   async start(): Promise<void> {
     try {
-      const { program, args } = parseMcpStdioCommand(this.command);
-
-      const options: { env?: Record<string, string> } =
-        Object.keys(this.env).length > 0 ? { env: this.env } : {};
-      this.commandInstance = Command.create(program, args, options);
-
-      this.commandInstance.stdout.on("data", (line: string) => {
-        this.readBuffer += line;
-        this.processReadBuffer();
+      const { handle, result } = spawnCommand(this.command, {
+        env: this.env,
+        onStdout: (data) => {
+          this.readBuffer += data;
+          this.processReadBuffer();
+        },
+        onStderr: (data) => {
+          logger.verbose(`MCP Server Stderr: ${data}`);
+        },
       });
 
-      this.commandInstance.stderr.on("data", (line: string) => {
-        logger.verbose(`MCP Server Stderr: ${line}`);
-      });
+      this.handle = handle;
 
-      this.commandInstance.on("error", (error: string) => {
-        const err = new Error(error);
-        logger.verbose(`MCP Server Command error:`, err);
-        this.onerror?.(err);
-      });
-
-      this.commandInstance.on("close", (data: { code: number | null; signal: number | null }) => {
-        logger.verbose(`MCP Server Closed with code ${data.code} and signal ${data.signal}`);
-        this.onclose?.();
-      });
-
-      this.childProcess = await this.commandInstance.spawn();
-      logger.verbose(`MCP Server Spawned with PID: ${this.childProcess.pid}`);
+      result
+        .then((r) => {
+          logger.verbose(`MCP Server Closed with code ${r.exitCode} and signal ${r.signal}`);
+          this.onclose?.();
+        })
+        .catch((error: unknown) => {
+          const err = error instanceof Error ? error : new Error(String(error));
+          logger.verbose(`MCP Server Command error:`, err);
+          this.onerror?.(err);
+        });
     } catch (error) {
       logger.warn("Failed to start MCP server:", error);
       this.onerror?.(error as Error);
@@ -109,17 +102,16 @@ class TauriStdioMCPTransport implements MCPTransport {
   }
 
   async send(message: JSONRPCMessage): Promise<void> {
-    if (!this.childProcess) {
+    if (!this.handle) {
       throw new Error("MCP server process is not running.");
     }
-    const messageString = JSON.stringify(message) + "\n";
-    await this.childProcess.write(messageString);
+    await this.handle.write(JSON.stringify(message) + "\n");
   }
 
   async close(): Promise<void> {
-    if (this.childProcess) {
-      await this.childProcess.kill();
-      this.childProcess = null;
+    if (this.handle) {
+      await this.handle.kill();
+      this.handle = null;
     }
   }
 }

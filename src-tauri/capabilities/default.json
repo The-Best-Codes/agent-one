@@ -16,36 +16,6 @@
       "identifier": "shell:allow-spawn",
       "allow": [
         {
-          "name": "npx",
-          "cmd": "npx",
-          "args": true
-        },
-        {
-          "name": "npm",
-          "cmd": "npm",
-          "args": true
-        },
-        {
-          "name": "node",
-          "cmd": "node",
-          "args": true
-        },
-        {
-          "name": "npx.cmd",
-          "cmd": "npx.cmd",
-          "args": true
-        },
-        {
-          "name": "npm.cmd",
-          "cmd": "npm.cmd",
-          "args": true
-        },
-        {
-          "name": "node.cmd",
-          "cmd": "node.cmd",
-          "args": true
-        },
-        {
           "name": "sh",
           "cmd": "sh",
           "args": true
