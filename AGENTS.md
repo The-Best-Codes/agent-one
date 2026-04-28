@@ -35,6 +35,7 @@ If you are an AI agent, please follow the instructions in this file to ensure yo
 - As an AI, you should only add comments to the code when absolutely necessary. You should confirm before removing TODOs, TODO comments, or other important comments. The developer's job is to touch up your code, including writing comments, not your job.
 - Any time you use the Tauri SQL plugin, if you are creating new tables in the TypeScript codebase, you're almost certainly doing it wrong. You can create and apply migrations in `src-tauri/migrations/` (and update `src-tauri/lib.rs`) instead.
 - Follow the project `PHILOSOPHY.md`.
+- Never use a subagent unless the user explicitly told you to use one. If you **must** use a subagent, pause and ask the user if it's okay.
 
 ## Docs
 
