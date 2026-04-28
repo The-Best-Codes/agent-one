@@ -290,7 +290,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
 
       const finalLiveState = getLiveState(toolCallId);
       if (finalLiveState?.stopRequested || finalLiveState?.skipRequested) {
-        return {
+        yield {
           stdout,
           stderr,
           exitCode: null,
@@ -299,6 +299,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
           skipped: finalLiveState.skipRequested,
           stopped: finalLiveState.stopRequested,
         } as ExecuteCommandOutput;
+        return;
       }
 
       await result.catch(() => {});
@@ -309,7 +310,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
         stderrLen: stderr.length,
       });
 
-      return {
+      yield {
         stdout,
         stderr,
         exitCode,
