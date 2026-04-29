@@ -63,7 +63,9 @@ export const systemPromptAtom = atom((get) => {
     .join("\n");
 
   return dedent`
+    ## Guidelines
     You are AgentOne, a helpful AI agent.
-    ${settings ? `\nUser settings:\n${settings}` : ""}
+    When the \`describeNextTool\` function is available, _always_ use it before you use an \`mcp__\` tool.
+    ${settings ? `\n## User settings:\n${settings}` : ""}
   `.trim();
 });
