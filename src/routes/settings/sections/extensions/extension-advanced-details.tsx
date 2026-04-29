@@ -83,7 +83,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
   }
 
   const loginLabel =
-    authState === "supports-oauth" ? "Login available for full access" : "Not logged in";
+    authState === "supports-oauth" ? "Connect your account for full access" : "Not connected";
 
   return (
     <div className="flex items-center justify-between rounded-md border p-3">
@@ -91,7 +91,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
         {authState === "logged-in" ? (
           <>
             <IconCircleCheck className="text-foreground size-5" />
-            <span className="text-sm">Logged in</span>
+            <span className="text-sm">Connected</span>
           </>
         ) : authState === "supports-oauth" ? (
           <>
@@ -109,11 +109,11 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
         <Button
           variant="outline"
           size="sm"
-          onClick={() => runAuthAction(() => mcpLogout(server.id))}
+          onClick={() => runAuthAction(() => mcpLogout(server.id, server.name))}
           disabled={loading}
         >
           {loading ? <Spinner data-icon="inline-start" /> : <IconLogout />}
-          Logout
+          Disconnect
         </Button>
       ) : (
         <Button
@@ -122,7 +122,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
           disabled={loading}
         >
           {loading ? <Spinner data-icon="inline-start" /> : <IconLogin />}
-          Login
+          Connect
         </Button>
       )}
     </div>

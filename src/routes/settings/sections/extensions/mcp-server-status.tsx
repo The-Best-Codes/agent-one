@@ -56,7 +56,7 @@ function getStatusDescription(
 
   if (hasAuthIssue(state?.status, authState)) {
     return authState === "supports-oauth"
-      ? "Log in for full access to this server"
+      ? "Connect your account for full access to this server"
       : "Authentication required to load tools";
   }
 

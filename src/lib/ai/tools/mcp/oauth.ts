@@ -45,12 +45,12 @@ export async function mcpLogin(
   toast.dismiss(`mcp-prompt-login-${serverId}`);
   toast.dismiss(`mcp-soft-login-${serverId}`);
 
-  const toastId = toast.loading(`Starting OAuth flow for ${serverName}...`, {
+  const toastId = toast.loading(`Connecting AgentOne to "${serverName}"...`, {
     action: {
       label: "Cancel",
       onClick: async (event) => {
         event.preventDefault();
-        toast.loading("Cancelling OAuth flow...", {
+        toast.loading(`Cancelling connection to "${serverName}"...`, {
           id: toastId,
           action: null,
           duration: Infinity,
@@ -69,7 +69,7 @@ export async function mcpLogin(
       serverId,
       serverUrl,
     });
-    toast.success("Logged in successfully", { id: toastId, action: null });
+    toast.success(`Connected to "${serverName}" successfully`, { id: toastId, action: null });
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-in") return prev;
       return {
@@ -81,13 +81,13 @@ export async function mcpLogin(
     return true;
   } catch (e) {
     if (typeof e === "string" && e.includes("Authorization cancelled")) {
-      toast.error("Login cancelled", {
+      toast.error(`Connection to "${serverName}" cancelled`, {
         id: toastId,
         action: null,
         duration: 10_000,
       });
     } else {
-      toast.error(`Login failed: ${String(e)}`, {
+      toast.error(`Connection failed: ${String(e)}`, {
         id: toastId,
         action: null,
         duration: 10_000,
@@ -97,10 +97,10 @@ export async function mcpLogin(
   }
 }
 
-export async function mcpLogout(serverId: string): Promise<boolean> {
+export async function mcpLogout(serverId: string, serverName: string): Promise<boolean> {
   try {
     await invoke("mcp_logout", { serverId });
-    toast.success("Logged out successfully");
+    toast.success(`Disconnected from "${serverName}" successfully`);
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-out") return prev;
       return {
@@ -111,7 +111,7 @@ export async function mcpLogout(serverId: string): Promise<boolean> {
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    toast.error(`Logout failed: ${String(e)}`);
+    toast.error(`Failed to disconnect from "${serverName}": ${String(e)}`);
     return false;
   }
 }
@@ -139,7 +139,7 @@ export async function mcpCheckAuth(
 }
 
 export function promptLoginToast(server: McpHttpServerConfig): void {
-  toast(`Log in to ${server.name} MCP Server`, {
+  toast(`Connect to the "${server.name}" Extension`, {
     id: `mcp-prompt-login-${server.id}`,
     description: "Authentication required to access tools.",
     action: {
@@ -156,7 +156,7 @@ export function promptSoftLoginToast(server: McpHttpServerConfig): void {
     return;
   }
 
-  toast(`Log in to ${server.name} MCP Server for full access`, {
+  toast(`Connect to the "${server.name}" Extension for full access`, {
     id: `mcp-soft-login-${server.id}`,
     action: {
       label: "Login",
