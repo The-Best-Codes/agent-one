@@ -143,7 +143,7 @@ export function promptLoginToast(server: McpHttpServerConfig): void {
     id: `mcp-prompt-login-${server.id}`,
     description: "Authentication required to access tools.",
     action: {
-      label: "Login",
+      label: "Connect",
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     duration: Infinity,
@@ -159,7 +159,7 @@ export function promptSoftLoginToast(server: McpHttpServerConfig): void {
   toast(`Connect to the "${server.name}" Extension for full access`, {
     id: `mcp-soft-login-${server.id}`,
     action: {
-      label: "Login",
+      label: "Connect",
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     cancel: {
