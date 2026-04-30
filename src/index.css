@@ -669,12 +669,9 @@
   -webkit-text-stroke: transparent;
   color: transparent;
   background-size: var(--text-gradient-shimmer-background-size, 200% 100%);
-  animation: var(
-    --text-gradient-shimmer-animation,
-    text-gradient-shimmer var(--text-gradient-shimmer-duration, 5s)
-      var(--text-gradient-shimmer-timing-function, linear) var(--text-gradient-shimmer-delay, 0s)
-      var(--text-gradient-shimmer-iteration-count, infinite)
-  );
+  animation: text-gradient-shimmer var(--text-gradient-shimmer-duration, 5s)
+    var(--text-gradient-shimmer-timing-function, linear)
+    var(--text-gradient-shimmer-iteration-count, infinite);
 }
 
 @utility shimmer-duration-* {
@@ -682,12 +679,7 @@
   --text-gradient-shimmer-duration: --value([*]);
 }
 
-@utility shimmer-delay-* {
-  --text-gradient-shimmer-delay: calc(--value(integer) * 1ms);
-  --text-gradient-shimmer-delay: --value([*]);
-}
-
-@utility shimmer-ease-* {
+@utility shimmer-* {
   --text-gradient-shimmer-timing-function: --value(
     "linear",
     "ease",
@@ -703,10 +695,6 @@
 @utility shimmer-repeat-* {
   --text-gradient-shimmer-iteration-count: --value("infinite");
   --text-gradient-shimmer-iteration-count: --value(integer, [*]);
-}
-
-@utility shimmer-animation-* {
-  --text-gradient-shimmer-animation: --value([*]);
 }
 
 @utility accordion-details-animated {

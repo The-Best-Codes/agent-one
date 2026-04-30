@@ -16,7 +16,7 @@ const LoadingIndicator = ({
   if (isApiKeysLoading) text = "Booting up";
 
   return (
-    <span className="text-gradient-shimmer from-foreground via-muted-foreground/50 to-foreground bg-linear-to-r text-sm font-bold">
+    <span className="text-gradient-shimmer from-foreground via-muted-foreground to-foreground bg-linear-to-r text-sm font-bold">
       {text}
     </span>
   );
