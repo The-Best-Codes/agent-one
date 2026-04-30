@@ -643,27 +643,15 @@
   ::selection {
     @apply bg-primary text-primary-foreground;
   }
+}
 
-  .text-shimmer {
-    font-optical-sizing: auto;
-    /* background: linear-gradient(135deg, #ffffff, #5e5e5e, #ffffff); */
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: transparent;
-    color: transparent;
-    background-size: 200% 100%;
-    animation: text-shimmer 5s linear infinite;
+@keyframes text-gradient-shimmer {
+  0% {
+    background-position: 200% 0;
   }
 
-  @keyframes text-shimmer {
-    0% {
-      background-position: 200% 0;
-    }
-
-    100% {
-      background-position: -200% 0;
-    }
+  100% {
+    background-position: -200% 0;
   }
 }
 
@@ -671,6 +659,22 @@
   &::-webkit-scrollbar {
     @apply size-0.5;
   }
+}
+
+@utility text-gradient-shimmer {
+  font-optical-sizing: auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: transparent;
+  color: transparent;
+  background-size: var(--text-gradient-shimmer-background-size, 200% 100%);
+  animation: var(
+    --text-gradient-shimmer-animation,
+    text-gradient-shimmer var(--text-gradient-shimmer-duration, 5s)
+      var(--text-gradient-shimmer-timing-function, linear) var(--text-gradient-shimmer-delay, 0s)
+      var(--text-gradient-shimmer-iteration-count, infinite)
+  );
 }
 
 @utility accordion-details-animated {

@@ -9,7 +9,7 @@ export default function SuspenseFallback() {
       role="main"
       data-testid="main"
     >
-      <span className="text-shimmer from-foreground via-muted-foreground to-foreground bg-linear-to-r p-4 text-5xl select-none">
+      <span className="text-gradient-shimmer from-foreground via-muted-foreground to-foreground bg-linear-to-r p-4 text-5xl select-none">
         AgentOne
       </span>
     </main>
