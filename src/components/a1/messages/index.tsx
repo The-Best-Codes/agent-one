@@ -146,7 +146,7 @@ const MessagePartsInternal = ({
                   disableEnter={isMobile}
                   onEnter={!isMobile ? handleEnterKey : undefined}
                   onCancel={handleCancel}
-                  className={cn(thisIndex > 0 ? "mt-1" : "")}
+                  className={cn(i > 1 || thisIndex > 0 ? "mt-1" : "")}
                 />
               </div>
             );
