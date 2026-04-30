@@ -677,6 +677,38 @@
   );
 }
 
+@utility shimmer-duration-* {
+  --text-gradient-shimmer-duration: calc(--value(integer) * 1ms);
+  --text-gradient-shimmer-duration: --value([*]);
+}
+
+@utility shimmer-delay-* {
+  --text-gradient-shimmer-delay: calc(--value(integer) * 1ms);
+  --text-gradient-shimmer-delay: --value([*]);
+}
+
+@utility shimmer-ease-* {
+  --text-gradient-shimmer-timing-function: --value(
+    "linear",
+    "ease",
+    "ease-in",
+    "ease-out",
+    "ease-in-out",
+    "step-start",
+    "step-end"
+  );
+  --text-gradient-shimmer-timing-function: --value(--ease-*, [*]);
+}
+
+@utility shimmer-repeat-* {
+  --text-gradient-shimmer-iteration-count: --value("infinite");
+  --text-gradient-shimmer-iteration-count: --value(integer, [*]);
+}
+
+@utility shimmer-animation-* {
+  --text-gradient-shimmer-animation: --value([*]);
+}
+
 @utility accordion-details-animated {
   & {
     interpolate-size: allow-keywords;

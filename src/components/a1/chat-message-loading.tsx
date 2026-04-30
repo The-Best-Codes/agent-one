@@ -1,29 +1,24 @@
 import type { UIMessage } from "ai";
 
-import { Spinner } from "@/components/ui/spinner";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
-import { cn } from "@/lib/utils";
 
 const LoadingIndicator = ({
   isApiKeysLoading,
   isMcpLoading,
-  className,
 }: {
   isApiKeysLoading: boolean;
   isMcpLoading: boolean;
-  className?: string;
 }) => {
-  let text = "Thinking";
+  let text = "Working";
   if (isMcpLoading) text = "Starting extensions";
   if (isApiKeysLoading) text = "Booting up";
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
-      <Spinner className="text-foreground size-4" />
-      <span className="text-foreground text-sm font-bold">{text}</span>
-    </div>
+    <span className="text-gradient-shimmer from-foreground via-muted-foreground/50 to-foreground bg-linear-to-r text-sm font-bold">
+      {text}
+    </span>
   );
 };
 
@@ -52,19 +47,11 @@ export const ChatMessageLoading = ({
     if (status === "streaming") {
       // TODO: Do something better here. We used to have a cursor, but it always showed up on the next line which looks awkward.
       // "Thinking" in the middle of a response is also awkward, but it will have to do for now.
-      return (
-        <div className="justify-end">
-          <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />
-        </div>
-      );
+      return <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />;
     }
 
     if (status === "submitted" && lastOverallMessage.role === "assistant") {
-      return (
-        <div className="justify-end">
-          <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />
-        </div>
-      );
+      return <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />;
     }
 
     return null;
