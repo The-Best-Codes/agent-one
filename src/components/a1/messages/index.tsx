@@ -225,7 +225,7 @@ const MessagePartsInternal = ({
       <div
         className={cn(
           "border-input focus-within:border-ring focus-within:ring-ring/50 bg-background ml-2 flex w-full flex-col rounded-md border p-2 focus-within:ring-[3px]",
-          message.role === "assistant" ? "my-2" : "mt-2",
+          message.role === "assistant" ? "my-2" : "mt-2 max-w-3/4 self-end",
         )}
       >
         <div className="flex flex-col">{renderedParts}</div>
