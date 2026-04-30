@@ -58,7 +58,7 @@ export function CustomProviderListItem({
             aria-label={`Enable ${provider.name}`}
           />
         </div>
-        <AccordionContent className="px-3 pb-3">
+        <AccordionContent className="overflow-auto px-3 pb-3">
           <div className="flex flex-col gap-4">
             <div className="grid gap-1.5">
               <Label htmlFor={`name-${provider.id}`} className="text-xs">
