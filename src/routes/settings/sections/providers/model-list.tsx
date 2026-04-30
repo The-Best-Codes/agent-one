@@ -91,9 +91,9 @@ export interface ModelItemInfoProps {
 
 export function ModelItemInfo({ model }: ModelItemInfoProps) {
   return (
-    <div className="min-w-0 flex-1">
-      <p className="truncate text-sm font-medium">{model.name || model.id}</p>
-      {model.name && <p className="text-muted-foreground truncate text-xs">{model.id}</p>}
+    <div className="flex min-w-0 flex-1 flex-col leading-tight">
+      <span className="truncate text-sm font-medium">{model.name || model.id}</span>
+      {model.name && <span className="text-muted-foreground truncate text-xs">{model.id}</span>}
     </div>
   );
 }
@@ -262,7 +262,7 @@ export function ModelList({ models, baseUrl, apiKey, headers, onChange }: ModelL
     }
   };
 
-  const listHeight = Math.min(models.length * MODEL_ITEM_HEIGHT, 220);
+  const listHeight = Math.min(models.length * MODEL_ITEM_HEIGHT, 220) + 2;
 
   return (
     <div className="rounded-md border p-3">
