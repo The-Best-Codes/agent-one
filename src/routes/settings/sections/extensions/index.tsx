@@ -1,4 +1,4 @@
-import { IconFilter, IconFlask, IconPlus, IconSearch } from "@tabler/icons-react";
+import { IconFilter, IconFlask, IconPlus, IconSearch, IconTool } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -16,9 +16,8 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -30,12 +29,9 @@ import { type McpServerConfig } from "@/lib/settings/types";
 import { AddServerDialog } from "./add-server-dialog";
 import { BuiltInExtensionsConfig } from "./built-in-extensions-config";
 import { BUILT_IN_SEARCH_TEXT, TOOL_IDS, useEnabledToolCount } from "./built-in-extensions-utils";
+import { DanglingExtensionsDialog } from "./dangling-extensions-dialog";
 import { ExtensionAdvancedDetails } from "./extension-advanced-details";
-import {
-  ExtensionsBrowser,
-  type ExtensionListItem,
-  type ExtensionScope,
-} from "./extensions-browser";
+import { ExtensionsBrowser, type ExtensionListItem } from "./extensions-browser";
 import { InstallExtensionDialog } from "./install-extension-dialog";
 import { UninstallExtensionDialog } from "./uninstall-extension-dialog";
 
@@ -43,12 +39,21 @@ function toRegistryIdFragment(registryName: string): string {
   return registryName.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
+function getRegistryNameFromServerId(serverId: string): string | null {
+  const atIdx = serverId.lastIndexOf("@");
+  if (atIdx <= 0) return null;
+  return serverId.slice(0, atIdx);
+}
+
 function isServerInstalledFromExtension(
   server: McpServerConfig,
   extension: McpRegistryExtension,
 ): boolean {
+  if (server.id === extension.id) return true;
+  const registryName = getRegistryNameFromServerId(server.id);
+  if (registryName && registryName === extension.registryName) return true;
   const registryIdFragment = toRegistryIdFragment(extension.registryName);
-  return server.id === extension.id || server.id.includes(`registry-${registryIdFragment}`);
+  return server.id.includes(`registry-${registryIdFragment}`);
 }
 
 function isServerFromRegistry(server: McpServerConfig): boolean {
@@ -82,12 +87,18 @@ export default function ExtensionsSection() {
     name: string;
   } | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
+  const [showDanglingDialog, setShowDanglingDialog] = useState(false);
   const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<ExtensionScope>("all");
+  const [onlyInstalled, setOnlyInstalled] = useState(false);
   const [showDeviceExtensions, setShowDeviceExtensions] = useState(true);
   const [showOnlineExtensions, setShowOnlineExtensions] = useState(true);
 
   const registryExtensions = useMemo(() => getMcpRegistryExtensions(), []);
+
+  const knownRegistryNames = useMemo(
+    () => new Set(registryExtensions.map((extension) => extension.registryName)),
+    [registryExtensions],
+  );
 
   const updateMcpServerById = useCallback(
     (serverId: string, updates: Partial<McpServerConfig>) => {
@@ -337,30 +348,31 @@ export default function ExtensionsSection() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuLabel>Show</DropdownMenuLabel>
-                <DropdownMenuRadioGroup
-                  value={scope}
-                  onValueChange={(v) => setScope(v as ExtensionScope)}
+                <DropdownMenuCheckboxItem
+                  checked={onlyInstalled}
+                  onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
                 >
-                  <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="installed">Installed</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="built-in">Built-in</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
+                  Only show installed
+                </DropdownMenuCheckboxItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Connection type</DropdownMenuLabel>
                 <DropdownMenuCheckboxItem
                   checked={showDeviceExtensions}
                   onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
-                  disabled={scope === "built-in"}
                 >
                   Runs on this device
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   checked={showOnlineExtensions}
                   onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
-                  disabled={scope === "built-in"}
                 >
                   Connects online
                 </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
+                  <IconTool data-icon="inline-start" />
+                  Find dangling extensions
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -373,7 +385,7 @@ export default function ExtensionsSection() {
         <ExtensionsBrowser
           items={items}
           query={query}
-          scope={scope}
+          onlyInstalled={onlyInstalled}
           showDeviceExtensions={showDeviceExtensions}
           showOnlineExtensions={showOnlineExtensions}
         />
@@ -410,6 +422,24 @@ export default function ExtensionsSection() {
           onOpenChange={setShowUninstallDialog}
           onConfirm={handleConfirmUninstall}
           onCancel={handleCancelUninstall}
+        />
+
+        <DanglingExtensionsDialog
+          open={showDanglingDialog}
+          onOpenChange={setShowDanglingDialog}
+          mcpServers={mcpServers}
+          knownRegistryNames={knownRegistryNames}
+          onRemove={(serverId) => {
+            const server = mcpServers.find((s) => s.id === serverId);
+            setMcpServers((prev) => prev.filter((s) => s.id !== serverId));
+            toast.success(`${server?.name || "Extension"} removed`);
+          }}
+          onRemoveAll={(serverIds) => {
+            const ids = new Set(serverIds);
+            setMcpServers((prev) => prev.filter((s) => !ids.has(s.id)));
+            toast.success(`Removed ${serverIds.length} dangling extensions`);
+            setShowDanglingDialog(false);
+          }}
         />
       </CardContent>
     </Card>

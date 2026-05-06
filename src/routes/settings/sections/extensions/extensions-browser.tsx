@@ -11,8 +11,6 @@ import { ExtensionListRow } from "./extension-list-row";
 
 const ESTIMATED_EXTENSION_ITEM_HEIGHT = 148;
 
-export type ExtensionScope = "all" | "installed" | "built-in";
-
 export interface ExtensionListItem {
   id: string;
   title: string;
@@ -39,7 +37,7 @@ export interface ExtensionListItem {
 interface ExtensionsBrowserProps {
   items: ExtensionListItem[];
   query: string;
-  scope: ExtensionScope;
+  onlyInstalled: boolean;
   showDeviceExtensions: boolean;
   showOnlineExtensions: boolean;
 }
@@ -47,7 +45,7 @@ interface ExtensionsBrowserProps {
 export function ExtensionsBrowser({
   items,
   query,
-  scope,
+  onlyInstalled,
   showDeviceExtensions,
   showOnlineExtensions,
 }: ExtensionsBrowserProps) {
@@ -56,10 +54,8 @@ export function ExtensionsBrowser({
   const filteredItems = useMemo(() => {
     let result = items;
 
-    if (scope === "installed") {
+    if (onlyInstalled) {
       result = result.filter((item) => item.installed);
-    } else if (scope === "built-in") {
-      result = result.filter((item) => item.transportType === "built-in");
     }
 
     result = result.filter((item) => {
@@ -79,13 +75,22 @@ export function ExtensionsBrowser({
         .filter(({ score }) => score > 0)
         .sort((a, b) => b.score - a.score)
         .map(({ item }) => item);
+    } else {
+      result = [...result].sort((a, b) => {
+        const rank = (item: ExtensionListItem) => {
+          if (item.transportType === "built-in") return 0;
+          if (item.installed) return 1;
+          return 2;
+        };
+        return rank(a) - rank(b);
+      });
     }
 
     return result;
-  }, [items, scope, query, showDeviceExtensions, showOnlineExtensions]);
+  }, [items, onlyInstalled, query, showDeviceExtensions, showOnlineExtensions]);
 
   const isOverflowing = useOverflow(parentRef, {
-    watch: `${filteredItems.length}:${scope}:${query}`,
+    watch: `${filteredItems.length}:${onlyInstalled}:${query}`,
   });
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -101,7 +106,7 @@ export function ExtensionsBrowser({
   useEffect(() => {
     parentRef.current?.scrollTo({ top: 0 });
     virtualizer.scrollToOffset(0);
-  }, [scope, query, showDeviceExtensions, showOnlineExtensions, virtualizer]);
+  }, [onlyInstalled, query, showDeviceExtensions, showOnlineExtensions, virtualizer]);
 
   return (
     <div
