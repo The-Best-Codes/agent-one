@@ -2,11 +2,7 @@ import type { LanguageModel } from "ai";
 import { useAtomValue } from "jotai";
 import { useMemo } from "react";
 
-import {
-  type ModelsDevData,
-  modelsDevData,
-  type ModelsDevModel,
-} from "@/assets/model-lists/models-dev";
+import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
 import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
 import {
   getEffectiveApiKey,
@@ -71,29 +67,27 @@ const PREFERRED_MODELS_BY_PROVIDER: Record<ProviderId, string[]> = {
   "fireworks-ai": ["fireworks-ai-accounts/fireworks/models/kimi-k2p5"],
 };
 
-const typedModelsDevData = modelsDevData as unknown as ModelsDevData;
-
-function getProviderModels(providerId: string): ModelsDevModel[] {
-  const provider = typedModelsDevData[providerId];
+function getProviderModels(providerId: string): ModelRecord[] {
+  const provider = modelDirectoryData[providerId];
   if (!provider) return [];
   return Object.values(provider.models);
 }
 
-function mapModelsDevModels(
+function mapDirectoryModels(
   providerId: string,
   providerName: string,
   createModel: (modelId: string) => LanguageModel,
-  filter?: (model: ModelsDevModel) => boolean,
+  filter?: (model: ModelRecord) => boolean,
 ): ModelData[] {
   const models = getProviderModels(providerId);
   const filteredModels = filter ? models.filter(filter) : models;
 
   return filteredModels.map((model) => ({
     id: `${providerId}-${model.id}`,
-    name: model.name,
+    name: model.name ?? model.id,
     provider: providerName,
     model: createModel(model.id),
-    supportsToolUse: model.tool_call ?? false,
+    supportsToolUse: model.features?.tool_call ?? false,
     contextWindow: model.limit?.context,
   }));
 }
@@ -112,12 +106,12 @@ function mapCustomProviderModels(provider: CustomProvider, apiKey: string): Mode
   }));
 }
 
-function isChatModel(model: ModelsDevModel): boolean {
+function isChatModel(model: ModelRecord): boolean {
   const outputModalities = model.modalities?.output ?? [];
   return outputModalities.includes("text");
 }
 
-function isImageModel(model: ModelsDevModel): boolean {
+function isImageModel(model: ModelRecord): boolean {
   const outputModalities = model.modalities?.output ?? [];
   return outputModalities.includes("image");
 }
@@ -261,7 +255,7 @@ export function useModelCatalog() {
 
   const AVAILABLE_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
-      mapModelsDevModels(p.id, p.label, providers[p.id].languageModel),
+      mapDirectoryModels(p.id, p.label, providers[p.id].languageModel),
     );
 
     const customModels = customProviders
@@ -273,7 +267,7 @@ export function useModelCatalog() {
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
-      mapModelsDevModels(p.id, p.label, providers[p.id].languageModel, isChatModel),
+      mapDirectoryModels(p.id, p.label, providers[p.id].languageModel, isChatModel),
     );
 
     const customModels = customProviders
@@ -287,7 +281,7 @@ export function useModelCatalog() {
     const builtInModels = PROVIDER_REGISTRY.filter(
       (p) => p.id === "google" || p.id === "openrouter",
     ).flatMap((p) =>
-      mapModelsDevModels(p.id, p.label, providers[p.id].languageModel, isImageModel),
+      mapDirectoryModels(p.id, p.label, providers[p.id].languageModel, isImageModel),
     );
 
     const customModels = customProviders

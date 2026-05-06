@@ -1,14 +1,9 @@
 import type { LanguageModelUsage, UIMessage } from "ai";
 
-import {
-  type ModelsDevData,
-  modelsDevData,
-  type ModelsDevModel,
-} from "@/assets/model-lists/models-dev";
+import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
 import { PROVIDER_IDS } from "@/lib/ai/providers/registry";
 
 const TOKENS_PER_MILLION = 1_000_000;
-const typedModelsDevData = modelsDevData as unknown as ModelsDevData;
 
 export interface ChatUsageSummary {
   inputTokens: number;
@@ -89,14 +84,14 @@ function sanitizeNumber(value: number | undefined): number {
 
 export function getModelCostByChatModelId(
   chatModelId: string | undefined,
-): ModelsDevModel["cost"] | undefined {
+): ModelRecord["pricing"] | undefined {
   if (!chatModelId) return undefined;
 
   const providerId = PROVIDER_IDS.find((id) => chatModelId.startsWith(`${id}-`));
   if (!providerId) return undefined;
   const modelId = chatModelId.slice(providerId.length + 1);
 
-  return typedModelsDevData[providerId]?.models[modelId]?.cost;
+  return modelDirectoryData[providerId]?.models[modelId]?.pricing;
 }
 
 export function normalizeUsage(usage: MessageTokenUsage | LanguageModelUsage | undefined) {
@@ -152,7 +147,7 @@ export function addMessageTokenUsage(
 
 export function calculateCostUsdFromUsage(
   usage: MessageTokenUsage | LanguageModelUsage | undefined,
-  modelCost: ModelsDevModel["cost"] | undefined,
+  modelCost: ModelRecord["pricing"] | undefined,
 ): number {
   if (!modelCost || !usage) return 0;
 

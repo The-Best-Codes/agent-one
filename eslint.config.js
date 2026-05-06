@@ -8,7 +8,7 @@ import tseslint from "typescript-eslint";
 export default [
   globalIgnores([
     "dist",
-    "src/assets/model-lists/models-dev.json",
+    "src/assets/model-lists/model-directory.json",
     "src/assets/mcp-registry/mcp-registry.json",
     "src/assets/mcp-registry/types.ts",
   ]),
