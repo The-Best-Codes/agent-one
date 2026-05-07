@@ -3,6 +3,26 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import type { CustomProvider } from "@/lib/jotai/custom-provider-atoms";
 
+export interface OpenAIModelsResponse {
+  data: Array<{
+    id: string;
+    object?: string;
+    created?: number;
+    owned_by?: string;
+  }>;
+}
+
+function buildModelsUrl(baseUrl: string) {
+  return baseUrl.endsWith("/") ? `${baseUrl}models` : `${baseUrl}/models`;
+}
+
+function buildRequestHeaders(apiKey?: string, headers?: Record<string, string>) {
+  return {
+    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+    ...headers,
+  };
+}
+
 export function createCustomProvider(provider: CustomProvider, apiKey: string) {
   return createOpenAICompatible({
     name: provider.id,
@@ -13,28 +33,14 @@ export function createCustomProvider(provider: CustomProvider, apiKey: string) {
   });
 }
 
-export interface OpenAIModelsResponse {
-  data: Array<{
-    id: string;
-    object?: string;
-    created?: number;
-    owned_by?: string;
-  }>;
-}
-
 export async function fetchProviderModels(
   baseUrl: string,
   apiKey?: string,
   headers?: Record<string, string>,
 ): Promise<OpenAIModelsResponse> {
-  const url = baseUrl.endsWith("/") ? `${baseUrl}models` : `${baseUrl}/models`;
-
-  const response = await tauriFetch(url, {
+  const response = await tauriFetch(buildModelsUrl(baseUrl), {
     method: "GET",
-    headers: {
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-      ...headers,
-    },
+    headers: buildRequestHeaders(apiKey, headers),
   });
 
   if (!response.ok) {
@@ -45,5 +51,6 @@ export async function fetchProviderModels(
   if (!json || typeof json !== "object" || !Array.isArray(json.data)) {
     throw new Error("Invalid models response format: missing 'data' array");
   }
+
   return json as OpenAIModelsResponse;
 }

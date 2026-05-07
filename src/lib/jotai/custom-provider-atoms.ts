@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { atom, type Atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
 import {
@@ -22,6 +22,17 @@ export type NewCustomProviderData = Omit<CustomProvider, "id" | "enabled">;
 export const customProvidersAtom = atomWithStorage<CustomProvider[]>(STORAGE_KEY, [], undefined, {
   getOnInit: true,
 });
+
+export const customProviderIdsAtom = atom((get) =>
+  get(customProvidersAtom).map((provider) => provider.id),
+);
+
+export const customProviderSearchItemsAtom = atom((get) =>
+  get(customProvidersAtom).map((provider) => ({
+    id: provider.id,
+    name: provider.name,
+  })),
+);
 
 export const addCustomProviderAtom = atom(null, (get, set, provider: NewCustomProviderData) => {
   const existing = get(customProvidersAtom);
@@ -66,3 +77,23 @@ export const normalizedCustomProvidersAtom = atom((get) => {
     models: provider.models.map(normalizeProviderModelMetadata),
   }));
 });
+
+export const hasEnabledCustomProviderAtom = atom((get) =>
+  get(customProvidersAtom).some((provider) => provider.enabled),
+);
+
+const customProviderAtomCache = new Map<string, Atom<CustomProvider | undefined>>();
+
+export function getCustomProviderAtom(providerId: string) {
+  const cachedAtom = customProviderAtomCache.get(providerId);
+  if (cachedAtom) {
+    return cachedAtom;
+  }
+
+  const providerAtom = atom((get) =>
+    get(customProvidersAtom).find((provider) => provider.id === providerId),
+  );
+
+  customProviderAtomCache.set(providerId, providerAtom);
+  return providerAtom;
+}

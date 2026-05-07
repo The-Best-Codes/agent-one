@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { atomWithStorage, unwrap } from "jotai/utils";
+import { atomFamily, atomWithStorage, unwrap } from "jotai/utils";
 
 import {
   PROVIDER_REGISTRY,
@@ -24,15 +24,11 @@ export const apiKeyAtoms = Object.fromEntries(
   PROVIDER_REGISTRY.map((provider) => [provider.id, createApiKeyAtoms(provider.storageKey)]),
 ) as Record<ProviderId, ReturnType<typeof createApiKeyAtoms>>;
 
-export const allApiKeysAtom = atom((get) => {
-  return Object.fromEntries(
-    PROVIDER_REGISTRY.map((p) => [p.id, get(apiKeyAtoms[p.id].atom)]),
-  ) as Record<ProviderId, string>;
-});
-
 export function getApiKeyAtom(providerId: ProviderId) {
   return apiKeyAtoms[providerId].atom;
 }
+
+export const apiKeyAtomFamily = atomFamily((providerId: ProviderId) => apiKeyAtoms[providerId].atom);
 
 export function getApiKeyLoadableAtom(providerId: ProviderId) {
   return apiKeyAtoms[providerId].loadableAtom;

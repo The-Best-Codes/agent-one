@@ -42,21 +42,6 @@ export function normalizeProviderModelMetadata(
   };
 }
 
-export function areProviderModelsEqual(
-  left: ProviderModelMetadata,
-  right: ProviderModelMetadata,
-): boolean {
-  return (
-    left.id === right.id &&
-    left.name === right.name &&
-    left.supportsText === right.supportsText &&
-    left.supportsTools === right.supportsTools &&
-    left.supportsImages === right.supportsImages &&
-    left.contextWindow === right.contextWindow &&
-    left.maxOutputTokens === right.maxOutputTokens
-  );
-}
-
 export function getBuiltInProviderModels(providerId: string) {
   return Object.values(modelDirectoryData[providerId]?.models ?? {}).map(
     mapDirectoryModelToMetadata,

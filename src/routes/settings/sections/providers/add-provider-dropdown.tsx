@@ -4,24 +4,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuGroup,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { ProviderModelMetadata } from "@/lib/ai/providers/provider-models";
+import type { NewCustomProviderData } from "@/lib/jotai/custom-provider-atoms";
 
-import { AddOpenAICompatibleDialog } from "./add-openai-compatible-dialog";
-
-interface NewProviderData {
-  name: string;
-  baseUrl: string;
-  headers: Record<string, string>;
-  models: ProviderModelMetadata[];
-}
+import { AddOpenAICompatibleDialog } from "./provider-dialogs";
 
 interface AddProviderDropdownProps {
-  onAddProvider: (data: NewProviderData, apiKey: string) => void;
+  onAddProvider: (data: NewCustomProviderData, apiKey: string) => void;
 }
 
 export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps) {

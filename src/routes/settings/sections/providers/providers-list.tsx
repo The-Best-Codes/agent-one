@@ -1,5 +1,5 @@
 import { IconPlugConnected } from "@tabler/icons-react";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useState } from "react";
 
 import { SearchInput } from "@/components/a1/search-input";
@@ -13,73 +13,59 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Accordion } from "@/components/ui/native/accordion";
-import { useProviderState } from "@/hooks/use-provider-state";
-import { getBuiltInProviderModels } from "@/lib/ai/providers/provider-models";
-import { getProviderById, PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
+import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import {
   deleteCustomProviderApiKeyAtom,
   setCustomProviderApiKeyAtom,
 } from "@/lib/jotai/custom-provider-api-key-atoms";
 import {
   addCustomProviderAtom,
-  customProvidersAtom,
+  customProviderIdsAtom,
+  customProviderSearchItemsAtom,
   deleteCustomProviderAtom,
-  updateCustomProviderAtom,
+  type NewCustomProviderData,
 } from "@/lib/jotai/custom-provider-atoms";
 
 import { AddProviderDropdown } from "./add-provider-dropdown";
-import { CustomProviderListItem } from "./custom-provider-list-item";
-import { ProviderListItem } from "./provider-list-item";
-
-function BuiltInProviderItem({ providerId }: { providerId: ProviderId }) {
-  const provider = getProviderById(providerId);
-  const state = useProviderState(providerId);
-
-  return (
-    <ProviderListItem
-      providerId={providerId}
-      label={provider.label}
-      config={state.config}
-      builtInModels={getBuiltInProviderModels(providerId)}
-      apiKey={state.apiKey}
-      hasEnvKey={state.hasEnvKey}
-      onConfigChange={state.setConfig}
-      onApiKeyChange={state.setApiKey}
-    />
-  );
-}
+import { BuiltInProviderListItem, CustomProviderListItem } from "./provider-list-item";
 
 export function ProvidersList() {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
 
-  const [customProviders] = useAtom(customProvidersAtom);
-  const [, addCustomProvider] = useAtom(addCustomProviderAtom);
-  const [, updateCustomProvider] = useAtom(updateCustomProviderAtom);
-  const [, deleteCustomProvider] = useAtom(deleteCustomProviderAtom);
+  const customProviderIds = useAtomValue(customProviderIdsAtom);
+  const customProviderSearchItems = useAtomValue(customProviderSearchItemsAtom);
+  const addCustomProvider = useSetAtom(addCustomProviderAtom);
+  const deleteCustomProvider = useSetAtom(deleteCustomProviderAtom);
   const setCustomProviderApiKey = useSetAtom(setCustomProviderApiKeyAtom);
   const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
+
+  const normalizedBuiltInQuery = builtInSearchQuery.trim().toLowerCase();
+  const normalizedCustomQuery = customSearchQuery.trim().toLowerCase();
 
   const filteredBuiltInProviders = useMemo(
     () =>
       PROVIDER_REGISTRY.filter(
         (provider) =>
           provider.id !== "agent-one" &&
-          provider.label.toLowerCase().includes(builtInSearchQuery.trim().toLowerCase()),
+          provider.label.toLowerCase().includes(normalizedBuiltInQuery),
       ),
-    [builtInSearchQuery],
+    [normalizedBuiltInQuery],
   );
 
-  const filteredCustomProviders = useMemo(
-    () =>
-      customProviders.filter((provider) =>
-        provider.name.toLowerCase().includes(customSearchQuery.trim().toLowerCase()),
-      ),
-    [customProviders, customSearchQuery],
-  );
+  const filteredCustomProviderIds = useMemo(() => {
+    if (!normalizedCustomQuery) {
+      return customProviderIds;
+    }
 
-  const handleAddProvider = (data: Parameters<typeof addCustomProvider>[0], apiKey: string) => {
+    return customProviderSearchItems
+      .filter((provider) => provider.name.toLowerCase().includes(normalizedCustomQuery))
+      .map((provider) => provider.id);
+  }, [customProviderIds, customProviderSearchItems, normalizedCustomQuery]);
+
+  const handleAddProvider = (data: NewCustomProviderData, apiKey: string) => {
     const providerId = addCustomProvider(data);
+
     if (apiKey) {
       void setCustomProviderApiKey(providerId, apiKey);
     }
@@ -104,13 +90,18 @@ export function ProvidersList() {
           <SearchInput
             placeholder="Search built-in providers..."
             value={builtInSearchQuery}
-            onChange={(e) => setBuiltInSearchQuery(e.target.value)}
+            onChange={(event) => setBuiltInSearchQuery(event.target.value)}
           />
 
           {filteredBuiltInProviders.length > 0 ? (
             <Accordion type="single" collapsible className="w-full">
               {filteredBuiltInProviders.map((provider) => (
-                <BuiltInProviderItem key={provider.id} providerId={provider.id} />
+                <BuiltInProviderListItem
+                  key={provider.id}
+                  providerId={provider.id}
+                  label={provider.label}
+                  hasEnvKey={hasEnvKey(provider.id)}
+                />
               ))}
             </Accordion>
           ) : (
@@ -133,13 +124,13 @@ export function ProvidersList() {
             <SearchInput
               placeholder="Search custom providers..."
               value={customSearchQuery}
-              onChange={(e) => setCustomSearchQuery(e.target.value)}
+              onChange={(event) => setCustomSearchQuery(event.target.value)}
               containerClassName="flex-1"
             />
             <AddProviderDropdown onAddProvider={handleAddProvider} />
           </div>
 
-          {customProviders.length === 0 ? (
+          {customProviderIds.length === 0 ? (
             <Empty className="bg-muted/20 border">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -154,14 +145,13 @@ export function ProvidersList() {
                 <AddProviderDropdown onAddProvider={handleAddProvider} />
               </EmptyContent>
             </Empty>
-          ) : filteredCustomProviders.length > 0 ? (
+          ) : filteredCustomProviderIds.length > 0 ? (
             <Accordion type="single" collapsible className="w-full">
-              {filteredCustomProviders.map((provider) => (
+              {filteredCustomProviderIds.map((providerId) => (
                 <CustomProviderListItem
-                  key={provider.id}
-                  provider={provider}
-                  onUpdate={(updates) => updateCustomProvider(provider.id, updates)}
-                  onDelete={() => handleDeleteProvider(provider.id)}
+                  key={providerId}
+                  providerId={providerId}
+                  onDelete={() => handleDeleteProvider(providerId)}
                 />
               ))}
             </Accordion>

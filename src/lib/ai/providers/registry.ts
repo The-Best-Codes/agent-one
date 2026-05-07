@@ -506,23 +506,33 @@ export const PROVIDER_REGISTRY = [
 export type ProviderId = (typeof PROVIDER_REGISTRY)[number]["id"];
 export type ProviderStorageKey = (typeof PROVIDER_REGISTRY)[number]["storageKey"];
 
-export const PROVIDER_IDS = PROVIDER_REGISTRY.map((p) => p.id);
+export const PROVIDER_IDS = PROVIDER_REGISTRY.map((provider) => provider.id);
+
+const providersById = new Map(PROVIDER_REGISTRY.map((provider) => [provider.id, provider]));
+const providersByStorageKey = new Map(
+  PROVIDER_REGISTRY.map((provider) => [provider.storageKey, provider]),
+);
 
 export function getProviderById(id: ProviderId): ProviderDefinition {
-  const provider = PROVIDER_REGISTRY.find((p) => p.id === id);
-  if (!provider) throw new Error(`Unknown provider: ${id}`);
+  const provider = providersById.get(id);
+  if (!provider) {
+    throw new Error(`Unknown provider: ${id}`);
+  }
+
   return provider;
 }
 
 export function getProviderByStorageKey(key: ProviderStorageKey): ProviderDefinition {
-  const provider = PROVIDER_REGISTRY.find((p) => p.storageKey === key);
-  if (!provider) throw new Error(`Unknown storage key: ${key}`);
+  const provider = providersByStorageKey.get(key);
+  if (!provider) {
+    throw new Error(`Unknown storage key: ${key}`);
+  }
+
   return provider;
 }
 
 export function getEnvApiKey(providerId: ProviderId): string | undefined {
-  const provider = getProviderById(providerId);
-  return import.meta.env[provider.envKey] as string | undefined;
+  return import.meta.env[getProviderById(providerId).envKey] as string | undefined;
 }
 
 export function getEffectiveApiKey(providerId: ProviderId, storedKey: string): string {

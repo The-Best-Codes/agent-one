@@ -7,7 +7,7 @@ import {
   IconSparkles,
   IconTrash,
 } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -46,17 +46,22 @@ interface ModelListProps {
 
 interface AddModelFormProps {
   existingIds: string[];
-  builtInModelIds?: Set<string>;
+  builtInModelIds: Set<string>;
   onAdd: (model: ProviderModelMetadata) => void;
   onCancel: () => void;
 }
 
 interface ModelConfigDialogProps {
   model: ProviderModelMetadata;
-  builtInModel?: ProviderModelMetadata;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onChange: (model: ProviderModelMetadata) => void;
+}
+
+interface ModelRowProps {
+  model: ProviderModelMetadata;
+  onChange: (model: ProviderModelMetadata) => void;
+  onDelete: (modelId: string) => void;
 }
 
 function normalizeOptionalNumber(value: string) {
@@ -85,7 +90,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
   const trimmedId = id.trim();
   const trimmedName = name.trim();
   const isDuplicate = existingIds.includes(trimmedId);
-  const overridesBuiltIn = Boolean(trimmedId && builtInModelIds?.has(trimmedId));
+  const overridesBuiltIn = trimmedId !== "" && builtInModelIds.has(trimmedId);
   const parsedContextWindow = normalizeOptionalNumber(contextWindow);
   const parsedMaxOutputTokens = normalizeOptionalNumber(maxOutputTokens);
   const hasInvalidNumber = parsedContextWindow === null || parsedMaxOutputTokens === null;
@@ -115,7 +120,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           <Input
             id="new-model-id"
             value={id}
-            onChange={(e) => setId(e.target.value)}
+            onChange={(event) => setId(event.target.value)}
             placeholder="e.g. gpt-5"
             aria-invalid={isDuplicate}
           />
@@ -137,7 +142,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           <Input
             id="new-model-name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(event) => setName(event.target.value)}
             placeholder="Optional label shown in the model picker"
           />
         </Field>
@@ -148,7 +153,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
             <Input
               id="new-model-context-window"
               value={contextWindow}
-              onChange={(e) => setContextWindow(e.target.value)}
+              onChange={(event) => setContextWindow(event.target.value)}
               placeholder="e.g. 200000"
               inputMode="numeric"
               aria-invalid={parsedContextWindow === null}
@@ -165,7 +170,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
             <Input
               id="new-model-max-output"
               value={maxOutputTokens}
-              onChange={(e) => setMaxOutputTokens(e.target.value)}
+              onChange={(event) => setMaxOutputTokens(event.target.value)}
               placeholder="e.g. 8192"
               inputMode="numeric"
               aria-invalid={parsedMaxOutputTokens === null}
@@ -221,6 +226,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 }
 
 function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigDialogProps) {
+  const [draft, setDraft] = useState(model);
   const [contextWindowValue, setContextWindowValue] = useState(
     model.contextWindow?.toString() ?? "",
   );
@@ -233,19 +239,19 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
   const isContextWindowInvalid = parsedContextWindow === null;
   const isMaxOutputTokensInvalid = parsedMaxOutputTokens === null;
 
-  if ((model.contextWindow?.toString() ?? "") !== contextWindowValue) {
-    setContextWindowValue(model.contextWindow?.toString() ?? "");
-  }
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onChange(draft);
+    }
 
-  if ((model.maxOutputTokens?.toString() ?? "") !== maxOutputTokensValue) {
-    setMaxOutputTokensValue(model.maxOutputTokens?.toString() ?? "");
-  }
+    onOpenChange(nextOpen);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{getProviderModelName(model)}</DialogTitle>
+          <DialogTitle>{getProviderModelName(draft)}</DialogTitle>
         </DialogHeader>
 
         <FieldGroup>
@@ -253,8 +259,13 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
             <FieldLabel htmlFor={`model-name-${model.id}`}>Display Name</FieldLabel>
             <Input
               id={`model-name-${model.id}`}
-              value={model.name ?? ""}
-              onChange={(e) => onChange({ ...model, name: e.target.value.trim() || undefined })}
+              value={draft.name ?? ""}
+              onChange={(event) =>
+                setDraft({
+                  ...draft,
+                  name: event.target.value.trim() || undefined,
+                })
+              }
               placeholder="Optional label shown in the model picker"
             />
           </Field>
@@ -265,12 +276,16 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
               <Input
                 id={`model-context-window-${model.id}`}
                 value={contextWindowValue}
-                onChange={(e) => {
-                  const nextValue = e.target.value;
+                onChange={(event) => {
+                  const nextValue = event.target.value;
                   setContextWindowValue(nextValue);
+
                   const parsed = normalizeOptionalNumber(nextValue);
                   if (parsed !== null) {
-                    onChange({ ...model, contextWindow: parsed ?? undefined });
+                    setDraft({
+                      ...draft,
+                      contextWindow: parsed ?? undefined,
+                    });
                   }
                 }}
                 inputMode="numeric"
@@ -287,12 +302,16 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
               <Input
                 id={`model-max-output-${model.id}`}
                 value={maxOutputTokensValue}
-                onChange={(e) => {
-                  const nextValue = e.target.value;
+                onChange={(event) => {
+                  const nextValue = event.target.value;
                   setMaxOutputTokensValue(nextValue);
+
                   const parsed = normalizeOptionalNumber(nextValue);
                   if (parsed !== null) {
-                    onChange({ ...model, maxOutputTokens: parsed ?? undefined });
+                    setDraft({
+                      ...draft,
+                      maxOutputTokens: parsed ?? undefined,
+                    });
                   }
                 }}
                 inputMode="numeric"
@@ -312,8 +331,8 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
               <FieldLabel htmlFor={`model-supports-text-${model.id}`}>Supports Text</FieldLabel>
               <Switch
                 id={`model-supports-text-${model.id}`}
-                checked={model.supportsText}
-                onCheckedChange={(checked) => onChange({ ...model, supportsText: checked })}
+                checked={draft.supportsText}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsText: checked })}
               />
             </Field>
 
@@ -321,8 +340,8 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
               <FieldLabel htmlFor={`model-supports-tools-${model.id}`}>Supports Tools</FieldLabel>
               <Switch
                 id={`model-supports-tools-${model.id}`}
-                checked={model.supportsTools}
-                onCheckedChange={(checked) => onChange({ ...model, supportsTools: checked })}
+                checked={draft.supportsTools}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsTools: checked })}
               />
             </Field>
 
@@ -330,8 +349,8 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
               <FieldLabel htmlFor={`model-supports-images-${model.id}`}>Supports Images</FieldLabel>
               <Switch
                 id={`model-supports-images-${model.id}`}
-                checked={model.supportsImages}
-                onCheckedChange={(checked) => onChange({ ...model, supportsImages: checked })}
+                checked={draft.supportsImages}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsImages: checked })}
               />
             </Field>
           </div>
@@ -341,16 +360,8 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
   );
 }
 
-interface ModelRowProps {
-  model: ProviderModelMetadata;
-  builtInModel?: ProviderModelMetadata;
-  onChange: (model: ProviderModelMetadata) => void;
-  onDelete: (modelId: string) => void;
-}
-
-function ModelRow({ model, builtInModel, onChange, onDelete }: ModelRowProps) {
+const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowProps) {
   const [configOpen, setConfigOpen] = useState(false);
-  const isBuiltInOverride = Boolean(builtInModel);
 
   return (
     <>
@@ -379,23 +390,25 @@ function ModelRow({ model, builtInModel, onChange, onDelete }: ModelRowProps) {
             size="icon"
             className="text-destructive hover:text-destructive size-8"
             onClick={() => onDelete(model.id)}
-            aria-label={isBuiltInOverride ? "Remove override" : "Delete model"}
+            aria-label="Delete model"
           >
             <IconTrash />
           </Button>
         </div>
       </div>
 
-      <ModelConfigDialog
-        model={model}
-        builtInModel={builtInModel}
-        open={configOpen}
-        onOpenChange={setConfigOpen}
-        onChange={onChange}
-      />
+      {configOpen ? (
+        <ModelConfigDialog
+          key={`${model.id}-${model.name ?? ""}-${model.contextWindow ?? ""}-${model.maxOutputTokens ?? ""}-${model.supportsText}-${model.supportsTools}-${model.supportsImages}`}
+          model={model}
+          open={configOpen}
+          onOpenChange={setConfigOpen}
+          onChange={onChange}
+        />
+      ) : null}
     </>
   );
-}
+});
 
 export function ModelList({
   models,
@@ -410,11 +423,15 @@ export function ModelList({
 }: ModelListProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
+  const fetchResetTimeoutRef = useRef<number | null>(null);
 
-  const builtInModelMap = useMemo(
-    () => new Map(builtInModels.map((model) => [model.id, model])),
-    [builtInModels],
-  );
+  useEffect(() => {
+    return () => {
+      if (fetchResetTimeoutRef.current !== null) {
+        window.clearTimeout(fetchResetTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const sortedModels = useMemo(
     () =>
@@ -423,6 +440,24 @@ export function ModelList({
       ),
     [models],
   );
+
+  const builtInModelIds = useMemo(
+    () => new Set(builtInModels.map((model) => model.id)),
+    [builtInModels],
+  );
+
+  const setFetchStateWithReset = (state: "success" | "error") => {
+    setFetchState(state);
+
+    if (fetchResetTimeoutRef.current !== null) {
+      window.clearTimeout(fetchResetTimeoutRef.current);
+    }
+
+    fetchResetTimeoutRef.current = window.setTimeout(() => {
+      setFetchState("idle");
+      fetchResetTimeoutRef.current = null;
+    }, 2000);
+  };
 
   const handleAddModel = (model: ProviderModelMetadata) => {
     onChange([model, ...models]);
@@ -433,8 +468,8 @@ export function ModelList({
     onChange(models.map((model) => (model.id === nextModel.id ? nextModel : model)));
   };
 
-  const handleDeleteModel = (id: string) => {
-    onChange(models.filter((model) => model.id !== id));
+  const handleDeleteModel = (modelId: string) => {
+    onChange(models.filter((model) => model.id !== modelId));
   };
 
   const handleFetchModels = async () => {
@@ -447,7 +482,7 @@ export function ModelList({
     try {
       const response: OpenAIModelsResponse = await fetchProviderModels(baseUrl, apiKey, headers);
       const existingIds = new Set(models.map((model) => model.id));
-      const newModels = response.data
+      const fetchedModels = response.data
         .filter((model) => !existingIds.has(model.id))
         .map(
           (model): ProviderModelMetadata => ({
@@ -458,15 +493,13 @@ export function ModelList({
           }),
         );
 
-      if (newModels.length > 0) {
-        onChange([...newModels, ...models]);
+      if (fetchedModels.length > 0) {
+        onChange([...fetchedModels, ...models]);
       }
 
-      setFetchState("success");
-      setTimeout(() => setFetchState("idle"), 2000);
+      setFetchStateWithReset("success");
     } catch {
-      setFetchState("error");
-      setTimeout(() => setFetchState("idle"), 2000);
+      setFetchStateWithReset("error");
     }
   };
 
@@ -510,7 +543,7 @@ export function ModelList({
         <div className="mt-4">
           <AddModelForm
             existingIds={models.map((model) => model.id)}
-            builtInModelIds={new Set(builtInModels.map((model) => model.id))}
+            builtInModelIds={builtInModelIds}
             onAdd={handleAddModel}
             onCancel={() => setIsAdding(false)}
           />
@@ -523,7 +556,6 @@ export function ModelList({
             <ModelRow
               key={model.id}
               model={model}
-              builtInModel={builtInModelMap.get(model.id)}
               onChange={handleUpdateModel}
               onDelete={handleDeleteModel}
             />

@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { atomWithStorage } from "jotai/utils";
+import { atomFamily, atomWithStorage } from "jotai/utils";
 
 import {
   normalizeProviderModelMetadata,
@@ -7,7 +7,7 @@ import {
 } from "@/lib/ai/providers/provider-models";
 import { PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
 
-import { normalizedCustomProvidersAtom } from "./custom-provider-atoms";
+import { hasEnabledCustomProviderAtom } from "./custom-provider-atoms";
 import { SETTING_PREFIX } from "./settings-atoms";
 
 export type { ProviderId } from "@/lib/ai/providers/registry";
@@ -37,29 +37,26 @@ export const providerConfigAtoms = Object.fromEntries(
   PROVIDER_REGISTRY.map((provider) => [provider.id, createProviderConfigAtom(provider.id)]),
 ) as Record<ProviderId, ProviderConfigAtom>;
 
-export const allProviderConfigsAtom = atom((get) => {
-  return Object.fromEntries(
-    PROVIDER_REGISTRY.map((p) => {
-      const config = get(providerConfigAtoms[p.id]);
-      return [
-        p.id,
-        {
-          ...config,
-          models: (config.models ?? []).map(normalizeProviderModelMetadata),
-        },
-      ];
-    }),
-  ) as Record<ProviderId, ProviderConfig>;
-});
-
 export function getProviderConfigAtom(providerId: ProviderId) {
   return providerConfigAtoms[providerId];
 }
+
+export const providerEnabledAtomFamily = atomFamily((providerId: ProviderId) =>
+  atom((get) => get(providerConfigAtoms[providerId]).enabled),
+);
+
+export const providerHeadersAtomFamily = atomFamily((providerId: ProviderId) =>
+  atom((get) => get(providerConfigAtoms[providerId]).headers),
+);
+
+export const providerModelsAtomFamily = atomFamily((providerId: ProviderId) =>
+  atom((get) => get(providerConfigAtoms[providerId]).models.map(normalizeProviderModelMetadata)),
+);
 
 export const hasEnabledProviderAtom = atom((get) => {
   const builtInEnabled = PROVIDER_REGISTRY.some(
     (p) => get(providerConfigAtoms[p.id as ProviderId]).enabled,
   );
   if (builtInEnabled) return true;
-  return get(normalizedCustomProvidersAtom).some((p) => p.enabled);
+  return get(hasEnabledCustomProviderAtom);
 });
