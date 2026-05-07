@@ -24,6 +24,7 @@
     "@ai-sdk/deepinfra": "^2.0.45",
     "@ai-sdk/deepseek": "^2.0.29",
     "@ai-sdk/fireworks": "^2.0.46",
+    "@ai-sdk/gateway": "^3.0.110",
     "@ai-sdk/google": "^3.0.64",
     "@ai-sdk/groq": "^3.0.35",
     "@ai-sdk/mcp": "^1.0.36",
@@ -34,6 +35,7 @@
     "@ai-sdk/react": "^3.0.170",
     "@ai-sdk/togetherai": "^2.0.45",
     "@ai-sdk/xai": "^3.0.83",
+    "@aihubmix/ai-sdk-provider": "^2.0.6",
     "@axe-core/playwright": "^4.11.2",
     "@codemirror/lang-markdown": "^6.5.0",
     "@codemirror/merge": "^6.12.1",
@@ -102,6 +104,7 @@
     "tailwindcss": "^4.2.4",
     "typescript-eslint": "^8.59.1",
     "vaul": "^1.1.2",
+    "venice-ai-sdk-provider": "^1.1.19",
     "zod": "^4.3.6"
   },
   "devDependencies": {

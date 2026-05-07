@@ -31,6 +31,12 @@ export const providerConfigAtoms = Object.fromEntries(
   PROVIDER_REGISTRY.map((provider) => [provider.id, createProviderConfigAtom(provider.id)]),
 ) as Record<ProviderId, ProviderConfigAtom>;
 
+export const allProviderConfigsAtom = atom((get) => {
+  return Object.fromEntries(
+    PROVIDER_REGISTRY.map((p) => [p.id, get(providerConfigAtoms[p.id])]),
+  ) as Record<ProviderId, ProviderConfig>;
+});
+
 export function getProviderConfigAtom(providerId: ProviderId) {
   return providerConfigAtoms[providerId];
 }

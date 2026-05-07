@@ -10,11 +10,11 @@ import {
   PROVIDER_REGISTRY,
   type ProviderId,
 } from "@/lib/ai/providers/registry";
-import { apiKeyAtoms } from "@/lib/jotai/api-key-atoms";
+import { allApiKeysAtom } from "@/lib/jotai/api-key-atoms";
 import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { customProviderApiKeysAtom } from "@/lib/jotai/custom-provider-api-key-atoms";
 import { type CustomProvider, customProvidersAtom } from "@/lib/jotai/custom-provider-atoms";
-import { providerConfigAtoms } from "@/lib/jotai/provider-atoms";
+import { allProviderConfigsAtom } from "@/lib/jotai/provider-atoms";
 
 export interface ModelData {
   id: string;
@@ -49,7 +49,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
-const PREFERRED_MODELS_BY_PROVIDER: Record<ProviderId, string[]> = {
+const PREFERRED_MODELS_BY_PROVIDER: Partial<Record<ProviderId, string[]>> = {
   "agent-one": ["agent-one-auto"],
   openrouter: ["openrouter-x-ai/grok-4.1-fast"],
   groq: ["groq-moonshotai/kimi-k2-instruct-0905"],
@@ -118,114 +118,11 @@ function isImageModel(model: ModelRecord): boolean {
 
 export function useModelCatalog() {
   const hideAgentOneModels = useAtomValue(hideAgentOneModelsAtom);
-  const agentOneKey = useAtomValue(apiKeyAtoms["agent-one"].atom);
-  const openrouterKey = useAtomValue(apiKeyAtoms.openrouter.atom);
-  const groqKey = useAtomValue(apiKeyAtoms.groq.atom);
-  const googleKey = useAtomValue(apiKeyAtoms.google.atom);
-  const cerebrasKey = useAtomValue(apiKeyAtoms.cerebras.atom);
-  const openaiKey = useAtomValue(apiKeyAtoms.openai.atom);
-  const anthropicKey = useAtomValue(apiKeyAtoms.anthropic.atom);
-  const mistralKey = useAtomValue(apiKeyAtoms.mistral.atom);
-  const deepseekKey = useAtomValue(apiKeyAtoms.deepseek.atom);
-  const xaiKey = useAtomValue(apiKeyAtoms.xai.atom);
-  const cohereKey = useAtomValue(apiKeyAtoms.cohere.atom);
-  const deepinfraKey = useAtomValue(apiKeyAtoms.deepinfra.atom);
-  const perplexityKey = useAtomValue(apiKeyAtoms.perplexity.atom);
-  const togetheraiKey = useAtomValue(apiKeyAtoms.togetherai.atom);
-  const fireworksAiKey = useAtomValue(apiKeyAtoms["fireworks-ai"].atom);
-
-  const agentOneConfig = useAtomValue(providerConfigAtoms["agent-one"]);
-  const openrouterConfig = useAtomValue(providerConfigAtoms.openrouter);
-  const groqConfig = useAtomValue(providerConfigAtoms.groq);
-  const googleConfig = useAtomValue(providerConfigAtoms.google);
-  const cerebrasConfig = useAtomValue(providerConfigAtoms.cerebras);
-  const openaiConfig = useAtomValue(providerConfigAtoms.openai);
-  const anthropicConfig = useAtomValue(providerConfigAtoms.anthropic);
-  const mistralConfig = useAtomValue(providerConfigAtoms.mistral);
-  const deepseekConfig = useAtomValue(providerConfigAtoms.deepseek);
-  const xaiConfig = useAtomValue(providerConfigAtoms.xai);
-  const cohereConfig = useAtomValue(providerConfigAtoms.cohere);
-  const deepinfraConfig = useAtomValue(providerConfigAtoms.deepinfra);
-  const perplexityConfig = useAtomValue(providerConfigAtoms.perplexity);
-  const togetheraiConfig = useAtomValue(providerConfigAtoms.togetherai);
-  const fireworksAiConfig = useAtomValue(providerConfigAtoms["fireworks-ai"]);
+  const apiKeys = useAtomValue(allApiKeysAtom);
+  const configs = useAtomValue(allProviderConfigsAtom);
 
   const customProviders = useAtomValue(customProvidersAtom);
   const customProviderApiKeys = useAtomValue(customProviderApiKeysAtom);
-
-  const apiKeys = useMemo(
-    () => ({
-      "agent-one": agentOneKey,
-      openrouter: openrouterKey,
-      groq: groqKey,
-      google: googleKey,
-      cerebras: cerebrasKey,
-      openai: openaiKey,
-      anthropic: anthropicKey,
-      mistral: mistralKey,
-      deepseek: deepseekKey,
-      xai: xaiKey,
-      cohere: cohereKey,
-      deepinfra: deepinfraKey,
-      perplexity: perplexityKey,
-      togetherai: togetheraiKey,
-      "fireworks-ai": fireworksAiKey,
-    }),
-    [
-      agentOneKey,
-      openrouterKey,
-      groqKey,
-      googleKey,
-      cerebrasKey,
-      openaiKey,
-      anthropicKey,
-      mistralKey,
-      deepseekKey,
-      xaiKey,
-      cohereKey,
-      deepinfraKey,
-      perplexityKey,
-      togetheraiKey,
-      fireworksAiKey,
-    ],
-  );
-
-  const configs = useMemo(
-    () => ({
-      "agent-one": agentOneConfig,
-      openrouter: openrouterConfig,
-      groq: groqConfig,
-      google: googleConfig,
-      cerebras: cerebrasConfig,
-      openai: openaiConfig,
-      anthropic: anthropicConfig,
-      mistral: mistralConfig,
-      deepseek: deepseekConfig,
-      xai: xaiConfig,
-      cohere: cohereConfig,
-      deepinfra: deepinfraConfig,
-      perplexity: perplexityConfig,
-      togetherai: togetheraiConfig,
-      "fireworks-ai": fireworksAiConfig,
-    }),
-    [
-      agentOneConfig,
-      openrouterConfig,
-      groqConfig,
-      googleConfig,
-      cerebrasConfig,
-      openaiConfig,
-      anthropicConfig,
-      mistralConfig,
-      deepseekConfig,
-      xaiConfig,
-      cohereConfig,
-      deepinfraConfig,
-      perplexityConfig,
-      togetheraiConfig,
-      fireworksAiConfig,
-    ],
-  );
 
   const providerHasApiKey = useMemo(
     () =>
