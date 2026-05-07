@@ -46,7 +46,7 @@ export function CustomProviderListItem({
   return (
     <>
       <AccordionItem value={provider.id}>
-        <AccordionTrigger className="px-3 hover:no-underline">
+        <AccordionTrigger className="px-1 py-2 hover:no-underline">
           <div className="flex flex-1 items-center justify-between gap-2 pr-2">
             <span>{provider.name}</span>
             <Switch
@@ -58,7 +58,7 @@ export function CustomProviderListItem({
             />
           </div>
         </AccordionTrigger>
-        <AccordionContent className="overflow-auto px-3 pb-3">
+        <AccordionContent className="overflow-auto px-1 pb-3">
           <div className="flex flex-col gap-4">
             <FieldGroup>
               <Field>

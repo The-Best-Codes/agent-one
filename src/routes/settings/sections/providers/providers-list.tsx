@@ -134,7 +134,7 @@ export function ProvidersList() {
               placeholder="Search custom providers..."
               value={customSearchQuery}
               onChange={(e) => setCustomSearchQuery(e.target.value)}
-              className="flex-1"
+              containerClassName="flex-1"
             />
             <AddProviderDropdown onAddProvider={handleAddProvider} />
           </div>
