@@ -7,6 +7,7 @@ import {
   IconSparkles,
   IconTrash,
 } from "@tabler/icons-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -424,6 +425,7 @@ export function ModelList({
   const [isAdding, setIsAdding] = useState(false);
   const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
   const fetchResetTimeoutRef = useRef<number | null>(null);
+  const parentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -445,6 +447,15 @@ export function ModelList({
     () => new Set(builtInModels.map((model) => model.id)),
     [builtInModels],
   );
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const virtualizer = useVirtualizer({
+    count: sortedModels.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 40,
+    getItemKey: (index) => sortedModels[index]?.id ?? index,
+    overscan: 8,
+  });
 
   const setFetchStateWithReset = (state: "success" | "error") => {
     setFetchState(state);
@@ -551,15 +562,34 @@ export function ModelList({
       ) : null}
 
       {sortedModels.length > 0 ? (
-        <div className="mt-3 max-h-80 overflow-y-auto">
-          {sortedModels.map((model) => (
-            <ModelRow
-              key={model.id}
-              model={model}
-              onChange={handleUpdateModel}
-              onDelete={handleDeleteModel}
-            />
-          ))}
+        <div ref={parentRef} className="mt-3 max-h-80 overflow-y-auto">
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const model = sortedModels[virtualItem.index];
+
+              return (
+                <div
+                  key={model.id}
+                  className="absolute top-0 left-0 w-full"
+                  style={{
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                >
+                  <ModelRow
+                    model={model}
+                    onChange={handleUpdateModel}
+                    onDelete={handleDeleteModel}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : !isAdding ? (
         <div className="mt-4">

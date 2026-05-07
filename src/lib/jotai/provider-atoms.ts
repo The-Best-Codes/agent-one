@@ -24,6 +24,14 @@ const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
   models: [],
 };
 
+function normalizeProviderConfig(config: Partial<ProviderConfig> | undefined): ProviderConfig {
+  return {
+    enabled: config?.enabled ?? DEFAULT_PROVIDER_CONFIG.enabled,
+    headers: config?.headers ?? DEFAULT_PROVIDER_CONFIG.headers,
+    models: (config?.models ?? DEFAULT_PROVIDER_CONFIG.models).map(normalizeProviderModelMetadata),
+  };
+}
+
 function createProviderConfigAtom(providerId: ProviderId) {
   const key = `${SETTING_PREFIX}PROVIDER_CONFIG_${providerId.toUpperCase()}`;
   return atomWithStorage<ProviderConfig>(key, DEFAULT_PROVIDER_CONFIG, undefined, {
@@ -42,15 +50,15 @@ export function getProviderConfigAtom(providerId: ProviderId) {
 }
 
 export const providerEnabledAtomFamily = atomFamily((providerId: ProviderId) =>
-  atom((get) => get(providerConfigAtoms[providerId]).enabled),
+  atom((get) => normalizeProviderConfig(get(providerConfigAtoms[providerId])).enabled),
 );
 
 export const providerHeadersAtomFamily = atomFamily((providerId: ProviderId) =>
-  atom((get) => get(providerConfigAtoms[providerId]).headers),
+  atom((get) => normalizeProviderConfig(get(providerConfigAtoms[providerId])).headers),
 );
 
 export const providerModelsAtomFamily = atomFamily((providerId: ProviderId) =>
-  atom((get) => get(providerConfigAtoms[providerId]).models.map(normalizeProviderModelMetadata)),
+  atom((get) => normalizeProviderConfig(get(providerConfigAtoms[providerId])).models),
 );
 
 export const hasEnabledProviderAtom = atom((get) => {

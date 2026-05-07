@@ -139,21 +139,24 @@ function mapDirectoryModels(
   }));
 }
 
-function mapCustomProviderModels(provider: CustomProvider, apiKey: string): ModelData[] {
+function mapCustomProviderModels(
+  provider: CustomProvider,
+  apiKey: string,
+  filter?: (model: ProviderModelMetadata) => boolean,
+): ModelData[] {
   const instance = createCustomProvider(provider, apiKey);
 
-  return provider.models.map((model) => {
-    const normalizedModel = normalizeProviderModelMetadata(model);
-
-    return {
-      id: `custom-${provider.id}-${normalizedModel.id}`,
-      name: normalizedModel.name || normalizedModel.id,
+  return provider.models
+    .map(normalizeProviderModelMetadata)
+    .filter((model) => (filter ? filter(model) : true))
+    .map((model) => ({
+      id: `custom-${provider.id}-${model.id}`,
+      name: model.name || model.id,
       provider: provider.name,
-      model: instance.languageModel(normalizedModel.id),
-      supportsToolUse: normalizedModel.supportsTools,
-      contextWindow: normalizedModel.contextWindow,
-    };
-  });
+      model: instance.languageModel(model.id),
+      supportsToolUse: model.supportsTools,
+      contextWindow: model.contextWindow,
+    }));
 }
 
 function isChatModel(model: ModelRecord) {
@@ -232,7 +235,11 @@ const availableChatModelsAtom = atom((get) => {
   const customModels = customProviders
     .filter((provider) => provider.enabled)
     .flatMap((provider) =>
-      mapCustomProviderModels(provider, customProviderApiKeys[provider.id] ?? ""),
+      mapCustomProviderModels(
+        provider,
+        customProviderApiKeys[provider.id] ?? "",
+        (model) => model.supportsText,
+      ),
     );
 
   return [...builtInModels, ...customModels];
