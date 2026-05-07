@@ -5,22 +5,16 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
+import type { NewCustomProviderData } from "@/lib/jotai/custom-provider-atoms";
 
-import { AddOpenAICompatibleDialog } from "./add-openai-compatible-dialog";
-
-interface NewProviderData {
-  name: string;
-  baseUrl: string;
-  headers: Record<string, string>;
-  models: CustomProviderModel[];
-}
+import { AddOpenAICompatibleDialog } from "./provider-dialogs";
 
 interface AddProviderDropdownProps {
-  onAddProvider: (data: NewProviderData, apiKey: string) => void;
+  onAddProvider: (data: NewCustomProviderData, apiKey: string) => void;
 }
 
 export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps) {
@@ -36,10 +30,12 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-auto min-w-max">
-          <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
-            <IconPlus data-icon="inline-start" />
-            OpenAI Compatible
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+              <IconPlus data-icon="inline-start" />
+              OpenAI Compatible
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
 

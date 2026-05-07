@@ -1,66 +1,71 @@
-import { useAtom, useSetAtom } from "jotai";
-import { useState } from "react";
+import { IconPlugConnected } from "@tabler/icons-react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useMemo, useState } from "react";
 
-import { Accordion } from "@/components/ui/accordion";
-import { Input } from "@/components/ui/input";
-import { useProviderState } from "@/hooks/use-provider-state";
-import { getProviderById, PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
+import { SearchInput } from "@/components/a1/search-input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Accordion } from "@/components/ui/native/accordion";
+import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import {
   deleteCustomProviderApiKeyAtom,
   setCustomProviderApiKeyAtom,
 } from "@/lib/jotai/custom-provider-api-key-atoms";
 import {
   addCustomProviderAtom,
-  customProvidersAtom,
+  customProviderIdsAtom,
+  customProviderSearchItemsAtom,
   deleteCustomProviderAtom,
-  updateCustomProviderAtom,
+  type NewCustomProviderData,
 } from "@/lib/jotai/custom-provider-atoms";
 
 import { AddProviderDropdown } from "./add-provider-dropdown";
-import { CustomProviderListItem } from "./custom-provider-list-item";
-import { ProviderListItem } from "./provider-list-item";
-
-function ProviderItem({ providerId }: { providerId: ProviderId }) {
-  const provider = getProviderById(providerId);
-  const state = useProviderState(providerId);
-
-  return (
-    <ProviderListItem
-      providerId={providerId}
-      label={provider.label}
-      config={state.config}
-      apiKey={state.apiKey}
-      hasEnvKey={state.hasEnvKey}
-      onConfigChange={state.setConfig}
-      onApiKeyChange={state.setApiKey}
-    />
-  );
-}
+import { BuiltInProviderListItem, CustomProviderListItem } from "./provider-list-item";
 
 export function ProvidersList() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
+  const [customSearchQuery, setCustomSearchQuery] = useState("");
 
-  const [customProviders] = useAtom(customProvidersAtom);
-  const [, addCustomProvider] = useAtom(addCustomProviderAtom);
-  const [, updateCustomProvider] = useAtom(updateCustomProviderAtom);
-  const [, deleteCustomProvider] = useAtom(deleteCustomProviderAtom);
+  const customProviderIds = useAtomValue(customProviderIdsAtom);
+  const customProviderSearchItems = useAtomValue(customProviderSearchItemsAtom);
+  const addCustomProvider = useSetAtom(addCustomProviderAtom);
+  const deleteCustomProvider = useSetAtom(deleteCustomProviderAtom);
   const setCustomProviderApiKey = useSetAtom(setCustomProviderApiKeyAtom);
   const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
 
-  const filteredBuiltInProviders = PROVIDER_REGISTRY.filter(
-    (provider) =>
-      provider.id !== "agent-one" &&
-      provider.label.toLowerCase().includes(searchQuery.toLowerCase()),
+  const normalizedBuiltInQuery = builtInSearchQuery.trim().toLowerCase();
+  const normalizedCustomQuery = customSearchQuery.trim().toLowerCase();
+
+  const filteredBuiltInProviders = useMemo(
+    () =>
+      PROVIDER_REGISTRY.filter(
+        (provider) =>
+          provider.id !== "agent-one" &&
+          provider.label.toLowerCase().includes(normalizedBuiltInQuery),
+      ),
+    [normalizedBuiltInQuery],
   );
 
-  const filteredCustomProviders = customProviders.filter((provider) =>
-    provider.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredCustomProviderIds = useMemo(() => {
+    if (!normalizedCustomQuery) {
+      return customProviderIds;
+    }
 
-  const hasResults = filteredBuiltInProviders.length > 0 || filteredCustomProviders.length > 0;
+    return customProviderSearchItems
+      .filter((provider) => provider.name.toLowerCase().includes(normalizedCustomQuery))
+      .map((provider) => provider.id);
+  }, [customProviderIds, customProviderSearchItems, normalizedCustomQuery]);
 
-  const handleAddProvider = (data: Parameters<typeof addCustomProvider>[0], apiKey: string) => {
+  const handleAddProvider = (data: NewCustomProviderData, apiKey: string) => {
     const providerId = addCustomProvider(data);
+
     if (apiKey) {
       void setCustomProviderApiKey(providerId, apiKey);
     }
@@ -73,33 +78,90 @@ export function ProvidersList() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
-        <Input
-          placeholder="Search providers..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1"
-        />
-        <AddProviderDropdown onAddProvider={handleAddProvider} />
-      </div>
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>Built-in Providers</CardTitle>
+          <CardDescription>
+            Enable built-in providers, set keys and headers, and override model metadata when
+            needed.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <SearchInput
+            placeholder="Search built-in providers..."
+            value={builtInSearchQuery}
+            onChange={(event) => setBuiltInSearchQuery(event.target.value)}
+          />
 
-      {hasResults ? (
-        <Accordion type="single" collapsible className="border-border w-full rounded-md border">
-          {filteredCustomProviders.map((provider) => (
-            <CustomProviderListItem
-              key={provider.id}
-              provider={provider}
-              onUpdate={(updates) => updateCustomProvider(provider.id, updates)}
-              onDelete={() => handleDeleteProvider(provider.id)}
+          {filteredBuiltInProviders.length > 0 ? (
+            <Accordion type="single" collapsible className="w-full">
+              {filteredBuiltInProviders.map((provider) => (
+                <BuiltInProviderListItem
+                  key={provider.id}
+                  providerId={provider.id}
+                  label={provider.label}
+                  hasEnvKey={hasEnvKey(provider.id)}
+                />
+              ))}
+            </Accordion>
+          ) : (
+            <p className="text-muted-foreground py-4 text-center text-sm">
+              No built-in providers found.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>Custom Providers</CardTitle>
+          <CardDescription>
+            Add OpenAI-compatible providers and configure exactly which models they expose.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex gap-2">
+            <SearchInput
+              placeholder="Search custom providers..."
+              value={customSearchQuery}
+              onChange={(event) => setCustomSearchQuery(event.target.value)}
+              containerClassName="flex-1"
             />
-          ))}
-          {filteredBuiltInProviders.map((provider) => (
-            <ProviderItem key={provider.id} providerId={provider.id} />
-          ))}
-        </Accordion>
-      ) : (
-        <p className="text-muted-foreground py-4 text-center text-sm">No providers found</p>
-      )}
+            <AddProviderDropdown onAddProvider={handleAddProvider} />
+          </div>
+
+          {customProviderIds.length === 0 ? (
+            <Empty className="bg-muted/20 border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <IconPlugConnected />
+                </EmptyMedia>
+                <EmptyTitle>No custom providers yet</EmptyTitle>
+                <EmptyDescription>
+                  Add an OpenAI-compatible provider, then configure its models and metadata here.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <AddProviderDropdown onAddProvider={handleAddProvider} />
+              </EmptyContent>
+            </Empty>
+          ) : filteredCustomProviderIds.length > 0 ? (
+            <Accordion type="single" collapsible className="w-full">
+              {filteredCustomProviderIds.map((providerId) => (
+                <CustomProviderListItem
+                  key={providerId}
+                  providerId={providerId}
+                  onDelete={() => handleDeleteProvider(providerId)}
+                />
+              ))}
+            </Accordion>
+          ) : (
+            <p className="text-muted-foreground py-4 text-center text-sm">
+              No custom providers found.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

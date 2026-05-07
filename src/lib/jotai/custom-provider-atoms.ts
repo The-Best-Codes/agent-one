@@ -1,14 +1,12 @@
-import { atom } from "jotai";
+import { atom, type Atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-const STORAGE_KEY = "agent-one-custom-providers";
+import {
+  normalizeProviderModelMetadata,
+  type ProviderModelMetadata,
+} from "@/lib/ai/providers/provider-models";
 
-export interface CustomProviderModel {
-  id: string;
-  name?: string;
-  supportsTools: boolean;
-  supportsImages: boolean;
-}
+const STORAGE_KEY = "agent-one-custom-providers";
 
 export interface CustomProvider {
   id: string;
@@ -16,7 +14,7 @@ export interface CustomProvider {
   baseUrl: string;
   headers: Record<string, string>;
   enabled: boolean;
-  models: CustomProviderModel[];
+  models: ProviderModelMetadata[];
 }
 
 export type NewCustomProviderData = Omit<CustomProvider, "id" | "enabled">;
@@ -24,6 +22,17 @@ export type NewCustomProviderData = Omit<CustomProvider, "id" | "enabled">;
 export const customProvidersAtom = atomWithStorage<CustomProvider[]>(STORAGE_KEY, [], undefined, {
   getOnInit: true,
 });
+
+export const customProviderIdsAtom = atom((get) =>
+  get(customProvidersAtom).map((provider) => provider.id),
+);
+
+export const customProviderSearchItemsAtom = atom((get) =>
+  get(customProvidersAtom).map((provider) => ({
+    id: provider.id,
+    name: provider.name,
+  })),
+);
 
 export const addCustomProviderAtom = atom(null, (get, set, provider: NewCustomProviderData) => {
   const existing = get(customProvidersAtom);
@@ -44,6 +53,9 @@ export const updateCustomProviderAtom = atom(
     if ("name" in sanitizedUpdates && !sanitizedUpdates.name?.trim()) {
       sanitizedUpdates.name = "Unnamed provider";
     }
+    if (sanitizedUpdates.models) {
+      sanitizedUpdates.models = sanitizedUpdates.models.map(normalizeProviderModelMetadata);
+    }
     set(
       customProvidersAtom,
       existing.map((p) => (p.id === id ? { ...p, ...sanitizedUpdates } : p)),
@@ -58,3 +70,30 @@ export const deleteCustomProviderAtom = atom(null, (get, set, id: string) => {
     existing.filter((p) => p.id !== id),
   );
 });
+
+export const normalizedCustomProvidersAtom = atom((get) => {
+  return get(customProvidersAtom).map((provider) => ({
+    ...provider,
+    models: provider.models.map(normalizeProviderModelMetadata),
+  }));
+});
+
+export const hasEnabledCustomProviderAtom = atom((get) =>
+  get(customProvidersAtom).some((provider) => provider.enabled),
+);
+
+const customProviderAtomCache = new Map<string, Atom<CustomProvider | undefined>>();
+
+export function getCustomProviderAtom(providerId: string) {
+  const cachedAtom = customProviderAtomCache.get(providerId);
+  if (cachedAtom) {
+    return cachedAtom;
+  }
+
+  const providerAtom = atom((get) =>
+    get(customProvidersAtom).find((provider) => provider.id === providerId),
+  );
+
+  customProviderAtomCache.set(providerId, providerAtom);
+  return providerAtom;
+}

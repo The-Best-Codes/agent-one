@@ -1,4 +1,4 @@
-import { atom } from "jotai";
+import { atom, type Atom } from "jotai";
 import { atomWithStorage, unwrap } from "jotai/utils";
 
 import { loadable } from "@/lib/jotai/loadable";
@@ -14,6 +14,20 @@ const baseAtom = atomWithStorage<CustomProviderApiKeys>(STORAGE_KEY, {}, keyring
 
 export const customProviderApiKeysAtom = unwrap(baseAtom, (prev) => prev ?? {});
 export const customProviderApiKeysLoadableAtom = loadable(baseAtom);
+
+const customProviderApiKeyAtomCache = new Map<string, Atom<string>>();
+
+export function getCustomProviderApiKeyAtom(providerId: string) {
+  const cachedAtom = customProviderApiKeyAtomCache.get(providerId);
+  if (cachedAtom) {
+    return cachedAtom;
+  }
+
+  const apiKeyAtom = atom((get) => get(customProviderApiKeysAtom)[providerId] ?? "");
+
+  customProviderApiKeyAtomCache.set(providerId, apiKeyAtom);
+  return apiKeyAtom;
+}
 
 export const setCustomProviderApiKeyAtom = atom(
   null,
