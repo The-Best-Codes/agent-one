@@ -28,7 +28,9 @@ export function getApiKeyAtom(providerId: ProviderId) {
   return apiKeyAtoms[providerId].atom;
 }
 
-export const apiKeyAtomFamily = atomFamily((providerId: ProviderId) => apiKeyAtoms[providerId].atom);
+export const apiKeyAtomFamily = atomFamily(
+  (providerId: ProviderId) => apiKeyAtoms[providerId].atom,
+);
 
 export function getApiKeyLoadableAtom(providerId: ProviderId) {
   return apiKeyAtoms[providerId].loadableAtom;
