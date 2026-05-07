@@ -28,7 +28,6 @@ import {
   type OpenAIModelsResponse,
 } from "@/lib/ai/providers/custom-provider-factory";
 import {
-  areProviderModelsEqual,
   getProviderModelName,
   type ProviderModelMetadata,
 } from "@/lib/ai/providers/provider-models";
@@ -179,7 +178,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           </Field>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
           <Field orientation="horizontal">
             <FieldLabel htmlFor="new-model-supports-text">Supports Text</FieldLabel>
             <Switch
@@ -221,13 +220,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
   );
 }
 
-function ModelConfigDialog({
-  model,
-  builtInModel,
-  open,
-  onOpenChange,
-  onChange,
-}: ModelConfigDialogProps) {
+function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigDialogProps) {
   const [contextWindowValue, setContextWindowValue] = useState(
     model.contextWindow?.toString() ?? "",
   );
@@ -239,7 +232,6 @@ function ModelConfigDialog({
   const parsedMaxOutputTokens = normalizeOptionalNumber(maxOutputTokensValue);
   const isContextWindowInvalid = parsedContextWindow === null;
   const isMaxOutputTokensInvalid = parsedMaxOutputTokens === null;
-  const canReset = Boolean(builtInModel && !areProviderModelsEqual(model, builtInModel));
 
   if ((model.contextWindow?.toString() ?? "") !== contextWindowValue) {
     setContextWindowValue(model.contextWindow?.toString() ?? "");
@@ -255,18 +247,6 @@ function ModelConfigDialog({
         <DialogHeader>
           <DialogTitle>{getProviderModelName(model)}</DialogTitle>
         </DialogHeader>
-
-        {canReset ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-fit"
-            onClick={() => onChange(builtInModel!)}
-          >
-            Reset to Built-in Defaults
-          </Button>
-        ) : null}
 
         <FieldGroup>
           <Field>
@@ -327,7 +307,7 @@ function ModelConfigDialog({
             </Field>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-4">
             <Field orientation="horizontal">
               <FieldLabel htmlFor={`model-supports-text-${model.id}`}>Supports Text</FieldLabel>
               <Switch
@@ -385,7 +365,7 @@ function ModelRow({ model, builtInModel, onChange, onDelete }: ModelRowProps) {
         <div className="flex shrink-0 items-center gap-1">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon"
             className="size-8"
             onClick={() => setConfigOpen(true)}
@@ -395,7 +375,7 @@ function ModelRow({ model, builtInModel, onChange, onDelete }: ModelRowProps) {
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant="destructive"
             size="icon"
             className="text-destructive hover:text-destructive size-8"
             onClick={() => onDelete(model.id)}
