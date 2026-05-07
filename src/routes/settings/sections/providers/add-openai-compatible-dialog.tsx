@@ -11,9 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import type { CustomProviderModel } from "@/lib/jotai/custom-provider-atoms";
+import type { ProviderModelMetadata } from "@/lib/ai/providers/provider-models";
 
 import { ModelList } from "./model-list";
 
@@ -21,7 +21,7 @@ interface NewProviderData {
   name: string;
   baseUrl: string;
   headers: Record<string, string>;
-  models: CustomProviderModel[];
+  models: ProviderModelMetadata[];
 }
 
 interface AddOpenAICompatibleDialogProps {
@@ -39,7 +39,7 @@ export function AddOpenAICompatibleDialog({
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [headers, setHeaders] = useState<Record<string, string>>({});
-  const [models, setModels] = useState<CustomProviderModel[]>([]);
+  const [models, setModels] = useState<ProviderModelMetadata[]>([]);
 
   const isValid = name.trim() !== "" && baseUrl.trim() !== "" && models.length > 0;
 
@@ -91,46 +91,50 @@ export function AddOpenAICompatibleDialog({
         </DialogHeader>
 
         <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="provider-name">Name</Label>
-              <Input
-                id="provider-name"
-                placeholder="e.g., My Local LLM"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+          <div className="py-4">
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="provider-name">Name</FieldLabel>
+                <Input
+                  id="provider-name"
+                  placeholder="e.g., My Local LLM"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="provider-base-url">Base URL</FieldLabel>
+                <Input
+                  id="provider-base-url"
+                  placeholder="e.g., http://localhost:1234/v1"
+                  value={baseUrl}
+                  onChange={(e) => setBaseUrl(e.target.value)}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="provider-api-key">API Key</FieldLabel>
+                <SecretInput
+                  id="provider-api-key"
+                  value={apiKey}
+                  onChange={setApiKey}
+                  placeholder="Enter API key if required"
+                />
+              </Field>
+
+              <HttpHeadersEditor id="new-provider" headers={headers} onChange={setHeaders} />
+
+              <ModelList
+                models={models}
+                baseUrl={baseUrl.trim()}
+                apiKey={apiKey.trim()}
+                headers={headers}
+                emptyTitle="No custom models yet"
+                emptyDescription="Add a model or fetch the provider’s model list, then edit the metadata you want AgentOne to use."
+                onChange={setModels}
               />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="provider-base-url">Base URL</Label>
-              <Input
-                id="provider-base-url"
-                placeholder="e.g., http://localhost:1234/v1"
-                value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="provider-api-key">API Key</Label>
-              <SecretInput
-                id="provider-api-key"
-                value={apiKey}
-                onChange={setApiKey}
-                placeholder="Enter API key if required"
-              />
-            </div>
-
-            <HttpHeadersEditor id="new-provider" headers={headers} onChange={setHeaders} />
-
-            <ModelList
-              models={models}
-              baseUrl={baseUrl.trim()}
-              apiKey={apiKey.trim()}
-              headers={headers}
-              onChange={setModels}
-            />
+            </FieldGroup>
           </div>
         </div>
 

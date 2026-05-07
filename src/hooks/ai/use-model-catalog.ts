@@ -5,6 +5,11 @@ import { useMemo } from "react";
 import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
 import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
 import {
+  mapDirectoryModelToMetadata,
+  normalizeProviderModelMetadata,
+  type ProviderModelMetadata,
+} from "@/lib/ai/providers/provider-models";
+import {
   getEffectiveApiKey,
   hasApiKey,
   PROVIDER_REGISTRY,
@@ -13,7 +18,10 @@ import {
 import { allApiKeysAtom } from "@/lib/jotai/api-key-atoms";
 import { hideAgentOneModelsAtom } from "@/lib/jotai/atoms";
 import { customProviderApiKeysAtom } from "@/lib/jotai/custom-provider-api-key-atoms";
-import { type CustomProvider, customProvidersAtom } from "@/lib/jotai/custom-provider-atoms";
+import {
+  type CustomProvider,
+  normalizedCustomProvidersAtom,
+} from "@/lib/jotai/custom-provider-atoms";
 import { allProviderConfigsAtom } from "@/lib/jotai/provider-atoms";
 
 export interface ModelData {
@@ -77,33 +85,64 @@ function mapDirectoryModels(
   providerId: string,
   providerName: string,
   createModel: (modelId: string) => LanguageModel,
+  overrides: ProviderModelMetadata[],
   filter?: (model: ModelRecord) => boolean,
 ): ModelData[] {
-  const models = getProviderModels(providerId);
-  const filteredModels = filter ? models.filter(filter) : models;
+  const builtInModels = getProviderModels(providerId).map(mapDirectoryModelToMetadata);
+  const modelMap = new Map(builtInModels.map((model) => [model.id, model]));
+
+  for (const override of overrides) {
+    modelMap.set(override.id, normalizeProviderModelMetadata(override));
+  }
+
+  const mergedModels = Array.from(modelMap.values());
+  const filteredModels = filter
+    ? mergedModels.filter((model) =>
+        filter({
+          id: model.id,
+          name: model.name,
+          features: {
+            tool_call: model.supportsTools,
+          },
+          limit: {
+            context: model.contextWindow,
+            output: model.maxOutputTokens,
+          },
+          modalities: {
+            output: [
+              ...(model.supportsText ? (["text"] as const) : []),
+              ...(model.supportsImages ? (["image"] as const) : []),
+            ],
+          },
+        } satisfies ModelRecord),
+      )
+    : mergedModels;
 
   return filteredModels.map((model) => ({
     id: `${providerId}-${model.id}`,
     name: model.name ?? model.id,
     provider: providerName,
     model: createModel(model.id),
-    supportsToolUse: model.features?.tool_call ?? false,
-    contextWindow: model.limit?.context,
+    supportsToolUse: model.supportsTools,
+    contextWindow: model.contextWindow,
   }));
 }
 
 function mapCustomProviderModels(provider: CustomProvider, apiKey: string): ModelData[] {
   const instance = createCustomProvider(provider, apiKey);
 
-  return provider.models.map((model) => ({
-    id: `custom-${provider.id}-${model.id}`,
-    name: model.name || model.id,
-    provider: provider.name,
-    model: instance.languageModel(model.id),
-    supportsToolUse: model.supportsTools,
-    // TODO: Support context window and pricing definitions for custom provider's models
-    // When implementing the above, be sure to review ALL model-related files.
-  }));
+  return provider.models.map((model) => {
+    const normalizedModel = normalizeProviderModelMetadata(model);
+
+    return {
+      id: `custom-${provider.id}-${normalizedModel.id}`,
+      name: normalizedModel.name || normalizedModel.id,
+      provider: provider.name,
+      model: instance.languageModel(normalizedModel.id),
+      supportsToolUse: normalizedModel.supportsTools,
+      contextWindow: normalizedModel.contextWindow,
+    };
+  });
 }
 
 function isChatModel(model: ModelRecord): boolean {
@@ -121,7 +160,7 @@ export function useModelCatalog() {
   const apiKeys = useAtomValue(allApiKeysAtom);
   const configs = useAtomValue(allProviderConfigsAtom);
 
-  const customProviders = useAtomValue(customProvidersAtom);
+  const customProviders = useAtomValue(normalizedCustomProvidersAtom);
   const customProviderApiKeys = useAtomValue(customProviderApiKeysAtom);
 
   const providerHasApiKey = useMemo(
@@ -152,7 +191,7 @@ export function useModelCatalog() {
 
   const AVAILABLE_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
-      mapDirectoryModels(p.id, p.label, providers[p.id].languageModel),
+      mapDirectoryModels(p.id, p.label, providers[p.id].languageModel, configs[p.id].models),
     );
 
     const customModels = customProviders
@@ -160,11 +199,17 @@ export function useModelCatalog() {
       .flatMap((p) => mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""));
 
     return [...builtInModels, ...customModels];
-  }, [providers, customProviders, customProviderApiKeys]);
+  }, [providers, configs, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_CHAT_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.flatMap((p) =>
-      mapDirectoryModels(p.id, p.label, providers[p.id].languageModel, isChatModel),
+      mapDirectoryModels(
+        p.id,
+        p.label,
+        providers[p.id].languageModel,
+        configs[p.id].models,
+        isChatModel,
+      ),
     );
 
     const customModels = customProviders
@@ -172,13 +217,19 @@ export function useModelCatalog() {
       .flatMap((p) => mapCustomProviderModels(p, customProviderApiKeys[p.id] ?? ""));
 
     return [...builtInModels, ...customModels];
-  }, [providers, customProviders, customProviderApiKeys]);
+  }, [providers, configs, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_IMAGE_MODELS = useMemo(() => {
     const builtInModels = PROVIDER_REGISTRY.filter(
       (p) => p.id === "google" || p.id === "openrouter",
     ).flatMap((p) =>
-      mapDirectoryModels(p.id, p.label, providers[p.id].languageModel, isImageModel),
+      mapDirectoryModels(
+        p.id,
+        p.label,
+        providers[p.id].languageModel,
+        configs[p.id].models,
+        isImageModel,
+      ),
     );
 
     const customModels = customProviders
@@ -186,6 +237,7 @@ export function useModelCatalog() {
       .flatMap((p) => {
         const instance = createCustomProvider(p, customProviderApiKeys[p.id] ?? "");
         return p.models
+          .map((m) => normalizeProviderModelMetadata(m))
           .filter((m) => m.supportsImages)
           .map((m) => ({
             id: `custom-${p.id}-${m.id}`,
@@ -197,7 +249,7 @@ export function useModelCatalog() {
       });
 
     return [...builtInModels, ...customModels];
-  }, [providers, customProviders, customProviderApiKeys]);
+  }, [providers, configs, customProviders, customProviderApiKeys]);
 
   const AVAILABLE_ENABLED_CHAT_MODELS = useMemo(() => {
     const providerIdByLabel = Object.fromEntries(PROVIDER_REGISTRY.map((p) => [p.label, p.id]));

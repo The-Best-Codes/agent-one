@@ -1,4 +1,4 @@
-import { IconFilter, IconFlask, IconPlus, IconSearch, IconTool } from "@tabler/icons-react";
+import { IconFilter, IconFlask, IconPlus, IconTool } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -9,6 +9,7 @@ import {
   type McpRegistryExtension,
   type McpRegistryInstallResult,
 } from "@/assets/mcp-registry/mcp-registry";
+import { SearchInput } from "@/components/a1/search-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -21,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
@@ -325,16 +325,14 @@ export default function ExtensionsSection() {
 
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div className="flex w-full flex-row gap-0">
-            <div className="group/extensions-search-input relative flex-1">
-              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/extensions-search-input:left-0 group-focus-within/extensions-search-input:opacity-0" />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search extensions..."
-                aria-label="Search extensions"
-                className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/extensions-search-input:pl-3"
-              />
-            </div>
+            <SearchInput
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search extensions..."
+              aria-label="Search extensions"
+              className="rounded-r-none"
+              containerClassName="flex-1"
+            />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

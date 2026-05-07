@@ -53,14 +53,14 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
             image: data.user.image,
           });
           void setAgentOneApiKey(accessToken);
-          setAgentOneConfig({ enabled: true, headers: {} });
+          setAgentOneConfig({ enabled: true, headers: {}, models: [] });
           void settingsSyncManager.pull();
           return "valid";
         }
         if (error?.status === 401 || error?.status === 403) {
           setAuthToken(null);
           void setAgentOneApiKey("");
-          setAgentOneConfig({ enabled: false, headers: {} });
+          setAgentOneConfig({ enabled: false, headers: {}, models: [] });
           return "invalid";
         }
         if (error) {
@@ -266,7 +266,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
       setAuthToken(null);
       await keyringStorage.removeItem(TOKEN_KEY);
       void setAgentOneApiKey("");
-      setAgentOneConfig({ enabled: false, headers: {} });
+      setAgentOneConfig({ enabled: false, headers: {}, models: [] });
       setUser(null);
       setDeviceFlow(null);
       setIsSigningIn(false);

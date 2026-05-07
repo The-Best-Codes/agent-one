@@ -1,14 +1,22 @@
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
-import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
+import {
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/native/accordion";
 import { Switch } from "@/components/ui/switch";
+import type { ProviderModelMetadata } from "@/lib/ai/providers/provider-models";
 import type { ProviderConfig, ProviderId } from "@/lib/jotai/provider-atoms";
+
+import { ModelList } from "./model-list";
 
 interface ProviderListItemProps {
   providerId: ProviderId;
   label: string;
   config: ProviderConfig;
+  builtInModels: ProviderModelMetadata[];
   apiKey: string;
   hasEnvKey: boolean;
   onConfigChange: (updates: Partial<ProviderConfig>) => void;
@@ -19,6 +27,7 @@ export function ProviderListItem({
   providerId,
   label,
   config,
+  builtInModels,
   apiKey,
   hasEnvKey,
   onConfigChange,
@@ -26,18 +35,18 @@ export function ProviderListItem({
 }: ProviderListItemProps) {
   return (
     <AccordionItem value={providerId}>
-      <div className="flex items-center gap-2 px-3 *:first:flex-1">
-        <AccordionTrigger className="hover:no-underline">
+      <AccordionTrigger className="px-3 hover:no-underline">
+        <div className="flex flex-1 items-center justify-between gap-2 pr-2">
           <span>{label}</span>
-        </AccordionTrigger>
-        <Switch
-          id={`enabled-${providerId}`}
-          checked={config.enabled}
-          onCheckedChange={(checked) => onConfigChange({ enabled: checked })}
-          onClick={(e) => e.stopPropagation()}
-          aria-label={`Enable ${label}`}
-        />
-      </div>
+          <Switch
+            id={`enabled-${providerId}`}
+            checked={config.enabled}
+            onCheckedChange={(checked) => onConfigChange({ enabled: checked })}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Enable ${label}`}
+          />
+        </div>
+      </AccordionTrigger>
       <AccordionContent className="overflow-auto px-3 pb-3">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -63,6 +72,15 @@ export function ProviderListItem({
             headers={config.headers}
             onChange={(headers) => onConfigChange({ headers })}
             labelClassName="text-xs"
+          />
+
+          <ModelList
+            models={config.models ?? []}
+            builtInModels={builtInModels}
+            addButtonLabel="Add Model Override"
+            emptyTitle="No model overrides"
+            emptyDescription="Add a model to override built-in metadata or to register an extra model for this provider."
+            onChange={(models) => onConfigChange({ models })}
           />
         </div>
       </AccordionContent>

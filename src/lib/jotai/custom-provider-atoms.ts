@@ -1,14 +1,12 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-const STORAGE_KEY = "agent-one-custom-providers";
+import {
+  normalizeProviderModelMetadata,
+  type ProviderModelMetadata,
+} from "@/lib/ai/providers/provider-models";
 
-export interface CustomProviderModel {
-  id: string;
-  name?: string;
-  supportsTools: boolean;
-  supportsImages: boolean;
-}
+const STORAGE_KEY = "agent-one-custom-providers";
 
 export interface CustomProvider {
   id: string;
@@ -16,7 +14,7 @@ export interface CustomProvider {
   baseUrl: string;
   headers: Record<string, string>;
   enabled: boolean;
-  models: CustomProviderModel[];
+  models: ProviderModelMetadata[];
 }
 
 export type NewCustomProviderData = Omit<CustomProvider, "id" | "enabled">;
@@ -44,6 +42,9 @@ export const updateCustomProviderAtom = atom(
     if ("name" in sanitizedUpdates && !sanitizedUpdates.name?.trim()) {
       sanitizedUpdates.name = "Unnamed provider";
     }
+    if (sanitizedUpdates.models) {
+      sanitizedUpdates.models = sanitizedUpdates.models.map(normalizeProviderModelMetadata);
+    }
     set(
       customProvidersAtom,
       existing.map((p) => (p.id === id ? { ...p, ...sanitizedUpdates } : p)),
@@ -57,4 +58,11 @@ export const deleteCustomProviderAtom = atom(null, (get, set, id: string) => {
     customProvidersAtom,
     existing.filter((p) => p.id !== id),
   );
+});
+
+export const normalizedCustomProvidersAtom = atom((get) => {
+  return get(customProvidersAtom).map((provider) => ({
+    ...provider,
+    models: provider.models.map(normalizeProviderModelMetadata),
+  }));
 });

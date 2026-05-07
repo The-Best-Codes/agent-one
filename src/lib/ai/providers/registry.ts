@@ -1,9 +1,7 @@
 import type { LanguageModel } from "ai";
 
-import { getAgentOne } from "./factories/agent-one";
 import { getAihubmix } from "./factories/aihubmix";
 import { getAnthropic } from "./factories/anthropic";
-import { getCerebras } from "./factories/cerebras";
 import { getCohere } from "./factories/cohere";
 import { getDeepInfra } from "./factories/deepinfra";
 import { getDeepSeek } from "./factories/deepseek";
@@ -21,6 +19,14 @@ import { getVercel } from "./factories/vercel";
 import { getXai } from "./factories/xai";
 
 const get302AI = createOpenAICompatibleFactory("302ai", "https://api.302.ai/v1");
+const getAgentOne = createOpenAICompatibleFactory(
+  "agent-one",
+  "https://www.agent-one.dev/api/openai-compat/v1",
+  undefined,
+  {
+    emptyApiKey: "not-authenticated",
+  },
+);
 const getAbacus = createOpenAICompatibleFactory("abacus", "https://routellm.abacus.ai/v1");
 const getAbliterationAI = createOpenAICompatibleFactory(
   "abliteration-ai",
@@ -33,6 +39,9 @@ const getAlibabaCn = createOpenAICompatibleFactory(
 const getAvian = createOpenAICompatibleFactory("avian", "https://api.avian.io/v1/");
 const getBaseten = createOpenAICompatibleFactory("baseten", "https://inference.baseten.co/v1");
 const getBerget = createOpenAICompatibleFactory("berget", "https://api.berget.ai/v1");
+const getCerebras = createOpenAICompatibleFactory("cerebras", "https://api.cerebras.ai/v1", {
+  "X-Cerebras-3rd-Party-Integration": "Vercel AI SDK",
+});
 const getChutes = createOpenAICompatibleFactory("chutes", "https://llm.chutes.ai/v1");
 const getCortecs = createOpenAICompatibleFactory("cortecs", "https://api.cortecs.ai/v1");
 const getFastRouter = createOpenAICompatibleFactory(
