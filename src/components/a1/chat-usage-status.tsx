@@ -100,6 +100,7 @@ export const ChatUsageStatus = () => {
   const lastUsage = getLastAssistantUsage(messages);
 
   const totalCostUsd = currentUsage.totalCostUsd;
+  const hasUnknownCost = currentUsage.hasUnknownCost;
   const contextInputTokens = lastUsage.inputTokens;
   const contextOutputTokens = lastUsage.outputTokens;
   const totalTokens = contextInputTokens + contextOutputTokens;
@@ -164,19 +165,27 @@ export const ChatUsageStatus = () => {
                       asChild
                     >
                       <span>
-                        <NumberFlow
-                          value={totalCostUsd}
-                          format={{
-                            style: "currency",
-                            currency: "USD",
-                          }}
-                          className="text-foreground tabular-nums"
-                        />
+                        {hasUnknownCost && totalCostUsd <= 0 ? (
+                          <span className="text-foreground tabular-nums">$?</span>
+                        ) : (
+                          <NumberFlow
+                            value={totalCostUsd}
+                            format={{
+                              style: "currency",
+                              currency: "USD",
+                            }}
+                            prefix={hasUnknownCost ? "≥ " : undefined}
+                            className="text-foreground tabular-nums"
+                          />
+                        )}
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
-                      Estimated cost of this chat in USD. Edits and deleted messages are not
-                      included in these stats.
+                      {hasUnknownCost
+                        ? totalCostUsd > 0
+                          ? "Estimated cost is a lower bound, as pricing data is missing for one or more messages in this chat. Edits and deleted messages are not included in these stats."
+                          : "Pricing data is unavailable for the model(s) used in this chat, so the cost cannot be estimated."
+                        : "Estimated cost of this chat in USD. Edits and deleted messages are not included in these stats."}
                     </TooltipContent>
                   </Tooltip>
                 </>

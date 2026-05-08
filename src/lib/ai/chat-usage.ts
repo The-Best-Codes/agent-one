@@ -13,6 +13,7 @@ export interface ChatUsageSummary {
   cacheWriteTokens: number;
   reasoningTokens: number;
   totalCostUsd: number;
+  hasUnknownCost: boolean;
 }
 
 export interface MessageTokenUsage {
@@ -193,12 +194,11 @@ export function getLastAssistantUsage(messages: UIMessage[]) {
 
 export function calculateMessageCostFromMetadata(
   metadata: ChatMessageMetadata | undefined,
-): number {
-  if (!metadata?.modelId) return 0;
-  return calculateCostUsdFromUsage(
-    metadata.totalUsage,
-    getModelCostByChatModelId(metadata.modelId),
-  );
+): number | null {
+  if (!metadata?.modelId) return null;
+  const pricing = getModelCostByChatModelId(metadata.modelId);
+  if (!pricing) return null;
+  return calculateCostUsdFromUsage(metadata.totalUsage, pricing);
 }
 
 export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsageSummary {
@@ -209,6 +209,7 @@ export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsage
   let cacheWriteTokens = 0;
   let reasoningTokens = 0;
   let totalCostUsd = 0;
+  let hasUnknownCost = false;
 
   for (const message of messages) {
     if (message.role !== "assistant") {
@@ -229,7 +230,15 @@ export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsage
     cacheReadTokens += usageSummary.cacheReadTokens;
     cacheWriteTokens += usageSummary.cacheWriteTokens;
     reasoningTokens += usageSummary.reasoningTokens;
-    totalCostUsd += calculateMessageCostFromMetadata(usageMetadata);
+
+    const messageCost = calculateMessageCostFromMetadata(usageMetadata);
+    if (messageCost === null) {
+      if (usageSummary.totalTokens > 0) {
+        hasUnknownCost = true;
+      }
+    } else {
+      totalCostUsd += messageCost;
+    }
   }
 
   return {
@@ -240,5 +249,6 @@ export function calculateChatUsageFromMessages(messages: UIMessage[]): ChatUsage
     cacheWriteTokens,
     reasoningTokens,
     totalCostUsd,
+    hasUnknownCost,
   };
 }
