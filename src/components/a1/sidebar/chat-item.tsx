@@ -79,7 +79,7 @@ interface ChatItemProps {
   selectionMode?: boolean;
   isSelected?: boolean;
   onSelectionToggle?: (id: string) => void;
-  onEnterSelectionMode?: (id: string) => void;
+  onEnterSelectionMode?: (ids: string[]) => void;
 }
 
 export const ChatItem = memo(
@@ -142,7 +142,16 @@ export const ChatItem = memo(
                 );
                 e.dataTransfer.effectAllowed = "copy";
               }}
-              onClick={() => additionalOnChatClickCallback && additionalOnChatClickCallback(id)}
+              onClick={(e) => {
+                if (e.shiftKey) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const ids = activeChatId && activeChatId !== id ? [activeChatId, id] : [id];
+                  onEnterSelectionMode?.(ids);
+                  return;
+                }
+                additionalOnChatClickCallback?.(id);
+              }}
             >
               <Link
                 to={`/chat/${id}`}
@@ -232,7 +241,7 @@ export const ChatItem = memo(
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          onEnterSelectionMode?.(id);
+                          onEnterSelectionMode?.([id]);
                         }}
                       >
                         <IconCheckbox />
@@ -285,7 +294,7 @@ export const ChatItem = memo(
             <ContextMenuSeparator />
             <ContextMenuItem
               onClick={() => {
-                onEnterSelectionMode?.(id);
+                onEnterSelectionMode?.([id]);
               }}
             >
               <IconCheckbox />

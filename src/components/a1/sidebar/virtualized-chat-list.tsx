@@ -263,9 +263,9 @@ export const VirtualizedChatList = ({
     setSelectedChatIds(new Set());
   }, []);
 
-  const enterSelectionMode = useCallback((initialId: string) => {
+  const enterSelectionMode = useCallback((initialIds: string[]) => {
     setSelectionMode(true);
-    setSelectedChatIds(new Set([initialId]));
+    setSelectedChatIds(new Set(initialIds));
   }, []);
 
   const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
