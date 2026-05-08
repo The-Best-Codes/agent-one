@@ -28,8 +28,6 @@ export interface MessageTokenUsage {
     textTokens?: number;
     reasoningTokens?: number;
   };
-  reasoningTokens?: number;
-  cachedInputTokens?: number;
 }
 
 export interface ChatMessageMetadata {
@@ -73,8 +71,6 @@ export function createEmptyMessageTokenUsage(): MessageTokenUsage {
       textTokens: undefined,
       reasoningTokens: undefined,
     },
-    reasoningTokens: undefined,
-    cachedInputTokens: undefined,
   };
 }
 
@@ -95,12 +91,8 @@ export function getModelCostByChatModelId(
 }
 
 export function normalizeUsage(usage: MessageTokenUsage | LanguageModelUsage | undefined) {
-  const reasoningTokens = sanitizeNumber(
-    usage?.outputTokenDetails?.reasoningTokens ?? usage?.reasoningTokens,
-  );
-  const cacheReadTokens = sanitizeNumber(
-    usage?.inputTokenDetails?.cacheReadTokens ?? usage?.cachedInputTokens,
-  );
+  const reasoningTokens = sanitizeNumber(usage?.outputTokenDetails?.reasoningTokens);
+  const cacheReadTokens = sanitizeNumber(usage?.inputTokenDetails?.cacheReadTokens);
   const cacheWriteTokens = sanitizeNumber(usage?.inputTokenDetails?.cacheWriteTokens);
   const inputTokens = sanitizeNumber(usage?.inputTokens);
   const outputTokens = sanitizeNumber(usage?.outputTokens);
@@ -140,8 +132,6 @@ export function addMessageTokenUsage(
       textTokens: normalized1.textTokens + normalized2.textTokens,
       reasoningTokens: normalized1.reasoningTokens + normalized2.reasoningTokens,
     },
-    reasoningTokens: normalized1.reasoningTokens + normalized2.reasoningTokens,
-    cachedInputTokens: normalized1.cacheReadTokens + normalized2.cacheReadTokens,
   };
 }
 
