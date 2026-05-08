@@ -18,6 +18,7 @@ const vendorManualChunks = {
     "@ai-sdk/deepinfra",
     "@ai-sdk/deepseek",
     "@ai-sdk/fireworks",
+    "@ai-sdk/gateway",
     "@ai-sdk/google",
     "@ai-sdk/groq",
     "@ai-sdk/mistral",
@@ -27,6 +28,8 @@ const vendorManualChunks = {
     "@ai-sdk/togetherai",
     "@ai-sdk/xai",
     "@openrouter/ai-sdk-provider",
+    "@aihubmix/ai-sdk-provider",
+    "venice-ai-sdk-provider",
   ],
   codemirrorCore: [
     "codemirror",
