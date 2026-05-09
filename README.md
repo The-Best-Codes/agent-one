@@ -69,6 +69,7 @@ You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) 
 - https://cmake.org/download/
 - `winget install LLVM.LLVM`
 - `winget install NASM.NASM`
+- Also, make sure `git` is installed
 
 ### Signing Updates
 
