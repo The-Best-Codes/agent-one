@@ -112,7 +112,13 @@ const vendorManualChunks = {
     "@tauri-apps/plugin-window-state",
   ],
   auth: ["better-auth", "@better-auth/core", "@better-fetch/fetch", "nanostores", "defu"],
-  stateAndVirtualization: ["jotai", "consola", "@tanstack/virtual-core", "@tanstack/react-virtual"],
+  stateAndVirtualization: [
+    "jotai",
+    "consola",
+    "@tanstack/virtual-core",
+    "@tanstack/react-virtual",
+    "virtua",
+  ],
 };
 
 export default defineConfig(() => ({
