@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Virtualizer } from "virtua";
+import { Virtualizer, type VirtualizerHandle } from "virtua";
 
 import { Button } from "@/components/ui/button";
 import { useOverflow } from "@/hooks/use-overflow";
@@ -70,22 +70,32 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const virtualizerRef = useRef<VirtualizerHandle>(null);
     const isOverflowing = useOverflow(containerRef);
     const [buttonOffset, setButtonOffset] = useState(BUTTON_HIDDEN_OFFSET);
     const isAtBottomRef = useRef(true);
     const isVirtualized = Boolean(virtualizedItems);
+    const virtualizedItemCount = virtualizedItems?.length ?? 0;
 
     const scrollToBottom = useCallback(
       (scrollBehavior: "smooth" | "instant" = behavior) => {
         const container = containerRef.current;
-        if (container) {
-          container.scrollTo({
-            top: container.scrollHeight,
-            behavior: scrollBehavior,
+        if (!container) return;
+
+        if (isVirtualized && virtualizerRef.current && virtualizedItemCount > 0) {
+          virtualizerRef.current.scrollToIndex(virtualizedItemCount - 1, {
+            align: "end",
+            smooth: scrollBehavior === "smooth",
           });
+          return;
         }
+
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: scrollBehavior,
+        });
       },
-      [behavior],
+      [behavior, isVirtualized, virtualizedItemCount],
     );
 
     const handleScrollButtonClick = () => {
@@ -238,6 +248,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
           <div ref={contentRef} className={scrollableClassName}>
             {isVirtualized && virtualizedItems && virtualizedItems.length > 0 ? (
               <Virtualizer
+                ref={virtualizerRef}
                 scrollRef={containerRef}
                 bufferSize={virtualizedBufferSize}
                 keepMounted={virtualizedKeepMounted}
