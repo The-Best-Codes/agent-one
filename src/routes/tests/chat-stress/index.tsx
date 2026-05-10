@@ -99,8 +99,14 @@ function createStressMessages({
 
 export default function ChatStressTestRoute() {
   const navigate = useNavigate();
-  const { createChat, getNewChatModelConfig, getNewChatModelId, saveChat, saveChatTitle } =
-    usePersistence();
+  const {
+    createChat,
+    getNewChatModelConfig,
+    getNewChatModelId,
+    saveChat,
+    saveChatTitle,
+    loadChatMessages,
+  } = usePersistence();
 
   const [title, setTitle] = useState("Virtualization Stress Chat");
   const [messagePairs, setMessagePairs] = useState(200);
@@ -134,7 +140,20 @@ export default function ChatStressTestRoute() {
       });
 
       saveChatTitle({ chatId, title: trimmedTitle });
-      saveChat({ chatId, messages });
+      saveChat({ chatId, messages }); // this is fire-and-forget, which is why the logic below exists
+
+      // 5 times, with a 1 second delay, try to load the chat messages. If there are any, proceed, if there aren't after 5 tries, throw an error.
+      let loadedMessages: UIMessage[] = [];
+      for (let i = 0; i < 5; i++) {
+        loadedMessages = await loadChatMessages(chatId);
+        if (loadedMessages.length > 0) {
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      if (loadedMessages.length === 0) {
+        throw new Error("Failed to load chat messages after 5 tries.");
+      }
 
       toast.success(`Created stress chat with ${messages.length.toLocaleString()} messages.`);
       await navigate(`/chat/${chatId}`);
