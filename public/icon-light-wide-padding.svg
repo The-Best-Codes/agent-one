@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+    width="192"
+    height="192"
+    viewBox="0 0 128 128"
+    xmlns="http://www.w3.org/2000/svg"
+    shape-rendering="crispEdges"
+>
+    <rect width="128" height="128" rx="28" ry="28" fill="#FFFFFF" />
+
+    <path
+        transform="translate(64, 64) scale(0.32) translate(-600, -300)"
+        d="M 480 180 L 660 180 L 720 240 L 720 420 L 660 420 L 600 360 L 540 360 L 480 420 L 480 180 Z M 600 360 L 660 360 L 660 240 L 540 240 L 540 300 L 600 300 L 600 360 Z"
+        fill="#000000"
+        fill-rule="evenodd"
+    />
+</svg>
