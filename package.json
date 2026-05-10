@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "generate-icons": "tauri icon public/icon-dark-wide-padding.svg",
     "lint": "eslint src --cache",
     "typecheck": "tsc -b --incremental --noEmit",
     "fmt": "oxfmt --write . && cd src-tauri && cargo fmt",
