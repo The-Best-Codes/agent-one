@@ -35,7 +35,7 @@ async fn discover_scopes_with_rmcp(server_url: &str) -> Result<Vec<String>, Stri
 
     let _ = auth_manager.discover_metadata().await;
 
-    Ok(auth_manager.select_scopes(None, &["mcp"]))
+    Ok(auth_manager.select_scopes(None, &[]))
 }
 
 async fn initialize_and_start_auth(
@@ -74,13 +74,30 @@ async fn initialize_and_start_auth(
 
 #[derive(Clone)]
 struct AppState {
-    code_receiver: Arc<Mutex<Option<oneshot::Sender<CallbackParams>>>>,
+    code_receiver: Arc<Mutex<Option<oneshot::Sender<CallbackResult>>>>,
 }
 
 #[derive(Debug, Deserialize)]
 struct CallbackParams {
     code: String,
     state: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct CallbackQuery {
+    code: Option<String>,
+    state: Option<String>,
+    error: Option<String>,
+    error_description: Option<String>,
+}
+
+#[derive(Debug)]
+enum CallbackResult {
+    Success(CallbackParams),
+    Error {
+        error: String,
+        description: Option<String>,
+    },
 }
 
 #[derive(Clone)]
@@ -131,11 +148,26 @@ impl CredentialStore for KeyringCredentialStore {
 }
 
 async fn callback_handler(
-    Query(params): Query<CallbackParams>,
+    Query(query): Query<CallbackQuery>,
     State(state): State<AppState>,
 ) -> Html<&'static str> {
     if let Some(sender) = state.code_receiver.lock().await.take() {
-        let _ = sender.send(params);
+        let result = match (
+            query.code,
+            query.state,
+            query.error,
+            query.error_description,
+        ) {
+            (Some(code), Some(state), _, _) => {
+                CallbackResult::Success(CallbackParams { code, state })
+            }
+            (_, _, Some(error), description) => CallbackResult::Error { error, description },
+            _ => CallbackResult::Error {
+                error: "invalid_callback".to_string(),
+                description: Some("Missing OAuth callback parameters".to_string()),
+            },
+        };
+        let _ = sender.send(result);
     }
     Html(include_str!("../static/mcp_oauth_callback.html"))
 }
@@ -156,7 +188,7 @@ pub async fn mcp_authenticate(
     let redirect_uri = format!("http://127.0.0.1:{}/callback", port);
     let client_metadata_url = get_client_metadata_url(port);
 
-    let (code_sender, code_receiver) = oneshot::channel::<CallbackParams>();
+    let (code_sender, code_receiver) = oneshot::channel::<CallbackResult>();
     let app_state = AppState {
         code_receiver: Arc::new(Mutex::new(Some(code_sender))),
     };
@@ -169,7 +201,7 @@ pub async fn mcp_authenticate(
 
     let scopes = discover_scopes_with_rmcp(&server_url)
         .await
-        .unwrap_or_else(|_| vec!["mcp".to_string()]);
+        .unwrap_or_default();
 
     let redirect_uri_clone = redirect_uri.clone();
     let client_metadata_clone = client_metadata_url.clone();
@@ -219,7 +251,13 @@ pub async fn mcp_authenticate(
 
     server_handle.abort();
 
-    let params = params_result?;
+    let params = match params_result? {
+        CallbackResult::Success(params) => params,
+        CallbackResult::Error { error, description } => {
+            let message = description.unwrap_or(error);
+            return Err(format!("Authorization failed: {}", message));
+        }
+    };
 
     oauth_state
         .handle_callback(&params.code, &params.state)
