@@ -121,6 +121,8 @@ pub fn run() {
         .setup(|app| {
             use tauri_plugin_deep_link::DeepLinkExt;
 
+            keyring::initialize_keyring_store()?;
+
             #[cfg(any(target_os = "linux", windows))]
             {
                 // On Linux and Windows, register at runtime for development

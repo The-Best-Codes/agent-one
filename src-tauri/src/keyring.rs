@@ -1,10 +1,11 @@
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine as _;
 use chacha20poly1305::aead::{rand_core::RngCore, Aead, KeyInit, OsRng};
 use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce};
-use keyring::{Entry, Error as KeyringError};
+use keyring_core::{CredentialStore, Entry, Error as KeyringError};
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::Row;
@@ -14,6 +15,56 @@ use tokio::task;
 
 pub const SERVICE_NAME: &str = "com.agentone.app";
 const FALLBACK_MARKER_PREFIX: &str = "__agentone_secret_fallback_v1__:";
+
+pub fn initialize_keyring_store() -> Result<(), String> {
+    let store: Arc<CredentialStore> = {
+        #[cfg(target_os = "macos")]
+        {
+            apple_native_keyring_store::keychain::Store::new()
+                .map_err(|e| format!("Failed to initialize macOS keychain store: {}", e))?
+        }
+
+        #[cfg(target_os = "ios")]
+        {
+            apple_native_keyring_store::protected::Store::new()
+                .map_err(|e| format!("Failed to initialize iOS protected store: {}", e))?
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            windows_native_keyring_store::Store::new()
+                .map_err(|e| format!("Failed to initialize Windows credential store: {}", e))?
+        }
+
+        #[cfg(all(
+            target_os = "linux",
+            not(any(
+                target_os = "android",
+                target_os = "ios",
+                target_os = "macos",
+                target_os = "windows"
+            ))
+        ))]
+        {
+            zbus_secret_service_keyring_store::Store::new()
+                .map_err(|e| format!("Failed to initialize Secret Service store: {}", e))?
+        }
+
+        #[cfg(not(any(
+            target_os = "macos",
+            target_os = "ios",
+            target_os = "windows",
+            target_os = "linux"
+        )))]
+        {
+            keyring_core::mock::Store::new()
+                .map_err(|e| format!("Failed to initialize fallback keyring store: {}", e))?
+        }
+    };
+
+    keyring_core::set_default_store(store);
+    Ok(())
+}
 
 struct EncryptedFallbackRecord {
     keyring_ref: String,

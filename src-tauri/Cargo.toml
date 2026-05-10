@@ -40,13 +40,7 @@ tauri-plugin-notification = "2"
 tauri-plugin-process = "2"
 tauri-plugin-deep-link = "2"
 tauri-plugin-os = "2"
-keyring = { version = "3.6.3", features = [
-  "apple-native",
-  "windows-native",
-  "linux-native-async-persistent",
-  "tokio",
-  "crypto-rust",
-] }
+keyring-core = "1.0.0"
 tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
 axum = "0.8.9"
 url = "2.5.8"
@@ -66,3 +60,12 @@ base64 = "0.22.1"
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"
+
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
+apple-native-keyring-store = { version = "1.0.0", features = ["keychain", "protected"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-native-keyring-store = "1.0.0"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus-secret-service-keyring-store = { version = "1.0.0", features = ["rt-tokio-crypto-rust"] }
