@@ -85,7 +85,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         if (isVirtualized && virtualizerRef.current && virtualizedItemCount > 0) {
           virtualizerRef.current.scrollToIndex(virtualizedItemCount - 1, {
             align: "end",
-            smooth: scrollBehavior === "smooth",
+            smooth: false,
           });
           return;
         }
