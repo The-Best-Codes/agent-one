@@ -9,6 +9,11 @@ on:
         description: "Release tag to publish (e.g. agent-one-v0.0.0)"
         required: true
         type: string
+      pkgrel:
+        description: "Package release number (default: 1)"
+        required: false
+        type: string
+        default: "1"
 
 jobs:
   publish-aur:
@@ -73,6 +78,7 @@ jobs:
       - name: Render PKGBUILD
         run: |
           VERSION="${{ steps.deb.outputs.version }}"
+          PKGREL="${{ inputs.pkgrel || '1' }}"
           SHA256="${{ steps.checksum.outputs.sha256 }}"
 
           mkdir -p /tmp/aur
@@ -80,6 +86,7 @@ jobs:
 
           sed \
             -e "s/^pkgver=.*/pkgver=${VERSION}/" \
+            -e "s/^pkgrel=.*/pkgrel=${PKGREL}/" \
             -e "s/sha256sums_x86_64=('SKIP')/sha256sums_x86_64=('${SHA256}')/" \
             distribution/aur/PKGBUILD > /tmp/aur/PKGBUILD
 
