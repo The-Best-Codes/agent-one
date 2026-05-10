@@ -31,7 +31,7 @@ dependencies = [
 
 [[package]]
 name = "agent-one"
-version = "0.0.17"
+version = "0.0.18"
 dependencies = [
  "apple-native-keyring-store",
  "async-trait",
