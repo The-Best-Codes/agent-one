@@ -17,6 +17,8 @@ import {
   type TextScaleOption,
   type ThemeOption,
   type TitleGenerationSettings,
+  type UiTintOption,
+  type UiTintStrengthOption,
   type CollapsedSidebarLayoutOption,
   type ToolConfigs,
   type ToolId,
@@ -134,6 +136,13 @@ export const themeAtom = createSettingAtom<ThemeOption>("THEME", DEFAULT_SETTING
 export const colorThemeAtom = createSettingAtom<ColorThemeOption>(
   "COLOR_THEME",
   DEFAULT_SETTINGS.COLOR_THEME,
+);
+
+export const uiTintAtom = createSettingAtom<UiTintOption>("UI_TINT", DEFAULT_SETTINGS.UI_TINT);
+
+export const uiTintStrengthAtom = createSettingAtom<UiTintStrengthOption>(
+  "UI_TINT_STRENGTH",
+  DEFAULT_SETTINGS.UI_TINT_STRENGTH,
 );
 
 export const roundnessAtom = createSettingAtom<RoundnessOption>(

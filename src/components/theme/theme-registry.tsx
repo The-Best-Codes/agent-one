@@ -8,18 +8,37 @@ import {
   roundnessAtom,
   textScaleAtom,
   themeAtom,
+  uiTintAtom,
+  uiTintStrengthAtom,
 } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
+
+const UI_TINT_STRENGTHS: Record<number, string> = {
+  1: "2%",
+  2: "4%",
+  3: "6%",
+  4: "8%",
+  5: "10%",
+  6: "12%",
+  7: "14%",
+  8: "16%",
+  9: "18%",
+  10: "20%",
+};
 
 export function ThemeRegistry() {
   const [rawTheme] = useAtom(themeAtom);
   const [rawColorTheme] = useAtom(colorThemeAtom);
+  const [rawUiTint] = useAtom(uiTintAtom);
+  const [rawUiTintStrength] = useAtom(uiTintStrengthAtom);
   const [rawRoundness] = useAtom(roundnessAtom);
   const [rawFont] = useAtom(fontAtom);
   const [rawTextScale] = useAtom(textScaleAtom);
 
   const theme = jsonParseCatch(rawTheme);
   const colorTheme = jsonParseCatch(rawColorTheme);
+  const uiTint = jsonParseCatch(rawUiTint);
+  const uiTintStrength = rawUiTintStrength;
   const roundness = jsonParseCatch(rawRoundness);
   const font = jsonParseCatch(rawFont);
   const textScale = jsonParseCatch(rawTextScale);
@@ -39,6 +58,30 @@ export function ThemeRegistry() {
       root.classList.add(colorTheme);
     }
     root.setAttribute("data-color-theme", colorTheme || "default");
+
+    root.classList.remove(
+      "ui-tint-red",
+      "ui-tint-blue",
+      "ui-tint-yellow",
+      "ui-tint-green",
+      "ui-tint-orange",
+      "ui-tint-rose",
+      "ui-tint-violet",
+    );
+    if (uiTint && uiTint !== "default") {
+      root.classList.add(`ui-tint-${uiTint}`);
+    }
+    root.setAttribute("data-ui-tint", uiTint || "default");
+
+    const resolvedUiTintStrength =
+      typeof uiTintStrength === "number" && uiTintStrength in UI_TINT_STRENGTHS
+        ? UI_TINT_STRENGTHS[uiTintStrength]
+        : UI_TINT_STRENGTHS[3];
+    root.style.setProperty(
+      "--ui-tint-strength",
+      uiTint && uiTint !== "default" ? resolvedUiTintStrength : "0%",
+    );
+    root.setAttribute("data-ui-tint-strength", String(uiTintStrength || 3));
 
     // Handle roundness
     root.classList.remove(
@@ -66,7 +109,7 @@ export function ThemeRegistry() {
     root.classList.remove("text-xs", "text-sm", "text-md", "text-lg", "text-xl", "text-2xl");
     root.classList.add(`text-${textScale || "md"}`);
     root.setAttribute("data-text-scale", textScale || "md");
-  }, [theme, colorTheme, roundness, font, textScale]);
+  }, [theme, colorTheme, uiTint, uiTintStrength, roundness, font, textScale]);
 
   return null;
 }
