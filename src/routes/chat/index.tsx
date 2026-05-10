@@ -16,6 +16,10 @@ import {
   clearEditingMessagesAtom,
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
+import {
+  chatVirtualizationModeAtom,
+  chatVirtualizationThresholdAtom,
+} from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
@@ -27,6 +31,8 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const [delayPassed, setDelayPassed] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const editingMessageIds = useAtomValue(editingMessageIdsAtom);
+  const chatVirtualizationMode = useAtomValue(chatVirtualizationModeAtom);
+  const chatVirtualizationThreshold = useAtomValue(chatVirtualizationThresholdAtom);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
 
   useEffect(() => {
@@ -74,6 +80,8 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
 
   const lastMessageId = messages[messages.length - 1]?.id;
   const initialInputValue = searchParams.get("initialMessage") || undefined;
+  const shouldVirtualizeMessages =
+    chatVirtualizationMode !== "off" && messages.length >= chatVirtualizationThreshold;
   const messageItems = useMemo(
     () =>
       messages.map((message, index) => (
@@ -119,15 +127,16 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
             <AutoScrollContainer
               ref={scrollRef}
               className="max-h-full min-h-0 flex-1 pt-2 pr-0 pb-2"
-              virtualizedItems={messageItems}
-              virtualizedKeepMounted={keepMountedIndexes}
-              contentUpdateKey={messages}
+              virtualizedItems={shouldVirtualizeMessages ? messageItems : undefined}
+              virtualizedKeepMounted={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
+              contentUpdateKey={shouldVirtualizeMessages ? messages : undefined}
               overflowingClassName="md:pr-2"
               scrollableClassName="pr-2 h-full"
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
               {messages.length === 0 && <NoMessagesGreeting />}
+              {!shouldVirtualizeMessages && messageItems}
               {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
             </AutoScrollContainer>
           )}

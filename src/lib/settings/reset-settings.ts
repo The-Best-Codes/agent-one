@@ -6,6 +6,8 @@ import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/r
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
+  chatVirtualizationModeAtom,
+  chatVirtualizationThresholdAtom,
   collapsedSidebarLayoutAtom,
   colorThemeAtom,
   enabledToolsAtom,
@@ -47,6 +49,8 @@ export function resetAllSettings(): void {
   store.set(maxCodeblockCharsAtom, RESET);
   store.set(maxMessageLengthAtom, RESET);
   store.set(maxToolResultCharsAtom, RESET);
+  store.set(chatVirtualizationModeAtom, RESET);
+  store.set(chatVirtualizationThresholdAtom, RESET);
   store.set(experimentalThrottleEnabledAtom, RESET);
   store.set(experimentalThrottleValueAtom, RESET);
   store.set(smoothStreamEnabledAtom, RESET);
@@ -109,6 +113,12 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "MAX_TOOL_RESULT_CHARS":
       store.set(maxToolResultCharsAtom, RESET);
+      break;
+    case "CHAT_VIRTUALIZATION_MODE":
+      store.set(chatVirtualizationModeAtom, RESET);
+      break;
+    case "CHAT_VIRTUALIZATION_THRESHOLD":
+      store.set(chatVirtualizationThresholdAtom, RESET);
       break;
     case "EXPERIMENTAL_THROTTLE_ENABLED":
       store.set(experimentalThrottleEnabledAtom, RESET);

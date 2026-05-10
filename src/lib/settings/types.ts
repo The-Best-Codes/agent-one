@@ -22,6 +22,7 @@ export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 export type MessageActionRowOption = "hover" | "always" | "never";
 export type InputStyleOption = "docked" | "floating";
 export type CollapsedSidebarLayoutOption = "row" | "column";
+export type ChatVirtualizationModeOption = "off" | "threshold";
 
 export type TitleGenerationMethodOption =
   | "ai"
@@ -141,6 +142,8 @@ export interface DefaultSettings extends ApiKeySettings {
   MAX_CODEBLOCK_CHARS: number;
   MAX_MESSAGE_LENGTH: number;
   MAX_TOOL_RESULT_CHARS: number;
+  CHAT_VIRTUALIZATION_MODE: ChatVirtualizationModeOption;
+  CHAT_VIRTUALIZATION_THRESHOLD: number;
   EXPERIMENTAL_THROTTLE_ENABLED: boolean;
   EXPERIMENTAL_THROTTLE_VALUE: number;
   SMOOTH_STREAM_ENABLED: boolean;
@@ -172,6 +175,8 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MAX_CODEBLOCK_CHARS: 10000,
   MAX_MESSAGE_LENGTH: 50000,
   MAX_TOOL_RESULT_CHARS: 15000,
+  CHAT_VIRTUALIZATION_MODE: "threshold",
+  CHAT_VIRTUALIZATION_THRESHOLD: 100,
   EXPERIMENTAL_THROTTLE_ENABLED: true,
   EXPERIMENTAL_THROTTLE_VALUE: 250,
   SMOOTH_STREAM_ENABLED: false,
