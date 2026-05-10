@@ -136,73 +136,78 @@ export default function PerformanceSection() {
               </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="flex flex-col gap-4 rounded-md border p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-1 flex-col gap-1">
-                <Label htmlFor="chat-virtualization-enabled" className="text-sm font-medium">
-                  Virtualize Chat Messages
+      <Card>
+        <CardHeader>
+          <CardTitle>Chat Virtualization</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-1 flex-col gap-1">
+              <Label htmlFor="chat-virtualization-enabled" className="text-sm font-medium">
+                Virtualize Chat Messages
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Reduce rendering work for large chats while preserving the same chat UI behavior.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="chat-virtualization-enabled"
+                checked={chatVirtualizationMode !== "off"}
+                onCheckedChange={(checked) => {
+                  setChatVirtualizationMode(checked ? "threshold" : "off");
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => resetSetting("CHAT_VIRTUALIZATION_MODE")}
+                disabled={isChatVirtualizationModeDefault}
+                aria-label="Reset chat virtualization mode"
+              >
+                <IconRestore data-icon="inline-start" />
+              </Button>
+            </div>
+          </div>
+
+          {chatVirtualizationMode !== "off" && (
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label htmlFor="chat-virtualization-threshold" className="text-sm font-medium">
+                  Message Count Threshold
                 </Label>
-                <p className="text-muted-foreground text-sm">
-                  Reduce rendering work for large chats while preserving the same chat UI behavior.
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Only enable chat virtualization when a conversation reaches at least this many
+                  messages.
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Switch
-                  id="chat-virtualization-enabled"
-                  checked={chatVirtualizationMode !== "off"}
-                  onCheckedChange={(checked) => {
-                    setChatVirtualizationMode(checked ? "threshold" : "off");
-                  }}
+                <Input
+                  id="chat-virtualization-threshold"
+                  type="number"
+                  min="1"
+                  max="100000"
+                  value={chatVirtualizationThreshold}
+                  onChange={(e) =>
+                    setChatVirtualizationThreshold(Math.max(1, parseInt(e.target.value) || 1))
+                  }
+                  className="w-full md:w-32"
                 />
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => resetSetting("CHAT_VIRTUALIZATION_MODE")}
-                  disabled={isChatVirtualizationModeDefault}
-                  aria-label="Reset chat virtualization mode"
+                  onClick={() => resetSetting("CHAT_VIRTUALIZATION_THRESHOLD")}
+                  disabled={isChatVirtualizationThresholdDefault}
+                  aria-label="Reset chat virtualization threshold"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
               </div>
             </div>
-
-            {chatVirtualizationMode !== "off" && (
-              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-                <div className="flex flex-1 flex-col items-start">
-                  <Label htmlFor="chat-virtualization-threshold" className="text-sm font-medium">
-                    Message Count Threshold
-                  </Label>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Only enable chat virtualization when a conversation reaches at least this many
-                    messages.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="chat-virtualization-threshold"
-                    type="number"
-                    min="1"
-                    max="100000"
-                    value={chatVirtualizationThreshold}
-                    onChange={(e) =>
-                      setChatVirtualizationThreshold(Math.max(1, parseInt(e.target.value) || 1))
-                    }
-                    className="w-full md:w-32"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => resetSetting("CHAT_VIRTUALIZATION_THRESHOLD")}
-                    disabled={isChatVirtualizationThresholdDefault}
-                    aria-label="Reset chat virtualization threshold"
-                  >
-                    <IconRestore data-icon="inline-start" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </CardContent>
       </Card>
 
