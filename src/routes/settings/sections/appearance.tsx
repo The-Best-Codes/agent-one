@@ -130,8 +130,6 @@ export default function AppearanceSection() {
 
   const isMarkdownHighlightingDefault =
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
-  const isPrimaryColorDefault = colorTheme === DEFAULT_SETTINGS.COLOR_THEME;
-  const isUiTintDefault = uiTint === DEFAULT_SETTINGS.UI_TINT;
   const isUiTintStrengthDefault = uiTintStrength === DEFAULT_SETTINGS.UI_TINT_STRENGTH;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
   const isCollapsedSidebarLayoutDefault =
@@ -189,21 +187,12 @@ export default function AppearanceSection() {
                   ))}
                 </div>
               </ScrollArea>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => resetSetting("COLOR_THEME")}
-                disabled={isPrimaryColorDefault}
-                aria-label="Reset primary color to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
             </div>
           </div>
 
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">UI Tint</Label>
+              <Label className="text-sm font-medium">Tint</Label>
               <p className="text-muted-foreground mt-1 text-sm">
                 Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted
                 buttons.
@@ -227,15 +216,6 @@ export default function AppearanceSection() {
                   ))}
                 </div>
               </ScrollArea>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => resetSetting("UI_TINT")}
-                disabled={isUiTintDefault}
-                aria-label="Reset UI tint to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
             </div>
           </div>
 
@@ -267,6 +247,7 @@ export default function AppearanceSection() {
               step={1}
               className="w-full"
               aria-label="Tint strength"
+              disabled={uiTint === "default"}
             />
           </div>
 
