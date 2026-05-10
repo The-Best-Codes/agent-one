@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
 import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto-scroll-container";
@@ -11,6 +12,14 @@ import { Sidebar } from "@/components/a1/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
+import {
+  clearEditingMessagesAtom,
+  editingMessageIdsAtom,
+} from "@/lib/jotai/chat-message-editing-atoms";
+import {
+  chatVirtualizationModeAtom,
+  chatVirtualizationThresholdAtom,
+} from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
@@ -21,6 +30,18 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const scrollRef = useRef<AutoScrollHandle | null>(null);
   const [delayPassed, setDelayPassed] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const editingMessageIds = useAtomValue(editingMessageIdsAtom);
+  const chatVirtualizationMode = useAtomValue(chatVirtualizationModeAtom);
+  const chatVirtualizationThreshold = useAtomValue(chatVirtualizationThresholdAtom);
+  const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
+
+  useEffect(() => {
+    clearEditingMessages();
+
+    return () => {
+      clearEditingMessages();
+    };
+  }, [chatId, clearEditingMessages]);
 
   useEffect(() => {
     if (isChatLoading) {
@@ -59,6 +80,34 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
 
   const lastMessageId = messages[messages.length - 1]?.id;
   const initialInputValue = searchParams.get("initialMessage") || undefined;
+  const shouldVirtualizeMessages =
+    chatVirtualizationMode !== "off" && messages.length >= chatVirtualizationThreshold;
+  const messageItems = useMemo(
+    () =>
+      messages.map((message, index) => (
+        <div
+          key={message.id}
+          className={cn(
+            "flex",
+            message.role === "user"
+              ? "justify-end"
+              : index === messages.length - 1
+                ? "justify-start"
+                : "mb-1 justify-start",
+          )}
+        >
+          <MessageParts message={message} isLastMessage={message.id === lastMessageId} />
+        </div>
+      )),
+    [lastMessageId, messages],
+  );
+  const keepMountedIndexes = useMemo(
+    () =>
+      editingMessageIds
+        .map((editingMessageId) => messages.findIndex((message) => message.id === editingMessageId))
+        .filter((index) => index >= 0),
+    [editingMessageIds, messages],
+  );
 
   return (
     <main className="flex h-svh" role="main" data-testid="main">
@@ -78,23 +127,16 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
             <AutoScrollContainer
               ref={scrollRef}
               className="max-h-full min-h-0 flex-1 pt-2 pr-0 pb-2"
+              virtualizedItems={shouldVirtualizeMessages ? messageItems : undefined}
+              virtualizedKeepMounted={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
+              contentUpdateKey={shouldVirtualizeMessages ? messages : undefined}
               overflowingClassName="md:pr-2"
               scrollableClassName="pr-2 h-full"
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
               {messages.length === 0 && <NoMessagesGreeting />}
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.role === "user" ? "justify-end" : "mb-1 justify-start last:mb-0",
-                  )}
-                >
-                  <MessageParts message={message} isLastMessage={message.id === lastMessageId} />
-                </div>
-              ))}
+              {!shouldVirtualizeMessages && messageItems}
               {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
             </AutoScrollContainer>
           )}

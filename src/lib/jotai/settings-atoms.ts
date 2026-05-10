@@ -89,6 +89,16 @@ export const maxToolResultCharsAtom = createSettingAtom(
   DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS,
 );
 
+export const chatVirtualizationModeAtom = createSettingAtom(
+  "CHAT_VIRTUALIZATION_MODE",
+  DEFAULT_SETTINGS.CHAT_VIRTUALIZATION_MODE,
+);
+
+export const chatVirtualizationThresholdAtom = createSettingAtom(
+  "CHAT_VIRTUALIZATION_THRESHOLD",
+  DEFAULT_SETTINGS.CHAT_VIRTUALIZATION_THRESHOLD,
+);
+
 export const experimentalThrottleEnabledAtom = createSettingAtom(
   "EXPERIMENTAL_THROTTLE_ENABLED",
   DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED,

@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
+  chatVirtualizationModeAtom,
+  chatVirtualizationThresholdAtom,
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
   maxToolResultCharsAtom,
@@ -18,11 +21,19 @@ export default function PerformanceSection() {
   const [maxMessageLength, setMaxMessageLength] = useAtom(maxMessageLengthAtom);
   const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(maxCodeblockCharsAtom);
   const [maxToolResultChars, setMaxToolResultChars] = useAtom(maxToolResultCharsAtom);
+  const [chatVirtualizationMode, setChatVirtualizationMode] = useAtom(chatVirtualizationModeAtom);
+  const [chatVirtualizationThreshold, setChatVirtualizationThreshold] = useAtom(
+    chatVirtualizationThresholdAtom,
+  );
   const [mcpParallelLoadLimit, setMcpParallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
 
   const isMaxMessageLengthDefault = maxMessageLength === DEFAULT_SETTINGS.MAX_MESSAGE_LENGTH;
   const isMaxCodeblockCharsDefault = maxCodeblockChars === DEFAULT_SETTINGS.MAX_CODEBLOCK_CHARS;
   const isMaxToolResultCharsDefault = maxToolResultChars === DEFAULT_SETTINGS.MAX_TOOL_RESULT_CHARS;
+  const isChatVirtualizationModeDefault =
+    chatVirtualizationMode === DEFAULT_SETTINGS.CHAT_VIRTUALIZATION_MODE;
+  const isChatVirtualizationThresholdDefault =
+    chatVirtualizationThreshold === DEFAULT_SETTINGS.CHAT_VIRTUALIZATION_THRESHOLD;
   const isMcpParallelLoadLimitDefault =
     mcpParallelLoadLimit === DEFAULT_SETTINGS.MCP_PARALLEL_LOAD_LIMIT;
 
@@ -125,6 +136,78 @@ export default function PerformanceSection() {
               </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Chat Virtualization</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-1 flex-col gap-1">
+              <Label htmlFor="chat-virtualization-enabled" className="text-sm font-medium">
+                Virtualize Chat Messages
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Reduce rendering work for large chats while preserving the same chat UI behavior.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="chat-virtualization-enabled"
+                checked={chatVirtualizationMode !== "off"}
+                onCheckedChange={(checked) => {
+                  setChatVirtualizationMode(checked ? "threshold" : "off");
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => resetSetting("CHAT_VIRTUALIZATION_MODE")}
+                disabled={isChatVirtualizationModeDefault}
+                aria-label="Reset chat virtualization mode"
+              >
+                <IconRestore data-icon="inline-start" />
+              </Button>
+            </div>
+          </div>
+
+          {chatVirtualizationMode !== "off" && (
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label htmlFor="chat-virtualization-threshold" className="text-sm font-medium">
+                  Message Count Threshold
+                </Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Only enable chat virtualization when a conversation reaches at least this many
+                  messages.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="chat-virtualization-threshold"
+                  type="number"
+                  min="1"
+                  max="100000"
+                  value={chatVirtualizationThreshold}
+                  onChange={(e) =>
+                    setChatVirtualizationThreshold(Math.max(1, parseInt(e.target.value) || 1))
+                  }
+                  className="w-full md:w-32"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => resetSetting("CHAT_VIRTUALIZATION_THRESHOLD")}
+                  disabled={isChatVirtualizationThresholdDefault}
+                  aria-label="Reset chat virtualization threshold"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

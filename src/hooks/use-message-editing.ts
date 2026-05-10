@@ -1,8 +1,10 @@
 import type { TextUIPart, UIMessage } from "ai";
+import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
+import { setMessageEditingAtom } from "@/lib/jotai/chat-message-editing-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -32,6 +34,7 @@ export const useMessageEditing = ({
 }: UseMessageEditingOptions): UseMessageEditingReturn => {
   const [isEditing, setIsEditing] = useState(false);
   const { setMessages, regenerate } = useChatFunctions();
+  const setMessageEditing = useSetAtom(setMessageEditingAtom);
 
   const initialValues = useMemo(() => {
     return message.parts.filter((p): p is TextUIPart => p.type === "text").map((p) => p.text);
@@ -54,13 +57,15 @@ export const useMessageEditing = ({
   }, [initialValues]);
 
   const handleEdit = useCallback(() => {
+    setMessageEditing({ isEditing: true, messageId: message.id });
     setIsEditing(true);
-  }, []);
+  }, [message.id, setMessageEditing]);
 
   const handleCancel = useCallback(() => {
+    setMessageEditing({ isEditing: false, messageId: message.id });
     setIsEditing(false);
     textValuesRef.current = [...initialValues];
-  }, [initialValues]);
+  }, [initialValues, message.id, setMessageEditing]);
 
   const handleTextChange = useCallback((textIndex: number, next: string) => {
     textValuesRef.current[textIndex] = next;
@@ -104,6 +109,7 @@ export const useMessageEditing = ({
           return updatedMessages;
         });
 
+        setMessageEditing({ isEditing: false, messageId: message.id });
         setIsEditing(false);
 
         if (shouldRegenerate) {
@@ -114,7 +120,7 @@ export const useMessageEditing = ({
         handleCancel();
       }
     },
-    [setMessages, message.id, regenerate, handleCancel],
+    [setMessages, message.id, regenerate, handleCancel, setMessageEditing],
   );
 
   useEffect(() => {

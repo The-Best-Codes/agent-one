@@ -51,6 +51,17 @@ export default function TestsRoute() {
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
+                  <h3 className="font-medium">Chat Stress Generator</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Create large test chats with configurable size and content for UI stress testing
+                  </p>
+                </div>
+                <Button onClick={() => navigate("/tests/chat-stress")} variant="outline">
+                  Run Test
+                </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div>
                   <h3 className="font-medium">Trigger Onboarding</h3>
                   <p className="text-muted-foreground text-sm">
                     Reset onboarding state and restart the onboarding flow
