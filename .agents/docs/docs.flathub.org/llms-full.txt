@@ -327,8 +327,6 @@ Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#appl
 
 The appid has >=6 components after splitting at each `.`. Applications must try to have at most 6 components.
 
-This is not checked for runtimes or baseapps.
-
 Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#application-id) for more information.
 
 ### appid-url-check-internal-error[​](#appid-url-check-internal-error "Direct link to appid-url-check-internal-error")
@@ -373,13 +371,13 @@ The latest release tag was detected to be a pre-release which is not allowed for
 
 ### appstream-external-screenshot-url[​](#appstream-external-screenshot-url "Direct link to appstream-external-screenshot-url")
 
-The screenshots in [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) aren't mirrored to <https://dl.flathub.org/media>.
+The screenshots in [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) aren't mirrored to `https://dl.flathub.org/media`.
 
-[Flatpak Builder](https://docs.flatpak.org/en/latest/flatpak-builder-command-reference.html) invokes `appstreamcli compose` for mirroring when `--mirror-screenshots-url=URL` is passed.
+Screenshot mirroring is done by AppStream when [Flatpak Builder](https://docs.flatpak.org/en/latest/flatpak-builder-command-reference.html) is invoked with `--compose-url-policy=full --mirror-screenshots-url=https://dl.flathub.org/media`.
 
-This can happen when mirroring fails due to spurious connectivity issues and is usually resolved by restarting the build.
+Externally built or uploaded apps must ensure that it was built using those arguments.
 
-Externally uploaded apps must ensure `--mirror-screenshots-url=URL` was passed to Flatpak Builder.
+This may also happen when mirroring fails due to spurious connectivity issues and it is usually resolved by restarting the build.
 
 ### appstream-failed-validation[​](#appstream-failed-validation "Direct link to appstream-failed-validation")
 
@@ -539,29 +537,21 @@ One of the `custom` tags in the \[MetaInfo file]\(/docs/for-app-authors/metainfo
 
 ### appstream-id-mismatch-flatpak-id[​](#appstream-id-mismatch-flatpak-id "Direct link to appstream-id-mismatch-flatpak-id")
 
-The `id` tag in the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) does not match the `FLATPAK_ID` (the `id` or `app-id` used in manifest).
+The `id` tag in the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) does not match the `FLATPAK_ID` (the `id` or `app-id` used in the Flatpak manifest).
 
-Existing applications should ask for exceptions, no new applications will be accepted with a mismatch.
-
-Please see the [Renaming ID tag](/docs/for-app-authors/metainfo-guidelines.md#renaming-id-tag) section before renaming the tag.
+Please also see the [Renaming ID tag](/docs/for-app-authors/metainfo-guidelines.md#renaming-id-tag) section before renaming the tag.
 
 ### appstream-launchable-file-missing[​](#appstream-launchable-file-missing "Direct link to appstream-launchable-file-missing")
 
-The MetaInfo file had a [launchable tag](/docs/for-app-authors/metainfo-guidelines.md#launchable) defined but the file was not found in `${FLATPAK_DEST}/share/applications`.
-
-This could be due to the file not being installed in `${FLATPAK_DEST}/share/applications` or having the wrong filename. The filename must be `$FLATPAK_ID.desktop`.
+The MetaInfo file had a [launchable tag](/docs/for-app-authors/metainfo-guidelines.md#launchable) defined but the file `${FLATPAK_DEST}/share/applications/$FLATPAK_ID.desktop` was not found.
 
 ### appstream-metainfo-missing[​](#appstream-metainfo-missing "Direct link to appstream-metainfo-missing")
 
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing from the build.
 
-Please make sure to install it to the correct folder and name the file according to the application id used in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html).
-
 ### appstream-missing-appinfo-file[​](#appstream-missing-appinfo-file "Direct link to appstream-missing-appinfo-file")
 
 The build or the OSTree repo is missing the [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file.
-
-This usually indicates something else is wrong. Please review additional errors if present.
 
 ### appstream-missing-categories[​](#appstream-missing-categories "Direct link to appstream-missing-categories")
 
@@ -593,7 +583,7 @@ The error indicates that the required icon sizes were not supplied or the genera
 
 A `release` tag in the [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file is missing the `timestamp` attribute.
 
-This tag is automatically generated provided the `date` attribute is correctly set for the `release` tag in metainfo. A timestamp may not be generated if the `release` tag in metainfo are misformatted.
+This tag is automatically generated provided the `date` attribute is correctly set for the `release` tag in metainfo. A timestamp may not be generated if the `release` tag in metainfo is misformatted.
 
 ### appstream-missing-icon-key[​](#appstream-missing-icon-key "Direct link to appstream-missing-icon-key")
 
@@ -613,9 +603,9 @@ Please see the [icon section](/docs/for-app-authors/metainfo-guidelines.md#icons
 
 The [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file has an `icon` key with `type=remote` but the URL in the tag does not start with `https://dl.flathub.org/media/`.
 
-Any remote icons from the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) will automatically be mirrored to the above media repo provided `--mirror-screenshots-url=https://dl.flathub.org/media/` was passed while [building the Flatpak](/docs/for-app-authors/submission.md#before-submission) to [Flatpak Builder](https://docs.flatpak.org/en/latest/flatpak-builder-command-reference.html).
+Any remote icons from the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) will automatically be mirrored to the above media repo provided `--compose-url-policy=full --mirror-screenshots-url=https://dl.flathub.org/media` was passed while [building the Flatpak](/docs/for-app-authors/submission.md#before-submission) to [Flatpak Builder](https://docs.flatpak.org/en/latest/flatpak-builder-command-reference.html).
 
-This should not be reached by applications built on Flathub. Externally uploaded applications must ensure to mirror media as explained above.
+Externally uploaded applications must ensure to mirror media as explained above.
 
 ### appstream-missing-screenshots[​](#appstream-missing-screenshots "Direct link to appstream-missing-screenshots")
 
@@ -639,13 +629,11 @@ This must be present for externally uploaded apps.
 
 The ostree ref is missing a `screenshots/{arch}` ref.
 
-This error should not be reached on Flathub and can be ignored if an app submission is targetting Flathub.
-
-Externally uploaded apps must ensure to [mirror screenshots](https://docs.flatpak.org/en/latest/flatpak-builder-command-reference.html), commit the screenshot ref and upload the screenshot ref for all architectures.
+Externally uploaded apps must ensure to [mirror screenshots](https://docs.flatpak.org/en/latest/flatpak-builder-command-reference.html), by passing `--compose-url-policy=full --mirror-screenshots-url=https://dl.flathub.org/media` to flatpak-builder, to commit the screenshot ref and upload the screenshot ref for all architectures.
 
 Committing is done after [Flatpak Builder](https://docs.flatpak.org/en/latest/flatpak-builder.html) exported a repo, using `ostree commit --repo=<repo name> --canonical-permissions --branch=screenshots/<arch> <builddir>/files/share/app-info/media`.
 
-The process is automated when using [flatpak-github-actions](https://github.com/flatpak/flatpak-github-actions#inputs).
+The process is automated since Flatpak builder 1.4.5.
 
 ### appstream-screenshots-files-not-found-in-ostree[​](#appstream-screenshots-files-not-found-in-ostree "Direct link to appstream-screenshots-files-not-found-in-ostree")
 
@@ -729,11 +717,25 @@ Git submodules outside of the GitHub orgs `flathub, flathub-infra, flatpak` are 
 
 The manifest directory of the Flathub GitHub repository exceeds 25 MB excluding the size of `.git/`.
 
+### finish-args-conditional-permission-not-allowed-permission[​](#finish-args-conditional-permission-not-allowed-permission "Direct link to finish-args-conditional-permission-not-allowed-permission")
+
+The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses a conditional permission which is not allowed.
+
+Only `if:all:!has-input-device, if:all:!has-usb-device, if:usb:!has-usb-portal` are allowed.
+
+### finish-args-conditional-permission-input-no-restriction[​](#finish-args-conditional-permission-input-no-restriction "Direct link to finish-args-conditional-permission-input-no-restriction")
+
+The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses the conditional permission `--device-if=all:!has-input-device` but no `--device=input`.
+
+### finish-args-conditional-permission-usb-no-restriction[​](#finish-args-conditional-permission-usb-no-restriction "Direct link to finish-args-conditional-permission-usb-no-restriction")
+
+The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses the conditional permission `--device-if=all:!has-usb-device` but no `--device=usb`.
+
 ### finish-args-contains-both-x11-and-fallback[​](#finish-args-contains-both-x11-and-fallback "Direct link to finish-args-contains-both-x11-and-fallback")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has both `--socket=x11` and `--socket=fallback-x11`.
 
-Both are never needed.
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#standard-permissions:~:text=native%20Wayland) for more information.
 
 ### finish-args-x11-without-ipc[​](#finish-args-x11-without-ipc "Direct link to finish-args-x11-without-ipc")
 
@@ -749,7 +751,9 @@ The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) i
 
 ### finish-args-incorrect-theme-folder-permission[​](#finish-args-incorrect-theme-folder-permission "Direct link to finish-args-incorrect-theme-folder-permission")
 
-The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.themes`. The correct way to integrate third party themes for Flatpaks is to package them as [Flatpak extensions](https://docs.flatpak.org/en/latest/desktop-integration.html#theming). [Unmaintained extensions](https://docs.flatpak.org/en/latest/extension.html#creating-an-unmaintained-gtk-theme-extension) can also be used for this.
+The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.themes`. The correct way to integrate third party themes for Flatpaks is to package them as [Flatpak extensions](https://docs.flatpak.org/en/latest/desktop-integration.html#theming).
+
+[Unmaintained extensions](https://docs.flatpak.org/en/latest/extension.html#creating-an-unmaintained-gtk-theme-extension) can also be used for this.
 
 ### finish-args-full-home-config-access[​](#finish-args-full-home-config-access "Direct link to finish-args-full-home-config-access")
 
@@ -771,23 +775,27 @@ The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) i
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a filesystem permission that starts with `/home` or `/var/home`.
 
-Flatpak cannot access anything in `/home` and `/home/username` becomes dependent on the username.
-
 `--filesystem=~/foo`, `--filesystem=home`, `--filesystem=home/foo` should be used instead.
 
 Please consult the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html) and the [manual page](https://docs.flatpak.org/en/latest/flatpak-command-reference.html?highlight=filesystem#).
 
 ### finish-args-flatpak-appdata-folder-access[​](#finish-args-flatpak-appdata-folder-access "Direct link to finish-args-flatpak-appdata-folder-access")
 
-The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `~/.var/app`.
+### finish-args-flatpak-appdata-folder-dir-access[​](#finish-args-flatpak-appdata-folder-dir-access "Direct link to finish-args-flatpak-appdata-folder-dir-access")
+
+The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `~/.var/app` or a subfolder of it.
 
 ### finish-args-flatpak-system-folder-access[​](#finish-args-flatpak-system-folder-access "Direct link to finish-args-flatpak-system-folder-access")
 
-The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `/var/lib/flatpak`.
+### finish-args-flatpak-system-folder-dir-access[​](#finish-args-flatpak-system-folder-dir-access "Direct link to finish-args-flatpak-system-folder-dir-access")
+
+The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `/var/lib/flatpak` or a subfolder of it.
 
 ### finish-args-flatpak-user-folder-access[​](#finish-args-flatpak-user-folder-access "Direct link to finish-args-flatpak-user-folder-access")
 
-The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `~/.local/share/flatpak`.
+### finish-args-flatpak-user-folder-dir-access[​](#finish-args-flatpak-user-folder-dir-access "Direct link to finish-args-flatpak-user-folder-dir-access")
+
+The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `~/.local/share/flatpak` or a subfolder of it.
 
 ### finish-args-host-tmp-access[​](#finish-args-host-tmp-access "Direct link to finish-args-host-tmp-access")
 
@@ -809,13 +817,11 @@ Please use `/run/media` or `/run/media/` instead.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-config/autostart` or `--filesystem=xdg-config/autostart:create`.
 
-Applications should be using the [background portal](https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Background.html) for that.
-
 ### finish-args-arbitrary-dbus-access[​](#finish-args-arbitrary-dbus-access "Direct link to finish-args-arbitrary-dbus-access")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--socket=session-bus` or `--socket=system-bus`.
 
-This must not be used except for very specific cases. Please follow the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#d-bus-access) for more information and find out the specific DBus names required using `--log-session-bus`.
+Please follow the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#d-bus-access) for more information.
 
 ### finish-args-metadata-key[​](#finish-args-metadata-key "Direct link to finish-args-metadata-key")
 
@@ -887,9 +893,7 @@ The following errors are included here finish-args-arbitrary-xdg-cache-ro-access
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-cache`, with or without any of `:ro, :rw, :create`.
 
-Flatpak creates its own XDG cache directory under `~/.var/app/<app-id>/cache`. Applications should never access the entirety of host's cache directory.
-
-Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#f3).
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-arbitrary-xdg-config-mode-access[​](#finish-args-arbitrary-xdg-config-mode-access "Direct link to finish-args-arbitrary-xdg-config-mode-access")
 
@@ -897,9 +901,7 @@ The following errors are included here finish-args-arbitrary-xdg-config-ro-acces
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-config`, with or without any of `:ro, :rw, :create`.
 
-Flatpak creates its own XDG config directory under `~/.var/app/<app-id>/config`. Applications should never access the entirety of host's config directory.
-
-Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#f3).
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-arbitrary-xdg-data-mode-access[​](#finish-args-arbitrary-xdg-data-mode-access "Direct link to finish-args-arbitrary-xdg-data-mode-access")
 
@@ -907,25 +909,17 @@ The following errors are included here finish-args-arbitrary-xdg-data-ro-access,
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-data`, with or without any of `:ro, :rw, :create`.
 
-Flatpak creates its own XDG data directory under `~/.var/app/<app-id>/data`. Applications should never access the entirety of host's data directory.
-
-Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#f3).
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-fallback-x11-without-wayland[​](#finish-args-fallback-x11-without-wayland "Direct link to finish-args-fallback-x11-without-wayland")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--socket=wayland` but no `--socket=fallback-x11`.
-
-This means the application won't launch in an X11 session. Applications supporting native wayland must specify both.
 
 Please follow the [permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html) for more information.
 
 ### finish-args-flatpak-spawn-access[​](#finish-args-flatpak-spawn-access "Direct link to finish-args-flatpak-spawn-access")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--talk-name=org.freedesktop.Flatpak` or `--talk-name=org.freedesktop.Flatpak.*`.
-
-This allows applications to launch arbitrary commands on the host and is restricted and granted on a case-by-case basis.
-
-This must not be used unless absolutely necessary and when no existing solutions using Flatpak or [portals](https://flatpak.github.io/xdg-desktop-portal/docs/) exist.
 
 ### finish-args-has-socket-gpg-agent[​](#finish-args-has-socket-gpg-agent "Direct link to finish-args-has-socket-gpg-agent")
 
@@ -943,13 +937,9 @@ This socket allows performing privileged operations with SSH on host.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--device=input`.
 
-This permission was introduced first in Flatpak 1.16.0 and is backwards incompatible with supported older Flatpak releases like 1.14.x. So it requires a manual exception to be granted in addition to specifying `--require-version` in the manifest's finish-args.
-
 ### finish-args-has-dev-usb[​](#finish-args-has-dev-usb "Direct link to finish-args-has-dev-usb")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--device=usb`.
-
-This permission was introduced first in Flatpak 1.16.0 and is backwards incompatible with supported older Flatpak releases like 1.14.x. So it requires a manual exception to be granted in addition to specifying `--require-version` in the manifest's finish-args.
 
 ### finish-args-has-nosocket-socket\_name[​](#finish-args-has-nosocket-socket_name "Direct link to finish-args-has-nosocket-socket_name")
 
@@ -959,8 +949,6 @@ finish-args-has-nosocket-x11, finish-args-has-nosocket-fallback-x11, finish-args
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--nosocket=socket_name`.
 
-These do not need to present in the build manifest. By default no access is granted unless `--socket=socket_name` is used.
-
 ### finish-args-has-nodevice-device\_name[​](#finish-args-has-nodevice-device_name "Direct link to finish-args-has-nodevice-device_name")
 
 The following error codes are included here:
@@ -968,8 +956,6 @@ The following error codes are included here:
 finish-args-has-nodevice-dri, finish-args-has-nodevice-input, finish-args-has-nodevice-kvm, finish-args-has-nodevice-shm, finish-args-has-nodevice-all
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--nodevice=device_name`.
-
-These do not need to present in the build manifest. By default no access is granted, unless `--device=device_name` is used.
 
 ### finish-args-has-unshare-subsystem[​](#finish-args-has-unshare-subsystem "Direct link to finish-args-has-unshare-subsystem")
 
@@ -979,21 +965,15 @@ finish-args-has-unshare-network, finish-args-has-unshare-ipc
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--unshare=subsystem_name`.
 
-These do not need to present in the build manifest. By default no access is granted unless `--share=subsystem_name` is used.
-
 ### finish-args-contains-both-x11-and-wayland[​](#finish-args-contains-both-x11-and-wayland "Direct link to finish-args-contains-both-x11-and-wayland")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has both `--socket=x11` and `--socket=wayland`.
-
-Both are not needed. If the application does not support native wayland only `--socket=x11` should be used. If it does support native wayland, `--socket=fallback-x11` and `--socket=wayland` should be used.
-
-Exceptions may be allowed on a case-by-case basis.
 
 ### finish-args-incorrect-dbus-gvfs[​](#finish-args-incorrect-dbus-gvfs "Direct link to finish-args-incorrect-dbus-gvfs")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--talk-name=org.gtk.vfs`.
 
-This permission does nothing. Please follow the [reference](https://docs.flatpak.org/en/latest/sandbox-permissions.html#gvfs-access) for permissions required for proper gvfs access.
+Please follow the [reference](https://docs.flatpak.org/en/latest/sandbox-permissions.html#gvfs-access) for permissions required for proper gvfs access.
 
 ### finish-args-not-defined[​](#finish-args-not-defined "Direct link to finish-args-not-defined")
 
@@ -1005,13 +985,11 @@ This may be selectively allowed for console applications only.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has only `--socket=wayland` but no `x11` or `fallback-x11` access.
 
-This means the application will not be able to launch in a X11 session.
-
 ### finish-args-incorrect-secret-service-talk-name[​](#finish-args-incorrect-secret-service-talk-name "Direct link to finish-args-incorrect-secret-service-talk-name")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--talk-name=org.freedesktop.Secrets`.
 
-This is incorrect. The correct name is in lowercase `org.freedesktop.secrets`.
+The correct name is `org.freedesktop.secrets`.
 
 ### finish-args-freedesktop-dbus-talk-name[​](#finish-args-freedesktop-dbus-talk-name "Direct link to finish-args-freedesktop-dbus-talk-name")
 
@@ -1099,7 +1077,7 @@ finish-args-reserved-.flatpak-info, finish-args-reserved-app, finish-args-reserv
 
 The manifest has both `--filesystem=/dir_name` in [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing).
 
-These paths are reserved by flatpak itself or the runtime and adding them to the manifest does nothing.
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#reserved-paths) for more information.
 
 ### finish-args-systemd1-talk-name[​](#finish-args-systemd1-talk-name "Direct link to finish-args-systemd1-talk-name")
 
@@ -1145,43 +1123,31 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-cache/foo` with or without any of `:ro, :rw, :create`.
 
-Flatpak creates its own XDG cache directory under `~/.var/app/<app-id>/cache`. Applications usually do not need to access the host's cache directory or subpaths of it.
-
-Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#f3).
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-unnecessary-xdg-config-subdir-mode-access[​](#finish-args-unnecessary-xdg-config-subdir-mode-access "Direct link to finish-args-unnecessary-xdg-config-subdir-mode-access")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-config/foo` with or without any of `:ro, :rw, :create`.
 
-Flatpak creates its own XDG config directory under `~/.var/app/<app-id>/config`. Applications usually do not need to access the host's config directory or subpaths of it.
-
-Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#f3).
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-unnecessary-xdg-data-subdir-mode-access[​](#finish-args-unnecessary-xdg-data-subdir-mode-access "Direct link to finish-args-unnecessary-xdg-data-subdir-mode-access")
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-data/foo` with or without any of `:ro, :rw, :create`.
 
-Flatpak creates its own XDG data directory under `~/.var/app/<app-id>/data`. Applications usually do not need to access the host's data directory or subpaths of it.
-
-Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#f3).
+Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-wildcard-freedesktop-talk-name[​](#finish-args-wildcard-freedesktop-talk-name "Direct link to finish-args-wildcard-freedesktop-talk-name")
 
 The manifest has a `talk-name` that is `org.freedesktop.*`.
 
-Wildcard access to bus names in well known namespace is a security issue.
-
 ### finish-args-wildcard-gnome-talk-name[​](#finish-args-wildcard-gnome-talk-name "Direct link to finish-args-wildcard-gnome-talk-name")
 
 The manifest has a `talk-name` that is one of `org.gnome.*`.
 
-Wildcard access to bus names in well known namespace is a security issue.
-
 ### finish-args-wildcard-kde-talk-name[​](#finish-args-wildcard-kde-talk-name "Direct link to finish-args-wildcard-kde-talk-name")
 
 The manifest has a `talk-name` that is `org.kde.*`.
-
-Wildcard access to bus names in well known namespace is a security issue.
 
 ### finish-args-no-required-flatpak[​](#finish-args-no-required-flatpak "Direct link to finish-args-no-required-flatpak")
 
@@ -1235,6 +1201,10 @@ The `flathub.json` file has `automerge-flathubbot-prs` property enabled. This is
 
 The `flathub.json` file had `end-of-life-rebase` property but no `end-of-life` property.
 
+### flathub-json-eol-rebase-target-not-on-flathub[​](#flathub-json-eol-rebase-target-not-on-flathub "Direct link to flathub-json-eol-rebase-target-not-on-flathub")
+
+The EOL rebase target app ID is not available on Flathub.
+
 Please consult the [documentation](/docs/for-app-authors/maintenance.md#end-of-life) for the proper end-of-life process.
 
 ### flathub-json-excluded-all-arches[​](#flathub-json-excluded-all-arches "Direct link to flathub-json-excluded-all-arches")
@@ -1271,19 +1241,19 @@ The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has a 
 
 ### manifest-json-warnings[​](#manifest-json-warnings "Direct link to manifest-json-warnings")
 
-The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has some invalid JSON structure which json-glib is raising a warning on.
+The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has some invalid JSON structure.
+
+### manifest-invalid-yaml[​](#manifest-invalid-yaml "Direct link to manifest-invalid-yaml")
+
+The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) or any YAML files relative to it, has invalid YAML structure. YAML structure supported by `ruamel.yaml` is considered to be valid.
+
+### manifest-invalid-json[​](#manifest-invalid-json "Direct link to manifest-invalid-json")
+
+The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) or any JSON files relative to it, has invalid JSON structure. Manifest must be valid JSON per RFC 7159.
 
 ### manifest-toplevel-build-network-access[​](#manifest-toplevel-build-network-access "Direct link to manifest-toplevel-build-network-access")
 
-The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has network access during build in the toplevel. This is not allowed for apps on Flathub.
-
-```
-build-options:
-
-  build-args:
-
-    - --share=network
-```
+The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has network access during build in the toplevel.
 
 ### metainfo-svg-screenshots[​](#metainfo-svg-screenshots "Direct link to metainfo-svg-screenshots")
 
@@ -1317,19 +1287,9 @@ Please see the [Metainfo guide](/docs/for-app-authors/metainfo-guidelines.md#scr
 
 The module `module_name` has network access during build in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html).
 
-```
-build-options:
-
-  build-args:
-
-    - --share=network
-```
-
 ### module-module\_name-source-dest-filename-is-path[​](#module-module_name-source-dest-filename-is-path "Direct link to module-module_name-source-dest-filename-is-path")
 
-The `dest-filename` property in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is a path.
-
-It must be a filename only.
+The `dest-filename` property in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is a path. It must be a filename only.
 
 ### module-module\_name-source-git-branch[​](#module-module_name-source-git-branch "Direct link to module-module_name-source-git-branch")
 
@@ -1479,25 +1439,25 @@ modules:
           dest: subprojects/bar
 ```
 
+### runtime-is-eol-id-branch[​](#runtime-is-eol-id-branch "Direct link to runtime-is-eol-id-branch")
+
+The Flatpak package is using a runtime that is [End-of-Life](/docs/for-app-authors/runtimes.md#currently-hosted-runtimes).
+
+This is an error only if the used runtime is EOL by three consecutive releases and a warning otherwise.
+
 ## Linter warnings[​](#linter-warnings "Direct link to Linter warnings")
 
 Warnings are non-fatal but they should be resolved, if possible. Some of them might be promoted to an error in the future if needed.
 
-### appstream-screenshot-missing-caption[​](#appstream-screenshot-missing-caption "Direct link to appstream-screenshot-missing-caption")
-
-The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing `caption` tag for one or more screenshots or the `caption` tag is empty.
-
-Please refer to the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.md#screenshots) for more details.
-
-### appstream-missing-vcs-browser-url[​](#appstream-missing-vcs-browser-url "Direct link to appstream-missing-vcs-browser-url")
-
-The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing a `vcs-browser` URL.
-
-Please refer to the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.md#url) for more details.
-
-### runtime-is-eol-id-branch[​](#runtime-is-eol-id-branch "Direct link to runtime-is-eol-id-branch")
+### runtime-is-eol-id-branch[​](#runtime-is-eol-id-branch-1 "Direct link to runtime-is-eol-id-branch")
 
 The Flatpak package is using a runtime that is [End-of-Life](/docs/for-app-authors/runtimes.md#currently-hosted-runtimes).
+
+If the used runtime is EOL by three consecutive releases, this will automatically be promoted to an error.
+
+### runtime-update-available-to-id-branch[​](#runtime-update-available-to-id-branch "Direct link to runtime-update-available-to-id-branch")
+
+A newer branch of the runtime used by the Flatpak package, is available. Maintainers should consider upgrading to it. Please see the [runtime documentation](/docs/for-app-authors/runtimes.md#currently-hosted-runtimes) for more information.
 
 ### module-module\_name-source-git-no-commit-with-tag[​](#module-module_name-source-git-no-commit-with-tag "Direct link to module-module_name-source-git-no-commit-with-tag")
 
@@ -3083,6 +3043,10 @@ Submissions that employ unethical, manipulative, or exploitative design patterns
 
 Projects must demonstrate reasonable structure, organization, maintainability, and be distributed in a verifiable manner. Open source and source-available projects must follow established conventions of their respective ecosystem.
 
+### Insufficient development history[​](#insufficient-development-history "Direct link to Insufficient development history")
+
+Submissions must demonstrate a meaningful history of development or existence, evidence of real-world use and a clear commitment to ongoing maintenance. For source-available projects, this includes a sustained commit history and standard release practices such as tagged versions. Applications that have only existed for a very short period of time will generally not be accepted. Exceptions may be granted on a case by case basis.
+
 ### Extensions or BaseApps[​](#extensions-or-baseapps "Direct link to Extensions or BaseApps")
 
 Flatpak extensions that add support for new languages, language specific tooling etc. or BaseApps will need a clear use case defined and prospective users to be accepted.
@@ -3307,7 +3271,7 @@ The following files must be included in the submission.
 
 The [application manifest](https://docs.flatpak.org/en/latest/manifests.html) **must be at the top level** and named after the [application ID](#application-id) with the extension `.json`, `.yml` or `.yaml` depending on whether it is a JSON or YAML file.
 
-The [runtime(s)](https://docs.flatpak.org/en/latest/basic-concepts.html#runtimes) used in the manifest must be hosted on Flathub.
+The [runtime(s)](https://docs.flatpak.org/en/latest/basic-concepts.html#runtimes) used in the manifest must be hosted on Flathub and must be the latest version at that time of submission.
 
 ### flathub.json[​](#flathubjson "Direct link to flathub.json")
 

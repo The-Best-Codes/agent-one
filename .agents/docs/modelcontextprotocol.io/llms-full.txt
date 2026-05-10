@@ -3186,6 +3186,7 @@ Before you begin, it helps to have gone through our [Build an MCP Server](/docs/
 
       @transport = MCP::Client::Stdio.new(command: command, args: [server_script_path])
       @mcp_client = MCP::Client.new(transport: @transport)
+      @mcp_client.connect
 
       tool_names = @mcp_client.tools.map(&:name)
       puts "\nConnected to server with tools: #{tool_names}"
@@ -6592,6 +6593,301 @@ handling, then test and ship:
 </CardGroup>
 
 
+# Client Best Practices
+Source: https://modelcontextprotocol.io/docs/develop/clients/client-best-practices
+
+Patterns for scaling MCP host applications across many servers and tools.
+
+As MCP host applications, such as agents, connect to more MCP servers and accumulate access to hundreds or thousands of tools, naive approaches to tool management break down. Loading every tool definition into the model's context window upfront wastes tokens, increases latency, and degrades model performance. Passing large intermediate results through the model between sequential tool calls compounds the problem.
+
+Two patterns address these challenges: **progressive discovery**, which controls *when* tool definitions enter context, and **programmatic tool calling**, which controls *how* tools are invoked.
+
+## Progressive Tool Discovery
+
+Naive MCP host implementations pass the tool definitions of every connected server directly to the model at the start of each conversation. For a handful of tools, this is perfectly reasonable. But when a host has access to dozens of servers exposing hundreds of tools, those definitions alone can consume the majority of the context window before the model has even read the user's message.
+
+<img alt="Comparison of loading all tools upfront versus discovering tools on demand. The upfront approach consumes ~150,000 tokens on definitions alone, while progressive discovery uses ~2,000 tokens by loading only what the task requires." />
+
+Progressive discovery avoids this:
+
+* The host fetches tool definitions via `tools/list` as normal, but defers injecting them into the model's context.
+* The host provides a lightweight `search_tools` meta-tool to the model.
+* The host loads full definitions into context only as needed.
+
+### When to Use Progressive Discovery
+
+Progressive discovery is best used when tool definitions take large parts of the context window. For a small
+set of tools with tool definitions taking up a small part of the context window, loading all tools is fine.
+Once the tool definitions take up a significant part of the available context window, clients should switch to progressive discovery. We recommend that clients implement thresholds to determine when to switch:
+
+* Implement a threshold as a percentage of the context window. For example, 1%-5%.
+* Load tool definitions. Once the threshold is reached, switch to progressive discovery.
+
+### Choosing a Discovery Strategy
+
+Once the model invokes the `search_tools` tool, we need to choose a search strategy:
+
+* **Keyword-based**: Keyword matching (BM25, regex). Simple and effective, particularly for descriptive tool names and descriptions.
+* **Embedding-based**: Vector-similarity retrieval over tool descriptions. Handles synonyms and semantic matching better.
+* **Subagent-based**: A secondary model, often a small and fast model such as Claude Haiku or Gemini Flash, selects tools for the task. This usually works very well but can be more costly than embedding-based or keyword-based solutions.
+* **Hybrid**: Combine approaches. For example, by scoring across keyword and embedding rankings, or choosing
+  different strategies depending on use-case or query.
+
+Some model providers already offer built-in tool search. For example, [OpenAI](https://developers.openai.com/api/docs/guides/tools-tool-search) and [Anthropic](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool) support this natively; check your provider's documentation for an equivalent. When available, you may prefer the platform's tool search over a custom implementation. Build your own when the provider doesn't offer one or when you need specialized retrieval logic (e.g., domain-specific ranking or access-control filtering).
+
+The three-layer pattern below illustrates a custom search-based approach in detail, but the layered principle (catalog, inspect, execute) applies regardless of retrieval mechanism.
+
+### Using Progressive Discovery
+
+One common implementation for progressive discovery uses a search-based three-layer approach:
+
+**Layer 1: Catalog.** The host exposes a small set of meta-tools for searching available capabilities. A `search_tools` tool accepts a natural-language query and returns matching tool names with brief descriptions.
+
+```typescript theme={null}
+// The model calls a lightweight search tool
+search_tools({ query: "update salesforce record" })
+
+// Returns concise matches: names and one-line descriptions only
+→ [
+    { name: "salesforce_updateRecord", description: "Update fields on a Salesforce object" },
+    { name: "salesforce_upsertRecord", description: "Insert or update based on external ID" }
+  ]
+```
+
+**Layer 2: Inspect.** Once the model identifies a candidate, it fetches the full definition (input schema, output schema, documentation) for that tool only.
+
+```typescript theme={null}
+// The model inspects only the tool it needs
+get_tool_details({ name: "salesforce_updateRecord" });
+```
+
+This returns the complete schema for a single tool:
+
+```json theme={null}
+{
+  "name": "salesforce_updateRecord",
+  "description": "Updates a record in Salesforce",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "objectType": {
+        "type": "string",
+        "description": "Salesforce object type"
+      },
+      "recordId": { "type": "string", "description": "Record ID to update" },
+      "data": { "type": "object", "description": "Fields to update" }
+    },
+    "required": ["objectType", "recordId", "data"]
+  }
+}
+```
+
+**Layer 3: Execute.** The model calls the tool with full knowledge of its interface, having loaded only the definitions it needed.
+
+This pattern reduces token usage dramatically and can improve tool selection accuracy: the model focuses on a few relevant tools rather than scanning hundreds of irrelevant ones. Other discovery strategies (embeddings, subagents, etc.) follow the same layered principle but substitute different retrieval mechanisms in the catalog layer.
+
+### Dynamic Server Management
+
+Progressive discovery extends beyond individual tools to entire servers. Rather than connecting to every configured server at startup, a host can:
+
+1. Maintain a registry of available servers and their high-level descriptions.
+2. Connect to a server only when the model determines it needs that server's capabilities.
+3. Disconnect servers that are no longer relevant to the current task, freeing context.
+
+```mermaid theme={null}
+sequenceDiagram
+    participant Model
+    participant Host
+    participant Registry
+    participant Server
+
+    Model->>Host: search_available_servers("CRM")
+    Host->>Registry: Query available servers
+    Registry-->>Host: Salesforce server (not connected)
+    Host-->>Model: Salesforce server available
+
+    Model->>Host: enable_server("salesforce")
+    Host->>Server: Initialize connection
+    Server-->>Host: Server capabilities + tools
+    Host-->>Model: Salesforce server connected
+
+    Note over Model: Task complete
+
+    Model->>Host: disable_server("salesforce")
+    Host->>Server: Close connection
+    Host-->>Model: Server disconnected, context freed
+```
+
+This works especially well for general-purpose agents, where the user's intent isn't known upfront. The agent starts with a minimal set of always-on servers and connects others as needed. Combined with [agent skills](/docs/develop/build-with-agent-skills), a skill file can declare which MCP servers it needs, and the host connects them only when that skill is invoked.
+
+### Implementation Guidelines
+
+When implementing progressive discovery:
+
+| Guideline                        | Rationale                                                                                                                                                                                          |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Offer multiple detail levels** | Let the model choose between name-only, name-and-description, or full-schema responses.                                                                                                            |
+| **Cache tool definitions**       | Once fetched from a server, memoize the definition host-side so re-injecting it later doesn't need another `tools/list` round trip. This is separate from what's currently in the model's context. |
+| **Refresh on `list_changed`**    | Re-index the search catalog when a server sends `notifications/tools/list_changed`.                                                                                                                |
+| **Group tools by server**        | Present tools organized by their source server so the model can reason about related capabilities.                                                                                                 |
+
+### Interaction with Prompt Caching
+
+Most providers cache the prompt prefix, including the `tools` array. Adding or removing tool
+definitions mid-conversation invalidates that cache, and the resulting miss can cost more tokens
+than the definitions you removed. To preserve caching:
+
+* Append newly discovered definitions after the cache breakpoint rather than re-sorting the
+  `tools` array, or route every call through a single stable `call_tool({name, args})` meta-tool
+  so the array never changes.
+* Treat server disconnection as a conversation-boundary operation rather than a per-turn one.
+* Consult your provider's caching documentation alongside the tool-search links above.
+
+## Programmatic Tool Calling / Code Mode
+
+With direct tool calling, every tool invocation is a round trip: the model generates a tool call, the client executes it, and the full result flows back into the model's context. When a task requires chaining multiple tools (read a document, transform it, write it somewhere else), each intermediate result passes through the model, consuming tokens and adding latency even when it has nothing to do with them.
+
+Programmatic tool calling (sometimes called "code mode") provides a way for clients to **compose tool calls** effectively. Instead of calling tools directly, the model writes code that calls tools. The code executes in a sandboxed environment, and only the final result returns to the model.
+
+Programmatic tool calling is powerful and allows for more efficient use of MCP tools and resources, but requires
+clients to implement a sandbox environment.
+
+<img alt="Comparison of direct tool calling versus programmatic tool calling. Direct calling passes every intermediate result through the model (~100K+ tokens). Programmatic calling sends a ~200-token script to a sandbox, which executes the tool calls and returns a ~15-token summary." />
+
+### How It Works
+
+The host converts MCP tool schemas into a typed API available inside a sandbox. When the model needs tools, it writes a script and executes it.
+
+**Step 1: Generate a programmatic API from MCP schemas.** The host reads each server's tool definitions and produces typed functions based on each tool's arguments and `outputSchema`:
+
+```typescript theme={null}
+// Auto-generated from the Logging MCP server's tool schema
+interface LogEntry {
+  timestamp: string;
+  message: string;
+  level: string;
+}
+
+function logging_getLogs(input: {
+  level: "error" | "warn" | "info";
+  since: number;
+}): Promise<{ entries: LogEntry[] }> {
+  return mcp.callTool<{ entries: LogEntry[] }>("logging_getLogs", input);
+}
+
+// Auto-generated from the Ticketing MCP server's tool schema
+function ticketing_createIssue(input: {
+  title: string;
+  body?: string;
+  priority: "low" | "medium" | "high";
+}): Promise<{ issueId: string }> {
+  return mcp.callTool<{ issueId: string }>("ticketing_createIssue", input);
+}
+```
+
+MCP Servers can provide an optional [`outputSchema`](/specification/draft/server/tools#output-schema) for each tool. When an output schema is present, the host can produce precise return types (like `LogEntry` above).
+
+When an output schema is absent, prefer the simple path:
+
+* **Use a generic type and move on.** Accept `any` or `string` and handle the unstructured output downstream. The real fix is for server authors to provide `outputSchema`.
+* **Extract a typed result using a fast model**, for single-shot calls outside loops. Expose a host-brokered `extract(value, ExpectedType)` helper through the same stub-interception path as MCP tool calls so the sandbox itself never opens a network connection. The helper routes to a small model (for example, Claude Haiku or Gemini Flash) to coerce the value into `ExpectedType`. This adds per-call latency and can hallucinate or drop fields, so validate the result against `ExpectedType` before use.
+
+**Step 2: The model writes code against these APIs.** Rather than making separate tool calls with full results flowing through context between them, the model writes a single script. Consider a task like "find all error logs from the past hour and file a ticket for each unique error." With direct tool calling, thousands of log entries would flow through the model's context. With code, the model filters in the sandbox:
+
+```typescript theme={null}
+// Model-generated code, executes in sandbox
+const logs = await logging_getLogs({
+  level: "error",
+  since: Date.now() - 3600000,
+});
+
+// Filter and deduplicate inside the sandbox, not in the model's context
+const uniqueErrors = new Map<string, LogEntry>();
+for (const log of logs.entries) {
+  if (!uniqueErrors.has(log.message)) {
+    uniqueErrors.set(log.message, log);
+  }
+}
+
+for (const [message, log] of uniqueErrors) {
+  await ticketing_createIssue({
+    title: `Error: ${message}`,
+    body: `First seen: ${log.timestamp}\nOccurrences: ${
+      logs.entries.filter((l) => l.message === message).length
+    }`,
+    priority: "high",
+  });
+}
+
+console.log(
+  `Filed ${uniqueErrors.size} tickets from ${logs.entries.length} error logs`,
+);
+```
+
+**Step 3: The sandbox executes the code.** Function calls inside the sandbox are intercepted and routed back to the appropriate MCP server through the host broker. The log data and ticket creation flow directly between servers without ever entering the model's context. Only the `console.log` output, a single summary line, returns to the model.
+
+### Choosing a Sandbox
+
+The right sandbox depends on the language you want the model to write, your host application's language, and how much isolation you need. The table lists example runtimes rather than endorsements; evaluate maturity for your use case:
+
+| Sandboxed language | Runtime / Library                                             | Host language     | Approach                                                                                        |
+| ------------------ | ------------------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| **JavaScript**     | [Deno](https://github.com/denoland/deno), `isolated-vm`       | Rust / Node / CLI | V8-based runtimes with fine-grained permissions. Can disable all permissions for full lockdown. |
+| **Python**         | [Monty](https://github.com/pydantic/monty) *(experimental)*   | Rust              | Minimal Python interpreter built for AI use cases. No I/O by default.                           |
+| **TypeScript**     | [pctx](https://github.com/portofcontext/pctx) *(early-stage)* | Python / Rust     | Incorporates code mode concepts as a library, with low-level Rust support.                      |
+| **Any (via Wasm)** | [Wasmtime](https://github.com/bytecodealliance/wasmtime)      | Rust / C / Go     | Compile any language to Wasm and run it with capability-based security.                         |
+
+Regardless of sandbox, the integration pattern is the same: the host injects function stubs, intercepts calls over an in-process or stdio channel (so network permissions can stay fully denied), and dispatches them as `tools/call` requests to MCP servers.
+
+### Execution Architecture
+
+The implementation has three components:
+
+```mermaid theme={null}
+flowchart LR
+    subgraph Host["MCP Host"]
+        A[LLM] -->|writes code| B[Sandbox]
+        B -->|function call| C[MCP Client]
+        C -->|return value| B
+        B -->|console output| A
+    end
+    C -->|tool call| D[MCP Server A]
+    C -->|tool call| E[MCP Server B]
+    D -->|result| C
+    E -->|result| C
+```
+
+**The sandbox** runs model-generated code in an isolated environment with no direct network access. Its only interface to the outside world is through the generated function stubs, which route calls back to the host.
+
+**The host** acts as a broker. It receives function calls from the sandbox, maps them to the correct MCP server, executes the tool call, and returns the result to the sandbox. Authorization tokens and credentials are held by the host and never exposed to the generated code.
+
+**The model** sees only what the sandbox returns, typically the output of `console.log` statements or a final return value. This gives the model (and the client developer) precise control over what enters the context window.
+
+### Security Considerations
+
+Programmatic tool calling introduces a code execution surface that requires careful sandboxing:
+
+* **Per-call authorization**: The broker is still the MCP host for spec purposes. Apply the same human-in-the-loop confirmation policy to sandbox-originated calls that you apply to direct calls (see [Tools: Security](/specification/draft/server/tools#security-considerations)). Approving the script does not grant blanket approval for every tool call it makes at runtime; hosts may grant categorical approval (for example, "allow `ticketing_createIssue` for this script run") rather than prompting per iteration, but the broker must still evaluate each call against that grant.
+* **Cross-server data flow**: Tool results from one server are untrusted input to another. The broker should apply the same input-review policy to brokered calls as to direct ones; output truncation alone does not prevent exfiltration.
+* **Network isolation**: The sandbox should have no direct network access. All external communication flows through the host broker, which enforces authorization and access control.
+* **No credential exposure**: API keys and tokens are held by the host. The generated code calls typed functions; the host adds authentication when forwarding to servers.
+* **Resource limits**: Set timeouts and memory limits on sandbox execution to prevent runaway scripts.
+* **Output filtering**: Validate and truncate sandbox console output before feeding it back to the model.
+
+### Error Handling
+
+MCP tool errors arrive as a successful response with
+[`isError: true`](/specification/draft/server/tools#error-handling) rather than a transport
+failure. Generated wrappers should convert this into a thrown exception so model-authored code
+can use `try`/`catch`. If an uncaught error terminates the script, surface it as the script's
+result so the model can self-correct; the model is responsible for reporting any partial side
+effects already committed.
+
+## Combining Both Patterns
+
+Progressive discovery and programmatic tool calling work well together. The model uses discovery tools to identify which tools it needs, loads their schemas, and then writes a single script that calls multiple tools in one execution pass. This combination minimizes both the token cost of tool definitions *and* the token cost of tool results, keeping the model's context focused on reasoning rather than passing data through it.
+
+
 # Connect to local MCP servers
 Source: https://modelcontextprotocol.io/docs/develop/connect-local-servers
 
@@ -7188,8 +7484,8 @@ For more details about server primitives see [server concepts](./server-concepts
 
 MCP also defines primitives that *clients* can expose. These primitives allow MCP server authors to build richer interactions.
 
-* **Sampling**: Allows servers to request language model completions from the client's AI application. This is useful when server authors want access to a language model, but want to stay model-independent and not include a language model SDK in their MCP server. They can use the `sampling/complete` method to request a language model completion from the client's AI application.
-* **Elicitation**: Allows servers to request additional information from users. This is useful when server authors want to get more information from the user, or ask for confirmation of an action. They can use the `elicitation/request` method to request additional information from the user.
+* **Sampling**: Allows servers to request language model completions from the client's AI application. This is useful when server authors want access to a language model, but want to stay model-independent and not include a language model SDK in their MCP server. They can use the `sampling/createMessage` method to request a language model completion from the client's AI application.
+* **Elicitation**: Allows servers to request additional information from users. This is useful when server authors want to get more information from the user, or ask for confirmation of an action. They can use the `elicitation/create` method to request additional information from the user.
 * **Logging**: Enables servers to send log messages to clients for debugging and monitoring purposes.
 
 For more details about client primitives see [client concepts](./client-concepts).
@@ -7577,7 +7873,7 @@ The flow enables dynamic information gathering. Servers can request specific dat
 
 ```typescript theme={null}
 {
-  method: "elicitation/requestInput",
+  method: "elicitation/create",
   params: {
     message: "Please confirm your Barcelona vacation booking details:",
     schema: {
@@ -20760,6 +21056,119 @@ MCP standardizes patterns that have already proven valuable. We look for convent
 We encourage the use of [MCP extensions](/extensions/overview) as a way to experiment with new patterns that may eventually lead to standardization.
 
 
+# File Uploads Charter
+Source: https://modelcontextprotocol.io/community/file-uploads/charter
+
+Charter for the MCP File Uploads Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The File Uploads Working Group exists to define how MCP tools and elicitation requests declare file
+inputs so that hosts can present native file pickers and pass user-selected file content to servers.
+Today, servers that need a file from the user resort to prose instructions asking for base64 strings
+or local paths, which produces inconsistent UX and pushes encoding details onto end users. This WG
+will specify a minimal, schema-level mechanism for declaring file inputs and the wire format for
+delivering them, anchored on [SEP-2356](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356).
+
+## Scope
+
+### In Scope
+
+* **Specification Work**: SEPs defining declarative file input descriptors on tool input schemas and
+  elicitation request schemas, the wire encoding for file content, and host-side handling
+  requirements.
+* **Reference Implementations**: SDK types and helpers for `FileInputDescriptor`, data URI encoding,
+  and a sample host flow demonstrating picker invocation and value substitution.
+* **Cross-Cutting Concerns**: Coordination with the MCP Apps WG where embedded UI surfaces present
+  their own file pickers, and with the Security WG on host-side validation requirements.
+* **Documentation**: Specification sections covering file input declaration and a migration guide
+  for servers currently using ad-hoc base64 instructions.
+
+### Out of Scope
+
+* Server-to-client file delivery, which is already covered by Resources and `BlobResourceContents`.
+* Changes to the transport layer or session model.
+
+The WG may evaluate approaches such as streaming, chunked transfer, or presigned upload URLs as part
+of its design work; whether those land in the initial SEP or a follow-up is a WG decision rather
+than a charter constraint.
+
+### Related Groups
+
+* **MCP Apps WG** — embedded app UIs may surface their own file pickers; the descriptor format
+  should be reusable in that context.
+* **Security WG** — host-side validation requirements for user-supplied file content (the SEP
+  references [OWASP ASVS V5](https://owasp.org/www-project-application-security-verification-standard/)
+  for general upload hygiene).
+* **Tool Annotations IG** — file input descriptors are a form of input-parameter metadata and should
+  remain consistent with the broader annotation taxonomy.
+
+## Leadership
+
+| Role | Name           | Organization | GitHub                                   | Term    |
+| ---- | -------------- | ------------ | ---------------------------------------- | ------- |
+| Lead | Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) | Initial |
+
+Sponsored by Den Delimarsky ([@localden](https://github.com/localden)) and Nick Cooper
+([@nickcoai](https://github.com/nickcoai)).
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+| Name           | Organization | GitHub                                   | Discord | Level     |
+| -------------- | ------------ | ---------------------------------------- | ------- | --------- |
+| Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) |         | Lead      |
+| Nick Cooper    | OpenAI       | [@nickcoai](https://github.com/nickcoai) |         | WG Member |
+| Olivier Chafik | Anthropic    | [@ochafik](https://github.com/ochafik)   |         | WG Member |
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                               |
+| --------------- | --------- | -------- | ------------------------------------- |
+| Working Session | Biweekly  | 30 min   | Technical discussion, proposal review |
+
+Discord: `#file-uploads-wg`
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                                                                        | Status | Target Date | Champion                               |
+| ----------------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
+| [SEP-2356: Declarative file inputs](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356) | Draft  | End May     | [@ochafik](https://github.com/ochafik) |
+| TypeScript SDK reference implementation                                                                     | —      | End May     | [@ochafik](https://github.com/ochafik) |
+| Reference implementation in a second Tier-1 SDK                                                             | —      | End June    | TBD                                    |
+
+### Success Criteria
+
+* An accepted SEP defining the file input descriptor and wire encoding.
+* Reference implementations in at least two Tier-1 SDKs.
+* At least one production host rendering a native file picker from the descriptor.
+* Conformance test coverage for the new schema keyword.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-23 | Initial charter |
+
+
 # Governance and Stewardship
 Source: https://modelcontextprotocol.io/community/governance
 
@@ -20878,11 +21287,12 @@ The nomination process, sponsorship requirements, review timeline, and inactivit
 * Paul Carleton
 * Nick Cooper
 * Nick Aldridge
-* Che Liu
 
 ## Emeritus
 
 * Justin Spahr-Summers (Co-Inventor, Lead Maintainer Emeritus)
+* Basil Hosmer (Core Maintainer Emeritus)
+* Che Liu (Core Maintainer Emeritus)
 
 ## Current Maintainers and Working Groups
 
@@ -21000,6 +21410,100 @@ Meetings are held at [meet.modelcontextprotocol.io/tag/inspector-v2-wg](https://
 | Date       | Change                                           | Author               |
 | ---------- | ------------------------------------------------ | -------------------- |
 | 2026-04-11 | Initial charter adopted for SEP-2149 compliance. | Cliff Hall (Co-Lead) |
+
+
+# Interceptors Charter
+Source: https://modelcontextprotocol.io/community/interceptors/charter
+
+Charter for the MCP Interceptors Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Interceptors Working Group exists to standardize how context operations are intercepted, validated, and transformed at key points in the agentic lifecycle. This covers MCP-defined operations such as tool invocations, resource access, prompt handling, sampling, and elicitation, as well as any other operation that shapes agent context — including LLM completions and custom application-specific workflows. The ecosystem is developing a sprawling landscape of sidecars, proxies, and gateways for cross-cutting concerns that are largely non-reusable and non-interoperable, creating an M × N integration problem. The WG will produce specification extensions and reference implementations that define interceptors as a new MCP primitive with two types — validators (inspect and return pass/fail decisions) and mutators (transform context payloads) — discoverable and invocable through MCP's existing JSON-RPC patterns across deployment models including in-process, sidecar, and remote service.
+
+## Scope
+
+### In Scope
+
+* **Specification Work**: SEPs defining the interceptor primitive — validator and mutator types, lifecycle event hooks for MCP operations (tool calls, resource reads, prompt gets, sampling, elicitation) and extensible to non-MCP context operations (LLM completions, custom workflows), trust-boundary-aware execution model, priority-based chain ordering, and audit mode semantics.
+* **Reference Implementations**: Multi-language SDK libraries for building interceptors, sample interceptors (PII redaction, schema validation, audit logging), a common interceptor sidecar/proxy runtime, and a CLI client for interceptor invocation and testing.
+* **Cross-Cutting Concerns**: Transport-level interception points, gateway-based deployment patterns, and interplay with routing and policy layers (see Related Groups).
+* **Documentation**: Specification sections covering interceptor authoring, deployment models (in-process, sidecar, remote service), chain configuration, and migration guidance from ad-hoc middleware approaches.
+
+### Out of Scope
+
+* Client-specific hook implementation details (e.g., Claude Code's internal hook execution engine) — the WG standardizes the protocol-level interface, not host internals.
+* Transport-layer wire format or session model changes (owned by the Transports WG).
+* General-purpose middleware or proxy infrastructure beyond what the MCP protocol requires.
+
+### Related Groups
+
+* **Transports WG** — interceptors operate on MCP message flows whose delivery behavior depends on the transport; coordination needed on transport-level interception points.
+* **Gateways IG** — gateways are a key deployment model for interceptors; coordination needed on gateway-based interceptor patterns and shared concerns around routing, policy, and observability.
+
+## Leadership
+
+| Role | Name                     | Organization | GitHub                                       | Term    |
+| ---- | ------------------------ | ------------ | -------------------------------------------- | ------- |
+| Lead | Sambhav Kothari          | Bloomberg    | [@sambhav](https://github.com/sambhav)       | Initial |
+| Lead | Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)       | Initial |
+| Lead | Kurt Degiorgio           | Bloomberg    | [@degiorgio](https://github.com/degiorgio)   | Initial |
+| Lead | Uk-Jae Jeong             | Bloomberg    | [@jeongukjae](https://github.com/jeongukjae) | Initial |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Operations
+
+| Meeting         | Frequency | Duration   | Purpose                               |
+| --------------- | --------- | ---------- | ------------------------------------- |
+| Working Session | Biweekly  | 60 minutes | Technical discussion, proposal review |
+
+## Resources
+
+* Experimental extension repository: [modelcontextprotocol/experimental-ext-interceptors](https://github.com/modelcontextprotocol/experimental-ext-interceptors)
+* Motivation: [SEP-1763](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1763)
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                                  | Status      | Target Date | Champion |
+| --------------------------------------------------------------------- | ----------- | ----------- | -------- |
+| SEP-1763: Interceptors                                                | Draft       |             | TBD      |
+| Sample interceptors (PII redaction, schema validation, audit logging) | In Progress |             | TBD      |
+| Common interceptor sidecar runtime                                    | Ideating    |             | TBD      |
+| CLI client for interceptor invocation and testing                     | Ideating    |             | TBD      |
+| Reference implementation in Go SDK                                    | In Progress |             | TBD      |
+| Reference implementation in C# SDK                                    | In Progress |             | TBD      |
+
+### Success Criteria
+
+* An accepted SEP defining the interceptor primitive (validators, mutators), lifecycle event hooks, and trust-boundary-aware chain execution.
+* Reference implementations in at least two Tier-1 SDKs (Go, C#).
+* A common interceptor sidecar runtime enabling platform teams to deploy interceptors without modifying individual MCP servers.
+* CLI tooling for interceptor invocation and testing.
+* Demonstrated interoperability across deployment models (in-process, sidecar, remote service).
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-21 | Initial charter |
 
 
 # SDK Tiering System
@@ -21143,6 +21647,98 @@ Use these exact label names across all repositories to enable consistent reporti
 * **Security vulnerabilities** with CVSS score ≥ 7.0 (High or Critical severity)
 * **Core functionality failures** that prevent basic MCP operations: connection establishment,
   message exchange, or use of core primitives (tools, resources, prompts)
+
+
+# SDK Working Group Charter
+Source: https://modelcontextprotocol.io/community/sdk/charter
+
+Charter for the MCP SDK Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The SDK Working Group exists to keep the official MCP SDKs consistent, conformant, and current with the specification. It coordinates implementation of new protocol versions across languages, governs the [SDK Tiering System](/community/sdk-tiers), and establishes shared design patterns where sensible, so that developers get a coherent experience across SDKs while each remains idiomatic to its language.
+
+## Scope
+
+### In Scope
+
+* **SDK Tiering**: Operating the [SDK Tiering System](/community/sdk-tiers), including reviewing tier advancement requests, applying relegation criteria, and maintaining the published tier assignments.
+* **Official SDK Roster**: Evaluating proposals to add new official SDKs or retire existing ones.
+* **Release Coordination**: Aligning Tier-1 SDK release plans with specification version dates so that protocol features land in SDKs on the timelines their tier requires.
+* **Cross-SDK Design Guidance**: Recommending common patterns for SDK API surface, versioning, deprecation, error handling, and extension packaging, so that SDKs remain recognisably similar across languages while staying idiomatic.
+* **Conformance Integration**: Working with the Conformance Testing project to ensure each official SDK runs the conformance suite and publishes results.
+* **Maintainer Coordination**: Providing a forum for per-language SDK maintainers to share implementation experience and surface specification ambiguities back to Core Maintainers.
+
+### Out of Scope
+
+* **Per-SDK day-to-day maintenance**: Issue triage, PR review, and releases for an individual SDK remain the responsibility of that SDK's maintainers as listed in [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md).
+* **Specification authorship**: Protocol changes are proposed through the [SEP process](/community/sep-guidelines) and owned by the relevant working group or Core Maintainers. The SDK WG implements accepted SEPs; it does not own spec sections.
+* **Conformance test authoring**: The conformance test suite itself is owned by the [Conformance Testing](https://github.com/modelcontextprotocol/conformance) project.
+* **Third-party and community SDKs**: SDKs outside the [modelcontextprotocol](https://github.com/modelcontextprotocol) organization are not governed by this group.
+
+### Related Groups
+
+* **Transports WG**: Transport implementations are a substantial part of every SDK. The SDK WG coordinates with the Transports WG on rollout sequencing when transport SEPs land.
+* **Conformance Testing**: Tier assignments depend on conformance scores. The SDK WG consumes conformance results and feeds back gaps in test coverage.
+* **All specification-producing WGs**: The SDK WG is a downstream consumer of accepted SEPs and coordinates reference-implementation timing with the originating group.
+
+## Leadership
+
+| Role | Name             | Organization | GitHub                                                 | Term    |
+| ---- | ---------------- | ------------ | ------------------------------------------------------ | ------- |
+| Lead | Felix Weinberger | Anthropic    | [@felixweinberger](https://github.com/felixweinberger) | Ongoing |
+
+## Authority & Decision Rights
+
+| Decision Type                            | Authority Level                                |
+| ---------------------------------------- | ---------------------------------------------- |
+| Meeting logistics & scheduling           | WG Leads (autonomous)                          |
+| Proposal prioritization within WG        | WG Leads (autonomous)                          |
+| SDK tier advancement or relegation       | WG consensus                                   |
+| Cross-SDK design guidance                | WG consensus (advisory to per-SDK maintainers) |
+| Per-SDK releases, versioning, API design | That SDK's maintainers (autonomous)            |
+| Adding or retiring an official SDK       | WG consensus → Core Maintainer approval        |
+| Changes to the tiering criteria          | WG consensus → Core Maintainer approval        |
+| Scope expansion                          | Core Maintainer approval required              |
+| WG Member approval                       | WG Member sponsors                             |
+
+## Membership
+
+WG Members are the maintainers of each official SDK as recorded in [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) and the corresponding roles in [modelcontextprotocol/access](https://github.com/modelcontextprotocol/access). Maintainers of any official SDK are WG Members by default.
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                                              |
+| --------------- | --------- | -------- | ---------------------------------------------------- |
+| Working Session | Biweekly  | 45 min   | Release coordination, tier reviews, cross-SDK design |
+
+Communication happens in the `#general-sdk-dev` Discord channel and the SDK Working Group category in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions).
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                | Status      | Target Date | Champion            |
+| --------------------------------------------------- | ----------- | ----------- | ------------------- |
+| 2026-06-30 spec support across Tier-1 SDKs          | Planning    | 2026 Q3     | Per-SDK maintainers |
+| Cross-SDK guidance for stateless transport adoption | In progress | 2026 Q2     | WG Leads            |
+| Quarterly tier review                               | Recurring   | Quarterly   | WG Leads            |
+
+### Success Criteria
+
+* All official SDKs have a published tier and a passing conformance run on their default branch.
+* Tier-1 SDKs ship support for each released specification version within the timeline their tier requires.
+* Tier advancement and relegation decisions are recorded with rationale in GitHub Discussions.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-28 | Initial charter |
 
 
 # SEP Guidelines
@@ -21509,7 +22105,9 @@ emerged from discussion on [SEP-2076 — Agent Skills as a First-Class MCP Primi
 which raised open questions about whether existing MCP primitives suffice or what
 conventions to standardize. The WG produces specification extensions, reference
 implementations, and coordination artifacts because solutions touch the protocol spec,
-registry schema, SDK implementations, and client behavior.
+registry schema, SDK implementations, and client behavior. The WG's current direction
+is captured in [SEP-2640 — Skills Extension](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)
+(Resources-based, Extensions Track).
 
 ## Scope
 
@@ -21583,6 +22181,7 @@ registry schema, SDK implementations, and client behavior.
 | Juan Antonio Osorio      | Stacklok                        | [@JAORMX](https://github.com/JAORMX)                   |         | Participant |
 | Kaxil Naik               | Astronomer / Apache Airflow PMC | [@kaxil](https://github.com/kaxil)                     |         | Participant |
 | Cliff Hall               | Futurescale                     | [@cliffhall](https://github.com/cliffhall)             |         | Participant |
+| Haoyu Wang               | Google                          | [@helloeve](https://github.com/helloeve)               |         | Participant |
 
 ## Operations
 
@@ -21607,12 +22206,12 @@ Discord: [#skills-over-mcp-wg](https://discord.com/channels/1358869848138059966/
 
 Full live tracking is on the [Skills Over MCP WG project board](https://github.com/orgs/modelcontextprotocol/projects/38/views/1). Headline workstreams:
 
-| Item                                           | Status      | Target Date | Champion                                                                                     |
-| ---------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------------- |
-| Skills Extension SEP (draft, Extensions Track) | In Review   |             | [@pja-ant](https://github.com/pja-ant)                                                       |
-| Skills Extension reference implementation      | In Review   |             | [@olaservo](https://github.com/olaservo)                                                     |
-| Agent Skills spec coordination                 | In Progress |             | [@jonathanhefner](https://github.com/jonathanhefner), [@pja-ant](https://github.com/pja-ant) |
-| Registry skills.json proposal                  | In Progress |             | [@JAORMX](https://github.com/JAORMX)                                                         |
+| Item                                                                                                              | Status      | Target Date | Champion                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------------- |
+| [Skills Extension SEP](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640) (Extensions Track) | In Review   |             | [@pja-ant](https://github.com/pja-ant)                                                       |
+| Skills Extension reference implementation                                                                         | In Review   |             | [@olaservo](https://github.com/olaservo)                                                     |
+| Agent Skills spec coordination                                                                                    | In Progress |             | [@jonathanhefner](https://github.com/jonathanhefner), [@pja-ant](https://github.com/pja-ant) |
+| Registry skills.json proposal                                                                                     | In Progress |             | [@JAORMX](https://github.com/JAORMX)                                                         |
 
 ### Success Criteria
 
@@ -21624,6 +22223,7 @@ Full live tracking is on the [Skills Over MCP WG project board](https://github.c
 
 | Date       | Change                                                                                                                                                                                                                                                                                                           |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-25 | Linked SEP-2640 in Active Work Items; added @helloeve (Google) as Participant                                                                                                                                                                                                                                    |
 | 2026-04-16 | Converted from Interest Group to Working Group                                                                                                                                                                                                                                                                   |
 | 2026-04-14 | Initial charter (formalized from [experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills) repo README, which served as the de facto charter before the charter process was established via [SEP-2149](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2149)) |
 | 2026-02-01 | IG formed; experimental repo created                                                                                                                                                                                                                                                                             |
@@ -22121,7 +22721,7 @@ The MCP Registry provides:
 * A REST API for MCP clients and aggregators to discover available servers
 * Standardized installation and configuration information
 
-Server metadata is stored in a standardized [`server.json` format](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/server.schema.json), which contains:
+Server metadata is stored in a standardized [`server.json` format](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/draft/server.schema.json), which contains:
 
 * The server's unique name (e.g., `io.github.user/server-name`)
 * Where to locate the server (e.g., npm package name, remote server URL)
@@ -29473,7 +30073,7 @@ HTTP Header Standardization for Streamable HTTP Transport
 
 <div>
   <Badge>
-    Draft
+    Final
   </Badge>
 
   <Badge>
@@ -29485,7 +30085,7 @@ HTTP Header Standardization for Streamable HTTP Transport
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2243                                                                            |
 | **Title**     | HTTP Header Standardization for Streamable HTTP Transport                       |
-| **Status**    | Draft                                                                           |
+| **Status**    | Final                                                                           |
 | **Type**      | Standards Track                                                                 |
 | **Created**   | 2026-02-04                                                                      |
 | **Author(s)** | MCP Transports Working Group                                                    |
@@ -30554,6 +31154,1689 @@ Add a `sampling.standalone` or similar capability for servers that want this beh
 * Current elicitation documentation: `/specification/draft/client/elicitation.mdx`
 * Transport specification: `/specification/draft/basic/transports.mdx`
 * User interaction model discussion in client concepts documentation
+
+
+# SEP-2322: Multi Round-Trip Requests
+Source: https://modelcontextprotocol.io/seps/2322-MRTR
+
+Multi Round-Trip Requests
+
+<div>
+  <Badge>
+    Approved
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 2322                                                                                                                      |
+| **Title**     | Multi Round-Trip Requests                                                                                                 |
+| **Status**    | Approved                                                                                                                  |
+| **Type**      | Standards Track                                                                                                           |
+| **Created**   | 2026-02-03                                                                                                                |
+| **Author(s)** | Mark D. Roth ([@markdroth](https://github.com/markdroth)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)), |
+| **Sponsor**   | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                                                             |
+| **PR**        | [#2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322)                                           |
+
+***
+
+## Abstract
+
+This proposal specifies a simple way to handle server-initiated requests
+in the context of a client-initiated request (e.g., an elicitation
+request in the context of a tool call) without requiring a shared
+storage layer shared across server instances or statefulness in
+load balancing, which will significantly reduce the cost of operating
+MCP servers at scale in the common case. It also reduces the HTTP
+transport's dependence on SSE streams, which cause problems in a lot of
+environments that cannot support long-lived connections.
+
+This proposed way of handling server-initiated requests will replace the current approach of sending server-initiated requests. This is a breaking change.
+
+This SEP also specifies the subset of client requests that a server can
+send a server-initiated request on. This is a reduced scope compared to the current spec and is also a breaking change.
+
+Making a breaking change here is necessary since adoption of server-initiated request features like Elicitation, Sampling and ListRoots is very low or blocked for many Remote MCP servers or Server Hosted Clients due to the operational complextity of supporting the SSE streams and server-side state.
+
+## Motivation
+
+Note: This SEP is intended to provide a generic mechanism for handling
+any server-initiated request in the context of any client-initiated
+request. For clarity, throughout this document, we will specifically
+discuss tool calls as a proxy for any client-initiated request, but it
+should be read as applying equally to (e.g.) resource or prompt
+requests; similarly, we will discuss elicitation requests as a proxy for
+any server-initiated request, but it should be read as applying equally
+to (e.g.) sampling requests.
+
+We start with the observation that there are two types of MCP tools:
+
+1. **Ephemeral**: No state is accumulated on the server side.
+   * If server needs more info to process the tool call, it can start from
+     scratch when it gets that additional info.
+   * Examples: weather app, accessing email
+2. **Persistent**: State is accumulated on the server side.
+   * Server may generate a large amount of state before requesting more
+     info from the client, and it may need to pick up that state to
+     continue processing after it receives the info from the client.
+   * Server may need to continue processing in the background while
+     waiting for more info from the client, in which case server-side
+     state is needed to track that ongoing processing.
+   * Examples: accessing an agent, spinning up a VM and needing user
+     interaction to manipulate the VM
+
+The vast majority of MCP tools will be ephemeral, and it is extremely
+common for tools to be deployed in a horizontally scaled, load balanced
+service, so we need to optimize for this case.
+
+Today, if a tool needs to send an elicitation request in order to make
+progress, the workflow works like this:
+
+1. Client sends tool call request. For this example, let's assume that
+   the load balancers happen to send this request to server instance A.
+2. Server A opens an SSE stream and sends the elicitation request on that
+   stream.
+3. Client sends the elicitation response as a separate request, for which
+   the load balancers will choose a server instance completely
+   independently of the one they chose in step 1. In this example,
+   let's assume that the load balancers happen to send this request to
+   server instance B.
+4. Server A must somehow discover the elicitation response delivered to
+   server B.
+5. Server A then sends the tool call result on the SSE stream opened in
+   step 2.
+
+```mermaid theme={null}
+sequenceDiagram
+    participant C as Client
+    participant LB as Load Balancer
+    participant SA as Server Instance A
+    participant SB as Server Instance B
+    Note over C,SA: 1. Initial Request
+    C->>LB: Tool Call (Start)
+    LB->>SA: Route to Instance A
+    activate SA
+    SA-->>C: Elicitation Request (SSE Stream Open)
+    Note right of SA: Server A holds memory,<br/>waiting for response...
+
+    Note over C,SB: 2. User Responds
+    C->>LB: Elicitation Result
+    LB->>SB: Route to Instance B (Stateless LB)
+    activate SB
+
+    Note over SA,SB:  A is waiting, but  B has the data.
+    Note over SA,SB: Requires Shared Storage to bridge this gap.
+
+    deactivate SA
+    deactivate SB
+```
+
+The difficult part here is step 4, which requires some sort of
+statefulness on the server side. The main way to solve this problem
+today is to have a storage layer shared across all server instances, so
+that multiple server instances can match up the elicitation response
+on one server instance with the original ongoing tool call on a
+different server instance.
+
+There are two main approaches that can be used to solve this problem today:
+
+* **Persistent Storage Layer Shared Across Server Instances**: Servers can
+  deploy and manage a persistent storage layer (e.g., PostgreSQL, Redis,
+  DynamoDB), which allow multiple server instances to match up the
+  elicitation response on one server instance with the original ongoing
+  tool call on a different server instance. This approach has a number
+  of drawbacks:
+  * The persistent storage layer is **extremely expensive**, especially for
+    ephemeral tools that may not already have such a layer (e.g., a weather
+    tool).
+  * The persistent storage layer imposes significant reliability concerns:
+    it becomes a critical dependency and therefore a potential single
+    point of failure. To avoid that, it must provide high availability,
+    replication, and backup mechanisms.
+  * The persistent storage layer becomes a bottleneck, limiting horizontal
+    scalability. Geographic distribution requires either expensive
+    global replication or sticky routing.
+  * The persistent storage layer also imposes significant operational
+    complexity. In horizontally scaled deployments, it requires
+    distributed locking or consensus protocols. It also requires special
+    garbage collection logic to determine when shared can be cleaned up,
+    which requires careful trade-offs: cleaning up state too aggressively
+    can reduce storage costs but limit how long users have to respond,
+    whereas cleaning up less aggressively accommodates slow users but
+    increases storage costs.
+  * This approach requires special behavior in the tool implementation to
+    integrate with the persistent storage layer. The MCP SDKs today do
+    not have any special hooks for this sort of storage layer integration,
+    which means that it's very hard to write in-line code via the SDKs.
+* **Statefulness in Load Balancing**: With the use of cookies, it is
+  possible for the load balancing layer to ensure that the elicitation
+  request in step 3 is delivered to the same server instance that the
+  original request was delivered to in step 1. This approach, while
+  often cheaper than a persistent storage layer, has the following
+  drawbacks:
+  * It requires special configuration and behavior in the load
+    balancers, which is often difficult to manage.
+  * It breaks normal load balancing models, resulting in uneven load
+    distribution, thus increasing the cost of running the service.
+  * It requires special behavior in clients to propagate the cookies
+    used for statefulness.
+  * It requires the tool implementation to match up the elicitation
+    request with the ongoing tool call. (The MCP SDKs have some code to
+    handle this, but it's still a very strange pattern in the HTTP
+    world.)
+  * It is not fault tolerant. If the server instance goes down, all
+    state is lost, and the tool call would need to start over from
+    scratch. (This doesn't necessarily matter for ephemeral tools,
+    but it is an issue for persistent tools.)
+
+Also, both of these approaches rely on the use of an SSE stream, which
+causes problems in environments that cannot support long-lived
+connections. They also require an instance of the tool to stay in memory
+in a particular server instance indefinitely. This is particularly
+problematic for elicitation requests specifically, since the result may
+not come from the user for an unbounded amount of time (e.g., it could
+be days or months, or maybe even never).
+
+The goal of this SEP is to propose a simpler way to handle the pattern
+of server-initiated requests within the context of a client-initiated
+request. Specifically, we need to make it cheaper to support this pattern
+in the common case of an ephemeral tool in a horizontally scaled, load
+balanced deployment. This means that we need a solution that does not
+depend on an SSE stream and does not require either a persistent storage
+layer or stateful load balancing, which in turn means that we need to
+avoid dependencies between requests: servers must be able to process
+each individual request using no information other than what is present
+in that individual request.
+
+Note that while the goal here is to optimize the common case of ephemeral
+tools, we do want to continue to support persistent tools, which generally
+already require a persistent storage layer.
+
+## Specification
+
+This SEP proposes a new mechanism for handling server requests in the
+context of a client request. This new mechanism will have a slightly
+different workflow for ephemeral tools and persistent tools, the latter
+of which will leverage Tasks. However, both workflows will use the same
+data structures.
+
+### Schema Changes
+
+First, we introduce the notion of `InputRequests`, which represents
+a set of one or more server-initiated request to be sent to the client,
+and `InputResponses`, which represents the client's responses to
+those requests. Both requests and responses are stored in a map with
+string keys. For `InputRequests`, the map values are server-initiated
+requests (e.g., elicitation or sampling requests), whereas for `InputResponses`, the map values are the responses to those requests. Here's
+how that would look in the typescript MCP schema:
+
+```typescript theme={null}
+export type InputRequest =
+  | CreateMessageRequest
+  | ElicitRequest
+  | ListRootsRequest;
+
+export interface InputRequests {
+  [key: string]: InputRequest;
+}
+
+export type InputResponse =
+  | CreateMessageResult
+  | ElicitResult
+  | ListRootsResult;
+
+export interface InputResponses {
+  [key: string]: InputResponse;
+}
+```
+
+The keys are assigned by the server when issuing the requests. The client
+will send the response for each request using the corresponding key.
+For example, a server might send the following input requests:
+
+```json5 theme={null}
+"inputRequests": {
+  // Elicitation request.
+  "github_login": {
+    "method": "elicitation/create",
+    "params": {
+      "mode": "form",
+      "message": "Please provide your GitHub username",
+      "requestedSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      }
+    }
+  },
+  // Sampling request.
+  "capital_of_france" : {
+    "method": "sampling/createMessage",
+    "params": {
+      "messages": [
+        {
+          "role": "user",
+          "content": {
+            "type": "text",
+            "text": "What is the capital of France?"
+          }
+        }
+      ],
+      "modelPreferences": {
+        "hints": [
+          {
+            "name": "claude-3-sonnet"
+          }
+        ],
+        "intelligencePriority": 0.8,
+        "speedPriority": 0.5
+      },
+      "systemPrompt": "You are a helpful assistant.",
+      "maxTokens": 100
+    }
+  }
+}
+```
+
+The client would then send the responses in the following form:
+
+```json5 theme={null}
+"inputResponses": {
+  // Elicitation response (ElicitResult).
+  "github_login": {
+    "action": "accept",
+    "content": {
+      "name": "octocat"
+    }
+  },
+  // Sampling response (CreateMessageResult).
+  "capital_of_france": {
+    "role": "assistant",
+    "content": {
+      "type": "text",
+      "text": "The capital of France is Paris."
+    },
+    "model": "claude-3-sonnet-20240307",
+    "stopReason": "endTurn"
+  }
+}
+```
+
+The schema looks like this:
+
+```typescript theme={null}
+export interface InputRequiredResult extends Result {
+  // Requests issued by the server that must be complete before the
+  // client can retry the original request.
+  inputRequests?: InputRequests;
+  // Request state to be passed back to the server when the client
+  // retries the original request.
+  // Note: The client must treat this as an opaque blob; it must not
+  // interpret it in any way.
+  requestState?: string;
+}
+
+// RequestParams type that includes input responses and request state.
+// These parameters may be included in any client-initiated request.
+export interface InputResponseRequestParams extends RequestParams {
+  // New field to carry the responses for the server's requests from the
+  // InputRequiredResult message. For each key in the response's inputRequests
+  // field, the same key must appear here with the associated response.
+  inputResponses?: InputResponses;
+  // Request state passed back to the server from the client.
+  requestState?: string;
+}
+```
+
+Since this change creates a polymorphic response for method calls like 'tools/call', we are introducing a new field to `Result` which indicate the `ResultType`. The client should parse this field to determine the type of the Result contained in the message. If this field is not provided the Client should assume a `ResultType` of "complete" for backwards compatibility. The schema change will look like this:
+
+```typescript theme={null}
+/**
+ * Common result fields.
+ *
+ * @category Common Types
+ */
+export interface Result {
+  _meta?: MetaObject;
+  // New field to indicate the type of the result, which allows the client to determine how to parse the result object. If no resultType is specified "complete" should be assumed.
+  resultType: ResultType;
+  [key: string]: unknown;
+}
+
+export type ResultType =
+  | "complete" // the request completed successfully and the result contains the final content.
+  | "input_required"; // the request is incomplete and the result contains an {@link InputRequiredResult} object
+```
+
+We anticipate this field will be useful for future extensibility, as it allows us to introduce new types of results and can also apply to `tasks` as well.
+
+These types will be used in two different workflows, one for ephemeral
+tools and another for persistent tools.
+
+### Server-Initiated Request Support for Client Requests
+
+Many `ClientRequest` don't have clear use cases where a Server would need to
+request more information from the Client. This SEP builds upon [SEP-2260](https://modelcontextprotocol.io/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests) and further restricts when a Server can send a Server-Initiated Request to the Client.
+
+Servers MAY send `InputRequiredResult` responses on the following Client Requests:
+
+| ClientRequest           | ServerResult           | InputRequiredResult Supported |
+| ----------------------- | ---------------------- | ----------------------------- |
+| `GetPromptRequest`      | `GetPromptResult`      | Yes                           |
+| `ReadResourceRequest`   | `ReadResourceResult`   | Yes                           |
+| `CallToolRequest`       | `CallToolResult`       | Yes                           |
+| `GetTaskPayloadRequest` | `GetTaskPayloadResult` | Yes                           |
+
+Servers MUST NOT send `InputRequiredResult` responses on any other Client Requests. The below table represents what `ClientRequest`s this excludes at the writing of this SEP.
+
+| ClientRequest                  | InputRequiredResult Supported |
+| ------------------------------ | ----------------------------- |
+| `PingRequest`                  | No                            |
+| `InitializeRequest`            | No                            |
+| `CompleteRequest`              | No                            |
+| `SetLevelRequest`              | No                            |
+| `ListPromptsRequest`           | No                            |
+| `ListResourcesRequest`         | No                            |
+| `ListResourceTemplatesRequest` | No                            |
+| `SubscribeRequest`             | No                            |
+| `UnsubscribeRequest`           | No                            |
+| `ListToolsRequest`             | No                            |
+| `GetTaskRequest`               | No                            |
+| `ListTasksRequest`             | No                            |
+| `CancelTaskRequest`            | No                            |
+| `TaskInputResponseRequest`     | No                            |
+
+### Ephemeral Tool Workflow
+
+For the ephemeral use case, in addition to input requests, we introduce
+the concept of request state. In cases where the server needs more
+information, the request state is sent to the client which echoes back
+the state to the server, allowing the server to remain stateless.
+
+We will adopt the following workflow for ephemeral tools:
+
+1. Client sends tool call request.
+2. Server sends back a single response indicating that the request is
+   incomplete. The response may include input requests that the client
+   must complete. It may also include some request state that the client
+   must return back to the server. This response terminates the original
+   request. It will normally be sent as a single response, not on an
+   SSE stream, although for now (this may change in a future SEP) it is
+   also legal to send this response on an SSE stream following (e.g.)
+   progress notifications. If this incomplete response is sent on an
+   SSE stream, it must be the last message on the SSE stream, just as if
+   it were a normal response.
+3. Client sends a new tool call request, completely independent of the
+   original one. This new tool call includes responses to the input
+   requests from step 2. It also includes the request state specified by
+   the server in step 2.
+4. Server sends back a CallToolResponse.
+
+```mermaid theme={null}
+sequenceDiagram
+    participant U as User
+    participant C as Client
+    participant S as Server (Stateless)
+    C->>S: tools/call (id: 1)
+    note right of S: Server needs more info<br/>Generates requestState
+    S-->>C: InputRequiredResult (id: 1, inputRequests, requestState)
+    note over C,S: Initial Request Terminated
+
+    C->>U: Prompts user for input
+    U-->>C: Provides responses
+
+    C->>S: tools/call (id: 2, inputResponses, requestState)
+    note right of S: Server reconstitutes state<br/>Completes execution
+    S-->>C: Result (id: 2, final content)
+```
+
+Note that the requests in steps 1 and 3 are completely independent: the
+server that processes the request in step 3 does not need any
+information that is not directly present in the request. To support this decoupling the JsonRPC Id MUST be different between the requests sent in step 1 and step 3.
+
+Note that both the "inputRequests" and "requestState" fields affect
+only the client's next retry of the original request. They will not
+be used for any other request that the client may be sending in parallel
+(e.g., a tool list or even another tool call).
+
+<details>
+  <summary>Click to expand Example Flow for Ephemeral Tools</summary>
+  <b>Example Flow for Ephemeral Tools</b>
+
+  Note: This is a contrived example, just to illustrate the flow.
+
+  1. The client sends the initial call tool request:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "get_weather",
+      "arguments": {
+        "location": "New York"
+      }
+    }
+  }
+  ```
+
+  2. The server responds with an incomplete response, indicating that the
+     client needs to respond to an elicitation request in order for the tool
+     call to complete, and including request state to be passed back:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "resultType": "input_required",
+      "inputRequests": {
+        "github_login": {
+          "method": "elicitation/create",
+          "params": {
+            "mode": "form",
+            "message": "Please provide your GitHub username",
+            "requestedSchema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": ["name"]
+            }
+          }
+        }
+      },
+      "requestState": "foo"
+    }
+  }
+  ```
+
+  3. The client then retries the original tool call, this time including the
+     responses to the input server request and the request state:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "get_weather",
+      "arguments": {
+        "location": "New York"
+      },
+      "inputResponses": {
+        "github_login": {
+          "action": "accept",
+          "content": {
+            "name": "octocat"
+          }
+        }
+      },
+      "requestState": "foo"
+    }
+  }
+  ```
+
+  4. Finally, the server completes the tool call:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": {
+      "resultType": "complete",
+      "content": [
+        {
+          "type": "text",
+          "text": "Current weather in New York:\nTemperature: 72°F\nConditions: Partly cloudy"
+        }
+      ],
+      "isError": false
+    }
+  }
+  ```
+</details>
+
+#### Real-World Example for Ephemeral Workflow
+
+This example demonstrates how `requestState` enables a multi-round-trip
+elicitation flow driven by [Azure DevOps custom
+rules](https://learn.microsoft.com/en-us/azure/devops/organizations/settings/work/custom-rules?view=azure-devops).
+The scenario involves an `update_work_item` tool that transitions a Bug
+work item to "Resolved." ADO custom rules require specific fields when
+certain state transitions occur, and the server uses iterative
+elicitation to gather them — accumulating context in `requestState`
+across rounds so that the final update can be executed without any
+server-side storage.
+
+<details>
+  <summary>Click to expand ADO Custom Rules Example</summary>
+
+  **Background — ADO Custom Rules in effect:**
+
+  * *Rule 1:* When State changes to "Resolved" → require the "Resolution"
+    field (e.g., Fixed, Won't Fix, Duplicate, By Design).
+  * *Rule 2:* When Resolution is "Duplicate" → require the "Duplicate Of"
+    field (a link to the original work item).
+
+  ##### Round 1 — Tool call triggers state change, server elicits Resolution
+
+  1. The client invokes the `update_work_item` tool to resolve Bug #4522:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "update_work_item",
+      "arguments": {
+        "workItemId": 4522,
+        "fields": { "System.State": "Resolved" }
+      }
+    }
+  }
+  ```
+
+  2. The server recognizes that setting State to "Resolved" triggers
+     Rule 1, which requires a Resolution value. Rather than failing the
+     call, the server returns an incomplete response with an elicitation
+     request. No `requestState` is needed yet, since the original tool
+     call arguments will be re-sent on retry:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "resultType": "input_required",
+      "inputRequests": {
+        "resolution": {
+          "method": "elicitation/create",
+          "params": {
+            "message": "Resolving Bug #4522 requires a resolution. How was this bug resolved?",
+            "requestedSchema": {
+              "type": "object",
+              "properties": {
+                "resolution": {
+                  "type": "string",
+                  "enum": ["Fixed", "Won't Fix", "Duplicate", "By Design"],
+                  "description": "Resolution type for this bug"
+                }
+              },
+              "required": ["resolution"]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  3. The user selects "Duplicate". The client retries the original tool
+     call with the elicitation response:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "update_work_item",
+      "arguments": {
+        "workItemId": 4522,
+        "fields": { "System.State": "Resolved" }
+      },
+      "inputResponses": {
+        "resolution": {
+          "action": "accept",
+          "content": { "resolution": "Duplicate" }
+        }
+      }
+    }
+  }
+  ```
+
+  ##### Round 2 — Resolution triggers another rule, server elicits Duplicate Of
+
+  4. The server merges the user's response and sees that Resolution =
+     "Duplicate" triggers Rule 2, requiring a "Duplicate Of" link. It
+     returns another incomplete response, this time encoding the
+     already-gathered resolution in `requestState` so it is available
+     regardless of which server instance handles the next retry:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "resultType": "input_required",
+      "inputRequests": {
+        "duplicate_of": {
+          "method": "elicitation/create",
+          "params": {
+            "message": "Since this is a duplicate, which work item is the original?",
+            "requestedSchema": {
+              "type": "object",
+              "properties": {
+                "duplicateOfId": {
+                  "type": "number",
+                  "description": "Work item ID of the original bug"
+                }
+              },
+              "required": ["duplicateOfId"]
+            }
+          }
+        }
+      },
+      "requestState": "eyJyZXNvbHV0aW9uIjoiRHVwbGljYXRlIn0..."
+    }
+  }
+  ```
+
+  5. The user provides the original work item ID. The client retries the
+     tool call, echoing back the `requestState` and including the new
+     elicitation response:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "update_work_item",
+      "arguments": {
+        "workItemId": 4522,
+        "fields": { "System.State": "Resolved" }
+      },
+      "inputResponses": {
+        "duplicate_of": {
+          "action": "accept",
+          "content": { "duplicateOfId": 4301 }
+        }
+      },
+      "requestState": "eyJyZXNvbHV0aW9uIjoiRHVwbGljYXRlIn0..."
+    }
+  }
+  ```
+
+  ##### Final — Server completes the update
+
+  6. The server decodes the `requestState` (which contains the
+     resolution), reads the `inputResponses` (which contains the
+     duplicate ID), and now has all required fields. It completes the
+     tool call:
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": {
+      "resultType": "complete",
+      "content": [
+        {
+          "type": "text",
+          "text": "Bug #4522 resolved as Duplicate of Bug #4301. State set to Resolved and duplicate link created."
+        }
+      ],
+      "isError": false
+    }
+  }
+  ```
+
+  **Key takeaway:** Across both elicitation rounds, the server held no
+  in-memory or persisted state. The `requestState` field carried the
+  accumulated context through the client, and any server instance could
+  have handled any individual round.
+</details>
+
+#### Use Cases for Request State
+
+The "requestState" mechanism provides a mechanism for doing multiple
+round trips on the same logical request. There are two main use-cases
+for this.
+
+##### Use Case 1: Rolling Upgrades
+
+Let's say that you are doing a rolling upgrade of your horizontally
+scaled server instances to deploy a new version of a tool implementation.
+The old version had two input requests with keys "github\_login" and
+"google\_login". However, in the new version of the tool implementation,
+it still uses the "github\_login" input request, but it replaces the
+"google\_login" input request with a new "microsoft\_login" input request.
+
+If the first request goes to an old version of the server but the second
+attempt (that includes the input responses) goes to a new version
+of the server, then the server will see the result for "github\_login",
+which it needs, but it won't see the result for "microsoft\_login".
+(It will also see the result for "google\_login", but it no longer needs
+that, so it doesn't matter.) At this point, the server needs to send a
+new input request for "microsoft\_login", but it also doesn't want
+to lose the answer that it's already gotten for "github\_login", so it
+would use the kind of state proposed in 1685 to retain that information
+without having to store the state on the server side.
+
+The workflow here would look like this:
+
+1. Client sends tool call request that hits a server instance running
+   the old version.
+2. Server sends back an incomplete response indicating the input
+   requests for "github\_login" and "google\_login".
+3. Client sends a new tool call request that includes the responses to
+   the input requests for "github\_login" and "google\_login". This
+   time it hits a server instance running the new version.
+4. Server sends back another incomplete response indicating the
+   input request for "microsoft\_login", which the client has not
+   already provided. However, the response also includes request state
+   containing the already-provided "github\_login" response, so that the
+   client does not need to prompt the user for the same information a
+   second time.
+5. Client sends a third tool call request that includes the response to
+   the "microsoft\_login" input request as well as echoing back the
+   request state provided by the server in step 4.
+6. Server now sees the "github\_login" info in the request state and the
+   "microsoft\_login" state in the input responses, so the request
+   now contains everything the server needs to perform the tool call and
+   send back a complete response.
+
+##### Use Case 2: Load Shedding
+
+Let's say that you have an MCP server instance that is processing a bunch
+of tool calls and notices that it's too heavily loaded, so it wants to
+move one of the ongoing tool calls to a different server instance.
+However, it has already done a significant amount of processing on that
+tool call, so it does not want to simply fail the call and have the
+client start over from scratch on another server instance; instead, it
+wants to preserve the state it has already accumulated, so that
+whichever server instance resumes processing can pick up from where the
+original server instance left off. This can be accomplished by sending
+an incomplete request that contains request state but does not contain
+any input requests.
+
+The workflow here would look like this:
+
+1. Client sends the original request, which the load balancers route
+   to server instance A.
+2. Server instance A does a bunch of computation before deciding that it
+   needs to shed load. It sends an incomplete response with its
+   accumulated state in the `requestState` field but without the
+   `inputRequests` field.
+3. Client retries the request with the `requestState` field attached.
+   The load balancers route this request to server instance B.
+4. Server instance B starts from the state it sees in the `requestState`
+   field, thus picking up the computation from where server instance A
+   left off, and eventually returning a complete response.
+
+#### Protocol Requirements for Ephemeral Workflow
+
+1. **Server Behavior:**
+   * Servers MAY respond to any client-initiated request with a
+     `InputRequiredResult`. This message MAY be sent either
+     as a standalone response or as the final message on an SSE stream,
+     although implementations are encouraged to prefer the former.
+     If using an SSE stream, servers MUST NOT send any message on the
+     stream after the incomplete response message.
+   * The `InputRequiredResult` MAY include an
+     `inputRequests` field.
+   * The `InputRequiredResult` MAY include a
+     `requestState` field. If specified, this field is an opaque
+     string that is meaningful only to the server. Servers are free to
+     encode the state in any format (e.g., plain JSON, base64-encoded
+     JSON, encrypted JWT, serialized binary, etc.).
+   * If a request contains a `requestState` field, servers MUST always
+     validate that state, as the client is an untrusted intermediary.
+     If tampering is a concern, servers SHOULD encrypt the `requestState`
+     field using an encryption algorithm of their choice (e.g., they can
+     use AES-GCM or a signed JWT) to ensure both confidentiality and
+     integrity. Note that there is also a risk of replaying/hijacking
+     attacks, where an authenticated attacker resends state that was
+     originally sent to a different user. Therefore, if the request
+     state contains any data that is specific to the original user, the
+     server MUST use some mechanism to cryptographically bind the data
+     to the original user and MUST verify that the `requestState` data
+     sent by the client is associated with the currently authenticated
+     user. Servers using plaintext state MUST treat the decoded
+     values as untrusted input and validate them the same way they would
+     validate any client-supplied data.
+
+2. **Client Behavior:**
+   * If a client receives an `InputRequiredResult` message,
+     if the message contains the `inputRequests` field, then the client
+     MUST construct the requested input before retrying the original
+     request. In contrast, if the message does *not* contain the
+     `inputRequests` field, then the client MAY retry the original
+     request immediately.
+   * If a client receives a `InputRequiredResult` message
+     that contains the `requestState` field, it MUST echo back the
+     exact value of that field when retrying the original request.
+     Clients MUST NOT inspect, parse, modify, or make any assumptions
+     about the `requestState` contents. If the `InputRequiredResult` does
+     not contain a `requestState` field, the client MUST NOT include one
+     in the retry.
+
+### Persistent Tool Workflow
+
+The persistent tool workflow will leverage Tasks. [`Tasks`](https://modelcontextprotocol.io/specification/draft/basic/utilities/tasks) already provide a mechanism to indicate that more information is needed to complete the request. The `input_required` Task Status allows the server to indicate that additional information is needed to complete processing the task.
+
+The workflow for `Tasks` is as follows:
+
+1. Server sets Task Status to `input_required`. The server can pause
+   processing the request at this point.
+2. Client retrieves the Task Status by calling `tasks/get` and sees that more information is needed.
+3. Client calls `tasks/result`
+4. Server returns the `InputRequests` object.
+5. Client calls `tasks/input_response` request that includes an `InputResponses` object along with `Task` metadata field.
+6. Server resumes processing sets TaskStatus back to `working`.
+
+```mermaid theme={null}
+sequenceDiagram
+    participant U as User
+    participant C as Client
+    participant S as Server (Stateful)
+    C->>S: tools/call (id: 1, task config)
+    S-->>C: Result (id: 1, taskId, status: working)
+
+    note over C,S: Client polls for status
+    C->>S: tasks/get (id: 2, taskId)
+    S-->>C: Result (id: 2, status: input_required)
+
+    C->>S: tasks/result (id: 3, taskId)
+    S-->>C: Result (id: 3, inputRequests)
+
+    C->>U: Prompts user for input
+    U-->>C: Provides responses
+
+    C->>S: tasks/input_response (id: 4, taskId, inputResponses)
+    S-->>C: Result (id: 4, acknowledged)
+
+    note over C,S: Processing resumes, Client polls
+    C->>S: tasks/get (id: 5, taskId)
+    S-->>C: Result (id: 5, status: completed)
+
+    C->>S: tasks/result (id: 6, taskId)
+    S-->>C: Result (id: 6, final content)
+```
+
+Since `Tasks` are likely longer running, have state associated with them, and are likely more costly to compute, the request for more information does not end the originally requested operation (e.g., the tool call). Instead, the server can resume processing once the necessary information is provided.
+
+To align with MRTR semantics, the server will respond to the `tasks/result` request with a `InputRequests` object. Both of these will have the same JsonRPC `id`. When the client responds with a `InputResponses` object this is a new client request with a new JSONRPC `id` and therefore needs a new method name. We propose `tasks/input_response`.
+
+The above workflow and below example do not leverage any of the optional Task Status Notifications although this SEP does not preclude their use.
+
+<details>
+  <summary>Click to expand Example Flow for Persistent Tools</summary>
+
+  The below example walks through the entire Task Message flow for a Echo Tool which can request additional information from the client via Elicitation.
+
+  1. <b>Client Request</b> to invoke EchoTool.
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "echo",
+      "task": {
+        "ttl": 60000
+      }
+    }
+  }
+  ```
+
+  2. <b>Server Response</b> with a `Task`
+
+  ```json theme={null}
+  {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "result": {
+      "task": {
+        "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5",
+        "status": "working",
+        "statusMessage": "Task has been created for echo tool invocation.",
+        "createdAt": "2026-01-27T03:32:48.3148180Z",
+        "lastUpdatedAt": "2026-01-27T03:32:48.3148180Z",
+        "ttl": 60000,
+        "pollInterval": 100
+      }
+    }
+  }
+  ```
+
+  3. <b>Client Request</b> periodically checks the status of the `Task` using
+     `tasks/get`.
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tasks/get",
+    "params": {
+      "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+    }
+  }
+  ```
+
+  4. <b>Server Response</b> with Task status `input_required`
+
+  ```json theme={null}
+  {
+    "id": 2,
+    "jsonrpc": "2.0",
+    "result": {
+      "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5",
+      "status": "input_required",
+      "statusMessage": "Input Required to Proceed call tasks/result",
+      "createdAt": "2026-01-27T03:38:07.7534643Z",
+      "lastUpdatedAt": "2026-01-27T03:38:07.7534643Z",
+      "ttl": 60000,
+      "pollInterval": 100
+    }
+  }
+  ```
+
+  5. <b>Client Request</b> sends message `tasks/result` to discover what input is
+     required to proceed.
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tasks/result",
+    "params": {
+      "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+    }
+  }
+  ```
+
+  6. <b>Server Response</b> returns `inputRequests` to request additional input
+
+  ```json theme={null}
+  {
+    "id": 3,
+    "jsonrpc": "2.0",
+    "result": {
+      "resultType": "input_required",
+      "inputRequests": {
+        "echo_input": {
+          "method": "elicitation/create",
+          "params": {
+            "mode": "form",
+            "message": "Please provide the input string to echo back",
+            "requestedSchema": {
+              "type": "object",
+              "properties": {
+                "input": { "type": "string" }
+              },
+              "required": ["input"]
+            }
+          }
+        }
+      }
+    },
+    "_meta": {
+      "io.modelcontextprotocol/related-task": {
+        "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+      }
+    }
+  }
+  ```
+
+  7. <b>Client Request</b> presents the Elicitation to the user and collects the
+     input, then sends message to the server.
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tasks/input_response",
+    "params": {
+      "inputResponses": {
+        "echo_input": {
+          "action": "accept",
+          "content": {
+            "input": "Hello World!"
+          }
+        }
+      },
+      "_meta": {
+        "io.modelcontextprotocol/related-task": {
+          "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+        }
+      }
+    }
+  }
+  ```
+
+  8. <b>Server Response</b> Server should acknowledge the receipt of the
+     'tasks/input\_response' message by sending a 'JSONRPCResponse'. If the message
+     was successfully received a `JSONRPCResultResponse` is sent including the
+     `taskId`. If an error occurs, a `JSONRPCErrorResponse` is sent. The server
+     can now proceed to complete the `Task` using the provided input, and the
+     `Task` status changes to `Working`.
+
+  ```json theme={null}
+  {
+    "id": 4,
+    "jsonrpc": "2.0",
+    "result": {
+      "_meta": {
+        "io.modelcontextprotocol/related-task": {
+          "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+        }
+      }
+    }
+  }
+  ```
+
+  9. <b>Client Request</b> continues to poll the input status using `tasks/get`
+     until server responds with Task Status of `Completed`
+
+  ```json theme={null}
+  {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "method": "tasks/get",
+    "params": {
+      "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+    }
+  }
+  ```
+
+  10. <b>Server Response</b> with Task status `completed`
+
+  ```json theme={null}
+  {
+    "id": 5,
+    "jsonrpc": "2.0",
+    "result": {
+      "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5",
+      "status": "completed",
+      "statusMessage": "Task has been completed successfully, call tasks/result",
+      "createdAt": "2026-01-27T03:38:07.7534643Z",
+      "lastUpdatedAt": "2026-01-27T03:38:08.1234567Z",
+      "ttl": 60000,
+      "pollInterval": 100
+    }
+  }
+  ```
+
+  11. <b>Client Request</b> calls `tasks/result` to get the final result of the
+      `Task` from the server.
+
+  ```json theme={null}
+  {
+    "id": 6,
+    "jsonrpc": "2.0",
+    "method": "tasks/result",
+    "params": {
+      "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+    }
+  }
+  ```
+
+  12. <b>Server Response</b> with the final result of the `Task`
+
+  ```json theme={null}
+  {
+    "id": 6,
+    "jsonrpc": "2.0",
+    "result": {
+      "resultType": "complete",
+      "isError": false,
+      "content": [
+        {
+          "type": "text",
+          "text": "Echo: Hello World!"
+        }
+      ],
+      "_meta": {
+        "io.modelcontextprotocol/related-task": {
+          "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+        }
+      }
+    }
+  }
+  ```
+</details>
+
+#### Protocol Requirements for Persistent Workflow
+
+1. **Server Behavior:**
+   * Servers MAY respond to `tasks/get` by indicating that the task
+     is in state `input_required`.
+   * Servers MUST include an `inputRequests` field in the
+     `tasks/result` response when the task is in state `input_required`.
+
+2. **Client Behavior:**
+   * When `tasks/get` shows state `input_required`, clients MUST call
+     `tasks/result` to get the input requests. Clients SHOULD construct the results of those requests, and then call `tasks/input_response` with the input responses to provide the required input for the task.
+   * Clients MAY choose not to fulfill the input requests, in which case they can cancel the task.
+
+### Interactions Between Ephemeral and Persistent Workflows
+
+If a tool implementation needs the client to respond to a set of
+input requests before it can even start processing but then later
+needs to do persistent processing, it can start using the ephemeral
+workflow and then switch to the persistent workflow by creating a task
+at that point. This avoids the need for the server to store state until
+it actually has the information needed to start processing the request.
+This workflow would look like this:
+
+1. Client sends tool call request with task metadata.
+2. Server sends back `inputRequests` response indicating that more information is needed to process the request. This terminates the original request.
+3. Client sends a new tool call request, completely independent of the
+   original one, which includes the `inputResponses` object along with the task metadata.
+4. Server sends back a task ID, indicating that it will be processing the
+   request in the background. All subsequent interaction will be done
+   via the Tasks API.
+
+Note that the opposite is not true: Once a tool implementation returns a
+task, it has committed to storing state on the server side for the
+duration of the task, and there is no way to transition back to the
+ephemeral model. All subsequent interactions must be performed via the
+Tasks API.
+
+### Guidance for Error Handling
+
+This section provides implementation guidance for error handling in scenarios where the client provides unexpected or malformed data in the `inputResponses` object.
+
+As with any received request, the server SHOULD validate the data provided by the client is a valid `inputResponses` object and that the information inside can be correctly parsed. Protocol errors, like malformed JSON, invalid schema, or internal server errors which prevent the processing of the request should return a `JSONRPCErrorResponse` with an appropriate error code and message.
+
+If additional parameters are provided in the `inputResponses` object The server SHOULD treat these as optional parameters. Therefore it SHOULD ignore any unexpected information in the `inputResponses` object that it does not recognize or need.
+
+The client may also fail to send all the information requested in previous `inputRequests`. If the missing information requested is necessary for the server to process the request, then it SHOULD respond with a new `InputRequiredResult`.
+
+We discussed having a specific application level error code returned, however the client may not have enough information to recover in all scenarios. Therefore, we decided to rely on the existing mechanics of requesting more input via `InputRequiredResult` to ensure a client can always recover by having the server request the necessary information again.
+
+Malicious clients could intentionally send incorrect information in the `inputResponses` object, and generate load on the server by causing it to repeatedly request the same information. However, this is not a new concern introduced by this workflow, since malicious clients could already generate load by sending malformed requests. Server implementors can use standard techniques like rate limiting and throttling to protect themselves from such attacks.
+
+In the ephemeral workflow, this would look like the following:
+
+1. The client retries the original tool call, this time including the `inputResponses` object, but the response is missing required information that the server needs to process the request.
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "location": "New York"
+    },
+    "inputResponses": {
+      "not_requested_info": {
+        "action": "accept",
+        "content": {
+          "not_requested_param_name": "Information the server did not request"
+        }
+      }
+    }
+  }
+}
+```
+
+2. The server responds with an incomplete response, indicating that the client needs to respond to an elicitation request in order for the tool call to complete, and including request state to be passed back:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "resultType": "input_required",
+    "inputRequests": {
+      "github_login": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "Please provide your GitHub username",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+2. The Server responds wit an incomplete response, indicating that the client needs to provide missing information for the request to succeed.
+
+In the persistent workflow, this would look like the following:
+Step 7 from above: <b>Client Request</b> The client mistakenly or maliciously sends unexpected, but well-formed data to the server in response to the input request.
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tasks/input_response",
+  "params": {
+    "inputResponses": {
+      "echo_input": {
+        "action": "accept",
+        "content": {
+          "not_requested_parameter": "Information the server did not request."
+        }
+      }
+    },
+    "_meta": {
+      "io.modelcontextprotocol/related-task": {
+        "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+      }
+    }
+  }
+}
+```
+
+Step 8 from above. <b>Server Response</b> Server acknowledges the receipt of the response by sending a `JSONRPCResultResponse`. However, since the response is missing required information, the server does not proceed with processing the taks and leaves the Task status as `input_required`. The next time the client calls `tasks/result`, the server responds with a new `inputRequest` requesting the necessary information again.
+
+```json theme={null}
+{
+  "id": 4,
+  "jsonrpc": "2.0",
+  "result": {
+    "_meta": {
+      "io.modelcontextprotocol/related-task": {
+        "taskId": "echo_dc792e24-01b5-4c0a-abcb-0559848ca3c5"
+      }
+    }
+  }
+}
+```
+
+## Rationale
+
+We considered a bidirectional stream approach to replace SSE streams.
+However, that approach would have made the wire protocol more
+complicated (e.g., it would have required HTTP/2 or HTTP/3). Also, it
+would not have eliminated problems for environments that cannot support
+long-lived connections, nor would it have addressed fault tolerance
+issues.
+
+There was discussion about whether the input requests should be a
+map or just a single object, possibly leveraging some field inside of
+the requests (e.g., the elicitation ID) to differentiate between them.
+We decided that the map makes sense, since it structurally guarantees
+the uniqueness of keys, which will avoid the need for explicit checks in
+SDKs and applications to avoid conflicts.
+
+In the persistent workflow, we considered including the input requests
+directly in the `tasks/get` response, rather than requiring the client
+to see the `input_required` status and then call `tasks/result` to get
+the input requests. We decided to keep those two things separate in
+deference to implementations that use separate infrastructure for task
+state and for the actual tool implementation; the idea is that the
+`tasks/get` call should have a consistent latency profile, regardless of
+what the task state actually is. We recognize that this requires an
+extra round-trip to the server, but we can optimize this in the future
+if becomes a problem.
+
+## Backward Compatibility
+
+Today many sdks support elicitation via an in-line but async fashion which waits for
+the elicitation response before sending the tool call response on the original SSE stream, this works for MCP Servers that are a single-process or can ensure sticky routing of requests.
+
+```python theme={null}
+def my_tool():
+  do_work()
+  await elicit_more_info()
+  do_more_work()
+  return tool_result
+```
+
+SDKs MAY continue to support this style of elicitation for existing tools and for backwards compatibility, however, they SHOULD mark this pattern as legacy/deprecated.
+
+Moving forward examples and SDKs need to support the new style of elicitation where the code can not assume the same process is handling both tool calls. This programming model is less appealing, however it ensures that MCP Servers can go from a single process Stdio MCP server to a multi-process remote MCP Server without major rewrites, and ensures we have a single recommended way to do elicitation moving forward.
+
+```python theme={null}
+def my_tool(request):
+  if(request.requestState):
+      state = decode(request.requestState)
+  if(request.inputResponses):
+      additionalInfo = decode(request.inputResponses)
+
+  do_work(state, additionalInfo)
+  if(more_info_needed):
+    return IncompleteResponse();
+  else
+    do_more_work()
+    return tool_result
+```
+
+Other options considered here were to have two separate programming models that developers could choose between based on their MCP Server deployment single-process or multi-process to continue to support the await semantics, however this would have added complexity to the developer experience, and would have made it more difficult for developers to switch between single-process and multi-process deployments.
+
+## Security Implications
+
+Because `requestState` passes through the client, malicious or
+compromised clients could attempt to modify it to alter server behavior,
+bypass authorization checks, or corrupt server logic. To mitigate this,
+we require servers to validate this state as described in the protocol
+requirements above.
+
+## Reference Implementation
+
+TBD
+
+### Acknowledgments
+
+Thanks to Luca Chang (@LucaButBoring) for his valuable input on how to
+integrate input requests into Tasks.
+
+
+# SEP-2567: Sessionless MCP via Explicit State Handles
+Source: https://modelcontextprotocol.io/seps/2567-sessionless-mcp
+
+Sessionless MCP via Explicit State Handles
+
+<div>
+  <Badge>
+    Final
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2567                                                                            |
+| **Title**     | Sessionless MCP via Explicit State Handles                                      |
+| **Status**    | Final                                                                           |
+| **Type**      | Standards Track                                                                 |
+| **Created**   | 2026-03-11                                                                      |
+| **Author(s)** | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
+| **Sponsor**   | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
+| **PR**        | [#2567](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2567) |
+
+***
+
+## Abstract
+
+This proposal removes the protocol-level session concept from MCP, replacing implicit session-scoped state with explicit, server-minted state handles that the model carries and threads through subsequent calls. [SEP-2575] removes the `initialize` handshake and carries protocol version and capabilities per-request; this proposal is the complementary change that removes sessions and the `Mcp-Session-Id` header. Together they make MCP stateless at the protocol layer.
+
+After more than a year in the spec, sessions have not converged on a consistent meaning across clients: some scope them per tool call, some per application launch, some per page load, and almost none resume them. A server author cannot predict what scope or lifetime a session will have when their server is connected to an arbitrary client, which has made the session unreliable as a container for application state. This proposal holds that application state can be served by explicit identifiers, and that the session abstraction adds constraints (fixed cardinality, undefined lifetime, uncacheable list endpoints across session boundaries) without corresponding benefit.
+
+Under this proposal, a server that currently scopes a shopping cart (for example) to the session instead exposes a tool `create_basket()` that returns a `basket_id` and threads that ID through subsequent tool calls, e.g. `add_item(basket_id, ...)`. The model decides what is shared and what is isolated; list endpoints become cacheable across what used to be session boundaries; and agent orchestrators can freely share or not share application state as needed. Explicit state handles are not a new protocol construct — there is no schema or wire format for them. They are a tool-design pattern; the protocol change is the removal of sessions, which leaves handles as the way to express cross-call state.
+
+[SEP-2575]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575
+
+[SEP-2322]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322
+
+[SEP-2549]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549
+
+## Motivation
+
+### What sessions scope today
+
+The current spec is imprecise about which behaviors are session-bound, but in practice five categories of things attach to a session's lifetime:
+
+1. **Negotiated capabilities and protocol version.** The result of `initialize` — which protocol version is in use and which optional capabilities each side supports — is established once per session and assumed for its duration. [SEP-2575] resolves this by removing `initialize` and carrying version/capability information per-request, so this proposal treats it as already addressed.
+
+2. **Elicitation and sampling intermediate state.** When a tool call triggers an `elicitation/create` or `sampling/createMessage` round-trip, the server has to correlate the eventual response with the original in-flight tool call — state that today lives implicitly in the session. [SEP-2322] (Multi Round-Trip Requests) resolves this by carrying the correlation state explicitly through the request/response cycle, so this proposal treats it as already addressed.
+
+3. **Application state.** The canonical example is a shopping cart: `add_item()`, `add_item()`, `checkout()`, with the cart existing implicitly per-session. This generalizes to any stateful workflow — a Playwright browser instance, a database transaction, an open file descriptor.
+
+4. **Mutable list endpoints.** `tools/list` (and `resources/list`, `prompts/list`) can legally return different results over a session's lifetime. For example, a database server could expose a `connect_database` tool that, once called, makes `query` and `list_tables` appear in subsequent `tools/list` results.
+
+5. **Resource subscriptions.** Subscription lifetime is tied to session lifetime. ([SEP-2575] introduces `messages/listen` as the delivery channel for server-to-client notifications; subscription lifetime under that model is not re-examined here.)
+
+With (1), (2), and (5) handled by other SEPs, this proposal addresses (3) and (4).
+
+### Problems with session scoping
+
+The issues below apply whether sessions are mandatory (the current spec) or made optional.
+
+#### Session lifetime is undefined, and servers can't design around it
+
+The spec does not say when a session begins or ends, because it depends on the host application. In practice, deployed clients vary widely and few scope sessions to a conversation: ChatGPT creates a fresh session for every individual tool call, and Claude.ai did the same until recently;[^per-call] most desktop and IDE clients create one at application launch and keep it for the process lifetime; web clients typically create one per page load. Almost no clients resume a prior session after a disconnect or restart, and on the server side the reference TypeScript SDK provides no public API for reconstructing a session on a different node, so multi-node deployments cannot honor resumption even when a client attempts it.[^ts-sdk-resume] A subagent might share its parent's session or get its own — there is no convention.
+
+[^per-call]: [microsoft/playwright-mcp#1045](https://github.com/microsoft/playwright-mcp/issues/1045), Sep 2025 — server author reports both ChatGPT and Claude.ai closing the session after each tool call, dropping browser state; ["Connector tool calls generating fresh MCP session each invocation"](https://community.openai.com/t/connector-tool-calls-generating-fresh-mcp-session-each-invocation/1364975), OpenAI Developer Community, Nov 2025.
+
+[^ts-sdk-resume]: [modelcontextprotocol/typescript-sdk#1658](https://github.com/modelcontextprotocol/typescript-sdk/issues/1658), Mar 2026 — `StreamableHTTPServerTransport` stores session state in private instance fields with no API to rehydrate from external storage.
+
+This matters because server authors are the ones deciding what to scope to the session, and they need to know what a session corresponds to in order to do that correctly. A Playwright server that ties a browser instance to the session needs to know whether that means one user turn, one agent process, or one long-lived chat. The spec does not specify this and different hosts give different answers, so the server is designing against an abstraction whose semantics it does not control.
+
+The practical consequence is that session-scoped application state often does not survive. Against a per-tool-call client it is destroyed before the next call; against a per-app-launch client it is shared across every conversation in the window and then lost on restart; against any client that does not resume, it is gone when the app restarts. Servers that appear to be using session state successfully are usually stdio servers relying on process lifetime, which is a property of the transport rather than the protocol.
+
+#### List endpoints cannot be cached across sessions
+
+Because `tools/list` may be session-dependent, a client cannot assume a result fetched in one session is valid in the next. Every new session must re-fetch, even when the server's tool set is fixed at build time and never changes, which is the common case.
+
+The Python SDK's own design issue for client-side list caching lists "what is the cache key — per-session or per-server-URL?" as an open question,[^py-sdk-cache] and gateway implementers have shipped per-session caching specifically because they could not assume cross-session validity from the spec.[^agentgateway-cache] Every list endpoint must be treated as potentially session-scoped, so each must be re-fetched per session to be safe.
+
+[^py-sdk-cache]: [modelcontextprotocol/python-sdk#2108](https://github.com/modelcontextprotocol/python-sdk/issues/2108), Feb 2026.
+
+[^agentgateway-cache]: [agentgateway/agentgateway#1510](https://github.com/agentgateway/agentgateway/issues/1510), Apr 2026.
+
+For hosts that regularly spawn subagents, this is a multiplier on the hot path. The possibility that a server is session-scoped forces `O(subagents × servers)` calls to `tools/list`: every subagent, for every server, every time, even if the underlying tool set has not changed since the orchestrator first connected. The client cannot skip the call because it cannot know in advance which servers are session-scoped. For an orchestrator spawning many short-lived subagents, this overhead can exceed the protocol traffic of the actual tool calls. Under this proposal the same workload is `O(servers)`: the orchestrator fetches each list once and every subagent reuses the cached result.
+
+If list endpoints were a function only of the server deployment and the authenticated principal, clients could cache them and invalidate on an explicit signal. [SEP-2549] specifies such a signal (a server-advertised TTL plus `notifications/*/list_changed`), but its caching model is only sound if the list does not also vary per session. Removing sessions makes that model safe; a subagent can then inherit its parent's cached lists at zero cost.
+
+#### Cardinality is fixed at one per session
+
+Session state has a cardinality of exactly one per session. The model gets one cart, one browser, one of whatever the server scopes to the session; it cannot have two, and it cannot have zero.
+
+This is a problem when different pieces of state need different scopes. Consider an orchestrator that spawns several subagents to independently research products to buy. The subagents should add to the same shopping cart (they are collaborating on one order) but each needs its own browser state (they are browsing different sites in parallel).
+
+No session boundary satisfies both:
+
+| Session model            | Cart (want: shared) | Browser (want: isolated) |
+| ------------------------ | :-----------------: | :----------------------: |
+| Subagents share parent's |       ✓ shared      |    ✗ shared (clobbers)   |
+| Subagents get their own  |      ✗ isolated     |        ✓ isolated        |
+
+With explicit IDs the orchestrator calls `create_basket()` once, passes the resulting `basket_id` to each subagent, and each subagent separately calls `create_browser()` for its own `browser_id`. The model decides what is shared and what is isolated per piece of state, rather than having one scope imposed on everything.
+
+The same lack of an identifier also means session state is not addressable from outside the session that created it. A cart created in one chat is invisible to another chat; if a user wants to resume work in a new conversation, hand something off to a different agent, or share state with a colleague, the session model provides nothing to refer to it by. An explicit `basket_id` can be passed to any of those.
+
+## Specification
+
+### Summary of changes
+
+1. **Remove the session concept from the protocol.** The `Mcp-Session-Id` header is removed and the spec language describing session lifecycle and session-scoped behavior is deleted. The protocol is sessionless at every layer. ([SEP-2575] removes the `initialize` handshake but explicitly defers session removal to this proposal.)
+
+2. **List endpoints are session-independent.** With no session, the results of `tools/list`, `resources/list`, and `prompts/list` have no per-session or per-connection scope to depend on. Lists can still change for other reasons (server deployment, auth changes); caching and invalidation mechanics for those are specified separately in [SEP-2549].
+
+3. **Stateful workflows use explicit handles.** With sessions gone, servers that need to maintain state across tool calls do so by returning an identifier from a creation tool and accepting it as a parameter on subsequent calls.
+
+That third point is **not a protocol change**. There is no `handles/*` method, no handle type in the schema, no wire-level concept of a handle at all. From the protocol's perspective a handle is a string in a tool result and a string in a tool argument, indistinguishable from any other tool data. "Explicit state handles" is a tool-design pattern that the spec documents and recommends — in the same way it might document pagination or error-message conventions — not something it implements. The normative content of this SEP is the removal in (1); (2) follows from it, and (3) is the guidance that fills the gap.
+
+### Explicit state handles
+
+#### Pattern
+
+Where a server would previously have relied on implicit session-scoped state — `add_item` calls operating on a per-session cart — it instead exposes an explicit creation tool that returns a handle:
+
+```jsonc theme={null}
+// → tools/call
+{ "name": "create_basket", "arguments": {} }
+
+// ← result
+{ "content": [{ "type": "text", "text": "Created basket bsk_a1b2c3" }],
+  "structuredContent": { "basket_id": "bsk_a1b2c3" } }
+```
+
+The model then threads that handle through subsequent calls as an ordinary argument:
+
+```jsonc theme={null}
+// → tools/call
+{ "name": "add_item",
+  "arguments": { "basket_id": "bsk_a1b2c3", "sku": "shoes" } }
+
+// ← result
+{ "content": [{ "type": "text", "text": "Added shoes to bsk_a1b2c3 (1 item)" }] }
+
+// → tools/call
+{ "name": "checkout",
+  "arguments": { "basket_id": "bsk_a1b2c3" } }
+```
+
+Nothing here is a protocol extension: `basket_id` is an ordinary string field in `structuredContent` and an ordinary string argument to subsequent tools. This pattern is already the norm in widely-deployed remote MCP servers that manage durable resources:
+
+| Server (official, remote)                                   | Create tool → returned ID         | Operate tools taking that ID                                     |
+| ----------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------------- |
+| [Linear](https://linear.app/docs/mcp)                       | `create_issue` → issue id         | `get_issue`, `update_issue`, `create_comment`                    |
+| [Notion](https://developers.notion.com/docs/mcp)            | `notion-create-pages` → page id   | `notion-update-page`, `notion-move-pages`                        |
+| [GitHub](https://github.com/github/github-mcp-server#tools) | `create_pull_request` → PR number | `pull_request_read`, `update_pull_request`, `merge_pull_request` |
+| [Stripe](https://docs.stripe.com/mcp)                       | `create_customer` → customer id   | `create_invoice`, `list_subscriptions`                           |
+
+The approach can be adopted for less-persistent objects (a browser context, an in-progress cart) by giving the created object a limited lifetime, and/or limiting its discoverability to the principal that created it. The server owns the state, the client holds a name for it, and authorization is checked on every call.
+
+#### Guidance for servers
+
+None of the following is normative. Handles are a tool-design pattern, not a protocol feature, and servers are free to shape them however fits their domain. The pattern works best when:
+
+* **Handles are opaque.** A handle that encodes internal structure (`cart_user42_2026-03-11`) invites clients to parse it or models to guess it; an opaque handle such as `bsk_a1b2c3` does not.
+* **Possession is not authorization (where auth exists).** For authenticated servers, validate `(handle, auth_context)` on every call; handles will end up in chat logs, copy-paste buffers, and subagent prompts. For unauthenticated servers, where the handle is necessarily a bearer token, generate it with at least 128 bits of cryptographically secure entropy and bound its lifetime. See [Security Implications](#security-implications).
+* **Durability is documented in the tool description.** Handles outlive connections by design, so "the state lasts until the connection closes" is no longer applicable. Put the policy in the `create_*` tool's description — "returns a basket\_id; baskets expire after 24h idle" — so it is visible to the model when it decides to create state. A policy only in server documentation is not visible to the model.
+* **Expired handles return useful errors.** When a tool receives a handle for state that has expired or been destroyed, the error should say so — "basket `bsk_a1b2c3` has expired" rather than "invalid argument". A clear expiry error lets the model recover by calling `create_*` again; an opaque error typically leads to retries or failure.
+* **Creation takes parameters.** `create_context(cluster="staging")` is preferable to `create_context()` followed by `set_cluster(ctx, "staging")`: one round-trip instead of two, and the state cannot exist half-configured.
+* **Cleanup is available.** A `destroy_*(handle)` tool lets models release resources. A `list_*()` tool lets a model recover after losing track of what it created. Neither is required.
+
+#### Guidance for clients
+
+From the client's perspective, a handle is an ordinary string in a tool result. The main client responsibility is ensuring that string survives context compaction; if the conversation is summarized and the handle is in the discarded portion, the state is orphaned. Clients that track tool-call results across compaction boundaries handle this already.
+
+### Session-independent list endpoints
+
+With sessions removed, list endpoints no longer have a session to vary against. This is the only constraint this SEP places on `tools/list`, `resources/list`, and `prompts/list`: there is no longer a per-session or per-connection scope for their results to depend on. This does not preclude varying the list by the authorization presented on the request: credentials are carried on each request, so a server returning different tool sets to different principals or scopes is relying on per-request input, not connection state. Lists can also still change over time for other reasons — a server deploys a new version, a user's plan or granted scopes change — and this SEP does not enumerate or restrict those.
+
+How clients learn that a cached list has gone stale is the subject of [SEP-2549], which defines a server-advertised TTL on list responses and the interaction with `notifications/*/list_changed`. The two SEPs are complementary: this one removes the session as a source of variation, so there is a stable thing to cache; [SEP-2549] specifies how long to cache it and when to invalidate.
+
+One consequence of the constraint above is that servers can no longer mutate list results as a side effect of other requests; the pattern from the Motivation — where calling `connect_database()` makes `query` and `list_tables` appear in subsequent `tools/list` results — is no longer permitted. For the same effect, the server exposes `query` and `list_tables` unconditionally at list time and has them take a `connection_id` argument returned by `connect_database()`. A `query` call without a valid `connection_id` fails with an error directing the model to call `connect_database()` first; the dependency is expressed in the tool's input schema and description rather than in the list result.
+
+### Consequential spec edits
+
+Beyond removing the §Session Management section itself, several other places in the current spec define behavior in terms of session scope and need re-scoping:
+
+* **JSON-RPC request ID uniqueness.** The spec currently requires that a request `id` "MUST NOT have been previously used by the requestor within the same session." The purpose of `id` is for the sender to correlate an incoming response with the request that produced it; the receiver only echoes it. With sessions removed, the constraint is re-scoped accordingly: a sender MUST NOT issue a request whose `id` matches that of another request it has sent and not yet received a response for. This is transport-agnostic, sufficient for correlation under every transport, and is what the TypeScript and Python SDKs already do via a monotonically increasing counter per client object. ([JSON-RPC 2.0 §4](https://www.jsonrpc.org/specification#request_object) itself imposes no uniqueness requirement — it only requires the receiver to echo the `id` — so this remains an MCP-level constraint.)
+* **SSE event ID uniqueness.** The spec currently scopes SSE event IDs as "globally unique across all streams within that session." With sessions removed, the constraint is simply that the ID is globally unique across all streams the server manages, so that a `Last-Event-ID` resolves to a single stream. The existing guidance that event IDs encode the originating stream already implies this.
+* **Pagination cursor validity.** The spec currently advises clients not to "persist cursors across sessions." With sessions removed, this advice disappears. Cursor stability and snapshot consistency are outside the scope of this proposal.
+* **List-endpoint variability.** The `tools/list`, `resources/list`, and `prompts/list` pages each say results "MAY change over the lifetime of the connection." These are re-scoped per [§Session-independent list endpoints](#session-independent-list-endpoints): results MAY change over time but MUST NOT vary per-connection or as a side effect of other requests on the connection.
+* **Wording.** A handful of phrases that use "session" descriptively — "stateful session protocol" in the architecture overview, "available during the session" in capability negotiation, "same logical session" in authorization, the elicitation prohibition on associating state "with session IDs alone," and similar — are reworded or removed. These carry no semantic change beyond the session removal itself.
+
+## Rationale
+
+### Why remove sessions rather than just default them off?
+
+[SEP-2575] already addresses making MCP work behind load balancers and without sticky routing by removing the `initialize` handshake. The reasons for also removing sessions, rather than retaining them as an opt-in capability, are:
+
+* **Opt-in sessions still prevent list caching.** A client cannot cache `tools/list` across session boundaries unless it knows the server does not opt into session-scoped mutation, and it cannot know that in advance. The client therefore re-fetches per session per server even though few servers opt in. The `O(subagents × servers)` cost from the Motivation section is caused by sessions being possible, not by sessions being used, so making them optional does not remove it.
+* **The primitive influences server design.** Offering session-scoped state in the spec leads server authors to use it for workflows that would be better served by explicit IDs.
+* **Fewer primitives reduce implementation surface.** Every protocol concept must be implemented by SDK authors, documented, and learned by new users.
+
+### Expressiveness
+
+A session provides exactly one scope per connection. Explicit IDs provide as many scopes as the model creates, and each can be shared or isolated independently. Anything expressible with a session is expressible with a single ID the model creates at the start of the conversation; the converse does not hold.
+
+### Resumption
+
+Because handles appear in tool results, they are part of the chat transcript. Any client that persists its chats — which is most of them — therefore persists the handles automatically. Reopening a conversation after an app restart, a page reload, or on a different device puts the handle back in front of the model with no additional resumption machinery, and this behavior is consistent across clients. Session-based state, by contrast, requires the client to persist and resend `Mcp-Session-Id` out of band, which (as covered in the Motivation) almost no clients do.
+
+### Anticipated objections
+
+#### Garbage collection
+
+Sessions provide a lifecycle signal — when the session ends, state is freed. Without it, the model might forget to call `destroy_basket()`, and state leaks.
+
+However, sessions do not deliver this reliably in practice. As covered in the Motivation, real clients either never end the session (per-app-launch), end it constantly (per-tool-call), or end it at moments uncorrelated with the conversation (page reload, network blip). Stateless HTTP servers behind load balancers never see a connection-close. Servers already rely on TTL-based expiry today; the session boundary is not what performs cleanup.
+
+Explicit IDs with a documented durability policy ("baskets expire after 24h idle") is the same mechanism, made explicit.
+
+#### Models have to carry the IDs forward
+
+With implicit session state, the server tracks the identifier; with explicit IDs, the model is responsible for threading `basket_abc123` through every relevant call. The failure modes are hallucinating a slightly-wrong ID, or the ID falling out of context when the conversation is compacted.
+
+Models already carry opaque identifiers through conversations routinely — file paths, URLs, commit hashes, PR numbers, UUIDs returned from prior tool calls — and current models do this reliably. Compaction is the harder case, but it affects any long-horizon state: if the compactor drops live tool-call results, the model loses track of what is in the session-scoped cart as well, not just the cart's ID.
+
+#### IDs in chat history
+
+A `basket_id` that can be pasted anywhere could become an unauthenticated capability in the user's chat log.
+
+For authenticated servers, the ID should be a name, with the server checking `(id, auth_context)` on every call. Google Doc IDs sit in URLs and browser history; access is controlled by ACL, not ID secrecy. The same applies here.
+
+For servers without authentication, the ID is necessarily a bearer token — possession is the only thing the server can check. In that case the handle should follow standard practice for unguessable capability tokens: generated from a cryptographically secure random source with at least 128 bits of entropy (e.g. UUIDv4, or 22+ characters of URL-safe base64), never derived from predictable inputs, and given a bounded lifetime. This is the same posture as other ephemeral public IDs in common use — "anyone with the link" share URLs, password-reset tokens, Stripe Checkout session IDs — and carries the same tradeoff: convenient, but anyone who obtains the token has access for its lifetime.
+
+#### Breaking change
+
+Sessions are in the spec today; removing them breaks anyone relying on them.
+
+An automated survey of a 1000-repo random sample of open source MCP servers (classified by per-repo LLM analysis) found:
+
+| Category                                                      | Share | Migration                                            |
+| ------------------------------------------------------------- | ----: | ---------------------------------------------------- |
+| No application-level reference to MCP session ID              | 90.0% | None                                                 |
+| `Map<sessionId, Transport>` routing (TS SDK boilerplate)      |  3.5% | Removed by a sessionless SDK transport               |
+| Transport setup only (`sessionIdGenerator`, never read)       |  2.8% | Delete one constructor option                        |
+| **Session-keyed application state**                           |  2.5% | Migrate to explicit handles or auth principal        |
+| **Proxy / gateway sticky routing**                            |  0.7% | Needs designed replacement                           |
+| **Auth binding** (JWT claims, PKCE verifier keyed on session) |  0.5% | Replace with server-generated nonce or token subject |
+
+The bolded rows are the repos that use the session ID for application semantics. The hardest-hit category — gateways that spawn one upstream per session — needs a designed replacement rather than a mechanical edit; see [Backward Compatibility](#backward-compatibility).
+
+## Backward Compatibility
+
+This is a **breaking change** for servers that rely on protocol-level session state. The migration path depends on server category:
+
+**Stdio servers using process-lifetime state.** These are the most common stateful servers today. Mechanically they are not broken by this proposal in their default deployment — the process lifetime still exists, and a server that keeps a single in-memory browser instance per process continues to function with a stdio client that spawns one process. However, such servers SHOULD NOT rely on process-lifetime state and SHOULD migrate to explicit handles. Process lifetime has the same undefined-scope problem this SEP removes for HTTP (whether the process corresponds to one conversation, one application launch, or something else is up to the host), and a server that depends on it cannot offer equivalent behavior over HTTP, where there is no process per client. Stdio servers never had `Mcp-Session-Id`, so the header removal itself does not affect them.
+
+**HTTP servers using `Mcp-Session-Id`.** These are less common and must migrate to explicit handles. The migration is mechanical: replace the session-scoped state map with a handle-keyed state map, add a `create_*` tool, add the handle as a parameter to stateful tools.
+
+**Servers using session ID as a telemetry key.** Some servers tag traces, logs, or rate-limit buckets with the session ID to correlate activity within a session. This already worked inconsistently across clients — against per-tool-call clients every event lands in its own bucket, and against clients that don't resume the correlation breaks at every restart. These use cases need to move to a different scoping mechanism, typically the authenticated principal (bearer token subject, API key) or a request-level correlation ID.
+
+**Proxies and gateways using session ID for sticky routing.** Gateways that route by `Mcp-Session-Id` lose their routing key — but they only needed one because their upstreams were stateful. If the upstream is stateless (or migrates to explicit handles, where the state key is in the tool arguments and any replica can serve it from shared storage), the gateway needs no sticky routing at all. The residual case is gateways that bridge HTTP to stdio by spawning one subprocess per session; those need a different correlation key, which is a transport-layer concern (route by authenticated principal, or a cookie / gateway-issued header) rather than something this SEP defines.
+
+**Servers binding auth artifacts to session ID.** A small number of servers store OAuth PKCE verifiers, session→user pinning maps, or JWT claims keyed on the session ID. In the PKCE case the server is already passing a correlation value through the OAuth `state` parameter (the browser callback is not an MCP request and never carried `Mcp-Session-Id`), so the change is to put a server-generated nonce in `state` instead of the session ID. Session→user pinning was a defense against the session-routing/auth decoupling described in [Security Implications](#security-implications) and is not needed once every request is independently authenticated. The migration is mostly mechanical, though worth a review since auth code is involved.
+
+**Clients.** Clients become simpler: they no longer track or resend session identifiers, or need to determine whether a given server is stateful. List-endpoint caching becomes safe.
+
+Rollout is a clean break: sessions are removed in the next spec version, with no deprecation window. Servers that currently rely on session-scoped state stay on the current protocol version until they have migrated to explicit handles. Protocol version negotiation already handles mixed-version deployments — a client that supports both versions speaks the old protocol to an unmigrated server and the new one to everyone else. This avoids shipping a version where clients support both modes simultaneously, which would prevent the caching benefit (a client cannot cache list endpoints if any connected server might be session-scoped).
+
+## Security Implications
+
+### Handle exposure
+
+The main security consideration introduced by this SEP is that handles will end up in places session IDs did not — chat logs, subagent prompts, copy-paste buffers, potentially other users' screens.
+
+This is a change in exposure surface, not a new class of vulnerability. Session IDs are already capability-bearing in practice: the Python SDK's stateful session manager, for example, routes by `Mcp-Session-Id` alone without verifying that the authenticated identity on the request matches the one that created the session, so a leaked session ID allows hijack by any other authenticated principal.[^py-sdk-hijack] The "validate `(id, auth_context)` on every call" guidance below applies equally to today's session IDs and to explicit handles; this SEP makes the requirement more visible because handles are more visible.
+
+[^py-sdk-hijack]: [modelcontextprotocol/python-sdk#2100](https://github.com/modelcontextprotocol/python-sdk/issues/2100).
+
+For authenticated servers, the recommended posture is the same one Google Doc IDs and GitHub PR numbers take: the ID identifies the resource, and the auth context on the request determines access. Servers that validate `(handle, auth_context)` on every call are unaffected by handle exposure.
+
+For unauthenticated servers there is no auth context to check, so the handle is a capability token. These should be generated with at least 128 bits of cryptographically secure entropy, never derived from predictable inputs, and given a bounded lifetime — the same practice as "anyone with the link" share URLs or password-reset tokens. Exposure of such a handle grants access for its lifetime; servers should size that lifetime accordingly.
+
+This is guidance, not a protocol requirement, since the protocol has no handle concept to enforce against.
+
+## Reference Implementation
+
+All official SDKs except PHP already provide a stateless mode, implemented as not generating a session ID (e.g. `sessionIdGenerator: undefined` in the TypeScript SDK, `stateless_http=True` in the Python SDK). This SEP makes that mode the only option for servers speaking the new protocol version. SDKs that support multiple protocol versions retain the session-ID-generating code path for older versions; the change is that it is no longer reachable when the negotiated protocol version is the one this SEP introduces.
+
+## Future Work
+
+This SEP deliberately does not introduce a protocol-level concept of a handle: from the wire's perspective `basket_id` is an ordinary string. A consequence is that nothing marks `basket_id` as a state handle to the client or model — the relationship between `create_basket`'s output and `add_item`'s input is inferred from naming and tool descriptions, not declared.
+
+A follow-up proposal could make that relationship explicit, for example via shared JSON Schema `$defs` referenced across a server's tool input and output schemas, or via a tool annotation that marks a result field as a handle. That would let orchestrators identify which values are live state (for compaction, hand-off, or cleanup purposes) without parsing tool descriptions. It is left out of scope here to keep this SEP to the minimum needed to remove sessions.
 
 
 # SEP-414: Document OpenTelemetry Trace Context Propagation Conventions
@@ -31661,16 +33944,18 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 
 ## Summary
 
+* **Final**: 29
+* **Approved**: 1
 * **Accepted**: 2
-* **Draft**: 1
-* **Final**: 27
 
 ## All SEPs
 
 | SEP                                                                                  | Title                                                                         | Status                  | Type             | Created    |
 | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ----------------------- | ---------------- | ---------- |
+| [SEP-2567](/seps/2567-sessionless-mcp)                                               | Sessionless MCP via Explicit State Handles                                    | <Badge>Final</Badge>    | Standards Track  | 2026-03-11 |
+| [SEP-2322](/seps/2322-MRTR)                                                          | Multi Round-Trip Requests                                                     | <Badge>Approved</Badge> | Standards Track  | 2026-02-03 |
 | [SEP-2260](/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests) | Require Server requests to be associated with a Client request.               | <Badge>Accepted</Badge> | Standards Track  | 2026-02-16 |
-| [SEP-2243](/seps/2243-http-standardization)                                          | HTTP Header Standardization for Streamable HTTP Transport                     | <Badge>Draft</Badge>    | Standards Track  | 2026-02-04 |
+| [SEP-2243](/seps/2243-http-standardization)                                          | HTTP Header Standardization for Streamable HTTP Transport                     | <Badge>Final</Badge>    | Standards Track  | 2026-02-04 |
 | [SEP-2207](/seps/2207-oidc-refresh-token-guidance)                                   | OIDC-Flavored Refresh Token Guidance                                          | <Badge>Accepted</Badge> | Standards Track  | 2026-02-04 |
 | [SEP-2149](/seps/2149-working-group-charter-template)                                | MCP Group Governance and Charter Template                                     | <Badge>Final</Badge>    | Process          | 2025-01-15 |
 | [SEP-2148](/seps/2148-contributor-ladder)                                            | MCP Contributor Ladder                                                        | <Badge>Final</Badge>    | Process          | 2026-01-15 |
