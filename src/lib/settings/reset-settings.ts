@@ -34,6 +34,8 @@ import {
   textScaleAtom,
   themeAtom,
   titleGenerationAtom,
+  uiTintAtom,
+  uiTintStrengthAtom,
   toolConfigsAtom,
   userNameAtom,
 } from "../jotai/settings-atoms";
@@ -60,6 +62,8 @@ export function resetAllSettings(): void {
   store.set(showMessageActionRowAtom, RESET);
   store.set(themeAtom, RESET);
   store.set(colorThemeAtom, RESET);
+  store.set(uiTintAtom, RESET);
+  store.set(uiTintStrengthAtom, RESET);
   store.set(roundnessAtom, RESET);
   store.set(fontAtom, RESET);
   store.set(notificationSettingAtom, RESET);
@@ -146,6 +150,12 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "COLOR_THEME":
       store.set(colorThemeAtom, RESET);
+      break;
+    case "UI_TINT":
+      store.set(uiTintAtom, RESET);
+      break;
+    case "UI_TINT_STRENGTH":
+      store.set(uiTintStrengthAtom, RESET);
       break;
     case "ROUNDNESS":
       store.set(roundnessAtom, RESET);

@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -25,6 +26,8 @@ import {
   markdownHighlightingAtom,
   roundnessAtom,
   textScaleAtom,
+  uiTintAtom,
+  uiTintStrengthAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
@@ -113,6 +116,8 @@ export default function AppearanceSection() {
   const [font, setFont] = useAtom(fontAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
   const [textScale, setTextScale] = useAtom(textScaleAtom);
+  const [uiTint, setUiTint] = useAtom(uiTintAtom);
+  const [uiTintStrength, setUiTintStrength] = useAtom(uiTintStrengthAtom);
   const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
   const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
   const [collapsedSidebarLayout, setCollapsedSidebarLayout] = useAtom(collapsedSidebarLayoutAtom);
@@ -125,6 +130,9 @@ export default function AppearanceSection() {
 
   const isMarkdownHighlightingDefault =
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
+  const isPrimaryColorDefault = colorTheme === DEFAULT_SETTINGS.COLOR_THEME;
+  const isUiTintDefault = uiTint === DEFAULT_SETTINGS.UI_TINT;
+  const isUiTintStrengthDefault = uiTintStrength === DEFAULT_SETTINGS.UI_TINT_STRENGTH;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
   const isCollapsedSidebarLayoutDefault =
     collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
@@ -157,25 +165,109 @@ export default function AppearanceSection() {
 
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Color Theme</Label>
+              <Label className="text-sm font-medium">Primary Color</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Controls the accent color used for switches, badges, highlights, and primary
+                actions.
+              </p>
             </div>
-            <ScrollArea className="max-w-full md:max-w-64">
-              <ScrollBar className="w-full" orientation="horizontal" />
-              <div className="flex flex-row flex-nowrap gap-2">
-                {colorThemeOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    ref={colorTheme === option.value ? activeColorRef : undefined}
-                    onClick={() => setColorTheme(option.value as typeof colorTheme)}
-                    size="icon"
-                    className={cn("border-foreground rounded-md border-0", option.className)}
-                    title={option.label}
-                  >
-                    {colorTheme === option.value && <IconCheck data-icon="inline-start" />}
-                  </Button>
-                ))}
+            <div className="flex items-center gap-2">
+              <ScrollArea className="max-w-full md:max-w-64">
+                <ScrollBar className="w-full" orientation="horizontal" />
+                <div className="flex flex-row flex-nowrap gap-2">
+                  {colorThemeOptions.map((option) => (
+                    <Button
+                      key={option.value}
+                      ref={colorTheme === option.value ? activeColorRef : undefined}
+                      onClick={() => setColorTheme(option.value as typeof colorTheme)}
+                      size="icon"
+                      className={cn("border-foreground rounded-md border-0", option.className)}
+                      title={option.label}
+                    >
+                      {colorTheme === option.value && <IconCheck data-icon="inline-start" />}
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => resetSetting("COLOR_THEME")}
+                disabled={isPrimaryColorDefault}
+                aria-label="Reset primary color to default"
+              >
+                <IconRestore data-icon="inline-start" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-col items-start">
+              <Label className="text-sm font-medium">UI Tint</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted
+                buttons.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <ScrollArea className="max-w-full md:max-w-64">
+                <ScrollBar className="w-full" orientation="horizontal" />
+                <div className="flex flex-row flex-nowrap gap-2">
+                  {colorThemeOptions.map((option) => (
+                    <Button
+                      key={option.value}
+                      ref={uiTint === option.value ? activeColorRef : undefined}
+                      onClick={() => setUiTint(option.value as typeof uiTint)}
+                      size="icon"
+                      className={cn("border-foreground rounded-md border-0", option.className)}
+                      title={option.label}
+                    >
+                      {uiTint === option.value && <IconCheck data-icon="inline-start" />}
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => resetSetting("UI_TINT")}
+                disabled={isUiTintDefault}
+                aria-label="Reset UI tint to default"
+              >
+                <IconRestore data-icon="inline-start" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium tabular-nums">
+                  Tint Strength: {uiTintStrength}/10
+                </Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose how light or strong the tint should feel.
+                </p>
               </div>
-            </ScrollArea>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => resetSetting("UI_TINT_STRENGTH")}
+                disabled={isUiTintStrengthDefault}
+                aria-label="Reset tint strength to default"
+              >
+                <IconRestore data-icon="inline-start" />
+              </Button>
+            </div>
+            <Slider
+              value={[uiTintStrength]}
+              onValueChange={(value) => setUiTintStrength(value[0] as typeof uiTintStrength)}
+              min={1}
+              max={10}
+              step={1}
+              className="w-full"
+              aria-label="Tint strength"
+            />
           </div>
 
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">

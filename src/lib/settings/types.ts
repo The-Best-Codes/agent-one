@@ -14,6 +14,8 @@ export type ColorThemeOption =
   | "orange"
   | "rose"
   | "violet";
+export type UiTintOption = ColorThemeOption;
+export type UiTintStrengthOption = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 export type RoundnessOption = "none" | "sm" | "md" | "lg";
 export type FontOption = "default" | "system" | "mono";
 export type TextScaleOption = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
@@ -154,6 +156,8 @@ export interface DefaultSettings extends ApiKeySettings {
   TITLE_GENERATION: TitleGenerationSettings;
   THEME: ThemeOption;
   COLOR_THEME: ColorThemeOption;
+  UI_TINT: UiTintOption;
+  UI_TINT_STRENGTH: UiTintStrengthOption;
   ROUNDNESS: RoundnessOption;
   FONT: FontOption;
   TEXT_SCALE: TextScaleOption;
@@ -192,6 +196,8 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   },
   THEME: "system",
   COLOR_THEME: "default",
+  UI_TINT: "default",
+  UI_TINT_STRENGTH: 3,
   ROUNDNESS: "md",
   FONT: "default",
   TEXT_SCALE: "md",

@@ -12,36 +12,80 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
+  --color-background: color-mix(
+    in oklch,
+    var(--background) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-foreground: var(--foreground);
-  --color-card: var(--card);
+  --color-card: color-mix(
+    in oklch,
+    var(--card) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
+  --color-popover: color-mix(
+    in oklch,
+    var(--popover) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
+  --color-secondary: color-mix(
+    in oklch,
+    var(--secondary) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  --color-muted: color-mix(
+    in oklch,
+    var(--muted) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
+  --color-accent: color-mix(
+    in oklch,
+    var(--accent) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
+  --color-border: color-mix(
+    in oklch,
+    var(--border) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
+  --color-input: color-mix(
+    in oklch,
+    var(--input) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
+  --color-sidebar: color-mix(
+    in oklch,
+    var(--sidebar) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent: color-mix(
+    in oklch,
+    var(--sidebar-accent) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-border: color-mix(
+    in oklch,
+    var(--sidebar-border) calc(100% - var(--ui-tint-strength)),
+    var(--ui-tint-color) var(--ui-tint-strength)
+  );
   --color-sidebar-ring: var(--sidebar-ring);
   --font-space-grotesk: "Space Grotesk Variable", sans-serif;
   --font-roboto: "Roboto Variable", sans-serif;
@@ -52,6 +96,8 @@
 
 :root {
   --radius: 0.625rem;
+  --ui-tint-color: transparent;
+  --ui-tint-strength: 0%;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -609,6 +655,34 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.38 0.189 293.745);
+}
+
+.ui-tint-red {
+  --ui-tint-color: oklch(0.637 0.237 25.331);
+}
+
+.ui-tint-blue {
+  --ui-tint-color: oklch(0.623 0.214 259.815);
+}
+
+.ui-tint-yellow {
+  --ui-tint-color: oklch(0.795 0.184 86.047);
+}
+
+.ui-tint-green {
+  --ui-tint-color: oklch(0.723 0.219 149.579);
+}
+
+.ui-tint-orange {
+  --ui-tint-color: oklch(0.705 0.213 47.604);
+}
+
+.ui-tint-rose {
+  --ui-tint-color: oklch(0.645 0.246 16.439);
+}
+
+.ui-tint-violet {
+  --ui-tint-color: oklch(0.606 0.25 292.717);
 }
 
 @layer base {
