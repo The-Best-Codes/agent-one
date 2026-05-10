@@ -39,6 +39,7 @@ interface ModelListProps {
   baseUrl?: string;
   apiKey?: string;
   headers?: Record<string, string>;
+  autoFetchOnMount?: boolean;
   addButtonLabel?: string;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -417,6 +418,7 @@ export function ModelList({
   baseUrl,
   apiKey = "",
   headers = {},
+  autoFetchOnMount = false,
   addButtonLabel = "Add Model",
   emptyTitle = "No models configured",
   emptyDescription = "Add a model to make it available in the model picker.",
@@ -425,6 +427,7 @@ export function ModelList({
   const [isAdding, setIsAdding] = useState(false);
   const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
   const fetchResetTimeoutRef = useRef<number | null>(null);
+  const hasAutoFetchedRef = useRef(false);
   const parentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -513,6 +516,16 @@ export function ModelList({
       setFetchStateWithReset("error");
     }
   };
+
+  useEffect(() => {
+    if (!autoFetchOnMount || !baseUrl || hasAutoFetchedRef.current) {
+      return;
+    }
+
+    hasAutoFetchedRef.current = true;
+    void handleFetchModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchIcon =
     fetchState === "fetching" ? (

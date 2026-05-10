@@ -29,6 +29,7 @@ import {
   updateCustomProviderAtom,
   type CustomProvider,
 } from "@/lib/jotai/custom-provider-atoms";
+import { getLocalProviderAtom, updateLocalProviderAtom } from "@/lib/jotai/local-provider-atoms";
 import { getProviderConfigAtom, type ProviderConfig } from "@/lib/jotai/provider-atoms";
 
 import { ModelList } from "./model-list";
@@ -55,6 +56,8 @@ interface SharedProviderEditorProps {
   emptyDescription?: string;
   details?: ReactNode;
   footer?: ReactNode;
+  showApiKey?: boolean;
+  autoFetchOnMount?: boolean;
   onEnabledChange: (enabled: boolean) => void;
 }
 
@@ -67,6 +70,10 @@ interface BuiltInProviderListItemProps {
 interface CustomProviderListItemProps {
   providerId: string;
   onDelete: () => void;
+}
+
+interface LocalProviderListItemProps {
+  providerId: string;
 }
 
 const ProviderAccordionItem = memo(function ProviderAccordionItem({
@@ -90,6 +97,8 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
   emptyDescription,
   details,
   footer,
+  showApiKey = true,
+  autoFetchOnMount = false,
   onEnabledChange,
 }: SharedProviderEditorProps) {
   return (
@@ -110,19 +119,21 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
         <div className="flex flex-col gap-4">
           {details}
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor={`api-key-${id}`} className="text-xs">
-              API Key
-            </Label>
-            {apiKeyHint ? <p className="text-muted-foreground text-sm">{apiKeyHint}</p> : null}
-            <SecretInput
-              id={`api-key-${id}`}
-              value={apiKey}
-              onChange={onApiKeyChange}
-              placeholder={apiKeyPlaceholder}
-              showSaveCancel
-            />
-          </div>
+          {showApiKey ? (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={`api-key-${id}`} className="text-xs">
+                API Key
+              </Label>
+              {apiKeyHint ? <p className="text-muted-foreground text-sm">{apiKeyHint}</p> : null}
+              <SecretInput
+                id={`api-key-${id}`}
+                value={apiKey}
+                onChange={onApiKeyChange}
+                placeholder={apiKeyPlaceholder}
+                showSaveCancel
+              />
+            </div>
+          ) : null}
 
           <HttpHeadersEditor
             id={id}
@@ -137,6 +148,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
             baseUrl={modelListBaseUrl}
             apiKey={modelListApiKey}
             headers={modelListHeaders}
+            autoFetchOnMount={autoFetchOnMount}
             addButtonLabel={addButtonLabel}
             emptyTitle={emptyTitle}
             emptyDescription={emptyDescription}
@@ -274,5 +286,51 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
         onCancel={() => setDeleteDialogOpen(false)}
       />
     </>
+  );
+});
+
+export const LocalProviderListItem = memo(function LocalProviderListItem({
+  providerId,
+}: LocalProviderListItemProps) {
+  const provider = useAtomValue(getLocalProviderAtom(providerId));
+  const updateProvider = useSetAtom(updateLocalProviderAtom);
+
+  if (!provider) {
+    return null;
+  }
+
+  return (
+    <ProviderAccordionItem
+      id={provider.id}
+      title={provider.name}
+      enabled={provider.enabled}
+      apiKey=""
+      onApiKeyChange={() => {}}
+      headers={provider.headers}
+      onHeadersChange={(headers) => updateProvider(provider.id, { headers })}
+      models={provider.models}
+      onModelsChange={(models) => updateProvider(provider.id, { models })}
+      showApiKey={false}
+      apiKeyPlaceholder="No API key required"
+      modelListBaseUrl={provider.baseUrl}
+      modelListHeaders={provider.headers}
+      autoFetchOnMount
+      emptyTitle="No models configured"
+      emptyDescription="Fetch models from Ollama or add one manually."
+      details={
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor={`base-url-${provider.id}`}>Base URL</FieldLabel>
+            <Input
+              id={`base-url-${provider.id}`}
+              value={provider.baseUrl}
+              onChange={(event) => updateProvider(provider.id, { baseUrl: event.target.value })}
+              placeholder="e.g. http://127.0.0.1:11434/v1"
+            />
+          </Field>
+        </FieldGroup>
+      }
+      onEnabledChange={(enabled) => updateProvider(provider.id, { enabled })}
+    />
   );
 });

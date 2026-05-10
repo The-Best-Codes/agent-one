@@ -1,6 +1,7 @@
 import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
+import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import ChatRoute from "@/routes/chat";
 import IndexRoute from "@/routes/index";
@@ -29,6 +30,7 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
+      <LocalProviderStartupSync />
       <KbdRegistry />
       <DeepLinkHandler />
       <ReleaseNotesDialog />

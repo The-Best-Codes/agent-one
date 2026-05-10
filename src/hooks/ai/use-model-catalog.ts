@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
 import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
+import { createLocalProvider } from "@/lib/ai/providers/local-provider-factory";
 import {
   mapDirectoryModelToMetadata,
   normalizeProviderModelMetadata,
@@ -23,6 +24,7 @@ import {
   type CustomProvider,
   normalizedCustomProvidersAtom,
 } from "@/lib/jotai/custom-provider-atoms";
+import { type LocalProvider, normalizedLocalProvidersAtom } from "@/lib/jotai/local-provider-atoms";
 import {
   providerEnabledAtomFamily,
   providerHeadersAtomFamily,
@@ -159,6 +161,25 @@ function mapCustomProviderModels(
     }));
 }
 
+function mapLocalProviderModels(
+  provider: LocalProvider,
+  filter?: (model: ProviderModelMetadata) => boolean,
+): ModelData[] {
+  const instance = createLocalProvider(provider);
+
+  return provider.models
+    .map(normalizeProviderModelMetadata)
+    .filter((model) => (filter ? filter(model) : true))
+    .map((model) => ({
+      id: `local-${provider.id}-${model.id}`,
+      name: model.name || model.id,
+      provider: provider.name,
+      model: instance.languageModel(model.id),
+      supportsToolUse: model.supportsTools,
+      contextWindow: model.contextWindow,
+    }));
+}
+
 function isChatModel(model: ModelRecord) {
   return (model.modalities?.output ?? []).includes("text");
 }
@@ -195,6 +216,7 @@ const providerInstancesAtom = atom((get) => {
 });
 
 const availableModelsAtom = atom((get) => {
+  const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
   const providers = get(providerInstancesAtom);
@@ -214,10 +236,15 @@ const availableModelsAtom = atom((get) => {
       mapCustomProviderModels(provider, customProviderApiKeys[provider.id] ?? ""),
     );
 
-  return [...builtInModels, ...customModels];
+  const localModels = localProviders
+    .filter((provider) => provider.enabled)
+    .flatMap((provider) => mapLocalProviderModels(provider));
+
+  return [...builtInModels, ...localModels, ...customModels];
 });
 
 const availableChatModelsAtom = atom((get) => {
+  const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
   const providers = get(providerInstancesAtom);
@@ -242,10 +269,15 @@ const availableChatModelsAtom = atom((get) => {
       ),
     );
 
-  return [...builtInModels, ...customModels];
+  const localModels = localProviders
+    .filter((provider) => provider.enabled)
+    .flatMap((provider) => mapLocalProviderModels(provider, (model) => model.supportsText));
+
+  return [...builtInModels, ...localModels, ...customModels];
 });
 
 const availableImageModelsAtom = atom((get) => {
+  const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
   const providers = get(providerInstancesAtom);
@@ -279,7 +311,11 @@ const availableImageModelsAtom = atom((get) => {
         }));
     });
 
-  return [...builtInModels, ...customModels];
+  const localModels = localProviders
+    .filter((provider) => provider.enabled)
+    .flatMap((provider) => mapLocalProviderModels(provider, (model) => model.supportsImages));
+
+  return [...builtInModels, ...localModels, ...customModels];
 });
 
 const availableEnabledChatModelsAtom = atom((get) => {
@@ -291,7 +327,7 @@ const availableEnabledChatModelsAtom = atom((get) => {
   ) as Record<string, ProviderId>;
 
   return availableChatModels.filter((model) => {
-    if (model.id.startsWith("custom-")) {
+    if (model.id.startsWith("custom-") || model.id.startsWith("local-")) {
       return true;
     }
 

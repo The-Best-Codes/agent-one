@@ -8,6 +8,7 @@ import {
 import { PROVIDER_REGISTRY, type ProviderId } from "@/lib/ai/providers/registry";
 
 import { hasEnabledCustomProviderAtom } from "./custom-provider-atoms";
+import { hasEnabledLocalProviderAtom } from "./local-provider-atoms";
 import { SETTING_PREFIX } from "./settings-atoms";
 
 export type { ProviderId } from "@/lib/ai/providers/registry";
@@ -66,5 +67,6 @@ export const hasEnabledProviderAtom = atom((get) => {
     (p) => get(providerConfigAtoms[p.id as ProviderId]).enabled,
   );
   if (builtInEnabled) return true;
+  if (get(hasEnabledLocalProviderAtom)) return true;
   return get(hasEnabledCustomProviderAtom);
 });

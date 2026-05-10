@@ -25,14 +25,25 @@ import {
   deleteCustomProviderAtom,
   type NewCustomProviderData,
 } from "@/lib/jotai/custom-provider-atoms";
+import {
+  localProviderIdsAtom,
+  localProviderSearchItemsAtom,
+} from "@/lib/jotai/local-provider-atoms";
 
 import { AddProviderDropdown } from "./add-provider-dropdown";
-import { BuiltInProviderListItem, CustomProviderListItem } from "./provider-list-item";
+import {
+  BuiltInProviderListItem,
+  CustomProviderListItem,
+  LocalProviderListItem,
+} from "./provider-list-item";
 
 export function ProvidersList() {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
 
+  const localProviderIds = useAtomValue(localProviderIdsAtom);
+  const localProviderSearchItems = useAtomValue(localProviderSearchItemsAtom);
   const customProviderIds = useAtomValue(customProviderIdsAtom);
   const customProviderSearchItems = useAtomValue(customProviderSearchItemsAtom);
   const addCustomProvider = useSetAtom(addCustomProviderAtom);
@@ -41,6 +52,7 @@ export function ProvidersList() {
   const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
 
   const normalizedBuiltInQuery = builtInSearchQuery.trim().toLowerCase();
+  const normalizedLocalQuery = localSearchQuery.trim().toLowerCase();
   const normalizedCustomQuery = customSearchQuery.trim().toLowerCase();
 
   const filteredBuiltInProviders = useMemo(
@@ -62,6 +74,16 @@ export function ProvidersList() {
       .filter((provider) => provider.name.toLowerCase().includes(normalizedCustomQuery))
       .map((provider) => provider.id);
   }, [customProviderIds, customProviderSearchItems, normalizedCustomQuery]);
+
+  const filteredLocalProviderIds = useMemo(() => {
+    if (!normalizedLocalQuery) {
+      return localProviderIds;
+    }
+
+    return localProviderSearchItems
+      .filter((provider) => provider.name.toLowerCase().includes(normalizedLocalQuery))
+      .map((provider) => provider.id);
+  }, [localProviderIds, localProviderSearchItems, normalizedLocalQuery]);
 
   const handleAddProvider = (data: NewCustomProviderData, apiKey: string) => {
     const providerId = addCustomProvider(data);
@@ -107,6 +129,34 @@ export function ProvidersList() {
           ) : (
             <p className="text-muted-foreground py-4 text-center text-sm">
               No built-in providers found.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>Local Providers</CardTitle>
+          <CardDescription>
+            Configure built-in local providers that can automatically discover models on startup.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <SearchInput
+            placeholder="Search local providers..."
+            value={localSearchQuery}
+            onChange={(event) => setLocalSearchQuery(event.target.value)}
+          />
+
+          {filteredLocalProviderIds.length > 0 ? (
+            <Accordion type="single" collapsible className="w-full">
+              {filteredLocalProviderIds.map((providerId) => (
+                <LocalProviderListItem key={providerId} providerId={providerId} />
+              ))}
+            </Accordion>
+          ) : (
+            <p className="text-muted-foreground py-4 text-center text-sm">
+              No local providers found.
             </p>
           )}
         </CardContent>
