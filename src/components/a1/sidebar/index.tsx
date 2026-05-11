@@ -41,7 +41,6 @@ const SidebarContent = ({
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex flex-row items-center justify-center gap-2">
-        <img src="/icon-currentcolor-raw.svg" alt="AgentOne Logo" className="text-foreground size-5" />
         <span className="text-xl">AgentOne</span>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
