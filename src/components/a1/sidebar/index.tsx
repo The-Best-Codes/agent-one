@@ -1,4 +1,4 @@
-import { IconLayoutSidebarFilled, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
+import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -40,7 +40,8 @@ const SidebarContent = ({
 }) => {
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-2 flex flex-row items-center justify-center">
+      <div className="mb-2 flex flex-row items-center justify-center gap-2">
+        <img src="/icon-currentcolor-raw.svg" alt="AgentOne Logo" className="text-foreground size-5" />
         <span className="text-xl">AgentOne</span>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
@@ -114,7 +115,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           className="size-6"
         >
-          <IconLayoutSidebarFilled data-icon="inline-start" />
+          <IconLayoutSidebar data-icon="inline-start" />
         </Button>
       </TooltipTrigger>
       <TooltipContent side={tooltipSide}>{toggleTooltip}</TooltipContent>
@@ -125,7 +126,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         <TooltipTrigger asChild>
           <DrawerTrigger asChild>
             <Button variant="outline" size="icon-sm" aria-label="Expand sidebar" className="size-6">
-              <IconLayoutSidebarFilled />
+              <IconLayoutSidebar />
             </Button>
           </DrawerTrigger>
         </TooltipTrigger>
