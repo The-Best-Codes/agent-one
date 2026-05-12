@@ -88,6 +88,18 @@ export function trackGoogleAnalyticsPageView(pagePath: string, pageTitle = docum
   });
 }
 
+export function setGoogleAnalyticsUserId(userId: string | null) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  initializeGoogleAnalytics();
+  logger.verbose("Updating Google Analytics user_id", {
+    hasUserId: Boolean(userId),
+  });
+  ReactGA.gtag("set", { user_id: userId });
+}
+
 export type ButtonAnalytics = {
   event: string;
   params?: GoogleAnalyticsEventParams;

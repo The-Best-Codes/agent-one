@@ -7,6 +7,7 @@ import {
   IconRocket,
   IconShieldCheck,
 } from "@tabler/icons-react";
+import { useAtom } from "jotai";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
+import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 
 export default function AboutSection() {
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
     useUpdate();
+  const { user } = useWebAuth();
+  const [analyticsIdentity, setAnalyticsIdentity] = useAtom(analyticsIdentityAtom);
 
   const currentVersion = packageJson.version;
 
@@ -200,6 +206,39 @@ export default function AboutSection() {
               Read the docs
               <IconExternalLink className="size-4" />
             </a>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Usage Analytics</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-1 flex-col gap-1">
+              <p className="text-sm font-medium">Associate analytics with my signed-in account</p>
+              <p className="text-muted-foreground text-sm">
+                When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you can
+                measure signed-in usage across sessions. Email and name are not sent, and IP
+                anonymization remains enabled.
+              </p>
+              {!user ? (
+                <p className="text-muted-foreground text-xs">
+                  Sign in to apply this preference to analytics events.
+                </p>
+              ) : null}
+            </div>
+            <Switch
+              checked={analyticsIdentity === "user-id"}
+              onCheckedChange={(checked) => {
+                trackSettingsInteraction("about", "analytics_identity_toggled", {
+                  value: checked ? "user-id" : "anonymous",
+                  signed_in: Boolean(user),
+                });
+                setAnalyticsIdentity(checked ? "user-id" : "anonymous");
+              }}
+              aria-label="Associate analytics with my signed-in account"
+            />
           </div>
         </CardContent>
       </Card>
