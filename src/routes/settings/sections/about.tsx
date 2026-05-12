@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 
 export default function AboutSection() {
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
@@ -80,7 +81,14 @@ export default function AboutSection() {
       case "idle":
       case "up-to-date":
         return (
-          <Button onClick={checkForUpdates} variant="outline" size="sm">
+          <Button
+            onClick={() => {
+              trackSettingsInteraction("about", "check_for_updates");
+              checkForUpdates();
+            }}
+            variant="outline"
+            size="sm"
+          >
             <IconRefresh data-icon="inline-start" />
             Check Now
           </Button>
@@ -96,14 +104,27 @@ export default function AboutSection() {
         return null;
       case "available":
         return (
-          <Button onClick={downloadAndInstallUpdate} size="sm">
+          <Button
+            onClick={() => {
+              trackSettingsInteraction("about", "download_and_install_update");
+              downloadAndInstallUpdate();
+            }}
+            size="sm"
+          >
             <IconDownload data-icon="inline-start" />
             Download &amp; Install
           </Button>
         );
       case "error":
         return (
-          <Button onClick={checkForUpdates} variant="outline" size="sm">
+          <Button
+            onClick={() => {
+              trackSettingsInteraction("about", "retry_update_check");
+              checkForUpdates();
+            }}
+            variant="outline"
+            size="sm"
+          >
             <IconRefresh data-icon="inline-start" />
             Try Again
           </Button>

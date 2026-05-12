@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
@@ -60,13 +61,21 @@ export default function PerformanceSection() {
                 min="1000"
                 max="1000000"
                 value={maxMessageLength}
-                onChange={(e) => setMaxMessageLength(parseInt(e.target.value) || 50000)}
+                onChange={(e) => {
+                  trackSettingsInteraction("performance", "max_message_length_changed", {
+                    value: parseInt(e.target.value) || 50000,
+                  });
+                  setMaxMessageLength(parseInt(e.target.value) || 50000);
+                }}
                 className="w-full md:w-32"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("MAX_MESSAGE_LENGTH")}
+                onClick={() => {
+                  trackSettingsInteraction("performance", "reset_max_message_length");
+                  resetSetting("MAX_MESSAGE_LENGTH");
+                }}
                 disabled={isMaxMessageLengthDefault}
                 aria-label="Reset to default"
               >
@@ -91,13 +100,21 @@ export default function PerformanceSection() {
                 min="1000"
                 max="1000000"
                 value={maxCodeblockChars}
-                onChange={(e) => setMaxCodeblockChars(parseInt(e.target.value) || 10000)}
+                onChange={(e) => {
+                  trackSettingsInteraction("performance", "max_codeblock_chars_changed", {
+                    value: parseInt(e.target.value) || 10000,
+                  });
+                  setMaxCodeblockChars(parseInt(e.target.value) || 10000);
+                }}
                 className="w-full md:w-32"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("MAX_CODEBLOCK_CHARS")}
+                onClick={() => {
+                  trackSettingsInteraction("performance", "reset_max_codeblock_chars");
+                  resetSetting("MAX_CODEBLOCK_CHARS");
+                }}
                 disabled={isMaxCodeblockCharsDefault}
                 aria-label="Reset to default"
               >
@@ -122,13 +139,21 @@ export default function PerformanceSection() {
                 min="1000"
                 max="1000000"
                 value={maxToolResultChars}
-                onChange={(e) => setMaxToolResultChars(parseInt(e.target.value) || 15000)}
+                onChange={(e) => {
+                  trackSettingsInteraction("performance", "max_tool_result_chars_changed", {
+                    value: parseInt(e.target.value) || 15000,
+                  });
+                  setMaxToolResultChars(parseInt(e.target.value) || 15000);
+                }}
                 className="w-full md:w-32"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("MAX_TOOL_RESULT_CHARS")}
+                onClick={() => {
+                  trackSettingsInteraction("performance", "reset_max_tool_result_chars");
+                  resetSetting("MAX_TOOL_RESULT_CHARS");
+                }}
                 disabled={isMaxToolResultCharsDefault}
                 aria-label="Reset to default"
               >
@@ -158,13 +183,19 @@ export default function PerformanceSection() {
                 id="chat-virtualization-enabled"
                 checked={chatVirtualizationMode !== "off"}
                 onCheckedChange={(checked) => {
+                  trackSettingsInteraction("performance", "chat_virtualization_toggled", {
+                    enabled: checked,
+                  });
                   setChatVirtualizationMode(checked ? "threshold" : "off");
                 }}
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("CHAT_VIRTUALIZATION_MODE")}
+                onClick={() => {
+                  trackSettingsInteraction("performance", "reset_chat_virtualization_mode");
+                  resetSetting("CHAT_VIRTUALIZATION_MODE");
+                }}
                 disabled={isChatVirtualizationModeDefault}
                 aria-label="Reset chat virtualization mode"
               >
@@ -191,15 +222,24 @@ export default function PerformanceSection() {
                   min="1"
                   max="100000"
                   value={chatVirtualizationThreshold}
-                  onChange={(e) =>
-                    setChatVirtualizationThreshold(Math.max(1, parseInt(e.target.value) || 1))
-                  }
+                  onChange={(e) => {
+                    const value = Math.max(1, parseInt(e.target.value) || 1);
+                    trackSettingsInteraction(
+                      "performance",
+                      "chat_virtualization_threshold_changed",
+                      { value },
+                    );
+                    setChatVirtualizationThreshold(value);
+                  }}
                   className="w-full md:w-32"
                 />
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => resetSetting("CHAT_VIRTUALIZATION_THRESHOLD")}
+                  onClick={() => {
+                    trackSettingsInteraction("performance", "reset_chat_virtualization_threshold");
+                    resetSetting("CHAT_VIRTUALIZATION_THRESHOLD");
+                  }}
                   disabled={isChatVirtualizationThresholdDefault}
                   aria-label="Reset chat virtualization threshold"
                 >
@@ -232,15 +272,22 @@ export default function PerformanceSection() {
                 min="1"
                 max="64"
                 value={mcpParallelLoadLimit}
-                onChange={(e) =>
-                  setMcpParallelLoadLimit(Math.max(1, parseInt(e.target.value) || 8))
-                }
+                onChange={(e) => {
+                  const value = Math.max(1, parseInt(e.target.value) || 8);
+                  trackSettingsInteraction("performance", "mcp_parallel_load_limit_changed", {
+                    value,
+                  });
+                  setMcpParallelLoadLimit(value);
+                }}
                 className="w-full md:w-32"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("MCP_PARALLEL_LOAD_LIMIT")}
+                onClick={() => {
+                  trackSettingsInteraction("performance", "reset_mcp_parallel_load_limit");
+                  resetSetting("MCP_PARALLEL_LOAD_LIMIT");
+                }}
                 disabled={isMcpParallelLoadLimitDefault}
                 aria-label="Reset to default"
               >

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
@@ -97,7 +98,10 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Select
                 value={markdownRendering}
-                onValueChange={(value) => setMarkdownRendering(value as MarkdownRenderingOption)}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("chats", "markdown_rendering_changed", { value });
+                  setMarkdownRendering(value as MarkdownRenderingOption);
+                }}
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
@@ -117,7 +121,10 @@ export default function ChatsSection() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("MARKDOWN_RENDERING")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_markdown_rendering");
+                  resetSetting("MARKDOWN_RENDERING");
+                }}
                 disabled={isMarkdownRenderingDefault}
                 aria-label="Reset to default"
               >
@@ -136,7 +143,10 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Select
                 value={notificationSetting}
-                onValueChange={(value) => setNotificationSetting(value as NotificationOption)}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("chats", "notification_setting_changed", { value });
+                  setNotificationSetting(value as NotificationOption);
+                }}
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
@@ -155,7 +165,10 @@ export default function ChatsSection() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("NOTIFICATION_SETTING")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_notification_setting");
+                  resetSetting("NOTIFICATION_SETTING");
+                }}
                 disabled={isNotificationSettingDefault}
                 aria-label="Reset to default"
               >
@@ -174,7 +187,10 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Select
                 value={showMessageActionRow}
-                onValueChange={(value) => setShowMessageActionRow(value as MessageActionRowOption)}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("chats", "message_action_row_changed", { value });
+                  setShowMessageActionRow(value as MessageActionRowOption);
+                }}
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
@@ -193,7 +209,10 @@ export default function ChatsSection() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("SHOW_MESSAGE_ACTION_ROW")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_message_action_row");
+                  resetSetting("SHOW_MESSAGE_ACTION_ROW");
+                }}
                 disabled={isShowMessageActionRowDefault}
                 aria-label="Reset to default"
               >
@@ -212,7 +231,10 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Select
                 value={submitKey}
-                onValueChange={(value) => setSubmitKey(value as SubmitKeyOption)}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("chats", "submit_key_changed", { value });
+                  setSubmitKey(value as SubmitKeyOption);
+                }}
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
@@ -230,7 +252,10 @@ export default function ChatsSection() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("SUBMIT_KEY")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_submit_key");
+                  resetSetting("SUBMIT_KEY");
+                }}
                 disabled={isSubmitKeyDefault}
                 aria-label="Reset to default"
               >
@@ -249,13 +274,21 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={regenerateOnSave}
-                onCheckedChange={setRegenerateOnSave}
+                onCheckedChange={(checked) => {
+                  trackSettingsInteraction("chats", "regenerate_on_save_toggled", {
+                    enabled: checked,
+                  });
+                  setRegenerateOnSave(checked);
+                }}
                 aria-label="Toggle regenerate on save"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("REGENERATE_ON_SAVE")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_regenerate_on_save");
+                  resetSetting("REGENERATE_ON_SAVE");
+                }}
                 disabled={isRegenerateOnSaveDefault}
                 aria-label="Reset to default"
               >
@@ -274,15 +307,21 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={alwaysShowStopButton === "immediate"}
-                onCheckedChange={(checked) =>
-                  setAlwaysShowStopButton(checked ? "immediate" : "at-stopping-point")
-                }
+                onCheckedChange={(checked) => {
+                  trackSettingsInteraction("chats", "stop_button_behavior_toggled", {
+                    enabled: checked,
+                  });
+                  setAlwaysShowStopButton(checked ? "immediate" : "at-stopping-point");
+                }}
                 aria-label="Toggle always show stop button"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("STOP_BUTTON_BEHAVIOR")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_stop_button_behavior");
+                  resetSetting("STOP_BUTTON_BEHAVIOR");
+                }}
                 disabled={isAlwaysShowStopButtonDefault}
                 aria-label="Reset to default"
               >
@@ -301,13 +340,21 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={showChatStatusIndicator}
-                onCheckedChange={setShowChatStatusIndicator}
+                onCheckedChange={(checked) => {
+                  trackSettingsInteraction("chats", "chat_status_indicators_toggled", {
+                    enabled: checked,
+                  });
+                  setShowChatStatusIndicator(checked);
+                }}
                 aria-label="Toggle chat status indicators"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("SHOW_CHAT_STATUS_INDICATOR")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_chat_status_indicators");
+                  resetSetting("SHOW_CHAT_STATUS_INDICATOR");
+                }}
                 disabled={isShowChatStatusIndicatorDefault}
                 aria-label="Reset to default"
               >
@@ -333,13 +380,21 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={smoothStreamEnabled}
-                onCheckedChange={setSmoothStreamEnabled}
+                onCheckedChange={(checked) => {
+                  trackSettingsInteraction("chats", "smooth_stream_toggled", {
+                    enabled: checked,
+                  });
+                  setSmoothStreamEnabled(checked);
+                }}
                 aria-label="Toggle smooth stream"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("SMOOTH_STREAM_ENABLED")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_smooth_stream");
+                  resetSetting("SMOOTH_STREAM_ENABLED");
+                }}
                 disabled={isSmoothStreamDefault}
                 aria-label="Reset to default"
               >
@@ -358,13 +413,21 @@ export default function ChatsSection() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={experimentalThrottleEnabled}
-                onCheckedChange={setExperimentalThrottleEnabled}
+                onCheckedChange={(checked) => {
+                  trackSettingsInteraction("chats", "experimental_throttle_toggled", {
+                    enabled: checked,
+                  });
+                  setExperimentalThrottleEnabled(checked);
+                }}
                 aria-label="Toggle experimental throttle"
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("EXPERIMENTAL_THROTTLE_ENABLED")}
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_experimental_throttle");
+                  resetSetting("EXPERIMENTAL_THROTTLE_ENABLED");
+                }}
                 disabled={isExperimentalThrottleEnabledDefault}
                 aria-label="Reset to default"
               >
@@ -386,7 +449,12 @@ export default function ChatsSection() {
               <div className="flex items-center gap-2">
                 <Slider
                   value={[experimentalThrottleValue]}
-                  onValueChange={(value) => setExperimentalThrottleValue(value[0])}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "experimental_throttle_value_changed", {
+                      value: value[0],
+                    });
+                    setExperimentalThrottleValue(value[0]);
+                  }}
                   min={0}
                   max={10000}
                   step={10}
@@ -396,7 +464,10 @@ export default function ChatsSection() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => resetSetting("EXPERIMENTAL_THROTTLE_VALUE")}
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_experimental_throttle_value");
+                    resetSetting("EXPERIMENTAL_THROTTLE_VALUE");
+                  }}
                   disabled={isExperimentalThrottleValueDefault}
                   aria-label="Reset to default"
                 >
@@ -415,7 +486,10 @@ export default function ChatsSection() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => resetSetting("TITLE_GENERATION")}
+              onClick={() => {
+                trackSettingsInteraction("chats", "reset_title_generation");
+                resetSetting("TITLE_GENERATION");
+              }}
               disabled={isTitleGenerationDefault}
               aria-label="Reset all title settings to default"
             >
@@ -433,11 +507,12 @@ export default function ChatsSection() {
             </div>
             <Select
               value={titleGeneration.method}
-              onValueChange={(value) =>
+              onValueChange={(value) => {
+                trackSettingsInteraction("chats", "title_generation_method_changed", { value });
                 updateTitleGeneration({
                   method: value as TitleGenerationMethodOption,
-                })
-              }
+                });
+              }}
             >
               <SelectTrigger
                 className="w-full md:w-fit md:max-w-96"
@@ -471,11 +546,14 @@ export default function ChatsSection() {
                 min="10"
                 max="200"
                 value={titleGeneration.characterLimit}
-                onChange={(e) =>
+                onChange={(e) => {
+                  trackSettingsInteraction("chats", "title_character_limit_changed", {
+                    value: parseInt(e.target.value) || 50,
+                  });
                   updateTitleGeneration({
                     characterLimit: parseInt(e.target.value) || 50,
-                  })
-                }
+                  });
+                }}
                 className="w-full md:w-32"
               />
             </div>
@@ -495,11 +573,14 @@ export default function ChatsSection() {
                 id="custom-phrase"
                 type="text"
                 value={titleGeneration.customPhrase}
-                onChange={(e) =>
+                onChange={(e) => {
+                  trackSettingsInteraction("chats", "title_custom_phrase_changed", {
+                    value_length: e.target.value.length,
+                  });
                   updateTitleGeneration({
                     customPhrase: e.target.value,
-                  })
-                }
+                  });
+                }}
                 placeholder="New chat"
                 className="w-full md:w-64"
               />
@@ -520,11 +601,14 @@ export default function ChatsSection() {
                 id="fallback-phrase"
                 type="text"
                 value={titleGeneration.fallbackPhrase}
-                onChange={(e) =>
+                onChange={(e) => {
+                  trackSettingsInteraction("chats", "title_fallback_phrase_changed", {
+                    value_length: e.target.value.length,
+                  });
                   updateTitleGeneration({
                     fallbackPhrase: e.target.value,
-                  })
-                }
+                  });
+                }}
                 placeholder="New chat"
                 className="w-full md:w-64"
               />

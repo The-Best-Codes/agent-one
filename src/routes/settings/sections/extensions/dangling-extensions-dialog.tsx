@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { type McpServerConfig } from "@/lib/settings/types";
 
 interface DanglingExtensionsDialogProps {
@@ -78,7 +79,10 @@ export function DanglingExtensionsDialog({
                   size="icon"
                   variant="outline"
                   aria-label={`Remove ${server.name || server.id}`}
-                  onClick={() => onRemove(server.id)}
+                  onClick={() => {
+                    trackSettingsInteraction("extensions", "remove_dangling_extension");
+                    onRemove(server.id);
+                  }}
                 >
                   <IconTrash />
                 </Button>
@@ -94,7 +98,12 @@ export function DanglingExtensionsDialog({
           {danglingServers.length > 0 && (
             <Button
               variant="destructive"
-              onClick={() => onRemoveAll(danglingServers.map((s) => s.id))}
+              onClick={() => {
+                trackSettingsInteraction("extensions", "remove_all_dangling_extensions", {
+                  count: danglingServers.length,
+                });
+                onRemoveAll(danglingServers.map((s) => s.id));
+              }}
             >
               Remove all
             </Button>

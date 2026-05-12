@@ -19,6 +19,7 @@ import {
   type ProviderModelMetadata,
 } from "@/lib/ai/providers/provider-models";
 import type { ProviderId } from "@/lib/ai/providers/registry";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { getApiKeyAtom } from "@/lib/jotai/api-key-atoms";
 import {
   getCustomProviderApiKeyAtom,
@@ -109,7 +110,13 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
           <Switch
             id={`enabled-${id}`}
             checked={enabled}
-            onCheckedChange={onEnabledChange}
+            onCheckedChange={(checked) => {
+              trackSettingsInteraction("providers", "provider_enabled_toggled", {
+                provider_id: id,
+                enabled: checked,
+              });
+              onEnabledChange(checked);
+            }}
             onClick={(event) => event.stopPropagation()}
             aria-label={`Enable ${title}`}
           />
@@ -265,7 +272,12 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => setDeleteDialogOpen(true)}
+            onClick={() => {
+              trackSettingsInteraction("providers", "delete_provider_dialog_opened", {
+                provider_id: provider.id,
+              });
+              setDeleteDialogOpen(true);
+            }}
             className="w-fit"
           >
             <IconTrash data-icon="inline-start" />

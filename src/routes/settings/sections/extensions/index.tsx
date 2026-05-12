@@ -1,6 +1,6 @@
 import { IconFilter, IconFlask, IconPlus, IconTool } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
@@ -102,13 +103,26 @@ export default function ExtensionsSection() {
 
   const updateMcpServerById = useCallback(
     (serverId: string, updates: Partial<McpServerConfig>) => {
+      const currentServer = mcpServers.find((server) => server.id === serverId);
+      if (
+        currentServer &&
+        typeof updates.enabled === "boolean" &&
+        updates.enabled !== currentServer.enabled
+      ) {
+        trackGoogleAnalyticsEvent("extension_enabled_changed", {
+          source: isServerFromRegistry(currentServer) ? "registry" : "custom",
+          transport_type: currentServer.type,
+          enabled: updates.enabled,
+        });
+      }
+
       setMcpServers((prev) =>
         prev.map((server) =>
           server.id === serverId ? ({ ...server, ...updates } as McpServerConfig) : server,
         ),
       );
     },
-    [setMcpServers],
+    [mcpServers, setMcpServers],
   );
 
   const handleAddServer = (serverData: {
@@ -147,6 +161,11 @@ export default function ExtensionsSection() {
           };
 
     setMcpServers((prev) => [newServer, ...prev]);
+    trackGoogleAnalyticsEvent("extension_added", {
+      source: "custom",
+      transport_type: newServer.type,
+      requires_approval: newServer.requiresApproval,
+    });
   };
 
   const handleInstallExtension = (installed: McpRegistryInstallResult) => {
@@ -176,6 +195,11 @@ export default function ExtensionsSection() {
           };
 
     setMcpServers((prev) => [newServer, ...prev]);
+    trackGoogleAnalyticsEvent("extension_added", {
+      source: "registry",
+      transport_type: newServer.type,
+      requires_approval: newServer.requiresApproval,
+    });
     toast.success(`${installed.name} installed`);
   };
 
@@ -186,6 +210,14 @@ export default function ExtensionsSection() {
 
   const handleConfirmUninstall = () => {
     if (!serverToUninstall) return;
+
+    const server = mcpServers.find((item) => item.id === serverToUninstall.id);
+    if (server) {
+      trackGoogleAnalyticsEvent("extension_removed", {
+        source: isServerFromRegistry(server) ? "registry" : "custom",
+        transport_type: server.type,
+      });
+    }
 
     setMcpServers((prev) => prev.filter((server) => server.id !== serverToUninstall.id));
     toast.success(`${serverToUninstall.name} removed`);
@@ -309,6 +341,26 @@ export default function ExtensionsSection() {
     handleUninstallClick,
   ]);
 
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      trackGoogleAnalyticsEvent("extension_search_used", {
+        query_length: trimmedQuery.length,
+        only_installed: onlyInstalled,
+        show_device_extensions: showDeviceExtensions,
+        show_online_extensions: showOnlineExtensions,
+      });
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [onlyInstalled, query, showDeviceExtensions, showOnlineExtensions]);
+
   return (
     <Card>
       <CardHeader>
@@ -340,6 +392,7 @@ export default function ExtensionsSection() {
                   size="icon"
                   variant="outline"
                   aria-label="Filter extensions"
+                  analytics={{ event: "extension_filters_opened" }}
                 >
                   <IconFilter data-icon="inline-start" />
                 </Button>
@@ -374,7 +427,10 @@ export default function ExtensionsSection() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button onClick={() => setShowAddDialog(true)}>
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            analytics={{ event: "custom_extension_dialog_opened" }}
+          >
             <IconPlus data-icon="inline-start" />
             Add Custom
           </Button>
@@ -429,10 +485,20 @@ export default function ExtensionsSection() {
           knownRegistryNames={knownRegistryNames}
           onRemove={(serverId) => {
             const server = mcpServers.find((s) => s.id === serverId);
+            if (server) {
+              trackGoogleAnalyticsEvent("extension_removed", {
+                source: "dangling",
+                transport_type: server.type,
+              });
+            }
             setMcpServers((prev) => prev.filter((s) => s.id !== serverId));
             toast.success(`${server?.name || "Extension"} removed`);
           }}
           onRemoveAll={(serverIds) => {
+            trackGoogleAnalyticsEvent("extension_removed", {
+              source: "dangling_bulk",
+              removed_count: serverIds.length,
+            });
             const ids = new Set(serverIds);
             setMcpServers((prev) => prev.filter((s) => !ids.has(s.id)));
             toast.success(`Removed ${serverIds.length} dangling extensions`);

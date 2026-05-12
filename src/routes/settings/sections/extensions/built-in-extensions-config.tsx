@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { enabledToolsAtom, toolConfigsAtom } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
@@ -30,15 +31,23 @@ export function BuiltInExtensionsConfig() {
     });
 
   const handleResetToolConfigs = () => {
+    trackSettingsInteraction("extensions", "reset_built_in_extensions");
     resetSetting("ENABLED_TOOLS");
     resetSetting("TOOL_CONFIGS");
   };
 
   const updateToolEnabled = (toolId: ToolId, enabled: boolean) => {
+    trackSettingsInteraction("extensions", "built_in_tool_toggled", {
+      tool_id: toolId,
+      enabled,
+    });
     setEnabledTools((prev) => ({ ...prev, [toolId]: enabled }));
   };
 
   const updateToolConfig = <T extends ToolId>(toolId: T, updates: Partial<ToolConfigs[T]>) => {
+    trackSettingsInteraction("extensions", "built_in_tool_config_changed", {
+      tool_id: toolId,
+    });
     setToolConfigs((prev) => ({
       ...prev,
       [toolId]: { ...prev[toolId], ...updates },

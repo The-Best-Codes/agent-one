@@ -18,6 +18,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   collapsedSidebarLayoutAtom,
   colorThemeAtom,
@@ -136,14 +137,17 @@ export default function AppearanceSection() {
     collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
 
   const handleResetMarkdownHighlighting = () => {
+    trackSettingsInteraction("appearance", "reset_markdown_highlighting");
     resetSetting("MARKDOWN_HIGHLIGHTING");
   };
 
   const handleResetInputStyle = () => {
+    trackSettingsInteraction("appearance", "reset_input_style");
     resetSetting("INPUT_STYLE");
   };
 
   const handleResetCollapsedSidebarLayout = () => {
+    trackSettingsInteraction("appearance", "reset_collapsed_sidebar_layout");
     resetSetting("COLLAPSED_SIDEBAR_LAYOUT");
   };
 
@@ -177,7 +181,12 @@ export default function AppearanceSection() {
                     <Button
                       key={option.value}
                       ref={colorTheme === option.value ? activeColorRef : undefined}
-                      onClick={() => setColorTheme(option.value as typeof colorTheme)}
+                      onClick={() => {
+                        trackSettingsInteraction("appearance", "primary_color_changed", {
+                          value: option.value,
+                        });
+                        setColorTheme(option.value as typeof colorTheme);
+                      }}
                       size="icon"
                       className={cn("border-foreground rounded-md border-0", option.className)}
                       title={option.label}
@@ -206,7 +215,12 @@ export default function AppearanceSection() {
                     <Button
                       key={option.value}
                       ref={uiTint === option.value ? activeColorRef : undefined}
-                      onClick={() => setUiTint(option.value as typeof uiTint)}
+                      onClick={() => {
+                        trackSettingsInteraction("appearance", "tint_changed", {
+                          value: option.value,
+                        });
+                        setUiTint(option.value as typeof uiTint);
+                      }}
                       size="icon"
                       className={cn("border-foreground rounded-md border-0", option.className)}
                       title={option.label}
@@ -232,7 +246,10 @@ export default function AppearanceSection() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => resetSetting("UI_TINT_STRENGTH")}
+                onClick={() => {
+                  trackSettingsInteraction("appearance", "reset_tint_strength");
+                  resetSetting("UI_TINT_STRENGTH");
+                }}
                 disabled={isUiTintStrengthDefault}
                 aria-label="Reset tint strength to default"
               >
@@ -241,7 +258,12 @@ export default function AppearanceSection() {
             </div>
             <Slider
               value={[uiTintStrength]}
-              onValueChange={(value) => setUiTintStrength(value[0] as typeof uiTintStrength)}
+              onValueChange={(value) => {
+                trackSettingsInteraction("appearance", "tint_strength_changed", {
+                  value: value[0],
+                });
+                setUiTintStrength(value[0] as typeof uiTintStrength);
+              }}
               min={1}
               max={10}
               step={1}
@@ -264,6 +286,7 @@ export default function AppearanceSection() {
               value={font}
               onValueChange={(value) => {
                 if (value) {
+                  trackSettingsInteraction("appearance", "font_changed", { value });
                   setFont(value as typeof font);
                 }
               }}
@@ -296,6 +319,7 @@ export default function AppearanceSection() {
               value={roundness}
               onValueChange={(value) => {
                 if (value) {
+                  trackSettingsInteraction("appearance", "roundness_changed", { value });
                   setRoundness(value as typeof roundness);
                 }
               }}
@@ -328,7 +352,10 @@ export default function AppearanceSection() {
             <div className="w-full md:max-w-64">
               <Select
                 value={textScale}
-                onValueChange={(value) => setTextScale(value as typeof textScale)}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("appearance", "text_scale_changed", { value });
+                  setTextScale(value as typeof textScale);
+                }}
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
@@ -366,7 +393,12 @@ export default function AppearanceSection() {
             <div className="flex items-center gap-2">
               <Switch
                 checked={markdownHighlighting}
-                onCheckedChange={setMarkdownHighlighting}
+                onCheckedChange={(checked) => {
+                  trackSettingsInteraction("appearance", "markdown_highlighting_toggled", {
+                    enabled: checked,
+                  });
+                  setMarkdownHighlighting(checked);
+                }}
                 aria-label="Toggle markdown highlighting"
               />
               <Button
@@ -391,7 +423,10 @@ export default function AppearanceSection() {
             <div className="flex items-center gap-2">
               <Select
                 value={inputStyle}
-                onValueChange={(value) => setInputStyle(value as InputStyleOption)}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("appearance", "input_style_changed", { value });
+                  setInputStyle(value as InputStyleOption);
+                }}
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
@@ -428,9 +463,12 @@ export default function AppearanceSection() {
             <div className="flex items-center gap-2">
               <Select
                 value={collapsedSidebarLayout}
-                onValueChange={(value) =>
-                  setCollapsedSidebarLayout(value as CollapsedSidebarLayoutOption)
-                }
+                onValueChange={(value) => {
+                  trackSettingsInteraction("appearance", "collapsed_sidebar_layout_changed", {
+                    value,
+                  });
+                  setCollapsedSidebarLayout(value as CollapsedSidebarLayoutOption);
+                }}
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
