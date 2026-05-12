@@ -204,7 +204,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   FONT: "default",
   TEXT_SCALE: "md",
   NOTIFICATION_SETTING: "never",
-  ANALYTICS_IDENTITY: "anonymous",
+  ANALYTICS_IDENTITY: "user-id",
   ENABLED_TOOLS: {
     dateTime: true,
     waitNumberMilliseconds: true,
