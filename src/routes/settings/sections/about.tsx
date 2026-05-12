@@ -219,14 +219,23 @@ export default function AboutSection() {
               <p className="text-sm font-medium">Associate analytics with my signed-in account</p>
               <p className="text-muted-foreground text-sm">
                 When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you can
-                measure signed-in usage across sessions. Email and name are not sent, and IP
-                anonymization remains enabled.
+                measure signed-in usage across sessions. We do not collect any personal data (like
+                names, email addresses, or IP addresses); we only collect basic usage data and error
+                logs.
               </p>
               {!user ? (
                 <p className="text-muted-foreground text-xs">
                   Sign in to apply this preference to analytics events.
                 </p>
               ) : null}
+              <a
+                href="https://www.agent-one.dev/privacy?utm_source=desktop-app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-fit underline"
+              >
+                Learn more
+              </a>
             </div>
             <Switch
               checked={analyticsIdentity === "user-id"}
