@@ -8,6 +8,7 @@ import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
   initializeGoogleAnalytics,
+  setGoogleAnalyticsEnabled,
   setGoogleAnalyticsUserId,
   trackGoogleAnalyticsPageView,
 } from "@/lib/google-analytics";
@@ -42,8 +43,12 @@ function GoogleAnalyticsTracker() {
   const { user } = useWebAuth();
 
   useEffect(() => {
-    initializeGoogleAnalytics();
-  }, []);
+    setGoogleAnalyticsEnabled(analyticsIdentity !== "off");
+
+    if (analyticsIdentity !== "off") {
+      initializeGoogleAnalytics();
+    }
+  }, [analyticsIdentity]);
 
   useEffect(() => {
     setGoogleAnalyticsUserId(analyticsIdentity === "user-id" ? (user?.id ?? null) : null);

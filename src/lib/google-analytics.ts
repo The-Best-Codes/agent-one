@@ -14,6 +14,7 @@ export type GoogleAnalyticsEventParams = Record<
 const logger = getLogger(import.meta.url);
 
 let googleAnalyticsInitialized = false;
+let googleAnalyticsEnabled = true;
 
 function normalizeGoogleAnalyticsParams(params?: GoogleAnalyticsEventParams) {
   if (!params) {
@@ -32,7 +33,7 @@ function normalizeGoogleAnalyticsParams(params?: GoogleAnalyticsEventParams) {
 }
 
 export function initializeGoogleAnalytics() {
-  if (typeof window === "undefined" || googleAnalyticsInitialized) {
+  if (typeof window === "undefined" || googleAnalyticsInitialized || !googleAnalyticsEnabled) {
     return;
   }
 
@@ -51,7 +52,7 @@ export function initializeGoogleAnalytics() {
 }
 
 export function trackGoogleAnalyticsEvent(event: string, params?: GoogleAnalyticsEventParams) {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || !googleAnalyticsEnabled) {
     return;
   }
 
@@ -71,7 +72,7 @@ export function trackGoogleAnalyticsEvent(event: string, params?: GoogleAnalytic
 }
 
 export function trackGoogleAnalyticsPageView(pagePath: string, pageTitle = document.title) {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || !googleAnalyticsEnabled) {
     return;
   }
 
@@ -89,7 +90,7 @@ export function trackGoogleAnalyticsPageView(pagePath: string, pageTitle = docum
 }
 
 export function setGoogleAnalyticsUserId(userId: string | null) {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || !googleAnalyticsEnabled) {
     return;
   }
 
@@ -98,6 +99,22 @@ export function setGoogleAnalyticsUserId(userId: string | null) {
     hasUserId: Boolean(userId),
   });
   ReactGA.gtag("set", { user_id: userId });
+}
+
+export function setGoogleAnalyticsEnabled(enabled: boolean) {
+  googleAnalyticsEnabled = enabled;
+
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  logger.verbose("Updating Google Analytics enabled state", {
+    enabled,
+  });
+
+  if (!enabled && googleAnalyticsInitialized) {
+    ReactGA.gtag("set", { user_id: null });
+  }
 }
 
 export type ButtonAnalytics = {
