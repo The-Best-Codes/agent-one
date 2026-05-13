@@ -3,6 +3,7 @@ import { atomWithStorage, RESET } from "jotai/utils";
 
 import type { DefaultSettings } from "@/lib/settings/types";
 import {
+  type AnalyticsIdentityOption,
   type ColorThemeOption,
   DEFAULT_SETTINGS,
   type FontOption,
@@ -160,6 +161,11 @@ export const textScaleAtom = createSettingAtom<TextScaleOption>(
 export const notificationSettingAtom = createSettingAtom<NotificationOption>(
   "NOTIFICATION_SETTING",
   DEFAULT_SETTINGS.NOTIFICATION_SETTING,
+);
+
+export const analyticsIdentityAtom = createSettingAtom<AnalyticsIdentityOption>(
+  "ANALYTICS_IDENTITY",
+  DEFAULT_SETTINGS.ANALYTICS_IDENTITY,
 );
 
 export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(

@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
 
@@ -130,7 +131,14 @@ export default function AccountSection() {
         </CardContent>
         <CardFooter className="flex gap-2">
           {!billingLoading && user && !billingError && !activeSubscription && (
-            <Button size="sm" asChild>
+            <Button
+              size="sm"
+              asChild
+              analytics={{
+                event: "settings_external_link_clicked",
+                params: { section: "account", control: "upgrade_plan" },
+              }}
+            >
               <a href={UPGRADE_URL} target="_blank" rel="noopener noreferrer">
                 <IconRocket data-icon="inline-start" />
                 <span>Upgrade your Plan</span>
@@ -138,7 +146,15 @@ export default function AccountSection() {
             </Button>
           )}
           {!billingLoading && user && !billingError && activeSubscription && (
-            <Button variant="outline" size="sm" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              analytics={{
+                event: "settings_external_link_clicked",
+                params: { section: "account", control: "manage_billing" },
+              }}
+            >
               <a href={BILLING_URL} target="_blank" rel="noopener noreferrer">
                 <IconCreditCard data-icon="inline-start" />
                 <span>Manage Billing</span>
@@ -146,7 +162,15 @@ export default function AccountSection() {
             </Button>
           )}
           {!billingLoading && user && (
-            <Button variant="outline" size="sm" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              analytics={{
+                event: "settings_external_link_clicked",
+                params: { section: "account", control: "account_dashboard" },
+              }}
+            >
               <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
                 <IconExternalLink data-icon="inline-start" />
                 <span>Account Dashboard</span>
@@ -176,7 +200,12 @@ export default function AccountSection() {
                   <Switch
                     id="sync-enabled"
                     checked={syncEnabled}
-                    onCheckedChange={setSyncEnabled}
+                    onCheckedChange={(checked) => {
+                      trackSettingsInteraction("account", "sync_enabled_toggled", {
+                        enabled: checked,
+                      });
+                      setSyncEnabled(checked);
+                    }}
                     disabled={!user}
                   />
                 </span>
@@ -199,7 +228,12 @@ export default function AccountSection() {
                   <Switch
                     id="hide-agentone-models"
                     checked={hideAgentOneModels}
-                    onCheckedChange={setHideAgentOneModels}
+                    onCheckedChange={(checked) => {
+                      trackSettingsInteraction("account", "hide_agentone_models_toggled", {
+                        enabled: checked,
+                      });
+                      setHideAgentOneModels(checked);
+                    }}
                     disabled={!user}
                   />
                 </span>
@@ -227,7 +261,12 @@ export default function AccountSection() {
               id="user-name"
               type="text"
               value={userName}
-              onChange={(e) => setUserName(e.target.value)}
+              onChange={(e) => {
+                trackSettingsInteraction("account", "user_name_changed", {
+                  value_length: e.target.value.length,
+                });
+                setUserName(e.target.value);
+              }}
               placeholder="Enter your name"
             />
           </div>
@@ -243,7 +282,12 @@ export default function AccountSection() {
               <Textarea
                 id="system-prompt-appendix"
                 value={systemPromptAppendix}
-                onChange={(e) => handleAppendixChange(e.target.value)}
+                onChange={(e) => {
+                  trackSettingsInteraction("account", "ai_instructions_changed", {
+                    value_length: e.target.value.length,
+                  });
+                  handleAppendixChange(e.target.value);
+                }}
                 placeholder="e.g., Always use British English. Be concise and technical."
                 className="field-sizing-fixed max-h-96 min-h-15 resize-y"
               />

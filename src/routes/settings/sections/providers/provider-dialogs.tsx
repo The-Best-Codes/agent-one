@@ -14,6 +14,7 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import type { ProviderModelMetadata } from "@/lib/ai/providers/provider-models";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import type { NewCustomProviderData } from "@/lib/jotai/custom-provider-atoms";
 
 import { ModelList } from "./model-list";
@@ -76,6 +77,11 @@ export function AddOpenAICompatibleDialog({
       },
       draft.apiKey.trim(),
     );
+
+    trackSettingsInteraction("providers", "submit_add_provider_dialog", {
+      has_api_key: Boolean(draft.apiKey.trim()),
+      model_count: draft.models.length,
+    });
 
     resetForm();
     onOpenChange(false);

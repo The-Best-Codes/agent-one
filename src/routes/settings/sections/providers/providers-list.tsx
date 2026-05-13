@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/empty";
 import { Accordion } from "@/components/ui/native/accordion";
 import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   deleteCustomProviderApiKeyAtom,
   setCustomProviderApiKeyAtom,
@@ -86,6 +87,10 @@ export function ProvidersList() {
   }, [localProviderIds, localProviderSearchItems, normalizedLocalQuery]);
 
   const handleAddProvider = (data: NewCustomProviderData, apiKey: string) => {
+    trackSettingsInteraction("providers", "custom_provider_added", {
+      has_api_key: Boolean(apiKey.trim()),
+      model_count: data.models.length,
+    });
     const providerId = addCustomProvider(data);
 
     if (apiKey) {
@@ -94,6 +99,7 @@ export function ProvidersList() {
   };
 
   const handleDeleteProvider = (providerId: string) => {
+    trackSettingsInteraction("providers", "custom_provider_deleted");
     deleteCustomProvider(providerId);
     void deleteCustomProviderApiKey(providerId);
   };
@@ -112,7 +118,12 @@ export function ProvidersList() {
           <SearchInput
             placeholder="Search built-in providers..."
             value={builtInSearchQuery}
-            onChange={(event) => setBuiltInSearchQuery(event.target.value)}
+            onChange={(event) => {
+              trackSettingsInteraction("providers", "built_in_search_changed", {
+                value_length: event.target.value.length,
+              });
+              setBuiltInSearchQuery(event.target.value);
+            }}
           />
 
           {filteredBuiltInProviders.length > 0 ? (
@@ -145,7 +156,12 @@ export function ProvidersList() {
           <SearchInput
             placeholder="Search local providers..."
             value={localSearchQuery}
-            onChange={(event) => setLocalSearchQuery(event.target.value)}
+            onChange={(event) => {
+              trackSettingsInteraction("providers", "local_search_changed", {
+                value_length: event.target.value.length,
+              });
+              setLocalSearchQuery(event.target.value);
+            }}
           />
 
           {filteredLocalProviderIds.length > 0 ? (
@@ -174,7 +190,12 @@ export function ProvidersList() {
             <SearchInput
               placeholder="Search custom providers..."
               value={customSearchQuery}
-              onChange={(event) => setCustomSearchQuery(event.target.value)}
+              onChange={(event) => {
+                trackSettingsInteraction("providers", "custom_search_changed", {
+                  value_length: event.target.value.length,
+                });
+                setCustomSearchQuery(event.target.value);
+              }}
               containerClassName="flex-1"
             />
             <AddProviderDropdown onAddProvider={handleAddProvider} />

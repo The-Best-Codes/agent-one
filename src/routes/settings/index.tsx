@@ -13,6 +13,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import { isValidSection, sections } from "./sections-config";
@@ -58,6 +59,7 @@ export default function SettingsRoute() {
   }, [displayedSection]);
 
   const handleSectionChange = (section: string) => {
+    trackSettingsInteraction("navigation", "section_changed", { value: section });
     setActiveSection(section);
     if (tabParam) {
       setSearchParams((prev) => {
@@ -72,13 +74,23 @@ export default function SettingsRoute() {
       <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
-          <Button variant="outline" size="sm" onClick={handleNavigateBack}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNavigateBack}
+            analytics={{ event: "settings_back_clicked", params: { source: "mobile_header" } }}
+          >
             <IconArrowLeft data-icon="inline-start" />
             Back
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
-              <Button variant="outline" size="icon" aria-label="Open settings menu">
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Open settings menu"
+                analytics={{ event: "settings_menu_opened", params: { source: "mobile_header" } }}
+              >
                 <IconList />
               </Button>
             </DrawerTrigger>
@@ -104,7 +116,15 @@ export default function SettingsRoute() {
           <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
             <div className="flex flex-col gap-2">
               <div className="mb-2">
-                <Button variant="outline" onClick={handleNavigateBack} className="w-full">
+                <Button
+                  variant="outline"
+                  onClick={handleNavigateBack}
+                  className="w-full"
+                  analytics={{
+                    event: "settings_back_clicked",
+                    params: { source: "desktop_sidebar" },
+                  }}
+                >
                   <IconArrowLeft data-icon="inline-start" />
                   Back to Chat
                 </Button>

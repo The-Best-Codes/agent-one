@@ -32,6 +32,7 @@ import {
   getProviderModelName,
   type ProviderModelMetadata,
 } from "@/lib/ai/providers/provider-models";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 
 interface ModelListProps {
   models: ProviderModelMetadata[];
@@ -111,6 +112,11 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
       supportsImages,
       contextWindow: parsedContextWindow ?? undefined,
       maxOutputTokens: parsedMaxOutputTokens ?? undefined,
+    });
+
+    trackSettingsInteraction("providers", "model_added", {
+      model_id_length: trimmedId.length,
+      overrides_built_in: overridesBuiltIn,
     });
   };
 
@@ -381,7 +387,10 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
             variant="outline"
             size="icon"
             className="size-8"
-            onClick={() => setConfigOpen(true)}
+            onClick={() => {
+              trackSettingsInteraction("providers", "model_config_opened");
+              setConfigOpen(true);
+            }}
             aria-label="Configure model"
           >
             <IconSettings />
@@ -391,7 +400,10 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
             variant="destructive"
             size="icon"
             className="text-destructive hover:text-destructive size-8"
-            onClick={() => onDelete(model.id)}
+            onClick={() => {
+              trackSettingsInteraction("providers", "model_deleted");
+              onDelete(model.id);
+            }}
             aria-label="Delete model"
           >
             <IconTrash />
@@ -511,6 +523,10 @@ export function ModelList({
         onChange([...fetchedModels, ...models]);
       }
 
+      trackSettingsInteraction("providers", "models_auto_fetched", {
+        fetched_count: fetchedModels.length,
+      });
+
       setFetchStateWithReset("success");
     } catch {
       setFetchStateWithReset("error");
@@ -551,12 +567,24 @@ export function ModelList({
               size="sm"
               onClick={handleFetchModels}
               disabled={fetchState !== "idle"}
+              analytics={{
+                event: "settings_interaction",
+                params: { section: "providers", control: "auto_fetch_models_clicked" },
+              }}
             >
               {fetchIcon}
               Auto
             </Button>
           ) : null}
-          <Button type="button" variant="outline" size="sm" onClick={() => setIsAdding(true)}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              trackSettingsInteraction("providers", "add_model_form_opened");
+              setIsAdding(true);
+            }}
+          >
             <IconPlus data-icon="inline-start" />
             {addButtonLabel}
           </Button>
@@ -615,7 +643,14 @@ export function ModelList({
               <EmptyDescription>{emptyDescription}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button type="button" variant="outline" onClick={() => setIsAdding(true)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  trackSettingsInteraction("providers", "add_model_form_opened");
+                  setIsAdding(true);
+                }}
+              >
                 <IconPlus data-icon="inline-start" />
                 {addButtonLabel}
               </Button>

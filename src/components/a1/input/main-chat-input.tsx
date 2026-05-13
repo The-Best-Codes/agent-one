@@ -18,6 +18,7 @@ import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
+import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   inputStyleAtom,
@@ -151,6 +152,12 @@ export const MainChatInput = ({
         text: currentText || "",
         files: files,
       });
+      trackGoogleAnalyticsEvent("message_sent", {
+        source: "main_chat_input",
+        text_length: currentText.length,
+        has_files: Boolean(files),
+        file_count: files?.length ?? 0,
+      });
       if (editorViewRef.current) {
         editorViewRef.current.dispatch({
           changes: {
@@ -219,6 +226,11 @@ export const MainChatInput = ({
         fileInputRef.current.files = updatedFileList;
       }
 
+      trackGoogleAnalyticsEvent("files_attached", {
+        source: "main_chat_input",
+        file_count: updatedFileList.length,
+      });
+
       logger.verbose("Files added successfully", {
         totalFileCount: updatedFileList.length,
       });
@@ -255,6 +267,11 @@ export const MainChatInput = ({
 
     const newFileList = dt.files;
     setFiles(newFileList.length > 0 ? newFileList : undefined);
+
+    trackGoogleAnalyticsEvent("attached_file_removed", {
+      source: "main_chat_input",
+      remaining_file_count: newFileList.length,
+    });
 
     if (fileInputRef.current) {
       fileInputRef.current.files = newFileList;
@@ -512,6 +529,10 @@ export const MainChatInput = ({
                   onClick={() => {
                     fileInputRef.current?.click();
                   }}
+                  analytics={{
+                    event: "attachment_picker_opened",
+                    params: { source: "main_chat_input" },
+                  }}
                   className="relative"
                   aria-label="Attach files"
                 >
@@ -546,6 +567,10 @@ export const MainChatInput = ({
                     type="button"
                     size="icon"
                     onClick={() => stop()}
+                    analytics={{
+                      event: "response_stop_clicked",
+                      params: { source: "main_chat_input" },
+                    }}
                     aria-label="Stop response"
                   >
                     <IconPlayerStopFilled />
@@ -567,6 +592,10 @@ export const MainChatInput = ({
                       !hasAvailableModels ||
                       hasPendingApproval
                     }
+                    analytics={{
+                      event: "send_button_clicked",
+                      params: { source: "main_chat_input" },
+                    }}
                     aria-label="Send message"
                   >
                     {status === "submitted" ? <Spinner /> : <IconArrowUp />}

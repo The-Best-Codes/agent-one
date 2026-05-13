@@ -20,6 +20,7 @@ export type RoundnessOption = "none" | "sm" | "md" | "lg";
 export type FontOption = "default" | "system" | "mono";
 export type TextScaleOption = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type NotificationOption = "always" | "when-unfocused" | "never";
+export type AnalyticsIdentityOption = "off" | "anonymous" | "user-id";
 export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
 export type MessageActionRowOption = "hover" | "always" | "never";
 export type InputStyleOption = "docked" | "floating";
@@ -162,6 +163,7 @@ export interface DefaultSettings extends ApiKeySettings {
   FONT: FontOption;
   TEXT_SCALE: TextScaleOption;
   NOTIFICATION_SETTING: NotificationOption;
+  ANALYTICS_IDENTITY: AnalyticsIdentityOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
   TOOL_CONFIGS: ToolConfigs;
   MCP_SERVERS: McpServerConfig[];
@@ -202,6 +204,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   FONT: "default",
   TEXT_SCALE: "md",
   NOTIFICATION_SETTING: "never",
+  ANALYTICS_IDENTITY: "user-id",
   ENABLED_TOOLS: {
     dateTime: true,
     waitNumberMilliseconds: true,

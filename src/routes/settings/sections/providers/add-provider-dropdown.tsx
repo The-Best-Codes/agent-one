@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { trackSettingsInteraction } from "@/lib/google-analytics";
 import type { NewCustomProviderData } from "@/lib/jotai/custom-provider-atoms";
 
 import { AddOpenAICompatibleDialog } from "./provider-dialogs";
@@ -24,14 +25,25 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            analytics={{
+              event: "settings_interaction",
+              params: { section: "providers", control: "add_provider_menu_opened" },
+            }}
+          >
             Add Provider
             <IconChevronDown data-icon="inline-end" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-auto min-w-max">
           <DropdownMenuGroup>
-            <DropdownMenuItem onSelect={() => setDialogOpen(true)}>
+            <DropdownMenuItem
+              onSelect={() => {
+                trackSettingsInteraction("providers", "open_openai_compatible_dialog");
+                setDialogOpen(true);
+              }}
+            >
               <IconPlus data-icon="inline-start" />
               OpenAI Compatible
             </DropdownMenuItem>

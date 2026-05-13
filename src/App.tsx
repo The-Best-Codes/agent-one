@@ -1,8 +1,18 @@
-import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import { useAtomValue } from "jotai";
+import { useEffect } from "react";
+import { BrowserRouter, Outlet, Route, Routes, useLocation } from "react-router";
 import { Toaster } from "sonner";
 
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import {
+  initializeGoogleAnalytics,
+  setGoogleAnalyticsEnabled,
+  setGoogleAnalyticsUserId,
+  trackGoogleAnalyticsPageView,
+} from "@/lib/google-analytics";
+import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import ChatRoute from "@/routes/chat";
 import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
@@ -27,9 +37,34 @@ function AppLayout() {
   );
 }
 
+function GoogleAnalyticsTracker() {
+  const location = useLocation();
+  const analyticsIdentity = useAtomValue(analyticsIdentityAtom);
+  const { user } = useWebAuth();
+
+  useEffect(() => {
+    setGoogleAnalyticsEnabled(analyticsIdentity !== "off");
+
+    if (analyticsIdentity !== "off") {
+      initializeGoogleAnalytics();
+    }
+  }, [analyticsIdentity]);
+
+  useEffect(() => {
+    setGoogleAnalyticsUserId(analyticsIdentity === "user-id" ? (user?.id ?? null) : null);
+  }, [analyticsIdentity, user?.id]);
+
+  useEffect(() => {
+    trackGoogleAnalyticsPageView(`${location.pathname}${location.search}`);
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <GoogleAnalyticsTracker />
       <LocalProviderStartupSync />
       <KbdRegistry />
       <DeepLinkHandler />
