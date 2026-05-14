@@ -16,7 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,7 @@ interface DeleteFileToolPartProps {
 export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as DeleteFileInput;
-  const { addToolApprovalResponse } = useChatFunctions();
+  const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const filePath = input?.filePath || "unknown file";
@@ -50,12 +50,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: false,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
               Deny
@@ -63,12 +58,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
               Approve

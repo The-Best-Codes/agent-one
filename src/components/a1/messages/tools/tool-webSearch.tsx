@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -49,7 +49,7 @@ interface WebSearchResult {
 export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as WebSearchInput;
-  const { addToolApprovalResponse } = useChatFunctions();
+  const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
@@ -69,12 +69,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: false,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
               Deny
@@ -82,12 +77,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
               Approve

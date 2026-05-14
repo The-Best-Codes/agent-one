@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -141,7 +141,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
   const callId = part.toolCallId;
   const input = part.input as GetUrlContentInput;
   const output = part.output as GetUrlContentOutput;
-  const { addToolApprovalResponse } = useChatFunctions();
+  const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
@@ -180,12 +180,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: false,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
               Deny
@@ -193,12 +188,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
               Approve

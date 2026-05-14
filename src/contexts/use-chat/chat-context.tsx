@@ -18,6 +18,7 @@ import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 import {
+  ChatApprovalHandlerContext,
   ChatFunctionsContext,
   ChatLoadingContext,
   ChatMessagesContext,
@@ -514,6 +515,14 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ],
   );
 
+  const approvalHandlerValue = useMemo(
+    () =>
+      async ({ id, approved, reason }: { id: string; approved: boolean; reason?: string }) => {
+        await addToolApprovalResponse({ id, approved, reason });
+      },
+    [addToolApprovalResponse],
+  );
+
   return (
     <ModelContext.Provider value={modelContextValue}>
       {Array.from(activeChatIds).map((id) => {
@@ -540,7 +549,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           <ChatMetadataContext.Provider value={metadataValue}>
             <ChatLoadingContext.Provider value={isChatLoading}>
               <ChatFunctionsContext.Provider value={functionsValue}>
-                {children}
+                <ChatApprovalHandlerContext.Provider value={approvalHandlerValue}>
+                  {children}
+                </ChatApprovalHandlerContext.Provider>
               </ChatFunctionsContext.Provider>
             </ChatLoadingContext.Provider>
           </ChatMetadataContext.Provider>

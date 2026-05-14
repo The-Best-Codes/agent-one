@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import {
   getExecuteCommandLiveState,
   skipExecuteCommand,
@@ -156,7 +156,7 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
 export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as ExecuteCommandInput;
-  const { addToolApprovalResponse } = useChatFunctions();
+  const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const [longRunningNow, setLongRunningNow] = useState(() => Date.now());
@@ -218,12 +218,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: false,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
               Deny
@@ -231,12 +226,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
               Approve

@@ -13,7 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { useTheme } from "@/hooks/use-theme";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { getLanguageExtension } from "@/lib/syntax-highlighter/language-extensions";
@@ -71,7 +71,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as ViewFileInput;
   const output = part.output as ViewFileOutput;
-  const { addToolApprovalResponse } = useChatFunctions();
+  const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
@@ -94,12 +94,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: false,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
               Deny
@@ -107,12 +102,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
               Approve

@@ -22,9 +22,14 @@ import { BUILT_IN_TOOLS, TOOL_IDS } from "./built-in-extensions-utils";
 export function BuiltInExtensionsConfig() {
   const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
   const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
+  const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
+  const mergedToolConfigs = {
+    ...DEFAULT_SETTINGS.TOOL_CONFIGS,
+    ...toolConfigs,
+  } satisfies ToolConfigs;
 
   const isToolConfigsDefault =
-    JSON.stringify({ enabledTools, toolConfigs }) ===
+    JSON.stringify({ enabledTools: mergedEnabledTools, toolConfigs: mergedToolConfigs }) ===
     JSON.stringify({
       enabledTools: DEFAULT_SETTINGS.ENABLED_TOOLS,
       toolConfigs: DEFAULT_SETTINGS.TOOL_CONFIGS,
@@ -80,7 +85,7 @@ export function BuiltInExtensionsConfig() {
             <div className="flex items-center gap-3 px-3 [&>h3]:flex-1">
               <Checkbox
                 id={`enabled-${toolId}`}
-                checked={enabledTools[toolId]}
+                checked={mergedEnabledTools[toolId]}
                 onCheckedChange={(checked) => updateToolEnabled(toolId, checked as boolean)}
                 aria-label={`Enable ${BUILT_IN_TOOLS[toolId].name}`}
               />
@@ -106,7 +111,7 @@ export function BuiltInExtensionsConfig() {
                   </div>
                   <Switch
                     id={`approval-${toolId}`}
-                    checked={toolConfigs[toolId].requiresApproval}
+                    checked={mergedToolConfigs[toolId].requiresApproval}
                     onCheckedChange={(checked) =>
                       updateToolConfig(toolId, {
                         requiresApproval: checked,
@@ -127,7 +132,7 @@ export function BuiltInExtensionsConfig() {
                     </div>
                     <Switch
                       id="dateTime-utc"
-                      checked={toolConfigs.dateTime.useUtc}
+                      checked={mergedToolConfigs.dateTime.useUtc}
                       onCheckedChange={(checked) =>
                         updateToolConfig("dateTime", { useUtc: checked })
                       }
@@ -145,15 +150,15 @@ export function BuiltInExtensionsConfig() {
                         id="wait-min"
                         type="number"
                         min={0}
-                        max={toolConfigs.waitNumberMilliseconds.maxMs}
-                        value={toolConfigs.waitNumberMilliseconds.minMs}
+                        max={mergedToolConfigs.waitNumberMilliseconds.maxMs}
+                        value={mergedToolConfigs.waitNumberMilliseconds.minMs}
                         onChange={(e) =>
                           updateToolConfig("waitNumberMilliseconds", {
                             minMs: Math.max(
                               0,
                               Math.min(
                                 parseInt(e.target.value) || 0,
-                                toolConfigs.waitNumberMilliseconds.maxMs,
+                                mergedToolConfigs.waitNumberMilliseconds.maxMs,
                               ),
                             ),
                           })
@@ -167,13 +172,13 @@ export function BuiltInExtensionsConfig() {
                       <Input
                         id="wait-max"
                         type="number"
-                        min={toolConfigs.waitNumberMilliseconds.minMs}
+                        min={mergedToolConfigs.waitNumberMilliseconds.minMs}
                         max={600000}
-                        value={toolConfigs.waitNumberMilliseconds.maxMs}
+                        value={mergedToolConfigs.waitNumberMilliseconds.maxMs}
                         onChange={(e) =>
                           updateToolConfig("waitNumberMilliseconds", {
                             maxMs: Math.max(
-                              toolConfigs.waitNumberMilliseconds.minMs,
+                              mergedToolConfigs.waitNumberMilliseconds.minMs,
                               Math.min(parseInt(e.target.value) || 60000, 600000),
                             ),
                           })
@@ -194,15 +199,15 @@ export function BuiltInExtensionsConfig() {
                           id="url-min"
                           type="number"
                           min={1}
-                          max={toolConfigs.getUrlContent.maxUrls}
-                          value={toolConfigs.getUrlContent.minUrls}
+                          max={mergedToolConfigs.getUrlContent.maxUrls}
+                          value={mergedToolConfigs.getUrlContent.minUrls}
                           onChange={(e) =>
                             updateToolConfig("getUrlContent", {
                               minUrls: Math.max(
                                 1,
                                 Math.min(
                                   parseInt(e.target.value) || 1,
-                                  toolConfigs.getUrlContent.maxUrls,
+                                  mergedToolConfigs.getUrlContent.maxUrls,
                                 ),
                               ),
                             })
@@ -216,13 +221,13 @@ export function BuiltInExtensionsConfig() {
                         <Input
                           id="url-max"
                           type="number"
-                          min={toolConfigs.getUrlContent.minUrls}
+                          min={mergedToolConfigs.getUrlContent.minUrls}
                           max={200}
-                          value={toolConfigs.getUrlContent.maxUrls}
+                          value={mergedToolConfigs.getUrlContent.maxUrls}
                           onChange={(e) =>
                             updateToolConfig("getUrlContent", {
                               maxUrls: Math.max(
-                                toolConfigs.getUrlContent.minUrls,
+                                mergedToolConfigs.getUrlContent.minUrls,
                                 Math.min(parseInt(e.target.value) || 5, 200),
                               ),
                             })
@@ -239,7 +244,7 @@ export function BuiltInExtensionsConfig() {
                         type="number"
                         min={100}
                         max={50000}
-                        value={toolConfigs.getUrlContent.defaultMaxLength}
+                        value={mergedToolConfigs.getUrlContent.defaultMaxLength}
                         onChange={(e) =>
                           updateToolConfig("getUrlContent", {
                             defaultMaxLength: Math.max(
@@ -263,7 +268,7 @@ export function BuiltInExtensionsConfig() {
                       type="number"
                       min={100}
                       max={100000}
-                      value={toolConfigs.viewFile.defaultMaxChars}
+                      value={mergedToolConfigs.viewFile.defaultMaxChars}
                       onChange={(e) =>
                         updateToolConfig("viewFile", {
                           defaultMaxChars: Math.max(
@@ -286,10 +291,7 @@ export function BuiltInExtensionsConfig() {
                       type="number"
                       min={1000}
                       max={600000}
-                      value={
-                        (toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand)
-                          .defaultTimeoutMs
-                      }
+                      value={mergedToolConfigs.executeCommand.defaultTimeoutMs}
                       onChange={(e) =>
                         updateToolConfig("executeCommand", {
                           defaultTimeoutMs: Math.max(
@@ -299,6 +301,13 @@ export function BuiltInExtensionsConfig() {
                         })
                       }
                     />
+                  </div>
+                )}
+
+                {toolId === "subAgent" && (
+                  <div className="text-muted-foreground text-xs">
+                    Subagents inherit the current model and enabled tools, but cannot spawn other
+                    subagents.
                   </div>
                 )}
 
@@ -313,7 +322,7 @@ export function BuiltInExtensionsConfig() {
                         type="number"
                         min={1}
                         max={50}
-                        value={toolConfigs.webSearch.maxConcurrent}
+                        value={mergedToolConfigs.webSearch.maxConcurrent}
                         onChange={(e) =>
                           updateToolConfig("webSearch", {
                             maxConcurrent: Math.max(1, Math.min(parseInt(e.target.value) || 3, 50)),
@@ -331,7 +340,7 @@ export function BuiltInExtensionsConfig() {
                           type="number"
                           min={1}
                           max={200}
-                          value={toolConfigs.webSearch.defaultMaxResults}
+                          value={mergedToolConfigs.webSearch.defaultMaxResults}
                           onChange={(e) =>
                             updateToolConfig("webSearch", {
                               defaultMaxResults: Math.max(
@@ -351,7 +360,7 @@ export function BuiltInExtensionsConfig() {
                           type="number"
                           min={1}
                           max={20}
-                          value={toolConfigs.webSearch.defaultMaxPages}
+                          value={mergedToolConfigs.webSearch.defaultMaxPages}
                           onChange={(e) =>
                             updateToolConfig("webSearch", {
                               defaultMaxPages: Math.max(

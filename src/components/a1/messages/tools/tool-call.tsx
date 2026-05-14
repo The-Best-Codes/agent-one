@@ -16,7 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -28,7 +28,7 @@ interface ToolCallPartProps {
 export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
   const callId = part.toolCallId;
   const toolName = getToolDisplayName(part.type.replace("tool-", ""), part.title);
-  const { addToolApprovalResponse } = useChatFunctions();
+  const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   switch (part.state) {
@@ -45,12 +45,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: false,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
               Deny
@@ -58,12 +53,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
               Approve

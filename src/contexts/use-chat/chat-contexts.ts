@@ -1,6 +1,7 @@
 import { createContext } from "react";
 
 import type {
+  ChatApprovalHandler,
   ChatFunctionsContextType,
   ChatMessagesContextType,
   ChatMetadataContextType,
@@ -13,3 +14,4 @@ export const ChatStatusContext = createContext<ChatStatusContextType | undefined
 export const ChatMetadataContext = createContext<ChatMetadataContextType | undefined>(undefined);
 export const ChatLoadingContext = createContext<boolean>(false);
 export const ChatFunctionsContext = createContext<ChatFunctionsContextType | undefined>(undefined);
+export const ChatApprovalHandlerContext = createContext<ChatApprovalHandler | undefined>(undefined);
