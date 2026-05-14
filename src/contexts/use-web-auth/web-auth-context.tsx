@@ -50,7 +50,6 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
             id: data.user.id,
             name: data.user.name,
             email: data.user.email,
-            image: data.user.image,
           });
           void setAgentOneApiKey(accessToken);
           setAgentOneConfig({ enabled: true, headers: {}, models: [] });
