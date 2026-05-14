@@ -24,6 +24,7 @@ import {
   isServerCached,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
+import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import {
@@ -40,9 +41,7 @@ import { ToolsContext } from "./tools-contexts";
 const logger = getLogger(import.meta.url);
 
 export interface ToolsContextType {
-  getTools: (options?: {
-    subAgentContext?: import("@/lib/ai/tools/subAgent").SubAgentExecutionContext;
-  }) => Promise<ToolSet>;
+  getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
 }
@@ -383,9 +382,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   }, [mcpServers, parallelLoadLimit, mcpAuthStates, setMcpServerLoadStates]);
 
   const getTools = useCallback(
-    async (options?: {
-      subAgentContext?: import("@/lib/ai/tools/subAgent").SubAgentExecutionContext;
-    }): Promise<ToolSet> => {
+    async (options?: { subAgentContext?: SubAgentExecutionContext }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
 
       if (enabledTools.dateTime) {

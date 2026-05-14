@@ -66,6 +66,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
   const pendingApprovals = liveState?.pendingApprovalIds ?? [];
   const hasPendingApprovals = pendingApprovals.length > 0;
   const isExpanded = Boolean(isAccordionOpen || hasPendingApprovals);
+  const showSpinnerIcon = isStreaming;
   const nestedApprovalHandler = useCallback(
     async ({ id, approved, reason }: { id: string; approved: boolean; reason?: string }) => {
       respondToSubAgentApproval(callId, id, approved, reason);
@@ -162,9 +163,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  {isStreaming ||
-                  liveState?.status === "running" ||
-                  liveState?.status === "waiting-approval" ? (
+                  {showSpinnerIcon ? (
                     <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
                   ) : (
                     <IconHierarchy3
@@ -174,16 +173,14 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
                       )}
                     />
                   )}
-                  {!isStreaming &&
-                    liveState?.status !== "running" &&
-                    liveState?.status !== "waiting-approval" && (
-                      <IconChevronDown
-                        className={cn(
-                          "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-100 group-hover/subagent-accordion:opacity-100",
-                          isExpanded && "scale-100 opacity-100",
-                        )}
-                      />
-                    )}
+                  {!showSpinnerIcon && (
+                    <IconChevronDown
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-100 group-hover/subagent-accordion:opacity-100",
+                        isExpanded && "scale-100 opacity-100",
+                      )}
+                    />
+                  )}
                 </div>
               }
               iconPosition="left"
