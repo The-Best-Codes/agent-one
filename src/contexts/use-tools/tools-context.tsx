@@ -10,6 +10,7 @@ import {
   createEditFileTool,
   createExecuteCommandTool,
   createGetUrlContentTool,
+  createSubAgentTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
@@ -23,6 +24,7 @@ import {
   isServerCached,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
+import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
 import {
@@ -39,7 +41,7 @@ import { ToolsContext } from "./tools-contexts";
 const logger = getLogger(import.meta.url);
 
 export interface ToolsContextType {
-  getTools: () => Promise<ToolSet>;
+  getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
 }
@@ -379,53 +381,62 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     loadingPromiseRef.current = promise;
   }, [mcpServers, parallelLoadLimit, mcpAuthStates, setMcpServerLoadStates]);
 
-  const getTools = useCallback(async (): Promise<ToolSet> => {
-    const filteredStaticTools: ToolSet = {};
+  const getTools = useCallback(
+    async (options?: { subAgentContext?: SubAgentExecutionContext }): Promise<ToolSet> => {
+      const filteredStaticTools: ToolSet = {};
 
-    if (enabledTools.dateTime) {
-      filteredStaticTools.dateTime = createDateTimeTool(toolConfigs.dateTime);
-    }
-    if (enabledTools.waitNumberMilliseconds) {
-      filteredStaticTools.waitNumberMilliseconds = createWaitTool(
-        toolConfigs.waitNumberMilliseconds,
-      );
-    }
-    if (enabledTools.getUrlContent) {
-      filteredStaticTools.getUrlContent = createGetUrlContentTool(toolConfigs.getUrlContent);
-    }
-    if (enabledTools.webSearch) {
-      filteredStaticTools.webSearch = createWebSearchTool(toolConfigs.webSearch);
-    }
-    if (enabledTools.editFile) {
-      filteredStaticTools.editFile = createEditFileTool(toolConfigs.editFile);
-    }
-    if (enabledTools.createFile) {
-      filteredStaticTools.createFile = createCreateFileTool(toolConfigs.createFile);
-    }
-    if (enabledTools.deleteFile) {
-      filteredStaticTools.deleteFile = createDeleteFileTool(toolConfigs.deleteFile);
-    }
-    if (enabledTools.viewFile) {
-      filteredStaticTools.viewFile = createViewFileTool(toolConfigs.viewFile);
-    }
-    if (enabledTools.executeCommand) {
-      filteredStaticTools.executeCommand = createExecuteCommandTool(
-        toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
-      );
-    }
+      if (enabledTools.dateTime) {
+        filteredStaticTools.dateTime = createDateTimeTool(toolConfigs.dateTime);
+      }
+      if (enabledTools.waitNumberMilliseconds) {
+        filteredStaticTools.waitNumberMilliseconds = createWaitTool(
+          toolConfigs.waitNumberMilliseconds,
+        );
+      }
+      if (enabledTools.getUrlContent) {
+        filteredStaticTools.getUrlContent = createGetUrlContentTool(toolConfigs.getUrlContent);
+      }
+      if (enabledTools.webSearch) {
+        filteredStaticTools.webSearch = createWebSearchTool(toolConfigs.webSearch);
+      }
+      if (enabledTools.editFile) {
+        filteredStaticTools.editFile = createEditFileTool(toolConfigs.editFile);
+      }
+      if (enabledTools.createFile) {
+        filteredStaticTools.createFile = createCreateFileTool(toolConfigs.createFile);
+      }
+      if (enabledTools.deleteFile) {
+        filteredStaticTools.deleteFile = createDeleteFileTool(toolConfigs.deleteFile);
+      }
+      if (enabledTools.viewFile) {
+        filteredStaticTools.viewFile = createViewFileTool(toolConfigs.viewFile);
+      }
+      if (enabledTools.executeCommand) {
+        filteredStaticTools.executeCommand = createExecuteCommandTool(
+          toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+        );
+      }
+      if (enabledTools.subAgent && options?.subAgentContext) {
+        filteredStaticTools.subAgent = createSubAgentTool(
+          toolConfigs.subAgent ?? DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent,
+          options.subAgentContext,
+        );
+      }
 
-    if (!mcpLoadedRef.current && loadingPromiseRef.current) {
-      await loadingPromiseRef.current;
-    }
+      if (!mcpLoadedRef.current && loadingPromiseRef.current) {
+        await loadingPromiseRef.current;
+      }
 
-    return {
-      ...filteredStaticTools,
-      ...mcpToolsRef.current,
-      ...(Object.keys(mcpToolsRef.current).length > 0 && {
-        describeNextTool: createDescribeNextToolTool(),
-      }),
-    };
-  }, [enabledTools, toolConfigs]);
+      return {
+        ...filteredStaticTools,
+        ...mcpToolsRef.current,
+        ...(Object.keys(mcpToolsRef.current).length > 0 && {
+          describeNextTool: createDescribeNextToolTool(),
+        }),
+      };
+    },
+    [enabledTools, toolConfigs],
+  );
 
   return (
     <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>

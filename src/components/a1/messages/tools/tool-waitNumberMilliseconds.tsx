@@ -16,7 +16,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
 }: WaitNumberMillisecondsToolPartProps) => {
   const callId = part.toolCallId;
   const input = part.input as WaitNumberMillisecondsInput;
-  const { addToolApprovalResponse } = useChatFunctions();
+  const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const safeFormatMilliseconds = (milliseconds: number) => {
@@ -78,12 +78,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: false,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
               Deny
@@ -91,12 +86,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                addToolApprovalResponse({
-                  id: part.approval.id,
-                  approved: true,
-                })
-              }
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
               Approve

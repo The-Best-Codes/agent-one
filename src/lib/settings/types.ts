@@ -74,7 +74,8 @@ export type ToolId =
   | "createFile"
   | "deleteFile"
   | "viewFile"
-  | "executeCommand";
+  | "executeCommand"
+  | "subAgent";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -123,6 +124,10 @@ export interface ExecuteCommandToolConfig {
   defaultTimeoutMs: number;
 }
 
+export interface SubAgentToolConfig {
+  requiresApproval: boolean;
+}
+
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
@@ -133,6 +138,7 @@ export interface ToolConfigs {
   deleteFile: DeleteFileToolConfig;
   viewFile: ViewFileToolConfig;
   executeCommand: ExecuteCommandToolConfig;
+  subAgent: SubAgentToolConfig;
 }
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
@@ -215,6 +221,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     deleteFile: true,
     viewFile: true,
     executeCommand: true,
+    subAgent: true,
   },
   TOOL_CONFIGS: {
     dateTime: {
@@ -254,6 +261,9 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     executeCommand: {
       requiresApproval: true,
       defaultTimeoutMs: 120000,
+    },
+    subAgent: {
+      requiresApproval: true,
     },
   },
   MCP_SERVERS: [],

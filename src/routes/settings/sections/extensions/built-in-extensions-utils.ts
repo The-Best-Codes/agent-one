@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 
 import { enabledToolsAtom } from "@/lib/jotai/settings-atoms";
-import { type ToolId } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS, type ToolId } from "@/lib/settings/types";
 
 export const BUILT_IN_TOOLS: Record<
   ToolId,
@@ -52,6 +52,11 @@ export const BUILT_IN_TOOLS: Record<
     description: "Execute terminal commands on your system",
     searchTerms: "execute command terminal shell bash run script",
   },
+  subAgent: {
+    name: "Spawn subagent",
+    description: "Delegate focused work to a streamed subagent",
+    searchTerms: "subagent delegate nested agent parallel work",
+  },
 };
 
 export const TOOL_IDS = Object.keys(BUILT_IN_TOOLS) as ToolId[];
@@ -63,5 +68,6 @@ export const BUILT_IN_SEARCH_TEXT = TOOL_IDS.map((id) => {
 
 export function useEnabledToolCount(): number {
   const [enabledTools] = useAtom(enabledToolsAtom);
-  return TOOL_IDS.filter((id) => enabledTools[id]).length;
+  const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
+  return TOOL_IDS.filter((id) => mergedEnabledTools[id]).length;
 }

@@ -18,6 +18,7 @@ import {
   createEmptyMessageTokenUsage,
   type ChatMessageMetadata,
 } from "@/lib/ai/chat-usage";
+import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -27,7 +28,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private modelId: string | null;
   private modelConfig: ModelConfig;
   private smoothStreamEnabled: boolean;
-  private getTools: () => Promise<ToolSet>;
+  private getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
   private getSystemPrompt: () => string;
   private getApiKeysLoadedPromise: () => Promise<void>;
 
@@ -36,7 +37,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     modelId: string | null,
     modelConfig: ModelConfig,
     smoothStreamEnabled: boolean,
-    getTools: () => Promise<ToolSet>,
+    getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>,
     getSystemPrompt: () => string,
     getApiKeysLoadedPromise: () => Promise<void>,
   ) {
@@ -99,7 +100,13 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     }
 
     await this.getApiKeysLoadedPromise();
-    const tools = await this.getTools();
+    const subAgentContext: SubAgentExecutionContext = {
+      model,
+      modelConfig,
+      systemPrompt: this.getSystemPrompt(),
+      getTools: () => this.getTools({ subAgentContext }),
+    };
+    const tools = await this.getTools({ subAgentContext });
 
     const stopWhenCondition: StopCondition<ToolSet> =
       modelConfig.maxSteps === undefined ? () => false : stepCountIs(modelConfig.maxSteps);

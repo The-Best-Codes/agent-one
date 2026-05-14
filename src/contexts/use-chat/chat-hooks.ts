@@ -4,6 +4,7 @@ import { useContext } from "react";
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
 
 import {
+  ChatApprovalHandlerContext,
   ChatFunctionsContext,
   ChatLoadingContext,
   ChatMessagesContext,
@@ -26,6 +27,12 @@ export type ChatFunctionsContextType = Pick<
   | "stop"
   | "setMessages"
 >;
+
+export type ChatApprovalHandler = (args: {
+  id: string;
+  approved: boolean;
+  reason?: string;
+}) => Promise<void>;
 
 export const useChatMessages = (): ChatMessagesContextType => {
   const context = useContext(ChatMessagesContext);
@@ -61,4 +68,8 @@ export const useChatFunctions = (): ChatFunctionsContextType => {
     throw new Error("useChatFunctions must be used within a ChatProvider");
   }
   return context;
+};
+
+export const useChatApprovalHandler = (): ChatApprovalHandler | undefined => {
+  return useContext(ChatApprovalHandlerContext);
 };

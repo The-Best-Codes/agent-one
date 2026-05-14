@@ -1,0 +1,281 @@
+import {
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconHierarchy3,
+  IconHourglassHigh,
+  IconX,
+} from "@tabler/icons-react";
+import type { ToolUIPart } from "ai";
+import { useCallback } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/native/accordion";
+import { Spinner } from "@/components/ui/spinner";
+import { ChatApprovalHandlerContext } from "@/contexts/use-chat/chat-contexts";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
+import {
+  getSubAgentLiveState,
+  respondToSubAgentApproval,
+  subscribeSubAgentLiveState,
+  type SubAgentInput,
+  type SubAgentOutput,
+} from "@/lib/ai/tools/subAgent";
+import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+
+import { SubagentTranscript } from "../parts/subagent-transcript";
+
+interface SubAgentToolPartProps {
+  part: ToolUIPart;
+}
+
+function getDisplayedMessage(part: ToolUIPart) {
+  if (part.state === "output-available") {
+    const output = part.output as SubAgentOutput | undefined;
+    return output?.message;
+  }
+
+  return undefined;
+}
+
+export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
+  const callId = part.toolCallId;
+  const input = part.input as SubAgentInput | undefined;
+  const approvalHandler = useChatApprovalHandler();
+  const [isAccordionOpen, setIsAccordionOpen] = useState<boolean | undefined>();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
+
+  const liveState = useSyncExternalStore(
+    (listener) => subscribeSubAgentLiveState(callId, listener),
+    () => getSubAgentLiveState(callId),
+    () => getSubAgentLiveState(callId),
+  );
+
+  const task = input?.task || "unknown task";
+  const truncatedTask = task.length > 96 ? `${task.slice(0, 96)}...` : task;
+  const displayedMessage = liveState?.message ?? getDisplayedMessage(part);
+  const isStreaming =
+    part.state === "output-available" && (part as { preliminary?: boolean }).preliminary === true;
+  const pendingApprovals = liveState?.pendingApprovalIds ?? [];
+  const hasPendingApprovals = pendingApprovals.length > 0;
+  const isExpanded = Boolean(isAccordionOpen || hasPendingApprovals);
+  const showSpinnerIcon = isStreaming;
+  const nestedApprovalHandler = useCallback(
+    async ({ id, approved, reason }: { id: string; approved: boolean; reason?: string }) => {
+      respondToSubAgentApproval(callId, id, approved, reason);
+    },
+    [callId],
+  );
+
+  const headerText = useMemo(() => {
+    if (part.state === "output-denied") {
+      return "Subagent denied";
+    }
+    if (part.state === "output-error") {
+      return part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL
+        ? "Subagent cancelled"
+        : "Subagent error";
+    }
+    if (liveState?.status === "waiting-approval") {
+      return `Subagent waiting for ${pendingApprovals.length === 1 ? "approval" : "approvals"}`;
+    }
+    if (isStreaming || part.state === "approval-responded" || part.state === "input-available") {
+      return "Subagent running";
+    }
+    if (part.state === "output-available") {
+      return "Subagent finished";
+    }
+    return "Preparing subagent";
+  }, [isStreaming, liveState?.status, part, pendingApprovals.length]);
+
+  switch (part.state) {
+    case "approval-requested":
+      return (
+        <div className="border-border flex w-full max-w-2xl flex-col gap-2 rounded-md border p-2">
+          <div className="flex items-center gap-1">
+            <IconHierarchy3 className="text-foreground size-4 shrink-0" />
+            <span className="text-foreground text-sm font-bold">
+              AgentOne wants to spawn a subagent
+            </span>
+          </div>
+          <div className="bg-secondary rounded px-2 py-1 text-xs break-words">{task}</div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
+            >
+              <IconX data-icon="inline-start" />
+              Deny
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
+            >
+              <IconCircleCheck data-icon="inline-start" />
+              Approve
+            </Button>
+          </div>
+        </div>
+      );
+
+    case "output-denied":
+      return (
+        <div className="flex items-center gap-1">
+          <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+          <span className="text-muted-foreground text-sm font-bold">Subagent denied</span>
+        </div>
+      );
+
+    case "input-streaming":
+      return (
+        <div className="flex items-center gap-1">
+          <Spinner className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">Preparing subagent...</span>
+        </div>
+      );
+
+    case "approval-responded":
+    case "input-available":
+    case "output-available": {
+      return (
+        <Accordion
+          type="single"
+          collapsible
+          onValueChange={(value) => setIsAccordionOpen(value === callId)}
+          className="text-foreground flex w-full max-w-3xl flex-row bg-transparent p-0 text-sm"
+        >
+          <AccordionItem
+            value={callId}
+            className={cn(
+              "group/subagent-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
+              isExpanded && "border border-b! p-2",
+            )}
+          >
+            <AccordionTrigger
+              icon={
+                <div className="relative">
+                  {showSpinnerIcon ? (
+                    <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
+                  ) : (
+                    <IconHierarchy3
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-0 group-hover/subagent-accordion:opacity-0",
+                        isExpanded && "scale-0 opacity-0",
+                      )}
+                    />
+                  )}
+                  {!showSpinnerIcon && (
+                    <IconChevronDown
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-100 group-hover/subagent-accordion:opacity-100",
+                        isExpanded && "scale-100 opacity-100",
+                      )}
+                    />
+                  )}
+                </div>
+              }
+              iconPosition="left"
+              shouldRotateIcon={true}
+              className="justify-start gap-1 p-0 font-bold hover:no-underline"
+            >
+              <span className="max-w-2xl truncate">
+                {headerText}: <code className="text-xs">{truncatedTask}</code>
+              </span>
+              {hasPendingApprovals && !isExpanded && (
+                <span className="border-border text-muted-foreground ml-2 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium">
+                  <IconHourglassHigh className="size-3 shrink-0" />
+                  Approval needed
+                </span>
+              )}
+            </AccordionTrigger>
+            <AccordionContent className="p-0 pt-2">
+              <div className="flex flex-col gap-3">
+                <div className="text-muted-foreground text-xs">Task: {task}</div>
+                {displayedMessage ? (
+                  <ChatApprovalHandlerContext.Provider value={nestedApprovalHandler}>
+                    <SubagentTranscript message={displayedMessage} />
+                  </ChatApprovalHandlerContext.Provider>
+                ) : null}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      );
+    }
+
+    case "output-error":
+      if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
+        return (
+          <div className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">Subagent cancelled</span>
+          </div>
+        );
+      }
+
+      return (
+        <Accordion
+          type="single"
+          collapsible
+          onValueChange={(value) => setIsErrorAccordionOpen(value === callId)}
+          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
+        >
+          <AccordionItem
+            value={callId}
+            className={cn(
+              "group/subagent-error-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+              isErrorAccordionOpen && "border border-b! p-2",
+            )}
+          >
+            <AccordionTrigger
+              icon={
+                <div className="relative">
+                  <IconCircleX
+                    className={cn(
+                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/subagent-error-accordion:scale-0 group-hover/subagent-error-accordion:opacity-0",
+                      isErrorAccordionOpen && "scale-0 opacity-0",
+                    )}
+                  />
+                  <IconChevronDown
+                    className={cn(
+                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-error-accordion:scale-100 group-hover/subagent-error-accordion:opacity-100",
+                      isErrorAccordionOpen && "scale-100 opacity-100",
+                    )}
+                  />
+                </div>
+              }
+              iconPosition="left"
+              shouldRotateIcon={true}
+              className="justify-start gap-1 p-0 font-bold hover:no-underline"
+            >
+              <span className="text-destructive max-w-2xl truncate">Subagent error</span>
+            </AccordionTrigger>
+            <AccordionContent className="p-0 pt-2">
+              <div className="text-destructive/80 text-sm font-normal">
+                {part.errorText || "Unknown error"}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      );
+
+    default:
+      return (
+        <div className="flex items-center gap-1">
+          <IconHierarchy3 className="text-foreground size-4 shrink-0" />
+          <span className="text-foreground text-sm font-bold">Subagent executed</span>
+        </div>
+      );
+  }
+};
+
+MessagePartToolSubAgent.displayName = "MessagePartToolSubAgent";
