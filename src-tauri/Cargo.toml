@@ -44,7 +44,7 @@ keyring-core = "1.0.0"
 tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
 axum = "0.8.9"
 url = "2.5.8"
-rmcp = { version = "1.6.0", features = [
+rmcp = { version = "1.7.0", features = [
   "auth",
   "client",
   "transport-streamable-http-client",
