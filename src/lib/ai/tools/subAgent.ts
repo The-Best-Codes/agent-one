@@ -388,7 +388,7 @@ export const createSubAgentTool = (
 ) => {
   return {
     description:
-      "Spawn a subagent to work on a focused task. The subagent can use the same tools as AgentOne except it cannot spawn more subagents.",
+      "Spawn a subagent to work on a focused task. The subagent can use the same tools as you, except it cannot spawn more subagents.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       task: z.string().min(1).describe("The task for the subagent to complete"),
