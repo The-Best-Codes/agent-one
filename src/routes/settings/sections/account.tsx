@@ -1,10 +1,10 @@
-import { IconCreditCard, IconExternalLink, IconRocket } from "@tabler/icons-react";
+import { IconCreditCard, IconExternalLink, IconLogout, IconRocket } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +35,8 @@ export default function AccountSection() {
   const {
     user,
     isLoading: isAuthLoading,
+    isSigningOut,
+    signOut,
     customerState,
     billingLoading,
     billingError,
@@ -70,121 +72,113 @@ export default function AccountSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Plan &amp; Usage</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {(isAuthLoading || billingLoading) && !customerState ? (
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-56" />
-            </div>
-          ) : !user ? (
-            <div className="flex flex-col gap-1">
-              <p className="font-medium">Free</p>
-              <p className="text-muted-foreground text-sm">
-                Sign in to load your current subscription and manage billing.
-              </p>
-            </div>
-          ) : billingError ? (
-            <p className="text-muted-foreground text-sm">{billingError}</p>
-          ) : (
-            <>
-              <div className="flex flex-col gap-1">
-                <p className="font-medium">{currentPlanName}</p>
-                {activeSubscription ? (
-                  <p className="text-muted-foreground text-sm">
-                    {renewalDate ? `Renews ${renewalDate}.` : "Your subscription is active."}
-                  </p>
-                ) : (
-                  <p className="text-muted-foreground text-sm">
-                    Upgrade to Pro for higher limits and premium features.
-                  </p>
-                )}
-              </div>
-              {usageSummary ? (
-                <Field>
-                  <FieldLabel htmlFor="credits-used">
-                    <span>Credits used</span>
-                    <span className="text-muted-foreground ml-auto">
-                      {usageSummary.credited > 0
-                        ? `${formatNumber((usageSummary.consumed / usageSummary.credited) * 100)}%`
-                        : "0%"}
-                    </span>
-                  </FieldLabel>
-                  <Progress
-                    id="credits-used"
-                    value={
-                      usageSummary.credited > 0
-                        ? Math.min((usageSummary.consumed / usageSummary.credited) * 100, 100)
-                        : 0
-                    }
-                  />
-                  <FieldDescription>
-                    {formatNumber(usageSummary.remaining)} credits remaining this period.
-                  </FieldDescription>
-                </Field>
-              ) : (
-                <p className="text-muted-foreground text-sm">No active usage meters.</p>
-              )}
-            </>
-          )}
-        </CardContent>
-        <CardFooter className="flex gap-2">
-          {!billingLoading && user && !billingError && !activeSubscription && (
-            <Button
-              size="sm"
-              asChild
-              analytics={{
-                event: "settings_external_link_clicked",
-                params: { section: "account", control: "upgrade_plan" },
-              }}
-            >
-              <a href={UPGRADE_URL} target="_blank" rel="noopener noreferrer">
-                <IconRocket data-icon="inline-start" />
-                <span>Upgrade your Plan</span>
-              </a>
-            </Button>
-          )}
-          {!billingLoading && user && !billingError && activeSubscription && (
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              analytics={{
-                event: "settings_external_link_clicked",
-                params: { section: "account", control: "manage_billing" },
-              }}
-            >
-              <a href={BILLING_URL} target="_blank" rel="noopener noreferrer">
-                <IconCreditCard data-icon="inline-start" />
-                <span>Manage Billing</span>
-              </a>
-            </Button>
-          )}
-          {!billingLoading && user && (
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              analytics={{
-                event: "settings_external_link_clicked",
-                params: { section: "account", control: "account_dashboard" },
-              }}
-            >
-              <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
-                <IconExternalLink data-icon="inline-start" />
-                <span>Account Dashboard</span>
-              </a>
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Sync &amp; Access</CardTitle>
+          <CardTitle>Account, Sync &amp; Access</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <AuthStatusDisplay />
+          <AuthStatusDisplay
+            signedInAction={
+              user ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    asChild
+                    analytics={{
+                      event: "settings_external_link_clicked",
+                      params: { section: "account", control: "account_dashboard" },
+                    }}
+                  >
+                    <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
+                      <IconExternalLink data-icon="inline-start" />
+                      <span>Account</span>
+                      <span className="sr-only lg:not-sr-only"> Dashboard</span>
+                    </a>
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
+                    <IconLogout data-icon="inline-start" />
+                    <span>Sign out</span>
+                  </Button>
+                </div>
+              ) : undefined
+            }
+          />
+          {user && (
+            <div className="flex flex-col gap-4">
+              {(isAuthLoading || billingLoading) && !customerState ? (
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-56" />
+                  <Skeleton className="h-2 w-full" />
+                </div>
+              ) : billingError ? (
+                <p className="text-muted-foreground text-sm">{billingError}</p>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <p className="font-medium">You're on the {currentPlanName} Plan</p>
+                      <p className="text-muted-foreground text-sm">
+                        {activeSubscription
+                          ? renewalDate
+                            ? `Renews ${renewalDate}.`
+                            : "Your subscription is active."
+                          : "Upgrade to Pro for higher limits and premium features."}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      asChild
+                      analytics={{
+                        event: "settings_external_link_clicked",
+                        params: {
+                          section: "account",
+                          control: activeSubscription ? "manage_billing" : "upgrade_plan",
+                        },
+                      }}
+                    >
+                      <a
+                        href={activeSubscription ? BILLING_URL : UPGRADE_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {activeSubscription ? (
+                          <IconCreditCard data-icon="inline-start" />
+                        ) : (
+                          <IconRocket data-icon="inline-start" />
+                        )}
+                        <span>{activeSubscription ? "Manage Billing" : "Upgrade"}</span>
+                      </a>
+                    </Button>
+                  </div>
+                  {usageSummary ? (
+                    <Field>
+                      <FieldLabel htmlFor="credits-used">
+                        <span>Credits used</span>
+                        <span className="text-muted-foreground ml-auto">
+                          {usageSummary.credited > 0
+                            ? `${formatNumber((usageSummary.consumed / usageSummary.credited) * 100)}%`
+                            : "0%"}
+                        </span>
+                      </FieldLabel>
+                      <Progress
+                        id="credits-used"
+                        value={
+                          usageSummary.credited > 0
+                            ? Math.min((usageSummary.consumed / usageSummary.credited) * 100, 100)
+                            : 0
+                        }
+                      />
+                      <FieldDescription>
+                        {formatNumber(usageSummary.remaining)} credits remaining this period.
+                      </FieldDescription>
+                    </Field>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">No active usage meters.</p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col gap-1">
               <Label htmlFor="sync-enabled" className="text-sm font-medium">

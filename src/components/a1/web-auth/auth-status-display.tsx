@@ -10,9 +10,10 @@ import { cn } from "@/lib/utils";
 
 interface AuthStatusDisplayProps {
   className?: string;
+  signedInAction?: ReactNode;
 }
 
-export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
+export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDisplayProps) {
   const {
     user,
     isLoading,
@@ -100,10 +101,12 @@ export function AuthStatusDisplay({ className }: AuthStatusDisplayProps) {
         className={className}
         user={user}
         action={
-          <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
-            {isSigningOut && <Spinner data-icon="inline-start" />}
-            Sign out
-          </Button>
+          signedInAction ?? (
+            <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
+              {isSigningOut && <Spinner data-icon="inline-start" />}
+              Sign out
+            </Button>
+          )
         }
       />
     );
