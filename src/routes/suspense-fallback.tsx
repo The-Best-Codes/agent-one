@@ -6,9 +6,9 @@ export default function SuspenseFallback() {
       data-testid="main"
     >
       <img src="/icon-dark-wide-padding.svg" alt="AgentOne" className="size-48" />
-      <span className="text-gradient-shimmer from-foreground via-muted-foreground to-foreground bg-linear-to-r p-4 text-xl select-none">
-        Almost there!
-      </span>
+      <div className="mt-2 h-1">
+        {/* Placeholder to prevent layout shift after progress bar is hidden */}
+      </div>
     </main>
   );
 }
