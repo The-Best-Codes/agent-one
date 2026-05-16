@@ -10,9 +10,12 @@ import { PersistenceProvider } from "@/contexts/use-persistence/persistence-cont
 import { ToolsProvider } from "@/contexts/use-tools/tools-context";
 import { UpdateProvider } from "@/contexts/use-update/update-context";
 import { WebAuthProvider } from "@/contexts/use-web-auth/web-auth-context";
+import { applyStartupPath } from "@/lib/windowing";
 import SuspenseFallback from "@/routes/suspense-fallback";
 
 import App from "./App";
+
+applyStartupPath();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

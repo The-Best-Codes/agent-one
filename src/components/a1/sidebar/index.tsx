@@ -1,8 +1,15 @@
-import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
+import {
+  IconAppWindow,
+  IconLayoutSidebar,
+  IconPlus,
+  IconSearch,
+  IconSettings,
+} from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +26,7 @@ import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
+import { openNewWindow } from "@/lib/windowing";
 
 import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
@@ -42,6 +50,26 @@ const SidebarContent = ({
     <div className="flex h-full flex-col">
       <div className="mb-2 flex flex-row items-center justify-center gap-2">
         <span className="text-xl">AgentOne</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => {
+                void openNewWindow("/chat").catch((error) => {
+                  logger.error("Failed to open new window", error);
+                  toast.error("Failed to open new window");
+                });
+              }}
+              analytics={{ event: "new_window_clicked", params: { source: "sidebar" } }}
+              aria-label="Open new window"
+              className="ml-auto size-6"
+            >
+              <IconAppWindow />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Open new window</TooltipContent>
+        </Tooltip>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
         <ChatList

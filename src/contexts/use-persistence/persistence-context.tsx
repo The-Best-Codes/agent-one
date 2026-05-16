@@ -7,6 +7,7 @@ import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-cat
 import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
 import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
+import { emitMetadataSync, onMetadataSync } from "@/lib/windowing";
 
 import { PersistenceContext } from "./persistence-contexts";
 
@@ -80,49 +81,44 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     });
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
+  const reloadFromStorage = useCallback(async () => {
+    const rawIds = await chatStorage.getItem(CHAT_IDS_KEY);
 
-    const loadInitialData = async () => {
-      const rawIds = await chatStorage.getItem(CHAT_IDS_KEY);
-      if (cancelled) return;
+    let ids: string[] = [];
+    if (rawIds) {
+      try {
+        ids = JSON.parse(rawIds);
+      } catch (error) {
+        logger.error("Failed to parse chat IDs from storage", error);
+      }
+    }
 
-      let ids: string[] = [];
-      if (rawIds) {
+    const cache = new Map<string, ChatMetadata>();
+    const results = await Promise.all(
+      ids.map(async (id) => {
         try {
-          ids = JSON.parse(rawIds);
+          const metadata = await chatStorage.getChatMetadata(id);
+          return [id, metadata ?? { ...DEFAULT_METADATA }] as const;
         } catch (error) {
-          logger.error("Failed to parse chat IDs from storage", error);
+          logger.error(`Failed to load metadata for chat ${id}`, error);
+          return [id, { ...DEFAULT_METADATA }] as const;
         }
-      }
+      }),
+    );
 
-      const cache = new Map<string, ChatMetadata>();
+    for (const [id, metadata] of results) {
+      cache.set(id, metadata);
+    }
 
-      const results = await Promise.all(
-        ids.map(async (id) => {
-          try {
-            const metadata = await chatStorage.getChatMetadata(id);
-            if (metadata) {
-              return [id, metadata] as const;
-            }
-            return [id, { ...DEFAULT_METADATA }] as const;
-          } catch (error) {
-            logger.error(`Failed to load metadata for chat ${id}`, error);
-            return [id, { ...DEFAULT_METADATA }] as const;
-          }
-        }),
-      );
+    metadataCacheRef.current = cache;
+    setChatIds(ids);
+    setChatUpdateTrigger((prev) => prev + 1);
+    setIsMetadataLoaded(true);
+  }, [setChatIds, setChatUpdateTrigger]);
 
-      if (cancelled) return;
-
-      for (const [id, metadata] of results) {
-        cache.set(id, metadata);
-      }
-
-      metadataCacheRef.current = cache;
-      setChatIds(ids);
-      setIsMetadataLoaded(true);
-
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void reloadFromStorage().then(() => {
       void chatStorage
         .performStartupMaintenance()
         .then(() => chatStorage.ensureSearchIndexConsistency())
@@ -137,15 +133,17 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         .catch((error) => {
           logger.error("Failed to run chat storage startup maintenance", error);
         });
-    };
-
-    void loadInitialData();
-
-    return () => {
-      cancelled = true;
-    };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    return onMetadataSync(() => {
+      void reloadFromStorage().catch((error) => {
+        logger.error("Failed to reload chat metadata after sync event", error);
+      });
+    });
+  }, [reloadFromStorage]);
 
   const getMetadata = useCallback((id: string): ChatMetadata => {
     return metadataCacheRef.current.get(id) ?? { ...DEFAULT_METADATA };
@@ -231,6 +229,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         return next;
       });
       setChatUpdateTrigger((prev) => prev + 1);
+      emitMetadataSync();
       return id;
     },
     [
@@ -338,6 +337,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
         setChatUpdateTrigger((prev) => prev + 1);
+        emitMetadataSync();
       } catch (error) {
         logger.error(`Failed to save chat title state ${chatId}`, error);
       }
@@ -359,6 +359,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           logger.error(`Failed to update FTS title ${chatId}`, error);
         });
         setChatUpdateTrigger((prev) => prev + 1);
+        emitMetadataSync();
       } catch (error) {
         logger.error(`Failed to save chat title ${chatId}`, error);
       }
@@ -379,6 +380,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           return next;
         });
         setChatUpdateTrigger((prev) => prev + 1);
+        emitMetadataSync();
       } catch (error) {
         logger.error(`Failed to delete chat ${chatId}`, error);
       }
@@ -401,6 +403,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           return next;
         });
         setChatUpdateTrigger((prev) => prev + 1);
+        emitMetadataSync();
       } catch (error) {
         logger.error("Failed to bulk delete chats", error);
       }
@@ -469,6 +472,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           return next;
         });
         setChatUpdateTrigger((prev) => prev + 1);
+        emitMetadataSync();
 
         logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
         return newId;

@@ -1,4 +1,5 @@
 import {
+  IconAppWindow,
   IconArrowsSplit,
   IconCheckbox,
   IconDotsVertical,
@@ -8,6 +9,7 @@ import {
 } from "@tabler/icons-react";
 import { memo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
+import { openNewWindow } from "@/lib/windowing";
 
 import { ChatStatusIndicator } from "./chat-status-indicator";
 import { ChangeTitleModal, DeleteChatModal, ExportChatModal } from "./modals";
@@ -101,6 +104,13 @@ export const ChatItem = memo(
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const isSelectedChat = activeChatId === id;
+
+    const handleOpenInNewWindow = () => {
+      void openNewWindow(`/chat/${id}`).catch((error) => {
+        logger.error("Failed to open chat in new window", error);
+        toast.error("Failed to open chat in new window");
+      });
+    };
 
     if (selectionMode) {
       return (
@@ -197,6 +207,17 @@ export const ChatItem = memo(
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          handleOpenInNewWindow();
+                        }}
+                      >
+                        <IconAppWindow />
+                        Open in New Window
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           logger.verbose("Opening change title modal", {
                             chatId: id,
                             title,
@@ -254,6 +275,11 @@ export const ChatItem = memo(
             </Button>
           </ContextMenuTrigger>
           <ContextMenuContent>
+            <ContextMenuItem onClick={handleOpenInNewWindow}>
+              <IconAppWindow />
+              Open in New Window
+            </ContextMenuItem>
+            <ContextMenuSeparator />
             <ContextMenuItem
               onClick={() => {
                 logger.verbose("Opening change title modal", {

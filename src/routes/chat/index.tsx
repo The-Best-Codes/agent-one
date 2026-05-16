@@ -1,6 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
+import { toast } from "sonner";
 
 import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto-scroll-container";
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
@@ -21,6 +22,7 @@ import {
   chatVirtualizationThresholdAtom,
 } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
+import { isChatOpenElsewhere, onChatPresenceQuery } from "@/lib/windowing";
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
@@ -42,6 +44,25 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
       clearEditingMessages();
     };
   }, [chatId, clearEditingMessages]);
+
+  useEffect(() => {
+    if (!chatId) return;
+    return onChatPresenceQuery(() => chatId);
+  }, [chatId]);
+
+  useEffect(() => {
+    if (!chatId) return;
+    let cancelled = false;
+    void isChatOpenElsewhere(chatId).then((openElsewhere) => {
+      if (cancelled || !openElsewhere) return;
+      toast.warning("This chat is already open in another window.", {
+        description: "Editing it here may cause changes to conflict.",
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [chatId]);
 
   useEffect(() => {
     if (isChatLoading) {
