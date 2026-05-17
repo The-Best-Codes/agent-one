@@ -1,4 +1,10 @@
-import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
+import {
+  IconAppWindow,
+  IconLayoutSidebar,
+  IconPlus,
+  IconSearch,
+  IconSettings,
+} from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -18,6 +24,7 @@ import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
+import { openNewWindow } from "@/lib/tauri/open-new-window";
 import { cn } from "@/lib/utils";
 
 import { ChatList } from "./chat-list";
@@ -203,6 +210,21 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 </Button>
               </TooltipTrigger>
               <TooltipContent side={tooltipSide}>New chat</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => openNewWindow("/chat")}
+                  analytics={{ event: "new_window_clicked", params: { source: "sidebar" } }}
+                  aria-label="New window"
+                  className="size-6"
+                >
+                  <IconAppWindow data-icon="inline-start" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side={tooltipSide}>New window</TooltipContent>
             </Tooltip>
           </div>
         </div>

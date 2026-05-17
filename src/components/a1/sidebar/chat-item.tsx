@@ -1,4 +1,5 @@
 import {
+  IconAppWindow,
   IconArrowsSplit,
   IconCheckbox,
   IconDotsVertical,
@@ -26,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getLogger } from "@/lib/logger";
+import { openNewWindow } from "@/lib/tauri/open-new-window";
 import { cn } from "@/lib/utils";
 
 import { ChatStatusIndicator } from "./chat-status-indicator";
@@ -197,6 +199,21 @@ export const ChatItem = memo(
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
+                          logger.verbose("Opening chat in new window", {
+                            chatId: id,
+                            title,
+                          });
+                          openNewWindow(`/chat/${id}`);
+                        }}
+                      >
+                        <IconAppWindow />
+                        Open in New Window
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           logger.verbose("Opening change title modal", {
                             chatId: id,
                             title,
@@ -254,6 +271,19 @@ export const ChatItem = memo(
             </Button>
           </ContextMenuTrigger>
           <ContextMenuContent>
+            <ContextMenuItem
+              onClick={() => {
+                logger.verbose("Opening chat in new window", {
+                  chatId: id,
+                  title,
+                });
+                openNewWindow(`/chat/${id}`);
+              }}
+            >
+              <IconAppWindow />
+              Open in New Window
+            </ContextMenuItem>
+            <ContextMenuSeparator />
             <ContextMenuItem
               onClick={() => {
                 logger.verbose("Opening change title modal", {
