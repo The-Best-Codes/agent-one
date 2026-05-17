@@ -6,6 +6,7 @@ mod keyring;
 mod mcp_auth;
 mod tools;
 mod utils;
+mod window_chat;
 
 // Global counter for unique window IDs
 static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
@@ -139,9 +140,11 @@ pub fn run() {
             app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
             )));
+            app.manage(window_chat::WindowChatState::default());
 
             Ok(())
         })
+        .on_window_event(window_chat::handle_window_event)
         .invoke_handler({
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
             {
@@ -161,6 +164,7 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    window_chat::sync_current_window_chat,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -178,6 +182,7 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
+                    window_chat::sync_current_window_chat,
                 ]
             }
         })

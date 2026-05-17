@@ -6,6 +6,7 @@
   "permissions": [
     "core:default",
     "core:webview:allow-create-webview",
+    "core:webview:allow-create-webview-window",
     "opener:default",
     "sql:default",
     "sql:allow-execute",
