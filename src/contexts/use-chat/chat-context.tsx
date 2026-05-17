@@ -215,6 +215,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [currentChatId, forceUpdate],
   );
 
+  const streamingChatsRef = useRef<Set<string>>(new Set());
+
   const handleStatusChange = useCallback(
     (id: string, status: string, hasError?: boolean) => {
       setLastStatusChange({ id, status });
@@ -222,9 +224,15 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       let emittedIndicator: ChatStatusIndicator | undefined;
 
       if (status === "streaming" || status === "submitted") {
+        streamingChatsRef.current.add(id);
         setChatStatusIndicators((prev) => ({ ...prev, [id]: "loading" }));
         emittedIndicator = "loading";
       } else if (status === "ready" || status === "error") {
+        const wasStreamingHere = streamingChatsRef.current.has(id);
+        if (!wasStreamingHere && !hasError) {
+          return;
+        }
+        streamingChatsRef.current.delete(id);
         setChatStatusIndicators((prev) => {
           const currentIndicator = prev[id];
           if (hasError) {
