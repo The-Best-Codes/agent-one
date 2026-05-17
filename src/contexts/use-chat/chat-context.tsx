@@ -290,15 +290,24 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (currentChatId) {
+      let cleared = false;
       setChatStatusIndicators((prev) => {
         const currentIndicator = prev[currentChatId];
         if (currentIndicator === "unread") {
           const { [currentChatId]: _removed, ...rest } = prev;
           void _removed;
+          cleared = true;
           return rest;
         }
         return prev;
       });
+      if (cleared) {
+        emitWindowSyncEvent({
+          type: "chat-status",
+          chatId: currentChatId,
+          status: null,
+        });
+      }
     }
   }, [currentChatId, setChatStatusIndicators]);
 
