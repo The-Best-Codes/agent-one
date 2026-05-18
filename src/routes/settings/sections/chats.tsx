@@ -17,6 +17,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
+  chatSortAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   markdownRenderingAtom,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
+  type ChatSortOption,
   DEFAULT_SETTINGS,
   type MarkdownRenderingOption,
   type MessageActionRowOption,
@@ -56,6 +58,7 @@ export default function ChatsSection() {
   const [showChatStatusIndicator, setShowChatStatusIndicator] = useAtom(
     showChatStatusIndicatorAtom,
   );
+  const [chatSort, setChatSort] = useAtom(chatSortAtom);
   const [titleGeneration, setTitleGeneration] = useAtom(titleGenerationAtom);
 
   const isMarkdownRenderingDefault = markdownRendering === DEFAULT_SETTINGS.MARKDOWN_RENDERING;
@@ -74,6 +77,7 @@ export default function ChatsSection() {
     alwaysShowStopButton === DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR;
   const isShowChatStatusIndicatorDefault =
     showChatStatusIndicator === DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR;
+  const isChatSortDefault = chatSort === DEFAULT_SETTINGS.CHAT_SORT;
   const isTitleGenerationDefault =
     JSON.stringify(titleGeneration) === JSON.stringify(DEFAULT_SETTINGS.TITLE_GENERATION);
 
@@ -88,6 +92,50 @@ export default function ChatsSection() {
           <CardTitle>Chat Behavior</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
+          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+            <div className="flex flex-1 flex-col items-start">
+              <Label className="text-sm font-medium">Chat Sort Order</Label>
+              <p className="text-muted-foreground mt-1 text-sm">
+                Choose whether the sidebar keeps newer chats first or brings recently updated chats
+                to the top.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select
+                value={chatSort}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("chats", "chat_sort_changed", { value });
+                  setChatSort(value as ChatSortOption);
+                }}
+              >
+                <SelectTrigger
+                  className="w-full md:w-fit md:max-w-96"
+                  aria-label="Select chat sort order"
+                >
+                  <SelectValue placeholder="Select option" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="created-at">Newest chats first</SelectItem>
+                    <SelectItem value="updated-at">Recently updated first</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  trackSettingsInteraction("chats", "reset_chat_sort");
+                  resetSetting("CHAT_SORT");
+                }}
+                disabled={isChatSortDefault}
+                aria-label="Reset to default"
+              >
+                <IconRestore data-icon="inline-start" />
+              </Button>
+            </div>
+          </div>
+
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <div className="flex flex-1 flex-col items-start">
               <Label className="text-sm font-medium">Markdown Rendering</Label>
