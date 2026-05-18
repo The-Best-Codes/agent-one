@@ -3,14 +3,26 @@ import { Link, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
+import {
+  getBillingUsageSummary,
+  isAgentOneAccountProvisioning,
+} from "@/contexts/use-web-auth/web-auth-contexts";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 
 export const MainInputNoModelSection = () => {
   const { hasAvailableModels } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
+  const { user, customerState, billingLoading, billingError } = useWebAuth();
   const { chatId } = useParams();
+  const usageSummary = getBillingUsageSummary(customerState);
+  const isProvisioning =
+    Boolean(user) &&
+    !billingLoading &&
+    !billingError &&
+    isAgentOneAccountProvisioning(usageSummary);
 
-  if (isApiKeysLoading || hasAvailableModels) {
+  if (isApiKeysLoading || hasAvailableModels || billingLoading || isProvisioning) {
     return null;
   }
 

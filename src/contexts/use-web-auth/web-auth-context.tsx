@@ -106,8 +106,8 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     let cancelled = false;
 
-    const loadBilling = async () => {
-      if (!customerState) {
+    const loadBilling = async (silent = false) => {
+      if (!silent && !customerState) {
         setBillingLoading(true);
       }
       setBillingError(null);
@@ -127,7 +127,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
           setBillingError("Unable to load billing information.");
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelled && (!silent || !customerState)) {
           setBillingLoading(false);
         }
       }
@@ -135,8 +135,13 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     void loadBilling();
 
+    const id = setInterval(() => {
+      void loadBilling(true);
+    }, 60_000);
+
     return () => {
       cancelled = true;
+      clearInterval(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);

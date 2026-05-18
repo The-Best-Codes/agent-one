@@ -36,6 +36,7 @@ import { Attachments } from "./attachments";
 import { MainInputErrorSection } from "./error-section";
 import { MainInputIncompleteSection } from "./incomplete-section";
 import { MainInputNoModelSection } from "./no-model-section";
+import { MainInputProvisioningSection } from "./provisioning-section";
 
 const logger = getLogger(import.meta.url);
 
@@ -391,6 +392,7 @@ export const MainChatInput = ({
 
   return (
     <div className={cn(isFloating ? "px-2 pb-2" : "px-0 md:px-2")}>
+      <MainInputProvisioningSection />
       <MainInputNoModelSection />
       <MainInputErrorSection onRetry={onScrollNeededAction} />
       <MainInputIncompleteSection onRetry={onScrollNeededAction} />

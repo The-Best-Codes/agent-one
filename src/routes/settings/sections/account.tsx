@@ -1,8 +1,15 @@
-import { IconCreditCard, IconExternalLink, IconLogout, IconRocket } from "@tabler/icons-react";
+import {
+  IconCreditCard,
+  IconExternalLink,
+  IconInfoCircle,
+  IconLogout,
+  IconRocket,
+} from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -13,6 +20,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  getBillingUsageSummary,
+  isAgentOneAccountProvisioning,
+} from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
@@ -56,13 +67,14 @@ export default function AccountSection() {
     : null;
 
   const usageSummary = useMemo(() => {
-    const meters = customerState?.activeMeters;
-    if (!meters?.length) return null;
-    const credited = meters.reduce((sum, m) => sum + m.creditedUnits, 0);
-    const consumed = meters.reduce((sum, m) => sum + m.consumedUnits, 0);
-    const balance = meters.reduce((sum, m) => sum + m.balance, 0);
-    return { credited, consumed, remaining: Math.max(balance, 0) };
+    return getBillingUsageSummary(customerState);
   }, [customerState]);
+
+  const isAccountProvisioning =
+    Boolean(user) &&
+    !billingLoading &&
+    !billingError &&
+    isAgentOneAccountProvisioning(usageSummary);
 
   const handleAppendixChange = (value: string) => {
     setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
@@ -150,7 +162,16 @@ export default function AccountSection() {
                       </a>
                     </Button>
                   </div>
-                  {usageSummary ? (
+                  {isAccountProvisioning ? (
+                    <Alert>
+                      <IconInfoCircle />
+                      <AlertTitle>Account setup in progress</AlertTitle>
+                      <AlertDescription>
+                        Your account will be ready in a few minutes. AgentOne billing is still
+                        finishing setup, so your credits have not appeared yet.
+                      </AlertDescription>
+                    </Alert>
+                  ) : usageSummary ? (
                     <Field>
                       <FieldLabel htmlFor="credits-used">
                         <span>Credits used</span>

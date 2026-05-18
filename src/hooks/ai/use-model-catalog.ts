@@ -4,6 +4,11 @@ import { atom } from "jotai";
 import { useMemo } from "react";
 
 import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
+import {
+  getBillingUsageSummary,
+  hasAgentOneCreditsAvailable,
+} from "@/contexts/use-web-auth/web-auth-contexts";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
 import { createLocalProvider } from "@/lib/ai/providers/local-provider-factory";
 import {
@@ -340,16 +345,30 @@ const availableEnabledChatModelsAtom = atom((get) => {
   });
 });
 
-const hasAvailableModelsAtom = atom((get) => get(availableEnabledChatModelsAtom).length > 0);
-
 export function useModelCatalog() {
   const AVAILABLE_MODELS = useAtomValue(availableModelsAtom);
   const AVAILABLE_CHAT_MODELS = useAtomValue(availableChatModelsAtom);
-  const AVAILABLE_ENABLED_CHAT_MODELS = useAtomValue(availableEnabledChatModelsAtom);
+  const baseEnabledChatModels = useAtomValue(availableEnabledChatModelsAtom);
   const AVAILABLE_IMAGE_MODELS = useAtomValue(availableImageModelsAtom);
-  const hasAvailableModels = useAtomValue(hasAvailableModelsAtom);
   const providerHasApiKey = useAtomValue(providerHasApiKeyAtom);
   const providerIsAvailable = useAtomValue(providerIsAvailableAtom);
+  const { user, customerState, billingLoading, billingError } = useWebAuth();
+
+  const usageSummary = useMemo(() => getBillingUsageSummary(customerState), [customerState]);
+  const shouldHideUnavailableAgentOneModels =
+    Boolean(user) &&
+    !billingError &&
+    (billingLoading || !hasAgentOneCreditsAvailable(usageSummary));
+
+  const AVAILABLE_ENABLED_CHAT_MODELS = useMemo(
+    () =>
+      baseEnabledChatModels.filter(
+        (model) => !shouldHideUnavailableAgentOneModels || !model.id.startsWith("agent-one-"),
+      ),
+    [baseEnabledChatModels, shouldHideUnavailableAgentOneModels],
+  );
+
+  const hasAvailableModels = AVAILABLE_ENABLED_CHAT_MODELS.length > 0;
 
   const getModelById = useMemo(
     () => (id: string) => AVAILABLE_MODELS.find((model) => model.id === id),
