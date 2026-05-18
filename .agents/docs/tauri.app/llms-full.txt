@@ -1185,7 +1185,7 @@ Below is a summary of the changes from Tauri 1.0 to Tauri 2.0:
 - `package` removed.
 - `tauri` key renamed to `app`.
 - `tauri > allowlist` removed. Refer to [Migrate Permissions](#migrate-permissions).
-- `tauri > allowlist > protocol > assetScope` moved to `app > security > assetProtocol > scope`.
+- `tauri > allowlist > protocol > assetScope` moved to `app > security > assetProtocol > scope`. See [Asset protocol scope](/security/asset-protocol/) for `enable`, glob patterns, `requireLiteralLeadingDot`, and dynamic paths.
 - `tauri > cli` moved to `plugins > cli`.
 - `tauri > windows > fileDropEnabled` renamed to `app > windows > dragDropEnabled`.
 - `tauri > updater > active` removed.
@@ -3711,6 +3711,147 @@ Alternatively you can contact us via email at: [security@tauri.app](mailto:secur
 
 Although we do not currently have a budget for security bounties,
 in some cases, we will consider rewarding coordinated disclosure with our limited resources.
+
+# Asset protocol scope
+
+Tauri can serve files from disk into the WebView through the **asset** custom protocol (for example when you use [`convertFileSrc`](https://v2.tauri.app/reference/javascript/api/namespacecore/#convertfilesrc) in the frontend). Whether a path is allowed is controlled by **`app.security.assetProtocol`** in `tauri.conf.json`.
+
+You must set **`enable`** to `true` and define a **`scope`** that lists which filesystem paths may be exposed. Paths resolved at runtime must match that scope, or the WebView will refuse the load (often with an error such as “asset protocol not configured to allow the path”).
+
+Content Security Policy for `asset:` sources is documented on the [Content Security Policy (CSP)](/security/csp/) page. This page focuses on **scope** and how it interacts with globs and hidden path segments.
+
+## How `scope` is defined
+
+`assetProtocol.scope` uses the same **`FsScope`** type as filesystem-related configuration elsewhere: either a **JSON array** of allowed glob patterns, or a **JSON object** with `allow`, optional `deny`, and optional `requireLiteralLeadingDot`. For how “scopes” fit into Tauri’s security model more broadly, see [Command scopes](/security/scope/).
+
+Patterns may start with a **base directory variable** (for example `$HOME`, `$CACHE`, `$APPCACHE`, `$APPDATA`, `$RESOURCE`). See the [path / base directory APIs](/reference/javascript/api/namespacepath/#basedirectory) for the full set of variables your app can rely on.
+
+Paths resolved when loading assets are usually **absolute** (on Linux, often under `/home/...`). A pattern like `["*/**"]` typically **does not** match those paths, because it does not line up with a leading `/` or a base-directory variable. Prefer patterns such as `$HOME/**/*`, `/home/username/**/*`, or another form that mirrors the resolved path.
+
+### Array form (allowed paths only)
+
+Use a list when you only need a fixed allow list and default glob behavior is enough:
+
+```json title="src-tauri/tauri.conf.json"
+{
+  "app": {
+    "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$APPCACHE/**/*", "$RESOURCE/**/*"]
+      }
+    }
+  }
+}
+```
+
+With the array form you **cannot** set `requireLiteralLeadingDot`; for that, use the object form below.
+
+### Object form (`allow`, `deny`, `requireLiteralLeadingDot`)
+
+Use an object when you need **deny** rules or to change **leading-dot** matching:
+
+```json title="src-tauri/tauri.conf.json"
+{
+  "app": {
+    "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": {
+          "allow": ["$APPCACHE/**/*"],
+          "deny": ["$APPCACHE/**/secrets/**"]
+        }
+      }
+    }
+  }
+}
+```
+
+`deny` takes precedence over `allow` when both match.
+
+## Unix: path segments starting with `.`
+
+On Unix, `requireLiteralLeadingDot` defaults to **`true`**. Then wildcard tokens such as `*`, `?`, `**`, and `[...]` **do not match a path component that starts with** `.` (dotfiles and dot-directories such as `.cache` or `.ssh`).
+
+So a pattern like `$HOME/**` can allow `/home/user/Documents/file.png` but **not** `/home/user/.cache/myapp/preview.png`, because `.cache` is a dot-prefixed component. A pattern that names the segment literally (for example `$HOME/.cache/myapp/**`) **does** match.
+
+To allow dot-prefixed components under a broad glob, you can set **`requireLiteralLeadingDot`** to **`false`** on the **object** `scope` (this widens what the WebView can load; review carefully):
+
+```json title="src-tauri/tauri.conf.json"
+{
+  "app": {
+    "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": {
+          "requireLiteralLeadingDot": false,
+          "allow": ["$HOME/**/*"]
+        }
+      }
+    }
+  }
+}
+```
+
+:::tip[Still blocked on Linux-style paths?]
+
+Community members often hit this when a path goes through a **dot-directory** (for example `~/.cache/...`) while the allow pattern only uses `**` under `$HOME`. See the discussion in [tauri#13788](https://github.com/tauri-apps/tauri/issues/13788) for concrete examples and fixes.
+
+:::
+
+## Prefer `**/*` over bare `**` for “all files under here”
+
+For globs that should match **files** under a tree, prefer `**/*` (and variants like `$DIR/**/*`) rather than bare `**`, consistent with other Tauri path examples. Bare `**` is easy to misuse when you intend “everything under this directory recursively.”
+
+## Highly permissive configuration (use with extreme care)
+
+If you intentionally need the broadest possible access **and** dot-prefixed segments, a maintainer-suggested shape looks like this. **This is not a default recommendation**; it increases exposure of hidden and sensitive files.
+
+```json title="src-tauri/tauri.conf.json"
+{
+  "app": {
+    "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": {
+          "requireLiteralLeadingDot": false,
+          "allow": ["**/*"]
+        }
+      }
+    }
+  }
+}
+```
+
+:::caution
+
+Prefer **narrow** directories (`$APPCACHE`, `$RESOURCE`, a single app subfolder under `$HOME`, etc.) instead of broad `$HOME/**/*` or `**/*` unless you have a strong reason and understand the security tradeoffs.
+
+:::
+
+## Static config vs dynamically chosen paths
+
+Entries in **`tauri.conf.json`** describe **static** allow/deny patterns. They do not replace runtime workflows where the user picks arbitrary folders or files (for example with the **dialog** plugin): those paths may need to be **persisted** across restarts using the [**persisted-scope**](/plugin/persisted-scope/) plugin.
+
+To persist **asset** / protocol-related scope with that plugin, enable its **`protocol-asset`** Cargo feature in `src-tauri/Cargo.toml`, for example:
+
+```toml
+tauri-plugin-persisted-scope = { version = "2", features = ["protocol-asset"] }
+```
+
+Register **`tauri_plugin_fs`** before **`tauri_plugin_persisted_scope`** as described in the plugin guide.
+
+## Troubleshooting
+
+| Symptom                                                             | Things to check                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| “asset protocol not configured to allow the path”                   | Path must match an **`allow`** pattern; **`deny`** overrides **`allow`**. Use **absolute** patterns or **`$VAR`/`$HOME`** style variables that match how the path is resolved on disk.                                                         |
+| Works for normal folders but not under **`.cache`** / **`.config`** | On Unix, default **`requireLiteralLeadingDot`** behavior: use a literal `.segment` in the pattern, or set **`requireLiteralLeadingDot`: `false`** in the object `scope` (see [tauri#13788](https://github.com/tauri-apps/tauri/issues/13788)). |
+| User picked a folder at runtime; still blocked after restart        | You may need [**persisted-scope**](/plugin/persisted-scope/) with the **`protocol-asset`** feature, not only `tauri.conf.json` entries.                                                                                                        |
+| Broad `**` seems wrong                                              | Try `**/*` for file-oriented globs; see [Embedding Additional Files](/develop/resources/) for similar `**` vs `**/*` guidance in bundle resources.                                                                                           |
+| Scope like `["*/**"]` never matches on Linux                        | Resolved paths are **absolute**; use **`$...` variables**, a leading **`/`**, or another pattern that matches the real path (see above).                                                                                                       |
+
+The authoritative Rust types for `assetProtocol` and `FsScope` live in Tauri’s [`config.rs`](https://github.com/tauri-apps/tauri/blob/dev/crates/tauri-utils/src/config.rs) (`AssetProtocolConfig`, `FsScope`). The generated [configuration reference](/reference/config/) may render nested `FsScope` fields in a compact or hard-to-read way; if something looks unclear there, cross-check this page and the [file system plugin](/plugin/file-system/) `requireLiteralLeadingDot` section (plugin config uses the same option name for its own scopes). If the reference still does not document those fields clearly, consider opening an issue on the **tauri-docs** repository so the config generator can be improved.
 
 # Capabilities
 
@@ -8288,6 +8429,23 @@ export async function onRequest(
 }
 ```
 
+:::note[Capability Required]
+
+Listening to plugin events from JavaScript is gated by the same [capability](/security/capabilities/) and [permission](/security/permissions/) system that gates plugin commands. Add the plugin's permission (commonly `<plugin-name>:default`, or a specific `allow-listen-*` permission if the plugin defines one) to the `permissions` array of a capability under `src-tauri/capabilities/`:
+
+```json
+// src-tauri/capabilities/default.json
+{
+  "identifier": "default",
+  "windows": ["main"],
+  "permissions": ["<plugin-name>:default"]
+}
+```
+
+Refer to the plugin's own documentation for the exact permission identifiers it exposes.
+
+:::
+
 # Embedding Additional Files
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -10693,7 +10851,7 @@ GUI apps on macOS and Linux do not inherit the `$PATH` from your shell dotfiles 
 
 ## Limitations
 
-Core libraries such as glibc frequently break compatibility with older systems. For this reason, you must build your Tauri application using the oldest base system you intend to support. A relatively old system such as Ubuntu 18.04 is more suited than Ubuntu 22.04, as the binary compiled on Ubuntu 22.04 will have a higher requirement of the glibc version, so when running on an older system, you will face a runtime error like `/usr/lib/libc.so.6: version 'GLIBC_2.33' not found`. We recommend using a Docker container or GitHub Actions to build your Tauri application for Linux.
+Core libraries such as glibc frequently break compatibility with older systems. For this reason, you must build your Tauri application using the oldest base system you intend to support that also provides Tauri v2's required WebKitGTK 4.1 packages. Ubuntu 22.04 and Debian 12 are suitable baseline examples because they provide `libwebkit2gtk-4.1-dev` from their standard package repositories. Building on a newer base system can raise the minimum glibc version required by your app, so when running on an older system, you may face a runtime error like `/usr/lib/libc.so.6: version 'GLIBC_2.33' not found`. We recommend using a Docker container or GitHub Actions to build your Tauri application for Linux.
 
 See the issues [tauri-apps/tauri#1355](https://github.com/tauri-apps/tauri/issues/1355) and [rust-lang/rust#57497](https://github.com/rust-lang/rust/issues/57497), in addition to the [AppImage guide](https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system) for more information.
 
@@ -10942,7 +11100,7 @@ GUI apps on macOS and Linux do not inherit the `$PATH` from your shell dotfiles 
 
 ## Limitations
 
-Core libraries such as glibc frequently break compatibility with older systems. For this reason, you must build your Tauri application using the oldest base system you intend to support. A relatively old system such as Ubuntu 18.04 is more suited than Ubuntu 22.04, as the binary compiled on Ubuntu 22.04 will have a higher requirement of the glibc version, so when running on an older system, you will face a runtime error like `/usr/lib/libc.so.6: version 'GLIBC_2.33' not found`. We recommend using a Docker container or GitHub Actions to build your Tauri application for Linux.
+Core libraries such as glibc frequently break compatibility with older systems. For this reason, you must build your Tauri application using the oldest base system you intend to support that also provides Tauri v2's required WebKitGTK 4.1 packages. Ubuntu 22.04 and Debian 12 are suitable baseline examples because they provide `libwebkit2gtk-4.1-dev` from their standard package repositories. Building on a newer base system can raise the minimum glibc version required by your app, so when running on an older system, you may face a runtime error like `/usr/lib/libc.so.6: version 'GLIBC_2.33' not found`. We recommend using a Docker container or GitHub Actions to build your Tauri application for Linux.
 
 See the issues [tauri-apps/tauri#1355](https://github.com/tauri-apps/tauri/issues/1355) and [rust-lang/rust#57497](https://github.com/rust-lang/rust/issues/57497), in addition to the [AppImage guide](https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system) for more information.
 
@@ -12213,7 +12371,7 @@ GUI apps on macOS and Linux do not inherit the `$PATH` from your shell dotfiles 
 
 ## Limitations
 
-Core libraries such as glibc frequently break compatibility with older systems. For this reason, you must build your Tauri application using the oldest base system you intend to support. A relatively old system such as Ubuntu 18.04 is more suited than Ubuntu 22.04, as the binary compiled on Ubuntu 22.04 will have a higher requirement of the glibc version, so when running on an older system, you will face a runtime error like `/usr/lib/libc.so.6: version 'GLIBC_2.33' not found`. We recommend using a Docker container or GitHub Actions to build your Tauri application for Linux.
+Core libraries such as glibc frequently break compatibility with older systems. For this reason, you must build your Tauri application using the oldest base system you intend to support that also provides Tauri v2's required WebKitGTK 4.1 packages. Ubuntu 22.04 and Debian 12 are suitable baseline examples because they provide `libwebkit2gtk-4.1-dev` from their standard package repositories. Building on a newer base system can raise the minimum glibc version required by your app, so when running on an older system, you may face a runtime error like `/usr/lib/libc.so.6: version 'GLIBC_2.33' not found`. We recommend using a Docker container or GitHub Actions to build your Tauri application for Linux.
 
 See the issues [tauri-apps/tauri#1355](https://github.com/tauri-apps/tauri/issues/1355) and [rust-lang/rust#57497](https://github.com/rust-lang/rust/issues/57497), in addition to the [AppImage guide](https://docs.appimage.org/reference/best-practices.html#binaries-compiled-on-old-enough-base-system) for more information.
 
@@ -13196,6 +13354,8 @@ To notarize your application, you must provide credentials for Tauri to authenti
     3. Set the `APPLE_TEAM_ID` environment variable to your Apple Team ID. You can find your Team ID in [your account's membership page][membership].
   </TabItem>
 </Tabs>
+
+After setting these environment variables, rerun your Tauri build or bundle command. For example, to build a DMG with pnpm, run `pnpm tauri build --bundles dmg` again. If you need to skip stapling for an initial notarization pass, append `--skip-stapling` directly to the Tauri command, such as `pnpm tauri build --bundles dmg --skip-stapling`.
 
 :::note
 Notarization is required when using a _Developer ID Application_ certificate.

@@ -12226,6 +12226,12 @@ Official extensions live inside the [Model Context Protocol GitHub organization]
 
 To get started building MCP Apps, see the [quickstart guide](/extensions/apps/build#getting-started) or read the full [MCP Apps documentation](https://apps.extensions.modelcontextprotocol.io/api/documents/Quickstart.html).
 
+### MCP Tasks
+
+| Extension                               | Description                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| [MCP Tasks](/extensions/tasks/overview) | Asynchronous task execution for long-running operations, with polling, mid-flight input, and durable handles. |
+
 ## Experimental Extensions
 
 Experimental extensions provide an incubation pathway for [Working Groups and Interest Groups](/community/working-interest-groups) to prototype ideas and collaborate on extension concepts before formal SEP submission.
@@ -12342,6 +12348,256 @@ Each extension specifies the schema of its settings object; an empty object indi
 If one side supports an extension but the other doesn't, the supporting side needs to either fall back to core protocol behavior or reject the request with an appropriate error if the extension is mandatory.
 
 It's a good practice to document expected fallback behavior in your extension. For example, a server offering UI-enhanced tools should still return meaningful text content for clients that don't support the UI extension. On the other hand, a server that requires a specific authentication extension can reject connections from clients that don't support it.
+
+
+# MCP Tasks
+Source: https://modelcontextprotocol.io/extensions/tasks/overview
+
+Asynchronous task execution for long-running MCP operations
+
+The [experimental-ext-tasks repository](https://github.com/modelcontextprotocol/experimental-ext-tasks) contains the full specification and documentation for MCP Tasks.
+
+<Card title="modelcontextprotocol/experimental-ext-tasks" icon="github" href="https://github.com/modelcontextprotocol/experimental-ext-tasks">
+  Full specification and documentation for MCP Tasks.
+</Card>
+
+Not every tool call returns instantly. Some operations — CI pipelines, batch
+processing, human approvals — take seconds, minutes, or longer. MCP Tasks let
+servers return a durable handle instead of blocking, so clients can poll for
+progress, provide input when needed, and retrieve the final result after
+reconnecting.
+
+## Why not just block?
+
+You could hold the connection open until the work finishes. Tasks solve
+problems that blocking cannot:
+
+* **No long-lived connections.** Blocking ties up a connection for the duration
+  of the operation. Many clients and transport intermediaries impose timeouts
+  that make this impractical beyond a few seconds.
+* **Crash resilience.** A task ID is a durable handle. If the client
+  disconnects or restarts, it can resume polling with the same ID.
+* **Progress visibility.** Tasks carry status metadata (`working`,
+  `input_required`, `completed`, `failed`, `cancelled`) and optional status
+  messages, giving clients visibility into progress.
+* **Mid-flight interaction.** When a task needs input (e.g., an elicitation for
+  user confirmation), it moves to `input_required` and surfaces the request.
+  The client responds via `tasks/update` — no second connection or unsolicited
+  server-to-client messages required.
+* **Server-directed.** The server decides per-request whether to create a task.
+  Clients opt in once via the extension capability and handle whichever result
+  shape arrives. No per-tool warmup or per-request flag.
+
+## How Tasks work
+
+Tasks extend the standard request flow. When a server decides a request will be
+long-running, it returns a task handle instead of the final result. The client
+polls for completion.
+
+1. **Capability negotiation.** The client includes
+   `io.modelcontextprotocol/tasks` in its per-request capabilities. The server
+   advertises the same extension in its own `server/discover` capabilities.
+
+2. **Task creation.** In response to a supported request, the server returns a
+   `CreateTaskResult` (identified by `resultType: "task"`) containing a `taskId`,
+   initial status, TTL, and suggested polling interval. The task is durably
+   created before the response is sent.
+
+3. **Polling.** The client calls `tasks/get` with the `taskId`. The response
+   carries the current status and, for terminal states, the final result or
+   error.
+
+4. **Mid-flight input.** If the task moves to `input_required`, the `tasks/get`
+   response includes an `inputRequests` map with elicitations or other server
+   requests. The client fulfills these via `tasks/update`.
+
+5. **Completion.** When the status reaches `completed`, the `result` field
+   contains what the original request would have returned synchronously. If the
+   status is `failed`, the `error` field contains the JSON-RPC error.
+
+6. **Cancellation.** The client can send `tasks/cancel` at any time.
+   Cancellation is cooperative — the server acknowledges the intent but is not
+   obligated to stop the work.
+
+```mermaid theme={null}
+sequenceDiagram
+    participant Client
+    participant Server
+
+    Client->>Server: tools/call (with tasks capability)
+    Server-->>Client: CreateTaskResult (taskId, status: working)
+
+    loop Poll until terminal
+        Client->>Server: tasks/get (taskId)
+        Server-->>Client: Task (status: working)
+    end
+
+    Note over Client,Server: Server needs user input
+    Client->>Server: tasks/get (taskId)
+    Server-->>Client: Task (status: input_required, inputRequests)
+    Client->>Server: tasks/update (taskId, inputResponses)
+    Server-->>Client: ack
+
+    loop Poll until terminal
+        Client->>Server: tasks/get (taskId)
+        Server-->>Client: Task (status: working)
+    end
+
+    Client->>Server: tasks/get (taskId)
+    Server-->>Client: Task (status: completed, result)
+```
+
+## When to use Tasks
+
+Tasks are a good fit when your use case involves:
+
+**Long-running operations.** CI pipelines, batch data processing, or model
+training jobs that take minutes or hours.
+
+**Human-in-the-loop workflows.** Approval gates, review steps, or any operation
+that pauses for user confirmation. The task moves to `input_required` and the
+client presents the request.
+
+**External job systems.** If your server wraps an API that already uses job IDs
+(cloud deployments, async APIs, queued work), return a task when you create the
+job and resolve it when the job completes.
+
+**Unreliable connections.** Mobile clients, intermittent networks, or
+environments where connections drop. Task IDs survive disconnects.
+
+**Batch processing.** Operations that process many items (bulk imports, mass
+updates) where partial progress is meaningful. Status messages report progress.
+
+## Task lifecycle
+
+| Status           | Meaning                                                                    |
+| ---------------- | -------------------------------------------------------------------------- |
+| `working`        | The operation is in progress.                                              |
+| `input_required` | The server needs client input before continuing. See `inputRequests`.      |
+| `completed`      | The operation finished. The `result` field contains the final output.      |
+| `failed`         | A JSON-RPC error occurred during execution. The `error` field has details. |
+| `cancelled`      | The operation was cancelled (not always honored).                          |
+
+`completed`, `failed`, and `cancelled` are terminal — once reached, the task's
+state does not change.
+
+## Notifications
+
+Servers can push status updates via `notifications/tasks/status`. Clients opt
+into these through the `subscriptions/listen` mechanism. Each notification
+carries the full task state, eliminating the need for an extra `tasks/get`
+round-trip.
+
+Polling is the default. If a server supports notifications, clients can rely on
+them instead of polling.
+
+## Implementation guide
+
+### For MCP clients
+
+To consume task-augmented responses, your client must:
+
+<Steps>
+  <Step title="Declare support">
+    Include the extension in per-request capabilities:
+
+    ```json theme={null}
+    {
+      "params": {
+        "_meta": {
+          "io.modelcontextprotocol/clientCapabilities": {
+            "extensions": {
+              "io.modelcontextprotocol/tasks": {}
+            }
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Handle polymorphic results">
+    When issuing a supported request (e.g., `tools/call`), be prepared to receive
+    either the standard result or a `CreateTaskResult` with `resultType: "task"`.
+  </Step>
+
+  <Step title="Poll for completion">
+    Call `tasks/get` with the returned `taskId`, respecting the `pollIntervalMs`
+    value. Continue polling until the task reaches a terminal status (`completed`,
+    `failed`, or `cancelled`).
+  </Step>
+
+  <Step title="Handle input requests">
+    If the task status is `input_required`, read the `inputRequests` map, present
+    the requests to the user or model, and submit responses via `tasks/update`.
+  </Step>
+
+  <Step title="Persist task IDs">
+    Store task IDs durably so polling can resume after a client crash or restart.
+  </Step>
+</Steps>
+
+### For MCP servers
+
+To return tasks from your server:
+
+<Steps>
+  <Step title="Advertise support">
+    Include the extension in your `server/discover` capabilities:
+
+    ```json theme={null}
+    {
+      "capabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Check client capabilities">
+    Before returning a `CreateTaskResult`, verify that the client included the
+    extension in its per-request capabilities. Never return a task to a client that
+    did not declare support.
+  </Step>
+
+  <Step title="Return CreateTaskResult">
+    When a request will be long-running, respond with `resultType: "task"` and a
+    `Task` object containing a unique `taskId`, initial status, `ttlMs`, and
+    `pollIntervalMs`. The task must be durably created before sending the response.
+  </Step>
+
+  <Step title="Serve tasks/get">
+    Return the current task state on each poll. For terminal states, include the
+    `result` (on `completed`) or `error` (on `failed`) field.
+  </Step>
+
+  <Step title="Handle tasks/update">
+    Accept `inputResponses` keyed to outstanding `inputRequests`. Acknowledge with
+    an empty result. Ignore responses for unknown or already-satisfied keys.
+  </Step>
+
+  <Step title="Handle tasks/cancel">
+    Acknowledge cancellation requests with an empty result. Honor them when
+    possible, but cancellation is cooperative — the task may still reach a
+    non-`cancelled` terminal status.
+  </Step>
+</Steps>
+
+## Client support
+
+<Note>
+  MCP Tasks is an extension to the [core MCP specification](/specification). Host
+  support varies by client.
+</Note>
+
+See the [client matrix](/extensions/client-matrix) for extension support across
+clients. Task support requires explicit opt-in from both client and server.
+
+## Specification
+
+The Tasks extension is specified in the [experimental-ext-tasks repository](https://github.com/modelcontextprotocol/experimental-ext-tasks). It uses the standard MCP [extension negotiation](/extensions/overview#negotiation) mechanism: clients and servers declare support in the `extensions` field of their capabilities during initialization.
 
 
 # Architecture
@@ -21807,7 +22063,7 @@ flowchart TD
     InReview --> Decision
     Decision --> Accepted
     Decision --> Rejected
-    Accepted -->|"Reference implementation complete"| Final
+    Accepted -->|"Reference implementation +<br/>conformance test complete"| Final
 ```
 
 ### Step-by-Step Process
@@ -21839,7 +22095,7 @@ flowchart TD
 
 8. **Resolution**: The SEP may be `accepted`, `rejected`, or returned for revision. The sponsor updates the status.
 
-9. **Finalization**: Once accepted, the reference implementation must be completed. When complete and incorporated into the specification, the sponsor updates the status to `final`.
+9. **Finalization**: Once accepted, the reference implementation must be completed. For Standards Track SEPs with observable protocol behavior, a [conformance test](#conformance-test-requirement) must also be merged. When complete and incorporated into the specification, the sponsor updates the status to `final`.
 
 ### SEP Statuses
 
@@ -21847,10 +22103,10 @@ flowchart TD
 | ------------ | ------------------------------------------------ |
 | `draft`      | Has a sponsor, undergoing informal review        |
 | `in-review`  | Ready for formal Core Maintainer review          |
-| `accepted`   | Approved, awaiting reference implementation      |
+| `accepted`   | Approved, awaiting implementation + conformance  |
 | `rejected`   | Declined by Core Maintainers                     |
 | `withdrawn`  | Author withdrew the proposal                     |
-| `final`      | Complete with reference implementation           |
+| `final`      | Complete with implementation and conformance     |
 | `superseded` | Replaced by a newer SEP                          |
 | `dormant`    | No sponsor found within 6 months; can be revived |
 
@@ -21955,6 +22211,31 @@ For a SEP to be accepted it must meet these criteria:
 * Community support and consensus
 
 Once a SEP has been accepted, the reference implementation must be completed. When complete and incorporated into the main repository, the status changes to "Final".
+
+## Conformance Test Requirement
+
+For **Standards Track SEPs** that introduce or modify observable protocol behavior, a conformance scenario must be merged into the [conformance repository](https://github.com/modelcontextprotocol/conformance) before the SEP can reach `Final` status.
+
+**What's required:**
+
+* A conformance scenario tagged with the SEP number, targeting the conformance repository's draft spec-version tag
+* A structured traceability file (`sep-NNNN.yaml`) mapping each MUST/MUST NOT and SHOULD/SHOULD NOT in the SEP's Specification section to either a check ID or a documented exclusion (with a tracking issue if it's a framework gap)
+* The scenario passes against the SEP's reference implementation
+
+**What's exempt:**
+
+* Process and Informational SEPs
+* Standards Track SEPs with no observable protocol behavior (documentation clarifications, non-validating schema annotations, implementation-hardening recommendations)
+
+**Who does what:**
+
+* The **sponsor** ensures a conformance scenario is written and verifies the traceability file covers every MUST/MUST NOT and SHOULD/SHOULD NOT in the SEP
+* The **conformance repository maintainers** review the scenario PR for technical correctness
+* The test **author** can be anyone: the SEP author, an SDK maintainer, a community contributor
+
+Writing a conformance scenario during SEP drafting (before Core Maintainer review) is encouraged but not required, since it often surfaces ambiguities in normative language that are cheaper to fix early.
+
+See [SEP-2484](/seps/2484-conformance-tests-required-for-final-seps) for the full specification including the traceability file format and dispute process.
 
 ## After Rejection
 
@@ -30862,7 +31143,7 @@ Require Server requests to be associated with a Client request.
 
 <div>
   <Badge>
-    Accepted
+    Final
   </Badge>
 
   <Badge>
@@ -30874,7 +31155,7 @@ Require Server requests to be associated with a Client request.
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2260                                                                            |
 | **Title**     | Require Server requests to be associated with a Client request.                 |
-| **Status**    | Accepted                                                                        |
+| **Status**    | Final                                                                           |
 | **Type**      | Standards Track                                                                 |
 | **Created**   | 2026-02-16                                                                      |
 | **Author(s)** | MCP Transports Working Group                                                    |
@@ -31163,7 +31444,7 @@ Multi Round-Trip Requests
 
 <div>
   <Badge>
-    Approved
+    Accepted
   </Badge>
 
   <Badge>
@@ -31175,7 +31456,7 @@ Multi Round-Trip Requests
 | ------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2322                                                                                                                      |
 | **Title**     | Multi Round-Trip Requests                                                                                                 |
-| **Status**    | Approved                                                                                                                  |
+| **Status**    | Accepted                                                                                                                  |
 | **Type**      | Standards Track                                                                                                           |
 | **Created**   | 2026-02-03                                                                                                                |
 | **Author(s)** | Mark D. Roth ([@markdroth](https://github.com/markdroth)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)), |
@@ -32542,6 +32823,533 @@ Thanks to Luca Chang (@LucaButBoring) for his valuable input on how to
 integrate input requests into Tasks.
 
 
+# SEP-2468: Recommend Issuer (iss) Parameter in MCP Auth Responses
+Source: https://modelcontextprotocol.io/seps/2468-recommend-issuer-claim-for-auth
+
+Recommend Issuer (iss) Parameter in MCP Auth Responses
+
+<div>
+  <Badge>
+    In-Review
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2468                                                                            |
+| **Title**     | Recommend Issuer (iss) Parameter in MCP Auth Responses                          |
+| **Status**    | In-Review                                                                       |
+| **Type**      | Standards Track                                                                 |
+| **Created**   | 2026-03-25                                                                      |
+| **Author(s)** | Emily Lauber ([@EmLauber](https://github.com/EmLauber))                         |
+| **Sponsor**   | [@pcarleton](https://github.com/pcarleton)                                      |
+| **PR**        | [#2468](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468) |
+
+***
+
+## Abstract
+
+This SEP proposes recommending the inclusion and requiring the validation of an explicit issuer (iss) parameter in Model Context Protocol (MCP) authorization responses to mitigate authorization mix‑up attacks. By binding authorization responses to a specific authorization server identity, MCP clients can reliably detect and reject responses originating from an unexpected issuer, improving protocol robustness in multi‑identity provider (IdP) environments. This SEP follows the specifications defined in [RFC9207](https://datatracker.ietf.org/doc/rfc9207/).
+
+## Motivation
+
+The Model Context Protocol increasingly operates in environments where multiple authorization servers, identity providers, and intermediaries coexist. In such environments, OAuth mix‑up attacks become a realistic threat. Mix-up attacks are when an attacker causes a client to associate an authorization response with the wrong authorization server, potentially leading to token leakage or privilege escalation.
+
+OAuth specifications describe two mitigations for mix‑up attacks: requiring issuer (*iss*) parameter or using a unique redirect\_uri for each issuer a client interacts with. A unique redirect\_uri per issuer is not possible with Client ID Metadata Documents (the recommended registration approach) and is operationally expensive with Dynamic Client Registration. As such, the recommendation is for MCP environments to leverage the issuer mitigation.
+
+Requiring an explicit iss parameter in MCP authorization responses provides a simple, interoperable, and well‑understood mechanism to bind responses to the correct authorization server and prevent mix‑up attacks by construction. Since not every authorization server sends the issuer parameter though, this SEP proposes a MUST for clients to validate issuer if provided and a SHOULD for authorization servers supporting MCP scenarios. Future SEPs and releases may change the SHOULD to a MUST.
+
+## Specification
+
+### Issuer Parameter Requirement
+
+MCP authorization servers SHOULD include an issuer (*iss*) parameter in authorization responses, including error responses, as defined in [RFC9207](https://datatracker.ietf.org/doc/html/rfc9207#section-2). Authorization servers that do so MUST advertise it by setting `authorization_response_iss_parameter_supported: true` in their authorization server metadata.
+
+The `iss` parameter MUST:
+
+* Exactly match the issuer identifier advertised via metadata discovery
+* Be a URL that uses the `https` scheme without query or fragment components ([RFC 8414 Section 2](https://datatracker.ietf.org/doc/html/rfc8414#section-2))
+
+### Client Validation Requirements
+
+MCP clients MUST validate the *iss* parameter in authorization responses by:
+
+* Determining the expected issuer for the authorization request
+* Comparing the received *iss* value against the expected issuer
+* Rejecting the authorization response if the values do not match exactly
+
+If issuer validation fails, the client **MUST** treat the response as invalid and abort the authorization flow.
+
+## Rationale
+
+The iss value is already used in OpenID Connect and JWT‑based token validation. Extending its use to MCP authorization responses:
+
+* Leverages existing ecosystem knowledge and tooling
+* Avoids introducing MCP‑specific security mechanisms
+* Provides a clear and auditable security for deployments
+
+### Alternatives considered
+
+Introducing MCP‑specific issuer binding fields
+
+* Rejected in favor of reusing established OAuth/OIDC mechanisms.
+
+Requiring unique redirect\_uri per issuer
+
+* CIMD metadata documents are static and cannot enumerate every issuer; with DCR it is technically possible but DCR has operational drawbacks in MCP deployments that make it undesirable to depend on for a security property. RFC 9207 works uniformly across registration approaches.
+
+Discarding `iss` when the server does not advertise support (strict RFC 9207 §2.4 SHOULD)
+
+* RFC 9207 §2.4 recommends that clients SHOULD discard responses carrying `iss` from servers that do not set `authorization_response_iss_parameter_supported`, but explicitly leaves the decision to local policy ("specific guidance is out of scope"). This SEP specifies comparison instead. The recorded issuer always comes from a metadata document the client has already validated per RFC 8414 §3.3, so a present `iss` can be checked against an authentic baseline; rejection on mismatch remains unconditional, so the only behavioral difference is accepting a response whose `iss` matches that baseline — which is not a relaxation. In practice, authorization servers often begin emitting `iss` before their metadata is updated, and discarding in that window would reject legitimate flows without security benefit.
+
+## Backward Compatibility
+
+The `iss` parameter is additive on the wire. Client validation introduces a behavioral change for hosts whose authorization server advertises `authorization_response_iss_parameter_supported: true` but whose callback handling does not yet pass `iss` to the SDK; those flows will be rejected until the host extracts `iss` from the redirect URI alongside `code`. SDKs are expected to widen callback signatures additively (e.g., an optional `iss` argument) so existing call sites continue to compile. Authorization servers that do not advertise support are unaffected. The accompanying RFC 8414 Section 3.3 metadata-validation requirement restates an existing RFC MUST; clients that were not already enforcing it may surface latent issuer misconfigurations on upgrade.
+
+## Security Implications
+
+This proposal is a mitigation against mix-up attacks; the security considerations for the mechanism itself are documented in [RFC9207 Section 4](https://datatracker.ietf.org/doc/html/rfc9207#section-4). In particular, the mitigation depends on clients establishing the expected issuer before redirecting and on the comparison being an exact simple string comparison. See also the MCP [security best practices](/docs/tutorials/security/security_best_practices).
+
+## Reference Implementation
+
+* Go SDK: [modelcontextprotocol/go-sdk#859](https://github.com/modelcontextprotocol/go-sdk/pull/859)
+* TypeScript SDK: [modelcontextprotocol/typescript-sdk#1957](https://github.com/modelcontextprotocol/typescript-sdk/pull/1957)
+
+Both record the expected issuer before redirect and compare any received `iss`, rejecting on absence only when the server advertises support.
+
+***
+
+### Acknowledgments
+
+Thanks to Sam Morrow, Max Gerber, Aaron Parecki, Stephen Halter, Nate Barbettini, Karl McGuinness, and Den Delimarsky for reviews and discussion in the Auth Mix-Up Attack Prevention working group.
+
+
+# SEP-2484: Require Conformance Tests for Standards Track SEPs to Reach Final Status
+Source: https://modelcontextprotocol.io/seps/2484-conformance-tests-required-for-final-seps
+
+Require Conformance Tests for Standards Track SEPs to Reach Final Status
+
+<div>
+  <Badge>
+    Draft
+  </Badge>
+
+  <Badge>
+    Process
+  </Badge>
+</div>
+
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2484                                                                            |
+| **Title**     | Require Conformance Tests for Standards Track SEPs to Reach Final Status        |
+| **Status**    | Draft                                                                           |
+| **Type**      | Process                                                                         |
+| **Created**   | 2026-03-27                                                                      |
+| **Author(s)** | Paul Carleton ([@pcarleton](https://github.com/pcarleton))                      |
+| **Sponsor**   | None                                                                            |
+| **PR**        | [#2484](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2484) |
+
+***
+
+## Abstract
+
+This SEP adds a conformance test requirement to the `Accepted → Final` transition for Standards Track SEPs. Before a Standards Track SEP that changes observable protocol behavior can be marked `Final`, a conformance scenario covering its normative requirements must be merged into the conformance repository, accompanied by a structured traceability file mapping each MUST/MUST NOT and SHOULD/SHOULD NOT to a check or a documented exclusion. This keeps the conformance suite synchronized with the specification as it evolves, gives SDK maintainers an executable target for implementation, and makes SEP-1730's tier percentages a meaningful measure of spec coverage. Process and Informational SEPs are exempt, as are Standards Track SEPs with no observable protocol behavior.
+
+## Motivation
+
+### The gap between specification and implementation
+
+The MCP specification is written in English. SDK maintainers translate that English into code, and every translation is an opportunity for drift. SEP-1730 (SDK Tiering) already depends on conformance tests (Tier 1 requires 100% pass rate, Tier 2 requires 80%), but there is no mechanism keeping the suite synchronized with the spec. When a SEP reaches `Final`, SDK maintainers implement from prose and hope they interpreted it the same way every other SDK did. Conformance tests arrive later, if at all, and when they do they sometimes reveal that two "compliant" SDKs disagree.
+
+### Why the existing reference implementation requirement is insufficient
+
+A **reference implementation** proves the feature can be built: one valid interpretation. A **conformance test** defines what every implementation must do: the normative requirements as executable assertions. A TypeScript reference implementation tells a Rust maintainer little about whether their code is correct. A conformance test tells them precisely, and when it doesn't, the disagreement surfaces an ambiguity in the spec itself.
+
+### Keeping the conformance suite alive
+
+The conformance suite is the yardstick SEP-1730's tier percentages measure against. If it falls behind, an SDK could be "100% compliant" while missing major specification features. Tying tests to the SEP lifecycle creates a forcing function: the suite grows exactly as fast as the spec does.
+
+## Specification
+
+### Scope
+
+This requirement applies **only** to Standards Track SEPs that introduce or modify **observable protocol behavior**: behavior a conformant peer can detect by inspecting messages on the wire, transport-observable side effects (HTTP status codes, headers, connection lifecycle, OAuth redirects), or process-observable side effects for local transports (stdio stream content, exit codes).
+
+The following are **exempt**:
+
+* **Process SEPs** (governance, workflow, community structure)
+* **Informational SEPs** (guidelines, best practices without normative force)
+* **Standards Track SEPs with no observable protocol behavior**, for example:
+  * Documentation-only clarifications of existing behavior
+  * Schema annotations that do not change validation or runtime behavior
+  * Security recommendations describing implementation hardening rather than wire-level requirements
+
+The conformance suite itself is not restricted to official SDKs. Any implementation (official SDK, community SDK, or custom deployment) may run it and report a compliance percentage.
+
+### The requirement
+
+For a Standards Track SEP in scope to transition from `Accepted` to `Final`:
+
+1. **A conformance scenario** tagged with the SEP number is merged into the conformance repository, targeting the conformance repository's draft spec-version tag for the upcoming release.
+2. **A traceability file** accompanies the scenario. See below.
+3. **The scenario passes** against the SEP's reference implementation.
+
+When that spec version is released, the scenario's spec-version tag is updated from the draft tag to the dated version as part of the normal release process. The conformance harness and the SDK under test must both recognize the draft tag as a negotiable protocol version so that the new requirements are actually exercised.
+
+### Traceability file
+
+The traceability file is a structured file (`sep-NNNN.yaml`) in the conformance repository. It maps each normative requirement in the SEP's Specification section to the check that exercises it, or documents why it is excluded:
+
+```yaml theme={null}
+sep: 1234
+spec_url: https://modelcontextprotocol.io/specification/draft/section#anchor
+requirements:
+  - check: sep-1234-foo-present
+    text: "MUST include `foo` in the response"
+  - check: sep-1234-bar-absent
+    text: "MUST NOT send `bar` before initialization"
+  - check: sep-1234-qux-present
+    text: "SHOULD include `qux` when available"
+  - check: sep-1234-baz-rejected
+    text: "MUST reject requests with invalid `baz`"
+
+  - text: "MUST retry on 503"
+    excluded: "Requires fault injection; not currently supported by framework"
+    issue: https://github.com/modelcontextprotocol/conformance/issues/N
+  - text: "MUST be rendered in a monospace font"
+    excluded: "Client rendering; not observable at the protocol level"
+```
+
+Structured data lets tooling link check failures back to spec sections and lets the conformance CLI report coverage per SEP.
+
+Exclusions come in two flavors. **Framework gaps** (the behavior is observable but the framework can't express it yet) should link a tracking `issue`. **Not protocol-observable** (the requirement governs client rendering, implementation internals, or similar) needs only the `excluded` reason. A SEP whose requirements are all the second kind is exempt and doesn't need a scenario at all.
+
+The sponsor verifies the traceability file is complete: every MUST, MUST NOT, SHOULD, and SHOULD NOT (and RFC 2119 equivalents: SHALL, REQUIRED, RECOMMENDED) in the SEP's Specification section has a row. Checks for SHOULD-level requirements report as warnings rather than failures. MAY requirements do not need rows. The sponsor does not review test code; that is the conformance repository's normal PR review. What counts as a normative requirement is the sponsor's call.
+
+### Who writes the tests
+
+The **sponsor** is responsible for ensuring a conformance scenario is written. Scenarios are authored in TypeScript; contributors unfamiliar with the conformance repository should start with its [CONTRIBUTING guide](https://github.com/modelcontextprotocol/conformance/blob/main/CONTRIBUTING.md). In practice the SEP author is often best positioned, since writing the test surfaces ambiguities in the normative language that are cheaper to fix before `Final` than after.
+
+### Specification text is authoritative
+
+Conformance tests are derived from and **subordinate to** the specification text. Where a test and the spec disagree, the spec is authoritative and the test is a bug.
+
+### Conformance test disputes
+
+If an implementer believes a merged conformance test contradicts the spec, they open an issue in the conformance repository citing the specific spec text. A test is considered disputed once a conformance maintainer applies the `disputed` label; disputed tests do not affect SEP-1730 tier assessments until resolved.
+
+Most disputes resolve through normal issue triage: the test is fixed, the spec is clarified, or the dispute is closed with rationale. If the disagreement is fundamental (the disputing party and the conformance maintainers cannot agree on what the spec means), either party may escalate unilaterally to Core Maintainers for a ruling, though joint escalation is preferred since the goal is to resolve ambiguity rather than win an argument. The same escalation path is available to a sponsor if a scenario PR is blocked on non-technical grounds.
+
+### Test stability and tiering
+
+SEP-1730 tier assessments are run against a **pinned conformance release version**, not the tip of the conformance repository. New checks added to a SEP's scenario after the SEP is `Final` (whether additional edge cases or coverage of previously-excluded requirements) land in the conformance repository's main branch but only affect tier percentages when the next tiering assessment adopts a newer conformance release.
+
+This means SDK maintainers have a stable target between tiering waves, and the conformance suite can evolve continuously without surprise regressions in tier status.
+
+### Sponsor responsibilities
+
+SEP-1850 makes the sponsor responsible for tracking reference implementation progress before marking a SEP as `Final`. This SEP extends that responsibility: for Standards Track SEPs in scope, the sponsor also confirms that a conformance scenario tagged with the SEP number is merged with a complete traceability file, or that an exemption is documented in the SEP.
+
+### Relationship to SEP-1730 (SDK Tiering)
+
+This SEP strengthens SEP-1730's foundation without changing its tier definitions or thresholds. Tier assessments use pinned conformance releases, so new checks do not retroactively affect tier status. Disputed tests do not count toward tier percentages until resolved.
+
+Scenario contributions covering existing spec behavior (not tied to a new SEP) remain welcome and are not required to carry a traceability file.
+
+### Relationship to SEP-1627 (Conformance Testing)
+
+This SEP **supersedes** SEP-1627 by accepting the conformance repository as the canonical home for conformance tests and formalizing its role in the SEP lifecycle. SEP-1627's golden-trace approach was not carried forward; the scenario-and-checks model trades language-neutral fixtures for runtime expressiveness. SEP-1627's protocol-debugger ideas remain valuable future work.
+
+## Rationale
+
+### Why gate `Final` rather than `Accepted`?
+
+Gating `Accepted` would require tests before Core Maintainers have agreed the feature belongs in the spec, wasting effort on rejected SEPs.
+
+That said, writing a conformance test *during* SEP drafting is often valuable: it forces precision in MUST/MUST NOT language and surfaces edge cases the prose glosses over. Authors are **encouraged** to draft a conformance scenario before Core Maintainer review, especially for SEPs with complex behavioral requirements. It is not required, because small SEPs may not justify the upfront effort, and a rejected SEP's test is wasted work.
+
+Gating `Final` places the hard requirement where the reference implementation requirement already sits: the SEP has consensus, and the remaining work is implementation.
+
+### Why a traceability file?
+
+Without a defined coverage bar, "has a conformance test" would be relitigated on every SEP: does one check suffice, or must every MUST be covered? The traceability file makes coverage auditable: every normative statement has a row, and every row is either a check or a documented exclusion. "Sufficient" becomes "the file is complete."
+
+The file also makes gaps visible. A SEP with ten MUSTs and eight exclusions is a signal: either the SEP is genuinely hard to test (the tracking issues say why) or the test author stopped early (the sponsor should push back).
+
+### Why put the authorship obligation on the sponsor?
+
+The sponsor already shepherds the SEP through review, tracks the reference implementation, and manages status transitions. Adding "ensure a conformance test is written" is a small marginal addition to an existing role, with a clear owner.
+
+### Alternatives considered
+
+**Require conformance tests in the SEP PR itself.** Rejected: couples two independent review processes with different maintainers and CI.
+
+**Gate only "major" SEPs.** Rejected: "major" is subjective. The observable-behavior scope is objective: either a conformant peer can detect the change, or it cannot.
+
+**Make conformance maintainers the sufficiency judges.** Rejected: concentrates veto power in a group not elected to approve spec changes. The traceability-file model lets the sponsor verify completeness without reading test code.
+
+## Backward Compatibility
+
+This SEP is **not retroactive**. SEPs that reached `Final` before this SEP takes effect are not required to add conformance tests, though contributions are welcome.
+
+## Security Implications
+
+None directly. Conformance tests that exercise security-relevant behavior (auth flows, input validation, transport security) improve the ecosystem's security posture by catching regressions, but this SEP does not mandate security-specific coverage beyond what the underlying SEP's MUSTs require.
+
+## Reference Implementation
+
+The conformance repository already demonstrates the scenario-tagging pattern this SEP formalizes:
+
+* [`JsonSchema2020_12Scenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/json-schema-2020-12.ts) — SEP-1613
+* [`ElicitationDefaultsScenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/elicitation-defaults.ts) — SEP-1034
+* [`ServerSSEPollingScenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/sse-polling.ts) — SEP-1699
+* [`ElicitationEnumsScenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/elicitation-enums.ts) — SEP-1330
+
+The structured traceability file format and the scenario scaffolding tool (`npx @modelcontextprotocol/conformance new-scenario --sep <number>`) will be added to the conformance repository before this SEP reaches `Final`.
+
+The process change is implemented by updating `docs/community/sep-guidelines.mdx` to add the conformance check to the `Accepted → Final` transition (see the accompanying changes in this PR).
+
+## Prerequisites for Final status
+
+Before this SEP itself can be marked `Final`, the following conformance-repository work must be complete:
+
+* Structured traceability file format (`sep-NNNN.yaml`) and schema
+* Scenario scaffolding tool
+* Conformance harness supports a draft spec-version tag as a negotiable protocol version
+* `MAINTAINERS.md` published and the repository listed in MCP governance documentation
+
+These are this SEP's own reference implementation checklist, not ongoing process requirements.
+
+
+# SEP-2549: TTL for List Results
+Source: https://modelcontextprotocol.io/seps/2549-TTL-for-list-results
+
+TTL for List Results
+
+<div>
+  <Badge>
+    Accepted
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2549                                                                            |
+| **Title**     | TTL for List Results                                                            |
+| **Status**    | Accepted                                                                        |
+| **Type**      | Standards Track                                                                 |
+| **Created**   | 2026-04-09                                                                      |
+| **Author(s)** | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                   |
+| **Sponsor**   | [@CaitieM20](https://github.com/CaitieM20)                                      |
+| **PR**        | [#2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549) |
+
+***
+
+## Abstract
+
+This SEP proposes adding fields to support caching result objects returned by `tools/list`, `prompts/list`, `resources/list`, `resources/read`, and `resources/templates/list`. Two fields will be added `ttlMs` and `cacheScope`. The TTL tells clients how long the response may be considered fresh before re-fetching. This allows clients to cache feature lists and reduce reliance on server-push notifications while remaining fully backward compatible. The `cacheScope` field controls who may cache a response. TTL supplements rather than replaces the existing notification mechanism — both can coexist.
+
+## Motivation
+
+Today, MCP clients discover server features by invoking methods on the server. These calls return the current set of features. To learn about changes, clients rely on push notifications from the server. The below table maps the Server Method to Notification Type.
+
+| Server Methods             | Notification Type                      |
+| -------------------------- | -------------------------------------- |
+| `tools/list`               | `notifications/tools/list_changed`     |
+| `prompts/list`             | `notifications/prompts/list_changed`   |
+| `resources/list`           | `notifications/resources/list_changed` |
+| `resources/templates/list` | `notifications/resources/list_changed` |
+| `resources/read`           | `notifications/resources/updated`      |
+
+This approach has several limitations:
+
+1. **HTTP-based transports require SSE Streams**: Many clients and servers have challenges supporting long lived SSE streams which are necessary for notifications. The goal is to make SSE streams an optional optimization, but support protocol functionality without them. A TTL allows clients to poll on a predictable schedule without relying on server-push notifications.
+
+2. **Implementation complexity**: Both clients and servers must implement notification subscription and delivery infrastructure. Many simple servers have feature lists that change infrequently (or never), yet must still support the notification machinery if they want clients to stay current.
+
+3. **No freshness signal**: Even clients that can receive notifications have no indication of how "stable" a list is. A server whose tool list changes once a day and one whose list changes every second look identical to the client — both simply send notifications when changes occur. A TTL provides an explicit freshness hint.
+
+4. **Alignment with web standards**: HTTP caching (`Cache-Control: max-age`) and DNS TTLs have long demonstrated that time-based freshness hints are a simple, well-understood mechanism for reducing unnecessary refetches. MCP can benefit from the same pattern.
+
+Adding a TTL field to list responses solves all of these problems with a minimal, backward-compatible protocol change.
+
+## Specification
+
+### New interface: `CacheableResult`
+
+A new `CacheableResult` interface is introduced as a standalone type extending `Result`. It owns the `ttlMs` and `cacheScope` fields.
+
+#### Schema change (TypeScript)
+
+```typescript theme={null}
+/**
+ * A result that supports a time-to-live (TTL) hint for client-side caching.
+ *
+ * @internal
+ */
+export interface CacheableResult extends Result {
+  /**
+   * A hint from the server indicating how long (in milliseconds) the
+   * client MAY cache this response before re-fetching. Semantics are
+   * analogous to HTTP Cache-Control max-age.
+   *
+   * - If 0, The response SHOULD be considered immediately stale, The client
+   *   MAY re-fetch every time the result is needed.
+   * - If positive, the client SHOULD consider the result fresh for this many
+   *   milliseconds after receiving the response.
+   */
+  ttlMs: number & { readonly minimum: 0 };
+
+  /**
+   * Indicates the intended scope of the cached response, analogous to HTTP
+   * Cache-Control: public vs Cache-Control: private.
+   *
+   * - "public": Any client or intermediary (e.g., shared gateway, proxy)
+   *   MAY cache the response and serve it to any user.
+   * - "private": Only the requesting user's client MAY cache the response.
+   *   Shared caches (e.g., multi-tenant gateways) MUST NOT serve a cached
+   *   copy to a different user.
+   *
+   * Defaults to "public" if absent.
+   */
+  cacheScope: "public" | "private";
+}
+```
+
+### Semantics
+
+A TTL is a freshness estimate, not a guarantee. Servers MAY change the underlying list before the TTL expires; servers that do so and have advertised listChanged SHOULD send the corresponding notification.
+
+Servers MUST provide a `ttlMs` on `Results` returned by `tools/list`, `prompts/list`, `resources/list`, `resources/read`, and `resources/templates/list`.
+
+`ttlMs` MUST be >= 0. If a server returns a negative value, clients SHOULD ignore it and treat it as 0 (immediately stale).
+
+| Condition                                          | Client behavior                                                                                               |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ttlMs` = 0                                        | The response SHOULD be considered immediately stale, The Client MAY re-fetch every time the result is needed. |
+| `ttlMs` > 0                                        | Client SHOULD consider the response fresh for `ttlMs` milliseconds from receipt.                              |
+| Relevant notification received while TTL is active | The notification invalidates the cached response. Client SHOULD re-fetch regardless of remaining TTL.         |
+| `cacheScope` = `"public"`                          | Any client or shared intermediary (gateway, proxy) MAY cache and serve the response to any user.              |
+| `cacheScope` = `"private"`                         | Only the requesting user's client MAY cache. Shared caches MUST NOT serve a cached copy to a different user.  |
+
+#### Freshness calculation
+
+A client records the local time at which the response was received (`t_received`). The response is considered **fresh** while `now < t_received + ttlMs`. Once the TTL expires the response is **stale** and the client SHOULD re-fetch on next access.
+
+Clients SHOULD NOT treat TTL as a polling interval that triggers automatic background refetches. The TTL is a **freshness hint**: the client checks freshness when it needs the list, and re-fetches only if stale. Implementations that do choose to poll SHOULD apply jitter and backoff.
+
+Clients MAY re-fetch if they have reason to believe the data has changed, even if the TTL has not yet expired. Examples include receiving an unexpected error on a tool call indicating that the the method was not found or the parameters were invalid.
+
+Clients MAY serve stale responses if errors occur in re-fetching results(e.g., network issues, server downtime). The TTL is a hint for how long the client can safely rely on the data, but real-world conditions may require flexibility.
+
+### Cache scope
+
+The `cacheScope` field controls who may cache a response:
+
+* **`"public"`**: The response does not contain user-specific data. Any client, shared gateway, or caching proxy MAY store and serve the cached response to any user. This is appropriate for lists of tools, prompts, and resource templates that are identical for all users.
+* **`"private"`**: The response contains user-specific data. Only the requesting user's client MAY cache it. Shared caches (e.g., multi-tenant API gateways) MUST NOT serve a `"private"` cached response to a different user. This is appropriate for `resources/read` results that depend on the authenticated user, or for filtered list results that vary per user.
+
+This design mirrors HTTP `Cache-Control: public` vs `Cache-Control: private`, applying the same well-understood semantics at the MCP protocol level.
+
+### Interaction with notifications
+
+TTL and server-push notifications are complementary:
+
+* A server MAY provide `ttlMs` without advertising `listChanged: true` in its capabilities. In this case the client relies entirely on TTL.
+* A server MAY advertise `listChanged: true` **and** provide `ttlMs`. In this case the client can use the TTL to avoid unnecessary refetches between notifications, and the notification acts as an immediate invalidation signal.
+
+```mermaid theme={null}
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+
+    C->>S: tools/list
+    S-->>C: { tools: [...], ttlMs: 300000 }
+    Note over C: Cache response, fresh for 5 min
+
+    Note over C: 2 minutes later...
+    C->>C: Need tools list → cache still fresh, use cached
+
+    Note over C: 3 minutes later (TTL expired)...
+    C->>C: Need tools list → cache stale
+    C->>S: tools/list
+    S-->>C: { tools: [...], ttlMs: 300000 }
+
+    Note over S: Tools change before TTL expires
+    S-->>C: notifications/tools/list_changed
+    Note over C: Invalidate cache immediately
+    C->>S: tools/list
+    S-->>C: { tools: [...], ttlMs: 300000 }
+```
+
+### Interaction with pagination
+
+When a list result is paginated (includes `nextCursor`), each page is an independently cacheable response — consistent with how HTTP `Cache-Control` treats paginated resources. Specifically:
+
+* Each page response carries its own `ttlMs` value. The freshness clock for each page starts at the time that page was received.
+* Servers MAY return different `ttlMs` values on different pages (e.g., a longer TTL for early pages of a stable list, a shorter TTL for the final page).
+* There is no cross-page consistency guarantee. If the underlying data changes between page fetches, clients may observe duplicates or gaps — the same trade-off that applies to HTTP paginated APIs.
+* Clients that require a consistent snapshot of the full list SHOULD re-fetch from the beginning (without a cursor).
+* If a cursor becomes invalid (e.g., the server returns an error for a previously valid cursor), the client SHOULD discard all cached pages and re-fetch from the beginning.
+
+Servers MUST apply the same cacheScope to all response pages for a given list request. For example, if the first page of a `tools/list` response has `cacheScope: "private"`, all subsequent pages for that request MUST also be treated as `"private"`.
+
+### Error handling
+
+* If `ttlMs` is present but is a negative integer, the client SHOULD ignore it and behave as if it were 0 (immediately stale).
+
+## Rationale
+
+### Why not replace `list_changed` notifications?
+
+Notifications provide immediate invalidation which is valuable for long-lived connections. TTL provides a complementary mechanism optimized for stateless transports and for reducing unnecessary polling. Both mechanisms serve different use cases and coexist naturally.
+
+### Why integer milliseconds for TTL?
+
+We chose integer milliseconds over seconds as we want one unit for ttl across the MCP protocol. Tasks has uses cases for sub-second TTLs, and using milliseconds allows for a consistent representation across all TTLs in MCP.
+
+Many existing systems use integer seconds for TTLs, but some (e.g., gRPC retry pushback) use milliseconds. The key is to choose a single, consistent unit for all TTLs in MCP. Integer milliseconds provides the necessary precision while remaining simple to implement and understand.
+
+| System                        | Mechanism             | Notes                                                            |
+| ----------------------------- | --------------------- | ---------------------------------------------------------------- |
+| HTTP `Cache-Control: max-age` | Integer seconds       | The most widely deployed freshness hint in web infrastructure    |
+| DNS TTL                       | Integer seconds       | Controls how long resolvers cache DNS records                    |
+| GraphQL `@cacheControl`       | `maxAge` integer secs | Per-field cache hints in GraphQL responses                       |
+| gRPC `grpc-retry-pushback-ms` | Milliseconds          | Server-provided retry hint (different use case, similar pattern) |
+
+### Why not use HTTP caching directly?
+
+MCP is transport-agnostic. While HTTP-based transports could theoretically use `Cache-Control` headers, MCP also operates over stdio, and supports pluggable transports where HTTP headers may not be available. Embedding the TTL in the JSON response body ensures it works uniformly across all transports.
+
+## Backward Compatibility
+
+* Existing servers that do not provide it continue to work unchanged. If a `ttlMs` field is missing, clients SHOULD assume a default ttlMs of 0 (immediately stale) and rely on their own caching heuristincs or notifications, which is the current behavior.
+* Existing clients that do not understand the field will ignore it, as MCP result objects permit additional properties via `[key: string]: unknown` on the `Result` base type.
+* `cacheScope` is required because there is no safe default for older servers. The server must explicitly declare the intended cache scope to prevent unintended caching of user-specific data.
+* No existing fields or behaviors are modified or removed.
+* No capability negotiation is required.
+* SDK Maintainers can choose to add defaults for ttl and cacheScope in their SDKs to simplify adoption, but this is not required for compliance.
+
+## Reference Implementation
+
+*No reference implementation yet.*
+
+***
+
+## Security Implications
+
+A misconfigured or malicious serer could set an excessively long TTL, causing clients to cache stale data for longer than desired. However, since the TTL is a hint and clients can choose to ignore it or re-fetch if they suspect changes, the security risk is minimal. Clients should be designed to handle unexpected TTL values gracefully.
+
+
 # SEP-2567: Sessionless MCP via Explicit State Handles
 Source: https://modelcontextprotocol.io/seps/2567-sessionless-mcp
 
@@ -32837,6 +33645,2122 @@ All official SDKs except PHP already provide a stateless mode, implemented as no
 This SEP deliberately does not introduce a protocol-level concept of a handle: from the wire's perspective `basket_id` is an ordinary string. A consequence is that nothing marks `basket_id` as a state handle to the client or model — the relationship between `create_basket`'s output and `add_item`'s input is inferred from naming and tool descriptions, not declared.
 
 A follow-up proposal could make that relationship explicit, for example via shared JSON Schema `$defs` referenced across a server's tool input and output schemas, or via a tool annotation that marks a result field as a handle. That would let orchestrators identify which values are live state (for compaction, hand-off, or cleanup purposes) without parsing tool descriptions. It is left out of scope here to keep this SEP to the minimum needed to remove sessions.
+
+
+# SEP-2575: Make MCP Stateless
+Source: https://modelcontextprotocol.io/seps/2575-stateless-mcp
+
+Make MCP Stateless
+
+<div>
+  <Badge>
+    Accepted
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 2575                                                                                                                            |
+| **Title**     | Make MCP Stateless                                                                                                              |
+| **Status**    | Accepted                                                                                                                        |
+| **Type**      | Standards Track                                                                                                                 |
+| **Created**   | 2025-06-18                                                                                                                      |
+| **Author(s)** | Jonathan Hefner ([@jonathanhefner](https://github.com/jonathanhefner)), Mark Roth ([@markdroth](https://github.com/markdroth)), |
+| **Sponsor**   | Kurtis Van Gent ([@kurtisvg](https://github.com/kurtisvg))                                                                      |
+| **PR**        | [#2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)                                                 |
+
+***
+
+## Abstract
+
+A truly stateless protocol, where every request is self-contained and can be
+understood in isolation, is highly desirable for its inherent simplicity,
+scalability, and reliability. The current Model Context Protocol (MCP) is not
+stateless by default. The specification requires an initialization handshake
+that establishes a session state between the client and server, which persists
+for the duration of the connection.
+
+This inherent statefulness makes it difficult to run MCP at scale. Placing an
+MCP server behind a standard load balancer, for example, is challenging because
+a client's session is coupled to the specific server instance holding its state.
+
+This proposal outlines a series of changes to **enable stateless MCP as the
+default**, embracing a "pay as you go" model for protocol complexity and state.
+Under this model, we provide simple, stateless features by default and only
+introduce the overhead of stateful, long-lived connections for cases where that
+functionality is actually required.
+
+Specifically, this SEP proposes removing the state-establishing initialization
+handshake and replacing it with discrete, stateless alternatives. This initial
+step allows each request to be processed independently, simplifying server-side
+logic and paving the way for robust, scalable deployments.
+
+## Motivation
+
+The Model Context Protocol (MCP) specification currently mandates a stateful
+initialization handshake. This design choice creates significant challenges for
+scalability, reliability, and implementation simplicity. This SEP is motivated
+by the need to address these shortcomings.
+
+### The Problem with Statefulness
+
+The core issue is that a server must retain session state from previous requests
+to understand subsequent ones. This is in direct opposition to the design of
+modern, cloud-native systems which favor stateless services for their resilience
+and scalability.
+
+1. **Impediment to Scalability:** The most critical issue is the difficulty of
+   load balancing stateful MCP. A simple stateless load balancer (e.g., L4/L7
+   round-robin) cannot be used, as it would route a client's requests to
+   different backend servers, none of which would have the correct session
+   state. Operators are forced to implement complex and fragile solutions like
+   sticky sessions, which bind a client to a specific server. This complicates
+   infrastructure, can lead to uneven load distribution, and makes horizontally
+   scaling the service non-trivial.
+2. **Poor Resilience and Fault Tolerance:** In a stateful model, if the specific
+   server instance handling a client session fails, that session state is lost.
+   The client must detect the connection failure, re-establish a connection
+   (likely to a new server instance via the load balancer), and perform the
+   entire initialization handshake again. This process is disruptive and
+   inefficient, adding complexity around "resumability".
+3. **Increased Implementation Complexity:** The current model imposes a
+   significant burden on developers.
+   * **Server-side:** Developers must implement logic to create, manage, and
+     eventually garbage-collect per-client session state. This is a common
+     source of bugs and memory leaks.
+   * **Client-side:** Developers must write complex code to manage a persistent
+     connection and handle the inevitable network failures and reconnections,
+     including the logic to resynchronize state after a disconnect.
+
+## Design Principles
+
+This proposal establishes a "pay as you go" model for protocol complexity,
+guided by the following principles in order of preference:
+
+1. **Prioritize Stateless-ness:** Whenever possible, a request must be
+   self-contained, providing all information the server needs to process it
+   without relying on state from previous requests.
+2. **Prefer State References:** If a fully stateless exchange is not practical,
+   references to state should be passed in every request.
+3. **Treat Statefulness as a Last Resort:** The complexity of stateful logic and
+   long-lived streaming connections should only be accepted when no simpler
+   alternative exists to solve a critical use case.
+
+### Transport Consistency
+
+It is critical that these stateless principles are applied consistently across
+all transports. Keeping the `stdio` and `http` implementations in sync ensures a
+**unified developer experience**, allowing the core protocol semantics to be
+learned once and applied everywhere. This consistency simplifies the creation of
+transport-agnostic libraries and tooling, and prevents protocol fragmentation
+where different transports behave in fundamentally different ways. A single,
+coherent protocol model is essential for a healthy ecosystem.
+
+## Specification
+
+### Overview
+
+This specification fundamentally refactors the MCP interaction model to be
+**stateless-first**. Currently, MCP requires a mandatory 3-way initialization
+handshake before any resources can be exchanged. This handshake negotiates and
+establishes several key pieces of information:
+
+1. MCP Protocol Version
+2. Server Capabilities and `serverInfo`
+3. Client Capabilities and `clientInfo`
+
+The requirement of this initialization handshake **enforces the establishment of
+a state** that is expected to persist for subsequent communication between
+client and server. Furthermore, by bundling these negotiations into a single
+initialization phase, the specification creates an implied link between them,
+particularly between the exchange of capabilities and a mandatory connection
+lifecycle.
+
+This proposal is to **remove the initialization handshake** and "unbundle" its
+functions into discrete, stateless components. We will provide new, more clearly
+defined mechanisms for clients and servers to exchange this information without
+a mandatory state-creating cycle.
+
+> **Note:** Session management (both transport-level and application-level) is
+> addressed separately by [SEP-2322][SEP-2322] and [SEP-2567][SEP-2567]. This
+> SEP focuses exclusively on removing the initialization handshake and providing
+> stateless alternatives for version negotiation, discovery, and capabilities.
+
+### Protocol Version
+
+To make requests self-contained, metadata previously negotiated during the
+handshake must now be included with **every request**.
+
+#### HTTP
+
+For the HTTP transport, protocol version MUST be passed as an **HTTP header**.
+The header value MUST match the value provided in the request payload's `_meta`
+field; otherwise the server MUST return a `400 Bad Request` (see
+[SEP-2243][SEP-2243]).
+
+* `MCP-Protocol-Version: 2025-06-18`
+  * **Purpose**: To inform the server which version of the MCP specification the
+    client is using for this specific request.
+  * **Requirement**: This header is **MANDATORY**. Servers should reject
+    requests with a missing or unsupported version.
+  * This header MUST match the value provided in the Request as specified below.
+
+#### Per-request Version
+
+The `protocol-version` MUST be embedded directly within the `_meta` field of the
+request payload. For HTTP, this \_meta MUST match the associated HTTP header, or
+else the server should return a 400 Bad Request.
+
+The following diff illustrates the required changes to `RequestMetaObject`:
+
+```ts theme={null}
+export interface RequestMetaObject extends MetaObject {
+  progressToken?: ProgressToken;
++ /**
++  * The MCP Protocol Version being used for this request.
++  */
++ "io.modelcontextprotocol/protocolVersion": string;
+  // Additional per-request fields (clientInfo, clientCapabilities, logLevel)
+  // are introduced in the Per-Request Client Capabilities section below.
+}
+```
+
+#### Unsupported Protocol Versions
+
+If a server receives a request with a protocol version it does not implement
+(whether the version is unknown to the server or is a known version the server
+has chosen not to support, such as an experimental or draft version), it MUST
+return a JSON-RPC error response. For HTTP, the response status code MUST be
+`400 Bad Request`. The error MUST conform to the following structure:
+
+```ts theme={null}
+export interface UnsupportedProtocolVersionError extends Omit<
+  JSONRPCErrorResponse,
+  "error"
+> {
+  error: Error & {
+    code: typeof INVALID_PARAMS;
+    data: {
+      /**
+       * An array of protocol version strings that the server supports.
+       */
+      supported: string[];
+      /**
+       * The protocol version that was requested by the client.
+       */
+      requested: string;
+    };
+  };
+}
+```
+
+#### Version Negotiation Flow
+
+Without an initialization handshake, version negotiation happens inline:
+
+1. The client sends a request with its preferred protocol version in the
+   `MCP-Protocol-Version` header and `io.modelcontextprotocol/protocolVersion`
+   `_meta` field.
+2. If the server supports that version, it processes the request normally.
+3. If the server does not support the requested version, it returns an
+   `UnsupportedProtocolVersionError` containing its list of `supported`
+   versions.
+4. The client selects a mutually supported version from the list and retries.
+
+Alternatively, a client **MAY** call `server/discover` first to learn the
+server's supported versions before sending any other requests.
+
+### Discovery for Server Capabilities
+
+To allow clients to adapt to different server implementations, this
+specification introduces a **discovery RPC**. This provides a standard mechanism
+for a server to advertise its supported protocol versions and capabilities.
+
+Servers **MUST** implement `server/discover`. Clients **MAY** call it but are
+not required to — a client is free to invoke any RPC without first calling the
+discovery endpoint. If a client calls an unsupported RPC, the server **MUST**
+return a `Method not found` JSON-RPC error (`-32601`). For HTTP, the response
+status code MUST be `404 Not Found`.
+
+#### `server/discover` RPC
+
+* **Purpose**: To allow a client to query the server for its supported protocol
+  versions, capabilities, and other metadata.
+
+**Request Schema:**
+
+```ts theme={null}
+export interface DiscoverRequest extends Request {
+  method: "server/discover";
+  params?: {};
+}
+```
+
+**Response Schema:**
+
+```ts theme={null}
+export interface DiscoverResult extends Result {
+  /**
+   * A list of MCP Protocol Version strings that this server supports.
+   * The client should choose a version from this list for use in
+   * subsequent requests.
+   */
+  supportedVersions: string[];
+
+  /**
+   * An object detailing the capabilities of the server.
+   */
+  capabilities: ServerCapabilities;
+
+  /**
+   * Information about the server software implementation.
+   */
+  serverInfo: Implementation;
+
+  /**
+   * Natural language instructions describing how to use the server and
+   * its features. This can be used by clients to improve an LLM's
+   * understanding of available tools (e.g., by including it in a system prompt).
+   */
+  instructions?: string;
+}
+```
+
+### Per-Request Client Capabilities
+
+To complete the decoupling from the initial handshake, client capabilities are
+no longer negotiated once at initialization. Instead, a client **MUST** specify
+its capabilities on every request. This ensures the server is always fully
+informed about what optional features the client can handle for that specific
+transaction. An empty capabilities object means the client supports no optional
+capabilities — servers **MUST NOT** infer capabilities from prior requests.
+
+#### Per-Request Metadata Schema
+
+Every request's `_meta` carries a small set of fields that previously lived in
+the initialization handshake. The full `RequestMetaObject` shape:
+
+```ts theme={null}
+export interface RequestMetaObject extends MetaObject {
+  progressToken?: ProgressToken;
+  /**
+   * The MCP Protocol Version being used for this request.
+   */
+  "io.modelcontextprotocol/protocolVersion": string;
+  /**
+   * Identifies the client software.
+   */
+  "io.modelcontextprotocol/clientInfo": Implementation;
+  /**
+   * Capabilities of the client for this specific request.
+   */
+  "io.modelcontextprotocol/clientCapabilities": ClientCapabilities;
+  /**
+   * The desired log level for this request.
+   */
+  "io.modelcontextprotocol/logLevel"?: LoggingLevel;
+}
+```
+
+Field semantics:
+
+* `"io.modelcontextprotocol/protocolVersion"`: `string` — the MCP Protocol
+  Version. **Required.** See the Protocol Version section above for negotiation
+  details.
+* `"io.modelcontextprotocol/clientInfo"`: `Implementation` — identifies the
+  client software. **Required.** The `Implementation` schema requires `name` and
+  `version`; other fields are optional.
+* `"io.modelcontextprotocol/clientCapabilities"`: `ClientCapabilities` — the
+  client's capabilities for this request. **Required.**
+* `"io.modelcontextprotocol/logLevel"`: `LoggingLevel` — the desired log level
+  for this request. **Optional.** If absent, the server **MUST NOT** send any
+  log notifications for this request. The client opts in to log messages by
+  explicitly setting a level. Replaces the `logging/setLevel` RPC.
+
+Roots are intentionally not included as a per-request `_meta` field. Servers
+that need the client's roots **MUST** request them via the MRTR
+`ListRootsRequest` mechanism (see [SEP-2322][SEP-2322]), which avoids putting
+potentially large root lists on every request and follows the "pay as you go"
+principle.
+
+A request missing any required field is malformed; the server **MUST** reject it
+with `INVALID_PARAMS` (and `400 Bad Request` for HTTP).
+
+#### Response Streaming
+
+These declared capabilities govern what the server may include in the response
+stream. [SEP-2322][SEP-2322] (MRTR) defines how server-to-client interactions
+are embedded inline within responses via `IncompleteResult`; this SEP specifies
+that those interactions are governed by the per-request `clientCapabilities`
+declared in `RequestMetaObject`.
+
+For HTTP, any request's response **MAY** be delivered as an SSE stream
+(`Content-Type: text/event-stream`) instead of a single JSON object. Only
+notifications (e.g., `notifications/progress`, `notifications/message`) flow as
+independent messages on this stream, followed by the final result.
+Server-to-client interactions (sampling, elicitation, listRoots) are **not**
+sent as independent requests — they are embedded as input requests inside an
+`IncompleteResult` returned from specific request paths (e.g., `CallTool`,
+`GetPrompt`, `ListResources`). The client satisfies the input requests and
+retries the original request.
+
+#### Request Cancellation
+
+How a client cancels an in-flight request depends on the transport:
+
+* **HTTP.** Closing the SSE response stream **MUST** be treated by the server
+  as cancellation of that request. Because each request has its own response
+  stream, the transport-level disconnect is unambiguous.
+* **STDIO.** The client **MUST** send a `notifications/cancelled`
+  notification referencing the request ID. STDIO has a single shared channel,
+  so there is no per-request stream to close.
+
+Servers **SHOULD** stop work on a cancelled request as soon as practical and
+**MUST NOT** send any further messages for it.
+
+##### Resumable Streams Are Removed
+
+Because connection drops now implicitly cancel a request, resumable SSE streams
+(via `Last-Event-ID` reconnection) are removed. They contradict the
+stateless-by-default paradigm: resuming would require the server to retain
+per-request state across connection failures.
+
+Workloads that need durability or resumability **MUST** use the tasks
+primitive instead, which provides explicit mechanisms for fetching results
+after a connection drop.
+
+#### Missing Required Capabilities
+
+A server **MUST NOT** rely on capabilities the client has not declared. If
+processing a request requires a capability the client did not declare in its
+`clientCapabilities`, the server **MUST** return a JSON-RPC error specifying
+the missing capabilities. For HTTP, the response status code MUST be
+`400 Bad Request`.
+
+```ts theme={null}
+export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32003;
+
+export interface MissingRequiredClientCapabilityError extends Omit<
+  JSONRPCErrorResponse,
+  "error"
+> {
+  error: Error & {
+    code: typeof MISSING_REQUIRED_CLIENT_CAPABILITY;
+    data: {
+      /**
+       * The capabilities the server requires from the client
+       * to process this request.
+       */
+      requiredCapabilities: ClientCapabilities;
+    };
+  };
+}
+```
+
+### `subscriptions/listen` RPC
+
+This SEP introduces a new `subscriptions/listen` RPC that replaces the previous
+HTTP GET endpoint and ensures consistent behavior between HTTP and STDIO. A
+client uses it to open a long-lived channel for receiving notifications outside
+the context of a specific request.
+
+The HTTP GET endpoint used by Streamable HTTP for server-to-client messages is
+**removed** in this version of the protocol. All communication uses POST.
+
+Per [SEP-2260][SEP-2260], only notifications (not requests) flow on this
+channel; server-initiated requests use MRTR (see Response Streaming above) and
+are scoped to a specific client request.
+
+#### Request Schema
+
+```ts theme={null}
+export interface SubscriptionsListenRequest extends Request {
+  method: "subscriptions/listen";
+  params: {
+    _meta: {
+      "io.modelcontextprotocol/protocolVersion": string;
+      "io.modelcontextprotocol/clientInfo": Implementation;
+      "io.modelcontextprotocol/clientCapabilities": ClientCapabilities;
+      // ... other meta fields
+    };
+
+    /**
+     * The notifications the client wants to receive on this stream.
+     * Each notification type is opt-in; the server **MUST NOT** send
+     * notification types the client has not explicitly requested here.
+     */
+    notifications: {
+      /**
+       * If true, receive notifications/tools/list_changed.
+       */
+      toolsListChanged?: boolean;
+
+      /**
+       * If true, receive notifications/prompts/list_changed.
+       */
+      promptsListChanged?: boolean;
+
+      /**
+       * If true, receive notifications/resources/list_changed.
+       */
+      resourcesListChanged?: boolean;
+
+      /**
+       * Subscribe to notifications/resources/updated for specific
+       * resource URIs. Replaces the resources/subscribe RPC.
+       */
+      resourceSubscriptions?: string[];
+    };
+  };
+}
+```
+
+The `notifications` field is **required** and the client **MUST** explicitly
+opt in to each notification type it wants to receive. If a field within
+`notifications` is omitted (or set to `false`), the server **MUST NOT** send
+notifications of that type.
+
+#### Acknowledgment Notification
+
+The server sends this notification first to acknowledge that the subscription
+has been established. The subscription is long-lived and has no natural
+"completion result"; it ends when:
+
+* the client explicitly cancels it (closing the SSE stream on HTTP, or sending
+  `notifications/cancelled` on STDIO);
+* the underlying connection is closed (HTTP timeout, TCP disconnect, STDIO
+  process exit); or
+* the server tears it down (e.g., shutdown), in which case it **MUST** close
+  the SSE stream (HTTP) or send `notifications/cancelled` referencing the
+  subscription's request ID (STDIO).
+
+```ts theme={null}
+export interface SubscriptionsAcknowledgedNotification extends Notification {
+  method: "notifications/subscriptions/acknowledged";
+  params: {
+    /**
+     * The notification subscriptions the server has agreed to honor.
+     * Only includes notification types the server actually supports.
+     * If the client requested an unsupported notification type
+     * (e.g., promptsListChanged when the server has no prompts),
+     * it is omitted from this set.
+     */
+    notifications: {
+      toolsListChanged?: boolean;
+      promptsListChanged?: boolean;
+      resourcesListChanged?: boolean;
+      resourceSubscriptions?: string[];
+    };
+  };
+}
+```
+
+#### Multiple Concurrent Subscriptions
+
+A client **MAY** have multiple active subscriptions concurrently (e.g., one
+listening for tools-list changes, another for resource updates). Each
+subscription is identified by the JSON-RPC request ID of its
+`SubscriptionsListenRequest`.
+
+To allow STDIO clients to demultiplex notifications belonging to different
+subscriptions on the single shared channel, every notification delivered as
+part of an active subscription **MUST** include the subscription's request ID
+in `_meta`:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/tools/list_changed",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/subscriptionId": "<original listen request id>"
+    }
+  }
+}
+```
+
+This same correlation pattern applies to other server-to-client notifications
+that need to be associated with a specific request, such as
+`notifications/progress` (which uses the originating request's ID).
+
+#### Stopping a Subscription
+
+* **HTTP.** Closing the SSE response stream stops the subscription.
+* **STDIO.** The client sends `notifications/cancelled` referencing the listen
+  request's ID. The server **MUST** stop sending notifications for that
+  subscription.
+
+#### Transport Behavior
+
+**HTTP.** The client sends `SubscriptionsListenRequest` via `POST`. The server's
+response is an open SSE stream (`Content-Type: text/event-stream`), and the
+first JSON-RPC message on this stream **MUST** be a
+`SubscriptionsAcknowledgedNotification`.
+
+**STDIO.** The client sends `SubscriptionsListenRequest` at any time. The server
+**MUST** acknowledge it by sending a `SubscriptionsAcknowledgedNotification`.
+Subsequent notifications flow on the bidirectional STDIO channel, each tagged
+with the subscription's request ID as described above. If the connection is
+terminated (e.g., the server crashes and restarts), the client **MUST** re-send
+`SubscriptionsListenRequest` to re-establish its subscriptions.
+
+### Deprecated and Removed RPCs
+
+To simplify the protocol and align with the move to per-request capabilities,
+the following RPC methods and notifications are removed:
+
+* `initialize` / `notifications/initialized`: The initialization handshake is
+  removed. Version negotiation is handled per-request via `MCP-Protocol-Version`
+  headers and `_meta` fields. Capability discovery is handled by
+  `server/discover`.
+* `logging/setLevel`: Removed. The log level is now specified per-request via
+  the `'io.modelcontextprotocol/logLevel'` `_meta` field. There is no
+  replacement RPC.
+* `roots/list`: Removed as a top-level server-to-client RPC. Servers that need
+  the client's roots **MUST** request them via the MRTR `ListRootsRequest`
+  mechanism (see SEP-2322).
+* `notifications/roots/list_changed`: Removed. Roots are fetched on demand via
+  MRTR, so there is no need for a change notification.
+* `resources/subscribe` / `resources/unsubscribe`: These methods are removed.
+  Resource subscriptions are inherently stateful — the server must remember
+  which resources each client has subscribed to. Instead, clients declare the
+  resources they want updates for in the `notifications` param of the
+  `subscriptions/listen` request. The server sends
+  `notifications/resources/updated` on the listen stream for matching resources.
+* `ping`: Removed in **both directions**. Server-to-client ping is removed
+  because servers can no longer independently send requests. Client-to-server
+  ping is also removed because any normal RPC call already proves server
+  liveness, and transport-layer mechanisms (HTTP keep-alives, SSE comments,
+  STDIO process status) handle connection-health checks more appropriately.
+
+## Rationale
+
+### Stateless-First by Default
+
+The primary design decision of this SEP is to remove the mandatory
+initialization handshake, making stateless interaction the default model for the
+protocol. This choice is rooted in the "pay as you go" principle and the desire
+to align MCP with modern, cloud-native architecture. By making the simplest
+interaction model the default, we lower the barrier to entry and reduce
+implementation complexity for the most common use cases. This immediately
+enables straightforward horizontal scaling and improves resilience, as any
+request can be handled by any server instance.
+
+#### Alternative Considered: Optional Handshake
+
+An alternative we considered was to keep the existing stateful handshake but
+make it optional. In this model, a client could choose to either perform the
+handshake to establish a persistent session or skip it and send self-contained
+requests.
+
+#### Why it was rejected:
+
+Supporting two parallel interaction models would have dramatically increased the
+complexity of the protocol and every implementation. Servers and clients would
+need to build, test, and maintain two separate logic paths, leading to a larger
+surface area for bugs. It also violates the design principle of having one
+clear, obvious way to perform a core function. By making a clean break, we
+ensure the entire ecosystem can move forward and benefit from a simpler, more
+scalable, and more robust foundation.
+
+### Explicit Session Management
+
+This proposal originally included dedicated `sessions/create` and
+`sessions/delete` RPCs to manage the lifecycle of a logical session.
+
+Session management is now addressed separately by [SEP-2567][SEP-2567], which
+proposes removing sessions entirely and replacing them with explicit state
+handles. This aligns with the [sessions-vs-sessionless
+decision][sessions-decision] made by the Core Maintainers.
+
+### Separation of Concerns
+
+A core principle of this proposal is the "unbundling" of the monolithic
+initialization handshake into a suite of discrete, single-purpose RPCs. The
+original handshake mixed the concerns of protocol negotiation and capability
+discovery into a single, complex interaction. The new design explicitly
+separates these:
+
+* **Discovery**: Handled exclusively by `server/discover`.
+* **Capabilities**: Handled on a per-request basis via the `_meta` field or the
+  `subscriptions/listen` RPC.
+
+The rationale for this is to create a more modular, flexible, and understandable
+protocol. Each component now has a single, well-defined responsibility. This
+allows clients to use only the parts of the protocol they need, adhering to our
+"pay as you go" principle.
+
+#### Alternative Considered: A Monolithic Handshake
+
+We could have kept a single, monolithic handshake RPC and simply added more
+parameters and complex logic to it to support the stateless-first model.
+
+#### Why it was rejected:
+
+A single, do-it-all RPC is difficult to implement, test, and evolve. It forces
+all clients, even the simplest ones, to be aware of the protocol's most complex
+features. By separating these concerns, we've made the protocol easier to learn
+and implement correctly, while also making it more flexible and extensible for
+the future.
+
+## Backward Compatibility
+
+While this proposal attempts to preserve existing functionality and use-cases,
+this proposal introduces a **fundamental, backward-incompatible change**. Thus,
+it will require a new version of the protocol.
+
+### Supporting Multiple Versions
+
+While this SEP removes the `initialize` handshake, a server that wishes to
+support both old and new clients **MAY** do so. Such a server can continue to
+implement the old `initialize` RPC to handle legacy clients, while also exposing
+the new stateless RPCs (`server/discover`, etc.) for updated clients.
+
+Both servers and clients should be able to handle changes in the versions
+appropriately. Two example scenarios are outlined below, where vPrev indicates
+the version prior to the SEP, and vAfter indicates a version after it.
+
+#### Client (supporting vPrev) → Server (vPrev, vPost)
+
+1. Client sends initialization
+2. Server supports vPrev, so initialization is returned per spec
+3. Client and server communicate per `vPrev`.
+
+#### Client (supporting vPrev, vPost) → Server (vPrev)
+
+For HTTP, the client may attempt any vPost request (e.g., `tools/list` with the
+MCP Protocol Version header). The server returns `400 Bad Request` (or
+`Unsupported protocol version`); the client falls back to vPrev (and performs
+initialization) for future requests.
+
+For STDIO, the client cannot rely on a per-request error to detect the server's
+version. A client that supports both a vPost (which does not require
+initialization) **and** a legacy version that does require `initialize`
+**SHOULD** probe with `server/discover` first to determine which to use:
+
+1. Client sends `server/discover` with the MCP Protocol Version `_meta` field
+   set to its preferred vPost.
+2. If the server supports vPost (or any vPost-style version the client also
+   supports), the client uses the discovered version for subsequent requests.
+3. If the server returns `Unsupported protocol version` or `Method not found`,
+   the client falls back to its supported legacy version and performs the
+   `initialize` handshake.
+
+A client that supports only vPost-style versions has no need to probe — it
+simply uses its preferred version and handles `Unsupported protocol version`
+errors normally.
+
+## Security Implications
+
+Without a session handshake, every request must be independently authenticated
+and authorized. Implementations **MUST** ensure that authentication is not
+bypassed by the removal of the initialization phase.
+
+Beyond per-request authentication, this proposal does not introduce additional
+security concerns.
+
+## Reference Implementation
+
+// TODO
+
+## FAQ
+
+### What is protocol level statelessness?
+
+[Wikipedia](https://en.wikipedia.org/wiki/Stateless_protocol) defines a
+stateless protocol as:
+
+> A stateless protocol is a communication protocol in which the receiver must
+> not retain session state from previous requests. The sender transfers relevant
+> session state to the receiver in such a way that every request can be
+> understood in isolation, that is without reference to session state from
+> previous requests retained by the receiver.
+
+This does NOT mean that you can't build stateful applications on top of a
+stateless protocol. HTTP is an example of a stateless protocol, which most of
+the web is built on today. However it does mean that the state cannot exist *in
+the protocol itself*, and should instead specify the state in the request (or
+failing that, a reference to the state for the server or client to track).
+
+### Does this make MCP a fully stateless protocol?
+
+Not entirely (hence 'by default'). Depending on your interpretation of
+"requests", the SSE streams mentioned (both client-initiated and
+server-initiated) tend to have multiple requests within a context of a stream.
+However, these streams are constrained to a single HTTP request and optional to
+use, meaning that the complexity is both constrained and optional to use when
+the situation requires it.
+
+### Why is it important for STDIO to be stateless as well?
+
+The transport MCP is using should be an implementation detail only. If one
+version of a protocol supports functionality that doesn't cleanly map over to
+another version of the protocol, they are really two different protocols.
+
+This makes it easy for developers to switch their services from one transport to
+another without needing to make significant changes to the behavior of their
+applications, and easier to proxy between different transports correctly.
+Otherwise, there will continue to be feature gaps and division between these
+different implementations, leading to both confusion and incompatibility.
+
+### How does `server/discover` relate to the MCP Server Card?
+
+The `server/discover` RPC overlaps with the [MCP Server Card][SEP-2127]
+proposal, which defines a `.well-known/mcp.json` document for HTTP-based
+discovery. Both mechanisms are intentionally retained: the Server Card is
+well-suited to HTTP (no auth required, cacheable, indexable) while
+`server/discover` provides a unified RPC interface that works consistently
+across HTTP and STDIO transports. The two should be aligned on content where
+applicable.
+
+## Open Questions
+
+### What belongs in `_meta` vs. as a top-level protocol field?
+
+This SEP places several previously-handshake-negotiated values
+(`protocolVersion`, `clientInfo`, `roots`, `logLevel`, `clientCapabilities`)
+into per-request `_meta` fields under the `io.modelcontextprotocol/` namespace.
+This follows the spec's allowance for "purpose-specific metadata" reserved by
+definitions in the schema.
+
+However, this risks overloading `_meta` over time — at what point do we add
+top-level fields again? One possible distinction: required protocol-level fields
+(e.g., `protocolVersion`) might better live as top-level fields, while optional
+or extension-provided values stay in `_meta`. This question deserves broader
+discussion before this SEP is finalized.
+
+### Should `clientInfo` be part of `ClientCapabilities`?
+
+Currently, `clientInfo` (`Implementation` type) and `clientCapabilities`
+(`ClientCapabilities` type) are separate fields. In a per-request model, having
+a single field for all client metadata would reduce overhead. However,
+`clientInfo` serves a different purpose (identity/UI) than capabilities (feature
+negotiation). Should `clientInfo` be folded into `ClientCapabilities`, remain a
+separate per-request `_meta` field, or be handled through a different mechanism
+entirely (e.g., only sent via `subscriptions/listen`)?
+
+[SEP-2127]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127
+
+[SEP-2243]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243
+
+[SEP-2260]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2260
+
+[SEP-2322]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322
+
+[SEP-2567]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2567
+
+[sessions-decision]: https://github.com/modelcontextprotocol/transports-wg/blob/main/docs/sessions-vs-sessionless-decision.md
+
+
+# SEP-2577: Deprecate Roots, Sampling, and Logging
+Source: https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging
+
+Deprecate Roots, Sampling, and Logging
+
+<div>
+  <Badge>
+    Final
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2577                                                                            |
+| **Title**     | Deprecate Roots, Sampling, and Logging                                          |
+| **Status**    | Final                                                                           |
+| **Type**      | Standards Track                                                                 |
+| **Created**   | 2026-04-14                                                                      |
+| **Author(s)** | Kurtis Van Gent ([@kurtisvg](https://github.com/kurtisvg))                      |
+| **Sponsor**   | [@kurtisvg](https://github.com/kurtisvg)                                        |
+| **PR**        | [#2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) |
+
+***
+
+## Abstract
+
+This SEP deprecates the following core protocol features:
+
+* **Roots** (`roots/list`, `notifications/roots/list_changed`)
+* **Sampling** (`sampling/createMessage`,
+  `ClientCapabilities.tasks.requests.sampling`)
+* **Logging** (`logging/setLevel`, `notifications/message`)
+
+These features are deprecated starting in the specification version that
+includes this SEP (expected June 2026). They will continue to be fully
+functional in all specification versions released within one year of that
+version's release.
+
+Each of those subsequent versions will in turn support the features for one year
+after its own release, assuming the one-year-per-version support policy proposed
+in a separate SEP. This provides implementations with an extended migration
+window before the features are fully removed.
+
+During the deprecation period, wire-level behavior is unchanged. No types are
+removed, no capability negotiation changes, and no existing implementations
+break. The deprecation serves as a signal to the ecosystem to stop building on
+these features and to plan for their eventual removal.
+
+## Motivation
+
+The MCP specification aims to remain minimal and focused. Features that see low
+adoption, overlap with existing alternatives, or impose disproportionate
+implementation burden relative to their value are candidates for removal.
+Keeping such features in the core specification increases the burden for every
+client and server, slows protocol evolution, and makes the specification harder
+to learn. The following three features meet these criteria.
+
+Deprecating these features was proposed during a recent core contributor
+meeting. This SEP formalizes that proposal with a concrete implementation plan.
+See [discussion #2536][discussion-2536].
+
+### Roots
+
+Roots provides "informational guidance" about which directories or files a
+server should operate on. In practice:
+
+* **Low adoption**: Few clients implement roots support, and few servers rely on
+  it. The [feature support matrix][feature-matrix] shows limited client
+  coverage.
+* **Vague semantics**: The specification describes roots as informational —
+  servers are not required to respect them, which reduces their utility.
+* **Overlapping alternatives**: Working directory context can be provided
+  through tool parameters, resource URIs, server configuration, or environment
+  variables — all of which are more explicit.
+
+### Sampling
+
+Sampling allows servers to request LLM completions from the client. While
+conceptually powerful, it has struggled with adoption:
+
+* **Complex to implement**: Correct sampling implementation requires
+  human-in-the-loop approval, model selection logic, security considerations,
+  and (since SEP-1577) tool loop support. This complexity has contributed to low
+  client adoption.
+* **Low adoption**: The [feature support matrix][feature-matrix] shows that few
+  clients support sampling, despite the feature being available since the
+  November 2024 specification.
+* **Direct alternatives**: Servers that need LLM capabilities can integrate
+  directly with LLM provider APIs, giving them full control over model
+  selection, parameters, and streaming.
+
+### Logging
+
+Logging allows servers to send structured log messages to clients via the
+protocol:
+
+* **Overlapping infrastructure**: Standard logging mechanisms (stderr for stdio
+  transports, OpenTelemetry for structured observability) are mature, widely
+  adopted, and better suited to logging than an application-protocol channel.
+* **Low value relative to complexity**: Adding log message types, severity
+  levels, and the `logging/setLevel` request to the core specification increases
+  the implementation surface for all clients and servers.
+
+[discussion-2536]: https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/2536
+
+[feature-matrix]: https://modelcontextprotocol.io/clients#feature-support-matrix
+
+## Specification
+
+### Overview of changes
+
+1. Mark deprecated features with `@deprecated` annotations in the schema
+2. Add deprecation notices to feature documentation pages
+3. No wire-level protocol changes during the deprecation period
+
+### Schema changes
+
+Add `@deprecated` JSDoc annotations to the following items in
+`schema/draft/schema.ts`. No types, interfaces, or union members are removed.
+
+#### Deprecated capabilities
+
+| Capability                                   | Location                               |
+| -------------------------------------------- | -------------------------------------- |
+| `ClientCapabilities.roots`                   | Client capability for listing roots    |
+| `ClientCapabilities.sampling`                | Client capability for LLM sampling     |
+| `ClientCapabilities.tasks.requests.sampling` | Task-augmented sampling sub-capability |
+| `ServerCapabilities.logging`                 | Server capability for log messages     |
+
+#### Deprecated types — Roots
+
+| Type                           | Description                               |
+| ------------------------------ | ----------------------------------------- |
+| `Root`                         | Represents a root directory or file       |
+| `ListRootsRequest`             | Server-to-client request for `roots/list` |
+| `ListRootsResult`              | Result containing roots array             |
+| `ListRootsResultResponse`      | JSON-RPC response wrapper                 |
+| `RootsListChangedNotification` | Client notification when roots change     |
+
+#### Deprecated types — Sampling
+
+| Type                          | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
+| `CreateMessageRequestParams`  | Parameters for `sampling/createMessage`        |
+| `CreateMessageRequest`        | Server-to-client request for sampling          |
+| `CreateMessageResult`         | Result from a sampling request                 |
+| `CreateMessageResultResponse` | JSON-RPC response wrapper                      |
+| `SamplingMessage`             | A message in a sampling conversation           |
+| `SamplingMessageContentBlock` | Content block union for sampling messages      |
+| `ToolChoice`                  | Controls model tool selection during sampling  |
+| `ToolUseContent`              | Tool use content block in sampling messages    |
+| `ToolResultContent`           | Tool result content block in sampling messages |
+| `ModelPreferences`            | Server preferences for model selection         |
+| `ModelHint`                   | Hints for model selection                      |
+
+#### Deprecated types — Logging
+
+| Type                               | Description                             |
+| ---------------------------------- | --------------------------------------- |
+| `LoggingLevel`                     | Syslog severity level enum              |
+| `SetLevelRequestParams`            | Parameters for `logging/setLevel`       |
+| `SetLevelRequest`                  | Client-to-server request to set level   |
+| `SetLevelResultResponse`           | JSON-RPC response wrapper               |
+| `LoggingMessageNotificationParams` | Parameters for log message notification |
+| `LoggingMessageNotification`       | Server-to-client log message            |
+
+#### Annotation format
+
+Each deprecated item SHOULD receive a JSDoc `@deprecated` tag with a brief
+explanation:
+
+```typescript theme={null}
+/**
+ * Present if the client supports listing roots.
+ *
+ * @deprecated Deprecated as of this specification version. Will be included
+ * in all versions released within one year, then may be removed.
+ */
+roots?: {
+  listChanged?: boolean;
+};
+```
+
+#### Union types
+
+The following union types reference deprecated types but MUST NOT be modified
+during the deprecation period. They will be updated when the deprecated types
+are removed:
+
+* `ClientNotification` (includes `RootsListChangedNotification`)
+* `ClientResult` (includes `CreateMessageResult`, `ListRootsResult`)
+* `ServerRequest` (includes `CreateMessageRequest`, `ListRootsRequest`)
+* `ServerNotification` (includes `LoggingMessageNotification`)
+
+### Documentation changes
+
+Add a deprecation warning block at the top of each feature's documentation page,
+after the title:
+
+**`docs/specification/draft/client/roots.mdx`:**
+
+```mdx theme={null}
+<Warning>
+**Deprecated**: The Roots feature is deprecated as of this specification
+version. It will remain fully functional in all specification versions released
+within one year of the <YYYY-MM-DD> release. Each of those versions will
+continue to support it for one year after its own release.
+</Warning>
+```
+
+**`docs/specification/draft/client/sampling.mdx`:**
+
+```mdx theme={null}
+<Warning>
+**Deprecated**: The Sampling feature is deprecated as of this specification
+version. It will remain fully functional in all specification versions released
+within one year of the <YYYY-MM-DD> release. Each of those versions will
+continue to support it for one year after its own release.
+</Warning>
+```
+
+**`docs/specification/draft/server/utilities/logging.mdx`:**
+
+```mdx theme={null}
+<Warning>
+**Deprecated**: The Logging feature is deprecated as of this specification
+version. It will remain fully functional in all specification versions released
+within one year of the <YYYY-MM-DD> release. Each of those versions will
+continue to support it for one year after its own release.
+</Warning>
+```
+
+### Capability negotiation
+
+During the deprecation period, capability negotiation is **unchanged**:
+
+* Clients and servers that support deprecated features SHOULD continue to
+  declare the corresponding capabilities.
+* Implementations that encounter deprecated capabilities MUST still handle them
+  correctly.
+* Implementations SHOULD emit a warning (e.g., in logs or developer tooling)
+  when deprecated capabilities are negotiated.
+* New implementations SHOULD NOT add support for deprecated features unless
+  needed for backward compatibility with existing counterparts.
+
+### Timeline
+
+* **Deprecated**: In the next specification release (currently planned for June
+  2026\).
+* **Included in subsequent releases**: All specification versions released
+  within one year of this version's release MUST continue to include these
+  features as deprecated.
+* **Per-version support**: Each version that includes these features will
+  support them for one year after that version's release, per the
+  one-year-per-version support policy proposed in a separate SEP.
+* **Removal**: Specification versions released more than one year after this
+  version's release MAY remove these features entirely.
+
+## Rationale
+
+### Why deprecate rather than move to extensions?
+
+These features are already implemented in many clients and servers. The
+extensions mechanism (SEP-2133) specifies that unless an extension is provided,
+implementations must behave as if the extension is not present. Retrofitting
+this logic into existing SDKs — especially across multiple protocol versions —
+would be complex and error-prone. Deprecation followed by removal is less
+disruptive: implementations can continue using the features as-is during the
+transition period, then simply stop when the features are removed.
+
+### Why deprecate rather than remove immediately?
+
+While adoption of these features is low, they are still in use. Removing them
+immediately would cause unnecessary churn and disruption for users, client and
+server owners, and SDK builders. A deprecation window minimizes this impact by
+giving the ecosystem time to migrate at its own pace.
+
+### Why these three features specifically?
+
+These were identified during a core contributor meeting as the features with the
+weakest adoption-to-complexity ratio. Each has viable alternatives outside the
+protocol, and none are critical to the core resource/tool/prompt interaction
+model that defines MCP. See [discussion #2536][discussion-2536].
+
+## Backward Compatibility
+
+During the deprecation period, there are **no backward compatibility issues**.
+All deprecated features continue to work identically. No wire-level changes are
+introduced.
+
+After removal (in specification versions released more than one year after this
+version):
+
+* Implementations negotiating an older protocol version that includes these
+  features will still have access to them through that version's schema.
+* Implementations negotiating a version that has removed these features will no
+  longer have access to them.
+
+## Security Implications
+
+Deprecating these features has a **net positive** effect on security:
+
+* **Sampling** is the most security-sensitive of the three. It allows servers to
+  request LLM completions through the client, which creates attack surface for
+  prompt injection and data exfiltration. Removing it reduces this risk.
+* **Roots** exposes information about the client's filesystem to servers.
+  Removing it reduces the risk of servers using root information to attempt
+  directory traversal or access files outside intended boundaries.
+* **Logging** has minimal security implications, but removing it simplifies the
+  protocol surface area.
+
+No new security concerns are introduced by deprecation.
+
+## Reference Implementation
+
+No reference implementation is required. This SEP only marks existing
+functionality as deprecated — no new protocol behavior is introduced.
+
+
+# SEP-2663: Tasks Extension
+Source: https://modelcontextprotocol.io/seps/2663-tasks-extension
+
+Tasks Extension
+
+<div>
+  <Badge>
+    Final
+  </Badge>
+
+  <Badge>
+    Extensions Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                                                                                                                 |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 2663                                                                                                                                                                  |
+| **Title**     | Tasks Extension                                                                                                                                                       |
+| **Status**    | Final                                                                                                                                                                 |
+| **Type**      | Extensions Track                                                                                                                                                      |
+| **Created**   | 2026-04-27                                                                                                                                                            |
+| **Author(s)** | Luca Chang ([@LucaButBoring](https://github.com/LucaButBoring)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)); on behalf of the Agents Working Group |
+| **Sponsor**   | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                                                                                                         |
+| **PR**        | [#2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663)                                                                                       |
+
+***
+
+## Abstract
+
+This SEP defines an extension that allows a server to respond to a `tools/call` request with an asynchronous *task handle* instead of a final result, allowing the client to retrieve the eventual result by polling. The extension introduces three methods: `tasks/get`, `tasks/update`, and `tasks/cancel`; a polymorphic-result discriminator (`resultType: "task"`); and a `Task` shape that carries a task status, in-progress server-to-client requests, and a final result or error. Task creation is server-directed: the client signals support by including the extension in its per-request capabilities, and the server decides on a per-request basis whether to materialize a task.
+
+Tasks will become a foundational building block of MCP and are expected to be supported in future protocol versions. The experimental `tasks` feature in the `2025-11-25` specification served as a stopgap until the protocol's extension mechanism was available. Now that [extensions](https://modelcontextprotocol.io/extensions/overview) have been [formalized](./2133-extensions.md), moving tasks to an official extension gives the feature time to incubate and evolve based on additional real-world implementation feedback, without being constrained by the core specification's release cadence. Once the extension has stabilized and achieved broad adoption, it is intended to be promoted into the core protocol.
+
+This proposal *removes* the version of [tasks](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks) specified in the `2025-11-25` release from the core protocol and moves it to an Extension. It also proposes updates to Tasks shaped by implementation feedback since that release, and by several changes to the base protocol included in the `2026-06-30` specification:
+
+* [SEP-2260: Require Server requests to be associated with a Client request](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md)
+* [SEP-2322: Multi Round-Trip Requests](./2322-MRTR.md)
+* [SEP-2243: HTTP Header Standardization for Streamable HTTP Transport](./2243-http-standardization.md)
+* [SEP-2567: Sessionless MCP via Explicit State Handles](./2567-sessionless-mcp.md)
+* [SEP-2575: Make MCP Stateless](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)
+
+## Motivation
+
+The experimental [tasks](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks) feature served as an alternate execution mode for tool calls, elicitation, and sampling, allowing receivers to return a poll handle instead of blocking until a final result was ready. Implementation experience surfaced several challenges:
+
+1. **The handshake is fragile.** Tasks today expose method-level capabilities (`tasks.requests.tools.call` declares that `tools/call` **MAY** be task-augmented) alongside a tool-level `execution.taskSupport` field that declares whether a particular tool will accept the augmentation. Clients express their own support for tasks by passing a `task` parameter on their requests, but **MUST NOT** include it if the method/tool does not support tasks. A client that wants to opt into tasks must therefore prime its state with a `tools/list` call before issuing any task-augmented request, and cannot blindly attach a `task` parameter to every request to handle tools isomorphically. This is confusing, implicit, and easy to get wrong.
+
+2. **`tasks/result` is a blocking trap.** In the current flow, a client that observes `input_required` is required to call `tasks/result` prematurely so that the server has an SSE stream on which to side-channel elicitation or sampling requests. `tasks/result` then blocks until the entire operation completes. This forces long-lived persistent connections that many clients and servers do not want to implement, and it conflicts with [SEP-2260](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md), which disallows unsolicited server-to-client requests outright. Under SEP-2260, the SSE semantics that justified the blocking behavior no longer apply.
+
+3. **`tasks/list` scoping cannot be defined.** To avoid clients cancelling or retrieving results for tasks they shouldn't have access to, all tasks should be bound to some sort of "authorization context," the implementation of which is left to individual servers according to their existing bespoke permission models. However, in many cases, it is not possible to perform this binding, in which case the task ID becomes the only line of defense against contamination. In this scenario, it is unsafe for a server to support `tasks/list` at all. While it was possible for tasks to instead be bound to a session, [SEP-2567](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2567) removes sessions from the protocol. There is no other natural scope a server can define unilaterally — task IDs can be unguessable handles that a server can recognize one at a time, but servers cannot reliably correlate two unrelated handles to the same caller without additional state.
+
+Beyond implementation challenges, tasks face another structural issue: **Client-hosted tasks are no longer expressible.** [SEP-1686](./1686-tasks.md) permitted clients to host tasks for elicitation and sampling, in part to avoid coupling tasks to tool calls. [SEP-2260](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md) makes any unsolicited server-to-client request invalid; every server-to-client polling request under client-hosted tasks would be unsolicited by definition.
+
+This proposal intends to solve the above issues by redesigning certain aspects of the feature and moving tasks out to an official extension. Redefining tasks as an official extension gives the feature more time to incubate and evolve independently of the core specification, promoting adoption. As part of the redesign, this proposal consolidates the polling lifecycle into `tasks/get` and a new `tasks/update` to remove the blocking `tasks/result` method. The redesign allows servers to return tasks unsolicited (in response to ordinary, non-`task`-flagged requests) to eliminate the per-request opt-in and the `tools/list` warmup, relying instead on the extension capability as the single handshake point. Finally, this proposal removes client-hosted elicitation and sampling tasks in compliance with [SEP-2260](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md).
+
+## Specification
+
+The MCP Tasks extension allows certain requests to be augmented with **tasks**. Tasks are durable state machines that carry information about the underlying execution state of the request they augment, and are intended for client polling and deferred result retrieval. Each task is uniquely identifiable by a server-generated **task ID**.
+
+Tasks are useful for representing expensive computations and batch processing requests, and map naturally onto external job APIs.
+
+### Extension Identifier
+
+This extension is identified as: `io.modelcontextprotocol/tasks`.
+
+### Capability Negotiation
+
+The client and server declare support for the tasks extension in their respective capabilities objects (using updated form from [SEP-2575: Make MCP Stateless](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)):
+
+```jsonc theme={null}
+// Client to server, in per-request capabilities
+{
+  // Other request parameters...
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/clientCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {},
+        },
+      },
+    },
+  },
+}
+```
+
+```jsonc theme={null}
+// Server to client, in response to server/discover
+{
+  "result": {
+    // Other response parameters...
+    "capabilities": {
+      "extensions": {
+        "io.modelcontextprotocol/tasks": {},
+      },
+    },
+  },
+}
+```
+
+No extension-specific settings are currently defined; an empty object indicates support.
+
+A server that has negotiated this extension **MAY** return `CreateTaskResult` in lieu of a standard result (e.g. `CallToolResult`) in response to any supported request at its own discretion and on a per-request basis. The server is the sole decider; clients do not signal task preference on the request itself. The client declaring the extension capability does not suggest that it requires a `CreateTaskResult` in response to that request.
+
+A server **MUST NOT** return `CreateTaskResult` to a client that did not include the extension capability on its request, regardless of prior declarations. A client that has negotiated this extension **MUST** be prepared to handle either `CallToolResult` or `CreateTaskResult` in response to any supported request it issues. A client that receives `CreateTaskResult` in response to an unsupported request type **MUST** interpret this as an invalid response to the request.
+
+If a server is unable to service a request to a client that does not declare this extension capability without returning `CreateTaskResult`, the server **MUST** return an error with the code `-32003` (Missing Required Client Capability), indicating the required extension in the error response:
+
+```jsonl theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    // MISSING_REQUIRED_CLIENT_CAPABILITY
+    "code": -32003,
+    // Message provided for example purposes only. The content of this example message is non-normative.
+    "message": "Missing required client capability",
+    "data": {
+      "requiredCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+  }
+}
+```
+
+### Supported Methods
+
+The following methods currently support task-augmented execution:
+
+* `tools/call`
+
+This specification may be extended to support tasks over other request types in the future; implementations **SHOULD** be designed to accommodate additional request types in future revisions of this specification.
+
+### Polymorphic Results
+
+A request that is eligible for task-augmentation may return one of two distinct result shapes — the request's standard result, or a `CreateTaskResult`. The discriminator is the `resultType` field on the result object, introduced by [SEP-2322](./2322-MRTR.md):
+
+```typescript theme={null}
+// "task" is introduced by this extension.
+type ResultType = "complete" | "input_required" | "task";
+```
+
+Servers **MUST** set `resultType` to `"task"` when returning a `CreateTaskResult` so that clients can distinguish it from a standard result. Servers **MUST NOT** set `resultType` to `"task"` on result types other than `CreateTaskResult`.
+
+Client implementors are advised that existing code returning a fixed shape (e.g., a `tools/call` method returning `CallToolResult`) need not change their public contract — they can transparently drive the polling flow internally and surface only the final, completed result. New implementation surfaces **MAY** expose the task lifecycle directly for applications able to leverage it.
+
+### Tasks
+
+A `Task` carries operational metadata about ongoing work.
+
+```typescript theme={null}
+interface Task {
+  /** Stable identifier for this task. */
+  taskId: string;
+
+  /** Current task status. */
+  status: "working" | "input_required" | "completed" | "cancelled" | "failed";
+
+  /**
+   * Optional message describing the current task state.
+   * This can provide context for any status, for example (non-normative):
+   * - Progress descriptions for "working"
+   * - Work blocked on "input_required"
+   * - Reasons for "cancelled" status
+   * - Summaries for "completed" status
+   * - Additional information for "failed" status (e.g., error details, what went wrong)
+   *
+   * This MAY be exposed to the end-user or model.
+   */
+  statusMessage?: string;
+
+  /** ISO 8601 timestamp when the task was created. */
+  createdAt: string;
+
+  /** ISO 8601 timestamp when the task was last updated. */
+  lastUpdatedAt: string;
+
+  /**
+   * Time-to-live duration from creation in integer milliseconds, null for unlimited.
+   * The server may discard the task after the TTL elapses. This value MAY change
+   * over the lifetime of a task.
+   */
+  ttlMs: number | null;
+
+  /**
+   * Suggested polling interval in integer milliseconds. Clients SHOULD honor
+   * this value to avoid overwhelming the server. This value MAY change over
+   * the lifetime of a task.
+   */
+  pollIntervalMs?: number;
+}
+```
+
+#### Task Status
+
+Tasks can be in one of the following states:
+
+* `working`: The request is currently being processed.
+* `input_required`: The server needs input from the client before the task can proceed. The `tasks/get` response will include outstanding requests in the `inputRequests` field. The client **MUST** inspect this field and **SHOULD** provide responses via the `inputResponses` field in subsequent `tasks/update` requests.
+* `completed`: The request completed successfully and results are available in the `result` field. This includes tool calls that returned results with `isError: true`.
+* `failed`: The request failed due to a JSON-RPC error during execution. The task will include the `error` field with the JSON-RPC error details. This status **MUST NOT** be used for non-JSON-RPC errors.
+* `cancelled`: The request was cancelled before completion.
+
+Derived shapes of `Task` inline status-specific payload fields and are used by `tasks/get` responses and `notifications/tasks` notifications:
+
+```ts theme={null}
+/**
+ * A task that is in a normal working state.
+ * Used by tasks/get and notifications/tasks.
+ */
+export interface WorkingTask extends Task {
+  status: "working";
+}
+
+/**
+ * A task that is waiting for input from the client.
+ * Used by tasks/get and notifications/tasks.
+ */
+export interface InputRequiredTask extends Task {
+  status: "input_required";
+  /**
+   * Server-to-client requests that need to be fulfilled during task execution.
+   * Keys are arbitrary identifiers for matching requests to responses.
+   */
+  inputRequests: InputRequests;
+}
+
+/**
+ * A task that has completed successfully.
+ * Used by tasks/get and notifications/tasks.
+ */
+export interface CompletedTask extends Task {
+  status: "completed";
+  /**
+   * The final result of the task.
+   * The structure matches the result type of the original request.
+   * For example, a CallToolRequest task would return the CallToolResult structure.
+   */
+  result: JSONObject;
+}
+
+/**
+ * A task that has failed due to a JSON-RPC error.
+ * Used by tasks/get and notifications/tasks.
+ */
+export interface FailedTask extends Task {
+  status: "failed";
+  /**
+   * The JSON-RPC error that caused the task to fail.
+   */
+  error: JSONObject;
+}
+
+/**
+ * A task that has been cancelled.
+ * Used by tasks/get and notifications/tasks.
+ */
+export interface CancelledTask extends Task {
+  status: "cancelled";
+}
+
+/**
+ * A union type representing a task with optional inlined result/error/inputRequests fields.
+ * This type is used by tasks/get and notifications/tasks to provide complete task state
+ * including terminal results or pending input requests.
+ */
+export type DetailedTask =
+  | WorkingTask
+  | InputRequiredTask
+  | CompletedTask
+  | FailedTask
+  | CancelledTask;
+```
+
+### Task Creation
+
+A server returns `CreateTaskResult` in lieu of the standard result shape for a request to indicate that request will be processed asynchronously.
+
+```typescript theme={null}
+// resultType: "task"
+type CreateTaskResult = Result & Task;
+```
+
+**Example Request (CallToolRequest):**
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "city": "New York"
+    }
+  }
+}
+```
+
+**Example Response (CreateTaskResult):**
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "statusMessage": "The operation is now in progress.",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 60000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+The embedded `task` is the seed state for the task, typically (though not necessarily) with `status: "working"`. The client uses `task.taskId` for all subsequent `tasks/get`, `tasks/update`, and `tasks/cancel` calls.
+
+A server **MUST NOT** return `CreateTaskResult` until the task is durably created — that is, until a `tasks/get` for the returned `taskId` would resolve. In eventually-consistent environments, the server **MUST** wait for consistency before responding. This requirement eliminates the need for clients to speculatively poll for task creation.
+
+Server implementations that use multi round-trip requests in conjunction with task creation (for example, a tool that requires elicitation over `InputRequiredResult` before creating a task) **SHOULD** resolve all MRTR exchanges *synchronously* before responding with a `CreateTaskResult`.
+
+### Task Polling
+
+Clients poll for task completion by sending `tasks/get` requests.
+
+Clients **SHOULD** respect the `pollIntervalMs` provided in responses when determining polling frequency. The `pollIntervalMs` **MAY** change over the lifetime of a task. Servers **MAY** rate-limit clients polling more frequently than the recorded `pollIntervalMs`.
+
+Clients **SHOULD** continue polling until the task reaches a terminal status or until invoking `tasks/cancel`. Clients **SHOULD** persist task IDs to durable storage so that polling can resume after a crash or restart.
+
+#### Request
+
+```typescript theme={null}
+interface GetTaskRequest extends JSONRPCRequest {
+  method: "tasks/get";
+  params: {
+    /** Identifier of the task to query. */
+    taskId: string;
+  };
+}
+```
+
+#### Response
+
+Upon receiving a `tasks/get` request, the server **MUST** check the status of the task and respond accordingly:
+
+1. If the status is `working`, the server **MUST** return a a `Task` object with status `working`.
+2. If the status is `input_required`, the server **MUST** return a `Task` object with status `input_required` and an `inputRequests` field defined in [Multi Round-Trip Requests](./2322-MRTR.md). The `inputRequests` field **MUST** contain all outstanding requests from the server to the client that need to be fulfilled before the task can proceed.
+3. If the status is `completed`, the server **MUST** return a `Task` object with status `completed` and a `result` field containing the final result of the task.
+4. If the status is `cancelled`, the server **MUST** return a `Task` object with status `cancelled`.
+5. If the status is `failed`, the server **MUST** return a `Task` object with status `failed` and the error that occurred during execution.
+
+```typescript theme={null}
+type GetTaskResult = Result & DetailedTask;
+```
+
+The response carries the appropriate response variant for the task's current status (see [Task Status](#task-status)). The `resultType` field **MUST** be set to `"complete"` on this object as it is the standard result shape for the `tasks/get` request.
+
+If the task has a non-null `ttlMs`, clients **MAY** treat the TTL as a backstop: if the task's observable status has not reflected the update after `createdAt` plus `ttlMs` has elapsed, the client **MAY** consider the task to no longer be usable. Conversely, servers **MAY** mark a task as `failed` at any point after the TTL elapses, and subsequently delete it at any time. The value of `ttlMs` **MAY** change over the lifetime of a task.
+
+### Task Update Requests
+
+When a task requires input from the client (indicated by the `input_required` status), the server includes outstanding requests in the `inputRequests` field of the `tasks/get` response (see [Multi Round-Trip Requests](./2322-MRTR.md)). The client provides responses via the `inputResponses` field in one or more subsequent `tasks/update` requests.
+
+When a client observes a `tasks/get` response (or `notifications/tasks` notification) with `status: "input_required"`, the client **SHOULD** fulfill the outstanding requests in `inputRequests` by sending one or more `tasks/update` requests with corresponding `inputResponses`. After sending a `tasks/update`, the client **SHOULD** continue observing the task's status via polling (`tasks/get`) or notifications (`notifications/tasks`) until it reaches a terminal state.
+
+Clients **MUST** treat each entry in `inputRequests` as they would the equivalent standalone server-to-client request — for example, an elicitation request surfaced via `inputRequests` is subject to the same trust model and user-facing behavior as a direct `elicitation/create` request. Clients **SHOULD** deduplicate `inputRequests` keys across consecutive polls to avoid presenting the same request to the user or model more than once.
+
+Each request key in `inputRequests` **MUST** be unique over the lifetime of a single task. A server **MUST NOT** reuse a key for a subsequent server-to-client request after a response for that key has been delivered, and **MUST NOT** use the same key to refer to two distinct requests over a task's lifetime. This guarantees that `inputResponses` keyed by the same identifier always refer to the request the client expects, eliminates ambiguity for clients deduplicating across polls, and lets servers ignore `inputResponses` for unknown or already-satisfied requests.
+
+#### Request
+
+```typescript theme={null}
+interface UpdateTaskRequest extends JSONRPCRequest {
+  method: "tasks/update";
+  params: {
+    /** Identifier of the task to update. */
+    taskId: string;
+
+    /**
+     * Responses to outstanding inputRequests previously surfaced by the
+     * server. Shape per MRTR. Each key MUST correspond to a currently-
+     * outstanding inputRequest key.
+     */
+    inputResponses: InputResponses;
+  };
+}
+```
+
+#### Response
+
+```typescript theme={null}
+type UpdateTaskResult = Result; // empty acknowledgement
+```
+
+On success, the server **MUST** acknowledge the request with an empty result. The acknowledgement is *eventually consistent*: the server **MAY** accept the responses and return the ack before the task's observable status (via `tasks/get` or `notifications/tasks`) reflects them. Servers **SHOULD** return a JSON-RPC error if the `taskId` does not correspond to a known task. Clients **SHOULD** track `inputRequests` keys to avoid responding to requests more than once.
+
+A server **SHOULD** ignore any `inputResponses` responses mapped to a key that is not currently outstanding for the task — including keys that were never issued, keys that have already been answered, and keys whose corresponding request has been superseded. A server **MAY** accept a partial set of responses (a strict subset of currently-outstanding keys);
+
+The `resultType` field **MUST** be set to `"complete"` on `UpdateTaskResult` as it is the standard result shape for the `tasks/update` request.
+
+### Task Cancellation
+
+A client sends a `tasks/cancel` request to signal its intent to cancel an in-progress task. The `notifications/cancelled` notification **MUST NOT** be used for task cancellation.
+
+#### Request
+
+```typescript theme={null}
+interface CancelTaskRequest extends JSONRPCRequest {
+  method: "tasks/cancel";
+  params: {
+    taskId: string;
+  };
+}
+```
+
+#### Response
+
+```typescript theme={null}
+type CancelTaskResult = Result; // empty acknowledgement
+```
+
+The server **MUST** acknowledge the request with an empty result. Servers **SHOULD** return a JSON-RPC error if the `taskId` does not correspond to a known task. Cancellation processing is *eventually consistent* — the task's observable status **MAY** remain `working` (or some other non-terminal status) after the ack, and **MAY** ultimately reach a terminal status other than `cancelled` if the work finished before cancellation could take effect.
+
+Cancellation is **cooperative**: The request signals intent, and the server decides whether and when to honor it. A server is not obligated to actually stop the work; it is only obligated to acknowledge the request. Eventual transition to `cancelled` is not guaranteed.
+
+Clients **MAY** delete all state associated with the task as soon as they send a cancellation (e.g., it no longer needs to retain the list of `inputRequests` keys that it has already responded to). The client does not need to poll `tasks/get` again to wait for the task to reach the `cancelled` state.
+
+The `resultType` field **MUST** be set to `"complete"` on `CancelTaskResult` as it is the standard result shape for the `tasks/cancel` request.
+
+### Task Status Notifications
+
+Servers **MAY** push status updates via `notifications/tasks` notifications in addition to servicing client polls:
+
+```typescript theme={null}
+export type TaskStatusNotificationParams = NotificationParams & Task;
+
+export interface TaskStatusNotification extends JSONRPCNotification {
+  method: "notifications/tasks";
+  params: TaskStatusNotificationParams;
+}
+```
+
+To begin listening for task status notifications, clients send a `subscriptions/listen` request to the server including a list of task IDs the client is interested in (see [SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)):
+
+```typescript theme={null}
+export interface SubscriptionsListenRequest extends Request {
+  method: "subscriptions/listen";
+  params: {
+    // Other existing fields...
+    notifications: {
+      taskIds?: string[];
+      // Other existing fields...
+    };
+  };
+}
+```
+
+In its acknowledgement notification, the server includes the list of task IDs it has agreed to send task status notifications for, if any:
+
+```typescript theme={null}
+export interface SubscriptionsAcknowledgedNotification extends Notification {
+  method: "notifications/subscriptions/acknowledged";
+  params: {
+    notifications: {
+      /**
+       * Subscribe to notifications/tasks for specific task IDs.
+       */
+      taskIds?: string[];
+      // Other existing fields...
+    };
+  };
+}
+```
+
+If a client requests task status notifications but does not declare the `io.modelcontextprotocol/tasks` extension capability, the server **MUST** return a JSON-RPC error specifying the missing capabilities:
+
+```jsonl theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 12,
+  "error": {
+    // MISSING_REQUIRED_CLIENT_CAPABILITY
+    "code": -32003,
+    // Message provided for example purposes only. The content of this example message is non-normative.
+    "message": "Missing required client capability",
+    "data": {
+      "requiredCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+  }
+}
+```
+
+Each notification carries a complete `DetailedTask` for the current status, identical to what `tasks/get` would have returned at that moment.
+
+**Notification:**
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/tasks",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 60000,
+    "pollIntervalMs": 5000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Operation completed successfully."
+        }
+      ],
+      "isError": false
+    }
+  }
+}
+```
+
+The notification includes the full task object, allowing clients to access the complete task state and final results without polling the `tasks/get` method. Clients **MAY** continue polling `tasks/get` in addition to subscribing to task status notifications, but need not do so.
+
+`notifications/progress` and `notifications/message` notifications **MUST NOT** be sent on the `subscriptions/listen` stream for a task, and are not supported on tasks in general in this specification.
+
+### Streamable HTTP: Routing Headers
+
+When `tasks/get`, `tasks/update`, or `tasks/cancel` is sent over the Streamable HTTP transport, the client **MUST** set the `Mcp-Name` header (defined by [SEP-2243](./2243-http-standardization.md)) to the value of `params.taskId`. This allows transport intermediaries and load balancers to route subsequent requests for the same task to the server instance holding its state, which is typically required for correctness. The `Mcp-Method` header is set to the JSON-RPC method name per [SEP-2243](./2243-http-standardization.md).
+
+### Example Message Flow
+
+Consider a simple tool call, `hello_world`, requiring an elicitation for the user to provide their name. The tool itself takes no arguments.
+
+To invoke this tool, the client makes a `CallToolRequest` as follows:
+
+```jsonc theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "hello_world",
+    "arguments": {},
+    "_meta": {
+      // Other metadata...
+      "io.modelcontextprotocol/clientCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {},
+        },
+      },
+    },
+  },
+}
+```
+
+The server determines (via bespoke logic) that it wants to create a task to represent this work, and it immediately returns a `CreateTaskResult`:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+Once the client receives the `CreateTaskResult`, it begins polling `tasks/get`:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+On each request while the task is in a `"working"` status, the server returns a regular task response:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+Eventually, the server reaches the point at which it needs to send an elicitation to the user. It sets the task status to `"input_required"` to signal this. On the next `tasks/get` request from the client, the server sends the elicitation payload via the `inputRequests` field. Note that while task `inputRequests` share structural similarities with [SEP-2322](./2322-MRTR.md) multi round-trip requests, they are a distinct mechanism: task `inputRequests` are surfaced via `tasks/get` and fulfilled via `tasks/update`, not via retries of the original method. A server that needs client input *before* returning a `CreateTaskResult` (e.g. to decide whether to proceed) uses the multi round-trip request flow on the original request; a server that needs client input *during* task execution uses the `inputRequests`/`inputResponses` mechanism described here.
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json theme={null}
+{
+  "id": 4,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "input_required",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "inputRequests": {
+      "name": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "Please enter your name.",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+For thoroughness, let's consider a case where the client happens to poll `tasks/get` again *before* the user has fulfilled the elicitation request. As `inputRequests` is effectively a point-in-time snapshot of all outstanding server-to-client requests associated with the task, the server includes the same request again, despite the client having already seen this information (the client is advised to deduplicate `inputRequests` with the same key for UX purposes):
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json theme={null}
+{
+  "id": 5,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "input_required",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "inputRequests": {
+      "name": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "Please enter your name.",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The user enters their name, and the client makes a `tasks/update` request with the satisfied information:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "method": "tasks/update",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "inputResponses": {
+      "name": {
+        "action": "accept",
+        "content": {
+          "input": "Luca"
+        }
+      }
+    }
+  }
+}
+```
+
+The server acknowledges the request:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "result": {
+    "resultType": "complete"
+  }
+}
+```
+
+Asynchronously, the server processes it and moves the task back into the `working` status:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json theme={null}
+{
+  "id": 7,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+Eventually, the server completes the request, so it stores the final `CallToolResult` and moves the task into the `"completed"` status. On the next `tasks/get` request, the server sends the final tool result inlined into the task object:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Hello, Luca!"
+        }
+      ],
+      "isError": false
+    }
+  }
+}
+```
+
+### Error Handling
+
+Tasks use two error reporting mechanisms:
+
+1. **Protocol Errors**: Standard JSON-RPC errors for protocol-level issues
+2. **Task Execution Errors**: Errors in the underlying request execution, reported through task status
+
+#### Protocol Errors
+
+Servers **MUST** return standard JSON-RPC errors for the following protocol error cases:
+
+* Invalid or nonexistent `taskId`: `-32602` (Invalid params)
+  * Servers **MUST** return this error for `tasks/get`.
+  * Servers **SHOULD** return this error for `tasks/update` and `tasks/cancel`.
+* Internal errors: `-32603` (Internal error)
+
+Servers **SHOULD** provide informative error messages to describe the cause of errors.
+
+**Example: Task not found**
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 70,
+  "error": {
+    "code": -32602,
+    "message": "Failed to retrieve task: Task not found"
+  }
+}
+```
+
+**Example: Task expired**
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 71,
+  "error": {
+    "code": -32602,
+    "message": "Failed to retrieve task: Task has expired"
+  }
+}
+```
+
+Servers are not required to retain tasks indefinitely. It is compliant behavior for a server to return an error stating the task cannot be found if it has purged an expired task.
+
+#### Task Execution Errors
+
+When the underlying request encounters a JSON-RPC protocol error during execution, the task moves to the `failed` status. The `tasks/get` response **SHOULD** include a `statusMessage` field with diagnostic information about the failure, and **MUST** include the `error` field with the JSON-RPC error.
+
+The `failed` status **MUST NOT** be used to represent non-JSON-RPC errors, such as a tool result that completed with `isError: true`. Errors within the context of a protocol method result **MUST** use the `completed` status with the error details in the `result` field. This maintains a strong separation between protocol-level faults (which use the `failed` status) and other faults.
+
+**Example: Task with JSON-RPC execution error**
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f820fe840",
+    "status": "failed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 3600000,
+    "statusMessage": "Tool execution failed: API rate limit exceeded",
+    "error": {
+      "code": -32603,
+      "message": "API rate limit exceeded"
+    }
+  }
+}
+```
+
+**Example: Tool call completed with tool error (isError: true)**
+
+For tool calls that complete successfully at the protocol level but return an tool-level error (indicated by `isError: true` in the tool result), the task reaches `completed` status with the tool result in the `result` field:
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f820fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 3600000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Failed to process request: invalid input"
+        }
+      ],
+      "isError": true
+    }
+  }
+}
+```
+
+The `tasks/get` endpoint returns exactly what the underlying request would have returned:
+
+* If the underlying request resulted in a JSON-RPC error, the task uses `failed` status and the `error` field **MUST** contain that JSON-RPC error.
+* If the request completed with a result (even if `isError: true` for tool results), the task uses `completed` status and the `result` field **MUST** contain that result.
+
+### Reservations
+
+* The `tasks/` method prefix and `notifications/tasks/` notification prefix are reserved for this extension.
+* The result-discriminator value `"task"` for `resultType` is reserved for this extension.
+* The label `io.modelcontextprotocol/tasks` is reserved for this extension.
+
+## Rationale
+
+### Unsolicited Tasks vs. Immediate Results
+
+An [alternative proposal](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1905) would have handled the immediate result case individually, and with slightly different preconditions: *If* tasks are supported, *and* the client supports immediate task results, *then* servers may return a regular result in response to a task-augmented request. That version of immediate results looked like a better option at the time, as it implied no breaking changes on top of the initial tasks specification.
+
+However, as we look to [move away](https://blog.modelcontextprotocol.io/posts/2025-12-19-mcp-transport-future/) from stateful protocol interactions and given the current experimental state of tasks in general, it seems worth proposing a somewhat more radical change that reduces the complexity of the overall specification and makes tasks more "native" to MCP at this time. In particular, the choice to allow unsolicited tasks (in *addition* to immediate results) means promoting tasks to a first-class concept intended for all persistent operations, as opposed to being a parallel and somewhat specialized concept.
+
+This happens to align with the proposed [SEP-2322](./2322-MRTR.md), but the two are not coupled with one another.
+
+### Splitting Reads (`tasks/get`) and Writes (`tasks/update`)
+
+Earlier drafts of this redesign let `tasks/get` carry `inputResponses` so a single round trip would both submit responses and observe the resulting state. That conflation has costs: it makes the read path non-idempotent (a retried `tasks/get` could re-submit responses), it forces the read path to share the eventual-consistency model of the write, and it complicates intermediaries that want to cache or deduplicate reads. Splitting the methods leaves `tasks/get` as a pure, idempotent read that any layer can cache or replay safely, and confines write semantics — including their eventual-consistency window — to `tasks/update`.
+
+`tasks/update`'s ack-only response shape follows from the same separation: there is no read data the server needs to return that the client cannot get from a follow-up `tasks/get`, and forcing an embedded `Task` into the response would re-introduce the non-idempotency we are trying to avoid. The cost is one extra round-trip per round of input — paid only when the task actually requires a client request.
+
+### Task Creation Consistency
+
+The following new requirement is introduced:
+
+> A server **MUST NOT** return `CreateTaskResult` until the task is durably created — that is, until a `tasks/get` for the returned `taskId` would resolve. In eventually-consistent environments, the server **MUST** wait for consistency before responding. This requirement eliminates the need for clients to speculatively poll for task creation.
+
+Unlike `tasks/update` and `tasks/cancel`, task creation is strongly-consistent. This has to be the case to avoid speculative `tasks/get` requests from requestors that would otherwise not know if a task has silently been dropped or if it simply has not been created yet. Conversely, eventual consistency in `tasks/update` and `tasks/cancel` works because the client behavior is not contingent on the results of those operations (the client can continue to poll either way). While consistent task creation does increase latency costs in distributed systems that did not already behave this way, explicitly introducing this requirement simplifies client implementations and eliminates a source of undefined behavior.
+
+This also aligns with long-running operation APIs in general, which typically require that once an operation is acknowledged, it must be findable via the polling endpoint.
+
+### Ack-only Cancellation
+
+In the `2025-11-25` design of tasks, `tasks/cancel` returned a task describing the task's state immediately after the cancellation attempt. That return shape implies a synchronous read — the server must consult task state to populate it — but cancellation is inherently asynchronous in many applications (a separate worker decides whether and when to honor it), so the returned task object would in many cases simply repeat what the next `tasks/get` would show. Reducing `tasks/cancel` to an ack matches the operation's actual semantics: The request is a signal, not a state query. Clients that want to know the post-cancel status do so via `tasks/get` on the same code path they use for all other state observation.
+
+The eventual-consistency on the ack is the same separation as for `tasks/update`: The server may record the cancellation request and respond before the worker has actually transitioned the task, without allowing the client to interpret the ack as strongly-consistent.
+
+While `tasks/update` and `tasks/cancel` use ack-only response shapes for the reasons above, servers **SHOULD** still return errors for clearly invalid requests — such as an unknown `taskId`. The ack-only design is about avoiding synchronous reads of task state in the success path, not about suppressing errors that the server can detect at request time. Returning errors for invalid inputs gives clients a faster signal that something is wrong, rather than forcing them to discover the problem indirectly through subsequent `tasks/get` polls.
+
+### Composition with Multi Round-Trip Requests
+
+The following new requirement is introduced:
+
+> Server implementations that use multi round-trip requests in conjunction with task creation (for example, a tool that requires elicitation over `InputRequiredResult` before creating a task) **SHOULD** resolve all MRTR exchanges *synchronously* before responding with a `CreateTaskResult`.
+
+A `tools/call` that supports both MRTR ([SEP-2322](./2322-MRTR.md)) and this extension may use them sequentially by sending one or more `InputRequiredResult` exchanges to gather input synchronously, followed by a `CreateTaskResult` to hand off to asynchronous execution. This composition is a consequence of the `resultType` discriminator — each response is independently typed and the client switches behavior based on the value it receives, *without* maintaining any state between the two modes. Prohibiting this would require imposing an artificial constraint with no protocol-level mechanism to enforce it, since the client is unaware that the server will create a task ahead of time.
+
+The two flows maintain separate state despite sharing field names. The MRTR phase ends when the server returns any non-`"input_required"` `resultType`, at which point its `inputRequests` keys are consumed. The task phase begins with `CreateTaskResult` and maintains *its own* `inputRequests` keys independently. Key uniqueness for task `inputRequests` is scoped to the lifetime of the task and does not extend to keys from the preceding MRTR phase. Clients do not need to deduplicate across the two flows.
+
+## Backward Compatibility
+
+The experimental tasks feature in the `2025-11-25` release is **not wire-compatible** with this extension. Specifically:
+
+* `tasks/result` is removed. Clients calling `tasks/result` against a server with this extension in the `2026-06-30` specification **MUST** receive `-32601` (Method Not Found).
+* The `task` parameter on `CallToolRequest` is removed. Servers receiving requests with a `task` parameter under this extension in the `2026-06-30` specification **MUST** ignore it (treat the field as unknown) rather than using it as an opt-in.
+* The `tasks.requests.*` and `tasks.cancel`/`tasks.list` capability declarations are not part of this extension. A server that previously advertised these **MUST** migrate to declaring `io.modelcontextprotocol/tasks` as of the `2026-06-30` specification and **MUST NOT** continue to advertise the legacy capabilities under any protocol version that includes this extension.
+
+Implementations that need to bridge legacy clients can shim at the SDK level: a server can implement both the experimental and extension surfaces in parallel, dispatching based on which capability and protocol version the client negotiated.
+
+A server that returns the standard `CallToolResult` shape — i.e., never elects to create a task — remains fully spec-compliant under this extension. Clients that have negotiated the extension **MUST** handle both result shapes for any augmented request.
+
+## Security Implications
+
+* **Task ID unguessability.** A server **MAY** use task IDs as bearer tokens for a server's stored state. Servers **MUST** generate them with sufficient entropy that a third party cannot enumerate or guess them.
+* **Auth binding.** Servers **MUST** perform authentication and authorization checks on each task-related request to ensure that the client has permission to access a task.
+* **Cross-caller correlation.** Because there is no `tasks/list`, a server cannot inadvertently leak the existence of one caller's tasks to another. This is an improvement over the `2025-11-25` tasks specification, in which a poorly-scoped list could expose unrelated task IDs.
+* **Input-request trust model.** `inputRequests` carry elicitation and sampling payloads from the server through the client to the user or model. Hosts **MUST** apply the same trust model to these payloads as they would to standard elicitation/sampling requests. A task is not a higher-trust channel.
+
+## Reference Implementation
+
+Implemented in [mcpkit](https://github.com/panyam/mcpkit/blob/02cfbe0d2cada8167b9043b9130804c8638b0aa5/core/task_v2.go) (see [usage example](https://github.com/panyam/mcpkit/tree/02cfbe0d2cada8167b9043b9130804c8638b0aa5/examples/tasks-v2)).
 
 
 # SEP-414: Document OpenTelemetry Trace Context Propagation Conventions
@@ -33944,46 +36868,53 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 
 ## Summary
 
-* **Final**: 29
-* **Approved**: 1
-* **Accepted**: 2
+* **Final**: 32
+* **Accepted**: 4
+* **Draft**: 1
+* **In-review**: 1
 
 ## All SEPs
 
-| SEP                                                                                  | Title                                                                         | Status                  | Type             | Created    |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ----------------------- | ---------------- | ---------- |
-| [SEP-2567](/seps/2567-sessionless-mcp)                                               | Sessionless MCP via Explicit State Handles                                    | <Badge>Final</Badge>    | Standards Track  | 2026-03-11 |
-| [SEP-2322](/seps/2322-MRTR)                                                          | Multi Round-Trip Requests                                                     | <Badge>Approved</Badge> | Standards Track  | 2026-02-03 |
-| [SEP-2260](/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests) | Require Server requests to be associated with a Client request.               | <Badge>Accepted</Badge> | Standards Track  | 2026-02-16 |
-| [SEP-2243](/seps/2243-http-standardization)                                          | HTTP Header Standardization for Streamable HTTP Transport                     | <Badge>Final</Badge>    | Standards Track  | 2026-02-04 |
-| [SEP-2207](/seps/2207-oidc-refresh-token-guidance)                                   | OIDC-Flavored Refresh Token Guidance                                          | <Badge>Accepted</Badge> | Standards Track  | 2026-02-04 |
-| [SEP-2149](/seps/2149-working-group-charter-template)                                | MCP Group Governance and Charter Template                                     | <Badge>Final</Badge>    | Process          | 2025-01-15 |
-| [SEP-2148](/seps/2148-contributor-ladder)                                            | MCP Contributor Ladder                                                        | <Badge>Final</Badge>    | Process          | 2026-01-15 |
-| [SEP-2133](/seps/2133-extensions)                                                    | Extensions                                                                    | <Badge>Final</Badge>    | Standards Track  | 2025-01-21 |
-| [SEP-2085](/seps/2085-governance-succession-and-amendment)                           | Governance Succession and Amendment Procedures                                | <Badge>Final</Badge>    | Process          | 2025-12-05 |
-| [SEP-1865](/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp)                  | MCP Apps - Interactive User Interfaces for MCP                                | <Badge>Final</Badge>    | Extensions Track | 2025-11-21 |
-| [SEP-1850](/seps/1850-pr-based-sep-workflow)                                         | PR-Based SEP Workflow                                                         | <Badge>Final</Badge>    | Process          | 2025-11-20 |
-| [SEP-1730](/seps/1730-sdks-tiering-system)                                           | SDKs Tiering System                                                           | <Badge>Final</Badge>    | Standards Track  | 2025-10-29 |
-| [SEP-1699](/seps/1699-support-sse-polling-via-server-side-disconnect)                | Support SSE polling via server-side disconnect                                | <Badge>Final</Badge>    | Standards Track  | 2025-10-22 |
-| [SEP-1686](/seps/1686-tasks)                                                         | Tasks                                                                         | <Badge>Final</Badge>    | Standards Track  | 2025-10-20 |
-| [SEP-1613](/seps/1613-establish-json-schema-2020-12-as-default-dialect-f)            | Establish JSON Schema 2020-12 as Default Dialect for MCP                      | <Badge>Final</Badge>    | Standards Track  | 2025-10-06 |
-| [SEP-1577](/seps/1577--sampling-with-tools)                                          | Sampling With Tools                                                           | <Badge>Final</Badge>    | Standards Track  | 2025-09-30 |
-| [SEP-1330](/seps/1330-elicitation-enum-schema-improvements-and-standards)            | Elicitation Enum Schema Improvements and Standards Compliance                 | <Badge>Final</Badge>    | Standards Track  | 2025-08-11 |
-| [SEP-1319](/seps/1319-decouple-request-payload-from-rpc-methods-definiti)            | Decouple Request Payload from RPC Methods Definition                          | <Badge>Final</Badge>    | Standards Track  | 2025-08-08 |
-| [SEP-1303](/seps/1303-input-validation-errors-as-tool-execution-errors)              | Input Validation Errors as Tool Execution Errors                              | <Badge>Final</Badge>    | Standards Track  | 2025-08-05 |
-| [SEP-1302](/seps/1302-formalize-working-groups-and-interest-groups-in-mc)            | Formalize Working Groups and Interest Groups in MCP Governance                | <Badge>Final</Badge>    | Standards Track  | 2025-08-05 |
-| [SEP-1046](/seps/1046-support-oauth-client-credentials-flow-in-authoriza)            | Support OAuth client credentials flow in authorization                        | <Badge>Final</Badge>    | Standards Track  | 2025-07-23 |
-| [SEP-1036](/seps/1036-url-mode-elicitation-for-secure-out-of-band-intera)            | URL Mode Elicitation for secure out-of-band interactions                      | <Badge>Final</Badge>    | Standards Track  | 2025-07-22 |
-| [SEP-1034](/seps/1034--support-default-values-for-all-primitive-types-in)            | Support default values for all primitive types in elicitation schemas         | <Badge>Final</Badge>    | Standards Track  | 2025-07-22 |
-| [SEP-1024](/seps/1024-mcp-client-security-requirements-for-local-server-)            | MCP Client Security Requirements for Local Server Installation                | <Badge>Final</Badge>    | Standards Track  | 2025-07-22 |
-| [SEP-994](/seps/994-shared-communication-practicesguidelines)                        | Shared Communication Practices/Guidelines                                     | <Badge>Final</Badge>    | Process          | 2025-07-17 |
-| [SEP-991](/seps/991-enable-url-based-client-registration-using-oauth-c)              | Enable URL-based Client Registration using OAuth Client ID Metadata Documents | <Badge>Final</Badge>    | Standards Track  | 2025-07-07 |
-| [SEP-990](/seps/990-enable-enterprise-idp-policy-controls-during-mcp-o)              | Enable enterprise IdP policy controls during MCP OAuth flows                  | <Badge>Final</Badge>    | Standards Track  | 2025-06-04 |
-| [SEP-986](/seps/986-specify-format-for-tool-names)                                   | Specify Format for Tool Names                                                 | <Badge>Final</Badge>    | Standards Track  | 2025-07-16 |
-| [SEP-985](/seps/985-align-oauth-20-protected-resource-metadata-with-rf)              | Align OAuth 2.0 Protected Resource Metadata with RFC 9728                     | <Badge>Final</Badge>    | Standards Track  | 2025-07-16 |
-| [SEP-973](/seps/973-expose-additional-metadata-for-implementations-res)              | Expose additional metadata for Implementations, Resources, Tools and Prompts  | <Badge>Final</Badge>    | Standards Track  | 2025-07-15 |
-| [SEP-932](/seps/932-model-context-protocol-governance)                               | Model Context Protocol Governance                                             | <Badge>Final</Badge>    | Process          | 2025-07-08 |
-| [SEP-414](/seps/414-request-meta)                                                    | Document OpenTelemetry Trace Context Propagation Conventions                  | <Badge>Final</Badge>    | Standards Track  | 2025-04-25 |
+| SEP                                                                                  | Title                                                                         | Status                   | Type             | Created    |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------ | ---------------- | ---------- |
+| [SEP-2663](/seps/2663-tasks-extension)                                               | Tasks Extension                                                               | <Badge>Final</Badge>     | Extensions Track | 2026-04-27 |
+| [SEP-2577](/seps/2577-deprecate-roots-sampling-and-logging)                          | Deprecate Roots, Sampling, and Logging                                        | <Badge>Final</Badge>     | Standards Track  | 2026-04-14 |
+| [SEP-2575](/seps/2575-stateless-mcp)                                                 | Make MCP Stateless                                                            | <Badge>Accepted</Badge>  | Standards Track  | 2025-06-18 |
+| [SEP-2567](/seps/2567-sessionless-mcp)                                               | Sessionless MCP via Explicit State Handles                                    | <Badge>Final</Badge>     | Standards Track  | 2026-03-11 |
+| [SEP-2549](/seps/2549-TTL-for-list-results)                                          | TTL for List Results                                                          | <Badge>Accepted</Badge>  | Standards Track  | 2026-04-09 |
+| [SEP-2484](/seps/2484-conformance-tests-required-for-final-seps)                     | Require Conformance Tests for Standards Track SEPs to Reach Final Status      | <Badge>Draft</Badge>     | Process          | 2026-03-27 |
+| [SEP-2468](/seps/2468-recommend-issuer-claim-for-auth)                               | Recommend Issuer (iss) Parameter in MCP Auth Responses                        | <Badge>In-Review</Badge> | Standards Track  | 2026-03-25 |
+| [SEP-2322](/seps/2322-MRTR)                                                          | Multi Round-Trip Requests                                                     | <Badge>Accepted</Badge>  | Standards Track  | 2026-02-03 |
+| [SEP-2260](/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests) | Require Server requests to be associated with a Client request.               | <Badge>Final</Badge>     | Standards Track  | 2026-02-16 |
+| [SEP-2243](/seps/2243-http-standardization)                                          | HTTP Header Standardization for Streamable HTTP Transport                     | <Badge>Final</Badge>     | Standards Track  | 2026-02-04 |
+| [SEP-2207](/seps/2207-oidc-refresh-token-guidance)                                   | OIDC-Flavored Refresh Token Guidance                                          | <Badge>Accepted</Badge>  | Standards Track  | 2026-02-04 |
+| [SEP-2149](/seps/2149-working-group-charter-template)                                | MCP Group Governance and Charter Template                                     | <Badge>Final</Badge>     | Process          | 2025-01-15 |
+| [SEP-2148](/seps/2148-contributor-ladder)                                            | MCP Contributor Ladder                                                        | <Badge>Final</Badge>     | Process          | 2026-01-15 |
+| [SEP-2133](/seps/2133-extensions)                                                    | Extensions                                                                    | <Badge>Final</Badge>     | Standards Track  | 2025-01-21 |
+| [SEP-2085](/seps/2085-governance-succession-and-amendment)                           | Governance Succession and Amendment Procedures                                | <Badge>Final</Badge>     | Process          | 2025-12-05 |
+| [SEP-1865](/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp)                  | MCP Apps - Interactive User Interfaces for MCP                                | <Badge>Final</Badge>     | Extensions Track | 2025-11-21 |
+| [SEP-1850](/seps/1850-pr-based-sep-workflow)                                         | PR-Based SEP Workflow                                                         | <Badge>Final</Badge>     | Process          | 2025-11-20 |
+| [SEP-1730](/seps/1730-sdks-tiering-system)                                           | SDKs Tiering System                                                           | <Badge>Final</Badge>     | Standards Track  | 2025-10-29 |
+| [SEP-1699](/seps/1699-support-sse-polling-via-server-side-disconnect)                | Support SSE polling via server-side disconnect                                | <Badge>Final</Badge>     | Standards Track  | 2025-10-22 |
+| [SEP-1686](/seps/1686-tasks)                                                         | Tasks                                                                         | <Badge>Final</Badge>     | Standards Track  | 2025-10-20 |
+| [SEP-1613](/seps/1613-establish-json-schema-2020-12-as-default-dialect-f)            | Establish JSON Schema 2020-12 as Default Dialect for MCP                      | <Badge>Final</Badge>     | Standards Track  | 2025-10-06 |
+| [SEP-1577](/seps/1577--sampling-with-tools)                                          | Sampling With Tools                                                           | <Badge>Final</Badge>     | Standards Track  | 2025-09-30 |
+| [SEP-1330](/seps/1330-elicitation-enum-schema-improvements-and-standards)            | Elicitation Enum Schema Improvements and Standards Compliance                 | <Badge>Final</Badge>     | Standards Track  | 2025-08-11 |
+| [SEP-1319](/seps/1319-decouple-request-payload-from-rpc-methods-definiti)            | Decouple Request Payload from RPC Methods Definition                          | <Badge>Final</Badge>     | Standards Track  | 2025-08-08 |
+| [SEP-1303](/seps/1303-input-validation-errors-as-tool-execution-errors)              | Input Validation Errors as Tool Execution Errors                              | <Badge>Final</Badge>     | Standards Track  | 2025-08-05 |
+| [SEP-1302](/seps/1302-formalize-working-groups-and-interest-groups-in-mc)            | Formalize Working Groups and Interest Groups in MCP Governance                | <Badge>Final</Badge>     | Standards Track  | 2025-08-05 |
+| [SEP-1046](/seps/1046-support-oauth-client-credentials-flow-in-authoriza)            | Support OAuth client credentials flow in authorization                        | <Badge>Final</Badge>     | Standards Track  | 2025-07-23 |
+| [SEP-1036](/seps/1036-url-mode-elicitation-for-secure-out-of-band-intera)            | URL Mode Elicitation for secure out-of-band interactions                      | <Badge>Final</Badge>     | Standards Track  | 2025-07-22 |
+| [SEP-1034](/seps/1034--support-default-values-for-all-primitive-types-in)            | Support default values for all primitive types in elicitation schemas         | <Badge>Final</Badge>     | Standards Track  | 2025-07-22 |
+| [SEP-1024](/seps/1024-mcp-client-security-requirements-for-local-server-)            | MCP Client Security Requirements for Local Server Installation                | <Badge>Final</Badge>     | Standards Track  | 2025-07-22 |
+| [SEP-994](/seps/994-shared-communication-practicesguidelines)                        | Shared Communication Practices/Guidelines                                     | <Badge>Final</Badge>     | Process          | 2025-07-17 |
+| [SEP-991](/seps/991-enable-url-based-client-registration-using-oauth-c)              | Enable URL-based Client Registration using OAuth Client ID Metadata Documents | <Badge>Final</Badge>     | Standards Track  | 2025-07-07 |
+| [SEP-990](/seps/990-enable-enterprise-idp-policy-controls-during-mcp-o)              | Enable enterprise IdP policy controls during MCP OAuth flows                  | <Badge>Final</Badge>     | Standards Track  | 2025-06-04 |
+| [SEP-986](/seps/986-specify-format-for-tool-names)                                   | Specify Format for Tool Names                                                 | <Badge>Final</Badge>     | Standards Track  | 2025-07-16 |
+| [SEP-985](/seps/985-align-oauth-20-protected-resource-metadata-with-rf)              | Align OAuth 2.0 Protected Resource Metadata with RFC 9728                     | <Badge>Final</Badge>     | Standards Track  | 2025-07-16 |
+| [SEP-973](/seps/973-expose-additional-metadata-for-implementations-res)              | Expose additional metadata for Implementations, Resources, Tools and Prompts  | <Badge>Final</Badge>     | Standards Track  | 2025-07-15 |
+| [SEP-932](/seps/932-model-context-protocol-governance)                               | Model Context Protocol Governance                                             | <Badge>Final</Badge>     | Process          | 2025-07-08 |
+| [SEP-414](/seps/414-request-meta)                                                    | Document OpenTelemetry Trace Context Propagation Conventions                  | <Badge>Final</Badge>     | Standards Track  | 2025-04-25 |
 
 ## SEP Status Definitions
 

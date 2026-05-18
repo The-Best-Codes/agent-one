@@ -46,6 +46,7 @@ Each section contains links to detailed markdown files that provide comprehensiv
 
 ## Security
 - [Security](https://v2.tauri.app/security)
+- [Asset protocol scope](https://v2.tauri.app/security/asset-protocol): Configure app.security.assetProtocol so the WebView can load local files safely, including FsScope, requireLiteralLeadingDot, and dynamic paths.
 - [Capabilities](https://v2.tauri.app/security/capabilities)
 - [Content Security Policy (CSP)](https://v2.tauri.app/security/csp)
 - [Tauri Ecosystem Security](https://v2.tauri.app/security/ecosystem)

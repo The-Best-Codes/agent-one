@@ -45,6 +45,7 @@
 - [Authorization Extensions](https://modelcontextprotocol.io/extensions/auth/overview.md): Supplementary authorization mechanisms for the Model Context Protocol
 - [Extension Support Matrix](https://modelcontextprotocol.io/extensions/client-matrix.md): Which MCP clients implement which official extensions
 - [Extensions Overview](https://modelcontextprotocol.io/extensions/overview.md): Optional extensions to the Model Context Protocol
+- [MCP Tasks](https://modelcontextprotocol.io/extensions/tasks/overview.md): Asynchronous task execution for long-running MCP operations
 - [The MCP Registry](https://modelcontextprotocol.io/registry/about.md)
 - [How to Authenticate When Publishing to the Official MCP Registry](https://modelcontextprotocol.io/registry/authentication.md)
 - [Frequently Asked Questions](https://modelcontextprotocol.io/registry/faq.md)
@@ -79,7 +80,13 @@
 - [SEP-2243: HTTP Header Standardization for Streamable HTTP Transport](https://modelcontextprotocol.io/seps/2243-http-standardization.md): HTTP Header Standardization for Streamable HTTP Transport
 - [SEP-2260: Require Server requests to be associated with a Client request.](https://modelcontextprotocol.io/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests.md): Require Server requests to be associated with a Client request.
 - [SEP-2322: Multi Round-Trip Requests](https://modelcontextprotocol.io/seps/2322-MRTR.md): Multi Round-Trip Requests
+- [SEP-2468: Recommend Issuer (iss) Parameter in MCP Auth Responses](https://modelcontextprotocol.io/seps/2468-recommend-issuer-claim-for-auth.md): Recommend Issuer (iss) Parameter in MCP Auth Responses
+- [SEP-2484: Require Conformance Tests for Standards Track SEPs to Reach Final Status](https://modelcontextprotocol.io/seps/2484-conformance-tests-required-for-final-seps.md): Require Conformance Tests for Standards Track SEPs to Reach Final Status
+- [SEP-2549: TTL for List Results](https://modelcontextprotocol.io/seps/2549-TTL-for-list-results.md): TTL for List Results
 - [SEP-2567: Sessionless MCP via Explicit State Handles](https://modelcontextprotocol.io/seps/2567-sessionless-mcp.md): Sessionless MCP via Explicit State Handles
+- [SEP-2575: Make MCP Stateless](https://modelcontextprotocol.io/seps/2575-stateless-mcp.md): Make MCP Stateless
+- [SEP-2577: Deprecate Roots, Sampling, and Logging](https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging.md): Deprecate Roots, Sampling, and Logging
+- [SEP-2663: Tasks Extension](https://modelcontextprotocol.io/seps/2663-tasks-extension.md): Tasks Extension
 - [SEP-414: Document OpenTelemetry Trace Context Propagation Conventions](https://modelcontextprotocol.io/seps/414-request-meta.md): Document OpenTelemetry Trace Context Propagation Conventions
 - [SEP-932: Model Context Protocol Governance](https://modelcontextprotocol.io/seps/932-model-context-protocol-governance.md): Model Context Protocol Governance
 - [SEP-973: Expose additional metadata for Implementations, Resources, Tools and Prompts](https://modelcontextprotocol.io/seps/973-expose-additional-metadata-for-implementations-res.md): Expose additional metadata for Implementations, Resources, Tools and Prompts
