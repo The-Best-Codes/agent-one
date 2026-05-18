@@ -113,6 +113,12 @@ pub fn run() {
                             sql: include_str!("../migrations/0005_remove_chat_usage_columns.sql"),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 6,
+                            description: "add_chat_timestamps",
+                            sql: include_str!("../migrations/0006_add_chat_timestamps.sql"),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),

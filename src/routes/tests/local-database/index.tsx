@@ -14,7 +14,6 @@ const WRITE_BATCH_SIZE = 25;
 const READ_BATCH_SIZE = 50;
 const DELETE_BATCH_SIZE = 250;
 const SHARED_SEARCH_QUERY = "agent one local database stress benchmark";
-const CHAT_IDS_KEY = "chat-ids";
 const LONG_USER_SEGMENT =
   "This long benchmark prompt simulates a user request with several clauses, extra context, repeated requirements, and enough natural language to stress JSON serialization, SQLite writes, full-text indexing, and later retrieval performance under sustained local workload.";
 const LONG_ASSISTANT_SEGMENT =
@@ -119,10 +118,10 @@ export default function LocalDatabaseTestRoute() {
       addLog(`Finished ${label.toLowerCase()} in ${formatDuration(durationMs)}`);
     };
 
-    let initialChatIdsRaw: string | null = null;
+    let initialChatIds = new Set<string>();
 
     try {
-      initialChatIdsRaw = await chatStorage.getItem(CHAT_IDS_KEY);
+      initialChatIds = new Set((await chatStorage.listChats("created-at")).map(({ id }) => id));
       addLog(
         `Preparing ${BENCHMARK_CHAT_COUNT} temporary chats with ${MESSAGES_PER_CHAT} messages each.`,
       );
@@ -261,8 +260,13 @@ export default function LocalDatabaseTestRoute() {
           await yieldToUi();
         }
 
-        const finalChatIdsRaw = await chatStorage.getItem(CHAT_IDS_KEY);
-        if (finalChatIdsRaw !== initialChatIdsRaw) {
+        const finalChatIds = new Set(
+          (await chatStorage.listChats("created-at")).map(({ id }) => id),
+        );
+        const chatListChanged =
+          finalChatIds.size !== initialChatIds.size ||
+          Array.from(initialChatIds).some((chatId) => !finalChatIds.has(chatId));
+        if (chatListChanged) {
           const cleanupMessage = "The stored chat list changed during cleanup.";
           setSummary((current) =>
             current

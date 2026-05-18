@@ -4,6 +4,7 @@ import { atomWithStorage, RESET } from "jotai/utils";
 import type { DefaultSettings } from "@/lib/settings/types";
 import {
   type AnalyticsIdentityOption,
+  type ChatSortOption,
   type ColorThemeOption,
   DEFAULT_SETTINGS,
   type FontOption,
@@ -198,6 +199,11 @@ export const systemPromptAppendixAtom = createSettingAtom(
 export const showMessageActionRowAtom = createSettingAtom<MessageActionRowOption>(
   "SHOW_MESSAGE_ACTION_ROW",
   DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW,
+);
+
+export const chatSortAtom = createSettingAtom<ChatSortOption>(
+  "CHAT_SORT",
+  DEFAULT_SETTINGS.CHAT_SORT,
 );
 
 export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(

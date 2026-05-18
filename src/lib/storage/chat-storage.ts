@@ -3,11 +3,17 @@ import type { UIMessage } from "ai";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
 import { getLogger } from "@/lib/logger";
+import type { ChatSortOption } from "@/lib/settings/types";
 
 export interface ChatSearchResult {
   chatId: string;
   title: string;
   snippet: string;
+}
+
+export interface StoredChat {
+  id: string;
+  metadata: ChatMetadata;
 }
 
 const logger = getLogger(import.meta.url);
@@ -112,9 +118,13 @@ export const chatStorage = {
         model_id: string | null;
         model_config: string | null;
         branch_of: string | null;
+        created_at: number | null;
+        updated_at: number | null;
       }[]
     >(
-      "SELECT title, title_state, model_id, model_config, branch_of FROM chat_metadata WHERE id = $1",
+      `SELECT title, title_state, model_id, model_config, branch_of, created_at, updated_at
+       FROM chat_metadata
+       WHERE id = $1`,
       [id],
     );
     if (rows.length === 0) return null;
@@ -125,6 +135,8 @@ export const chatStorage = {
       modelId: row.model_id ?? undefined,
       modelConfig: row.model_config ? JSON.parse(row.model_config) : undefined,
       branchOf: row.branch_of ?? undefined,
+      createdAt: row.created_at ?? undefined,
+      updatedAt: row.updated_at ?? undefined,
     };
   },
 
@@ -137,15 +149,19 @@ export const chatStorage = {
            title_state,
            model_id,
            model_config,
-           branch_of
+           branch_of,
+           created_at,
+           updated_at
          )
-         VALUES ($1, $2, $3, $4, $5, $6)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          ON CONFLICT(id) DO UPDATE SET
-           title = $2,
-           title_state = $3,
-           model_id = $4,
-           model_config = $5,
-           branch_of = $6`,
+            title = $2,
+            title_state = $3,
+            model_id = $4,
+            model_config = $5,
+            branch_of = $6,
+            created_at = COALESCE(chat_metadata.created_at, excluded.created_at),
+            updated_at = COALESCE(excluded.updated_at, chat_metadata.updated_at)`,
         [
           id,
           metadata.title,
@@ -153,9 +169,49 @@ export const chatStorage = {
           metadata.modelId ?? null,
           metadata.modelConfig ? JSON.stringify(metadata.modelConfig) : null,
           metadata.branchOf ?? null,
+          metadata.createdAt ?? null,
+          metadata.updatedAt ?? null,
         ],
       ),
     );
+  },
+
+  async listChats(sortBy: ChatSortOption): Promise<StoredChat[]> {
+    const d = await getDb();
+    const sortColumn =
+      sortBy === "updated-at"
+        ? "COALESCE(updated_at, created_at, 0)"
+        : "COALESCE(created_at, updated_at, 0)";
+    const rows = await d.select<
+      {
+        id: string;
+        title: string;
+        title_state: string | null;
+        model_id: string | null;
+        model_config: string | null;
+        branch_of: string | null;
+        created_at: number | null;
+        updated_at: number | null;
+      }[]
+    >(
+      `SELECT id, title, title_state, model_id, model_config, branch_of, created_at, updated_at
+       FROM chat_metadata
+       ORDER BY ${sortColumn} DESC, id DESC`,
+      [],
+    );
+
+    return rows.map((row) => ({
+      id: row.id,
+      metadata: {
+        title: row.title,
+        titleState: row.title_state as ChatMetadata["titleState"],
+        modelId: row.model_id ?? undefined,
+        modelConfig: row.model_config ? JSON.parse(row.model_config) : undefined,
+        branchOf: row.branch_of ?? undefined,
+        createdAt: row.created_at ?? undefined,
+        updatedAt: row.updated_at ?? undefined,
+      },
+    }));
   },
 
   async getChatMessages(id: string): Promise<UIMessage[] | null> {

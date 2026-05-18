@@ -26,6 +26,7 @@ export type MessageActionRowOption = "hover" | "always" | "never";
 export type InputStyleOption = "docked" | "floating";
 export type CollapsedSidebarLayoutOption = "row" | "column";
 export type ChatVirtualizationModeOption = "off" | "threshold";
+export type ChatSortOption = "created-at" | "updated-at";
 
 export type TitleGenerationMethodOption =
   | "ai"
@@ -160,6 +161,7 @@ export interface DefaultSettings extends ApiKeySettings {
   STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   SHOW_CHAT_STATUS_INDICATOR: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
+  CHAT_SORT: ChatSortOption;
   TITLE_GENERATION: TitleGenerationSettings;
   THEME: ThemeOption;
   COLOR_THEME: ColorThemeOption;
@@ -196,6 +198,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   STOP_BUTTON_BEHAVIOR: "immediate",
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
+  CHAT_SORT: "created-at",
   TITLE_GENERATION: {
     method: "ai",
     characterLimit: 50,

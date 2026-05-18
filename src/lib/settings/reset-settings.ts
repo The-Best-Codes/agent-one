@@ -7,6 +7,7 @@ import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
   analyticsIdentityAtom,
+  chatSortAtom,
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
   collapsedSidebarLayoutAtom,
@@ -61,6 +62,7 @@ export function resetAllSettings(): void {
   store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
+  store.set(chatSortAtom, RESET);
   store.set(themeAtom, RESET);
   store.set(colorThemeAtom, RESET);
   store.set(uiTintAtom, RESET);
@@ -146,6 +148,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SHOW_MESSAGE_ACTION_ROW":
       store.set(showMessageActionRowAtom, RESET);
+      break;
+    case "CHAT_SORT":
+      store.set(chatSortAtom, RESET);
       break;
     case "THEME":
       store.set(themeAtom, RESET);

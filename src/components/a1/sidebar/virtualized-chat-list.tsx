@@ -33,6 +33,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useOverflow } from "@/hooks/use-overflow";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
+import { chatSortAtom } from "@/lib/jotai/settings-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
@@ -49,6 +50,8 @@ interface ChatListItem {
   title: string;
   branchOf?: string;
   snippet?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 interface VirtualizedChatListProps {
@@ -83,6 +86,7 @@ export const VirtualizedChatList = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const latestSearchQueryRef = useRef("");
   const [chatIds] = useAtom(chatIdsAtom);
+  const [chatSort] = useAtom(chatSortAtom);
 
   useHotkeys(kbdRegistry.focusChatSearch, () => {
     searchInputRef.current?.focus();
@@ -101,6 +105,8 @@ export const VirtualizedChatList = ({
             id,
             title: chatMetadata?.title || `Chat ${id.slice(0, 8)}`,
             branchOf: chatMetadata?.branchOf,
+            createdAt: chatMetadata?.createdAt,
+            updatedAt: chatMetadata?.updatedAt,
           };
         } catch (error) {
           logger.error(`Error loading chat ${id}:`, error);
@@ -108,15 +114,32 @@ export const VirtualizedChatList = ({
             id,
             title: `Chat ${id.slice(0, 8)}`,
             branchOf: undefined,
+            createdAt: undefined,
+            updatedAt: undefined,
           };
         }
+      });
+
+      loadedChats.sort((a, b) => {
+        const left =
+          chatSort === "updated-at"
+            ? (a.updatedAt ?? a.createdAt ?? 0)
+            : (a.createdAt ?? a.updatedAt ?? 0);
+        const right =
+          chatSort === "updated-at"
+            ? (b.updatedAt ?? b.createdAt ?? 0)
+            : (b.createdAt ?? b.updatedAt ?? 0);
+        if (right !== left) {
+          return right - left;
+        }
+        return b.id.localeCompare(a.id);
       });
 
       setChats(loadedChats);
     } catch (error) {
       logger.error("Error loading chats:", error);
     }
-  }, [chatIds, loadChatMetadata, isMetadataLoaded]);
+  }, [chatIds, chatSort, loadChatMetadata, isMetadataLoaded]);
 
   useEffect(() => {
     loadChats();
