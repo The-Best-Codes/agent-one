@@ -43,6 +43,27 @@ pub fn handle_window_event(window: &Window, event: &WindowEvent) {
 }
 
 #[tauri::command]
+pub fn check_chat_open_elsewhere(
+    window: Window,
+    chat_id: String,
+    state: State<'_, WindowChatState>,
+) -> Result<usize, String> {
+    let app = window.app_handle();
+    let window_label = window.label().to_string();
+
+    with_window_chats(&state, |chats| {
+        chats.retain(|label, _| app.get_webview_window(label).is_some());
+
+        chats
+            .iter()
+            .filter(|(label, entry)| {
+                label.as_str() != window_label.as_str() && entry.chat_id == chat_id
+            })
+            .count()
+    })
+}
+
+#[tauri::command]
 pub fn sync_current_window_chat(
     window: Window,
     chat_id: Option<String>,

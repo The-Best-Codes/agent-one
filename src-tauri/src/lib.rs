@@ -171,6 +171,7 @@ pub fn run() {
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
                     window_chat::sync_current_window_chat,
+                    window_chat::check_chat_open_elsewhere,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -189,6 +190,7 @@ pub fn run() {
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
                     window_chat::sync_current_window_chat,
+                    window_chat::check_chat_open_elsewhere,
                 ]
             }
         })
