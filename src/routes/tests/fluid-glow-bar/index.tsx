@@ -15,7 +15,7 @@ import { getLogger } from "@/lib/logger";
 const logger = getLogger(import.meta.url);
 
 const WINDOW_LABEL = "fluid-glow-bar";
-const WINDOW_HEIGHT = 20;
+const WINDOW_HEIGHT = 50;
 
 export default function FluidGlowBarTestRoute() {
   const navigate = useNavigate();
@@ -46,7 +46,6 @@ export default function FluidGlowBarTestRoute() {
         url: "/fluid-glow-bar.html",
         title: "Fluid Glow Bar",
         width: monitorWidth,
-        minHeight: WINDOW_HEIGHT,
         height: WINDOW_HEIGHT,
         x: targetX,
         y: targetY,
