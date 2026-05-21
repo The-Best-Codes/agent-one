@@ -66,7 +66,9 @@ pub fn run() {
             .plugin(tauri_plugin_updater::Builder::new().build())
             .plugin(
                 tauri_plugin_window_state::Builder::new()
-                    .with_filter(|label| !label.starts_with("headless-webview-"))
+                    .with_filter(|label| {
+                        !label.starts_with("headless-webview-") && label != "fluid-glow-bar"
+                    })
                     .build(),
             );
     }

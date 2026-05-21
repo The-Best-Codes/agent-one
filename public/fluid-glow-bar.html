@@ -12,6 +12,14 @@
         height: 100%;
         background: transparent;
         overflow: hidden;
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+        animation-delay: 1s;
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+        }
       }
       #fluid-glow-bar-container {
         position: fixed;
