@@ -511,6 +511,18 @@ This page showcases applications that support the Model Context Protocol (MCP). 
   * Works across a wide variety of GenAI models from top providers
 </McpClient>
 
+<McpClient name="GitHub Copilot CLI">
+  GitHub Copilot CLI runs a GitHub-native agent in your terminal that works directly with your issues and pull requests, executes across a `/fleet` of parallelized subagents, and carries you from `/plan` to merged code.
+
+  **Key features:**
+
+  * Work with issues, branches, and pull requests through GitHub's native `/mcp` server.
+  * Use `/model` and `/fleet` to execute in parallel or run multiple models at once.
+  * Start with a `/plan`, refine work in your `/IDE`, and ship a pull request on GitHub.
+  * Extend Copilot CLI with custom MCP server integrations, skills, and plugins.
+  * Runs on macOS, Linux, and Windows and inherits organization Copilot policies and governance settings.
+</McpClient>
+
 <McpClient name="GitHub Copilot coding agent">
   Delegate tasks to GitHub Copilot coding agent and let it work in the background while you stay focused on the highest-impact and most interesting work
 
@@ -22887,103 +22899,6 @@ You can either:
 Yes. Participate in as many groups as your time allows.
 
 
-# Roadmap
-Source: https://modelcontextprotocol.io/development/roadmap
-
-Our plans for evolving Model Context Protocol
-
-<Info>Last updated: **2026-03-05**</Info>
-
-This page describes our strategic priorities and what we expect **Working Groups** and **Interest Groups** to deliver against them.
-
-<Note>
-  The ideas presented here are not commitments. We may solve these challenges differently than described. Some items may not materialize at all. This is also not an *exhaustive* list. We may incorporate work that isn't mentioned here.
-</Note>
-
-## SEP Prioritization
-
-**SEPs that fall within the priority areas below will receive expedited review and have the highest chance of acceptance.** SEPs outside these areas are not automatically rejected, but contributors should expect longer review timelines and a higher bar for justification. Maintainer capacity is finite. We direct it toward these priorities first.
-
-If you are considering a SEP, check whether it aligns with one of the areas below, discuss it in the relevant [Working Group or Interest Group](/community/working-interest-groups), and bring that group's backing with you. SEPs with WG support and a clear connection to the roadmap move fastest. See the [SEP guidelines](/community/sep-guidelines) for the full process.
-
-## Priority Areas
-
-### 1. Transport Evolution and Scalability
-
-Streamable HTTP gave MCP a production-ready transport, but running it at scale has revealed gaps around horizontal scaling, stateless operation, and middleware patterns.
-
-**What we want to achieve:**
-
-* **Next-generation transport**: evolve Streamable HTTP to run statelessly across multiple server instances and behave correctly behind load balancers and proxies.
-* **Scalable session handling**: define how sessions are created, resumed, and migrated so that server restarts and scale-out events are transparent to connected clients.
-* **MCP Server Cards**: a standard for exposing structured server metadata via a `.well-known` URL, so browsers, crawlers, and registries can discover a server's capabilities without connecting to it.
-
-**Working Group ownership:**
-
-* **Transports WG** owns the transport and session work: a series of SEPs covering the wire format, session model, and resumption protocol, plus conformance guidance for SDK authors.
-* **Server Card WG** owns the Server Card format and its distribution, coordinating with the broader industry AI-catalog effort.
-
-We will **not** be introducing additional official transports this cycle. Keeping the set small protects ecosystem compatibility; the community should experiment via custom transports.
-
-### 2. Agent Communication
-
-The Tasks primitive ([SEP-1686](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686)) gave agents a reliable call-now / fetch-later pattern. Running it in production has surfaced gaps in the lifecycle semantics that the **Agents WG** should close:
-
-* **Retry semantics**: what happens when a task fails transiently, and who decides whether to retry.
-* **Expiry policies**: how long results are retained after completion, and how clients learn a result has expired.
-
-These are the gaps we can point to today. The Agents WG should also collect and triage operational issues from production deployments—this list will grow as more of the ecosystem runs Tasks at scale.
-
-### 3. Governance Maturation
-
-MCP has grown into a multi-company open standard under the Linux Foundation. [SEP-1302](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1302) formalized Working Groups and Interest Groups, and [SEP-2085](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2085) established succession and amendment procedures. The next step is giving the community a clear path to leadership so the project does not depend on a small set of individuals.
-
-The **Governance WG** should deliver:
-
-* **A Contributor Ladder SEP** defining the progression from community participant → WG contributor → WG facilitator → lead maintainer → core maintainer, with explicit nomination and review criteria at each step.
-* **A delegation model** allowing WGs with a proven track record to accept SEPs and publish extension updates within their domain without a full core-maintainer review cycle.
-* **A charter template** that every WG and IG maintains publicly: scope, active deliverables, success criteria, and retirement conditions, reviewed quarterly.
-
-### 4. Enterprise Readiness
-
-Enterprises are deploying MCP at scale and hitting gaps the protocol does not yet address.
-
-Areas where we need clear problem statements and directional proposals:
-
-* **Audit trails and observability**: end-to-end visibility into what a client requested and what a server did, in a form enterprises can feed into their existing logging and compliance pipelines.
-* **Enterprise-managed auth**: paved paths away from static client secrets and toward SSO-integrated flows ([Cross-App Access](https://xaa.dev)), so IT can manage MCP access the same way they manage everything else.
-* **Gateway and proxy patterns**: well-defined behavior when a client does not connect directly to a server but routes through an intermediary. This may include authorization propagation, session semantics, and what the gateway is allowed to see.
-* **Configuration portability**: a way to configure a server once and have that configuration work across different MCP clients.
-
-We expect an **Enterprise WG** to form to own this. Much of the output will likely land as extensions rather than core specification changes.
-
-## On the Horizon
-
-These areas have community interest and interest from core maintainers but are not top priorities. We will support a community-formed Working Group in any of them and review SEPs on these topics if time permits.
-
-* **Triggers and Event-Driven Updates** — clients currently learn about server-side state changes by polling or holding an SSE connection open. A standardized callback mechanism (webhooks or similar) would let servers proactively notify clients when new data is available, with defined ordering guarantees across all transports.
-* **Result Type Improvements** — tool calls, resource reads, and task results all arrive complete and inline. Streamed results would let clients receive output incrementally for interactive scenarios (generated text, audio, video frames); reference-based results would let clients decide when to pull large payloads into context rather than polluting it by default. This is cross-cutting: streaming touches transport, references touch the schema.
-* **Security & Authorization** — finer-grained least-privilege scopes, clearer guidance on avoiding OAuth mix-up attacks, secure credential management on both client and server, and a community-driven vulnerability disclosure program routed through the Linux Foundation. Sponsored work is already underway: [SEP-1932 (DPoP)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1932) and [SEP-1933 (Workload Identity Federation)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1933).
-* **Extensions Ecosystem** — the `ext-auth` and `ext-apps` tracks are early proof that the extension mechanism works. Maturing them, investigating a Skills primitive for composed capabilities, and adding first-class extension support to the registry would all strengthen the path from experiment to standard.
-
-## Validation
-
-A protocol specification is only as good as the implementations that follow it. Alongside the areas above, we continue to invest in:
-
-* **Conformance Test Suites**: automated verification that clients, servers, and SDKs correctly implement the specification, with coverage expanding alongside each new feature area.
-* **SDK Tiers**: the tiering system introduced in [SEP-1730](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1730) gives developers a clear signal of which SDKs track the specification most closely.
-* **Reference Implementations**: canonical implementations of new features to anchor community development and unblock early adopters.
-
-## Get Involved
-
-MCP's roadmap is built by its community:
-
-* **Join a Working Group or Interest Group**: see the [Working Groups & Interest Groups](/community/working-interest-groups) page and the [community communication channels](/community/communication) to connect with the groups active in each area above.
-* **Propose or comment on SEPs**: review the [SEP guidelines](/community/sep-guidelines) and open or weigh in on proposals.
-* **Start an experimental extension**: [SEP-2133](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2133) lets any WG or IG experiment in an `experimental-ext-` repository before a formal SEP is required.
-* **Contribute to the project**: read the [contributing guide](/community/contributing) for how to get involved with the specification, SDKs, and tooling.
-
-
 # The MCP Registry
 Source: https://modelcontextprotocol.io/registry/about
 
@@ -28880,6 +28795,435 @@ Upon acceptance, this SEP will be implemented by adding the Succession and Amend
 A draft pull request implementing these changes will be linked here once available.
 
 
+# SEP-2106: Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12
+Source: https://modelcontextprotocol.io/seps/2106-json-schema-2020-12
+
+Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12
+
+<div>
+  <Badge>
+    Draft
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                                                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 2106                                                                                                                                                                          |
+| **Title**     | Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12                                                                                                           |
+| **Status**    | Draft                                                                                                                                                                         |
+| **Type**      | Standards Track                                                                                                                                                               |
+| **Created**   | 2026-01-06                                                                                                                                                                    |
+| **Author(s)** | John McBride ([@jpmcb](https://github.com/jpmcb)) — original proposal; Ola Hungerford ([@olaservo](https://github.com/olaservo)) — current shepherd, post-SEP-1850 conversion |
+| **Sponsor**   | Ola Hungerford ([@olaservo](https://github.com/olaservo))                                                                                                                     |
+| **PR**        | [#2106](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2106)                                                                                               |
+
+***
+
+## Abstract
+
+This SEP proposes loosening the restrictions on `inputSchema`, `outputSchema`, and `structuredContent` to better support JSON Schema 2020-12. Specifically:
+
+* **`inputSchema`**: Keeps `type: "object"` required (since tool arguments are objects), but allows any additional JSON Schema properties to support powerful validation compositions (`anyOf`, `oneOf`, `allOf`, etc.)
+* **`outputSchema`**: Fully supports JSON Schema 2020-12 since MCP servers may return any valid JSON
+* **`structuredContent`**: Accepts any JSON value validated by `outputSchema`
+
+This proposal enables MCP servers to leverage the expressiveness of JSON Schema 2020-12 while maintaining backward compatibility with existing implementations.
+
+## Motivation
+
+The current MCP specification restricts tool schemas in ways that conflict with full JSON Schema support:
+
+1. **inputSchema restriction**: Currently only allows `type`, `properties`, and `required` fields. This prevents use of composition keywords like `anyOf`, `oneOf`, and `allOf` for sophisticated object validation patterns.
+
+2. **outputSchema restriction**: Also restricted to `type: "object"` with only `properties` and `required`, despite the specification claiming to support "JSON Schema."
+
+3. **structuredContent restriction**: Defined as `{ [key: string]: unknown }` (an object with string keys), which prevents returning arrays—a common API response pattern.
+
+### Real-World Impact
+
+Consider a weather API tool that returns hourly forecasts:
+
+```json theme={null}
+[
+  { "hour": "09:00", "temp": 68, "conditions": "sunny" },
+  { "hour": "10:00", "temp": 72, "conditions": "partly cloudy" },
+  { "hour": "11:00", "temp": 75, "conditions": "cloudy" }
+]
+```
+
+Currently, this natural array response is **impossible** because `structuredContent` must be an object. Developers are forced to wrap arrays in unnecessary container objects:
+
+```json theme={null}
+{
+  "forecasts": [
+    { "hour": "09:00", "temp": 68, "conditions": "sunny" },
+    ...
+  ]
+}
+```
+
+This artificial constraint:
+
+* Adds unnecessary nesting to responses
+* Conflicts with common REST API patterns
+* Prevents direct schema validation of array responses
+
+### Schema Composition Use Cases
+
+The current `inputSchema` restriction prevents legitimate schema patterns. With this SEP, tools can use composition keywords alongside `type: "object"`:
+
+```json theme={null}
+{
+  "type": "object",
+  "oneOf": [
+    { "properties": { "id": { "type": "string" } }, "required": ["id"] },
+    { "properties": { "name": { "type": "string" } }, "required": ["name"] }
+  ]
+}
+```
+
+This pattern allows a tool to accept either an ID-based or name-based lookup—a common API design that is currently unsupported because the schema only allows `type`, `properties`, and `required` fields.
+
+## Specification
+
+### 1. Loosen inputSchema
+
+**Current definition:**
+
+```typescript theme={null}
+inputSchema: {
+  type: "object";
+  properties?: { [key: string]: object };
+  required?: string[];
+};
+```
+
+**Proposed definition:**
+
+```typescript theme={null}
+inputSchema: {
+  $schema?: string;
+  type: "object";
+  [key: string]: unknown;
+};
+```
+
+The `inputSchema` field retains the `type: "object"` requirement (since tool arguments are always objects), but now accepts any additional JSON Schema properties. This enables:
+
+* Composition keywords: `anyOf`, `oneOf`, `allOf`, `not`
+* Conditional schemas: `if`/`then`/`else`
+* Reference schemas: `$ref`, `$defs`
+* Any other valid JSON Schema 2020-12 keywords
+
+### 2. Loosen outputSchema
+
+**Current definition:**
+
+```typescript theme={null}
+outputSchema?: {
+  type: "object";
+  properties?: { [key: string]: object };
+  required?: string[];
+};
+```
+
+**Proposed definition:**
+
+```typescript theme={null}
+outputSchema?: {
+  $schema?: string;
+  [key: string]: unknown;
+};
+```
+
+The `outputSchema` field accepts any valid JSON Schema 2020-12 object, enabling schemas that validate arrays, primitives, or complex compositions. Unlike `inputSchema`, there is no `type: "object"` requirement since tool outputs can be any valid JSON.
+
+### 3. Loosen structuredContent
+
+**Current definition:**
+
+```typescript theme={null}
+structuredContent?: { [key: string]: unknown };
+```
+
+**Proposed definition:**
+
+```typescript theme={null}
+structuredContent?: unknown;
+```
+
+The `structuredContent` field accepts any valid JSON value that conforms to the tool's `outputSchema`. This includes:
+
+* Objects: `{ "key": "value" }`
+* Arrays: `[1, 2, 3]` or `[{ "id": "abc" }, { "id": "xyz" }]`
+* Primitives: `"string"`, `42`, `true`, `null`
+
+### 4. Documentation Updates
+
+Update `docs/specification/draft/server/tools.mdx`:
+
+* Remove statement that `structuredContent` is "returned as a JSON object"
+* Clarify that `structuredContent` can be any JSON value conforming to `outputSchema`
+* Add examples demonstrating array responses
+
+### 5. Examples
+
+#### Tool returning an array of objects:
+
+```json theme={null}
+{
+  "name": "list_users",
+  "description": "List all users in the system",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "limit": { "type": "integer", "minimum": 1, "maximum": 100 }
+    }
+  },
+  "outputSchema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": ["id", "name"]
+    }
+  }
+}
+```
+
+Response:
+
+```json theme={null}
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 2 users: Alice (u1, alice@example.com) and Bob (u2, bob@example.com)."
+    }
+  ],
+  "structuredContent": [
+    { "id": "u1", "name": "Alice", "email": "alice@example.com" },
+    { "id": "u2", "name": "Bob", "email": "bob@example.com" }
+  ]
+}
+```
+
+#### Tool with composition schema:
+
+```json theme={null}
+{
+  "name": "find_resource",
+  "description": "Find a resource by ID or name",
+  "inputSchema": {
+    "type": "object",
+    "oneOf": [
+      {
+        "properties": { "id": { "type": "string", "format": "uuid" } },
+        "required": ["id"]
+      },
+      {
+        "properties": { "name": { "type": "string", "minLength": 1 } },
+        "required": ["name"]
+      }
+    ]
+  }
+}
+```
+
+## Rationale
+
+### Why not just allow arrays?
+
+While we could simply extend `structuredContent` to allow arrays, this would be an incomplete solution. The root cause is that the schema types are artificially restricted to `type: "object"`. By allowing any valid JSON Schema, we:
+
+1. Enable the full power of JSON Schema 2020-12
+2. Align with the specification's claim of JSON Schema support
+3. Provide a consistent, principled approach rather than piecemeal fixes
+
+### Why not require a wrapper object?
+
+Requiring arrays to be wrapped in objects (e.g., `{ "items": [...] }`) was considered but rejected because:
+
+1. It adds unnecessary complexity to responses
+2. It conflicts with common API design patterns
+3. It prevents direct schema validation of the actual response structure
+4. JSON Schema already handles array validation elegantly
+
+### Real-World API Patterns
+
+Many production APIs return arrays directly:
+
+* **GitHub Events API**: Returns arrays of event objects
+* **AccuWeather Search API**: Returns arrays of location matches
+* **REST collection endpoints**: Standard `GET /users` returns `[{...}, {...}]`
+
+Forcing wrapper objects creates friction for developers integrating existing APIs with MCP. Generic JSON Schema validation libraries should work without MCP-specific customization.
+
+### Alignment with JSON Schema 2020-12
+
+JSON Schema 2020-12 provides powerful features for schema composition and validation. By removing artificial restrictions, MCP aligns with industry standards (OpenAPI 3.1 uses JSON Schema 2020-12) and enables developers to leverage existing JSON Schema knowledge and tooling.
+
+### SDK Ecosystem Evidence
+
+The friction caused by current restrictions is not theoretical. FastMCP, one of the most popular Python SDKs for MCP, has implemented extensive workarounds:
+
+1. **Explicit error messages** acknowledge the limitation:
+
+   ```python theme={null}
+   raise ValueError(
+       f"Output schemas must represent object types due to MCP spec limitations."
+   )
+   ```
+
+2. **Auto-wrapping infrastructure** adds complexity:
+   * A `_WrappedResult` dataclass wraps non-object returns
+   * A custom `x-fastmcp-wrap-result` extension enables client-side unwrapping
+   * Both SDK and client need matching wrap/unwrap logic
+
+3. **Real bugs** have resulted from these workarounds:
+   * Issue #2455: `$ref` schemas without `type: object` broke ALL tools on the server
+   * Issue #2421: Unexpected `{"result": ...}` wrapping confused users
+
+This demonstrates that the current restrictions create genuine ecosystem friction that SEP-2106 would eliminate.
+
+### OpenAPI Precedent
+
+The OpenAPI specification went through a similar evolution. OpenAPI 3.0 used an "extended subset" of JSON Schema with custom restrictions (like requiring `nullable: true` instead of allowing `"null"` as a type).
+
+OpenAPI 3.1 made the strategic decision to fully align with JSON Schema 2020-12, accepting breaking changes to eliminate the friction. The result: better tooling compatibility and less ecosystem confusion.
+
+| OpenAPI's Problem                   | MCP's Parallel                            |
+| ----------------------------------- | ----------------------------------------- |
+| `type` must be string, not array    | `inputSchema` only allows specific fields |
+| Couldn't use standard null handling | Can't use `oneOf`/`anyOf` in schemas      |
+| Custom `nullable` keyword           | Object-only `structuredContent`           |
+| Caused tooling confusion            | Causes SDK workarounds                    |
+
+MCP can learn from OpenAPI's experience rather than repeating the same evolution over several years.
+
+## Backward Compatibility
+
+This change is **wire-format backward compatible** but has nuances depending on the direction of the version mismatch.
+
+### Compatibility Matrix
+
+|                           | New client (post-SEP)                                        | Old client (pre-SEP)                                                                                                              |
+| ------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| **New server (post-SEP)** | Fully compatible.                                            | Compatible **only when the server returns object-typed `structuredContent`**. Arrays/primitives in `structuredContent` may break. |
+| **Old server (pre-SEP)**  | Fully compatible. Existing object-only schemas remain valid. | Unchanged.                                                                                                                        |
+
+The asymmetry: a new server that takes advantage of array or primitive `structuredContent` (or composition keywords in `inputSchema`) cannot assume an old client will accept the response. Old clients written against the previous wire format may reject `structuredContent` that is not a JSON object, or fail to validate `inputSchema` containing keywords beyond `type`/`properties`/`required`.
+
+To remain interoperable with older clients, **servers using array or primitive `structuredContent` MUST also emit a `TextContent` block containing the serialized JSON** (as already recommended in the tools specification). Clients that do not understand non-object `structuredContent` can fall back to the text content.
+
+### TypeScript / SDK Migration
+
+Widening the `structuredContent` field type from `{ [key: string]: unknown }` to `unknown` is a **source-breaking change for typed consumers**, even though the wire format is unchanged. Code such as:
+
+```typescript theme={null}
+const result = await client.callTool({ name: "get_weather", arguments: { ... } });
+const temp = result.structuredContent?.temperature;        // previously compiled (type: unknown)
+const city = result.structuredContent?.["city"] as string; // previously compiled
+```
+
+will no longer type-check after the change, because TypeScript forbids property access on `unknown` without a narrowing guard:
+
+```typescript theme={null}
+const sc = result.structuredContent;
+if (sc && typeof sc === "object" && !Array.isArray(sc)) {
+  const temp = (sc as Record<string, unknown>).temperature;
+}
+```
+
+This break is intentional — the previous type was a lie whenever a tool returned a non-object — but SDK maintainers SHOULD:
+
+* Document the migration in SDK release notes.
+* Where ergonomic, provide typed helpers (e.g. generics over a tool's `outputSchema`) so consumers do not need to write narrowing guards by hand.
+
+### Migration Path
+
+* **Servers**: No migration is required to keep working as before. To use array or primitive `structuredContent`, also emit a serialized `TextContent` fallback.
+* **Clients**: Old clients continue to work against object-only servers. To consume the new flexibility, accept any JSON value in `structuredContent` and validate against `outputSchema` if present.
+* **SDKs**: Update generated types to mirror the new schema (`unknown` for `structuredContent`, open-ended `inputSchema`/`outputSchema`) and call out the source-breaking type change in release notes.
+
+## Security Implications
+
+JSON Schema validation already handles type checking, value constraints, and required field validation, and implementations MUST continue to validate all inputs and outputs against declared schemas. Allowing the full JSON Schema 2020-12 vocabulary surfaces two areas that warrant explicit guidance.
+
+### `$ref` Dereferencing (SSRF and Fetch-DoS)
+
+JSON Schema 2020-12 permits `$ref` to point at an absolute URI, not just a JSON Pointer into the same document. A naive implementation that resolves every `$ref` it encounters by issuing an HTTP request gives an attacker a server-side request forgery / fetch amplification primitive: a malicious tool definition can cause the host to fetch arbitrary URLs, including internal metadata endpoints or large payloads designed to exhaust resources.
+
+To mitigate this:
+
+* Implementations **MUST NOT** automatically dereference `$ref` values that resolve to a network URI (i.e. anything that is not a same-document JSON Pointer such as `#/$defs/Foo` or an internal `$anchor`).
+* "Automatically" here means "as part of normal validation or schema processing, without explicit operator action." Implementations **MAY** offer an opt-in mode that fetches non-local `$ref`s, but it MUST be disabled by default and SHOULD enforce an allowlist of hosts (or at minimum reject loopback, link-local, and private network addresses), apply timeouts and size limits, and log dereferenced URIs.
+* Schemas that fail to validate due to an unresolved external `$ref` SHOULD be rejected rather than silently treated as permissive.
+
+### Composition-Keyword Resource Use
+
+Composition keywords (`anyOf`, `oneOf`, `allOf`, `if`/`then`/`else`) and `$defs` enable expressive schemas, but pathological combinations can be expensive to validate. Implementations SHOULD apply reasonable bounds — for example, a maximum schema depth, a cap on the total number of subschemas, or a per-validation time budget — to prevent a malicious tool definition from acting as a CPU DoS vector against the validator.
+
+## Reference Implementation
+
+### TypeScript SDK
+
+A reference implementation demonstrating the loosened type restrictions:
+
+* **Branch**: [olaservo/typescript-sdk@sep-834-v1x](https://github.com/olaservo/typescript-sdk/tree/sep-834-v1x)
+* **npm**: `@olaservo/mcp-sdk@1.25.2-sep834.4`
+* **Key changes**:
+  * `inputSchema`: Retains `type: "object"` but allows any additional JSON Schema properties (compositions like `oneOf`/`anyOf`)
+  * `outputSchema`: Any valid JSON Schema object (arrays, primitives, objects, compositions)
+  * `structuredContent`: Any JSON value (objects, arrays, or primitives)
+  * McpServer high-level API updated to support array and primitive outputSchema
+
+### Everything Server Demo Tools
+
+Three demo tools added to the `everything` server demonstrating SEP-2106 capabilities:
+
+* **Branch**: [olaservo/servers@sep-834-json-schema-2020-12](https://github.com/olaservo/servers/tree/sep-834-json-schema-2020-12/src/everything)
+* **npm**: `@olaservo/mcp-server-everything-sep834@1.1.0-sep834.1`
+* **Tools**:
+  * `get-weather-forecast`: Returns **raw array** of hourly forecasts directly in `structuredContent`
+    * Matches the exact example from SEP-2106's Motivation section
+    * `outputSchema`: `z.array(HourlyForecastSchema)` - array type at root
+    * `structuredContent`: `[{hour, temp, conditions}, ...]` - direct array
+  * `find-by-id-or-name`: Demonstrates flexible input patterns (accepts `id` OR `name`)
+  * `get-count`: Returns **raw number** directly in `structuredContent` (not wrapped in object)
+    * `outputSchema`: `z.number()` - primitive type at root
+    * `structuredContent`: `42` - direct primitive
+
+### Related Links
+
+* Original PR: [https://github.com/modelcontextprotocol/modelcontextprotocol/pull/881](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/881)
+* Related issue: [https://github.com/modelcontextprotocol/modelcontextprotocol/issues/834](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/834)
+* `outputSchema` type restriction inconsistency: [https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1906](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1906)
+* TypeScript SDK schema types: [https://github.com/modelcontextprotocol/typescript-sdk/issues/1149](https://github.com/modelcontextprotocol/typescript-sdk/issues/1149)
+* SEP-2200 (Clarify Tool Result Content and Model Visibility): [https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2200](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2200)
+
+### Implementation Guidance
+
+SDK implementations will need to:
+
+1. Update `inputSchema` types to retain `type: "object"` but allow any additional JSON Schema properties
+2. Update `outputSchema` types to allow any valid JSON Schema (remove `type: "object"` constraint)
+3. Update `structuredContent` types to accept any valid JSON value
+4. Update JSON Schema definitions accordingly
+
+## Acknowledgments
+
+This proposal builds on discussions in GitHub issue #834 and incorporates feedback from the MCP community.
+
+
 # SEP-2133: Extensions
 Source: https://modelcontextprotocol.io/seps/2133-extensions
 
@@ -30132,6 +30476,110 @@ This SEP is implemented by:
 2. `docs/community/charter-template.mdx` — copyable charter template (Part 2) linked from the above
 3. Both pages added to `docs/docs.json` under the Community → Governance navigation group
 4. Existing WGs and IGs must create conforming charters at `docs/community/<name>/charter.mdx` within 8 weeks of acceptance
+
+
+# SEP-2164: Standardize Resource Not Found Error Code
+Source: https://modelcontextprotocol.io/seps/2164-resource-not-found-error
+
+Standardize Resource Not Found Error Code
+
+<div>
+  <Badge>
+    Draft
+  </Badge>
+
+  <Badge>
+    Standards Track
+  </Badge>
+</div>
+
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2164                                                                            |
+| **Title**     | Standardize Resource Not Found Error Code                                       |
+| **Status**    | Draft                                                                           |
+| **Type**      | Standards Track                                                                 |
+| **Created**   | 2026-01-28                                                                      |
+| **Author(s)** | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
+| **Sponsor**   | None (seeking sponsor)                                                          |
+| **PR**        | [#2164](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2164) |
+
+***
+
+## Abstract
+
+The current MCP specification [recommends `-32002`](https://modelcontextprotocol.io/specification/draft/server/resources#error-handling) as the error code for resource not found. However, `-32002` falls within the JSON-RPC "server error" range (`-32000` to `-32099`) which is reserved for implementation-defined errors, not protocol-level semantics. Additionally, SDK implementations are inconsistent — only 4 of 6 official SDKs use `-32002`, while the TypeScript SDK uses `-32602` and the Python SDK uses `0`.
+
+This SEP standardizes on `-32602` (Invalid Params), the correct JSON-RPC error code for this case, and aligns the specification with the JSON-RPC standard.
+
+## Motivation
+
+Current SDK implementations vary in their error handling for resource not found:
+
+| SDK        | Current Error Code                     | Source                                                                                                                                                                                    |
+| ---------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript | `-32602` (InvalidParams)               | [mcp.ts#L561](https://github.com/modelcontextprotocol/typescript-sdk/blob/main/packages/server/src/server/mcp.ts#L561)                                                                    |
+| Python     | `0` (generic)                          | [server.py#L790](https://github.com/modelcontextprotocol/python-sdk/blob/main/src/mcp/server/lowlevel/server.py#L790)                                                                     |
+| C#         | `-32002` (custom RESOURCE\_NOT\_FOUND) | [McpServerImpl.cs#L289](https://github.com/modelcontextprotocol/csharp-sdk/blob/main/src/ModelContextProtocol.Core/Server/McpServerImpl.cs#L289)                                          |
+| Rust       | `-32002` (custom RESOURCE\_NOT\_FOUND) | [model.rs#L450](https://github.com/modelcontextprotocol/rust-sdk/blob/main/crates/rmcp/src/model.rs#L450)                                                                                 |
+| Java       | `-32002` (custom RESOURCE\_NOT\_FOUND) | [McpAsyncServer.java#L732](https://github.com/modelcontextprotocol/java-sdk/blob/main/mcp-core/src/main/java/io/modelcontextprotocol/server/McpAsyncServer.java#L732)                     |
+| Go         | `-32002` (custom RESOURCE\_NOT\_FOUND) | [server.go#L786](https://github.com/modelcontextprotocol/go-sdk/blob/main/mcp/server.go#L786)                                                                                             |
+| Kotlin     | `-32603` (INTERNAL\_ERROR)             | [Server.kt#L618-L621](https://github.com/modelcontextprotocol/kotlin-sdk/blob/main/kotlin-sdk-server/src/commonMain/kotlin/io/modelcontextprotocol/kotlin/sdk/server/Server.kt#L618-L621) |
+| PHP        | `-32002` (custom RESOURCE\_NOT\_FOUND) | [Error.php#L37](https://github.com/modelcontextprotocol/php-sdk/blob/main/src/Schema/JsonRpc/Error.php#L37)                                                                               |
+| Ruby       | N/A (left to implementor)              | [server.rb#L375-L379](https://github.com/modelcontextprotocol/ruby-sdk/blob/main/lib/mcp/server.rb#L375-L379)                                                                             |
+| Swift      | N/A (no built-in handler)              | N/A                                                                                                                                                                                       |
+
+This inconsistency means clients cannot reliably detect resource-not-found conditions across implementations. Of the 8 SDKs with built-in resource handling, four different error codes are used: `-32002` (C#, Rust, Java, Go, PHP), `-32602` (TypeScript), `-32603` (Kotlin), and `0` (Python). Ruby and Swift leave error handling to the server implementor. Clients that need to distinguish "resource not found" from other errors must handle all variants.
+
+## Specification
+
+If the requested resource does not exist, servers MUST return a JSON-RPC error with code `-32602` (Invalid Params):
+
+```json theme={null}
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "error": {
+    "code": -32602,
+    "message": "Resource not found",
+    "data": {
+      "uri": "file:///nonexistent.txt"
+    }
+  }
+}
+```
+
+The `data` field SHOULD include the `uri` that was not found.
+
+Servers MUST NOT return an empty `contents` array for a non-existent resource. An empty array is ambiguous — it could mean the resource exists but has no content, or that it doesn't exist at all.
+
+## Rationale
+
+### Why `-32602` (Invalid Params)?
+
+`-32602` is the standard JSON-RPC error code for invalid parameters. A non-existent URI is semantically an invalid parameter — the client provided a URI that doesn't correspond to any resource. This aligns with the TypeScript SDK's existing behavior and avoids introducing custom error codes outside the JSON-RPC reserved range.
+
+### Why Not a Custom Error Code?
+
+Several SDKs use `-32002` (RESOURCE\_NOT\_FOUND), but:
+
+* Custom codes in the `-32000` to `-32099` range are "reserved for implementation-defined server errors" per JSON-RPC spec, not for protocol-level semantics
+* Adding a protocol-defined custom code requires all clients to be updated to recognize it
+* `-32602` already has the correct meaning and is universally understood by JSON-RPC libraries
+
+## Backward Compatibility
+
+This changes what is specified — the current spec recommends `-32002`, and this SEP changes it to `-32602`. However, since the current recommendation is not consistently followed across SDKs (only 5 of 10 use `-32002`), clients cannot rely on any single error code today. This means the practical impact on clients is minimal — any client robust enough to work across existing SDKs already handles multiple error codes or treats all errors generically.
+
+### Migration Path
+
+1. SDKs should update their resource-not-found error code to `-32602`
+2. During the transition, clients SHOULD handle both `-32602` and `-32002` as resource-not-found
+3. The specification should document `-32602` as the canonical error code
+
+## Security Implications
+
+None. This change only affects error code values, not access control or data exposure.
 
 
 # SEP-2207: OIDC-Flavored Refresh Token Guidance
@@ -33838,12 +34286,14 @@ return a JSON-RPC error response. For HTTP, the response status code MUST be
 `400 Bad Request`. The error MUST conform to the following structure:
 
 ```ts theme={null}
+export const UNSUPPORTED_PROTOCOL_VERSION = -32004;
+
 export interface UnsupportedProtocolVersionError extends Omit<
   JSONRPCErrorResponse,
   "error"
 > {
   error: Error & {
-    code: typeof INVALID_PARAMS;
+    code: typeof UNSUPPORTED_PROTOCOL_VERSION;
     data: {
       /**
        * An array of protocol version strings that the server supports.
@@ -34777,6 +35227,424 @@ No new security concerns are introduced by deprecation.
 
 No reference implementation is required. This SEP only marks existing
 functionality as deprecated — no new protocol behavior is introduced.
+
+
+# SEP-2596: Specification Feature Lifecycle and Deprecation Policy
+Source: https://modelcontextprotocol.io/seps/2596-spec-feature-lifecycle-and-deprecation
+
+Specification Feature Lifecycle and Deprecation Policy
+
+<div>
+  <Badge>
+    Draft
+  </Badge>
+
+  <Badge>
+    Process
+  </Badge>
+</div>
+
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2596                                                                            |
+| **Title**     | Specification Feature Lifecycle and Deprecation Policy                          |
+| **Status**    | Draft                                                                           |
+| **Type**      | Process                                                                         |
+| **Created**   | 2026-04-17                                                                      |
+| **Author(s)** | Den Delimarsky ([@localden](https://github.com/localden))                       |
+| **Sponsor**   | [@localden](https://github.com/localden)                                        |
+| **PR**        | [#2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596) |
+
+***
+
+## Abstract
+
+This SEP defines a lifecycle for individual features within the Model Context Protocol
+specification, separate from the revision lifecycle of the specification document itself. It
+introduces three feature states (Active, Deprecated, Removed), the criteria and procedure for
+moving between them, a minimum window between deprecation and removal, and the documentation
+required at each transition. The goal is a predictable timeline that SDK authors and implementers
+can plan migrations against when protocol surface area is retired.
+
+## Motivation
+
+The specification has already retired or signaled retirement of several features, but each case
+has been handled ad hoc:
+
+* The HTTP+SSE transport is described as "deprecated" in the
+  [Streamable HTTP backwards-compatibility guidance][transports-compat], with no stated removal
+  date.
+* The `includeContext` values `"thisServer"` and `"allServers"` are labeled "soft-deprecated" in
+  [`sampling/createMessage`][sampling-includecontext] and in `schema.ts`, with the note that they
+  "may be removed in future spec releases."
+* JSON-RPC batching was added in revision `2025-03-26` and removed in `2025-06-18`, a single
+  release later, with no deprecation period.
+* Open proposals such as consolidating `Resource` and `ResourceTemplate` ([#1540][issue-1540]) and
+  deprecating roots, sampling, and logging ([SEP-2577][sep-2577]) would each retire existing
+  surface area but have no process to follow.
+
+This inconsistency has costs. Implementers cannot tell whether "deprecated" and "soft-deprecated"
+mean different things, or how long either state lasts before removal. Community questions such as
+[discussion #2177][disc-2177] (asking when the SSE transport will actually be removed) have no
+policy to point to. At the [NYC maintainer meeting][nyc-2026-03-31], large implementers described
+indefinite support for past protocol versions as "corrosive tech debt." The [Stability over
+velocity][design-principles] design principle observes that "removing from \[the spec] is nearly
+impossible" but offers no path for the cases where removal is warranted.
+
+The Core Maintainers agreed at the [April 1, 2026 meeting][cm-2026-04-01] that MCP needs "a formal
+versioning status and a defined deprecation cycle" with "direction agreed, mechanics TBD." This SEP
+proposes those mechanics.
+
+## Specification
+
+### Scope
+
+This policy governs **features** of the MCP core specification: protocol messages, capabilities,
+transports, schema types, and normative behavioral requirements. It does not govern the
+independent lifecycle of SDK-specific APIs, registry policies, or the revision lifecycle of the
+specification document itself (Draft, Current, Final), which is defined in the [versioning
+guide][versioning].
+
+Note that "Final" is used in two senses in this document: a specification *revision* is Final when
+superseded by a later one (per the versioning guide), and a *SEP* reaches Final when its status
+advances per the [SEP guidelines][sep-guidelines]. Context disambiguates; where it does not, this
+document writes "the SEP reaches Final" or "Final revision" explicitly.
+
+### Feature states
+
+A specification feature is in exactly one of three states:
+
+| State          | Meaning                                                                                                                                                       | Implementer expectation                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Active**     | The feature is part of the Current specification revision with no planned removal.                                                                            | Implement per the feature's normative requirements.                                                                         |
+| **Deprecated** | The feature remains in the specification but is scheduled for removal. A migration path is documented (see below).                                            | New implementations SHOULD NOT adopt the feature. Existing implementations SHOULD migrate before the earliest removal date. |
+| **Removed**    | The feature has been deleted from `draft` and will be absent from the next Current revision. It remains documented in the Final revision it last appeared in. | Implementations targeting that next Current revision MUST NOT depend on the feature.                                        |
+
+The term "soft-deprecated" is retired. Existing uses in the specification are reclassified as
+Deprecated under this policy (see [Transition](#transition)).
+
+Removal from the specification does not oblige an SDK to drop the feature from releases that
+continue to support an earlier revision in which it was Active or Deprecated; that timeline is
+governed by the SDK's own revision-support policy (see [Open Questions](#open-questions)).
+
+A Deprecated feature MAY be restored to Active by a SEP that supersedes the deprecation SEP and
+documents the changed circumstances. Restoration follows the same approval path as deprecation. If
+the feature is later deprecated again, the minimum deprecation window in [Deprecating a
+feature](#deprecating-a-feature) is measured afresh from the revision in which the new deprecation
+takes effect.
+
+### Deprecating a feature
+
+A feature MAY be proposed for deprecation when at least one of the following holds:
+
+* It has been superseded by another feature that covers the same use cases.
+* It presents a security, privacy, or interoperability risk that cannot be mitigated in place.
+* Ecosystem telemetry or SDK maintainer consensus indicates negligible adoption relative to its
+  maintenance cost.
+
+Deprecation is a specification change and therefore requires a SEP per the [SEP
+guidelines][sep-guidelines]. The deprecation SEP MUST:
+
+1. Identify the feature by name and link to its definition in `schema.ts` (where applicable) and
+   the specification prose.
+2. State the rationale against the criteria above.
+3. Document the migration path, or state explicitly that none is required. If the migration path
+   names a replacement feature, that feature MUST be Active in the revision in which the
+   deprecation takes effect; the replacement and the deprecation MAY land in the same revision. A
+   feature is not deprecated under this policy while its documented replacement is still only in
+   `draft`.
+4. Specify the **minimum deprecation window**: the number of months, at least twelve, that the
+   feature MUST remain Deprecated before it is eligible for removal. The window is measured from
+   the release of the specification revision in which the feature is first marked Deprecated, not
+   from the date the SEP reaches Final. The feature becomes eligible for removal in the first
+   specification revision released as Current on or after the window elapses; that point is the
+   feature's **earliest removal**.
+
+When the deprecation SEP reaches Final the deprecation is scheduled: the following changes land in
+the draft specification (`schema/draft/` and `docs/specification/draft/`). The feature becomes
+Deprecated when the revision carrying these changes is released as Current under the [versioning
+guide][versioning], and the minimum deprecation window is counted from that release. Anchoring the
+clock to the revision release means every feature deprecated in the same revision shares one
+earliest removal rather than each carrying a date derived from when its own SEP happened to land.
+
+* The feature's entry in `schema.ts` gains a `@deprecated` JSDoc tag referencing the deprecation
+  SEP and the revision in which the deprecation takes effect.
+* The specification prose for the feature gains a deprecation notice with the same information.
+* The `changelog.mdx` for that revision gains an entry under a "Deprecated" heading. This SEP
+  introduces "Deprecated" and "Removed" as standing changelog headings alongside the existing
+  Major/Minor/Other groupings.
+* The feature is added to the [deprecated registry](#the-deprecated-registry) with its deprecation
+  SEP, the revision in which it became Deprecated, its migration path, and its earliest removal.
+
+### The deprecated registry
+
+`docs/specification/draft/deprecated.mdx` is a single page listing every feature currently in the
+Deprecated state. It is the canonical answer to "what is on its way out, and by when," so that an
+implementer does not have to reconstruct that picture from deprecation entries spread across
+revision changelogs. Each row records the feature, its deprecation SEP, the revision in which it
+became Deprecated, the documented migration path, and its earliest removal. A deprecation adds a
+row; a removal moves the row to a Removed section of the same page with a link to the changelog
+entry, so the page also serves as the historical record. The registry carries no normative force
+of its own; it is a derived view kept consistent with the per-feature notices and changelog
+entries, which are the normative records.
+
+### Tier 1 SDK obligations
+
+A feature lifecycle is only as effective as the implementations that surface it to consumers. The
+specification artifacts above record that a feature is Deprecated; Tier 1 SDKs (per
+[SEP-1730][sep-1730]) deliver that record to the implementers who would otherwise discover the
+removal by breakage. Once the revision in which a feature becomes Deprecated is released as
+Current, Tier 1 SDKs:
+
+* MUST mark the corresponding API surface deprecated using the language's native mechanism (for
+  example `@Deprecated` in Java, `[Obsolete]` in .NET, `@deprecated` JSDoc in TypeScript, the
+  `Deprecated:` doc convention in Go) in their next release, referencing the deprecation SEP and
+  the earliest removal date where the mechanism permits. The marker applies to the SDK API surface
+  and is not conditioned on the specification revision a consumer targets; surfacing it to
+  consumers still on an earlier revision is intentional forward signal.
+* SHOULD emit a runtime warning when a deprecated feature is exercised, using the language's
+  idiomatic mechanism (for example Python's `DeprecationWarning`, Node.js's
+  `process.emitWarning`, or a configurable logger). A runtime warning reaches developers who never
+  read API documentation and is an observable signal a conformance test can assert against.
+
+These obligations are conformance criteria for Tier 1 status. A Tier 1 SDK that persistently fails
+to surface a Deprecated feature is subject to the [Tier Relegation Process][sep-1730-relegation]
+in [SEP-1730][sep-1730].
+
+### Removing a feature
+
+1. Once a feature is set for removal, the removal is executed at the discretion of the Core
+   Maintainers after the minimum deprecation window has elapsed, during release preparation,
+   under the [governance decision process][governance-decisions]. Removal does not require its
+   own SEP. Before removing a feature the Core Maintainers MUST confirm that the migration target
+   named in the deprecation SEP, if any, is still Active.
+2. A SEP is required for any other change to a deprecation or removal, for example extending or
+   shortening the timeline ([Expedited removal](#expedited-removal)) or restoring the feature to
+   Active ([Feature states](#feature-states)).
+
+Note that features may remain Deprecated, without removal, for much longer than the minimum
+deprecation window.
+
+SDKs implement deprecation as part of the [SDK Tiering System][sep-1730] (see [Tier 1 SDK
+obligations](#tier-1-sdk-obligations)); removal imposes no additional requirements on SDK
+maintainers.
+
+When a removal decision is taken, the feature is deleted from `schema/draft/schema.ts` (where
+present) and the draft specification prose; `changelog.mdx` for that revision gains an entry under
+the "Removed" heading that links to the deprecation SEP and the last Final revision in which the
+feature was present; and the feature's [registry](#the-deprecated-registry) row moves to the
+Removed section with a link to that changelog entry.
+
+### Expedited removal
+
+The twelve-month floor MAY be shortened when the feature presents an active security risk, meaning
+a vulnerability with a published security advisory or documented in-the-wild exploitation for which
+no in-place mitigation exists. Shortening the window requires Core Maintainer approval under the
+[governance decision process][governance-decisions], recorded in the deprecation SEP or, where the
+risk surfaces after that SEP is already Final, in a short expedited-removal SEP that references it.
+The shortened window MUST still provide at least ninety days between the feature becoming
+Deprecated and its earliest removal.
+
+### Roles
+
+| Action                                         | Who                                                                           |
+| ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| Propose deprecation, extension, or restoration | Any contributor, per the SEP process                                          |
+| Sponsor                                        | A Maintainer or Core Maintainer, per the SEP process                          |
+| Approve a deprecation SEP                      | Core Maintainers, per the [governance decision process][governance-decisions] |
+| Decide a removal during release preparation    | Core Maintainers, per the [governance decision process][governance-decisions] |
+| Approve an extension or restoration SEP        | Core Maintainers, per the [governance decision process][governance-decisions] |
+| Approve expedited removal                      | Core Maintainers, per the [governance decision process][governance-decisions] |
+
+As with all Core Maintainer decisions, Lead Maintainers retain veto authority over each of the
+approvals above, per the [governance roles][governance-roles] definition.
+
+[governance-roles]: https://modelcontextprotocol.io/community/governance#roles
+
+### Transition
+
+Two features were already described as deprecated in the specification before this policy existed
+(see [Motivation](#motivation)). When this SEP reaches Final they are classified as Deprecated and
+seeded into the [registry](#the-deprecated-registry); the deprecation-SEP requirements in
+[Deprecating a feature](#deprecating-a-feature) are not applied retroactively. The deprecation
+decision in each case predates this policy; this section records it under the new vocabulary so the
+terms "deprecated" and "soft-deprecated" carry a single defined meaning going forward.
+
+Both features were publicly deprecated well over twelve months before this SEP, so the minimum
+deprecation window has in practice already been served; re-anchoring their clock to a future
+revision release would restart a window the ecosystem has already had. Each is therefore given a
+three-month grace period from the date this SEP reaches Final before it is eligible for removal,
+matching the floor the [Expedited removal](#expedited-removal) clause sets for the shortest
+permissible window. Removal still follows [Removing a feature](#removing-a-feature): a Core
+Maintainer decision at release preparation, not an automatic event when the grace period ends.
+
+| Feature                                         | Migration target                     | Earliest removal                        |
+| ----------------------------------------------- | ------------------------------------ | --------------------------------------- |
+| HTTP+SSE transport                              | [Streamable HTTP][transports-compat] | Three months after this SEP is Final    |
+| `includeContext: "thisServer"` / `"allServers"` | Omit the field or use `"none"`       | Follows Sampling ([SEP-2577][sep-2577]) |
+
+`includeContext` is a parameter of `sampling/createMessage`. [SEP-2577][sep-2577] deprecates the
+Sampling feature as a whole; the two affected `includeContext` values follow that feature's
+deprecation schedule rather than carrying an independent removal clock, and are removed no later
+than Sampling itself.
+
+This grandfathering applies only to features the specification already described as deprecated on
+the date this SEP reaches Final. Every subsequent deprecation follows [Deprecating a
+feature](#deprecating-a-feature) in full, and removal of the grandfathered features follows
+[Removing a feature](#removing-a-feature) without exception.
+
+When this SEP reaches Final the following land in `draft/` directly, with no separate
+implementation gate: the [versioning guide][versioning] is updated to reference this policy;
+`deprecated.mdx` is created seeded with the two features above; the "Deprecated" heading is added
+to `changelog.mdx` with both entries; and each feature gains the `@deprecated` schema annotation
+and prose notice described in [Deprecating a feature](#deprecating-a-feature). For
+`includeContext` the annotation is on the property as a whole, since per-value `@deprecated` tags
+are not expressible on a string-literal union; the HTTP+SSE transport has no `schema.ts` types and
+is annotated in the transport prose only.
+
+## Rationale
+
+### Why a separate state model from specification revisions?
+
+The [versioning guide][versioning] already defines Draft, Current, and Final for specification
+*revisions*. Those states describe the editorial maturity of a whole document and say nothing about
+whether a given message or field within a Current revision is on its way out. The [Kubernetes
+deprecation policy][k8s-deprecation], the [Node.js deprecation cycle][nodejs-deprecation], and IETF
+practice such as [RFC 8996][rfc-8996] (which deprecates TLS 1.0 and 1.1 within the TLS protocol
+family) all maintain feature-level deprecation rules alongside their release versioning for this
+reason.
+
+### Why a SEP to deprecate but not to remove?
+
+The deliberation that needs community review is the decision to retire a feature and the choice of
+migration path; that is what the deprecation SEP carries. Once it reaches Final the project has
+committed to removal and fixed the earliest date, so carrying out that decision on schedule adds no
+new judgment and a second SEP for it is process for its own sake. The deliberate maintainer
+decision still exists as the release-preparation removal decision and its confirmations in
+[Removing a feature](#removing-a-feature), mirroring the tier advancement procedure in
+[SEP-1730][sep-1730] where advancement is a maintainer decision rather than a timer expiring. A SEP
+is reserved for the cases that do change the committed outcome: extending the window, restoring the
+feature, or shortening the floor for a security risk. This keeps the process consistent with the
+[SEP guidelines][sep-guidelines] treating a change to protocol surface area as SEP-worthy while not
+demanding a SEP to ratify a change already made.
+
+### Why twelve months?
+
+The [NYC maintainer meeting][nyc-2026-03-31] floated a "one year supported plus one year
+deprecation" model and recorded reluctance to commit to longer windows given how quickly the
+agentic space is moving. The same discussion flagged even that model as a possible burden on SDK
+maintainers; this SEP keeps the twelve-month floor because removal is permissive rather than
+automatic ([Removing a feature](#removing-a-feature)), so a feature stays Deprecated as long as the
+ecosystem needs rather than the SDKs racing the calendar. Measuring the window from the
+revision release rather than from the SEP date keeps it observable: it is the same clock SDK
+authors and implementers already track for the revision itself. Because the deprecation only takes
+effect when its revision is released, a replacement introduced in that same revision is proven over
+the twelve-month window itself; a separate prior revision is not required for that purpose. The
+window spans at least two of
+the six-month release cycles discussed at the same meeting: one for SDK maintainers to ship
+migration support and one for downstream adoption. Core Maintainers may leave a feature Deprecated
+for longer; twelve months is the minimum.
+
+### Relationship to SEP-1400 (Semantic Versioning)
+
+[SEP-1400][sep-1400] proposes replacing date-based revision identifiers with semantic versioning.
+The two proposals address different questions: SEP-1400 is about how revisions are numbered, and
+this SEP is about how features within a revision are retired. This SEP measures the removal window
+from a revision *release* rather than from a revision *identifier*, so it does not depend on the
+identifier scheme; it applies unchanged whether revisions are dated or semantically versioned.
+
+### Consensus
+
+Direction was agreed at the [NYC maintainer meeting (March 31, 2026)][nyc-2026-03-31] and confirmed
+at the [April 1, 2026 Core Maintainer meeting][cm-2026-04-01], which recorded "formal versioning
+status and SDK deprecation cycle (direction agreed, mechanics TBD)." Community demand is visible in
+[discussion #2177][disc-2177] (asking when SSE removal will happen) and [discussion
+\#1980][disc-1980] (asking to sunset a backwards-compatibility requirement that has outlived its
+purpose).
+
+## Backward Compatibility
+
+This SEP introduces a process and does not change protocol behavior. The
+[Transition](#transition) section assigns a Deprecated state and an earliest removal to two
+features that are already informally deprecated. Neither had a stated removal date, so making the
+timeline explicit (a three-month grace period for features the ecosystem has already had more than
+a year to migrate away from) does not shorten any commitment implementers were given.
+
+## Security Implications
+
+None identified. This is a governance change with no new protocol surface, transport,
+authentication flow, or trust boundary. A defined deprecation path has an indirect security
+benefit: it gives the project a predictable mechanism for retiring features that are later found to
+be unsafe, which is what the [Expedited removal](#expedited-removal) clause is for.
+
+## Reference Implementation
+
+This SEP defines a process and has no reference implementation. The specification edits that apply
+the policy to the two existing informal deprecations are described in [Transition](#transition) and
+land directly in `draft/` when this SEP reaches Final.
+
+***
+
+## Open Questions
+
+* **Specification revision support window.** The NYC meeting also discussed how long Tier 1 SDKs
+  must support a given specification *revision* (as distinct from a feature within one). That
+  policy belongs in an amendment to [SEP-1730][sep-1730], but it determines whether the deprecation
+  window in this policy is observable in practice. If a Tier 1 SDK supports only the latest
+  revision, a consumer that updates the SDK between releases can move directly from one that
+  predates the deprecation to one that postdates the removal, never seeing the Deprecated marker
+  in [Tier 1 SDK obligations](#tier-1-sdk-obligations). Requiring Tier 1 SDKs to support all
+  revisions released as Current within a trailing window at least equal to the twelve-month
+  deprecation floor closes that gap. The SEP-1730 amendment should be pursued alongside this SEP.
+* **Telemetry source for the "negligible adoption" criterion.** The policy permits deprecation on
+  adoption grounds, but the project has no shared telemetry today. Until one exists, this criterion
+  relies on SDK maintainer attestation.
+* **Feature maturity tiers.** This SEP applies a uniform twelve-month floor to every Active
+  feature. The [Kubernetes deprecation policy][k8s-deprecation] uses alpha/beta/GA tiers with
+  shorter windows for less mature features, which would have allowed the JSON-RPC batching reversal
+  cited in [Motivation](#motivation) without a year-long deprecation. Whether MCP should adopt an
+  Experimental tier with a shorter or zero window is left for a follow-up SEP.
+* **Wire-level deprecation signal.** [Tier 1 SDK obligations](#tier-1-sdk-obligations) puts the
+  deprecation warning into official SDKs; implementers that do not use one and do not read the
+  changelog still receive no warning before removal. A wire-level signal (for example a `_meta`
+  deprecation field on responses, comparable to the Kubernetes `Warning` header) would close that
+  gap but is a Standards Track change outside the scope of this Process SEP.
+
+[transports-compat]: https://modelcontextprotocol.io/specification/draft/basic/transports#backwards-compatibility
+
+[sampling-includecontext]: https://modelcontextprotocol.io/specification/draft/client/sampling
+
+[versioning]: https://modelcontextprotocol.io/docs/learn/versioning
+
+[design-principles]: https://modelcontextprotocol.io/community/design-principles
+
+[sep-guidelines]: https://modelcontextprotocol.io/community/sep-guidelines
+
+[governance-decisions]: https://modelcontextprotocol.io/community/governance#decision-process
+
+[sep-1730]: https://modelcontextprotocol.io/seps/1730-sdks-tiering-system
+
+[sep-1730-relegation]: https://modelcontextprotocol.io/seps/1730-sdks-tiering-system#tier-relegation-process
+
+[sep-1400]: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1400
+
+[issue-1540]: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1540
+
+[sep-2577]: https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging
+
+[nyc-2026-03-31]: https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/2547
+
+[cm-2026-04-01]: https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/2536
+
+[disc-2177]: https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/2177
+
+[disc-1980]: https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/1980
+
+[k8s-deprecation]: https://kubernetes.io/docs/reference/using-api/deprecation-policy/
+
+[nodejs-deprecation]: https://nodejs.org/api/deprecations.html
+
+[rfc-8996]: https://www.rfc-editor.org/rfc/rfc8996
 
 
 # SEP-2663: Tasks Extension
@@ -36869,8 +37737,8 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 ## Summary
 
 * **Final**: 32
+* **Draft**: 4
 * **Accepted**: 4
-* **Draft**: 1
 * **In-review**: 1
 
 ## All SEPs
@@ -36878,6 +37746,7 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 | SEP                                                                                  | Title                                                                         | Status                   | Type             | Created    |
 | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------ | ---------------- | ---------- |
 | [SEP-2663](/seps/2663-tasks-extension)                                               | Tasks Extension                                                               | <Badge>Final</Badge>     | Extensions Track | 2026-04-27 |
+| [SEP-2596](/seps/2596-spec-feature-lifecycle-and-deprecation)                        | Specification Feature Lifecycle and Deprecation Policy                        | <Badge>Draft</Badge>     | Process          | 2026-04-17 |
 | [SEP-2577](/seps/2577-deprecate-roots-sampling-and-logging)                          | Deprecate Roots, Sampling, and Logging                                        | <Badge>Final</Badge>     | Standards Track  | 2026-04-14 |
 | [SEP-2575](/seps/2575-stateless-mcp)                                                 | Make MCP Stateless                                                            | <Badge>Accepted</Badge>  | Standards Track  | 2025-06-18 |
 | [SEP-2567](/seps/2567-sessionless-mcp)                                               | Sessionless MCP via Explicit State Handles                                    | <Badge>Final</Badge>     | Standards Track  | 2026-03-11 |
@@ -36888,9 +37757,11 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 | [SEP-2260](/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests) | Require Server requests to be associated with a Client request.               | <Badge>Final</Badge>     | Standards Track  | 2026-02-16 |
 | [SEP-2243](/seps/2243-http-standardization)                                          | HTTP Header Standardization for Streamable HTTP Transport                     | <Badge>Final</Badge>     | Standards Track  | 2026-02-04 |
 | [SEP-2207](/seps/2207-oidc-refresh-token-guidance)                                   | OIDC-Flavored Refresh Token Guidance                                          | <Badge>Accepted</Badge>  | Standards Track  | 2026-02-04 |
+| [SEP-2164](/seps/2164-resource-not-found-error)                                      | Standardize Resource Not Found Error Code                                     | <Badge>Draft</Badge>     | Standards Track  | 2026-01-28 |
 | [SEP-2149](/seps/2149-working-group-charter-template)                                | MCP Group Governance and Charter Template                                     | <Badge>Final</Badge>     | Process          | 2025-01-15 |
 | [SEP-2148](/seps/2148-contributor-ladder)                                            | MCP Contributor Ladder                                                        | <Badge>Final</Badge>     | Process          | 2026-01-15 |
 | [SEP-2133](/seps/2133-extensions)                                                    | Extensions                                                                    | <Badge>Final</Badge>     | Standards Track  | 2025-01-21 |
+| [SEP-2106](/seps/2106-json-schema-2020-12)                                           | Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12           | <Badge>Draft</Badge>     | Standards Track  | 2026-01-06 |
 | [SEP-2085](/seps/2085-governance-succession-and-amendment)                           | Governance Succession and Amendment Procedures                                | <Badge>Final</Badge>     | Process          | 2025-12-05 |
 | [SEP-1865](/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp)                  | MCP Apps - Interactive User Interfaces for MCP                                | <Badge>Final</Badge>     | Extensions Track | 2025-11-21 |
 | [SEP-1850](/seps/1850-pr-based-sep-workflow)                                         | PR-Based SEP Workflow                                                         | <Badge>Final</Badge>     | Process          | 2025-11-20 |
@@ -36928,5 +37799,102 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 | <Badge>Withdrawn</Badge>  | SEP withdrawn by the author                              |
 | <Badge>Superseded</Badge> | SEP replaced by a newer SEP                              |
 | <Badge>Dormant</Badge>    | SEP without a sponsor, closed after 6 months             |
+
+
+# Roadmap
+Source: https://modelcontextprotocol.io/development/roadmap
+
+Our plans for evolving Model Context Protocol
+
+<Info>Last updated: **2026-03-05**</Info>
+
+This page describes our strategic priorities and what we expect **Working Groups** and **Interest Groups** to deliver against them.
+
+<Note>
+  The ideas presented here are not commitments. We may solve these challenges differently than described. Some items may not materialize at all. This is also not an *exhaustive* list. We may incorporate work that isn't mentioned here.
+</Note>
+
+## SEP Prioritization
+
+**SEPs that fall within the priority areas below will receive expedited review and have the highest chance of acceptance.** SEPs outside these areas are not automatically rejected, but contributors should expect longer review timelines and a higher bar for justification. Maintainer capacity is finite. We direct it toward these priorities first.
+
+If you are considering a SEP, check whether it aligns with one of the areas below, discuss it in the relevant [Working Group or Interest Group](/community/working-interest-groups), and bring that group's backing with you. SEPs with WG support and a clear connection to the roadmap move fastest. See the [SEP guidelines](/community/sep-guidelines) for the full process.
+
+## Priority Areas
+
+### 1. Transport Evolution and Scalability
+
+Streamable HTTP gave MCP a production-ready transport, but running it at scale has revealed gaps around horizontal scaling, stateless operation, and middleware patterns.
+
+**What we want to achieve:**
+
+* **Next-generation transport**: evolve Streamable HTTP to run statelessly across multiple server instances and behave correctly behind load balancers and proxies.
+* **Scalable session handling**: define how sessions are created, resumed, and migrated so that server restarts and scale-out events are transparent to connected clients.
+* **MCP Server Cards**: a standard for exposing structured server metadata via a `.well-known` URL, so browsers, crawlers, and registries can discover a server's capabilities without connecting to it.
+
+**Working Group ownership:**
+
+* **Transports WG** owns the transport and session work: a series of SEPs covering the wire format, session model, and resumption protocol, plus conformance guidance for SDK authors.
+* **Server Card WG** owns the Server Card format and its distribution, coordinating with the broader industry AI-catalog effort.
+
+We will **not** be introducing additional official transports this cycle. Keeping the set small protects ecosystem compatibility; the community should experiment via custom transports.
+
+### 2. Agent Communication
+
+The Tasks primitive ([SEP-1686](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686)) gave agents a reliable call-now / fetch-later pattern. Running it in production has surfaced gaps in the lifecycle semantics that the **Agents WG** should close:
+
+* **Retry semantics**: what happens when a task fails transiently, and who decides whether to retry.
+* **Expiry policies**: how long results are retained after completion, and how clients learn a result has expired.
+
+These are the gaps we can point to today. The Agents WG should also collect and triage operational issues from production deployments—this list will grow as more of the ecosystem runs Tasks at scale.
+
+### 3. Governance Maturation
+
+MCP has grown into a multi-company open standard under the Linux Foundation. [SEP-1302](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1302) formalized Working Groups and Interest Groups, and [SEP-2085](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2085) established succession and amendment procedures. The next step is giving the community a clear path to leadership so the project does not depend on a small set of individuals.
+
+The **Governance WG** should deliver:
+
+* **A Contributor Ladder SEP** defining the progression from community participant → WG contributor → WG facilitator → lead maintainer → core maintainer, with explicit nomination and review criteria at each step.
+* **A delegation model** allowing WGs with a proven track record to accept SEPs and publish extension updates within their domain without a full core-maintainer review cycle.
+* **A charter template** that every WG and IG maintains publicly: scope, active deliverables, success criteria, and retirement conditions, reviewed quarterly.
+
+### 4. Enterprise Readiness
+
+Enterprises are deploying MCP at scale and hitting gaps the protocol does not yet address.
+
+Areas where we need clear problem statements and directional proposals:
+
+* **Audit trails and observability**: end-to-end visibility into what a client requested and what a server did, in a form enterprises can feed into their existing logging and compliance pipelines.
+* **Enterprise-managed auth**: paved paths away from static client secrets and toward SSO-integrated flows ([Cross-App Access](https://xaa.dev)), so IT can manage MCP access the same way they manage everything else.
+* **Gateway and proxy patterns**: well-defined behavior when a client does not connect directly to a server but routes through an intermediary. This may include authorization propagation, session semantics, and what the gateway is allowed to see.
+* **Configuration portability**: a way to configure a server once and have that configuration work across different MCP clients.
+
+We expect an **Enterprise WG** to form to own this. Much of the output will likely land as extensions rather than core specification changes.
+
+## On the Horizon
+
+These areas have community interest and interest from core maintainers but are not top priorities. We will support a community-formed Working Group in any of them and review SEPs on these topics if time permits.
+
+* **Triggers and Event-Driven Updates** — clients currently learn about server-side state changes by polling or holding an SSE connection open. A standardized callback mechanism (webhooks or similar) would let servers proactively notify clients when new data is available, with defined ordering guarantees across all transports.
+* **Result Type Improvements** — tool calls, resource reads, and task results all arrive complete and inline. Streamed results would let clients receive output incrementally for interactive scenarios (generated text, audio, video frames); reference-based results would let clients decide when to pull large payloads into context rather than polluting it by default. This is cross-cutting: streaming touches transport, references touch the schema.
+* **Security & Authorization** — finer-grained least-privilege scopes, clearer guidance on avoiding OAuth mix-up attacks, secure credential management on both client and server, and a community-driven vulnerability disclosure program routed through the Linux Foundation. Sponsored work is already underway: [SEP-1932 (DPoP)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1932) and [SEP-1933 (Workload Identity Federation)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1933).
+* **Extensions Ecosystem** — the `ext-auth` and `ext-apps` tracks are early proof that the extension mechanism works. Maturing them, investigating a Skills primitive for composed capabilities, and adding first-class extension support to the registry would all strengthen the path from experiment to standard.
+
+## Validation
+
+A protocol specification is only as good as the implementations that follow it. Alongside the areas above, we continue to invest in:
+
+* **Conformance Test Suites**: automated verification that clients, servers, and SDKs correctly implement the specification, with coverage expanding alongside each new feature area.
+* **SDK Tiers**: the tiering system introduced in [SEP-1730](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1730) gives developers a clear signal of which SDKs track the specification most closely.
+* **Reference Implementations**: canonical implementations of new features to anchor community development and unblock early adopters.
+
+## Get Involved
+
+MCP's roadmap is built by its community:
+
+* **Join a Working Group or Interest Group**: see the [Working Groups & Interest Groups](/community/working-interest-groups) page and the [community communication channels](/community/communication) to connect with the groups active in each area above.
+* **Propose or comment on SEPs**: review the [SEP guidelines](/community/sep-guidelines) and open or weigh in on proposals.
+* **Start an experimental extension**: [SEP-2133](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2133) lets any WG or IG experiment in an `experimental-ext-` repository before a formal SEP is required.
+* **Contribute to the project**: read the [contributing guide](/community/contributing) for how to get involved with the specification, SDKs, and tooling.
 
 

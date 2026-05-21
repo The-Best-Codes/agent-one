@@ -24,6 +24,7 @@
 - [Useful links](/docs/for-app-authors/useful-links.md): - Use the GitHub search for code that might help you
 - [Verification](/docs/for-app-authors/verification.md): What is verification?
 - [Why Flathub?](/docs/for-app-authors/why-flathub.md): What Flathub offers
+- [Historical documents](/docs/for-team-members/historical.md): These were migrated from the wiki.
 - [Review](/docs/for-team-members/review.md): Reviews happen via comments on GitHub PR's where we also have
 - [Bisecting regressions in application builds](/docs/for-users/bisecting.md): In case the newest builds of an application introduce regressions, you
 - [Downgrading](/docs/for-users/downgrading.md): It is possible to downgrade an installed application (or runtime) to an

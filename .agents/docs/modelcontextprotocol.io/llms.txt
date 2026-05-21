@@ -73,9 +73,11 @@
 - [SEP-1850: PR-Based SEP Workflow](https://modelcontextprotocol.io/seps/1850-pr-based-sep-workflow.md): PR-Based SEP Workflow
 - [SEP-1865: MCP Apps - Interactive User Interfaces for MCP](https://modelcontextprotocol.io/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp.md): MCP Apps - Interactive User Interfaces for MCP
 - [SEP-2085: Governance Succession and Amendment Procedures](https://modelcontextprotocol.io/seps/2085-governance-succession-and-amendment.md): Governance Succession and Amendment Procedures
+- [SEP-2106: Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12](https://modelcontextprotocol.io/seps/2106-json-schema-2020-12.md): Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12
 - [SEP-2133: Extensions](https://modelcontextprotocol.io/seps/2133-extensions.md): Extensions
 - [SEP-2148: MCP Contributor Ladder](https://modelcontextprotocol.io/seps/2148-contributor-ladder.md): MCP Contributor Ladder
 - [SEP-2149: MCP Group Governance and Charter Template](https://modelcontextprotocol.io/seps/2149-working-group-charter-template.md): MCP Group Governance and Charter Template
+- [SEP-2164: Standardize Resource Not Found Error Code](https://modelcontextprotocol.io/seps/2164-resource-not-found-error.md): Standardize Resource Not Found Error Code
 - [SEP-2207: OIDC-Flavored Refresh Token Guidance](https://modelcontextprotocol.io/seps/2207-oidc-refresh-token-guidance.md): OIDC-Flavored Refresh Token Guidance
 - [SEP-2243: HTTP Header Standardization for Streamable HTTP Transport](https://modelcontextprotocol.io/seps/2243-http-standardization.md): HTTP Header Standardization for Streamable HTTP Transport
 - [SEP-2260: Require Server requests to be associated with a Client request.](https://modelcontextprotocol.io/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests.md): Require Server requests to be associated with a Client request.
@@ -86,6 +88,7 @@
 - [SEP-2567: Sessionless MCP via Explicit State Handles](https://modelcontextprotocol.io/seps/2567-sessionless-mcp.md): Sessionless MCP via Explicit State Handles
 - [SEP-2575: Make MCP Stateless](https://modelcontextprotocol.io/seps/2575-stateless-mcp.md): Make MCP Stateless
 - [SEP-2577: Deprecate Roots, Sampling, and Logging](https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging.md): Deprecate Roots, Sampling, and Logging
+- [SEP-2596: Specification Feature Lifecycle and Deprecation Policy](https://modelcontextprotocol.io/seps/2596-spec-feature-lifecycle-and-deprecation.md): Specification Feature Lifecycle and Deprecation Policy
 - [SEP-2663: Tasks Extension](https://modelcontextprotocol.io/seps/2663-tasks-extension.md): Tasks Extension
 - [SEP-414: Document OpenTelemetry Trace Context Propagation Conventions](https://modelcontextprotocol.io/seps/414-request-meta.md): Document OpenTelemetry Trace Context Propagation Conventions
 - [SEP-932: Model Context Protocol Governance](https://modelcontextprotocol.io/seps/932-model-context-protocol-governance.md): Model Context Protocol Governance
