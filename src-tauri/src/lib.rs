@@ -1,15 +1,9 @@
-use std::sync::atomic::{AtomicU64, Ordering};
-
 use tauri::{Emitter, Manager};
 
 mod keyring;
 mod mcp_auth;
 mod tools;
 mod utils;
-mod window_chat;
-
-// Global counter for unique window IDs
-static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -36,21 +30,10 @@ pub fn run() {
                 }
             }
 
-            // Generate a unique window ID using atomic counter
-            let window_id = WINDOW_COUNTER.fetch_add(1, Ordering::SeqCst);
-            let window_label = format!("a1-instance-{}", window_id);
-
-            match tauri::WebviewWindowBuilder::new(
-                app,
-                &window_label,
-                tauri::WebviewUrl::App("index.html".into()),
-            )
-            .title("AgentOne")
-            .inner_size(800.0, 600.0)
-            .build()
-            {
-                Ok(_) => println!("Created new window: {}", window_label),
-                Err(e) => eprintln!("Failed to create new window: {}", e),
+            if let Some(main_window) = app.get_webview_window("main") {
+                let _ = main_window.unminimize();
+                let _ = main_window.show();
+                let _ = main_window.set_focus();
             }
         }));
     }
@@ -147,11 +130,9 @@ pub fn run() {
             app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
             )));
-            app.manage(window_chat::WindowChatState::default());
 
             Ok(())
         })
-        .on_window_event(window_chat::handle_window_event)
         .invoke_handler({
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
             {
@@ -171,8 +152,6 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
-                    window_chat::sync_current_window_chat,
-                    window_chat::check_chat_open_elsewhere,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]
@@ -190,8 +169,6 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
-                    window_chat::sync_current_window_chat,
-                    window_chat::check_chat_open_elsewhere,
                 ]
             }
         })

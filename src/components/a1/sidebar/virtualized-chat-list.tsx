@@ -1,5 +1,4 @@
 import {
-  IconAppWindow,
   IconChevronDown,
   IconDeselect,
   IconDownload,
@@ -28,7 +27,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useOverflow } from "@/hooks/use-overflow";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
@@ -37,7 +35,6 @@ import { chatSortAtom } from "@/lib/jotai/settings-atoms";
 import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
-import { openNewWindow } from "@/lib/tauri/open-new-window";
 import { cn } from "@/lib/utils";
 
 import { ChatItem } from "./chat-item";
@@ -314,31 +311,15 @@ export const VirtualizedChatList = ({
     <div className={cn("flex h-full flex-col", className)}>
       <div className={cn("pb-2", showNewChatButton && "flex flex-col gap-2")}>
         {showNewChatButton && !selectionMode && (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => handleNewChat && handleNewChat()}
-              className="flex-1 justify-start"
-              variant="outline"
-              analytics={{ event: "new_chat_clicked", params: { source: "chat_list" } }}
-            >
-              <IconPlus data-icon="inline-start" />
-              New Chat
-            </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => openNewWindow("/chat")}
-                  analytics={{ event: "new_window_clicked", params: { source: "chat_list" } }}
-                  aria-label="New window"
-                >
-                  <IconAppWindow />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>New window</TooltipContent>
-            </Tooltip>
-          </div>
+          <Button
+            onClick={() => handleNewChat && handleNewChat()}
+            className="w-full justify-start"
+            variant="outline"
+            analytics={{ event: "new_chat_clicked", params: { source: "chat_list" } }}
+          >
+            <IconPlus data-icon="inline-start" />
+            New Chat
+          </Button>
         )}
         {selectionMode ? (
           <div className="flex flex-col gap-1.5">
