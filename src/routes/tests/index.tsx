@@ -74,6 +74,18 @@ export default function TestsRoute() {
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
+                  <h3 className="font-medium">Voice Assistant</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Continuously listens for wake words, launches the enlarged fluid glow bar, and
+                    streams recognized request text into it live
+                  </p>
+                </div>
+                <Button onClick={() => navigate("/tests/voice-assistant")} variant="outline">
+                  Run Test
+                </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div>
                   <h3 className="font-medium">Trigger Onboarding</h3>
                   <p className="text-muted-foreground text-sm">
                     Reset onboarding state and restart the onboarding flow

@@ -23,6 +23,7 @@ import ChatStressTestRoute from "@/routes/tests/chat-stress";
 import FluidGlowBarTestRoute from "@/routes/tests/fluid-glow-bar";
 import LocalDatabaseTestRoute from "@/routes/tests/local-database";
 import NotificationsTestRoute from "@/routes/tests/notifications";
+import VoiceAssistantTestRoute from "@/routes/tests/voice-assistant";
 
 import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
@@ -84,6 +85,7 @@ function App() {
           <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
           <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
           <Route path="/tests/fluid-glow-bar" element={<FluidGlowBarTestRoute />} />
+          <Route path="/tests/voice-assistant" element={<VoiceAssistantTestRoute />} />
           <Route path="*" element={<NotFoundRoute />} />
         </Route>
       </Routes>

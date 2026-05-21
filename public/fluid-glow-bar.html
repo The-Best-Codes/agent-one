@@ -26,6 +26,9 @@
         inset: 0;
         overflow: hidden;
         pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       #fluid-glow-bar-canvas {
         position: absolute;
@@ -34,11 +37,31 @@
         height: 100%;
         display: block;
       }
+      #transcript {
+        position: relative;
+        z-index: 1;
+        width: min(78vw, 960px);
+        max-height: 70%;
+        overflow: hidden;
+        padding: 0 32px;
+        color: rgba(255, 255, 255, 0.96);
+        font-family: "Space Grotesk", "Roboto", system-ui, sans-serif;
+        font-size: clamp(22px, 2.1vw, 40px);
+        font-weight: 600;
+        line-height: 1.18;
+        text-align: center;
+        text-wrap: balance;
+        word-break: break-word;
+        text-shadow:
+          0 0 18px rgba(0, 0, 0, 0.52),
+          0 8px 32px rgba(0, 0, 0, 0.42);
+      }
     </style>
   </head>
   <body>
     <div id="fluid-glow-bar-container" aria-hidden="true">
       <canvas id="fluid-glow-bar-canvas"></canvas>
+      <div id="transcript"></div>
     </div>
     <script>
       (function () {
@@ -46,6 +69,7 @@
 
         const container = document.getElementById("fluid-glow-bar-container");
         const canvas = document.getElementById("fluid-glow-bar-canvas");
+        const transcript = document.getElementById("transcript");
 
         const vertexShaderSource = `
           attribute vec2 position;
@@ -173,8 +197,49 @@
           rightHeight: 1.0,
           randomness: 0.6,
           density: 1.0,
-          glow: 1.0,
+          glow: 0.25,
         };
+
+        let socket = null;
+        let reconnectTimer = null;
+        let currentWsUrl = null;
+
+        function setTranscript(text) {
+          transcript.textContent = text || "";
+        }
+
+        function connect(url) {
+          if (!url || currentWsUrl === url) {
+            return;
+          }
+
+          currentWsUrl = url;
+          if (socket) {
+            socket.close();
+          }
+
+          socket = new WebSocket(url);
+          socket.addEventListener("message", (event) => {
+            try {
+              const payload = JSON.parse(event.data);
+              setTranscript(payload.transcript || "");
+            } catch (error) {
+              console.error("Failed to parse glow bar websocket payload", error);
+            }
+          });
+          socket.addEventListener("close", () => {
+            if (!currentWsUrl) {
+              return;
+            }
+
+            reconnectTimer = window.setTimeout(() => {
+              connect(currentWsUrl);
+            }, 500);
+          });
+        }
+
+        const paramsFromLocation = new URLSearchParams(window.location.search);
+        connect(paramsFromLocation.get("ws"));
 
         const contextAttribs = {
           alpha: true,

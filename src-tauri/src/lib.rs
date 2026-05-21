@@ -6,6 +6,7 @@ mod keyring;
 mod mcp_auth;
 mod tools;
 mod utils;
+mod voice_assistant;
 mod window_chat;
 
 // Global counter for unique window IDs
@@ -150,6 +151,7 @@ pub fn run() {
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
             )));
             app.manage(window_chat::WindowChatState::default());
+            app.manage(voice_assistant::VoiceAssistantState::default());
 
             Ok(())
         })
@@ -175,6 +177,9 @@ pub fn run() {
                     mcp_auth::mcp_check_oauth_support,
                     window_chat::sync_current_window_chat,
                     window_chat::check_chat_open_elsewhere,
+                    voice_assistant::start_voice_assistant_test,
+                    voice_assistant::stop_voice_assistant_test,
+                    voice_assistant::get_voice_assistant_test_state,
                 ]
             }
             #[cfg(any(target_os = "android", target_os = "ios"))]

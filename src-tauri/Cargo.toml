@@ -55,6 +55,11 @@ tauri-plugin-websocket = "2"
 sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio-rustls"] }
 chacha20poly1305 = "0.10.1"
 base64 = "0.22.1"
+transcribe-rs = { version = "0.3.11", features = ["onnx", "vad-silero"] }
+cpal = "0.17.3"
+tokio-tungstenite = "0.29.0"
+futures-util = "0.3.32"
+reqwest = { version = "0.13.3", default-features = false, features = ["rustls", "stream", "json"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
