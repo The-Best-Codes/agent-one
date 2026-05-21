@@ -57,6 +57,7 @@ chacha20poly1305 = "0.10.1"
 base64 = "0.22.1"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"

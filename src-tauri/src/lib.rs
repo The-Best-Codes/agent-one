@@ -13,7 +13,8 @@ static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder = tauri::Builder::default();
+    let mut builder =
+        tauri::Builder::default().plugin(tauri_plugin_global_shortcut::Builder::new().build());
 
     // Single instance plugin should be the first plugin registered
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
