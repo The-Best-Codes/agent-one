@@ -1,5 +1,4 @@
 import {
-  IconAppWindow,
   IconArrowsSplit,
   IconCheckbox,
   IconDotsVertical,
@@ -7,11 +6,9 @@ import {
   IconEdit,
   IconTrash,
 } from "@tabler/icons-react";
-import { invoke } from "@tauri-apps/api/core";
 import { memo, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
-import { ChatAlreadyOpenDialog } from "@/components/a1/chat-already-open-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -29,7 +26,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getLogger } from "@/lib/logger";
-import { openNewWindow } from "@/lib/tauri/open-new-window";
 import { cn } from "@/lib/utils";
 
 import { ChatStatusIndicator } from "./chat-status-indicator";
@@ -103,51 +99,8 @@ export const ChatItem = memo(
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [pendingOtherWindowCount, setPendingOtherWindowCount] = useState<number | null>(null);
-    const navigate = useNavigate();
 
     const isSelectedChat = activeChatId === id;
-
-    const navigateToChat = () => {
-      additionalOnChatClickCallback?.(id);
-      void navigate(`/chat/${id}`);
-    };
-
-    const handleNavigationRequest = async () => {
-      try {
-        const otherWindowCount = await invoke<number>("check_chat_open_elsewhere", {
-          chatId: id,
-        });
-        if (otherWindowCount > 0) {
-          setPendingOtherWindowCount(otherWindowCount);
-          return;
-        }
-        navigateToChat();
-      } catch (error) {
-        logger.error("Failed to check if chat is open in another window", {
-          chatId: id,
-          error,
-        });
-        navigateToChat();
-      }
-    };
-
-    const handleConfirmOpenAnyway = async () => {
-      setPendingOtherWindowCount(null);
-      try {
-        await invoke("sync_current_window_chat", {
-          chatId: id,
-          ownerToken: crypto.randomUUID(),
-          force: true,
-        });
-      } catch (error) {
-        logger.error("Failed to force-claim chat for current window", {
-          chatId: id,
-          error,
-        });
-      }
-      navigateToChat();
-    };
 
     if (selectionMode) {
       return (
@@ -201,8 +154,7 @@ export const ChatItem = memo(
                   additionalOnChatClickCallback?.(id);
                   return;
                 }
-                e.preventDefault();
-                void handleNavigationRequest();
+                additionalOnChatClickCallback?.(id);
               }}
             >
               <Link
@@ -245,21 +197,6 @@ export const ChatItem = memo(
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-auto min-w-max">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          logger.verbose("Opening chat in new window", {
-                            chatId: id,
-                            title,
-                          });
-                          openNewWindow(`/chat/${id}`);
-                        }}
-                      >
-                        <IconAppWindow />
-                        Open in New Window
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.preventDefault();
@@ -321,19 +258,6 @@ export const ChatItem = memo(
             </Button>
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem
-              onClick={() => {
-                logger.verbose("Opening chat in new window", {
-                  chatId: id,
-                  title,
-                });
-                openNewWindow(`/chat/${id}`);
-              }}
-            >
-              <IconAppWindow />
-              Open in New Window
-            </ContextMenuItem>
-            <ContextMenuSeparator />
             <ContextMenuItem
               onClick={() => {
                 logger.verbose("Opening change title modal", {
@@ -402,15 +326,6 @@ export const ChatItem = memo(
           onClose={() => setShowExportModal(false)}
           chatId={id}
           chatTitle={title}
-        />
-
-        <ChatAlreadyOpenDialog
-          isOpen={pendingOtherWindowCount !== null}
-          otherWindowCount={pendingOtherWindowCount ?? 0}
-          onConfirm={() => {
-            void handleConfirmOpenAnyway();
-          }}
-          onCancel={() => setPendingOtherWindowCount(null)}
         />
       </>
     );

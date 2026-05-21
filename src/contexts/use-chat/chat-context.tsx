@@ -12,11 +12,10 @@ import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
-import { type ChatStatusIndicator, chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
+import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
-import { emitWindowSyncEvent, onWindowSyncEvent } from "@/lib/sync/window-sync";
 
 import {
   ChatApprovalHandlerContext,
@@ -215,55 +214,32 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [currentChatId, forceUpdate],
   );
 
-  const streamingChatsRef = useRef<Set<string>>(new Set());
-
   const handleStatusChange = useCallback(
     (id: string, status: string, hasError?: boolean) => {
       setLastStatusChange({ id, status });
 
-      let emittedIndicator: ChatStatusIndicator | undefined;
-
       if (status === "streaming" || status === "submitted") {
-        streamingChatsRef.current.add(id);
         setChatStatusIndicators((prev) => ({ ...prev, [id]: "loading" }));
-        emittedIndicator = "loading";
       } else if (status === "ready" || status === "error") {
-        const wasStreamingHere = streamingChatsRef.current.has(id);
-        if (!wasStreamingHere && !hasError) {
-          return;
-        }
-        streamingChatsRef.current.delete(id);
         setChatStatusIndicators((prev) => {
           const currentIndicator = prev[id];
           if (hasError) {
-            emittedIndicator = "error";
             return { ...prev, [id]: "error" };
           }
           if (currentIndicator === "error") {
             const { [id]: _removed, ...rest } = prev;
             void _removed;
-            emittedIndicator = null;
             return rest;
           }
           if (currentIndicator === "loading") {
             if (id === currentChatId) {
               const { [id]: _removed, ...rest } = prev;
               void _removed;
-              emittedIndicator = null;
               return rest;
             }
-            emittedIndicator = "unread";
             return { ...prev, [id]: "unread" };
           }
           return prev;
-        });
-      }
-
-      if (emittedIndicator !== undefined) {
-        emitWindowSyncEvent({
-          type: "chat-status",
-          chatId: id,
-          status: emittedIndicator,
         });
       }
     },
@@ -271,51 +247,16 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   );
 
   useEffect(() => {
-    let unlisten: (() => void) | null = null;
-    let cancelled = false;
-
-    void onWindowSyncEvent((event) => {
-      if (event.type !== "chat-status") return;
-      setChatStatusIndicators((prev) => {
-        if (event.status === null) {
-          if (!(event.chatId in prev)) return prev;
-          const { [event.chatId]: _removed, ...rest } = prev;
-          void _removed;
-          return rest;
-        }
-        return { ...prev, [event.chatId]: event.status };
-      });
-    }).then((fn) => {
-      if (cancelled) fn();
-      else unlisten = fn;
-    });
-
-    return () => {
-      cancelled = true;
-      unlisten?.();
-    };
-  }, [setChatStatusIndicators]);
-
-  useEffect(() => {
     if (currentChatId) {
-      let cleared = false;
       setChatStatusIndicators((prev) => {
         const currentIndicator = prev[currentChatId];
         if (currentIndicator === "unread") {
           const { [currentChatId]: _removed, ...rest } = prev;
           void _removed;
-          cleared = true;
           return rest;
         }
         return prev;
       });
-      if (cleared) {
-        emitWindowSyncEvent({
-          type: "chat-status",
-          chatId: currentChatId,
-          status: null,
-        });
-      }
     }
   }, [currentChatId, setChatStatusIndicators]);
 

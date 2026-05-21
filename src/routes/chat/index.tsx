@@ -1,10 +1,8 @@
-import { invoke } from "@tauri-apps/api/core";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 
 import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto-scroll-container";
-import { ChatAlreadyOpenDialog } from "@/components/a1/chat-already-open-dialog";
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
 import { ChatUsageStatus } from "@/components/a1/chat-usage-status";
 import { NoMessagesGreeting } from "@/components/a1/empty-states/no-messages";
@@ -22,19 +20,7 @@ import {
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
 } from "@/lib/jotai/settings-atoms";
-import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
-
-type ChatOpenStatus = {
-  otherWindowCount: number;
-  openedHere: boolean;
-};
-
-const logger = getLogger(import.meta.url);
-
-const syncCurrentWindowChat = async (chatId: string | null, ownerToken: string, force = false) => {
-  return invoke<ChatOpenStatus>("sync_current_window_chat", { chatId, ownerToken, force });
-};
 
 const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
@@ -170,93 +156,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
 
 function ChatRoute() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const ownerTokenRef = useRef<string | null>(null);
-  const [pendingChatId, setPendingChatId] = useState<string | null>(null);
-  const [otherWindowCount, setOtherWindowCount] = useState(0);
-  const currentRouteChatIdRef = useRef<string | null>(null);
-
-  if (currentRouteChatIdRef.current !== (id ?? null)) {
-    currentRouteChatIdRef.current = id ?? null;
-    if (pendingChatId !== null) {
-      setPendingChatId(null);
-    }
-    if (otherWindowCount !== 0) {
-      setOtherWindowCount(0);
-    }
-  }
-
-  useEffect(() => {
-    if (!id) {
-      ownerTokenRef.current = null;
-      return;
-    }
-
-    let cancelled = false;
-    const ownerToken = crypto.randomUUID();
-    ownerTokenRef.current = ownerToken;
-
-    void (async () => {
-      try {
-        const status = await syncCurrentWindowChat(id, ownerToken);
-        if (cancelled) {
-          return;
-        }
-
-        setOtherWindowCount(status.otherWindowCount);
-
-        if (!status.openedHere) {
-          setPendingChatId(id);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          logger.error("Failed to sync current window chat", { chatId: id, error });
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-      if (ownerTokenRef.current === ownerToken) {
-        ownerTokenRef.current = null;
-      }
-      void syncCurrentWindowChat(null, ownerToken).catch((error) => {
-        logger.error("Failed to clear current window chat", { chatId: id, error });
-      });
-    };
-  }, [id]);
-
-  return (
-    <>
-      <ChatInterface chatId={id} />
-      <ChatAlreadyOpenDialog
-        isOpen={pendingChatId === id && otherWindowCount > 0}
-        otherWindowCount={otherWindowCount}
-        onConfirm={() => {
-          const ownerToken = ownerTokenRef.current;
-          if (id && ownerToken) {
-            void syncCurrentWindowChat(id, ownerToken, true)
-              .then((status) => {
-                setOtherWindowCount(status.otherWindowCount);
-                if (status.openedHere) {
-                  setPendingChatId(null);
-                }
-              })
-              .catch((error) => {
-                logger.error("Failed to force-open chat in current window", {
-                  chatId: id,
-                  error,
-                });
-              });
-          }
-        }}
-        onCancel={() => {
-          setPendingChatId(null);
-          void navigate("/chat");
-        }}
-      />
-    </>
-  );
+  return <ChatInterface chatId={id} />;
 }
 
 export default ChatRoute;
