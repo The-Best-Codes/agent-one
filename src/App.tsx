@@ -20,6 +20,7 @@ import OnboardingRoute from "@/routes/onboarding";
 import SettingsRoute from "@/routes/settings";
 import TestsRoute from "@/routes/tests";
 import ChatStressTestRoute from "@/routes/tests/chat-stress";
+import FluidGlowBarTestRoute from "@/routes/tests/fluid-glow-bar";
 import LocalDatabaseTestRoute from "@/routes/tests/local-database";
 import NotificationsTestRoute from "@/routes/tests/notifications";
 
@@ -82,6 +83,7 @@ function App() {
           <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
           <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
           <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
+          <Route path="/tests/fluid-glow-bar" element={<FluidGlowBarTestRoute />} />
           <Route path="*" element={<NotFoundRoute />} />
         </Route>
       </Routes>
