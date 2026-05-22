@@ -52,7 +52,7 @@ rmcp = { version = "1.7.0", features = [
 ] }
 async-trait = "0.1.89"
 tauri-plugin-websocket = "2"
-sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio-rustls"] }
+sqlx = { version = "0.9.0", features = ["sqlite", "runtime-tokio", "tls-rustls"] }
 chacha20poly1305 = "0.10.1"
 base64 = "0.22.1"
 
