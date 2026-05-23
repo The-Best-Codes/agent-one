@@ -1,15 +1,46 @@
 export const keyboardShortcutDefinitions = [
-  { id: "focusMainChatInput", label: "Focus chat input", defaultShortcut: "ctrl+l" },
-  { id: "openSettings", label: "Open settings", defaultShortcut: "ctrl+comma" },
-  { id: "openTests", label: "Open tests", defaultShortcut: "ctrl+shift+q" },
-  { id: "newChat", label: "New chat", defaultShortcut: "ctrl+n" },
-  { id: "focusChatSearch", label: "Focus chat search", defaultShortcut: "ctrl+k" },
+  {
+    id: "focusMainChatInput",
+    label: "Focus chat input",
+    description: "Move the cursor to the message box.",
+    defaultShortcut: "ctrl+l",
+  },
+  {
+    id: "openSettings",
+    label: "Open settings",
+    description: "Jump directly to the settings screen.",
+    defaultShortcut: "ctrl+comma",
+  },
+  {
+    id: "openTests",
+    label: "Open tests",
+    description: "Open the internal tests screen.",
+    defaultShortcut: "ctrl+shift+q",
+  },
+  {
+    id: "newChat",
+    label: "New chat",
+    description: "Start a new conversation.",
+    defaultShortcut: "ctrl+n",
+  },
+  {
+    id: "focusChatSearch",
+    label: "Focus chat search",
+    description: "Search your chats from the sidebar.",
+    defaultShortcut: "ctrl+k",
+  },
   {
     id: "focusChatSearchCollapsed",
     label: "Open chat search when sidebar is collapsed",
+    description: "Open chat search when the sidebar is hidden or compact.",
     defaultShortcut: "ctrl+k",
   },
-  { id: "toggleSidebar", label: "Toggle sidebar", defaultShortcut: "ctrl+b" },
+  {
+    id: "toggleSidebar",
+    label: "Toggle sidebar",
+    description: "Show or hide the chat sidebar.",
+    defaultShortcut: "ctrl+b",
+  },
 ] as const;
 
 export type KeyboardShortcutId = (typeof keyboardShortcutDefinitions)[number]["id"];

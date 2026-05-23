@@ -51,11 +51,13 @@ function eventToShortcut(event: KeyboardEvent) {
 function ShortcutEditor({
   id,
   label,
+  enabledInInputsDefault,
   open,
   onOpenChange,
 }: {
   id: KeyboardShortcutId;
   label: string;
+  enabledInInputsDefault: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -122,7 +124,7 @@ function ShortcutEditor({
           <div className="flex items-center justify-between gap-4">
             <Label>Activate in input fields</Label>
             <Switch
-              checked={enabledInInputs ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS}
+              checked={enabledInInputs ?? enabledInInputsDefault}
               onCheckedChange={setEnabledInInputs}
             />
           </div>
@@ -202,32 +204,32 @@ export default function KeyboardShortcutsSection() {
                 >
                   <div>
                     <Label className="text-sm font-medium">{definition.label}</Label>
-                    <p className="text-muted-foreground mt-1 text-xs">{definition.id}</p>
+                    <p className="text-muted-foreground mt-1 text-xs">{definition.description}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Kbd>{config.shortcut}</Kbd>
                     <div className="flex items-center gap-0.5">
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => setEditingId(definition.id)}
-                      aria-label={`Edit ${definition.label}`}
-                    >
-                      <IconPencil />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      disabled={isDefault}
-                      onClick={() => {
-                        setShortcuts((currentShortcuts) => ({
-                          ...currentShortcuts,
-                          [definition.id]: defaultConfig,
-                        }));
-                      }}
-                      aria-label={`Reset ${definition.label}`}
-                    >
-                      <IconRestore />
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={() => setEditingId(definition.id)}
+                        aria-label={`Edit ${definition.label}`}
+                      >
+                        <IconPencil />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        disabled={isDefault}
+                        onClick={() => {
+                          setShortcuts((currentShortcuts) => ({
+                            ...currentShortcuts,
+                            [definition.id]: defaultConfig,
+                          }));
+                        }}
+                        aria-label={`Reset ${definition.label}`}
+                      >
+                        <IconRestore />
                       </Button>
                     </div>
                   </div>
@@ -242,6 +244,7 @@ export default function KeyboardShortcutsSection() {
         <ShortcutEditor
           id={editingId}
           label={keyboardShortcutDefinitions.find((shortcut) => shortcut.id === editingId)!.label}
+          enabledInInputsDefault={enabledInInputsDefault}
           open={Boolean(editingId)}
           onOpenChange={(open) => !open && setEditingId(null)}
         />
