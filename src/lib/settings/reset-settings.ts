@@ -17,6 +17,8 @@ import {
   experimentalThrottleValueAtom,
   fontAtom,
   inputStyleAtom,
+  keyboardShortcutsAtom,
+  keyboardShortcutsEnabledInInputsAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -79,6 +81,8 @@ export function resetAllSettings(): void {
   store.set(mcpParallelLoadLimitAtom, RESET);
   store.set(titleGenerationAtom, RESET);
   store.set(collapsedSidebarLayoutAtom, RESET);
+  store.set(keyboardShortcutsEnabledInInputsAtom, RESET);
+  store.set(keyboardShortcutsAtom, RESET);
 
   for (const provider of PROVIDER_REGISTRY) {
     void store.set(getApiKeyBaseAtom(provider.id), RESET);
@@ -202,6 +206,12 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "COLLAPSED_SIDEBAR_LAYOUT":
       store.set(collapsedSidebarLayoutAtom, RESET);
+      break;
+    case "KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS":
+      store.set(keyboardShortcutsEnabledInInputsAtom, RESET);
+      break;
+    case "KEYBOARD_SHORTCUTS":
+      store.set(keyboardShortcutsAtom, RESET);
       break;
   }
 }

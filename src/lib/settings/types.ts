@@ -1,6 +1,8 @@
 // If you update this file, check if you also need to update reset-settings.ts in this directory
 
 import type { ProviderStorageKey } from "@/lib/ai/providers/registry";
+import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
+import { defaultKeyboardShortcuts } from "@/lib/kbd-registry";
 
 export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
 export type SubmitKeyOption = "enter" | "ctrl-enter";
@@ -179,6 +181,8 @@ export interface DefaultSettings extends ApiKeySettings {
   USER_NAME: string;
   SYSTEM_PROMPT_APPENDIX: string;
   COLLAPSED_SIDEBAR_LAYOUT: CollapsedSidebarLayoutOption;
+  KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: boolean;
+  KEYBOARD_SHORTCUTS: KeyboardShortcutSettings;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -274,6 +278,8 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   USER_NAME: "",
   SYSTEM_PROMPT_APPENDIX: "",
   COLLAPSED_SIDEBAR_LAYOUT: "row",
+  KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: true,
+  KEYBOARD_SHORTCUTS: defaultKeyboardShortcuts,
   AGENT_ONE_API_KEY: "",
   "302AI_API_KEY": "",
   ABACUS_API_KEY: "",

@@ -1,7 +1,6 @@
 import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,10 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
 import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
-import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -80,13 +79,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const toggleTooltip = isCollapsed ? "Open sidebar" : "Close sidebar";
   const tooltipSide = isColumnLayout && isSidebarSmall ? "right" : undefined;
 
-  useHotkeys(kbdRegistry.focusChatSearchCollapsed, () => {
+  useKeyboardShortcut("focusChatSearchCollapsed", () => {
     if (isSidebarSmall) {
       setIsSearchModalOpen(true);
     }
   });
 
-  useHotkeys(kbdRegistry.toggleSidebar, () => {
+  useKeyboardShortcut("toggleSidebar", () => {
     setIsSearchModalOpen(false);
     setIsCollapsed(!isCollapsed);
   });

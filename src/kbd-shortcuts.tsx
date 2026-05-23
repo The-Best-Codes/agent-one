@@ -1,18 +1,17 @@
-import { useHotkeys } from "react-hotkeys-hook";
 import { useNavigate } from "react-router";
 
-import { kbdRegistry } from "@/lib/kbd-registry";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 
 export function KbdRegistry() {
   // TODO: Disable this in prod
   const navigate = useNavigate();
-  useHotkeys(kbdRegistry.openTests, () => {
+  useKeyboardShortcut("openTests", () => {
     void navigate("/tests");
   });
-  useHotkeys(kbdRegistry.openSettings, () => {
+  useKeyboardShortcut("openSettings", () => {
     void navigate("/settings");
   });
-  useHotkeys(kbdRegistry.newChat, () => {
+  useKeyboardShortcut("newChat", () => {
     void navigate("/chat");
   });
 

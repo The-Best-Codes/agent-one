@@ -6,6 +6,7 @@ import AccountSection from "./sections/account";
 import AppearanceSection from "./sections/appearance";
 import ChatsSection from "./sections/chats";
 import ExtensionsSection from "./sections/extensions";
+import KeyboardShortcutsSection from "./sections/keyboard-shortcuts";
 import PerformanceSection from "./sections/performance";
 import ProvidersSection from "./sections/providers";
 
@@ -23,6 +24,7 @@ const componentMap: Record<SectionId, ComponentType> = {
   performance: PerformanceSection,
   appearance: AppearanceSection,
   extensions: ExtensionsSection,
+  "keyboard-shortcuts": KeyboardShortcutsSection,
   about: AboutSection,
 };
 
