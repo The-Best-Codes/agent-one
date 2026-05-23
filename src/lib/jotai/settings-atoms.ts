@@ -1,6 +1,7 @@
 import { atom, getDefaultStore } from "jotai";
 import { atomWithStorage, RESET } from "jotai/utils";
 
+import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
 import type { DefaultSettings } from "@/lib/settings/types";
 import {
   type AnalyticsIdentityOption,
@@ -214,4 +215,14 @@ export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(
 export const collapsedSidebarLayoutAtom = createSettingAtom<CollapsedSidebarLayoutOption>(
   "COLLAPSED_SIDEBAR_LAYOUT",
   DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT,
+);
+
+export const keyboardShortcutsEnabledInInputsAtom = createSettingAtom(
+  "KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS",
+  DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS,
+);
+
+export const keyboardShortcutsAtom = createSettingAtom<KeyboardShortcutSettings>(
+  "KEYBOARD_SHORTCUTS",
+  DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS,
 );

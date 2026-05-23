@@ -13,7 +13,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,11 +27,11 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useOverflow } from "@/hooks/use-overflow";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom } from "@/lib/jotai/settings-atoms";
-import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
@@ -85,7 +84,7 @@ export const VirtualizedChatList = ({
   const [chatIds] = useAtom(chatIdsAtom);
   const [chatSort] = useAtom(chatSortAtom);
 
-  useHotkeys(kbdRegistry.focusChatSearch, () => {
+  useKeyboardShortcut("focusChatSearch", () => {
     searchInputRef.current?.focus();
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);

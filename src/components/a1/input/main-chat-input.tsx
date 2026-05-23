@@ -6,7 +6,6 @@ import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
@@ -26,7 +26,6 @@ import {
   stopButtonBehaviorAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
-import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -120,7 +119,7 @@ export const MainChatInput = ({
       ? status === "streaming" || status === "submitted"
       : status === "streaming";
 
-  useHotkeys(kbdRegistry.focusMainChatInput, () => {
+  useKeyboardShortcut("focusMainChatInput", () => {
     editorViewRef.current?.focus();
   });
 
