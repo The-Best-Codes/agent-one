@@ -45,8 +45,6 @@ export const ChatMessageLoading = ({
     }
 
     if (status === "streaming") {
-      // TODO: Do something better here. We used to have a cursor, but it always showed up on the next line which looks awkward.
-      // "Thinking" in the middle of a response is also awkward, but it will have to do for now.
       return <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />;
     }
 
