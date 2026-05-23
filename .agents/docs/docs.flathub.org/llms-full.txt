@@ -3142,6 +3142,10 @@ For example, the repository URL for the ID `io.github.example_foo.bar` will be `
 
 [Flatpak extensions](https://docs.flatpak.org/en/latest/extension.html) must prefix their ID with the extension point ID, which is either defined in one of the [runtimes](/docs/for-app-authors/runtimes.md) or in an app. If the extension point is defined in an app, it must use the app's ID as a prefix. They are exempt from the [domain control rules](/docs/for-app-authors/requirements.md#control-over-domain-or-repository).
 
+BaseApps and Extensions must be built against a runtime that provides a stable ABI and performs ABI checks as part of their releases.
+
+BaseApps and Extensions must themselves maintain a stable ABI in a given branch and must not depend or use any private ABI from the runtime, for their contents. Certain things such as extensions providing themes may be exempt from this rule.
+
 ## Renaming Flatpak ID[​](#renaming-flatpak-id "Direct link to Renaming Flatpak ID")
 
 [Flatpak ID renames](/docs/for-app-authors/maintenance.md#renaming-the-flatpak-id) are reviewed and accepted on a conservative basis provided justified reasons for the rename are provided.
@@ -3391,6 +3395,10 @@ Manifest properties must be ordered logically and not alphabetically.
 
   * config-opts or build-commands
 
+  * post-install
+
+  * cleanup
+
   * sources
 
     * type
@@ -3414,10 +3422,6 @@ Manifest properties must be ordered logically and not alphabetically.
     * only-arches or skip-arches
 
     * x-checker-data
-
-  * post-install
-
-  * cleanup
 ```
 
 #### Creating submanifests[​](#creating-submanifests "Direct link to Creating submanifests")
