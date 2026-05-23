@@ -90,7 +90,7 @@ export default function AboutSection() {
           <Button
             onClick={() => {
               trackSettingsInteraction("about", "check_for_updates");
-              checkForUpdates();
+              void checkForUpdates();
             }}
             variant="outline"
             size="sm"
@@ -113,7 +113,7 @@ export default function AboutSection() {
           <Button
             onClick={() => {
               trackSettingsInteraction("about", "download_and_install_update");
-              downloadAndInstallUpdate();
+              void downloadAndInstallUpdate();
             }}
             size="sm"
           >
@@ -126,7 +126,7 @@ export default function AboutSection() {
           <Button
             onClick={() => {
               trackSettingsInteraction("about", "retry_update_check");
-              checkForUpdates();
+              void checkForUpdates();
             }}
             variant="outline"
             size="sm"
