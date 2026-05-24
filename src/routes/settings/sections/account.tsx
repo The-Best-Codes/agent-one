@@ -87,40 +87,73 @@ export default function AccountSection() {
           <CardTitle>Account, Sync &amp; Access</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <AuthStatusDisplay
-            signedInAction={
-              user ? (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    asChild
-                    analytics={{
-                      event: "settings_external_link_clicked",
-                      params: { section: "account", control: "account_dashboard" },
-                    }}
-                  >
-                    <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
-                      <IconExternalLink data-icon="inline-start" />
-                      <span>Account</span>
-                      <span className="sr-only lg:not-sr-only"> Dashboard</span>
-                    </a>
-                  </Button>
-                  <Button variant="destructive" size="sm" onClick={signOut} disabled={isSigningOut}>
-                    <IconLogout data-icon="inline-start" />
-                    <span>Sign out</span>
-                  </Button>
+          {isAuthLoading ? (
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="size-10 rounded-full" />
+                <div className="flex flex-col gap-1.5">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-3 w-52" />
                 </div>
-              ) : undefined
-            }
-          />
-          {user && (
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-24" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            </div>
+          ) : (
+            <AuthStatusDisplay
+              signedInAction={
+                user ? (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      analytics={{
+                        event: "settings_external_link_clicked",
+                        params: { section: "account", control: "account_dashboard" },
+                      }}
+                    >
+                      <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
+                        <IconExternalLink data-icon="inline-start" />
+                        <span>Account</span>
+                        <span className="sr-only lg:not-sr-only"> Dashboard</span>
+                      </a>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={signOut}
+                      disabled={isSigningOut}
+                    >
+                      <IconLogout data-icon="inline-start" />
+                      <span>Sign out</span>
+                    </Button>
+                  </div>
+                ) : undefined
+              }
+            />
+          )}
+          {(user || isAuthLoading) && (
             <div className="flex flex-col gap-4">
               {(isAuthLoading || billingLoading) && !customerState ? (
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-56" />
-                  <Skeleton className="h-2 w-full" />
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-5 w-44" />
+                      <Skeleton className="h-4 w-36" />
+                    </div>
+                    <Skeleton className="h-8 w-28 shrink-0" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-4 w-8" />
+                    </div>
+                    <Skeleton className="h-2 w-full" />
+                    <Skeleton className="h-3 w-40" />
+                  </div>
                 </div>
               ) : billingError ? (
                 <p className="text-muted-foreground text-sm">{billingError}</p>
