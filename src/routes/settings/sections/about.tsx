@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
@@ -246,11 +247,6 @@ export default function AboutSection() {
                 measure signed-in usage across sessions. We do not send your name or email address
                 to Google Analytics.
               </p>
-              {!user ? (
-                <p className="text-muted-foreground text-xs">
-                  Sign in to apply this preference to analytics events.
-                </p>
-              ) : null}
               <a
                 href="https://www.agent-one.dev/privacy?utm_source=desktop-app"
                 target="_blank"
@@ -260,18 +256,30 @@ export default function AboutSection() {
                 Learn more
               </a>
             </div>
-            <Switch
-              checked={analyticsIdentity === "user-id"}
-              disabled={analyticsIdentity === "off"}
-              onCheckedChange={(checked) => {
-                trackSettingsInteraction("about", "analytics_identity_toggled", {
-                  value: checked ? "user-id" : "anonymous",
-                  signed_in: Boolean(user),
-                });
-                setAnalyticsIdentity(checked ? "user-id" : "anonymous");
-              }}
-              aria-label="Associate analytics with my signed-in account"
-            />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Switch
+                    checked={analyticsIdentity === "user-id"}
+                    disabled={analyticsIdentity === "off" || !user}
+                    onCheckedChange={(checked) => {
+                      trackSettingsInteraction("about", "analytics_identity_toggled", {
+                        value: checked ? "user-id" : "anonymous",
+                        signed_in: Boolean(user),
+                      });
+                      setAnalyticsIdentity(checked ? "user-id" : "anonymous");
+                    }}
+                    aria-label="Associate analytics with my signed-in account"
+                  />
+                </span>
+              </TooltipTrigger>
+              {!user && (
+                <TooltipContent>
+                  You're not signed in, so analytics aren't associated with your account.
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
         </CardContent>
       </Card>
