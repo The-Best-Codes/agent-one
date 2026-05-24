@@ -1,7 +1,7 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,7 @@ import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -52,11 +53,46 @@ export default function SettingsRoute() {
   };
 
   const contentRef = useRef<HTMLDivElement>(null);
+  const previousSectionRef = useRef(displayedSection);
 
   useEffect(() => {
     const viewport = contentRef.current?.closest("[data-slot='scroll-area-viewport']");
-    viewport?.scrollTo({ top: 0 });
-  }, [displayedSection]);
+    const sectionChanged = previousSectionRef.current !== displayedSection;
+
+    previousSectionRef.current = displayedSection;
+
+    if (location.hash) {
+      const targetId = location.hash.slice(1);
+      let frameId = 0;
+      let attempts = 0;
+
+      const scrollToHashTarget = () => {
+        const target = document.getElementById(targetId);
+
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+
+        if (attempts < 10) {
+          attempts += 1;
+          frameId = window.requestAnimationFrame(scrollToHashTarget);
+        }
+      };
+
+      frameId = window.requestAnimationFrame(scrollToHashTarget);
+
+      return () => {
+        window.cancelAnimationFrame(frameId);
+      };
+
+      return;
+    }
+
+    if (sectionChanged) {
+      viewport?.scrollTo({ top: 0 });
+    }
+  }, [displayedSection, location.hash]);
 
   const handleSectionChange = (section: string) => {
     trackSettingsInteraction("navigation", "section_changed", { value: section });

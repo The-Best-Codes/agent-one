@@ -31,6 +31,7 @@ import {
   localProviderSearchItemsAtom,
 } from "@/lib/jotai/local-provider-atoms";
 
+import SettingsTarget from "../../settings-target";
 import { AddProviderDropdown } from "./add-provider-dropdown";
 import {
   BuiltInProviderListItem,
@@ -106,133 +107,139 @@ export function ProvidersList() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Card size="sm">
-        <CardHeader>
-          <CardTitle>Built-in Providers</CardTitle>
-          <CardDescription>
-            Enable built-in providers, set keys and headers, and override model metadata when
-            needed.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <SearchInput
-            placeholder="Search built-in providers..."
-            value={builtInSearchQuery}
-            onChange={(event) => {
-              trackSettingsInteraction("providers", "built_in_search_changed", {
-                value_length: event.target.value.length,
-              });
-              setBuiltInSearchQuery(event.target.value);
-            }}
-          />
-
-          {filteredBuiltInProviders.length > 0 ? (
-            <Accordion type="single" collapsible className="w-full">
-              {filteredBuiltInProviders.map((provider) => (
-                <BuiltInProviderListItem
-                  key={provider.id}
-                  providerId={provider.id}
-                  label={provider.label}
-                  hasEnvKey={hasEnvKey(provider.id)}
-                />
-              ))}
-            </Accordion>
-          ) : (
-            <p className="text-muted-foreground py-4 text-center text-sm">
-              No built-in providers found.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card size="sm">
-        <CardHeader>
-          <CardTitle>Local Providers</CardTitle>
-          <CardDescription>
-            Configure built-in local providers that can automatically discover models on startup.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <SearchInput
-            placeholder="Search local providers..."
-            value={localSearchQuery}
-            onChange={(event) => {
-              trackSettingsInteraction("providers", "local_search_changed", {
-                value_length: event.target.value.length,
-              });
-              setLocalSearchQuery(event.target.value);
-            }}
-          />
-
-          {filteredLocalProviderIds.length > 0 ? (
-            <Accordion type="single" collapsible className="w-full">
-              {filteredLocalProviderIds.map((providerId) => (
-                <LocalProviderListItem key={providerId} providerId={providerId} />
-              ))}
-            </Accordion>
-          ) : (
-            <p className="text-muted-foreground py-4 text-center text-sm">
-              No local providers found.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card size="sm">
-        <CardHeader>
-          <CardTitle>Custom Providers</CardTitle>
-          <CardDescription>
-            Add OpenAI-compatible providers and configure exactly which models they expose.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex gap-2">
+      <SettingsTarget id="setting-built-in-providers">
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>Built-in Providers</CardTitle>
+            <CardDescription>
+              Enable built-in providers, set keys and headers, and override model metadata when
+              needed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
             <SearchInput
-              placeholder="Search custom providers..."
-              value={customSearchQuery}
+              placeholder="Search built-in providers..."
+              value={builtInSearchQuery}
               onChange={(event) => {
-                trackSettingsInteraction("providers", "custom_search_changed", {
+                trackSettingsInteraction("providers", "built_in_search_changed", {
                   value_length: event.target.value.length,
                 });
-                setCustomSearchQuery(event.target.value);
+                setBuiltInSearchQuery(event.target.value);
               }}
-              containerClassName="flex-1"
             />
-            <AddProviderDropdown onAddProvider={handleAddProvider} />
-          </div>
 
-          {customProviderIds.length === 0 ? (
-            <Empty className="bg-muted/20 border">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <IconPlugConnected />
-                </EmptyMedia>
-                <EmptyTitle>No custom providers yet</EmptyTitle>
-                <EmptyDescription>
-                  Add an OpenAI-compatible provider, then configure its models and metadata here.
-                </EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <AddProviderDropdown onAddProvider={handleAddProvider} />
-              </EmptyContent>
-            </Empty>
-          ) : filteredCustomProviderIds.length > 0 ? (
-            <Accordion type="single" collapsible className="w-full">
-              {filteredCustomProviderIds.map((providerId) => (
-                <CustomProviderListItem
-                  key={providerId}
-                  providerId={providerId}
-                  onDelete={() => handleDeleteProvider(providerId)}
-                />
-              ))}
-            </Accordion>
-          ) : (
-            <p className="text-muted-foreground py-4 text-center text-sm">
-              No custom providers found.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            {filteredBuiltInProviders.length > 0 ? (
+              <Accordion type="single" collapsible className="w-full">
+                {filteredBuiltInProviders.map((provider) => (
+                  <BuiltInProviderListItem
+                    key={provider.id}
+                    providerId={provider.id}
+                    label={provider.label}
+                    hasEnvKey={hasEnvKey(provider.id)}
+                  />
+                ))}
+              </Accordion>
+            ) : (
+              <p className="text-muted-foreground py-4 text-center text-sm">
+                No built-in providers found.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </SettingsTarget>
+
+      <SettingsTarget id="setting-local-providers">
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>Local Providers</CardTitle>
+            <CardDescription>
+              Configure built-in local providers that can automatically discover models on startup.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <SearchInput
+              placeholder="Search local providers..."
+              value={localSearchQuery}
+              onChange={(event) => {
+                trackSettingsInteraction("providers", "local_search_changed", {
+                  value_length: event.target.value.length,
+                });
+                setLocalSearchQuery(event.target.value);
+              }}
+            />
+
+            {filteredLocalProviderIds.length > 0 ? (
+              <Accordion type="single" collapsible className="w-full">
+                {filteredLocalProviderIds.map((providerId) => (
+                  <LocalProviderListItem key={providerId} providerId={providerId} />
+                ))}
+              </Accordion>
+            ) : (
+              <p className="text-muted-foreground py-4 text-center text-sm">
+                No local providers found.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </SettingsTarget>
+
+      <SettingsTarget id="setting-custom-providers">
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>Custom Providers</CardTitle>
+            <CardDescription>
+              Add OpenAI-compatible providers and configure exactly which models they expose.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex gap-2">
+              <SearchInput
+                placeholder="Search custom providers..."
+                value={customSearchQuery}
+                onChange={(event) => {
+                  trackSettingsInteraction("providers", "custom_search_changed", {
+                    value_length: event.target.value.length,
+                  });
+                  setCustomSearchQuery(event.target.value);
+                }}
+                containerClassName="flex-1"
+              />
+              <AddProviderDropdown onAddProvider={handleAddProvider} />
+            </div>
+
+            {customProviderIds.length === 0 ? (
+              <Empty className="bg-muted/20 border">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <IconPlugConnected />
+                  </EmptyMedia>
+                  <EmptyTitle>No custom providers yet</EmptyTitle>
+                  <EmptyDescription>
+                    Add an OpenAI-compatible provider, then configure its models and metadata here.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <AddProviderDropdown onAddProvider={handleAddProvider} />
+                </EmptyContent>
+              </Empty>
+            ) : filteredCustomProviderIds.length > 0 ? (
+              <Accordion type="single" collapsible className="w-full">
+                {filteredCustomProviderIds.map((providerId) => (
+                  <CustomProviderListItem
+                    key={providerId}
+                    providerId={providerId}
+                    onDelete={() => handleDeleteProvider(providerId)}
+                  />
+                ))}
+              </Accordion>
+            ) : (
+              <p className="text-muted-foreground py-4 text-center text-sm">
+                No custom providers found.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </SettingsTarget>
     </div>
   );
 }

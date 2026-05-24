@@ -24,6 +24,8 @@ import { type KeyboardShortcutId, keyboardShortcutDefinitions } from "@/lib/kbd-
 import { resetSetting } from "@/lib/settings/reset-settings";
 import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 
+import SettingsTarget from "../settings-target";
+
 function formatKey(key: string) {
   if (key === " ") return "space";
   if (key === "Escape") return "esc";
@@ -161,31 +163,33 @@ export default function KeyboardShortcutsSection() {
           <CardTitle>Keyboard Shortcuts</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Activate shortcuts in input fields</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Applies to shortcuts that do not have their own override.
-              </p>
+          <SettingsTarget id="setting-activate-shortcuts-in-input-fields">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium">Activate shortcuts in input fields</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Applies to shortcuts that do not have their own override.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={enabledInInputsDefault}
+                  onCheckedChange={setEnabledInInputsDefault}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={
+                    enabledInInputsDefault === DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS
+                  }
+                  onClick={() => resetSetting("KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS")}
+                  aria-label="Reset input field shortcut behavior"
+                >
+                  <IconRestore />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={enabledInInputsDefault}
-                onCheckedChange={setEnabledInInputsDefault}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={
-                  enabledInInputsDefault === DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS
-                }
-                onClick={() => resetSetting("KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS")}
-                aria-label="Reset input field shortcut behavior"
-              >
-                <IconRestore />
-              </Button>
-            </div>
-          </div>
+          </SettingsTarget>
 
           <div className="divide-y rounded-lg border">
             {keyboardShortcutDefinitions.map((definition) => {

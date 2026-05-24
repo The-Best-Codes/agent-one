@@ -29,6 +29,8 @@ import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
 
+import SettingsTarget from "../settings-target";
+
 const MAX_APPENDIX_CHARS = 2000;
 const DASHBOARD_URL = "https://www.agent-one.dev/dashboard";
 const BILLING_URL = `${DASHBOARD_URL}/billing`;
@@ -233,64 +235,68 @@ export default function AccountSection() {
               )}
             </div>
           )}
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="sync-enabled" className="text-sm font-medium">
-                Synchronize my settings
-              </Label>
-              <p className="text-muted-foreground text-sm">
-                Keep your settings in sync across devices using your AgentOne account.
-              </p>
+          <SettingsTarget id="setting-synchronize-my-settings">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="sync-enabled" className="text-sm font-medium">
+                  Synchronize my settings
+                </Label>
+                <p className="text-muted-foreground text-sm">
+                  Keep your settings in sync across devices using your AgentOne account.
+                </p>
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Switch
+                      id="sync-enabled"
+                      checked={syncEnabled}
+                      onCheckedChange={(checked) => {
+                        trackSettingsInteraction("account", "sync_enabled_toggled", {
+                          enabled: checked,
+                        });
+                        setSyncEnabled(checked);
+                      }}
+                      disabled={!user}
+                    />
+                  </span>
+                </TooltipTrigger>
+                {!user && <TooltipContent>Sign in to enable sync</TooltipContent>}
+              </Tooltip>
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Switch
-                    id="sync-enabled"
-                    checked={syncEnabled}
-                    onCheckedChange={(checked) => {
-                      trackSettingsInteraction("account", "sync_enabled_toggled", {
-                        enabled: checked,
-                      });
-                      setSyncEnabled(checked);
-                    }}
-                    disabled={!user}
-                  />
-                </span>
-              </TooltipTrigger>
-              {!user && <TooltipContent>Sign in to enable sync</TooltipContent>}
-            </Tooltip>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="hide-agentone-models" className="text-sm font-medium">
-                Hide AgentOne models
-              </Label>
-              <p className="text-muted-foreground text-sm">
-                Remove AgentOne models from the model selector.
-              </p>
+          </SettingsTarget>
+          <SettingsTarget id="setting-hide-agentone-models">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="hide-agentone-models" className="text-sm font-medium">
+                  Hide AgentOne models
+                </Label>
+                <p className="text-muted-foreground text-sm">
+                  Remove AgentOne models from the model selector.
+                </p>
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Switch
+                      id="hide-agentone-models"
+                      checked={hideAgentOneModels}
+                      onCheckedChange={(checked) => {
+                        trackSettingsInteraction("account", "hide_agentone_models_toggled", {
+                          enabled: checked,
+                        });
+                        setHideAgentOneModels(checked);
+                      }}
+                      disabled={!user}
+                    />
+                  </span>
+                </TooltipTrigger>
+                {!user && (
+                  <TooltipContent>You won't see AgentOne models unless signed-in</TooltipContent>
+                )}
+              </Tooltip>
             </div>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Switch
-                    id="hide-agentone-models"
-                    checked={hideAgentOneModels}
-                    onCheckedChange={(checked) => {
-                      trackSettingsInteraction("account", "hide_agentone_models_toggled", {
-                        enabled: checked,
-                      });
-                      setHideAgentOneModels(checked);
-                    }}
-                    disabled={!user}
-                  />
-                </span>
-              </TooltipTrigger>
-              {!user && (
-                <TooltipContent>You won't see AgentOne models unless signed-in</TooltipContent>
-              )}
-            </Tooltip>
-          </div>
+          </SettingsTarget>
         </CardContent>
       </Card>
       <Card>
@@ -298,52 +304,56 @@ export default function AccountSection() {
           <CardTitle>Profile &amp; Instructions</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="user-name" className="text-sm font-medium">
-              Your Name
-            </Label>
-            <p className="text-muted-foreground text-sm">
-              AgentOne will use this name to address you.
-            </p>
-            <Input
-              id="user-name"
-              type="text"
-              value={userName}
-              onChange={(e) => {
-                trackSettingsInteraction("account", "user_name_changed", {
-                  value_length: e.target.value.length,
-                });
-                setUserName(e.target.value);
-              }}
-              placeholder="Enter your name"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="system-prompt-appendix" className="text-sm font-medium">
-              AI Instructions
-            </Label>
-            <p className="text-muted-foreground text-sm">
-              Add custom instructions that will be appended to the system prompt. These will guide
-              how AgentOne responds to you.
-            </p>
-            <div className="relative">
-              <Textarea
-                id="system-prompt-appendix"
-                value={systemPromptAppendix}
+          <SettingsTarget id="setting-your-name">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="user-name" className="text-sm font-medium">
+                Your Name
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                AgentOne will use this name to address you.
+              </p>
+              <Input
+                id="user-name"
+                type="text"
+                value={userName}
                 onChange={(e) => {
-                  trackSettingsInteraction("account", "ai_instructions_changed", {
+                  trackSettingsInteraction("account", "user_name_changed", {
                     value_length: e.target.value.length,
                   });
-                  handleAppendixChange(e.target.value);
+                  setUserName(e.target.value);
                 }}
-                placeholder="e.g., Always use British English. Be concise and technical."
-                className="field-sizing-fixed max-h-96 min-h-15 resize-y"
+                placeholder="Enter your name"
               />
-              <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
-                {systemPromptAppendix.length} / {MAX_APPENDIX_CHARS}
-              </span>
             </div>
-          </div>
+          </SettingsTarget>
+          <SettingsTarget id="setting-ai-instructions">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="system-prompt-appendix" className="text-sm font-medium">
+                AI Instructions
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Add custom instructions that will be appended to the system prompt. These will guide
+                how AgentOne responds to you.
+              </p>
+              <div className="relative">
+                <Textarea
+                  id="system-prompt-appendix"
+                  value={systemPromptAppendix}
+                  onChange={(e) => {
+                    trackSettingsInteraction("account", "ai_instructions_changed", {
+                      value_length: e.target.value.length,
+                    });
+                    handleAppendixChange(e.target.value);
+                  }}
+                  placeholder="e.g., Always use British English. Be concise and technical."
+                  className="field-sizing-fixed max-h-96 min-h-15 resize-y"
+                />
+                <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
+                  {systemPromptAppendix.length} / {MAX_APPENDIX_CHARS}
+                </span>
+              </div>
+            </div>
+          </SettingsTarget>
         </CardContent>
       </Card>
     </div>

@@ -38,6 +38,8 @@ import {
 } from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
+import SettingsTarget from "../settings-target";
+
 const roundnessOptions = [
   { value: "none", label: "Not Round", radius: "rounded-[0px]" },
   { value: "sm", label: "Slightly Round", radius: "rounded-[0.3125rem]" },
@@ -158,223 +160,237 @@ export default function AppearanceSection() {
           <CardTitle>General Look and Feel</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Theme</Label>
-            </div>
-            <ThemeToggle className="md:max-w-64" />
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Primary Color</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Controls the accent color used for switches, badges, highlights, and primary
-                actions.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <ScrollArea className="max-w-full md:max-w-64">
-                <ScrollBar className="w-full" orientation="horizontal" />
-                <div className="flex flex-row flex-nowrap gap-2">
-                  {colorThemeOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      ref={colorTheme === option.value ? activeColorRef : undefined}
-                      onClick={() => {
-                        trackSettingsInteraction("appearance", "primary_color_changed", {
-                          value: option.value,
-                        });
-                        setColorTheme(option.value as typeof colorTheme);
-                      }}
-                      size="icon"
-                      className={cn("border-foreground rounded-md border-0", option.className)}
-                      title={option.label}
-                    >
-                      {colorTheme === option.value && <IconCheck data-icon="inline-start" />}
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Tint</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted
-                buttons.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <ScrollArea className="max-w-full md:max-w-64">
-                <ScrollBar className="w-full" orientation="horizontal" />
-                <div className="flex flex-row flex-nowrap gap-2">
-                  {colorThemeOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      ref={uiTint === option.value ? activeColorRef : undefined}
-                      onClick={() => {
-                        trackSettingsInteraction("appearance", "tint_changed", {
-                          value: option.value,
-                        });
-                        setUiTint(option.value as typeof uiTint);
-                      }}
-                      size="icon"
-                      className={cn("border-foreground rounded-md border-0", option.className)}
-                      title={option.label}
-                    >
-                      {uiTint === option.value && <IconCheck data-icon="inline-start" />}
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
+          <SettingsTarget id="setting-theme">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium tabular-nums">
-                  Tint Strength: {uiTintStrength}/10
-                </Label>
+                <Label className="text-sm font-medium">Theme</Label>
+              </div>
+              <ThemeToggle className="md:max-w-64" />
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-primary-color">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium">Primary Color</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Choose how light or strong the tint should feel.
+                  Controls the accent color used for switches, badges, highlights, and primary
+                  actions.
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("appearance", "reset_tint_strength");
-                  resetSetting("UI_TINT_STRENGTH");
-                }}
-                disabled={isUiTintStrengthDefault}
-                aria-label="Reset tint strength to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-            <Slider
-              value={[uiTintStrength]}
-              onValueChange={(value) => {
-                trackSettingsInteraction("appearance", "tint_strength_changed", {
-                  value: value[0],
-                });
-                setUiTintStrength(value[0] as typeof uiTintStrength);
-              }}
-              min={1}
-              max={10}
-              step={1}
-              className="w-full"
-              aria-label="Tint strength"
-              disabled={uiTint === "default"}
-            />
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Font</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Choose the font for the application.
-              </p>
-            </div>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={font}
-              onValueChange={(value) => {
-                if (value) {
-                  trackSettingsInteraction("appearance", "font_changed", { value });
-                  setFont(value as typeof font);
-                }
-              }}
-              aria-label="Select font"
-              className="w-full min-w-64 md:w-fit"
-            >
-              {fontOptions.map((option) => (
-                <ToggleGroupItem
-                  key={option.value}
-                  value={option.value}
-                  aria-label={option.label}
-                  className={option.className}
-                >
-                  {option.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Roundness</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Adjust the corner radius of UI elements.
-              </p>
-            </div>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={roundness}
-              onValueChange={(value) => {
-                if (value) {
-                  trackSettingsInteraction("appearance", "roundness_changed", { value });
-                  setRoundness(value as typeof roundness);
-                }
-              }}
-              aria-label="Select roundness"
-              className="w-full md:w-fit"
-              size="lg"
-            >
-              {roundnessOptions.map((option) => (
-                <ToggleGroupItem
-                  key={option.value}
-                  value={option.value}
-                  aria-label={option.label}
-                  title={option.label}
-                  size="lg"
-                  className="size-16"
-                >
-                  <div className={cn("bg-primary size-10", option.radius)} />
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-col items-start">
-              <Label className="text-sm font-medium">Text Scale</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Adjust the text size throughout the application.
-              </p>
-            </div>
-            <div className="w-full md:max-w-64">
-              <Select
-                value={textScale}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("appearance", "text_scale_changed", { value });
-                  setTextScale(value as typeof textScale);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select text scale"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {textScaleOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
+              <div className="flex items-center gap-2">
+                <ScrollArea className="max-w-full md:max-w-64">
+                  <ScrollBar className="w-full" orientation="horizontal" />
+                  <div className="flex flex-row flex-nowrap gap-2">
+                    {colorThemeOptions.map((option) => (
+                      <Button
+                        key={option.value}
+                        ref={colorTheme === option.value ? activeColorRef : undefined}
+                        onClick={() => {
+                          trackSettingsInteraction("appearance", "primary_color_changed", {
+                            value: option.value,
+                          });
+                          setColorTheme(option.value as typeof colorTheme);
+                        }}
+                        size="icon"
+                        className={cn("border-foreground rounded-md border-0", option.className)}
+                        title={option.label}
+                      >
+                        {colorTheme === option.value && <IconCheck data-icon="inline-start" />}
+                      </Button>
                     ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                  </div>
+                </ScrollArea>
+              </div>
             </div>
-          </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-tint">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium">Tint</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted
+                  buttons.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <ScrollArea className="max-w-full md:max-w-64">
+                  <ScrollBar className="w-full" orientation="horizontal" />
+                  <div className="flex flex-row flex-nowrap gap-2">
+                    {colorThemeOptions.map((option) => (
+                      <Button
+                        key={option.value}
+                        ref={uiTint === option.value ? activeColorRef : undefined}
+                        onClick={() => {
+                          trackSettingsInteraction("appearance", "tint_changed", {
+                            value: option.value,
+                          });
+                          setUiTint(option.value as typeof uiTint);
+                        }}
+                        size="icon"
+                        className={cn("border-foreground rounded-md border-0", option.className)}
+                        title={option.label}
+                      >
+                        {uiTint === option.value && <IconCheck data-icon="inline-start" />}
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-tint-strength">
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex flex-col items-start">
+                  <Label className="text-sm font-medium tabular-nums">
+                    Tint Strength: {uiTintStrength}/10
+                  </Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Choose how light or strong the tint should feel.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("appearance", "reset_tint_strength");
+                    resetSetting("UI_TINT_STRENGTH");
+                  }}
+                  disabled={isUiTintStrengthDefault}
+                  aria-label="Reset tint strength to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+              <Slider
+                value={[uiTintStrength]}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("appearance", "tint_strength_changed", {
+                    value: value[0],
+                  });
+                  setUiTintStrength(value[0] as typeof uiTintStrength);
+                }}
+                min={1}
+                max={10}
+                step={1}
+                className="w-full"
+                aria-label="Tint strength"
+                disabled={uiTint === "default"}
+              />
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-font">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium">Font</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose the font for the application.
+                </p>
+              </div>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={font}
+                onValueChange={(value) => {
+                  if (value) {
+                    trackSettingsInteraction("appearance", "font_changed", { value });
+                    setFont(value as typeof font);
+                  }
+                }}
+                aria-label="Select font"
+                className="w-full min-w-64 md:w-fit"
+              >
+                {fontOptions.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    aria-label={option.label}
+                    className={option.className}
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-roundness">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium">Roundness</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Adjust the corner radius of UI elements.
+                </p>
+              </div>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={roundness}
+                onValueChange={(value) => {
+                  if (value) {
+                    trackSettingsInteraction("appearance", "roundness_changed", { value });
+                    setRoundness(value as typeof roundness);
+                  }
+                }}
+                aria-label="Select roundness"
+                className="w-full md:w-fit"
+                size="lg"
+              >
+                {roundnessOptions.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    aria-label={option.label}
+                    title={option.label}
+                    size="lg"
+                    className="size-16"
+                  >
+                    <div className={cn("bg-primary size-10", option.radius)} />
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-text-scale">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium">Text Scale</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Adjust the text size throughout the application.
+                </p>
+              </div>
+              <div className="w-full md:max-w-64">
+                <Select
+                  value={textScale}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("appearance", "text_scale_changed", { value });
+                    setTextScale(value as typeof textScale);
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select text scale"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {textScaleOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </SettingsTarget>
         </CardContent>
       </Card>
 
@@ -383,117 +399,123 @@ export default function AppearanceSection() {
           <CardTitle>Chat Appearance</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-row items-center justify-between gap-2">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Markdown Highlighting</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Show markdown formatting styles while typing in the chat input.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={markdownHighlighting}
-                onCheckedChange={(checked) => {
-                  trackSettingsInteraction("appearance", "markdown_highlighting_toggled", {
-                    enabled: checked,
-                  });
-                  setMarkdownHighlighting(checked);
-                }}
-                aria-label="Toggle markdown highlighting"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleResetMarkdownHighlighting}
-                disabled={isMarkdownHighlightingDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Input Style</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Choose how the chat input box is displayed.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={inputStyle}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("appearance", "input_style_changed", { value });
-                  setInputStyle(value as InputStyleOption);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select input style"
+          <SettingsTarget id="setting-markdown-highlighting">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Markdown Highlighting</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Show markdown formatting styles while typing in the chat input.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={markdownHighlighting}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("appearance", "markdown_highlighting_toggled", {
+                      enabled: checked,
+                    });
+                    setMarkdownHighlighting(checked);
+                  }}
+                  aria-label="Toggle markdown highlighting"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleResetMarkdownHighlighting}
+                  disabled={isMarkdownHighlightingDefault}
+                  aria-label="Reset to default"
                 >
-                  <SelectValue placeholder="Select style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="docked">Docked</SelectItem>
-                    <SelectItem value="floating">Floating</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleResetInputStyle}
-                disabled={isInputStyleDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-          </div>
+          </SettingsTarget>
 
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Collapsed Sidebar Layout</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Choose whether collapsed sidebar buttons are laid out in a row or column.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={collapsedSidebarLayout}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("appearance", "collapsed_sidebar_layout_changed", {
-                    value,
-                  });
-                  setCollapsedSidebarLayout(value as CollapsedSidebarLayoutOption);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select collapsed sidebar layout"
+          <SettingsTarget id="setting-input-style">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Input Style</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose how the chat input box is displayed.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={inputStyle}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("appearance", "input_style_changed", { value });
+                    setInputStyle(value as InputStyleOption);
+                  }}
                 >
-                  <SelectValue placeholder="Select layout" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="row">Row</SelectItem>
-                    <SelectItem value="column">Column</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleResetCollapsedSidebarLayout}
-                disabled={isCollapsedSidebarLayoutDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select input style"
+                  >
+                    <SelectValue placeholder="Select style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="docked">Docked</SelectItem>
+                      <SelectItem value="floating">Floating</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleResetInputStyle}
+                  disabled={isInputStyleDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-          </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-collapsed-sidebar-layout">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Collapsed Sidebar Layout</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose whether collapsed sidebar buttons are laid out in a row or column.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={collapsedSidebarLayout}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("appearance", "collapsed_sidebar_layout_changed", {
+                      value,
+                    });
+                    setCollapsedSidebarLayout(value as CollapsedSidebarLayoutOption);
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select collapsed sidebar layout"
+                  >
+                    <SelectValue placeholder="Select layout" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="row">Row</SelectItem>
+                      <SelectItem value="column">Column</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleResetCollapsedSidebarLayout}
+                  disabled={isCollapsedSidebarLayoutDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
         </CardContent>
       </Card>
     </div>

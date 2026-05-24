@@ -25,6 +25,8 @@ import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
+import SettingsTarget from "../settings-target";
+
 export default function AboutSection() {
   const navigate = useNavigate();
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
@@ -220,67 +222,72 @@ export default function AboutSection() {
           <CardTitle>Usage Analytics</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-1 flex-col gap-1">
-              <p className="text-sm font-medium">Allow usage analytics</p>
-              <p className="text-muted-foreground text-sm">
-                When disabled, AgentOne stops sending Google Analytics events from the desktop app.
-              </p>
+          <SettingsTarget id="setting-allow-usage-analytics">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-1 flex-col gap-1">
+                <p className="text-sm font-medium">Allow usage analytics</p>
+                <p className="text-muted-foreground text-sm">
+                  When disabled, AgentOne stops sending Google Analytics events from the desktop
+                  app.
+                </p>
+              </div>
+              <Switch
+                checked={analyticsIdentity !== "off"}
+                onCheckedChange={(checked) => {
+                  const nextValue = checked ? "user-id" : "off";
+                  trackSettingsInteraction("about", "analytics_enabled_toggled", {
+                    value: nextValue,
+                  });
+                  setAnalyticsIdentity(nextValue);
+                }}
+                aria-label="Allow usage analytics"
+              />
             </div>
-            <Switch
-              checked={analyticsIdentity !== "off"}
-              onCheckedChange={(checked) => {
-                const nextValue = checked ? "user-id" : "off";
-                trackSettingsInteraction("about", "analytics_enabled_toggled", {
-                  value: nextValue,
-                });
-                setAnalyticsIdentity(nextValue);
-              }}
-              aria-label="Allow usage analytics"
-            />
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-1 flex-col gap-1">
-              <p className="text-sm font-medium">Associate analytics with my signed-in account</p>
-              <p className="text-muted-foreground text-sm">
-                When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you can
-                measure signed-in usage across sessions. We do not send your name or email address
-                to Google Analytics.
-              </p>
-              <a
-                href="https://www.agent-one.dev/privacy?utm_source=desktop-app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-fit underline"
-              >
-                Learn more
-              </a>
-            </div>
+          </SettingsTarget>
+          <SettingsTarget id="setting-associate-analytics-with-my-signed-in-account">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-1 flex-col gap-1">
+                <p className="text-sm font-medium">Associate analytics with my signed-in account</p>
+                <p className="text-muted-foreground text-sm">
+                  When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you
+                  can measure signed-in usage across sessions. We do not send your name or email
+                  address to Google Analytics.
+                </p>
+                <a
+                  href="https://www.agent-one.dev/privacy?utm_source=desktop-app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-fit underline"
+                >
+                  Learn more
+                </a>
+              </div>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
-                  <Switch
-                    checked={analyticsIdentity === "user-id"}
-                    disabled={analyticsIdentity === "off" || !user}
-                    onCheckedChange={(checked) => {
-                      trackSettingsInteraction("about", "analytics_identity_toggled", {
-                        value: checked ? "user-id" : "anonymous",
-                        signed_in: Boolean(user),
-                      });
-                      setAnalyticsIdentity(checked ? "user-id" : "anonymous");
-                    }}
-                    aria-label="Associate analytics with my signed-in account"
-                  />
-                </span>
-              </TooltipTrigger>
-              {!user && (
-                <TooltipContent>
-                  You're not signed in, so analytics aren't associated with your account.
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Switch
+                      checked={analyticsIdentity === "user-id"}
+                      disabled={analyticsIdentity === "off" || !user}
+                      onCheckedChange={(checked) => {
+                        trackSettingsInteraction("about", "analytics_identity_toggled", {
+                          value: checked ? "user-id" : "anonymous",
+                          signed_in: Boolean(user),
+                        });
+                        setAnalyticsIdentity(checked ? "user-id" : "anonymous");
+                      }}
+                      aria-label="Associate analytics with my signed-in account"
+                    />
+                  </span>
+                </TooltipTrigger>
+                {!user && (
+                  <TooltipContent>
+                    You're not signed in, so analytics aren't associated with your account.
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </div>
+          </SettingsTarget>
         </CardContent>
       </Card>
       {debugMode && (

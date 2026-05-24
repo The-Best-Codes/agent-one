@@ -41,6 +41,8 @@ import {
   type TitleGenerationMethodOption,
 } from "@/lib/settings/types";
 
+import SettingsTarget from "../settings-target";
+
 export default function ChatsSection() {
   const [markdownRendering, setMarkdownRendering] = useAtom(markdownRenderingAtom);
   const [notificationSetting, setNotificationSetting] = useAtom(notificationSettingAtom);
@@ -92,324 +94,340 @@ export default function ChatsSection() {
           <CardTitle>Chat Behavior</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Chat Sort Order</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Choose whether the sidebar keeps newer chats first or brings recently updated chats
-                to the top.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={chatSort}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("chats", "chat_sort_changed", { value });
-                  setChatSort(value as ChatSortOption);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select chat sort order"
+          <SettingsTarget id="setting-chat-sort-order">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Chat Sort Order</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose whether the sidebar keeps newer chats first or brings recently updated
+                  chats to the top.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={chatSort}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "chat_sort_changed", { value });
+                    setChatSort(value as ChatSortOption);
+                  }}
                 >
-                  <SelectValue placeholder="Select option" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="created-at">Newest chats first</SelectItem>
-                    <SelectItem value="updated-at">Recently updated first</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_chat_sort");
-                  resetSetting("CHAT_SORT");
-                }}
-                disabled={isChatSortDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Markdown Rendering</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Choose which messages should render markdown formatting.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={markdownRendering}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("chats", "markdown_rendering_changed", { value });
-                  setMarkdownRendering(value as MarkdownRenderingOption);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select markdown rendering"
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select chat sort order"
+                  >
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="created-at">Newest chats first</SelectItem>
+                      <SelectItem value="updated-at">Recently updated first</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_chat_sort");
+                    resetSetting("CHAT_SORT");
+                  }}
+                  disabled={isChatSortDefault}
+                  aria-label="Reset to default"
                 >
-                  <SelectValue placeholder="Select option" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="both">All messages</SelectItem>
-                    <SelectItem value="user">User messages only</SelectItem>
-                    <SelectItem value="assistant">Assistant messages only</SelectItem>
-                    <SelectItem value="neither">No messages</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_markdown_rendering");
-                  resetSetting("MARKDOWN_RENDERING");
-                }}
-                disabled={isMarkdownRenderingDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-          </div>
+          </SettingsTarget>
 
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Completion Notification</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Show notification when AgentOne finishes responding.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={notificationSetting}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("chats", "notification_setting_changed", { value });
-                  setNotificationSetting(value as NotificationOption);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select completion notification"
+          <SettingsTarget id="setting-markdown-rendering">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Markdown Rendering</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose which messages should render markdown formatting.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={markdownRendering}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "markdown_rendering_changed", { value });
+                    setMarkdownRendering(value as MarkdownRenderingOption);
+                  }}
                 >
-                  <SelectValue placeholder="Select option" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="always">Always</SelectItem>
-                    <SelectItem value="when-unfocused">When window unfocused</SelectItem>
-                    <SelectItem value="never">Never</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_notification_setting");
-                  resetSetting("NOTIFICATION_SETTING");
-                }}
-                disabled={isNotificationSettingDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Message Action Row</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Control when message actions (copy, edit, etc.) are visible.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={showMessageActionRow}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("chats", "message_action_row_changed", { value });
-                  setShowMessageActionRow(value as MessageActionRowOption);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select message action row"
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select markdown rendering"
+                  >
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="both">All messages</SelectItem>
+                      <SelectItem value="user">User messages only</SelectItem>
+                      <SelectItem value="assistant">Assistant messages only</SelectItem>
+                      <SelectItem value="neither">No messages</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_markdown_rendering");
+                    resetSetting("MARKDOWN_RENDERING");
+                  }}
+                  disabled={isMarkdownRenderingDefault}
+                  aria-label="Reset to default"
                 >
-                  <SelectValue placeholder="Select option" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="hover">Show on hover</SelectItem>
-                    <SelectItem value="always">Always show</SelectItem>
-                    <SelectItem value="never">Never show</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_message_action_row");
-                  resetSetting("SHOW_MESSAGE_ACTION_ROW");
-                }}
-                disabled={isShowMessageActionRowDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-          </div>
+          </SettingsTarget>
 
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Submit Key</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Choose which key combination submits your message.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={submitKey}
-                onValueChange={(value) => {
-                  trackSettingsInteraction("chats", "submit_key_changed", { value });
-                  setSubmitKey(value as SubmitKeyOption);
-                }}
-              >
-                <SelectTrigger
-                  className="w-full md:w-fit md:max-w-96"
-                  aria-label="Select submit key"
+          <SettingsTarget id="setting-completion-notification">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Completion Notification</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Show notification when AgentOne finishes responding.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={notificationSetting}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "notification_setting_changed", { value });
+                    setNotificationSetting(value as NotificationOption);
+                  }}
                 >
-                  <SelectValue placeholder="Select option" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="enter">Enter</SelectItem>
-                    <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_submit_key");
-                  resetSetting("SUBMIT_KEY");
-                }}
-                disabled={isSubmitKeyDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select completion notification"
+                  >
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="always">Always</SelectItem>
+                      <SelectItem value="when-unfocused">When window unfocused</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_notification_setting");
+                    resetSetting("NOTIFICATION_SETTING");
+                  }}
+                  disabled={isNotificationSettingDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-          </div>
+          </SettingsTarget>
 
-          <div className="flex flex-row items-center justify-between gap-2">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Regenerate on Save</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Automatically regenerate the AI response when you save an edited message.
-              </p>
+          <SettingsTarget id="setting-message-action-row">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Message Action Row</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Control when message actions (copy, edit, etc.) are visible.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={showMessageActionRow}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "message_action_row_changed", { value });
+                    setShowMessageActionRow(value as MessageActionRowOption);
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select message action row"
+                  >
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="hover">Show on hover</SelectItem>
+                      <SelectItem value="always">Always show</SelectItem>
+                      <SelectItem value="never">Never show</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_message_action_row");
+                    resetSetting("SHOW_MESSAGE_ACTION_ROW");
+                  }}
+                  disabled={isShowMessageActionRowDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={regenerateOnSave}
-                onCheckedChange={(checked) => {
-                  trackSettingsInteraction("chats", "regenerate_on_save_toggled", {
-                    enabled: checked,
-                  });
-                  setRegenerateOnSave(checked);
-                }}
-                aria-label="Toggle regenerate on save"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_regenerate_on_save");
-                  resetSetting("REGENERATE_ON_SAVE");
-                }}
-                disabled={isRegenerateOnSaveDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-          </div>
+          </SettingsTarget>
 
-          <div className="flex flex-row items-center justify-between gap-2">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Always Show Stop Button</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Show the stop button immediately after submitting a message.
-              </p>
+          <SettingsTarget id="setting-submit-key">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Submit Key</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose which key combination submits your message.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={submitKey}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "submit_key_changed", { value });
+                    setSubmitKey(value as SubmitKeyOption);
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select submit key"
+                  >
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="enter">Enter</SelectItem>
+                      <SelectItem value="ctrl-enter">Ctrl + Enter</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_submit_key");
+                    resetSetting("SUBMIT_KEY");
+                  }}
+                  disabled={isSubmitKeyDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={alwaysShowStopButton === "immediate"}
-                onCheckedChange={(checked) => {
-                  trackSettingsInteraction("chats", "stop_button_behavior_toggled", {
-                    enabled: checked,
-                  });
-                  setAlwaysShowStopButton(checked ? "immediate" : "at-stopping-point");
-                }}
-                aria-label="Toggle always show stop button"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_stop_button_behavior");
-                  resetSetting("STOP_BUTTON_BEHAVIOR");
-                }}
-                disabled={isAlwaysShowStopButtonDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-          </div>
+          </SettingsTarget>
 
-          <div className="flex flex-row items-center justify-between gap-2">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Chat Status Indicators</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Show status icons in the sidebar for loading, error, and unread chats.
-              </p>
+          <SettingsTarget id="setting-regenerate-on-save">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Regenerate on Save</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Automatically regenerate the AI response when you save an edited message.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={regenerateOnSave}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "regenerate_on_save_toggled", {
+                      enabled: checked,
+                    });
+                    setRegenerateOnSave(checked);
+                  }}
+                  aria-label="Toggle regenerate on save"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_regenerate_on_save");
+                    resetSetting("REGENERATE_ON_SAVE");
+                  }}
+                  disabled={isRegenerateOnSaveDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={showChatStatusIndicator}
-                onCheckedChange={(checked) => {
-                  trackSettingsInteraction("chats", "chat_status_indicators_toggled", {
-                    enabled: checked,
-                  });
-                  setShowChatStatusIndicator(checked);
-                }}
-                aria-label="Toggle chat status indicators"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_chat_status_indicators");
-                  resetSetting("SHOW_CHAT_STATUS_INDICATOR");
-                }}
-                disabled={isShowChatStatusIndicatorDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-always-show-stop-button">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Always Show Stop Button</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Show the stop button immediately after submitting a message.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={alwaysShowStopButton === "immediate"}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "stop_button_behavior_toggled", {
+                      enabled: checked,
+                    });
+                    setAlwaysShowStopButton(checked ? "immediate" : "at-stopping-point");
+                  }}
+                  aria-label="Toggle always show stop button"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_stop_button_behavior");
+                    resetSetting("STOP_BUTTON_BEHAVIOR");
+                  }}
+                  disabled={isAlwaysShowStopButtonDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
             </div>
-          </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-chat-status-indicators">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Chat Status Indicators</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Show status icons in the sidebar for loading, error, and unread chats.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showChatStatusIndicator}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "chat_status_indicators_toggled", {
+                      enabled: checked,
+                    });
+                    setShowChatStatusIndicator(checked);
+                  }}
+                  aria-label="Toggle chat status indicators"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_chat_status_indicators");
+                    resetSetting("SHOW_CHAT_STATUS_INDICATOR");
+                  }}
+                  disabled={isShowChatStatusIndicatorDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
         </CardContent>
       </Card>
 
@@ -418,111 +436,117 @@ export default function ChatsSection() {
           <CardTitle>Streaming Experience</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-row items-center justify-between gap-2">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Smooth Stream</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Enable smooth streaming for a more fluid typing experience.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={smoothStreamEnabled}
-                onCheckedChange={(checked) => {
-                  trackSettingsInteraction("chats", "smooth_stream_toggled", {
-                    enabled: checked,
-                  });
-                  setSmoothStreamEnabled(checked);
-                }}
-                aria-label="Toggle smooth stream"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_smooth_stream");
-                  resetSetting("SMOOTH_STREAM_ENABLED");
-                }}
-                disabled={isSmoothStreamDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-row items-center justify-between gap-2">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Experimental Throttle</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                Enable throttling to control streaming speed.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={experimentalThrottleEnabled}
-                onCheckedChange={(checked) => {
-                  trackSettingsInteraction("chats", "experimental_throttle_toggled", {
-                    enabled: checked,
-                  });
-                  setExperimentalThrottleEnabled(checked);
-                }}
-                aria-label="Toggle experimental throttle"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  trackSettingsInteraction("chats", "reset_experimental_throttle");
-                  resetSetting("EXPERIMENTAL_THROTTLE_ENABLED");
-                }}
-                disabled={isExperimentalThrottleEnabledDefault}
-                aria-label="Reset to default"
-              >
-                <IconRestore data-icon="inline-start" />
-              </Button>
-            </div>
-          </div>
-
-          {experimentalThrottleEnabled && (
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium tabular-nums">
-                  Throttle Value: {experimentalThrottleValue}ms
-                </Label>
+          <SettingsTarget id="setting-smooth-stream">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Smooth Stream</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Adjust the throttle delay from 0ms to 10,000ms.
+                  Enable smooth streaming for a more fluid typing experience.
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Slider
-                  value={[experimentalThrottleValue]}
-                  onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "experimental_throttle_value_changed", {
-                      value: value[0],
+                <Switch
+                  checked={smoothStreamEnabled}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "smooth_stream_toggled", {
+                      enabled: checked,
                     });
-                    setExperimentalThrottleValue(value[0]);
+                    setSmoothStreamEnabled(checked);
                   }}
-                  min={0}
-                  max={10000}
-                  step={10}
-                  className="flex-1"
-                  aria-label="Throttle value"
+                  aria-label="Toggle smooth stream"
                 />
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_experimental_throttle_value");
-                    resetSetting("EXPERIMENTAL_THROTTLE_VALUE");
+                    trackSettingsInteraction("chats", "reset_smooth_stream");
+                    resetSetting("SMOOTH_STREAM_ENABLED");
                   }}
-                  disabled={isExperimentalThrottleValueDefault}
+                  disabled={isSmoothStreamDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
               </div>
             </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-experimental-throttle">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Experimental Throttle</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Enable throttling to control streaming speed.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={experimentalThrottleEnabled}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "experimental_throttle_toggled", {
+                      enabled: checked,
+                    });
+                    setExperimentalThrottleEnabled(checked);
+                  }}
+                  aria-label="Toggle experimental throttle"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_experimental_throttle");
+                    resetSetting("EXPERIMENTAL_THROTTLE_ENABLED");
+                  }}
+                  disabled={isExperimentalThrottleEnabledDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          {experimentalThrottleEnabled && (
+            <SettingsTarget id="setting-throttle-value">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-col items-start">
+                  <Label className="text-sm font-medium tabular-nums">
+                    Throttle Value: {experimentalThrottleValue}ms
+                  </Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Adjust the throttle delay from 0ms to 10,000ms.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Slider
+                    value={[experimentalThrottleValue]}
+                    onValueChange={(value) => {
+                      trackSettingsInteraction("chats", "experimental_throttle_value_changed", {
+                        value: value[0],
+                      });
+                      setExperimentalThrottleValue(value[0]);
+                    }}
+                    min={0}
+                    max={10000}
+                    step={10}
+                    className="flex-1"
+                    aria-label="Throttle value"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      trackSettingsInteraction("chats", "reset_experimental_throttle_value");
+                      resetSetting("EXPERIMENTAL_THROTTLE_VALUE");
+                    }}
+                    disabled={isExperimentalThrottleValueDefault}
+                    aria-label="Reset to default"
+                  >
+                    <IconRestore data-icon="inline-start" />
+                  </Button>
+                </div>
+              </div>
+            </SettingsTarget>
           )}
         </CardContent>
       </Card>
@@ -546,121 +570,129 @@ export default function ChatsSection() {
           </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-            <div className="flex flex-1 flex-col items-start">
-              <Label className="text-sm font-medium">Generation Method</Label>
-              <p className="text-muted-foreground mt-1 text-sm">
-                How chat titles should be generated.
-              </p>
-            </div>
-            <Select
-              value={titleGeneration.method}
-              onValueChange={(value) => {
-                trackSettingsInteraction("chats", "title_generation_method_changed", { value });
-                updateTitleGeneration({
-                  method: value as TitleGenerationMethodOption,
-                });
-              }}
-            >
-              <SelectTrigger
-                className="w-full md:w-fit md:max-w-96"
-                aria-label="Select generation method"
+          <SettingsTarget id="setting-generation-method">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Generation Method</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  How chat titles should be generated.
+                </p>
+              </div>
+              <Select
+                value={titleGeneration.method}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("chats", "title_generation_method_changed", { value });
+                  updateTitleGeneration({
+                    method: value as TitleGenerationMethodOption,
+                  });
+                }}
               >
-                <SelectValue placeholder="Select method" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ai">AI generated</SelectItem>
-                <SelectItem value="first-user-message">First user message</SelectItem>
-                <SelectItem value="first-assistant-message">First assistant message</SelectItem>
-                <SelectItem value="custom">Custom phrase</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <SelectTrigger
+                  className="w-full md:w-fit md:max-w-96"
+                  aria-label="Select generation method"
+                >
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ai">AI generated</SelectItem>
+                  <SelectItem value="first-user-message">First user message</SelectItem>
+                  <SelectItem value="first-assistant-message">First assistant message</SelectItem>
+                  <SelectItem value="custom">Custom phrase</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </SettingsTarget>
 
           {(titleGeneration.method === "first-user-message" ||
             titleGeneration.method === "first-assistant-message") && (
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-1 flex-col items-start">
-                <Label htmlFor="character-limit" className="text-sm font-medium">
-                  Character Limit
-                </Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Maximum characters to use from the message.
-                </p>
+            <SettingsTarget id="setting-character-limit">
+              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label htmlFor="character-limit" className="text-sm font-medium">
+                    Character Limit
+                  </Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Maximum characters to use from the message.
+                  </p>
+                </div>
+                <Input
+                  id="character-limit"
+                  type="number"
+                  min="10"
+                  max="200"
+                  value={titleGeneration.characterLimit}
+                  onChange={(e) => {
+                    trackSettingsInteraction("chats", "title_character_limit_changed", {
+                      value: parseInt(e.target.value) || 50,
+                    });
+                    updateTitleGeneration({
+                      characterLimit: parseInt(e.target.value) || 50,
+                    });
+                  }}
+                  className="w-full md:w-32"
+                />
               </div>
-              <Input
-                id="character-limit"
-                type="number"
-                min="10"
-                max="200"
-                value={titleGeneration.characterLimit}
-                onChange={(e) => {
-                  trackSettingsInteraction("chats", "title_character_limit_changed", {
-                    value: parseInt(e.target.value) || 50,
-                  });
-                  updateTitleGeneration({
-                    characterLimit: parseInt(e.target.value) || 50,
-                  });
-                }}
-                className="w-full md:w-32"
-              />
-            </div>
+            </SettingsTarget>
           )}
 
           {titleGeneration.method === "custom" && (
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-1 flex-col items-start">
-                <Label htmlFor="custom-phrase" className="text-sm font-medium">
-                  Custom Phrase
-                </Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  The phrase to use as the chat title.
-                </p>
+            <SettingsTarget id="setting-custom-phrase">
+              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label htmlFor="custom-phrase" className="text-sm font-medium">
+                    Custom Phrase
+                  </Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    The phrase to use as the chat title.
+                  </p>
+                </div>
+                <Input
+                  id="custom-phrase"
+                  type="text"
+                  value={titleGeneration.customPhrase}
+                  onChange={(e) => {
+                    trackSettingsInteraction("chats", "title_custom_phrase_changed", {
+                      value_length: e.target.value.length,
+                    });
+                    updateTitleGeneration({
+                      customPhrase: e.target.value,
+                    });
+                  }}
+                  placeholder="New chat"
+                  className="w-full md:w-64"
+                />
               </div>
-              <Input
-                id="custom-phrase"
-                type="text"
-                value={titleGeneration.customPhrase}
-                onChange={(e) => {
-                  trackSettingsInteraction("chats", "title_custom_phrase_changed", {
-                    value_length: e.target.value.length,
-                  });
-                  updateTitleGeneration({
-                    customPhrase: e.target.value,
-                  });
-                }}
-                placeholder="New chat"
-                className="w-full md:w-64"
-              />
-            </div>
+            </SettingsTarget>
           )}
 
           {titleGeneration.method !== "custom" && (
-            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
-              <div className="flex flex-1 flex-col items-start">
-                <Label htmlFor="fallback-phrase" className="text-sm font-medium">
-                  Fallback Phrase
-                </Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Used when title generation fails or no content is available.
-                </p>
+            <SettingsTarget id="setting-fallback-phrase">
+              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label htmlFor="fallback-phrase" className="text-sm font-medium">
+                    Fallback Phrase
+                  </Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Used when title generation fails or no content is available.
+                  </p>
+                </div>
+                <Input
+                  id="fallback-phrase"
+                  type="text"
+                  value={titleGeneration.fallbackPhrase}
+                  onChange={(e) => {
+                    trackSettingsInteraction("chats", "title_fallback_phrase_changed", {
+                      value_length: e.target.value.length,
+                    });
+                    updateTitleGeneration({
+                      fallbackPhrase: e.target.value,
+                    });
+                  }}
+                  placeholder="New chat"
+                  className="w-full md:w-64"
+                />
               </div>
-              <Input
-                id="fallback-phrase"
-                type="text"
-                value={titleGeneration.fallbackPhrase}
-                onChange={(e) => {
-                  trackSettingsInteraction("chats", "title_fallback_phrase_changed", {
-                    value_length: e.target.value.length,
-                  });
-                  updateTitleGeneration({
-                    fallbackPhrase: e.target.value,
-                  });
-                }}
-                placeholder="New chat"
-                className="w-full md:w-64"
-              />
-            </div>
+            </SettingsTarget>
           )}
         </CardContent>
       </Card>

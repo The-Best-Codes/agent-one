@@ -17,6 +17,7 @@ import { enabledToolsAtom, toolConfigsAtom } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
 
+import SettingsTarget from "../../settings-target";
 import { BUILT_IN_TOOLS, TOOL_IDS } from "./built-in-extensions-utils";
 
 export function BuiltInExtensionsConfig() {
@@ -61,23 +62,25 @@ export function BuiltInExtensionsConfig() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-1 flex-col items-start">
-          <Label className="text-sm font-medium">Built-in tools</Label>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Choose which built-in tools are available and how they behave.
-          </p>
+      <SettingsTarget id="setting-built-in-tools">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">Built-in tools</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Choose which built-in tools are available and how they behave.
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleResetToolConfigs}
+            disabled={isToolConfigsDefault}
+            aria-label="Reset to default"
+          >
+            <IconRestore data-icon="inline-start" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleResetToolConfigs}
-          disabled={isToolConfigsDefault}
-          aria-label="Reset to default"
-        >
-          <IconRestore data-icon="inline-start" />
-        </Button>
-      </div>
+      </SettingsTarget>
 
       <Accordion type="single" collapsible className="border-border w-full rounded-md border">
         {TOOL_IDS.map((toolId) => (
