@@ -1,5 +1,6 @@
 import {
   IconAlertCircle,
+  IconBug,
   IconCircleCheck,
   IconDownload,
   IconExternalLink,
@@ -8,6 +9,7 @@ import {
   IconShieldCheck,
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
+import { useNavigate } from "react-router";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
@@ -20,12 +22,15 @@ import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
+import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export default function AboutSection() {
+  const navigate = useNavigate();
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
     useUpdate();
   const { user } = useWebAuth();
   const [analyticsIdentity, setAnalyticsIdentity] = useAtom(analyticsIdentityAtom);
+  const [debugMode] = useAtom(debugModeEnabledAtom);
 
   const currentVersion = packageJson.version;
 
@@ -270,6 +275,31 @@ export default function AboutSection() {
           </div>
         </CardContent>
       </Card>
+      {debugMode && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Debug</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-full">
+                  <IconBug className="text-muted-foreground size-5" />
+                </div>
+                <div>
+                  <p className="leading-none font-medium">Internal Tests</p>
+                  <p className="text-muted-foreground text-sm">
+                    Access internal testing tools and utilities.
+                  </p>
+                </div>
+              </div>
+              <Button onClick={() => navigate("/tests")} size="sm">
+                Open Tests
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

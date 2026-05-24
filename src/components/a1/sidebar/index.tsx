@@ -1,7 +1,8 @@
 import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
-import { useAtom } from "jotai";
-import { useState } from "react";
+import { useAtom, useSetAtom } from "jotai";
+import { useCallback, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
-import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { debugModeEnabledAtom, sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -37,10 +38,42 @@ const SidebarContent = ({
   handleNewChat: () => void;
   onChatClick?: (id: string) => void;
 }) => {
+  const navigate = useNavigate();
+  const setDebugMode = useSetAtom(debugModeEnabledAtom);
+  const clickTimestamps = useRef<number[]>([]);
+
+  const handleTitleClick = useCallback(() => {
+    const now = Date.now();
+    clickTimestamps.current.push(now);
+    clickTimestamps.current = clickTimestamps.current.filter((t) => now - t < 1500);
+    if (clickTimestamps.current.length >= 5) {
+      clickTimestamps.current = [];
+      toast("Enable debug mode?", {
+        description: "This will add a Debug section to Help & Updates in Settings.",
+        action: {
+          label: "Enable",
+          onClick: () => {
+            setDebugMode(true);
+            toast.success("Debug mode enabled", {
+              description: "Check Settings > Help & Updates to access internal tests.",
+              action: {
+                label: "Open Settings",
+                onClick: () => navigate("/settings"),
+              },
+            });
+          },
+        },
+        duration: Infinity,
+      });
+    }
+  }, [navigate, setDebugMode]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex flex-row items-center justify-center gap-2">
-        <span className="text-xl">AgentOne</span>
+        <span className="cursor-default text-xl select-none" onClick={handleTitleClick}>
+          AgentOne
+        </span>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
         <ChatList

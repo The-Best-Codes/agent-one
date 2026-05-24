@@ -12,12 +12,6 @@ export const keyboardShortcutDefinitions = [
     defaultShortcut: "ctrl+comma",
   },
   {
-    id: "openTests",
-    label: "Open tests",
-    description: "Open the internal tests screen.",
-    defaultShortcut: "ctrl+shift+q",
-  },
-  {
     id: "newChat",
     label: "New chat",
     description: "Start a new conversation.",

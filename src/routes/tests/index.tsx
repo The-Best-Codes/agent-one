@@ -14,9 +14,14 @@ export default function TestsRoute() {
     <div className="bg-background min-h-screen">
       <div className="container mx-auto max-w-4xl p-6">
         <div className="mb-6 flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate("/chat")} className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/settings")}
+            className="gap-2"
+          >
             <IconArrowLeft data-icon="inline-start" />
-            Back to Chat
+            Back to Settings
           </Button>
           <h1 className="text-2xl font-bold">Tests</h1>
         </div>
