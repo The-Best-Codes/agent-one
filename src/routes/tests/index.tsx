@@ -1,7 +1,8 @@
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconAlertTriangle, IconArrowLeft } from "@tabler/icons-react";
 import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
@@ -25,6 +26,15 @@ export default function TestsRoute() {
           </Button>
           <h1 className="text-2xl font-bold">Tests</h1>
         </div>
+
+        <Alert variant="destructive" className="mb-6">
+          <IconAlertTriangle />
+          <AlertTitle>Developer Tools</AlertTitle>
+          <AlertDescription>
+            These tests are intended for developers and debugging only. They may affect your app
+            data, performance, or stability. Proceed with caution.
+          </AlertDescription>
+        </Alert>
 
         <div className="grid gap-6">
           <Card>

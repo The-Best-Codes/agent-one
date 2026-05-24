@@ -1,5 +1,5 @@
 import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import { useCallback, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -39,16 +39,18 @@ const SidebarContent = ({
   onChatClick?: (id: string) => void;
 }) => {
   const navigate = useNavigate();
-  const setDebugMode = useSetAtom(debugModeEnabledAtom);
+  const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
   const clickTimestamps = useRef<number[]>([]);
 
   const handleTitleClick = useCallback(() => {
+    if (debugMode) return;
     const now = Date.now();
     clickTimestamps.current.push(now);
     clickTimestamps.current = clickTimestamps.current.filter((t) => now - t < 1500);
     if (clickTimestamps.current.length >= 5) {
       clickTimestamps.current = [];
       toast("Enable debug mode?", {
+        id: "enable-debug-mode",
         description: "This will add a Debug section to Help & Updates in Settings.",
         action: {
           label: "Enable",
@@ -66,7 +68,7 @@ const SidebarContent = ({
         duration: Infinity,
       });
     }
-  }, [navigate, setDebugMode]);
+  }, [navigate, debugMode, setDebugMode]);
 
   return (
     <div className="flex h-full flex-col">
