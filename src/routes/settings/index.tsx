@@ -78,7 +78,7 @@ export default function SettingsRoute() {
             variant="outline"
             size="sm"
             onClick={handleNavigateBack}
-            analytics={{ event: "settings_back_clicked", params: { source: "mobile_header" } }}
+            analytics={{ event: "settings_back_clicked", params: { ui_location: "mobile_header" } }}
           >
             <IconArrowLeft data-icon="inline-start" />
             Back
@@ -89,7 +89,10 @@ export default function SettingsRoute() {
                 variant="outline"
                 size="icon"
                 aria-label="Open settings menu"
-                analytics={{ event: "settings_menu_opened", params: { source: "mobile_header" } }}
+                analytics={{
+                  event: "settings_menu_opened",
+                  params: { ui_location: "mobile_header" },
+                }}
               >
                 <IconList />
               </Button>
@@ -122,7 +125,7 @@ export default function SettingsRoute() {
                   className="w-full"
                   analytics={{
                     event: "settings_back_clicked",
-                    params: { source: "desktop_sidebar" },
+                    params: { ui_location: "desktop_sidebar" },
                   }}
                 >
                   <IconArrowLeft data-icon="inline-start" />

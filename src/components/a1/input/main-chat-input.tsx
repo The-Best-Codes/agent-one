@@ -153,7 +153,7 @@ export const MainChatInput = ({
         files: files,
       });
       trackGoogleAnalyticsEvent("message_sent", {
-        source: "main_chat_input",
+        ui_location: "main_chat_input",
         text_length: currentText.length,
         has_files: Boolean(files),
         file_count: files?.length ?? 0,
@@ -227,7 +227,7 @@ export const MainChatInput = ({
       }
 
       trackGoogleAnalyticsEvent("files_attached", {
-        source: "main_chat_input",
+        ui_location: "main_chat_input",
         file_count: updatedFileList.length,
       });
 
@@ -269,7 +269,7 @@ export const MainChatInput = ({
     setFiles(newFileList.length > 0 ? newFileList : undefined);
 
     trackGoogleAnalyticsEvent("attached_file_removed", {
-      source: "main_chat_input",
+      ui_location: "main_chat_input",
       remaining_file_count: newFileList.length,
     });
 
@@ -532,7 +532,7 @@ export const MainChatInput = ({
                   }}
                   analytics={{
                     event: "attachment_picker_opened",
-                    params: { source: "main_chat_input" },
+                    params: { ui_location: "main_chat_input" },
                   }}
                   className="relative"
                   aria-label="Attach files"
@@ -570,7 +570,7 @@ export const MainChatInput = ({
                     onClick={() => stop()}
                     analytics={{
                       event: "response_stop_clicked",
-                      params: { source: "main_chat_input" },
+                      params: { ui_location: "main_chat_input" },
                     }}
                     aria-label="Stop response"
                   >
@@ -595,7 +595,7 @@ export const MainChatInput = ({
                     }
                     analytics={{
                       event: "send_button_clicked",
-                      params: { source: "main_chat_input" },
+                      params: { ui_location: "main_chat_input" },
                     }}
                     aria-label="Send message"
                   >

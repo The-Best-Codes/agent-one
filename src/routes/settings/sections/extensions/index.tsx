@@ -110,7 +110,7 @@ export default function ExtensionsSection() {
         updates.enabled !== currentServer.enabled
       ) {
         trackGoogleAnalyticsEvent("extension_enabled_changed", {
-          source: isServerFromRegistry(currentServer) ? "registry" : "custom",
+          extension_source: isServerFromRegistry(currentServer) ? "registry" : "custom",
           transport_type: currentServer.type,
           enabled: updates.enabled,
         });
@@ -162,7 +162,7 @@ export default function ExtensionsSection() {
 
     setMcpServers((prev) => [newServer, ...prev]);
     trackGoogleAnalyticsEvent("extension_added", {
-      source: "custom",
+      extension_source: "custom",
       transport_type: newServer.type,
       requires_approval: newServer.requiresApproval,
     });
@@ -196,7 +196,7 @@ export default function ExtensionsSection() {
 
     setMcpServers((prev) => [newServer, ...prev]);
     trackGoogleAnalyticsEvent("extension_added", {
-      source: "registry",
+      extension_source: "registry",
       transport_type: newServer.type,
       requires_approval: newServer.requiresApproval,
     });
@@ -214,7 +214,7 @@ export default function ExtensionsSection() {
     const server = mcpServers.find((item) => item.id === serverToUninstall.id);
     if (server) {
       trackGoogleAnalyticsEvent("extension_removed", {
-        source: isServerFromRegistry(server) ? "registry" : "custom",
+        extension_source: isServerFromRegistry(server) ? "registry" : "custom",
         transport_type: server.type,
       });
     }
@@ -487,7 +487,7 @@ export default function ExtensionsSection() {
             const server = mcpServers.find((s) => s.id === serverId);
             if (server) {
               trackGoogleAnalyticsEvent("extension_removed", {
-                source: "dangling",
+                extension_source: "dangling",
                 transport_type: server.type,
               });
             }
@@ -496,7 +496,7 @@ export default function ExtensionsSection() {
           }}
           onRemoveAll={(serverIds) => {
             trackGoogleAnalyticsEvent("extension_removed", {
-              source: "dangling_bulk",
+              extension_source: "dangling_bulk",
               removed_count: serverIds.length,
             });
             const ids = new Set(serverIds);
