@@ -357,7 +357,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     </>
   ) : (
     <>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 text-left">
         <span className="text-muted-foreground">No model selected</span>
       </div>
       <IconSelector className="size-4 shrink-0 opacity-50" />
