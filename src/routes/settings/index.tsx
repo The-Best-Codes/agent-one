@@ -26,6 +26,7 @@ export default function SettingsRoute() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const rootRef = useRef<HTMLElement>(null);
 
   const tabParam = searchParams.get("tab");
   const displayedSection = useMemo(() => {
@@ -52,11 +53,10 @@ export default function SettingsRoute() {
     }
   };
 
-  const contentRef = useRef<HTMLDivElement>(null);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const previousSectionRef = useRef(displayedSection);
 
   useEffect(() => {
-    const viewport = contentRef.current?.closest("[data-slot='scroll-area-viewport']");
     const sectionChanged = previousSectionRef.current !== displayedSection;
 
     previousSectionRef.current = displayedSection;
@@ -90,7 +90,13 @@ export default function SettingsRoute() {
     }
 
     if (sectionChanged) {
-      viewport?.scrollTo({ top: 0 });
+      rootRef.current?.scrollIntoView({ block: "start" });
+      scrollViewportRef.current
+        ?.querySelector("[data-slot='scroll-area-viewport']")
+        ?.scrollTo({ top: 0 });
+      window.requestAnimationFrame(() => {
+        rootRef.current?.scrollIntoView({ block: "start" });
+      });
     }
   }, [displayedSection, location.hash]);
 
@@ -106,7 +112,7 @@ export default function SettingsRoute() {
   };
 
   return (
-    <main role="main" className="bg-background min-h-screen">
+    <main ref={rootRef} role="main" className="bg-background min-h-screen">
       <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
@@ -175,9 +181,13 @@ export default function SettingsRoute() {
             </div>
           </ScrollArea>
 
-          <ScrollArea type="always" className="-m-0.5 flex-1 md:min-h-0" viewportClassName="p-0.5">
+          <ScrollArea
+            ref={scrollViewportRef}
+            type="always"
+            className="-m-0.5 flex-1 md:min-h-0"
+            viewportClassName="p-0.5"
+          >
             <div
-              ref={contentRef}
               role="tabpanel"
               tabIndex={0}
               className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
