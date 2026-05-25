@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
+import { Link } from "react-router";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -297,6 +298,13 @@ export default function AccountSection() {
               </Tooltip>
             </div>
           </SettingsTarget>
+          <p className="text-muted-foreground text-sm">
+            Account analytics have moved to the{" "}
+            <Link to="/settings?tab=about#setting-allow-usage-analytics" className="underline">
+              Help &amp; Updates section
+            </Link>
+            .
+          </p>
         </CardContent>
       </Card>
       <Card>
