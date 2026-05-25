@@ -171,7 +171,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       </Tooltip>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
-        className="bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
+        className="bg-background dark:bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
       >
         <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
         <DrawerDescription className="sr-only">Mobile chat sidebar content</DrawerDescription>
@@ -245,7 +245,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       {isDesktop && (
         <aside
           className={cn(
-            "bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width,padding] duration-200",
+            "bg-background dark:bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width,padding] duration-200",
             isSidebarSmall
               ? "pointer-events-none w-0 p-0 border-0 -translate-x-full opacity-0"
               : "w-64 translate-x-0 opacity-100",

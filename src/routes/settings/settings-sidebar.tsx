@@ -24,7 +24,7 @@ export default function SettingsSidebar({
         }
       }}
       orientation="vertical"
-      className={cn("flex w-full flex-col gap-0 bg-sidebar", className)}
+      className={cn("flex w-full flex-col gap-0 bg-background border border-border", className)}
       role="tablist"
       aria-orientation="vertical"
     >
@@ -35,7 +35,7 @@ export default function SettingsSidebar({
           role="tab"
           aria-selected={activeSection === section.id}
           aria-checked={undefined}
-          className="hover:text-sidebar-foreground w-full flex-none justify-start rounded-md border-0 px-4 text-left shadow-none transition-none"
+          className="data-[state=on]:bg-input w-full flex-none justify-start rounded-md border-0 px-4 text-left shadow-none transition-none"
         >
           {section.label}
         </ToggleGroupItem>
