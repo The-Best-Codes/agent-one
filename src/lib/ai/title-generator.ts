@@ -5,6 +5,7 @@ import { getLogger } from "@/lib/logger";
 import type { TitleGenerationSettings } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
+const DEFAULT_TITLE_MAX_OUTPUT_TOKENS = 1024;
 
 function calculateMaxOutputTokens(maxTokens?: number | "none"): number | undefined {
   if (maxTokens === "none") {
@@ -13,7 +14,7 @@ function calculateMaxOutputTokens(maxTokens?: number | "none"): number | undefin
   if (typeof maxTokens === "number") {
     return maxTokens;
   }
-  return 20;
+  return DEFAULT_TITLE_MAX_OUTPUT_TOKENS;
 }
 
 function extractTextFromMessage(message: UIMessage): string {
@@ -120,5 +121,10 @@ export async function generateChatTitle(
     return syncTitle;
   }
 
-  return generateChatTitleAI(model, messages, settings.fallbackPhrase, maxTokens);
+  return generateChatTitleAI(
+    model,
+    messages,
+    settings.fallbackPhrase,
+    maxTokens ?? settings.maxOutputTokens,
+  );
 }

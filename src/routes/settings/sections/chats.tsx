@@ -87,6 +87,11 @@ export default function ChatsSection() {
     setTitleGeneration((prev) => ({ ...prev, ...updates }));
   };
 
+  const titleMaxOutputTokens = titleGeneration.maxOutputTokens ?? 1024;
+  const titleMaxOutputTokenValue = titleMaxOutputTokens === "none" ? 0 : titleMaxOutputTokens;
+  const titleMaxOutputTokenLabel =
+    titleMaxOutputTokens === "none" ? "No limit" : titleMaxOutputTokens.toLocaleString();
+
   return (
     <div className="flex flex-col gap-6">
       <Card>
@@ -630,6 +635,38 @@ export default function ChatsSection() {
                     });
                   }}
                   className="w-full md:w-32"
+                />
+              </div>
+            </SettingsTarget>
+          )}
+
+          {titleGeneration.method === "ai" && (
+            <SettingsTarget id="setting-title-max-output-tokens">
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label className="text-sm font-medium tabular-nums">
+                    Max Output Tokens: {titleMaxOutputTokenLabel}
+                  </Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Maximum tokens available for AI title generation. Use no limit if title
+                    generation fails with thinking models. Manually generated titles don't respect
+                    this setting.
+                  </p>
+                </div>
+                <Slider
+                  value={[titleMaxOutputTokenValue]}
+                  onValueChange={(value) => {
+                    const maxOutputTokens = value[0] === 0 ? "none" : value[0];
+                    trackSettingsInteraction("chats", "title_max_output_tokens_changed", {
+                      value: maxOutputTokens,
+                    });
+                    updateTitleGeneration({ maxOutputTokens });
+                  }}
+                  min={0}
+                  max={64000}
+                  step={64}
+                  className="w-full"
+                  aria-label="Title generation max output tokens"
                 />
               </div>
             </SettingsTarget>
