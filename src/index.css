@@ -181,32 +181,6 @@
   --radius: 1.25rem;
 }
 
-@keyframes settings-target-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 20%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 0.75rem color-mix(in oklab, var(--primary) 0%, transparent);
-  }
-}
-
-.settings-target-pulse {
-  animation: settings-target-pulse 900ms ease-out infinite;
-}
-
-@keyframes settings-target-fade-out {
-  0% {
-    box-shadow: 0 0 0 0.3rem color-mix(in oklab, var(--primary) 10%, transparent);
-  }
-  100% {
-    box-shadow: 0 0 0 1rem color-mix(in oklab, var(--primary) 0%, transparent);
-  }
-}
-
-.settings-target-fade-out {
-  animation: settings-target-fade-out 1200ms ease-out forwards;
-}
-
 .red {
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -771,6 +745,32 @@
   ::selection {
     @apply bg-primary text-primary-foreground;
   }
+}
+
+@keyframes settings-target-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 20%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0.75rem color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+}
+
+.settings-target-pulse {
+  animation: settings-target-pulse 1000ms ease-out infinite;
+}
+
+@keyframes settings-target-fade-out {
+  0% {
+    box-shadow: 0 0 0 0rem color-mix(in oklab, var(--primary) 20%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 1rem color-mix(in oklab, var(--primary) 0%, transparent);
+  }
+}
+
+.settings-target-fade-out {
+  animation: settings-target-fade-out 1000ms ease-out forwards;
 }
 
 @keyframes text-gradient-shimmer {
