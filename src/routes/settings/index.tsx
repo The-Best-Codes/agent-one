@@ -85,8 +85,6 @@ export default function SettingsRoute() {
       return () => {
         window.cancelAnimationFrame(frameId);
       };
-
-      return;
     }
 
     if (sectionChanged) {
