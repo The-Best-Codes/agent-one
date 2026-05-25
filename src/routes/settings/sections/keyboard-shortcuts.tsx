@@ -1,6 +1,7 @@
-import { IconPencil, IconRestore } from "@tabler/icons-react";
+import { IconBulb, IconPencil, IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -168,7 +169,8 @@ export default function KeyboardShortcutsSection() {
               <div className="flex flex-col items-start">
                 <Label className="text-sm font-medium">Activate shortcuts in input fields</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Applies to shortcuts that do not have their own override.
+                  This is the default behavior. You can change it for individual shortcuts in the
+                  shortcut editor.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -191,7 +193,17 @@ export default function KeyboardShortcutsSection() {
             </div>
           </SettingsTarget>
 
-          <div className="divide-y rounded-lg border">
+          <div className="flex gap-1">
+            <IconBulb className="size-5 shrink-0" />
+            <span>
+              You can change the send key (<Kbd>Enter</Kbd> or <Kbd>Ctrl+Enter</Kbd>) in{" "}
+              <Link to="/settings?tab=chats#setting-submit-key" className="underline">
+                chat settings.
+              </Link>
+            </span>
+          </div>
+
+          <div className="divide-y rounded-md border">
             {keyboardShortcutDefinitions.map((definition) => {
               const config =
                 shortcuts[definition.id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[definition.id];
