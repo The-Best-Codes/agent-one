@@ -70,7 +70,7 @@ export default function SettingsRoute() {
         const target = document.getElementById(targetId);
 
         if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "center" });
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
           return;
         }
 
