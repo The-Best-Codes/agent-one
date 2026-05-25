@@ -13,7 +13,7 @@ import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 export const MainInputNoModelSection = () => {
   const { hasAvailableModels } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
-  const { user, customerState, billingLoading, billingError } = useWebAuth();
+  const { user, isLoading, customerState, billingLoading, billingError } = useWebAuth();
   const { chatId } = useParams();
   const usageSummary = getBillingUsageSummary(customerState);
   const isProvisioning =
@@ -22,7 +22,7 @@ export const MainInputNoModelSection = () => {
     !billingError &&
     isAgentOneAccountProvisioning(usageSummary);
 
-  if (isApiKeysLoading || hasAvailableModels || billingLoading || isProvisioning) {
+  if (isApiKeysLoading || isLoading || hasAvailableModels || billingLoading || isProvisioning) {
     return null;
   }
 

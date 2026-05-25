@@ -23,6 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
@@ -224,6 +225,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
+  const { isLoading: isAuthLoading, billingLoading } = useWebAuth();
 
   if (!loading && staleModel !== currentModel) {
     setStaleModel(currentModel);
@@ -366,7 +368,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
-  if (isApiKeysLoading || shouldShowLoadingSkeleton) {
+  if (isApiKeysLoading || isAuthLoading || billingLoading || shouldShowLoadingSkeleton) {
     return (
       <Skeleton
         className={cn(

@@ -352,13 +352,14 @@ export function useModelCatalog() {
   const AVAILABLE_IMAGE_MODELS = useAtomValue(availableImageModelsAtom);
   const providerHasApiKey = useAtomValue(providerHasApiKeyAtom);
   const providerIsAvailable = useAtomValue(providerIsAvailableAtom);
-  const { user, customerState, billingLoading, billingError } = useWebAuth();
+  const { user, isLoading, customerState, billingLoading, billingError } = useWebAuth();
 
   const usageSummary = useMemo(() => getBillingUsageSummary(customerState), [customerState]);
   const shouldHideUnavailableAgentOneModels =
-    Boolean(user) &&
-    !billingError &&
-    (billingLoading || !hasAgentOneCreditsAvailable(usageSummary));
+    isLoading ||
+    (Boolean(user) &&
+      !billingError &&
+      (billingLoading || !hasAgentOneCreditsAvailable(usageSummary)));
 
   const AVAILABLE_ENABLED_CHAT_MODELS = useMemo(
     () =>
