@@ -336,12 +336,6 @@ export function BuiltInExtensionsConfig() {
                   </div>
                 )}
 
-                {toolId === "memory" && (
-                  <div className="text-muted-foreground text-xs">
-                    Lets AgentOne remember facts about you.
-                  </div>
-                )}
-
                 {toolId === "webSearch" && (
                   <>
                     <div className="grid gap-1.5">
