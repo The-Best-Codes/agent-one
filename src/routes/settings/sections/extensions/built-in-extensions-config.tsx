@@ -20,14 +20,36 @@ import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/
 import SettingsTarget from "../../settings-target";
 import { BUILT_IN_TOOLS, TOOL_IDS } from "./built-in-extensions-utils";
 
+function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
+  return {
+    dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
+    waitNumberMilliseconds: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.waitNumberMilliseconds,
+      ...toolConfigs.waitNumberMilliseconds,
+    },
+    getUrlContent: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.getUrlContent,
+      ...toolConfigs.getUrlContent,
+    },
+    webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
+    memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
+    editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
+    createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
+    deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
+    viewFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.viewFile, ...toolConfigs.viewFile },
+    executeCommand: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+      ...toolConfigs.executeCommand,
+    },
+    subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
+  };
+}
+
 export function BuiltInExtensionsConfig() {
   const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
   const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
   const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
-  const mergedToolConfigs = {
-    ...DEFAULT_SETTINGS.TOOL_CONFIGS,
-    ...toolConfigs,
-  } satisfies ToolConfigs;
+  const mergedToolConfigs = getMergedToolConfigs(toolConfigs);
 
   const isToolConfigsDefault =
     JSON.stringify({ enabledTools: mergedEnabledTools, toolConfigs: mergedToolConfigs }) ===
@@ -56,7 +78,7 @@ export function BuiltInExtensionsConfig() {
     });
     setToolConfigs((prev) => ({
       ...prev,
-      [toolId]: { ...mergedToolConfigs[toolId], ...prev[toolId], ...updates },
+      [toolId]: { ...DEFAULT_SETTINGS.TOOL_CONFIGS[toolId], ...prev[toolId], ...updates },
     }));
   };
 

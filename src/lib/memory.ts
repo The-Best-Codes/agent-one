@@ -10,7 +10,7 @@ function getMemoryEntryKey(value: string): string {
 }
 
 export function sanitizeMemoryEntry(value: string): string {
-  return normalizeWhitespace(value).slice(0, MAX_MEMORY_ENTRY_CHARS);
+  return normalizeWhitespace(value).trim().slice(0, MAX_MEMORY_ENTRY_CHARS);
 }
 
 export function sanitizeMemoryEntries(memory: string[]): string[] {
@@ -18,7 +18,7 @@ export function sanitizeMemoryEntries(memory: string[]): string[] {
   const seen = new Set<string>();
 
   for (const rawEntry of memory) {
-    const entry = sanitizeMemoryEntry(rawEntry).trim();
+    const entry = sanitizeMemoryEntry(rawEntry);
     if (!entry) continue;
 
     const key = entry.toLocaleLowerCase();

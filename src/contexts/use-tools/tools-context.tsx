@@ -386,7 +386,28 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     async (options?: { subAgentContext?: SubAgentExecutionContext }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
       const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
-      const mergedToolConfigs = { ...DEFAULT_SETTINGS.TOOL_CONFIGS, ...toolConfigs };
+      const mergedToolConfigs = {
+        dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
+        waitNumberMilliseconds: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.waitNumberMilliseconds,
+          ...toolConfigs.waitNumberMilliseconds,
+        },
+        getUrlContent: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.getUrlContent,
+          ...toolConfigs.getUrlContent,
+        },
+        webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
+        memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
+        editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
+        createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
+        deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
+        viewFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.viewFile, ...toolConfigs.viewFile },
+        executeCommand: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+          ...toolConfigs.executeCommand,
+        },
+        subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
+      };
 
       if (mergedEnabledTools.dateTime) {
         filteredStaticTools.dateTime = createDateTimeTool(mergedToolConfigs.dateTime);
