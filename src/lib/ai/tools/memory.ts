@@ -39,7 +39,7 @@ function getMemorySummary(entries: string[]) {
 export const createMemoryTool = (config: MemoryToolConfig) =>
   tool({
     description:
-      "Maintain the user's long-term memory. Use this to add, remove, or replace concise memory entries without rewriting the whole memory block. Keep entries short, stable, non-duplicative, and free of contradictions.",
+      "Store long-term memory. Use this to add, remove, or replace concise memory entries that you can reference in later conversations. Keep entries short, stable, non-duplicative, and free of contradictions.",
     needsApproval: config.requiresApproval,
     inputSchema: memoryOperationSchema,
     execute: async (input) => {
