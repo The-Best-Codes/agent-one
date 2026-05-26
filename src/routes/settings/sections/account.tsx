@@ -8,7 +8,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -18,6 +18,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -49,6 +57,7 @@ export default function AccountSection() {
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(systemPromptAppendixAtom);
   const [memory, setMemory] = useAtom(memoryAtom);
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
+  const [removingIndex, setRemovingIndex] = useState<number | null>(null);
   const [hideAgentOneModels, setHideAgentOneModels] = useAtom(hideAgentOneModelsAtom);
   const {
     user,
@@ -89,6 +98,7 @@ export default function AccountSection() {
 
   const addMemoryEntry = () => {
     if (memory.length >= MAX_MEMORY_ENTRIES) return;
+    if (memory.length > 0 && memory[memory.length - 1] === "") return;
 
     trackSettingsInteraction("account", "memory_entry_added", {
       entry_count: memory.length + 1,
@@ -413,7 +423,10 @@ export default function AccountSection() {
                     variant="outline"
                     size="sm"
                     onClick={addMemoryEntry}
-                    disabled={memory.length >= MAX_MEMORY_ENTRIES}
+                    disabled={
+                      memory.length >= MAX_MEMORY_ENTRIES ||
+                      (memory.length > 0 && memory[memory.length - 1] === "")
+                    }
                   >
                     <IconPlus data-icon="inline-start" />
                     Add
@@ -431,15 +444,58 @@ export default function AccountSection() {
                           maxLength={MAX_MEMORY_ENTRY_CHARS}
                           className="flex-1"
                         />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => removeMemoryEntry(index)}
-                          aria-label="Remove memory entry"
-                        >
-                          <IconX />
-                        </Button>
+                        {entry ? (
+                          <Popover
+                            open={removingIndex === index}
+                            onOpenChange={(open) => setRemovingIndex(open ? index : null)}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                aria-label="Remove memory entry"
+                              >
+                                <IconX />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end">
+                              <PopoverHeader>
+                                <PopoverTitle>Delete this memory?</PopoverTitle>
+                                <PopoverDescription>This cannot be undone.</PopoverDescription>
+                              </PopoverHeader>
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setRemovingIndex(null)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    removeMemoryEntry(index);
+                                    setRemovingIndex(null);
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => removeMemoryEntry(index)}
+                            aria-label="Remove memory entry"
+                          >
+                            <IconX />
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
