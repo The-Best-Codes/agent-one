@@ -3,7 +3,9 @@ import {
   IconExternalLink,
   IconInfoCircle,
   IconLogout,
+  IconPlus,
   IconRocket,
+  IconX,
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo } from "react";
@@ -29,7 +31,7 @@ import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
-import { MAX_MEMORY_CHARS, sanitizeMemoryText } from "@/lib/memory";
+import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS, sanitizeMemoryEntry } from "@/lib/memory";
 
 import SettingsTarget from "../settings-target";
 
@@ -85,8 +87,32 @@ export default function AccountSection() {
     setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
   };
 
-  const handleMemoryChange = (value: string) => {
-    setMemory(sanitizeMemoryText(value));
+  const addMemoryEntry = () => {
+    if (memory.length >= MAX_MEMORY_ENTRIES) return;
+
+    trackSettingsInteraction("account", "memory_entry_added", {
+      entry_count: memory.length + 1,
+    });
+    setMemory((prev) => [...prev, ""]);
+  };
+
+  const updateMemoryEntry = (index: number, value: string) => {
+    trackSettingsInteraction("account", "memory_changed", {
+      value_length: value.length,
+      entry_index: index,
+    });
+
+    setMemory((prev) =>
+      prev.map((entry, entryIndex) => (entryIndex === index ? sanitizeMemoryEntry(value) : entry)),
+    );
+  };
+
+  const removeMemoryEntry = (index: number) => {
+    trackSettingsInteraction("account", "memory_entry_removed", {
+      entry_index: index,
+    });
+
+    setMemory((prev) => prev.filter((_, entryIndex) => entryIndex !== index));
   };
 
   return (
@@ -374,26 +400,54 @@ export default function AccountSection() {
                 Memory
               </Label>
               <p className="text-muted-foreground text-sm">
-                Saved context that AgentOne can carry across chats. It is appended to the system
-                prompt, and the built-in memory tool can keep it concise by adding, removing, or
-                replacing entries.
+                Save the things you want AgentOne to remember about you across chats, like your
+                preferences, goals, or ongoing projects.
               </p>
-              <div className="relative">
-                <Textarea
-                  id="memory"
-                  value={memory}
-                  onChange={(e) => {
-                    trackSettingsInteraction("account", "memory_changed", {
-                      value_length: e.target.value.length,
-                    });
-                    handleMemoryChange(e.target.value);
-                  }}
-                  placeholder="One fact or preference per line, e.g. Lives in USA. Likes cats and red cars."
-                  className="field-sizing-fixed max-h-96 min-h-24 resize-y"
-                />
-                <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
-                  {memory.length} / {MAX_MEMORY_CHARS}
-                </span>
+              <div className="rounded-md border p-3">
+                <div className="mb-3 flex items-start justify-between gap-2">
+                  <p className="text-muted-foreground text-xs">
+                    Keep each item short and specific so AgentOne can reuse it well.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addMemoryEntry}
+                    disabled={memory.length >= MAX_MEMORY_ENTRIES}
+                  >
+                    <IconPlus data-icon="inline-start" />
+                    Add
+                  </Button>
+                </div>
+                {memory.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {memory.map((entry, index) => (
+                      <div key={`memory-entry-${index}`} className="flex items-center gap-2">
+                        <Input
+                          id={index === 0 ? "memory" : undefined}
+                          value={entry}
+                          onChange={(e) => updateMemoryEntry(index, e.target.value)}
+                          placeholder="e.g. I prefer concise technical answers"
+                          maxLength={MAX_MEMORY_ENTRY_CHARS}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeMemoryEntry(index)}
+                          aria-label="Remove memory entry"
+                        >
+                          <IconX />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground flex h-20 items-center justify-center rounded-md border border-dashed p-2 text-sm">
+                    Nothing saved yet.
+                  </p>
+                )}
               </div>
             </div>
           </SettingsTarget>

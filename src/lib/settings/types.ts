@@ -187,7 +187,7 @@ export interface DefaultSettings extends ApiKeySettings {
   MCP_PARALLEL_LOAD_LIMIT: number;
   USER_NAME: string;
   SYSTEM_PROMPT_APPENDIX: string;
-  MEMORY: string;
+  MEMORY: string[];
   COLLAPSED_SIDEBAR_LAYOUT: CollapsedSidebarLayoutOption;
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: boolean;
   KEYBOARD_SHORTCUTS: KeyboardShortcutSettings;
@@ -290,7 +290,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MCP_PARALLEL_LOAD_LIMIT: 8,
   USER_NAME: "",
   SYSTEM_PROMPT_APPENDIX: "",
-  MEMORY: "",
+  MEMORY: [],
   COLLAPSED_SIDEBAR_LAYOUT: "row",
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: true,
   KEYBOARD_SHORTCUTS: defaultKeyboardShortcuts,

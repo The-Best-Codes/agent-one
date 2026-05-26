@@ -5,11 +5,10 @@ import { z } from "zod";
 import { memoryAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import {
-  getMemoryEntries,
   hasMemoryEntry,
-  normalizeMemoryEntry,
   removeMemoryEntries,
-  serializeMemoryEntries,
+  sanitizeMemoryEntries,
+  sanitizeMemoryEntry,
 } from "@/lib/memory";
 import type { MemoryToolConfig } from "@/lib/settings/types";
 
@@ -47,20 +46,19 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
       logger.verbose("Executing memory tool with input:", input);
 
       const store = getDefaultStore();
-      const currentMemory = store.get(memoryAtom);
-      let entries = getMemoryEntries(currentMemory);
+      let entries = sanitizeMemoryEntries(store.get(memoryAtom));
 
       if (input.operation === "add") {
         const added: string[] = [];
 
         for (const rawEntry of input.entries) {
-          const entry = normalizeMemoryEntry(rawEntry);
+          const entry = sanitizeMemoryEntry(rawEntry);
           if (!entry || hasMemoryEntry(entries, entry)) continue;
-          entries = [...entries, entry];
+          entries = sanitizeMemoryEntries([...entries, entry]);
           added.push(entry);
         }
 
-        const nextMemory = serializeMemoryEntries(entries);
+        const nextMemory = entries;
         store.set(memoryAtom, nextMemory);
 
         return {
@@ -72,10 +70,10 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
       }
 
       if (input.operation === "remove") {
-        const normalizedEntries = input.entries.map((entry) => normalizeMemoryEntry(entry));
-        const nextEntries = removeMemoryEntries(entries, normalizedEntries);
+        const normalizedEntries = input.entries.map((entry) => sanitizeMemoryEntry(entry));
+        const nextEntries = sanitizeMemoryEntries(removeMemoryEntries(entries, normalizedEntries));
         const removed = entries.filter((entry) => !hasMemoryEntry(nextEntries, entry));
-        const nextMemory = serializeMemoryEntries(nextEntries);
+        const nextMemory = nextEntries;
         store.set(memoryAtom, nextMemory);
 
         return {
@@ -86,13 +84,14 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         };
       }
 
-      const oldEntry = normalizeMemoryEntry(input.oldEntry);
-      const newEntry = normalizeMemoryEntry(input.newEntry);
+      const oldEntry = sanitizeMemoryEntry(input.oldEntry);
+      const newEntry = sanitizeMemoryEntry(input.newEntry);
       const withoutOld = removeMemoryEntries(entries, [oldEntry]);
       const replaced = withoutOld.length !== entries.length;
-      const nextEntries =
-        newEntry && !hasMemoryEntry(withoutOld, newEntry) ? [...withoutOld, newEntry] : withoutOld;
-      const nextMemory = serializeMemoryEntries(nextEntries);
+      const nextEntries = sanitizeMemoryEntries(
+        newEntry && !hasMemoryEntry(withoutOld, newEntry) ? [...withoutOld, newEntry] : withoutOld,
+      );
+      const nextMemory = nextEntries;
       store.set(memoryAtom, nextMemory);
 
       return {

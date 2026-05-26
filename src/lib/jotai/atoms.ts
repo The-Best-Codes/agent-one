@@ -2,7 +2,7 @@ import dedent from "dedent";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-import { getMemoryEntries } from "@/lib/memory";
+import { sanitizeMemoryEntries } from "@/lib/memory";
 
 import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
 
@@ -57,7 +57,7 @@ export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);
   const memory = get(memoryAtom);
-  const memoryEntries = getMemoryEntries(memory);
+  const memoryEntries = sanitizeMemoryEntries(memory);
 
   const settings = [
     userName && `- Name: ${userName}`,

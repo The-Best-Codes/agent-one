@@ -1,27 +1,28 @@
-export const MAX_MEMORY_CHARS = 40000;
+export const MAX_MEMORY_ENTRIES = 100;
+export const MAX_MEMORY_ENTRY_CHARS = 500;
 
 function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
-export function sanitizeMemoryText(value: string): string {
-  return value.slice(0, MAX_MEMORY_CHARS);
-}
-
 export function normalizeMemoryEntry(value: string): string {
-  return normalizeWhitespace(value.replace(/^\s*[-*]\s+/, ""));
+  return normalizeWhitespace(value);
 }
 
 function getMemoryEntryKey(value: string): string {
   return normalizeMemoryEntry(value).toLocaleLowerCase();
 }
 
-export function getMemoryEntries(memory: string): string[] {
+export function sanitizeMemoryEntry(value: string): string {
+  return normalizeMemoryEntry(value).slice(0, MAX_MEMORY_ENTRY_CHARS);
+}
+
+export function sanitizeMemoryEntries(memory: string[]): string[] {
   const entries: string[] = [];
   const seen = new Set<string>();
 
-  for (const line of memory.split(/\r?\n/)) {
-    const entry = normalizeMemoryEntry(line);
+  for (const rawEntry of memory) {
+    const entry = sanitizeMemoryEntry(rawEntry);
     if (!entry) continue;
 
     const key = getMemoryEntryKey(entry);
@@ -29,6 +30,8 @@ export function getMemoryEntries(memory: string): string[] {
 
     seen.add(key);
     entries.push(entry);
+
+    if (entries.length >= MAX_MEMORY_ENTRIES) break;
   }
 
   return entries;
@@ -42,8 +45,4 @@ export function hasMemoryEntry(entries: string[], value: string): boolean {
 export function removeMemoryEntries(entries: string[], valuesToRemove: string[]): string[] {
   const removeKeys = new Set(valuesToRemove.map((value) => getMemoryEntryKey(value)));
   return entries.filter((entry) => !removeKeys.has(getMemoryEntryKey(entry)));
-}
-
-export function serializeMemoryEntries(entries: string[]): string {
-  return sanitizeMemoryText(entries.join("\n"));
 }
