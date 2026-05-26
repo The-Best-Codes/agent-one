@@ -197,6 +197,8 @@ export const systemPromptAppendixAtom = createSettingAtom(
   DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
 );
 
+export const memoryAtom = createSettingAtom("MEMORY", DEFAULT_SETTINGS.MEMORY);
+
 export const showMessageActionRowAtom = createSettingAtom<MessageActionRowOption>(
   "SHOW_MESSAGE_ACTION_ROW",
   DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW,

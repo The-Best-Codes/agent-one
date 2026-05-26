@@ -27,6 +27,11 @@ export const BUILT_IN_TOOLS: Record<
     description: "Find information online",
     searchTerms: "search web internet results",
   },
+  memory: {
+    name: "Memory",
+    description: "Maintain concise long-term user memory",
+    searchTerms: "memory remember preferences profile facts notes",
+  },
   editFile: {
     name: "Edit file",
     description: "Edit files by replacing text content",

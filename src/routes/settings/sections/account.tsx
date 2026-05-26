@@ -28,7 +28,8 @@ import {
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
-import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
+import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
+import { MAX_MEMORY_CHARS, sanitizeMemoryText } from "@/lib/memory";
 
 import SettingsTarget from "../settings-target";
 
@@ -44,6 +45,7 @@ function formatNumber(value: number) {
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(systemPromptAppendixAtom);
+  const [memory, setMemory] = useAtom(memoryAtom);
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
   const [hideAgentOneModels, setHideAgentOneModels] = useAtom(hideAgentOneModelsAtom);
   const {
@@ -81,6 +83,10 @@ export default function AccountSection() {
 
   const handleAppendixChange = (value: string) => {
     setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
+  };
+
+  const handleMemoryChange = (value: string) => {
+    setMemory(sanitizeMemoryText(value));
   };
 
   return (
@@ -358,6 +364,35 @@ export default function AccountSection() {
                 />
                 <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
                   {systemPromptAppendix.length} / {MAX_APPENDIX_CHARS}
+                </span>
+              </div>
+            </div>
+          </SettingsTarget>
+          <SettingsTarget id="setting-memory">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="memory" className="text-sm font-medium">
+                Memory
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Saved context that AgentOne can carry across chats. It is appended to the system
+                prompt, and the built-in memory tool can keep it concise by adding, removing, or
+                replacing entries.
+              </p>
+              <div className="relative">
+                <Textarea
+                  id="memory"
+                  value={memory}
+                  onChange={(e) => {
+                    trackSettingsInteraction("account", "memory_changed", {
+                      value_length: e.target.value.length,
+                    });
+                    handleMemoryChange(e.target.value);
+                  }}
+                  placeholder="One fact or preference per line, e.g. Lives in USA. Likes cats and red cars."
+                  className="field-sizing-fixed max-h-96 min-h-24 resize-y"
+                />
+                <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
+                  {memory.length} / {MAX_MEMORY_CHARS}
                 </span>
               </div>
             </div>

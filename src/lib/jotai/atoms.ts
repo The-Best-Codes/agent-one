@@ -2,7 +2,9 @@ import dedent from "dedent";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-import { systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
+import { getMemoryEntries } from "@/lib/memory";
+
+import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
 
 export type ChatStatusIndicator = "loading" | "error" | "unread" | null;
 
@@ -54,6 +56,8 @@ export const lastVacuumTimestampAtom = atomWithStorage<number>(
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);
+  const memory = get(memoryAtom);
+  const memoryEntries = getMemoryEntries(memory);
 
   const settings = [
     userName && `- Name: ${userName}`,
@@ -62,10 +66,15 @@ export const systemPromptAtom = atom((get) => {
     .filter(Boolean)
     .join("\n");
 
+  const memorySection =
+    memoryEntries.length > 0 ? memoryEntries.map((entry) => `- ${entry}`).join("\n") : "";
+
   return dedent`
     ## Guidelines
     You are AgentOne, a helpful AI agent.
     When the \`describeNextTool\` function is available, _always_ use it before you use an \`mcp__\` tool.
+    When the \`memory\` tool is available, use it to store facts about the user across chats to personalize responses, or when the user asks you to remember something. Prefer small targeted edits. Avoid adding duplicates or contradictory entries. Only save stable, reusable information that is likely to help in future chats.
     ${settings ? `\n## User settings:\n${settings}` : ""}
+    ${memorySection ? `\n## User memory:\n${memorySection}` : ""}
   `.trim();
 });

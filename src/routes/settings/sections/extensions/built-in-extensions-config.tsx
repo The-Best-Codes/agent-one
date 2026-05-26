@@ -56,7 +56,7 @@ export function BuiltInExtensionsConfig() {
     });
     setToolConfigs((prev) => ({
       ...prev,
-      [toolId]: { ...prev[toolId], ...updates },
+      [toolId]: { ...mergedToolConfigs[toolId], ...prev[toolId], ...updates },
     }));
   };
 
@@ -311,6 +311,12 @@ export function BuiltInExtensionsConfig() {
                   <div className="text-muted-foreground text-xs">
                     Subagents inherit the current model and enabled tools, but cannot spawn other
                     subagents.
+                  </div>
+                )}
+
+                {toolId === "memory" && (
+                  <div className="text-muted-foreground text-xs">
+                    Lets AgentOne remember facts about you.
                   </div>
                 )}
 

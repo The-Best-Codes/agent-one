@@ -10,6 +10,7 @@ import {
   createEditFileTool,
   createExecuteCommandTool,
   createGetUrlContentTool,
+  createMemoryTool,
   createSubAgentTool,
   createViewFileTool,
   createWaitTool,
@@ -384,41 +385,48 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const getTools = useCallback(
     async (options?: { subAgentContext?: SubAgentExecutionContext }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
+      const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
+      const mergedToolConfigs = { ...DEFAULT_SETTINGS.TOOL_CONFIGS, ...toolConfigs };
 
-      if (enabledTools.dateTime) {
-        filteredStaticTools.dateTime = createDateTimeTool(toolConfigs.dateTime);
+      if (mergedEnabledTools.dateTime) {
+        filteredStaticTools.dateTime = createDateTimeTool(mergedToolConfigs.dateTime);
       }
-      if (enabledTools.waitNumberMilliseconds) {
+      if (mergedEnabledTools.waitNumberMilliseconds) {
         filteredStaticTools.waitNumberMilliseconds = createWaitTool(
-          toolConfigs.waitNumberMilliseconds,
+          mergedToolConfigs.waitNumberMilliseconds,
         );
       }
-      if (enabledTools.getUrlContent) {
-        filteredStaticTools.getUrlContent = createGetUrlContentTool(toolConfigs.getUrlContent);
+      if (mergedEnabledTools.getUrlContent) {
+        filteredStaticTools.getUrlContent = createGetUrlContentTool(
+          mergedToolConfigs.getUrlContent,
+        );
       }
-      if (enabledTools.webSearch) {
-        filteredStaticTools.webSearch = createWebSearchTool(toolConfigs.webSearch);
+      if (mergedEnabledTools.webSearch) {
+        filteredStaticTools.webSearch = createWebSearchTool(mergedToolConfigs.webSearch);
       }
-      if (enabledTools.editFile) {
-        filteredStaticTools.editFile = createEditFileTool(toolConfigs.editFile);
+      if (mergedEnabledTools.memory) {
+        filteredStaticTools.memory = createMemoryTool(mergedToolConfigs.memory);
       }
-      if (enabledTools.createFile) {
-        filteredStaticTools.createFile = createCreateFileTool(toolConfigs.createFile);
+      if (mergedEnabledTools.editFile) {
+        filteredStaticTools.editFile = createEditFileTool(mergedToolConfigs.editFile);
       }
-      if (enabledTools.deleteFile) {
-        filteredStaticTools.deleteFile = createDeleteFileTool(toolConfigs.deleteFile);
+      if (mergedEnabledTools.createFile) {
+        filteredStaticTools.createFile = createCreateFileTool(mergedToolConfigs.createFile);
       }
-      if (enabledTools.viewFile) {
-        filteredStaticTools.viewFile = createViewFileTool(toolConfigs.viewFile);
+      if (mergedEnabledTools.deleteFile) {
+        filteredStaticTools.deleteFile = createDeleteFileTool(mergedToolConfigs.deleteFile);
       }
-      if (enabledTools.executeCommand) {
+      if (mergedEnabledTools.viewFile) {
+        filteredStaticTools.viewFile = createViewFileTool(mergedToolConfigs.viewFile);
+      }
+      if (mergedEnabledTools.executeCommand) {
         filteredStaticTools.executeCommand = createExecuteCommandTool(
-          toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+          mergedToolConfigs.executeCommand,
         );
       }
-      if (enabledTools.subAgent && options?.subAgentContext) {
+      if (mergedEnabledTools.subAgent && options?.subAgentContext) {
         filteredStaticTools.subAgent = createSubAgentTool(
-          toolConfigs.subAgent ?? DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent,
+          mergedToolConfigs.subAgent,
           options.subAgentContext,
         );
       }

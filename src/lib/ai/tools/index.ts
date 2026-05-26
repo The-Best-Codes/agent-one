@@ -5,6 +5,7 @@ export { createDescribeNextToolTool } from "./describeNextTool";
 export { createEditFileTool } from "./editFile";
 export { createExecuteCommandTool } from "./executeCommand";
 export { createGetUrlContentTool } from "./getUrlContent";
+export { createMemoryTool } from "./memory";
 export { createSubAgentTool } from "./subAgent";
 export { createViewFileTool } from "./viewFile";
 export { createWaitTool } from "./waitNumberMilliseconds";
