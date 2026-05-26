@@ -20,3 +20,9 @@ const releaseNotesByVersion = Object.entries(releaseNoteFiles).reduce<Record<str
 export function getReleaseNotes(version: string) {
   return releaseNotesByVersion[version] ?? null;
 }
+
+export function getReleaseNotesVersions() {
+  return Object.keys(releaseNotesByVersion).sort((a, b) =>
+    b.localeCompare(a, undefined, { numeric: true }),
+  );
+}
