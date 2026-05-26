@@ -39,7 +39,7 @@ import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
-import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS, sanitizeMemoryEntry } from "@/lib/memory";
+import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 
 import SettingsTarget from "../settings-target";
 
@@ -112,9 +112,7 @@ export default function AccountSection() {
       entry_index: index,
     });
 
-    setMemory((prev) =>
-      prev.map((entry, entryIndex) => (entryIndex === index ? sanitizeMemoryEntry(value) : entry)),
-    );
+    setMemory((prev) => prev.map((entry, entryIndex) => (entryIndex === index ? value : entry)));
   };
 
   const removeMemoryEntry = (index: number) => {

@@ -2,19 +2,15 @@ export const MAX_MEMORY_ENTRIES = 100;
 export const MAX_MEMORY_ENTRY_CHARS = 500;
 
 function normalizeWhitespace(value: string): string {
-  return value.replace(/\s+/g, " ").trim();
-}
-
-export function normalizeMemoryEntry(value: string): string {
-  return normalizeWhitespace(value);
+  return value.replace(/\s+/g, " ");
 }
 
 function getMemoryEntryKey(value: string): string {
-  return normalizeMemoryEntry(value).toLocaleLowerCase();
+  return normalizeWhitespace(value).trim().toLocaleLowerCase();
 }
 
 export function sanitizeMemoryEntry(value: string): string {
-  return normalizeMemoryEntry(value).slice(0, MAX_MEMORY_ENTRY_CHARS);
+  return normalizeWhitespace(value).slice(0, MAX_MEMORY_ENTRY_CHARS);
 }
 
 export function sanitizeMemoryEntries(memory: string[]): string[] {
@@ -22,10 +18,10 @@ export function sanitizeMemoryEntries(memory: string[]): string[] {
   const seen = new Set<string>();
 
   for (const rawEntry of memory) {
-    const entry = sanitizeMemoryEntry(rawEntry);
+    const entry = sanitizeMemoryEntry(rawEntry).trim();
     if (!entry) continue;
 
-    const key = getMemoryEntryKey(entry);
+    const key = entry.toLocaleLowerCase();
     if (seen.has(key)) continue;
 
     seen.add(key);
