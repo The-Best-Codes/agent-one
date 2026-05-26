@@ -74,6 +74,7 @@ export type ToolId =
   | "waitNumberMilliseconds"
   | "getUrlContent"
   | "webSearch"
+  | "memory"
   | "editFile"
   | "createFile"
   | "deleteFile"
@@ -104,6 +105,10 @@ export interface WebSearchToolConfig {
   maxConcurrent: number;
   defaultMaxResults: number;
   defaultMaxPages: number;
+}
+
+export interface MemoryToolConfig {
+  requiresApproval: boolean;
 }
 
 export interface EditFileToolConfig {
@@ -137,6 +142,7 @@ export interface ToolConfigs {
   waitNumberMilliseconds: WaitToolConfig;
   getUrlContent: GetUrlContentToolConfig;
   webSearch: WebSearchToolConfig;
+  memory: MemoryToolConfig;
   editFile: EditFileToolConfig;
   createFile: CreateFileToolConfig;
   deleteFile: DeleteFileToolConfig;
@@ -181,6 +187,7 @@ export interface DefaultSettings extends ApiKeySettings {
   MCP_PARALLEL_LOAD_LIMIT: number;
   USER_NAME: string;
   SYSTEM_PROMPT_APPENDIX: string;
+  MEMORY: string[];
   COLLAPSED_SIDEBAR_LAYOUT: CollapsedSidebarLayoutOption;
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: boolean;
   KEYBOARD_SHORTCUTS: KeyboardShortcutSettings;
@@ -225,6 +232,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     waitNumberMilliseconds: true,
     getUrlContent: true,
     webSearch: true,
+    memory: true,
     editFile: true,
     createFile: true,
     deleteFile: true,
@@ -254,6 +262,9 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       defaultMaxResults: 20,
       defaultMaxPages: 2,
     },
+    memory: {
+      requiresApproval: false,
+    },
     editFile: {
       requiresApproval: true,
     },
@@ -279,6 +290,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MCP_PARALLEL_LOAD_LIMIT: 8,
   USER_NAME: "",
   SYSTEM_PROMPT_APPENDIX: "",
+  MEMORY: [],
   COLLAPSED_SIDEBAR_LAYOUT: "row",
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: true,
   KEYBOARD_SHORTCUTS: defaultKeyboardShortcuts,

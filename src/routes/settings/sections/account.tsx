@@ -3,10 +3,12 @@ import {
   IconExternalLink,
   IconInfoCircle,
   IconLogout,
+  IconPlus,
   IconRocket,
+  IconX,
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -16,6 +18,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
@@ -28,7 +38,8 @@ import {
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
-import { systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
+import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
+import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 
 import SettingsTarget from "../settings-target";
 
@@ -44,7 +55,9 @@ function formatNumber(value: number) {
 export default function AccountSection() {
   const [userName, setUserName] = useAtom(userNameAtom);
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(systemPromptAppendixAtom);
+  const [memory, setMemory] = useAtom(memoryAtom);
   const [syncEnabled, setSyncEnabled] = useAtom(syncEnabledAtom);
+  const [removingIndex, setRemovingIndex] = useState<number | null>(null);
   const [hideAgentOneModels, setHideAgentOneModels] = useAtom(hideAgentOneModelsAtom);
   const {
     user,
@@ -81,6 +94,33 @@ export default function AccountSection() {
 
   const handleAppendixChange = (value: string) => {
     setSystemPromptAppendix(value.slice(0, MAX_APPENDIX_CHARS));
+  };
+
+  const addMemoryEntry = () => {
+    if (memory.length >= MAX_MEMORY_ENTRIES) return;
+    if (memory.length > 0 && memory[memory.length - 1] === "") return;
+
+    trackSettingsInteraction("account", "memory_entry_added", {
+      entry_count: memory.length + 1,
+    });
+    setMemory((prev) => [...prev, ""]);
+  };
+
+  const updateMemoryEntry = (index: number, value: string) => {
+    trackSettingsInteraction("account", "memory_changed", {
+      value_length: value.length,
+      entry_index: index,
+    });
+
+    setMemory((prev) => prev.map((entry, entryIndex) => (entryIndex === index ? value : entry)));
+  };
+
+  const removeMemoryEntry = (index: number) => {
+    trackSettingsInteraction("account", "memory_entry_removed", {
+      entry_index: index,
+    });
+
+    setMemory((prev) => prev.filter((_, entryIndex) => entryIndex !== index));
   };
 
   return (
@@ -359,6 +399,109 @@ export default function AccountSection() {
                 <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
                   {systemPromptAppendix.length} / {MAX_APPENDIX_CHARS}
                 </span>
+              </div>
+            </div>
+          </SettingsTarget>
+          <SettingsTarget id="setting-memory">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="memory" className="text-sm font-medium">
+                Memory
+              </Label>
+              <p className="text-muted-foreground text-sm">
+                Save the things you want AgentOne to remember about you across chats, like your
+                preferences, goals, or ongoing projects.
+              </p>
+              <div className="rounded-md border p-3">
+                <div className="mb-3 flex items-start justify-between gap-2">
+                  <p className="text-muted-foreground text-xs">
+                    Keep each item short and specific so AgentOne can reuse it well.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addMemoryEntry}
+                    disabled={
+                      memory.length >= MAX_MEMORY_ENTRIES ||
+                      (memory.length > 0 && memory[memory.length - 1] === "")
+                    }
+                  >
+                    <IconPlus data-icon="inline-start" />
+                    Add
+                  </Button>
+                </div>
+                {memory.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {memory.map((entry, index) => (
+                      <div key={`memory-entry-${index}`} className="flex items-center gap-2">
+                        <Input
+                          id={index === 0 ? "memory" : undefined}
+                          value={entry}
+                          onChange={(e) => updateMemoryEntry(index, e.target.value)}
+                          placeholder="e.g. I prefer concise technical answers"
+                          maxLength={MAX_MEMORY_ENTRY_CHARS}
+                          className="flex-1"
+                        />
+                        {entry ? (
+                          <Popover
+                            open={removingIndex === index}
+                            onOpenChange={(open) => setRemovingIndex(open ? index : null)}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                aria-label="Remove memory entry"
+                              >
+                                <IconX />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="end">
+                              <PopoverHeader>
+                                <PopoverTitle>Delete this memory?</PopoverTitle>
+                                <PopoverDescription>This cannot be undone.</PopoverDescription>
+                              </PopoverHeader>
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setRemovingIndex(null)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    removeMemoryEntry(index);
+                                    setRemovingIndex(null);
+                                  }}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        ) : (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => removeMemoryEntry(index)}
+                            aria-label="Remove memory entry"
+                          >
+                            <IconX />
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground flex h-20 items-center justify-center rounded-md border border-dashed p-2 text-sm">
+                    Nothing saved yet.
+                  </p>
+                )}
               </div>
             </div>
           </SettingsTarget>

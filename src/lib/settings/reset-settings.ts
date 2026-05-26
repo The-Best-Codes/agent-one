@@ -24,6 +24,7 @@ import {
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
   maxToolResultCharsAtom,
+  memoryAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
   notificationSettingAtom,
@@ -75,6 +76,7 @@ export function resetAllSettings(): void {
   store.set(analyticsIdentityAtom, RESET);
   store.set(userNameAtom, RESET);
   store.set(systemPromptAppendixAtom, RESET);
+  store.set(memoryAtom, RESET);
   store.set(enabledToolsAtom, RESET);
   store.set(toolConfigsAtom, RESET);
   store.set(mcpServersAtom, RESET);
@@ -200,6 +202,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SYSTEM_PROMPT_APPENDIX":
       store.set(systemPromptAppendixAtom, RESET);
+      break;
+    case "MEMORY":
+      store.set(memoryAtom, RESET);
       break;
     case "TITLE_GENERATION":
       store.set(titleGenerationAtom, RESET);
