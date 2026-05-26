@@ -60,6 +60,7 @@ export function ReleaseNotesDialog() {
         <div className="max-h-[70vh] overflow-y-auto">
           <div className="prose prose-sm prose-neutral dark:prose-invert px-1">
             <MemoizedMarkdown
+              allowInternalLinks
               content={releaseNotesData.content}
               id="release-notes"
               messageRole="assistant"

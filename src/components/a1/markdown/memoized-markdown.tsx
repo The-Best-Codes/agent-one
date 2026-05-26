@@ -2,6 +2,7 @@ import type { UIMessage } from "ai";
 import { marked } from "marked";
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
+import { Link } from "react-router";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import remend from "remend";
@@ -46,7 +47,15 @@ function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({ block, messageRole }: { block: MarkdownBlock; messageRole: UIMessage["role"] }) => {
+  ({
+    allowInternalLinks,
+    block,
+    messageRole,
+  }: {
+    allowInternalLinks?: boolean;
+    block: MarkdownBlock;
+    messageRole: UIMessage["role"];
+  }) => {
     const { type, content, lang } = block;
 
     if (type === "code") {
@@ -60,6 +69,10 @@ const MemoizedMarkdownBlock = memo(
           components={{
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             a({ node, ...props }) {
+              if (allowInternalLinks && props.href?.startsWith("/")) {
+                return <Link to={props.href} {...props} />;
+              }
+
               return <a {...props} target="_blank" rel="noopener noreferrer" />;
             },
             table({ ...props }) {
@@ -97,7 +110,8 @@ const MemoizedMarkdownBlock = memo(
     return (
       prevProps.block.type === nextProps.block.type &&
       prevProps.block.content === nextProps.block.content &&
-      prevProps.block.lang === nextProps.block.lang
+      prevProps.block.lang === nextProps.block.lang &&
+      prevProps.allowInternalLinks === nextProps.allowInternalLinks
     );
   },
 );
@@ -106,10 +120,12 @@ MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
 
 export const MemoizedMarkdown = memo(
   ({
+    allowInternalLinks,
     content,
     id,
     messageRole,
   }: {
+    allowInternalLinks?: boolean;
     content: string;
     id: string;
     messageRole: UIMessage["role"];
@@ -117,7 +133,12 @@ export const MemoizedMarkdown = memo(
     const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
 
     return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock block={block} messageRole={messageRole} key={`${id}-block_${index}`} />
+      <MemoizedMarkdownBlock
+        allowInternalLinks={allowInternalLinks}
+        block={block}
+        messageRole={messageRole}
+        key={`${id}-block_${index}`}
+      />
     ));
   },
 );
