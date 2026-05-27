@@ -38,6 +38,7 @@ import {
   systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
+  ttsSettingsAtom,
   titleGenerationAtom,
   uiTintAtom,
   uiTintStrengthAtom,
@@ -66,6 +67,7 @@ export function resetAllSettings(): void {
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
   store.set(chatSortAtom, RESET);
+  store.set(ttsSettingsAtom, RESET);
   store.set(themeAtom, RESET);
   store.set(colorThemeAtom, RESET);
   store.set(uiTintAtom, RESET);
@@ -157,6 +159,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "CHAT_SORT":
       store.set(chatSortAtom, RESET);
+      break;
+    case "TTS":
+      store.set(ttsSettingsAtom, RESET);
       break;
     case "THEME":
       store.set(themeAtom, RESET);

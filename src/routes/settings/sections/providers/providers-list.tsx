@@ -2,6 +2,7 @@ import { IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useMemo, useState } from "react";
 
+import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,8 +13,21 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Accordion } from "@/components/ui/native/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
+import { TTS_PROVIDER_OPTIONS, getDefaultTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   deleteCustomProviderApiKeyAtom,
@@ -30,6 +44,8 @@ import {
   localProviderIdsAtom,
   localProviderSearchItemsAtom,
 } from "@/lib/jotai/local-provider-atoms";
+import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
+import { ttsApiKeyAtomFamily } from "@/lib/jotai/tts-api-key-atoms";
 
 import SettingsTarget from "../../settings-target";
 import { AddProviderDropdown } from "./add-provider-dropdown";
@@ -45,6 +61,7 @@ export function ProvidersList() {
   const [customSearchQuery, setCustomSearchQuery] = useState("");
 
   const localProviderIds = useAtomValue(localProviderIdsAtom);
+  const rawTtsSettings = useAtomValue(ttsSettingsAtom);
   const localProviderSearchItems = useAtomValue(localProviderSearchItemsAtom);
   const customProviderIds = useAtomValue(customProviderIdsAtom);
   const customProviderSearchItems = useAtomValue(customProviderSearchItemsAtom);
@@ -52,6 +69,26 @@ export function ProvidersList() {
   const deleteCustomProvider = useSetAtom(deleteCustomProviderAtom);
   const setCustomProviderApiKey = useSetAtom(setCustomProviderApiKeyAtom);
   const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
+  const setTtsSettings = useSetAtom(ttsSettingsAtom);
+  const setOpenAiTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("openai"));
+  const setElevenLabsTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("elevenlabs"));
+  const setLmntTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("lmnt"));
+  const setHumeTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("hume"));
+  const ttsSettings = normalizeTtsSettings(rawTtsSettings);
+  const selectedTtsProvider = TTS_PROVIDER_OPTIONS.find(
+    (provider) => provider.id === ttsSettings.provider,
+  );
+  const openAiTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("openai"));
+  const elevenLabsTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("elevenlabs"));
+  const lmntTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("lmnt"));
+  const humeTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("hume"));
+
+  const updateTtsSettings = (updates: Partial<typeof ttsSettings>) => {
+    setTtsSettings({
+      ...ttsSettings,
+      ...updates,
+    });
+  };
 
   const normalizedBuiltInQuery = builtInSearchQuery.trim().toLowerCase();
   const normalizedLocalQuery = localSearchQuery.trim().toLowerCase();
@@ -237,6 +274,453 @@ export function ProvidersList() {
                 No custom providers found.
               </p>
             )}
+          </CardContent>
+        </Card>
+      </SettingsTarget>
+
+      <SettingsTarget id="setting-tts-providers">
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>Text-to-Speech Providers</CardTitle>
+            <CardDescription>
+              Choose which voice service reads assistant replies out loud and adjust how it sounds.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="tts-provider">Provider</FieldLabel>
+                <Select
+                  value={ttsSettings.provider}
+                  onValueChange={(value) => {
+                    const provider = value as (typeof TTS_PROVIDER_OPTIONS)[number]["id"];
+                    trackSettingsInteraction("providers", "tts_provider_changed", { provider });
+                    updateTtsSettings({
+                      provider,
+                      model: getDefaultTtsModel(provider),
+                    });
+                  }}
+                >
+                  <SelectTrigger id="tts-provider" className="w-full md:max-w-96">
+                    <SelectValue placeholder="Choose a voice provider" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {TTS_PROVIDER_OPTIONS.map((provider) => (
+                        <SelectItem key={provider.id} value={provider.id}>
+                          {provider.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FieldDescription>
+                  Pick the service you want to use when you tap the speaker button.
+                </FieldDescription>
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="tts-model">Voice Model</FieldLabel>
+                <Select
+                  value={ttsSettings.model}
+                  onValueChange={(model) => {
+                    trackSettingsInteraction("providers", "tts_model_changed", { model });
+                    updateTtsSettings({ model });
+                  }}
+                  disabled={!selectedTtsProvider}
+                >
+                  <SelectTrigger id="tts-model" className="w-full md:max-w-96">
+                    <SelectValue placeholder="Choose a voice model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {(selectedTtsProvider?.models ?? []).map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              {ttsSettings.provider === "openai" ? (
+                <Field>
+                  <FieldLabel htmlFor="tts-openai-api-key">API Key</FieldLabel>
+                  <SecretInput
+                    id="tts-openai-api-key"
+                    value={openAiTtsApiKey}
+                    onChange={setOpenAiTtsApiKey}
+                    placeholder="Enter your OpenAI API key"
+                    showSaveCancel
+                  />
+                </Field>
+              ) : null}
+
+              {ttsSettings.provider === "elevenlabs" ? (
+                <Field>
+                  <FieldLabel htmlFor="tts-elevenlabs-api-key">API Key</FieldLabel>
+                  <SecretInput
+                    id="tts-elevenlabs-api-key"
+                    value={elevenLabsTtsApiKey}
+                    onChange={setElevenLabsTtsApiKey}
+                    placeholder="Enter your ElevenLabs API key"
+                    showSaveCancel
+                  />
+                </Field>
+              ) : null}
+
+              {ttsSettings.provider === "lmnt" ? (
+                <Field>
+                  <FieldLabel htmlFor="tts-lmnt-api-key">API Key</FieldLabel>
+                  <SecretInput
+                    id="tts-lmnt-api-key"
+                    value={lmntTtsApiKey}
+                    onChange={setLmntTtsApiKey}
+                    placeholder="Enter your LMNT API key"
+                    showSaveCancel
+                  />
+                </Field>
+              ) : null}
+
+              {ttsSettings.provider === "hume" ? (
+                <Field>
+                  <FieldLabel htmlFor="tts-hume-api-key">API Key</FieldLabel>
+                  <SecretInput
+                    id="tts-hume-api-key"
+                    value={humeTtsApiKey}
+                    onChange={setHumeTtsApiKey}
+                    placeholder="Enter your Hume API key"
+                    showSaveCancel
+                  />
+                </Field>
+              ) : null}
+
+              {ttsSettings.provider === "openai" ? (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor="tts-openai-voice">Voice</FieldLabel>
+                    <Select
+                      value={ttsSettings.openai.voice}
+                      onValueChange={(voice) =>
+                        updateTtsSettings({
+                          openai: { ...ttsSettings.openai, voice },
+                        })
+                      }
+                    >
+                      <SelectTrigger id="tts-openai-voice" className="w-full md:max-w-96">
+                        <SelectValue placeholder="Choose a voice" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {TTS_PROVIDER_OPTIONS.find(
+                            (provider) => provider.id === "openai",
+                          )?.voices.map((voice) => (
+                            <SelectItem key={voice} value={voice}>
+                              {voice}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="tts-openai-speed">Speech Rate</FieldLabel>
+                    <Input
+                      id="tts-openai-speed"
+                      type="number"
+                      min="0.25"
+                      max="4"
+                      step="0.05"
+                      value={ttsSettings.openai.speed}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          openai: {
+                            ...ttsSettings.openai,
+                            speed: Number(event.target.value) || 1,
+                          },
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="tts-openai-instructions">How It Should Sound</FieldLabel>
+                    <Textarea
+                      id="tts-openai-instructions"
+                      value={ttsSettings.openai.instructions}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          openai: { ...ttsSettings.openai, instructions: event.target.value },
+                        })
+                      }
+                      placeholder="Optional, for example: warm, calm, and conversational"
+                    />
+                  </Field>
+                </>
+              ) : null}
+
+              {ttsSettings.provider === "elevenlabs" ? (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor="tts-elevenlabs-voice">Voice ID</FieldLabel>
+                    <Input
+                      id="tts-elevenlabs-voice"
+                      value={ttsSettings.elevenlabs.voice}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          elevenlabs: { ...ttsSettings.elevenlabs, voice: event.target.value },
+                        })
+                      }
+                      placeholder="Paste a voice ID from ElevenLabs"
+                    />
+                  </Field>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="tts-elevenlabs-speed">Speech Rate</FieldLabel>
+                      <Input
+                        id="tts-elevenlabs-speed"
+                        type="number"
+                        min="0.7"
+                        max="1.2"
+                        step="0.05"
+                        value={ttsSettings.elevenlabs.speed}
+                        onChange={(event) =>
+                          updateTtsSettings({
+                            elevenlabs: {
+                              ...ttsSettings.elevenlabs,
+                              speed: Number(event.target.value) || 1,
+                            },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="tts-elevenlabs-language">Language Code</FieldLabel>
+                      <Input
+                        id="tts-elevenlabs-language"
+                        value={ttsSettings.elevenlabs.languageCode}
+                        onChange={(event) =>
+                          updateTtsSettings({
+                            elevenlabs: {
+                              ...ttsSettings.elevenlabs,
+                              languageCode: event.target.value,
+                            },
+                          })
+                        }
+                        placeholder="Optional, for example: en"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="tts-elevenlabs-stability">Stability</FieldLabel>
+                      <Input
+                        id="tts-elevenlabs-stability"
+                        type="number"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={ttsSettings.elevenlabs.stability}
+                        onChange={(event) =>
+                          updateTtsSettings({
+                            elevenlabs: {
+                              ...ttsSettings.elevenlabs,
+                              stability: Number(event.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="tts-elevenlabs-similarity">Voice Match</FieldLabel>
+                      <Input
+                        id="tts-elevenlabs-similarity"
+                        type="number"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={ttsSettings.elevenlabs.similarityBoost}
+                        onChange={(event) =>
+                          updateTtsSettings({
+                            elevenlabs: {
+                              ...ttsSettings.elevenlabs,
+                              similarityBoost: Number(event.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="tts-elevenlabs-style">Style Strength</FieldLabel>
+                      <Input
+                        id="tts-elevenlabs-style"
+                        type="number"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={ttsSettings.elevenlabs.style}
+                        onChange={(event) =>
+                          updateTtsSettings({
+                            elevenlabs: {
+                              ...ttsSettings.elevenlabs,
+                              style: Number(event.target.value) || 0,
+                            },
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="tts-elevenlabs-normalization">Text Cleanup</FieldLabel>
+                      <Select
+                        value={ttsSettings.elevenlabs.applyTextNormalization}
+                        onValueChange={(value) =>
+                          updateTtsSettings({
+                            elevenlabs: {
+                              ...ttsSettings.elevenlabs,
+                              applyTextNormalization: value as "auto" | "on" | "off",
+                            },
+                          })
+                        }
+                      >
+                        <SelectTrigger id="tts-elevenlabs-normalization" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="auto">Auto</SelectItem>
+                            <SelectItem value="on">On</SelectItem>
+                            <SelectItem value="off">Off</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  </div>
+                  <Field orientation="horizontal">
+                    <FieldLabel htmlFor="tts-elevenlabs-speaker-boost">
+                      Boost Voice Match
+                    </FieldLabel>
+                    <Switch
+                      id="tts-elevenlabs-speaker-boost"
+                      checked={ttsSettings.elevenlabs.useSpeakerBoost}
+                      onCheckedChange={(useSpeakerBoost) =>
+                        updateTtsSettings({
+                          elevenlabs: { ...ttsSettings.elevenlabs, useSpeakerBoost },
+                        })
+                      }
+                    />
+                  </Field>
+                </>
+              ) : null}
+
+              {ttsSettings.provider === "lmnt" ? (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor="tts-lmnt-voice">Voice</FieldLabel>
+                    <Input
+                      id="tts-lmnt-voice"
+                      value={ttsSettings.lmnt.voice}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          lmnt: { ...ttsSettings.lmnt, voice: event.target.value },
+                        })
+                      }
+                      placeholder="e.g. ava"
+                    />
+                  </Field>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field>
+                      <FieldLabel htmlFor="tts-lmnt-language">Language Code</FieldLabel>
+                      <Input
+                        id="tts-lmnt-language"
+                        value={ttsSettings.lmnt.language}
+                        onChange={(event) =>
+                          updateTtsSettings({
+                            lmnt: { ...ttsSettings.lmnt, language: event.target.value },
+                          })
+                        }
+                        placeholder="e.g. en"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="tts-lmnt-speed">Speech Rate</FieldLabel>
+                      <Input
+                        id="tts-lmnt-speed"
+                        type="number"
+                        min="0.25"
+                        max="2"
+                        step="0.05"
+                        value={ttsSettings.lmnt.speed}
+                        onChange={(event) =>
+                          updateTtsSettings({
+                            lmnt: {
+                              ...ttsSettings.lmnt,
+                              speed: Number(event.target.value) || 1,
+                            },
+                          })
+                        }
+                      />
+                    </Field>
+                  </div>
+                  <Field orientation="horizontal">
+                    <FieldLabel htmlFor="tts-lmnt-conversational">Conversational Voice</FieldLabel>
+                    <Switch
+                      id="tts-lmnt-conversational"
+                      checked={ttsSettings.lmnt.conversational}
+                      onCheckedChange={(conversational) =>
+                        updateTtsSettings({
+                          lmnt: { ...ttsSettings.lmnt, conversational },
+                        })
+                      }
+                    />
+                  </Field>
+                </>
+              ) : null}
+
+              {ttsSettings.provider === "hume" ? (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor="tts-hume-voice">Voice ID</FieldLabel>
+                    <Input
+                      id="tts-hume-voice"
+                      value={ttsSettings.hume.voice}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          hume: { ...ttsSettings.hume, voice: event.target.value },
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="tts-hume-speed">Speech Rate</FieldLabel>
+                    <Input
+                      id="tts-hume-speed"
+                      type="number"
+                      step="0.05"
+                      value={ttsSettings.hume.speed}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          hume: {
+                            ...ttsSettings.hume,
+                            speed: Number(event.target.value) || 1,
+                          },
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="tts-hume-instructions">How It Should Sound</FieldLabel>
+                    <Textarea
+                      id="tts-hume-instructions"
+                      value={ttsSettings.hume.instructions}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          hume: { ...ttsSettings.hume, instructions: event.target.value },
+                        })
+                      }
+                      placeholder="Optional, for example: upbeat and friendly"
+                    />
+                  </Field>
+                </>
+              ) : null}
+            </FieldGroup>
           </CardContent>
         </Card>
       </SettingsTarget>

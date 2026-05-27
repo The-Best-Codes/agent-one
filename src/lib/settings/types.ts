@@ -29,6 +29,46 @@ export type InputStyleOption = "docked" | "floating";
 export type CollapsedSidebarLayoutOption = "row" | "column";
 export type ChatVirtualizationModeOption = "off" | "threshold";
 export type ChatSortOption = "created-at" | "updated-at";
+export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume";
+
+export interface TtsOpenAISettings {
+  voice: string;
+  speed: number;
+  instructions: string;
+}
+
+export interface TtsElevenLabsSettings {
+  voice: string;
+  speed: number;
+  languageCode: string;
+  stability: number;
+  similarityBoost: number;
+  style: number;
+  useSpeakerBoost: boolean;
+  applyTextNormalization: "auto" | "on" | "off";
+}
+
+export interface TtsLmtnSettings {
+  voice: string;
+  language: string;
+  speed: number;
+  conversational: boolean;
+}
+
+export interface TtsHumeSettings {
+  voice: string;
+  speed: number;
+  instructions: string;
+}
+
+export interface TtsSettings {
+  provider: TtsProviderId | "";
+  model: string;
+  openai: TtsOpenAISettings;
+  elevenlabs: TtsElevenLabsSettings;
+  lmnt: TtsLmtnSettings;
+  hume: TtsHumeSettings;
+}
 
 export type TitleGenerationMethodOption =
   | "ai"
@@ -171,6 +211,7 @@ export interface DefaultSettings extends ApiKeySettings {
   SHOW_CHAT_STATUS_INDICATOR: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
   CHAT_SORT: ChatSortOption;
+  TTS: TtsSettings;
   TITLE_GENERATION: TitleGenerationSettings;
   THEME: ThemeOption;
   COLOR_THEME: ColorThemeOption;
@@ -211,6 +252,36 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
   CHAT_SORT: "created-at",
+  TTS: {
+    provider: "",
+    model: "",
+    openai: {
+      voice: "alloy",
+      speed: 1,
+      instructions: "",
+    },
+    elevenlabs: {
+      voice: "21m00Tcm4TlvDq8ikWAM",
+      speed: 1,
+      languageCode: "",
+      stability: 0.5,
+      similarityBoost: 0.75,
+      style: 0,
+      useSpeakerBoost: false,
+      applyTextNormalization: "auto",
+    },
+    lmnt: {
+      voice: "ava",
+      language: "en",
+      speed: 1,
+      conversational: false,
+    },
+    hume: {
+      voice: "d8ab67c6-953d-4bd8-9370-8fa53a0f1453",
+      speed: 1,
+      instructions: "",
+    },
+  },
   TITLE_GENERATION: {
     method: "ai",
     characterLimit: 50,

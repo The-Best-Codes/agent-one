@@ -17,6 +17,7 @@ import {
   type RoundnessOption,
   type StopButtonBehaviorOption,
   type SubmitKeyOption,
+  type TtsSettings,
   type TextScaleOption,
   type ThemeOption,
   type TitleGenerationSettings,
@@ -208,6 +209,8 @@ export const chatSortAtom = createSettingAtom<ChatSortOption>(
   "CHAT_SORT",
   DEFAULT_SETTINGS.CHAT_SORT,
 );
+
+export const ttsSettingsAtom = createSettingAtom<TtsSettings>("TTS", DEFAULT_SETTINGS.TTS);
 
 export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(
   "TITLE_GENERATION",

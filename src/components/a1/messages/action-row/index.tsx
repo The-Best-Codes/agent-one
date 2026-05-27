@@ -9,15 +9,18 @@ import { cn } from "@/lib/utils";
 import { BranchButton } from "./branch-button";
 import { EditButton } from "./edit-button";
 import { RetryButton } from "./retry-button";
+import { TtsButton } from "./tts-button";
 
 export const MessageActionRow = ({
   contentToCopy,
+  contentToSpeak,
   messageRole,
   messageId,
   onEdit,
   onBranch,
 }: {
   contentToCopy: string;
+  contentToSpeak: string;
   messageRole: UIMessage["role"];
   messageId: UIMessage["id"];
   onEdit?: () => void;
@@ -57,6 +60,17 @@ export const MessageActionRow = ({
           </TooltipTrigger>
           <TooltipContent side="bottom">Copy message</TooltipContent>
         </Tooltip>
+
+        {messageRole === "assistant" && contentToSpeak.trim() ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <TtsButton messageId={messageId} text={contentToSpeak} className="size-6" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Read aloud</TooltipContent>
+          </Tooltip>
+        ) : null}
 
         {onBranch && messageRole === "assistant" && (
           <Tooltip>

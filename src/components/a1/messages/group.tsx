@@ -8,6 +8,7 @@ export const MessageGroup = ({
   children,
   messageRole,
   contentToCopy,
+  contentToSpeak,
   messageId,
   onEdit,
   onBranch,
@@ -15,6 +16,7 @@ export const MessageGroup = ({
   children: React.ReactNode;
   messageRole: UIMessage["role"];
   contentToCopy: string;
+  contentToSpeak: string;
   messageId: UIMessage["id"];
   onEdit?: () => void;
   onBranch?: () => void;
@@ -36,6 +38,7 @@ export const MessageGroup = ({
       </div>
       <MessageActionRow
         contentToCopy={contentToCopy}
+        contentToSpeak={contentToSpeak}
         messageRole={messageRole}
         messageId={messageId}
         onEdit={onEdit}
