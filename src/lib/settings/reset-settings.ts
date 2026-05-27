@@ -2,6 +2,7 @@ import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
 import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/registry";
+import type { TtsProviderId } from "@/lib/settings/types";
 
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
@@ -47,6 +48,8 @@ import {
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
 
+const TTS_PROVIDER_IDS: readonly TtsProviderId[] = ["openai", "elevenlabs", "lmnt", "hume"];
+
 export function resetAllSettings(): void {
   const store = getDefaultStore();
 
@@ -91,6 +94,10 @@ export function resetAllSettings(): void {
   for (const provider of PROVIDER_REGISTRY) {
     void store.set(getApiKeyBaseAtom(provider.id), RESET);
     store.set(providerConfigAtoms[provider.id], RESET);
+  }
+
+  for (const providerId of TTS_PROVIDER_IDS) {
+    void store.set(getApiKeyBaseAtom(`tts-${providerId}`), RESET);
   }
 }
 
