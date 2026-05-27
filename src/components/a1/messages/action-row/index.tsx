@@ -1,9 +1,12 @@
 import type { UIMessage } from "ai";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { isTtsProviderConfigured, normalizeTtsSettings } from "@/lib/ai/tts";
+import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
 import { showMessageActionRowAtom } from "@/lib/jotai/settings-atoms";
+import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
 import { BranchButton } from "./branch-button";
@@ -14,7 +17,6 @@ import { TtsButton } from "./tts-button";
 export const MessageActionRow = ({
   contentToCopy,
   contentToSpeak,
-  showTts,
   messageRole,
   messageId,
   onEdit,
@@ -22,7 +24,6 @@ export const MessageActionRow = ({
 }: {
   contentToCopy: string;
   contentToSpeak: string;
-  showTts: boolean;
   messageRole: UIMessage["role"];
   messageId: UIMessage["id"];
   onEdit?: () => void;
@@ -63,15 +64,8 @@ export const MessageActionRow = ({
           <TooltipContent side="bottom">Copy message</TooltipContent>
         </Tooltip>
 
-        {showTts ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <TtsButton messageId={messageId} text={contentToSpeak} className="size-6" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">Read aloud</TooltipContent>
-          </Tooltip>
+        {messageRole === "assistant" && contentToSpeak.trim() ? (
+          <TtsAction messageId={messageId} text={contentToSpeak} />
         ) : null}
 
         {onBranch && messageRole === "assistant" && (
@@ -108,3 +102,29 @@ export const MessageActionRow = ({
     </div>
   );
 };
+
+function TtsAction({ messageId, text }: { messageId: string; text: string }) {
+  const rawTtsSettings = useAtomValue(ttsSettingsAtom);
+  const ttsSettings = normalizeTtsSettings(rawTtsSettings);
+  const apiKeys = {
+    openai: useAtomValue(apiKeyAtomFamily("tts-openai")),
+    elevenlabs: useAtomValue(apiKeyAtomFamily("tts-elevenlabs")),
+    lmnt: useAtomValue(apiKeyAtomFamily("tts-lmnt")),
+    hume: useAtomValue(apiKeyAtomFamily("tts-hume")),
+  };
+
+  if (!isTtsProviderConfigured(ttsSettings, apiKeys)) {
+    return null;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div>
+          <TtsButton messageId={messageId} text={text} className="size-6" />
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">Read aloud</TooltipContent>
+    </Tooltip>
+  );
+}

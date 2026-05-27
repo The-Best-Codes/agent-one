@@ -1,6 +1,6 @@
 import { IconCheck, IconChevronDown, IconX } from "@tabler/icons-react";
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import { memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -17,9 +17,7 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
-import { isTtsProviderConfigured, normalizeTtsSettings } from "@/lib/ai/tts";
-import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
-import { regenerateOnSaveAtom, ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
+import { regenerateOnSaveAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -61,14 +59,6 @@ const MessagePartsInternal = ({
   const { id: activeChatId } = useParams<{ id: string }>();
   const { branchChat } = usePersistence();
   const allMessages = useChatMessages();
-  const rawTtsSettings = useAtomValue(ttsSettingsAtom);
-  const ttsSettings = normalizeTtsSettings(rawTtsSettings);
-  const ttsApiKeys = {
-    openai: useAtomValue(apiKeyAtomFamily("tts-openai")),
-    elevenlabs: useAtomValue(apiKeyAtomFamily("tts-elevenlabs")),
-    lmnt: useAtomValue(apiKeyAtomFamily("tts-lmnt")),
-    hume: useAtomValue(apiKeyAtomFamily("tts-hume")),
-  };
 
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
 
@@ -140,12 +130,6 @@ const MessagePartsInternal = ({
       .filter(Boolean)
       .join("\n");
   }, [message.parts]);
-
-  const textToSpeechContent = getTextToSpeechContent();
-  const showTtsButton =
-    message.role === "assistant" &&
-    textToSpeechContent.trim().length > 0 &&
-    isTtsProviderConfigured(ttsSettings, ttsApiKeys);
 
   const renderedParts = useMemo(() => {
     let textIndex = 0;
@@ -302,8 +286,7 @@ const MessagePartsInternal = ({
   return (
     <MessageGroup
       contentToCopy={getCopyContent()}
-      contentToSpeak={textToSpeechContent}
-      showTts={showTtsButton}
+      contentToSpeak={getTextToSpeechContent()}
       messageRole={message.role}
       messageId={message.id}
       onEdit={canEdit ? handleEdit : undefined}
