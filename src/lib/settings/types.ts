@@ -32,12 +32,14 @@ export type ChatSortOption = "created-at" | "updated-at";
 export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume";
 
 export interface TtsOpenAISettings {
+  model: string;
   voice: string;
   speed: number;
   instructions: string;
 }
 
 export interface TtsElevenLabsSettings {
+  model: string;
   voice: string;
   speed: number;
   languageCode: string;
@@ -49,6 +51,7 @@ export interface TtsElevenLabsSettings {
 }
 
 export interface TtsLmtnSettings {
+  model: string;
   voice: string;
   language: string;
   speed: number;
@@ -56,6 +59,7 @@ export interface TtsLmtnSettings {
 }
 
 export interface TtsHumeSettings {
+  model: string;
   voice: string;
   speed: number;
   instructions: string;
@@ -63,7 +67,6 @@ export interface TtsHumeSettings {
 
 export interface TtsSettings {
   provider: TtsProviderId | "";
-  model: string;
   openai: TtsOpenAISettings;
   elevenlabs: TtsElevenLabsSettings;
   lmnt: TtsLmtnSettings;
@@ -254,13 +257,14 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   CHAT_SORT: "created-at",
   TTS: {
     provider: "",
-    model: "",
     openai: {
+      model: "tts-1",
       voice: "alloy",
       speed: 1,
       instructions: "",
     },
     elevenlabs: {
+      model: "eleven_v3",
       voice: "21m00Tcm4TlvDq8ikWAM",
       speed: 1,
       languageCode: "",
@@ -271,12 +275,14 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       applyTextNormalization: "auto",
     },
     lmnt: {
+      model: "aurora",
       voice: "ava",
       language: "en",
       speed: 1,
       conversational: false,
     },
     hume: {
+      model: "default",
       voice: "d8ab67c6-953d-4bd8-9370-8fa53a0f1453",
       speed: 1,
       instructions: "",

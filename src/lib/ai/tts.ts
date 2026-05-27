@@ -7,6 +7,10 @@ import { experimental_generateSpeech as generateSpeech } from "ai";
 
 import type { TtsProviderId, TtsSettings } from "@/lib/settings/types";
 
+type LegacyTtsSettings = Partial<TtsSettings> & {
+  model?: string;
+};
+
 export const TTS_PROVIDER_OPTIONS = [
   {
     id: "openai",
@@ -64,7 +68,22 @@ export function getDefaultTtsModel(provider: TtsProviderId): string {
   return TTS_PROVIDER_OPTIONS.find((option) => option.id === provider)?.models[0] ?? "";
 }
 
-export function normalizeTtsSettings(settings: Partial<TtsSettings> | undefined): TtsSettings {
+export function getSelectedTtsModel(settings: TtsSettings): string {
+  switch (settings.provider) {
+    case "openai":
+      return settings.openai.model;
+    case "elevenlabs":
+      return settings.elevenlabs.model;
+    case "lmnt":
+      return settings.lmnt.model;
+    case "hume":
+      return settings.hume.model;
+    default:
+      return "";
+  }
+}
+
+export function normalizeTtsSettings(settings: LegacyTtsSettings | undefined): TtsSettings {
   const provider =
     settings?.provider && TTS_PROVIDER_OPTIONS.some((option) => option.id === settings.provider)
       ? settings.provider
@@ -72,13 +91,18 @@ export function normalizeTtsSettings(settings: Partial<TtsSettings> | undefined)
 
   return {
     provider,
-    model: settings?.model?.trim() || (provider ? getDefaultTtsModel(provider) : ""),
     openai: {
+      model:
+        settings?.openai?.model?.trim() || settings?.model?.trim() || getDefaultTtsModel("openai"),
       voice: settings?.openai?.voice?.trim() || "alloy",
       speed: settings?.openai?.speed ?? 1,
       instructions: settings?.openai?.instructions ?? "",
     },
     elevenlabs: {
+      model:
+        settings?.elevenlabs?.model?.trim() ||
+        settings?.model?.trim() ||
+        getDefaultTtsModel("elevenlabs"),
       voice: settings?.elevenlabs?.voice?.trim() || "21m00Tcm4TlvDq8ikWAM",
       speed: settings?.elevenlabs?.speed ?? 1,
       languageCode: settings?.elevenlabs?.languageCode?.trim() || "",
@@ -89,12 +113,14 @@ export function normalizeTtsSettings(settings: Partial<TtsSettings> | undefined)
       applyTextNormalization: settings?.elevenlabs?.applyTextNormalization ?? "auto",
     },
     lmnt: {
+      model: settings?.lmnt?.model?.trim() || settings?.model?.trim() || getDefaultTtsModel("lmnt"),
       voice: settings?.lmnt?.voice?.trim() || "ava",
       language: settings?.lmnt?.language?.trim() || "en",
       speed: settings?.lmnt?.speed ?? 1,
       conversational: settings?.lmnt?.conversational ?? false,
     },
     hume: {
+      model: settings?.hume?.model?.trim() || settings?.model?.trim() || getDefaultTtsModel("hume"),
       voice: settings?.hume?.voice?.trim() || "d8ab67c6-953d-4bd8-9370-8fa53a0f1453",
       speed: settings?.hume?.speed ?? 1,
       instructions: settings?.hume?.instructions ?? "",
@@ -103,7 +129,7 @@ export function normalizeTtsSettings(settings: Partial<TtsSettings> | undefined)
 }
 
 export function hasConfiguredTts(settings: TtsSettings): boolean {
-  return settings.provider !== "" && settings.model.trim() !== "";
+  return settings.provider !== "" && getSelectedTtsModel(settings).trim() !== "";
 }
 
 export function isTtsProviderConfigured(
@@ -132,6 +158,7 @@ export async function generateTtsAudio(
   abortSignal?: AbortSignal,
 ): Promise<{ uint8Array: Uint8Array; mediaType: string }> {
   const settings = normalizeTtsSettings(settingsInput);
+  const model = getSelectedTtsModel(settings);
 
   switch (settings.provider) {
     case "openai": {
@@ -141,7 +168,7 @@ export async function generateTtsAudio(
       });
 
       const result = await generateSpeech({
-        model: provider.speech(settings.model),
+        model: provider.speech(model),
         text,
         voice: settings.openai.voice,
         speed: settings.openai.speed,
@@ -168,7 +195,7 @@ export async function generateTtsAudio(
       });
 
       const result = await generateSpeech({
-        model: provider.speech(settings.model),
+        model: provider.speech(model),
         text,
         voice: settings.elevenlabs.voice,
         speed: settings.elevenlabs.speed,
@@ -200,14 +227,14 @@ export async function generateTtsAudio(
       });
 
       const result = await generateSpeech({
-        model: provider.speech(settings.model),
+        model: provider.speech(model),
         text,
         voice: settings.lmnt.voice,
         language: settings.lmnt.language,
         speed: settings.lmnt.speed,
         providerOptions: {
           lmnt: {
-            model: settings.model,
+            model,
             format: "mp3",
             sampleRate: 24000,
             speed: settings.lmnt.speed,

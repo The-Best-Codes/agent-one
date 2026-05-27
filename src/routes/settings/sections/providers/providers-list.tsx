@@ -27,7 +27,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
-import { TTS_PROVIDER_OPTIONS, getDefaultTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
+import { TTS_PROVIDER_OPTIONS, getSelectedTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
 import {
@@ -78,6 +78,7 @@ export function ProvidersList() {
   const selectedTtsProvider = TTS_PROVIDER_OPTIONS.find(
     (provider) => provider.id === ttsSettings.provider,
   );
+  const selectedTtsModel = getSelectedTtsModel(ttsSettings);
   const openAiTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-openai"));
   const elevenLabsTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-elevenlabs"));
   const lmntTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-lmnt"));
@@ -297,7 +298,6 @@ export function ProvidersList() {
                     trackSettingsInteraction("providers", "tts_provider_changed", { provider });
                     updateTtsSettings({
                       provider,
-                      model: getDefaultTtsModel(provider),
                     });
                   }}
                 >
@@ -322,10 +322,27 @@ export function ProvidersList() {
               <Field>
                 <FieldLabel htmlFor="tts-model">Voice Model</FieldLabel>
                 <Select
-                  value={ttsSettings.model}
+                  value={selectedTtsModel}
                   onValueChange={(model) => {
                     trackSettingsInteraction("providers", "tts_model_changed", { model });
-                    updateTtsSettings({ model });
+
+                    if (ttsSettings.provider === "openai") {
+                      updateTtsSettings({
+                        openai: { ...ttsSettings.openai, model },
+                      });
+                    } else if (ttsSettings.provider === "elevenlabs") {
+                      updateTtsSettings({
+                        elevenlabs: { ...ttsSettings.elevenlabs, model },
+                      });
+                    } else if (ttsSettings.provider === "lmnt") {
+                      updateTtsSettings({
+                        lmnt: { ...ttsSettings.lmnt, model },
+                      });
+                    } else if (ttsSettings.provider === "hume") {
+                      updateTtsSettings({
+                        hume: { ...ttsSettings.hume, model },
+                      });
+                    }
                   }}
                   disabled={!selectedTtsProvider}
                 >
