@@ -2,6 +2,7 @@ import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
 import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/registry";
+import type { TtsProviderId } from "@/lib/settings/types";
 
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
@@ -38,6 +39,7 @@ import {
   systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
+  ttsSettingsAtom,
   titleGenerationAtom,
   uiTintAtom,
   uiTintStrengthAtom,
@@ -45,6 +47,8 @@ import {
   userNameAtom,
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
+
+const TTS_PROVIDER_IDS: readonly TtsProviderId[] = ["openai", "elevenlabs", "lmnt", "hume"];
 
 export function resetAllSettings(): void {
   const store = getDefaultStore();
@@ -66,6 +70,7 @@ export function resetAllSettings(): void {
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
   store.set(chatSortAtom, RESET);
+  store.set(ttsSettingsAtom, RESET);
   store.set(themeAtom, RESET);
   store.set(colorThemeAtom, RESET);
   store.set(uiTintAtom, RESET);
@@ -89,6 +94,10 @@ export function resetAllSettings(): void {
   for (const provider of PROVIDER_REGISTRY) {
     void store.set(getApiKeyBaseAtom(provider.id), RESET);
     store.set(providerConfigAtoms[provider.id], RESET);
+  }
+
+  for (const providerId of TTS_PROVIDER_IDS) {
+    void store.set(getApiKeyBaseAtom(`tts-${providerId}`), RESET);
   }
 }
 
@@ -157,6 +166,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "CHAT_SORT":
       store.set(chatSortAtom, RESET);
+      break;
+    case "TTS":
+      store.set(ttsSettingsAtom, RESET);
       break;
     case "THEME":
       store.set(themeAtom, RESET);
