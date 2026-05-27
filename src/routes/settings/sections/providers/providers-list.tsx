@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS, getDefaultTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
+import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
 import {
   deleteCustomProviderApiKeyAtom,
   setCustomProviderApiKeyAtom,
@@ -45,7 +46,6 @@ import {
   localProviderSearchItemsAtom,
 } from "@/lib/jotai/local-provider-atoms";
 import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
-import { ttsApiKeyAtomFamily } from "@/lib/jotai/tts-api-key-atoms";
 
 import SettingsTarget from "../../settings-target";
 import { AddProviderDropdown } from "./add-provider-dropdown";
@@ -70,18 +70,18 @@ export function ProvidersList() {
   const setCustomProviderApiKey = useSetAtom(setCustomProviderApiKeyAtom);
   const deleteCustomProviderApiKey = useSetAtom(deleteCustomProviderApiKeyAtom);
   const setTtsSettings = useSetAtom(ttsSettingsAtom);
-  const setOpenAiTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("openai"));
-  const setElevenLabsTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("elevenlabs"));
-  const setLmntTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("lmnt"));
-  const setHumeTtsApiKey = useSetAtom(ttsApiKeyAtomFamily("hume"));
+  const setOpenAiTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-openai"));
+  const setElevenLabsTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-elevenlabs"));
+  const setLmntTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-lmnt"));
+  const setHumeTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-hume"));
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const selectedTtsProvider = TTS_PROVIDER_OPTIONS.find(
     (provider) => provider.id === ttsSettings.provider,
   );
-  const openAiTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("openai"));
-  const elevenLabsTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("elevenlabs"));
-  const lmntTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("lmnt"));
-  const humeTtsApiKey = useAtomValue(ttsApiKeyAtomFamily("hume"));
+  const openAiTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-openai"));
+  const elevenLabsTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-elevenlabs"));
+  const lmntTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-lmnt"));
+  const humeTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-hume"));
 
   const updateTtsSettings = (updates: Partial<typeof ttsSettings>) => {
     setTtsSettings({

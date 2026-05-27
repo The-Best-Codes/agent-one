@@ -3,9 +3,9 @@ import { useAtom, useAtomValue } from "jotai";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { generateTtsAudio, isTtsProviderConfigured, normalizeTtsSettings } from "@/lib/ai/tts";
+import { generateTtsAudio, normalizeTtsSettings } from "@/lib/ai/tts";
+import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
 import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
-import { ttsApiKeysAtom } from "@/lib/jotai/tts-api-key-atoms";
 import { ttsPlaybackControllerAtom, ttsPlaybackStateAtom } from "@/lib/jotai/tts-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
@@ -24,15 +24,15 @@ export function TtsButton({
   const [ttsState, setTtsState] = useAtom(ttsPlaybackStateAtom);
   const [controller, setController] = useAtom(ttsPlaybackControllerAtom);
   const rawTtsSettings = useAtomValue(ttsSettingsAtom);
-  const apiKeys = useAtomValue(ttsApiKeysAtom);
+  const apiKeys = {
+    openai: useAtomValue(apiKeyAtomFamily("tts-openai")),
+    elevenlabs: useAtomValue(apiKeyAtomFamily("tts-elevenlabs")),
+    lmnt: useAtomValue(apiKeyAtomFamily("tts-lmnt")),
+    hume: useAtomValue(apiKeyAtomFamily("tts-hume")),
+  };
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const isCurrentMessage = ttsState.messageId === messageId;
-  const isConfigured = isTtsProviderConfigured(ttsSettings, apiKeys);
   const isDisabled = isCurrentMessage && ["loading", "error"].includes(ttsState.status);
-
-  if (!isConfigured) {
-    return null;
-  }
 
   const stopPlayback = () => {
     controller?.stop();

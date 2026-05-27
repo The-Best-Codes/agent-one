@@ -9,6 +9,7 @@ export const MessageGroup = ({
   messageRole,
   contentToCopy,
   contentToSpeak,
+  showTts,
   messageId,
   onEdit,
   onBranch,
@@ -17,6 +18,7 @@ export const MessageGroup = ({
   messageRole: UIMessage["role"];
   contentToCopy: string;
   contentToSpeak: string;
+  showTts: boolean;
   messageId: UIMessage["id"];
   onEdit?: () => void;
   onBranch?: () => void;
@@ -39,6 +41,7 @@ export const MessageGroup = ({
       <MessageActionRow
         contentToCopy={contentToCopy}
         contentToSpeak={contentToSpeak}
+        showTts={showTts}
         messageRole={messageRole}
         messageId={messageId}
         onEdit={onEdit}

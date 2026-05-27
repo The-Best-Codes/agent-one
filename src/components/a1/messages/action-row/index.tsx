@@ -14,6 +14,7 @@ import { TtsButton } from "./tts-button";
 export const MessageActionRow = ({
   contentToCopy,
   contentToSpeak,
+  showTts,
   messageRole,
   messageId,
   onEdit,
@@ -21,6 +22,7 @@ export const MessageActionRow = ({
 }: {
   contentToCopy: string;
   contentToSpeak: string;
+  showTts: boolean;
   messageRole: UIMessage["role"];
   messageId: UIMessage["id"];
   onEdit?: () => void;
@@ -61,7 +63,7 @@ export const MessageActionRow = ({
           <TooltipContent side="bottom">Copy message</TooltipContent>
         </Tooltip>
 
-        {messageRole === "assistant" && contentToSpeak.trim() ? (
+        {showTts ? (
           <Tooltip>
             <TooltipTrigger asChild>
               <div>
