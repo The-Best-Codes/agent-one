@@ -117,6 +117,7 @@ const vendorManualChunks = {
   auth: ["better-auth", "@better-auth/core", "@better-fetch/fetch", "nanostores", "defu"],
   stateAndVirtualization: [
     "jotai",
+    "jotai-family",
     "consola",
     "@tanstack/virtual-core",
     "@tanstack/react-virtual",

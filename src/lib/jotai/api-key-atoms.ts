@@ -1,5 +1,6 @@
 import { atom } from "jotai";
-import { atomFamily, atomWithStorage, unwrap } from "jotai/utils";
+import { atomFamily } from "jotai-family";
+import { atomWithStorage, unwrap } from "jotai/utils";
 
 import {
   PROVIDER_REGISTRY,

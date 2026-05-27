@@ -50,7 +50,7 @@ export interface TtsElevenLabsSettings {
   applyTextNormalization: "auto" | "on" | "off";
 }
 
-export interface TtsLmtnSettings {
+export interface TtsLmntSettings {
   model: string;
   voice: string;
   language: string;
@@ -69,7 +69,7 @@ export interface TtsSettings {
   provider: TtsProviderId | "";
   openai: TtsOpenAISettings;
   elevenlabs: TtsElevenLabsSettings;
-  lmnt: TtsLmtnSettings;
+  lmnt: TtsLmntSettings;
   hume: TtsHumeSettings;
 }
 

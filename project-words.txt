@@ -114,3 +114,8 @@ Unlisten
 duplicative
 contenteditable
 entr
+elevenlabs
+lmnt
+LMNT
+ELEVENLABS
+Lmnt
