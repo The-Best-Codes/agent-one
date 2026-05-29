@@ -1,9 +1,10 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { useSetAtom } from "jotai";
+import { useSetAtom, useStore } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient, CLIENT_ID, setAuthToken } from "@/lib/auth/auth-client";
 import { getApiKeyBaseAtom } from "@/lib/jotai/api-key-atoms";
+import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
@@ -22,6 +23,7 @@ const TOKEN_KEY = "agent-one-web-auth-token";
 const DEVICE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code" as const;
 
 export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const store = useStore();
   const setAgentOneApiKey = useSetAtom(getApiKeyBaseAtom("agent-one"));
   const setAgentOneConfig = useSetAtom(getProviderConfigAtom("agent-one"));
 
@@ -53,7 +55,8 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
           });
           void setAgentOneApiKey(accessToken);
           setAgentOneConfig({ enabled: true, headers: {}, models: [] });
-          void settingsSyncManager.pull();
+          store.set(syncEnabledAtom, true);
+          settingsSyncManager.syncNow();
           return "valid";
         }
         if (error?.status === 401 || error?.status === 403) {
@@ -73,7 +76,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
         return "error";
       }
     },
-    [setAgentOneApiKey, setAgentOneConfig],
+    [setAgentOneApiKey, setAgentOneConfig, store],
   );
 
   useEffect(() => {
@@ -271,13 +274,14 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
       await keyringStorage.removeItem(TOKEN_KEY);
       void setAgentOneApiKey("");
       setAgentOneConfig({ enabled: false, headers: {}, models: [] });
+      store.set(syncEnabledAtom, false);
       setUser(null);
       setDeviceFlow(null);
       setIsSigningIn(false);
     } finally {
       setIsSigningOut(false);
     }
-  }, [stopPolling, setAgentOneApiKey, setAgentOneConfig]);
+  }, [stopPolling, setAgentOneApiKey, setAgentOneConfig, store]);
 
   useEffect(() => {
     return () => stopPolling();
@@ -287,7 +291,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (!user) return;
 
     const id = setInterval(() => {
-      void settingsSyncManager.pull();
+      settingsSyncManager.syncNow();
     }, 60_000);
 
     return () => clearInterval(id);
