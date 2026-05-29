@@ -1,10 +1,9 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { useSetAtom, useStore } from "jotai";
+import { useSetAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient, CLIENT_ID, setAuthToken } from "@/lib/auth/auth-client";
 import { getApiKeyBaseAtom } from "@/lib/jotai/api-key-atoms";
-import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import { getLogger } from "@/lib/logger";
 import { keyringStorage } from "@/lib/storage/keyring-storage";
@@ -23,7 +22,6 @@ const TOKEN_KEY = "agent-one-web-auth-token";
 const DEVICE_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:device_code" as const;
 
 export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const store = useStore();
   const setAgentOneApiKey = useSetAtom(getApiKeyBaseAtom("agent-one"));
   const setAgentOneConfig = useSetAtom(getProviderConfigAtom("agent-one"));
 
@@ -55,7 +53,6 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
           });
           void setAgentOneApiKey(accessToken);
           setAgentOneConfig({ enabled: true, headers: {}, models: [] });
-          store.set(syncEnabledAtom, true);
           settingsSyncManager.syncNow();
           return "valid";
         }
@@ -76,7 +73,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
         return "error";
       }
     },
-    [setAgentOneApiKey, setAgentOneConfig, store],
+    [setAgentOneApiKey, setAgentOneConfig],
   );
 
   useEffect(() => {
@@ -274,14 +271,13 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
       await keyringStorage.removeItem(TOKEN_KEY);
       void setAgentOneApiKey("");
       setAgentOneConfig({ enabled: false, headers: {}, models: [] });
-      store.set(syncEnabledAtom, false);
       setUser(null);
       setDeviceFlow(null);
       setIsSigningIn(false);
     } finally {
       setIsSigningOut(false);
     }
-  }, [stopPolling, setAgentOneApiKey, setAgentOneConfig, store]);
+  }, [stopPolling, setAgentOneApiKey, setAgentOneConfig]);
 
   useEffect(() => {
     return () => stopPolling();
