@@ -10,7 +10,6 @@
 - [Section overview](/docs/category/for-app-authors.md)
 - [Section overview](/docs/category/for-team-members.md)
 - [Section overview](/docs/category/for-users.md)
-- [External Data Checker](/docs/for-app-authors/external-data-checker.md): The Flatpak External Data Checker
 - [GitHub actions](/docs/for-app-authors/github-actions.md): Using GitHub actions on your own repository
 - [Flatpak builder lint](/docs/for-app-authors/linter.md): Flatpak builder lint is a linter for Flatpak manifests and builds. It is
 - [Maintenance](/docs/for-app-authors/maintenance.md): This is a guide on how to maintain an application once it is published
@@ -20,10 +19,10 @@
 - [Runtimes](/docs/for-app-authors/runtimes.md): Runtimes supply the essential dependencies required by applications, and
 - [Shared Modules](/docs/for-app-authors/shared-modules.md): A small number of dependencies that are frequently used by applications
 - [Submission](/docs/for-app-authors/submission.md): App submissions are extremely welcome and the process is straightforward.
-- [Updates](/docs/for-app-authors/updates.md): Flathub builds and publishes app updates after a change is made to an
 - [Useful links](/docs/for-app-authors/useful-links.md): - Use the GitHub search for code that might help you
 - [Verification](/docs/for-app-authors/verification.md): What is verification?
 - [Why Flathub?](/docs/for-app-authors/why-flathub.md): What Flathub offers
+- [Becoming a Flathub Team Member](/docs/for-team-members/becoming-a-team-member.md): Flathub, as a centralized application repository, relies on a dedicated
 - [Historical documents](/docs/for-team-members/historical.md): These were migrated from the wiki.
 - [Review](/docs/for-team-members/review.md): Reviews happen via comments on GitHub PR's where we also have
 - [Bisecting regressions in application builds](/docs/for-users/bisecting.md): In case the newest builds of an application introduce regressions, you
@@ -97,137 +96,6 @@ Copyright © 2022-2026 Flathub Team. Licensed under Creative Commons Attribution
 
 ---
 
-# External Data Checker
-
-The [Flatpak External Data Checker](https://github.com/flathub/flatpak-external-data-checker) is a tool that can be used to automatically check for updates to external sources in the Flatpak manifest.
-
-## Configuration[​](#configuration "Direct link to Configuration")
-
-A global External Data Checker action runs hourly on Flathub by default. If the application manifest has a [checker](https://github.com/flathub-infra/flatpak-external-data-checker?tab=readme-ov-file#changes-to-flatpak-manifests) configured and if there are newer versions of external data found, a pull request with the update will be created through the [flathubbot GitHub account](https://github.com/flathubbot).
-
-By default, the global action only supports the [default GitHub branch](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/changing-the-default-branch) but External Data Checker can be configured to run on multiple branches through a [custom workflow](/docs/for-app-authors/external-data-checker.md#run-on-multiple-branches).
-
-If a custom workflow is being used, please [disable](/docs/for-app-authors/external-data-checker.md#disable) the default Flathub provided workflow.
-
-### Only create updates for important modules[​](#only-create-updates-for-important-modules "Direct link to Only create updates for important modules")
-
-You can configure External Data Checker to only create updates for modules that are marked as important. This is done by creating a `flathub.json` file with the following contents:
-
-flathub.json
-
-```
-{
-
-  "require-important-update": true
-
-}
-```
-
-This also needs your module config to have `is-important: true` set.
-
-### Automatically merge PRs[​](#automatically-merge-prs "Direct link to Automatically merge PRs")
-
-danger
-
-This is not allowed by default on Flathub without a [Linter exception](/docs/for-app-authors/linter.md#exceptions) to [flathub-json-automerge-enabled](/docs/for-app-authors/linter.md#flathub-json-automerge-enabled)
-
-note
-
-Automatically merging PRs ensures each update builds, but does not guarantee the app will launch or run correctly. We highly recommend human-testing each PR before merging it.
-
-You can configure External Data Checker to automatically merge PRs. This is done by creating a `flathub.json` file in the root of your manifest's repo with the following contents:
-
-flathub.json
-
-```
-{
-
-  "automerge-flathubbot-prs": true
-
-}
-```
-
-### Disable[​](#disable "Direct link to Disable")
-
-You can opt out of External Data Checker by creating a `flathub.json` file in the root of your manifest's repo with the following contents:
-
-flathub.json
-
-```
-{
-
-  "disable-external-data-checker": true
-
-}
-```
-
-### Run on multiple branches[​](#run-on-multiple-branches "Direct link to Run on multiple branches")
-
-By default, the Flathub provided External Data checker workflow runs only on the default branch of the GitHub repository, but a custom workflow can be defined to run it on multiple branches. This is useful for extensions or baseapps which have multiple branches - one for each runtime version.
-
-This uses the docker image published by External Data Checker upstream.
-
-First [opt out](#disable) of the default Flathub provided workflow.
-
-Then, this needs to be committed to the Github repo at `.github/workflows/update.yaml`.
-
-```
-name: Check for updates
-
-on:
-
-  schedule:
-
-    - cron: '0 14 * * 1' # Run once a week, on Monday, at 14:00
-
-  workflow_dispatch: {}
-
-jobs:
-
-  flatpak-external-data-checker:
-
-    runs-on: ubuntu-latest
-
-    if: github.repository_owner == 'flathub'
-
-    strategy:
-
-      matrix:
-
-        branch: [ branch/23.08, branch/24.08, beta ]
-
-    steps:
-
-      - uses: actions/checkout@v4
-
-        with:
-
-          ref: ${{ matrix.branch }}
-
-      - uses: docker://ghcr.io/flathub/flatpak-external-data-checker:latest
-
-        env:
-
-          GIT_AUTHOR_NAME: Flatpak External Data Checker
-
-          GIT_COMMITTER_NAME: Flatpak External Data Checker
-
-          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-
-          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-
-          EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-        with:
-
-          args: --update --never-fork <MANIFEST FILENAME>
-```
-
-
----
-
 # GitHub actions
 
 ## Using GitHub actions on your own repository[​](#using-github-actions-on-your-own-repository "Direct link to Using GitHub actions on your own repository")
@@ -296,6 +164,10 @@ The syntax is given below.
 
 ## Exception policies[​](#exception-policies "Direct link to Exception policies")
 
+Exceptions should always be treated as a temporary measure rather than a permanent solution. If the linter produces incorrect or misleading errors that require an exception, please report an issue. Otherwise, applications should aim to replace exceptions with proper solutions as they become available in Flatpak, XDG standards, XDG portals, or their frameworks and dependencies.
+
+Please do not use LLMs in any way to handle exceptions PRs. The exception can be permanently denied in that case.
+
 * Certain exceptions that enable breaking out of the Flatpak sandbox including but not limited to home, host, flatpak-spawn, arbitrary bus name access will not be granted if there are signs of LLM usage in the software or in the exception PR.
 
 ### Check currently published exceptions[​](#check-currently-published-exceptions "Direct link to Check currently published exceptions")
@@ -312,11 +184,15 @@ Here is a list of linter errors, and whether exceptions may be applied, by defau
 
 ### appid-length-more-than-255-chars[​](#appid-length-more-than-255-chars "Direct link to appid-length-more-than-255-chars")
 
+Criteria: This exception is never granted.
+
 The length of appid string is more than 255 characters.
 
 Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#application-id) for more information.
 
 ### appid-less-than-3-components[​](#appid-less-than-3-components "Direct link to appid-less-than-3-components")
+
+Criteria: This exception is never granted.
 
 The appid has less than 3 components after splitting at each `.`. At least 3 components is needed.
 
@@ -324,11 +200,15 @@ Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#appl
 
 ### appid-component-wrong-syntax[​](#appid-component-wrong-syntax "Direct link to appid-component-wrong-syntax")
 
+Criteria: This exception is never granted.
+
 The appid contains a disallowed character.
 
 Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#application-id) for more information.
 
 ### appid-too-many-components-for-app[​](#appid-too-many-components-for-app "Direct link to appid-too-many-components-for-app")
+
+Criteria: This exception is never granted.
 
 The appid has >=6 components after splitting at each `.`. Applications must try to have at most 6 components.
 
@@ -336,9 +216,13 @@ Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#appl
 
 ### appid-url-check-internal-error[​](#appid-url-check-internal-error "Direct link to appid-url-check-internal-error")
 
+Criteria: This exception is never granted.
+
 The URL could not be determined from the appid. This is an internal error for the linter.
 
 ### appid-url-not-reachable[​](#appid-url-not-reachable "Direct link to appid-url-not-reachable")
+
+Criteria: This exception is only granted after manual verification in case the URL is unreachable due to bot protection, server issues etc.
 
 The URL determined from the domain portion of the appid was not reachable.
 
@@ -346,11 +230,15 @@ Please see the [Control over domain or repository](/docs/for-app-authors/require
 
 ### appid-code-hosting-too-few-components[​](#appid-code-hosting-too-few-components "Direct link to appid-code-hosting-too-few-components")
 
+Criteria: This exception is never granted.
+
 The app id uses a code hosting domain like GitLab, GitHub or Codeberg and doesn't have 4 components: `{tld}.{domain}.foo.bar`.
 
 Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#application-id) for more information.
 
 ### appid-ends-with-lowercase-desktop[​](#appid-ends-with-lowercase-desktop "Direct link to appid-ends-with-lowercase-desktop")
+
+Criteria: This exception is never granted.
 
 The app id ends with lowercase `.desktop`.
 
@@ -358,13 +246,19 @@ Please follow the [Flatpak documentation](https://docs.flatpak.org/en/latest/con
 
 ### appid-filename-mismatch[​](#appid-filename-mismatch "Direct link to appid-filename-mismatch")
 
+Criteria: This exception is never granted.
+
 The filename of the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) does not match the app id used in the manifest.
 
 ### appid-not-defined[​](#appid-not-defined "Direct link to appid-not-defined")
 
+Criteria: This exception is never granted.
+
 The app id (`id` or `app-id`) is not defined in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html).
 
 ### appid-uses-code-hosting-domain[​](#appid-uses-code-hosting-domain "Direct link to appid-uses-code-hosting-domain")
+
+Criteria: This exception is never granted.
 
 The app id uses a code hosting domain like GitLab, GitHub or Codeberg and the first `{tld}` component does not start with `io` for GitHub and GitLab; `page` for Codeberg.
 
@@ -372,9 +266,13 @@ Please follow the [app id guidelines](/docs/for-app-authors/requirements.md#appl
 
 ### appstream-latest-release-is-prerelease[​](#appstream-latest-release-is-prerelease "Direct link to appstream-latest-release-is-prerelease")
 
+Criteria: This exception is never granted.
+
 The latest release tag was detected to be a pre-release which is not allowed for the Flathub stable remote.
 
 ### appstream-external-screenshot-url[​](#appstream-external-screenshot-url "Direct link to appstream-external-screenshot-url")
+
+Criteria: This exception is never granted.
 
 The screenshots in [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) aren't mirrored to `https://dl.flathub.org/media`.
 
@@ -385,6 +283,8 @@ Externally built or uploaded apps must ensure that it was built using those argu
 This may also happen when mirroring fails due to spurious connectivity issues and it is usually resolved by restarting the build.
 
 ### appstream-failed-validation[​](#appstream-failed-validation "Direct link to appstream-failed-validation")
+
+Criteria: This exception is never granted.
 
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) has failed validation. The output from the validation is in the `appstream` block.
 
@@ -542,23 +442,33 @@ One of the `custom` tags in the \[MetaInfo file]\(/docs/for-app-authors/metainfo
 
 ### appstream-id-mismatch-flatpak-id[​](#appstream-id-mismatch-flatpak-id "Direct link to appstream-id-mismatch-flatpak-id")
 
+Criteria: This exception is never granted.
+
 The `id` tag in the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) does not match the `FLATPAK_ID` (the `id` or `app-id` used in the Flatpak manifest).
 
 Please also see the [Renaming ID tag](/docs/for-app-authors/metainfo-guidelines.md#renaming-id-tag) section before renaming the tag.
 
 ### appstream-launchable-file-missing[​](#appstream-launchable-file-missing "Direct link to appstream-launchable-file-missing")
 
+Criteria: This exception is never granted.
+
 The MetaInfo file had a [launchable tag](/docs/for-app-authors/metainfo-guidelines.md#launchable) defined but the file `${FLATPAK_DEST}/share/applications/$FLATPAK_ID.desktop` was not found.
 
 ### appstream-metainfo-missing[​](#appstream-metainfo-missing "Direct link to appstream-metainfo-missing")
+
+Criteria: This exception is never granted.
 
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing from the build.
 
 ### appstream-missing-appinfo-file[​](#appstream-missing-appinfo-file "Direct link to appstream-missing-appinfo-file")
 
+Criteria: This exception is never granted.
+
 The build or the OSTree repo is missing the [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file.
 
 ### appstream-missing-categories[​](#appstream-missing-categories "Direct link to appstream-missing-categories")
+
+Criteria: This exception is never granted.
 
 The [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file is missing `categories`.
 
@@ -570,15 +480,21 @@ If this error is accompanied with `desktop-file-low-quality-category`, it means 
 
 ### appstream-missing-developer-name[​](#appstream-missing-developer-name "Direct link to appstream-missing-developer-name")
 
+Criteria: This exception is never granted.
+
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing a developer tag.
 
 Please see the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.md#developer-name) on how to define it.
 
 ### appstream-missing-project-license[​](#appstream-missing-project-license "Direct link to appstream-missing-project-license")
 
+Criteria: This exception is never granted.
+
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing the `project_license` tag. Please see the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.md#license).
 
 ### appstream-missing-icon-file[​](#appstream-missing-icon-file "Direct link to appstream-missing-icon-file")
+
+Criteria: This exception is never granted.
 
 A 128px png icon was not generated by `appstreamcli compose`. This is generated automatically provided atleast a 128px png icon or a SVG icon is installed to the [correct location](https://docs.flatpak.org/en/latest/conventions.html#application-icons).
 
@@ -586,11 +502,15 @@ The error indicates that the required icon sizes were not supplied or the genera
 
 ### appstream-release-tag-missing-timestamp[​](#appstream-release-tag-missing-timestamp "Direct link to appstream-release-tag-missing-timestamp")
 
+Criteria: This exception is never granted.
+
 A `release` tag in the [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file is missing the `timestamp` attribute.
 
 This tag is automatically generated provided the `date` attribute is correctly set for the `release` tag in metainfo. A timestamp may not be generated if the `release` tag in metainfo is misformatted.
 
 ### appstream-missing-icon-key[​](#appstream-missing-icon-key "Direct link to appstream-missing-icon-key")
+
+Criteria: This exception is never granted.
 
 The [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file is missing an `icon` key.
 
@@ -600,11 +520,15 @@ The error indicates something else is wrong. Please review additional errors if 
 
 ### appstream-icon-key-no-type[​](#appstream-icon-key-no-type "Direct link to appstream-icon-key-no-type")
 
+Criteria: This exception is never granted.
+
 The [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file has an `icon` key with no `type` attribute.
 
 Please see the [icon section](/docs/for-app-authors/metainfo-guidelines.md#icons) of the MetaInfo guidelines on how to use this tag.
 
 ### appstream-remote-icon-not-mirrored[​](#appstream-remote-icon-not-mirrored "Direct link to appstream-remote-icon-not-mirrored")
+
+Criteria: This exception is never granted.
 
 The [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file has an `icon` key with `type=remote` but the URL in the tag does not start with `https://dl.flathub.org/media/`.
 
@@ -614,6 +538,8 @@ Externally uploaded applications must ensure to mirror media as explained above.
 
 ### appstream-missing-screenshots[​](#appstream-missing-screenshots "Direct link to appstream-missing-screenshots")
 
+Criteria: This exception is never granted.
+
 The [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file is missing screenshots tags. These are generated automatically and the error means something else is wrong.
 
 This can happen when screenshot tags are missing/not properly defined in the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) or if the image file/URL is not reachable. Please see the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.md#screenshots) on how to define them.
@@ -622,15 +548,21 @@ If the screenshot tag is properly defined but the error happens, it can mean tha
 
 ### appstream-multiple-components[​](#appstream-multiple-components "Direct link to appstream-multiple-components")
 
+Criteria: This exception is never granted.
+
 The [AppStream catalog](/docs/for-app-authors/metainfo-guidelines.md#checking-the-generated-output) file is malformed and has multiple `component` tags.
 
 ### appstream-no-flathub-manifest-key[​](#appstream-no-flathub-manifest-key "Direct link to appstream-no-flathub-manifest-key")
+
+Criteria: This exception is never granted.
 
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing the `flathub::manifest` tag. Please see the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.md#manifest-location) on how to define it.
 
 This must be present for externally uploaded apps.
 
 ### appstream-screenshots-not-mirrored-in-ostree[​](#appstream-screenshots-not-mirrored-in-ostree "Direct link to appstream-screenshots-not-mirrored-in-ostree")
+
+Criteria: This exception is never granted.
 
 The ostree ref is missing a `screenshots/{arch}` ref.
 
@@ -642,9 +574,13 @@ The process is automated since Flatpak builder 1.4.5.
 
 ### appstream-screenshots-files-not-found-in-ostree[​](#appstream-screenshots-files-not-found-in-ostree "Direct link to appstream-screenshots-files-not-found-in-ostree")
 
+Criteria: This exception is never granted.
+
 The screenshot filenames defined in catalogue data were not found in the OSTree screenshot ref.
 
 ### appstream-unsupported-component-type[​](#appstream-unsupported-component-type "Direct link to appstream-unsupported-component-type")
+
+Criteria: This exception is never granted.
 
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) either uses an unsupported `component` type or is missing the `type` attribute.
 
@@ -654,15 +590,21 @@ Please see the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.m
 
 ### desktop-file-exec-has-flatpak-run[​](#desktop-file-exec-has-flatpak-run "Direct link to desktop-file-exec-has-flatpak-run")
 
+Criteria: This exception is never granted.
+
 The `Exec` key of the desktop file in the build has `flatpak run` in it.
 
 Desktop files do not need to manually make the `Exec` value `flatpak run ...` as that is done by `flatpak` itself during installation.
 
 ### desktop-file-exec-key-absent[​](#desktop-file-exec-key-absent "Direct link to desktop-file-exec-key-absent")
 
+Criteria: This exception is never granted.
+
 The `Exec` key is missing in the desktop file supplied. Desktop files must have an `Exec` key.
 
 ### desktop-file-failed-validation[​](#desktop-file-failed-validation "Direct link to desktop-file-failed-validation")
+
+Criteria: This exception is never granted.
 
 The [desktop file(s)](https://docs.flatpak.org/en/latest/conventions.html#desktop-files) supplied in the build have failed validation with `desktop-file-validate`.
 
@@ -670,11 +612,15 @@ Please fix the errors reported.
 
 ### desktop-file-icon-key-absent[​](#desktop-file-icon-key-absent "Direct link to desktop-file-icon-key-absent")
 
+Criteria: This exception is never granted.
+
 The desktop file supplied in the build has no `Icon` key.
 
 There must be an icon key present in the desktop file of a graphical application.
 
 ### desktop-file-icon-key-empty[​](#desktop-file-icon-key-empty "Direct link to desktop-file-icon-key-empty")
+
+Criteria: This exception is never granted.
 
 The desktop file supplied in the build has an empty `Icon` key.
 
@@ -682,47 +628,69 @@ The `Icon` key in the desktop file must have a proper value.
 
 ### desktop-file-icon-key-wrong-value[​](#desktop-file-icon-key-wrong-value "Direct link to desktop-file-icon-key-wrong-value")
 
+Criteria: This exception is never granted.
+
 The `Icon` key of the desktop file supplied in the build does not have a proper value.
 
 The value must be of the following patterns: `$FLATPAK_ID`, `$FLATPAK_ID.foo` or `$FLATPAK_ID-foo`. It may end with an extension but only `svg, svgz, png` are allowed.
 
 ### desktop-file-icon-not-installed[​](#desktop-file-icon-not-installed "Direct link to desktop-file-icon-not-installed")
 
+Criteria: This exception is never granted.
+
 The `Icon` defined in the desktop file is not installed to the [proper location](https://docs.flatpak.org/en/latest/conventions.html#application-icons) or has the wrong filename.
 
 ### desktop-file-is-hidden[​](#desktop-file-is-hidden "Direct link to desktop-file-is-hidden")
+
+Criteria: This exception is never granted.
 
 The desktop file supplied in the build sets `Hidden=true`
 
 ### desktop-file-is-nodisplay[​](#desktop-file-is-nodisplay "Direct link to desktop-file-is-nodisplay")
 
+Criteria: This exception is never granted.
+
 The desktop file supplied in the build sets `NoDisplay=true`. This is only allowed for console applications.
 
 ### desktop-file-terminal-key-not-true[​](#desktop-file-terminal-key-not-true "Direct link to desktop-file-terminal-key-not-true")
+
+Criteria: This exception is never granted.
 
 This is for console applications only. The desktop file is set to display on desktop environments but no `Terminal=true` is present.
 
 ### desktop-file-not-installed[​](#desktop-file-not-installed "Direct link to desktop-file-not-installed")
 
+Criteria: This exception is never granted.
+
 The [desktop file(s)](https://docs.flatpak.org/en/latest/conventions.html#desktop-files), are either not installed to the proper location during the build or does not match the `$FLATPAK_ID`.
 
 ### elf-arch-multiple-found[​](#elf-arch-multiple-found "Direct link to elf-arch-multiple-found")
+
+Criteria: This exception is never granted.
 
 Multiple ELF architectures were found after analysing the contents of the ref or build directory. All ELFs should match the architecture of the host.
 
 ### elf-arch-not-found[​](#elf-arch-not-found "Direct link to elf-arch-not-found")
 
+Criteria: This exception is never granted.
+
 The architecture of ELFs in the ref contents or build directory does not match the architecture of the OSTree ref.
 
 ### external-gitmodule-url-found[​](#external-gitmodule-url-found "Direct link to external-gitmodule-url-found")
+
+Criteria: New exception requests for this are not granted unless coming from a direct upload app.
 
 Git submodules outside of the GitHub orgs `flathub, flathub-infra, flatpak` are not allowed in the [Flathub manifest repository on GitHub](https://github.com/flathub/).
 
 ### manifest-directory-too-large[​](#manifest-directory-too-large "Direct link to manifest-directory-too-large")
 
+Criteria: This exception is never granted.
+
 The manifest directory of the Flathub GitHub repository exceeds 25 MB excluding the size of `.git/`.
 
 ### finish-args-conditional-permission-not-allowed-permission[​](#finish-args-conditional-permission-not-allowed-permission "Direct link to finish-args-conditional-permission-not-allowed-permission")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses a conditional permission which is not allowed.
 
@@ -730,13 +698,19 @@ Only `if:all:!has-input-device, if:all:!has-usb-device, if:usb:!has-usb-portal` 
 
 ### finish-args-conditional-permission-input-no-restriction[​](#finish-args-conditional-permission-input-no-restriction "Direct link to finish-args-conditional-permission-input-no-restriction")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses the conditional permission `--device-if=all:!has-input-device` but no `--device=input`.
 
 ### finish-args-conditional-permission-usb-no-restriction[​](#finish-args-conditional-permission-usb-no-restriction "Direct link to finish-args-conditional-permission-usb-no-restriction")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses the conditional permission `--device-if=all:!has-usb-device` but no `--device=usb`.
 
 ### finish-args-contains-both-x11-and-fallback[​](#finish-args-contains-both-x11-and-fallback "Direct link to finish-args-contains-both-x11-and-fallback")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has both `--socket=x11` and `--socket=fallback-x11`.
 
@@ -744,17 +718,25 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 ### finish-args-x11-without-ipc[​](#finish-args-x11-without-ipc "Direct link to finish-args-x11-without-ipc")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--socket=x11` or `--socket=fallback-x11` but no `--share=ipc`.
 
 ### finish-args-legacy-icon-folder-permission[​](#finish-args-legacy-icon-folder-permission "Direct link to finish-args-legacy-icon-folder-permission")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.icons`. This is a [legacy path](https://docs.flatpak.org/en/latest/desktop-integration.html#icons) and should not be used.
 
 ### finish-args-legacy-font-folder-permission[​](#finish-args-legacy-font-folder-permission "Direct link to finish-args-legacy-font-folder-permission")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.fonts`. This is a [legacy path](https://docs.flatpak.org/en/latest/desktop-integration.html#fonts) and should not be used.
 
 ### finish-args-incorrect-theme-folder-permission[​](#finish-args-incorrect-theme-folder-permission "Direct link to finish-args-incorrect-theme-folder-permission")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.themes`. The correct way to integrate third party themes for Flatpaks is to package them as [Flatpak extensions](https://docs.flatpak.org/en/latest/desktop-integration.html#theming).
 
@@ -762,21 +744,31 @@ The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) i
 
 ### finish-args-full-home-config-access[​](#finish-args-full-home-config-access "Direct link to finish-args-full-home-config-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to entire `~/.config`.
 
 ### finish-args-full-home-cache-access[​](#finish-args-full-home-cache-access "Direct link to finish-args-full-home-cache-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to entire `~/.cache`.
 
 ### finish-args-full-home-local-access[​](#finish-args-full-home-local-access "Direct link to finish-args-full-home-local-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to entire `~/.local`.
 
 ### finish-args-full-home-local-share-access[​](#finish-args-full-home-local-share-access "Direct link to finish-args-full-home-local-share-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to entire `~/.local/share`.
 
 ### finish-args-absolute-home-path[​](#finish-args-absolute-home-path "Direct link to finish-args-absolute-home-path")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a filesystem permission that starts with `/home` or `/var/home`.
 
@@ -788,11 +780,15 @@ Please consult the [Flatpak permission guide](https://docs.flatpak.org/en/latest
 
 ### finish-args-flatpak-appdata-folder-dir-access[​](#finish-args-flatpak-appdata-folder-dir-access "Direct link to finish-args-flatpak-appdata-folder-dir-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `~/.var/app` or a subfolder of it.
 
 ### finish-args-flatpak-system-folder-access[​](#finish-args-flatpak-system-folder-access "Direct link to finish-args-flatpak-system-folder-access")
 
 ### finish-args-flatpak-system-folder-dir-access[​](#finish-args-flatpak-system-folder-dir-access "Direct link to finish-args-flatpak-system-folder-dir-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `/var/lib/flatpak` or a subfolder of it.
 
@@ -800,17 +796,25 @@ The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) i
 
 ### finish-args-flatpak-user-folder-dir-access[​](#finish-args-flatpak-user-folder-dir-access "Direct link to finish-args-flatpak-user-folder-dir-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `~/.local/share/flatpak` or a subfolder of it.
 
 ### finish-args-host-tmp-access[​](#finish-args-host-tmp-access "Direct link to finish-args-host-tmp-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `/tmp`.
 
 ### finish-args-host-var-access[​](#finish-args-host-var-access "Direct link to finish-args-host-var-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `filesystem` permission to `/var` or a subdirectory of it.
 
 ### finish-args-absolute-run-media-path[​](#finish-args-absolute-run-media-path "Direct link to finish-args-absolute-run-media-path")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has an absolute `/run/media/foo` path in `filesystem` permission.
 
@@ -820,9 +824,13 @@ Please use `/run/media` or `/run/media/` instead.
 
 ### finish-args-arbitrary-autostart-access[​](#finish-args-arbitrary-autostart-access "Direct link to finish-args-arbitrary-autostart-access")
 
+Criteria: This exception is not granted as an Autostart portal exists. Exceptions can be menu editors, or destop file editor like apps.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-config/autostart` or `--filesystem=xdg-config/autostart:create`.
 
 ### finish-args-arbitrary-dbus-access[​](#finish-args-arbitrary-dbus-access "Direct link to finish-args-arbitrary-dbus-access")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--socket=session-bus` or `--socket=system-bus`.
 
@@ -830,71 +838,105 @@ Please follow the [Flatpak permission guide](https://docs.flatpak.org/en/latest/
 
 ### finish-args-metadata-key[​](#finish-args-metadata-key "Direct link to finish-args-metadata-key")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses the `--metadata` key.
 
 ### finish-args-contains-inherit-wayland-socket[​](#finish-args-contains-inherit-wayland-socket "Direct link to finish-args-contains-inherit-wayland-socket")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest uses the `inherit-wayland-socket` socket.
 
 ### finish-args-host-filesystem-access[​](#finish-args-host-filesystem-access "Direct link to finish-args-host-filesystem-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read and write `host` filesystem access.
 
 ### finish-args-home-filesystem-access[​](#finish-args-home-filesystem-access "Direct link to finish-args-home-filesystem-access")
+
+Criteria: Granted on sufficient explanation being provided. The application should try to use Portals, or restrict itself to well known directories instead of full home.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read and write `home` filesystem access.
 
 ### finish-args-host-etc-filesystem-access[​](#finish-args-host-etc-filesystem-access "Direct link to finish-args-host-etc-filesystem-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read and write `host-etc` filesystem access.
 
 ### finish-args-host-os-filesystem-access[​](#finish-args-host-os-filesystem-access "Direct link to finish-args-host-os-filesystem-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read and write `host-os` filesystem access.
 
 ### finish-args-host-ro-filesystem-access[​](#finish-args-host-ro-filesystem-access "Direct link to finish-args-host-ro-filesystem-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read-only `host` filesystem access.
 
 ### finish-args-host-etc-ro-filesystem-access[​](#finish-args-host-etc-ro-filesystem-access "Direct link to finish-args-host-etc-ro-filesystem-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read-only `host-etc` filesystem access.
 
 ### finish-args-host-os-ro-filesystem-access[​](#finish-args-host-os-ro-filesystem-access "Direct link to finish-args-host-os-ro-filesystem-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read-only `host-os` filesystem access.
 
 ### finish-args-home-ro-filesystem-access[​](#finish-args-home-ro-filesystem-access "Direct link to finish-args-home-ro-filesystem-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has read-only `home` filesystem access.
 
 ### finish-args-autostart-filesystem-access[​](#finish-args-autostart-filesystem-access "Direct link to finish-args-autostart-filesystem-access")
 
+Criteria: This exception is not granted as an Autostart portal exists. Exceptions can be menu editors, or destop file editor like apps.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.config/autostart`.
 
 ### finish-args-systemd-filesystem-access[​](#finish-args-systemd-filesystem-access "Direct link to finish-args-systemd-filesystem-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.config/systemd`.
 
 ### finish-args-gnupg-filesystem-access[​](#finish-args-gnupg-filesystem-access "Direct link to finish-args-gnupg-filesystem-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.gnupg`.
 
 ### finish-args-ssh-filesystem-access[​](#finish-args-ssh-filesystem-access "Direct link to finish-args-ssh-filesystem-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.ssh`.
 
 ### finish-args-desktopfile-filesystem-access[​](#finish-args-desktopfile-filesystem-access "Direct link to finish-args-desktopfile-filesystem-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has filesystem access to `~/.local/share/applications`.
 
 ### finish-args-uses-no-talk-name[​](#finish-args-uses-no-talk-name "Direct link to finish-args-uses-no-talk-name")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--no-talk-name` or `--no-system-talk-name`.
 
 ### finish-args-arbitrary-xdg-cache-mode-access[​](#finish-args-arbitrary-xdg-cache-mode-access "Direct link to finish-args-arbitrary-xdg-cache-mode-access")
 
 The following errors are included here finish-args-arbitrary-xdg-cache-ro-access, finish-args-arbitrary-xdg-cache-rw-access and finish-args-arbitrary-xdg-cache-create-access
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-cache`, with or without any of `:ro, :rw, :create`.
 
@@ -904,6 +946,8 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 The following errors are included here finish-args-arbitrary-xdg-config-ro-access, finish-args-arbitrary-xdg-config-rw-access and finish-args-arbitrary-xdg-config-create-access
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-config`, with or without any of `:ro, :rw, :create`.
 
 Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
@@ -912,11 +956,15 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 The following errors are included here finish-args-arbitrary-xdg-data-ro-access, finish-args-arbitrary-xdg-data-rw-access and finish-args-arbitrary-xdg-data-create-access
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-data`, with or without any of `:ro, :rw, :create`.
 
 Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-fallback-x11-without-wayland[​](#finish-args-fallback-x11-without-wayland "Direct link to finish-args-fallback-x11-without-wayland")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--socket=wayland` but no `--socket=fallback-x11`.
 
@@ -924,9 +972,13 @@ Please follow the [permission guide](https://docs.flatpak.org/en/latest/sandbox-
 
 ### finish-args-flatpak-spawn-access[​](#finish-args-flatpak-spawn-access "Direct link to finish-args-flatpak-spawn-access")
 
+Criteria: Granted on sufficient explanation being provided. See [inclusion policy](/docs/for-app-authors/requirements.md) for details.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--talk-name=org.freedesktop.Flatpak` or `--talk-name=org.freedesktop.Flatpak.*`.
 
 ### finish-args-has-socket-gpg-agent[​](#finish-args-has-socket-gpg-agent "Direct link to finish-args-has-socket-gpg-agent")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--socket=gpg-agent`.
 
@@ -934,19 +986,27 @@ This socket allows performing privileged operations with GPG on host.
 
 ### finish-args-has-socket-ssh-auth[​](#finish-args-has-socket-ssh-auth "Direct link to finish-args-has-socket-ssh-auth")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--socket=ssh-auth`.
 
 This socket allows performing privileged operations with SSH on host.
 
 ### finish-args-has-dev-input[​](#finish-args-has-dev-input "Direct link to finish-args-has-dev-input")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--device=input`.
 
 ### finish-args-has-dev-usb[​](#finish-args-has-dev-usb "Direct link to finish-args-has-dev-usb")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--device=usb`.
 
 ### finish-args-has-nosocket-socket\_name[​](#finish-args-has-nosocket-socket_name "Direct link to finish-args-has-nosocket-socket_name")
+
+Criteria: This exception is never granted.
 
 The following error codes are included here:
 
@@ -956,6 +1016,8 @@ The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) i
 
 ### finish-args-has-nodevice-device\_name[​](#finish-args-has-nodevice-device_name "Direct link to finish-args-has-nodevice-device_name")
 
+Criteria: This exception is never granted.
+
 The following error codes are included here:
 
 finish-args-has-nodevice-dri, finish-args-has-nodevice-input, finish-args-has-nodevice-kvm, finish-args-has-nodevice-shm, finish-args-has-nodevice-all
@@ -963,6 +1025,8 @@ finish-args-has-nodevice-dri, finish-args-has-nodevice-input, finish-args-has-no
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--nodevice=device_name`.
 
 ### finish-args-has-unshare-subsystem[​](#finish-args-has-unshare-subsystem "Direct link to finish-args-has-unshare-subsystem")
+
+Criteria: This exception is never granted.
 
 The following error codes are included here:
 
@@ -972,9 +1036,13 @@ The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) i
 
 ### finish-args-contains-both-x11-and-wayland[​](#finish-args-contains-both-x11-and-wayland "Direct link to finish-args-contains-both-x11-and-wayland")
 
+Criteria: This exception is only granted if the application crashes or fails to launch without both of these permissions and the bug cannot be solved (for example proprietary apps etc.).
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has both `--socket=x11` and `--socket=wayland`.
 
 ### finish-args-incorrect-dbus-gvfs[​](#finish-args-incorrect-dbus-gvfs "Direct link to finish-args-incorrect-dbus-gvfs")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--talk-name=org.gtk.vfs`.
 
@@ -982,15 +1050,19 @@ Please follow the [reference](https://docs.flatpak.org/en/latest/sandbox-permiss
 
 ### finish-args-not-defined[​](#finish-args-not-defined "Direct link to finish-args-not-defined")
 
+Criteria: This exception is never granted.
+
 The manifest has no [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing).
 
-This may be selectively allowed for console applications only.
-
 ### finish-args-only-wayland[​](#finish-args-only-wayland "Direct link to finish-args-only-wayland")
+
+Criteria: This exception is granted only if the application explicitly does not support X11 and it is verified.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has only `--socket=wayland` but no `x11` or `fallback-x11` access.
 
 ### finish-args-incorrect-secret-service-talk-name[​](#finish-args-incorrect-secret-service-talk-name "Direct link to finish-args-incorrect-secret-service-talk-name")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--talk-name=org.freedesktop.Secrets`.
 
@@ -998,9 +1070,13 @@ The correct name is `org.freedesktop.secrets`.
 
 ### finish-args-freedesktop-dbus-talk-name[​](#finish-args-freedesktop-dbus-talk-name "Direct link to finish-args-freedesktop-dbus-talk-name")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.freedesktop.DBus`.
 
 ### finish-args-portal-talk-name[​](#finish-args-portal-talk-name "Direct link to finish-args-portal-talk-name")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.freedesktop.portal.`.
 
@@ -1008,17 +1084,25 @@ Portal interfaces do not need to be manually added. These are allowed by Flatpak
 
 ### finish-args-portal-impl-component-talk-name[​](#finish-args-portal-impl-component-talk-name "Direct link to finish-args-portal-impl-component-talk-name")
 
+Criteria: Granted on sufficient explanation being provided and only for Flatpak stores or clients.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.freedesktop.impl.portal.`. `component` is the last component of the bus name in lowercase.
 
 ### finish-args-mpris-flatpak-id-talk-name[​](#finish-args-mpris-flatpak-id-talk-name "Direct link to finish-args-mpris-flatpak-id-talk-name")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--talk-name=org.mpris.MediaPlayer2.$FLATPAK_ID`.
 
 ### finish-args-flatpak-talk-name[​](#finish-args-flatpak-talk-name "Direct link to finish-args-flatpak-talk-name")
 
+Criteria: Granted on sufficient explanation being provided and only for Flatpak clients or development apps.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.freedesktop.Flatpak.`.
 
 ### finish-args-own-name-cpt[​](#finish-args-own-name-cpt "Direct link to finish-args-own-name-cpt")
+
+Criteria: This exception is never granted.
 
 All `--own-name` in [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) are blocked by default unless it exactly matches Flatpak ID or is an exact subname of the Flatpak ID or is a subname of MPRIS.
 
@@ -1026,55 +1110,81 @@ An `--own-name=org.foo.bar` will generate an error string of `finish-args-own-na
 
 ### finish-args-system-own-name-cpt[​](#finish-args-system-own-name-cpt "Direct link to finish-args-system-own-name-cpt")
 
+Criteria: This exception is never granted.
+
 All `--system-own-name` in [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) are blocked by default.
 
 A `--system-own-name=org.foo.bar` will generate an error string of `finish-args-system-own-name-org.foo.bar` and if it is `--system-own-name=org.foo.*` it will generate `finish-args-system-own-name-wildcard-org.foo`.
 
 ### finish-args-portal-impl-component-system-talk-name[​](#finish-args-portal-impl-component-system-talk-name "Direct link to finish-args-portal-impl-component-system-talk-name")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--system-talk-name=` starting with `org.freedesktop.impl.portal.`. `component` is the last component of the bus name in lowercase.
 
 ### finish-args-freedesktop-dbus-system-talk-name[​](#finish-args-freedesktop-dbus-system-talk-name "Direct link to finish-args-freedesktop-dbus-system-talk-name")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--system-talk-name=` starting with `org.freedesktop.DBus`.
 
 ### finish-args-mpris-flatpak-id-system-talk-name[​](#finish-args-mpris-flatpak-id-system-talk-name "Direct link to finish-args-mpris-flatpak-id-system-talk-name")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `-system-talk-name=org.mpris.MediaPlayer2.$FLATPAK_ID`.
 
 ### finish-args-wildcard-freedesktop-system-talk-name[​](#finish-args-wildcard-freedesktop-system-talk-name "Direct link to finish-args-wildcard-freedesktop-system-talk-name")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--system-talk-name=org.freedesktop.*`.
 
 ### finish-args-wildcard-gnome-system-talk-name[​](#finish-args-wildcard-gnome-system-talk-name "Direct link to finish-args-wildcard-gnome-system-talk-name")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--system-talk-name=org.gnome.*`.
 
 ### finish-args-wildcard-kde-system-talk-name[​](#finish-args-wildcard-kde-system-talk-name "Direct link to finish-args-wildcard-kde-system-talk-name")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--system-talk-name=org.kde.*`.
 
 ### finish-args-flatpak-system-talk-name[​](#finish-args-flatpak-system-talk-name "Direct link to finish-args-flatpak-system-talk-name")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--system-talk-name=` starting with `org.freedesktop.Flatpak`.
 
 ### finish-args-systemd1-system-talk-name[​](#finish-args-systemd1-system-talk-name "Direct link to finish-args-systemd1-system-talk-name")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--system-talk-name=` starting with `org.freedesktop.systemd1`.
 
 ### finish-args-login1-system-talk-name[​](#finish-args-login1-system-talk-name "Direct link to finish-args-login1-system-talk-name")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--system-talk-name=` starting with `org.freedesktop.login1`.
 
 ### finish-args-kwin-system-talk-name[​](#finish-args-kwin-system-talk-name "Direct link to finish-args-kwin-system-talk-name")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--system-talk-name=` starting with `org.kde.KWin`.
 
 ### finish-args-plasmashell-system-talk-name[​](#finish-args-plasmashell-system-talk-name "Direct link to finish-args-plasmashell-system-talk-name")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--system-talk-name=` starting with `org.kde.plasmashell`.
 
 ### finish-args-reserved-dir\_name[​](#finish-args-reserved-dir_name "Direct link to finish-args-reserved-dir_name")
+
+Criteria: This exception is never granted.
 
 The following error codes are included here:
 
@@ -1086,21 +1196,31 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 ### finish-args-systemd1-talk-name[​](#finish-args-systemd1-talk-name "Direct link to finish-args-systemd1-talk-name")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.freedesktop.systemd1`.
 
 ### finish-args-login1-talk-name[​](#finish-args-login1-talk-name "Direct link to finish-args-login1-talk-name")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.freedesktop.login1`.
 
 ### finish-args-kwin-talk-name[​](#finish-args-kwin-talk-name "Direct link to finish-args-kwin-talk-name")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.kde.KWin`.
 
 ### finish-args-plasmashell-talk-name[​](#finish-args-plasmashell-talk-name "Direct link to finish-args-plasmashell-talk-name")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has a `--talk-name=` starting with `org.kde.plasmashell`.
 
 ### finish-args-unnecessary-appid-own-name[​](#finish-args-unnecessary-appid-own-name "Direct link to finish-args-unnecessary-appid-own-name")
+
+Criteria: This exception is never granted.
 
 The manifest has `--own-name=<FLATPAK_ID>` in [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing).
 
@@ -1110,6 +1230,8 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 ### finish-args-unnecessary-appid-mpris-own-name[​](#finish-args-unnecessary-appid-mpris-own-name "Direct link to finish-args-unnecessary-appid-mpris-own-name")
 
+Criteria: This exception is never granted.
+
 The manifest has `--own-name=org.mpris.MediaPlayer2.<FLATPAK_ID>` in [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing).
 
 This access is granted automatically by Flatpak and there is no need to specify manually.
@@ -1117,6 +1239,8 @@ This access is granted automatically by Flatpak and there is no need to specify 
 Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html#d-bus-access) section for more details.
 
 ### finish-args-unnecessary-appid-talk-name[​](#finish-args-unnecessary-appid-talk-name "Direct link to finish-args-unnecessary-appid-talk-name")
+
+Criteria: This exception is never granted.
 
 The manifest has `--talk-name=<FLATPAK_ID>` in [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing).
 
@@ -1126,11 +1250,15 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 ### finish-args-unnecessary-xdg-cache-subdir-mode-access[​](#finish-args-unnecessary-xdg-cache-subdir-mode-access "Direct link to finish-args-unnecessary-xdg-cache-subdir-mode-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-cache/foo` with or without any of `:ro, :rw, :create`.
 
 Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-unnecessary-xdg-config-subdir-mode-access[​](#finish-args-unnecessary-xdg-config-subdir-mode-access "Direct link to finish-args-unnecessary-xdg-config-subdir-mode-access")
+
+Criteria: Granted on sufficient explanation being provided.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-config/foo` with or without any of `:ro, :rw, :create`.
 
@@ -1138,37 +1266,53 @@ Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/san
 
 ### finish-args-unnecessary-xdg-data-subdir-mode-access[​](#finish-args-unnecessary-xdg-data-subdir-mode-access "Direct link to finish-args-unnecessary-xdg-data-subdir-mode-access")
 
+Criteria: Granted on sufficient explanation being provided.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has `--filesystem=xdg-data/foo` with or without any of `:ro, :rw, :create`.
 
 Please see the [Flatpak permission guide](https://docs.flatpak.org/en/latest/sandbox-permissions.html).
 
 ### finish-args-wildcard-freedesktop-talk-name[​](#finish-args-wildcard-freedesktop-talk-name "Direct link to finish-args-wildcard-freedesktop-talk-name")
 
+Criteria: This exception is never granted.
+
 The manifest has a `talk-name` that is `org.freedesktop.*`.
 
 ### finish-args-wildcard-gnome-talk-name[​](#finish-args-wildcard-gnome-talk-name "Direct link to finish-args-wildcard-gnome-talk-name")
+
+Criteria: This exception is never granted.
 
 The manifest has a `talk-name` that is one of `org.gnome.*`.
 
 ### finish-args-wildcard-kde-talk-name[​](#finish-args-wildcard-kde-talk-name "Direct link to finish-args-wildcard-kde-talk-name")
 
+Criteria: This exception is never granted.
+
 The manifest has a `talk-name` that is `org.kde.*`.
 
 ### finish-args-no-required-flatpak[​](#finish-args-no-required-flatpak "Direct link to finish-args-no-required-flatpak")
+
+Criteria: This exception is never granted.
 
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has some newly introduced Flatpak context metadata such as `--device=input` or `--device=usb` but doesn't have `--require-version`.
 
 ### finish-args-insufficient-required-flatpak[​](#finish-args-insufficient-required-flatpak "Direct link to finish-args-insufficient-required-flatpak")
 
+Criteria: This exception is never granted.
+
 The [finish-args](https://docs.flatpak.org/en/latest/manifests.html#finishing) in the manifest has newly introduced Flatpak context metadata such as `--device=input` or `--device=usb` but the specified `--require-version` is insufficient. It should be >=1.16.0.
 
 ### flatpak-repo-too-large[​](#flatpak-repo-too-large "Direct link to flatpak-repo-too-large")
+
+Criteria: This exception is never granted.
 
 The Flatpak repo exported from the build exceeds the maximum allowed size. The maximum allowed size starts at 10 GB and after that `(number of app/ refs in the repo) * 12 GB`.
 
 Maintainers should try to reduce the size of the sources in the manifest and any large source in the manifest should be converted to use [extra-data](https://docs.flatpak.org/en/latest/module-sources.html#extra-data).
 
 ### flat-manager-branch-repo-mismatch[​](#flat-manager-branch-repo-mismatch "Direct link to flat-manager-branch-repo-mismatch")
+
+Criteria: This exception is never granted.
 
 The branch of the ostree ref does not match the target Flathub repo it is being uploaded to.
 
@@ -1184,13 +1328,19 @@ Apps built on Flathub must avoid setting either key in the manifest.
 
 ### flat-manager-wrong-ref-branch-for-beta-repo[​](#flat-manager-wrong-ref-branch-for-beta-repo "Direct link to flat-manager-wrong-ref-branch-for-beta-repo")
 
+Criteria: This exception is never granted.
+
 The target repo is Flathub beta but the branch of ref does not end with `beta` or `beta-extra`.
 
 ### flat-manager-wrong-ref-branch-for-stable-repo[​](#flat-manager-wrong-ref-branch-for-stable-repo "Direct link to flat-manager-wrong-ref-branch-for-stable-repo")
 
+Criteria: This exception is never granted.
+
 The target repo is Flathub stable but the branch of ref ends with `beta` or `beta-extra`.
 
 ### flat-manager-no-app-ref-uploaded[​](#flat-manager-no-app-ref-uploaded "Direct link to flat-manager-no-app-ref-uploaded")
+
+Criteria: This exception is never granted.
 
 The flat manager token was of type `app` but no ostree refs starting with `app/` were uploaded.
 
@@ -1198,15 +1348,19 @@ This should not be reached by applications built on Flathub. Externally uploaded
 
 ### flathub-json-automerge-enabled[​](#flathub-json-automerge-enabled "Direct link to flathub-json-automerge-enabled")
 
-apps if upstream rotates/deletes sources
+Criteria: The criteria is mentioned in [maintenance docs](/docs/for-app-authors/maintenance.md#automerge-request)
 
 The `flathub.json` file has `automerge-flathubbot-prs` property enabled. This is no longer allowed by default.
 
 ### flathub-json-eol-rebase-without-message[​](#flathub-json-eol-rebase-without-message "Direct link to flathub-json-eol-rebase-without-message")
 
+Criteria: This exception is never granted.
+
 The `flathub.json` file had `end-of-life-rebase` property but no `end-of-life` property.
 
 ### flathub-json-eol-rebase-target-not-on-flathub[​](#flathub-json-eol-rebase-target-not-on-flathub "Direct link to flathub-json-eol-rebase-target-not-on-flathub")
+
+Criteria: This exception is never granted.
 
 The EOL rebase target app ID is not available on Flathub.
 
@@ -1214,57 +1368,85 @@ Please consult the [documentation](/docs/for-app-authors/maintenance.md#end-of-l
 
 ### flathub-json-excluded-all-arches[​](#flathub-json-excluded-all-arches "Direct link to flathub-json-excluded-all-arches")
 
+Criteria: This exception is never granted.
+
 The `flathub.json` file excluded all currently available architectures on Flathub ie. `aarch64, x86_64`. At least one must be present otherwise the build won't be done.
 
 ### flathub-json-only-arches-empty[​](#flathub-json-only-arches-empty "Direct link to flathub-json-only-arches-empty")
+
+Criteria: This exception is never granted.
 
 The `flathub.json` file had `only-arches` but it was empty.
 
 ### flathub-json-skip-appstream-check[​](#flathub-json-skip-appstream-check "Direct link to flathub-json-skip-appstream-check")
 
+Criteria: This exception is never granted.
+
 The `flathub.json` file had `skip-appstream-check`. This is a legacy parameter and has no use.
 
 ### jsonschema-schema-error[​](#jsonschema-schema-error "Direct link to jsonschema-schema-error")
+
+Criteria: This exception is never granted.
 
 The manifest schema was malformed.
 
 ### jsonschema-validation-error[​](#jsonschema-validation-error "Direct link to jsonschema-validation-error")
 
+Criteria: This exception is never granted.
+
 The manifest schema failed validation.
 
 ### manifest-file-is-symlink[​](#manifest-file-is-symlink "Direct link to manifest-file-is-symlink")
+
+Criteria: This exception is never granted.
 
 The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is a symlink.
 
 ### appid-unprefixed-bundled-extension-extension\_id[​](#appid-unprefixed-bundled-extension-extension_id "Direct link to appid-unprefixed-bundled-extension-extension_id")
 
+Criteria: This exception is never granted.
+
 The Flatpak manifest has a [bundled extension](https://docs.flatpak.org/en/latest/extension.html#bundled-extensions) whose extension ID does not start with the parent app-id.
 
 ### manifest-unknown-properties[​](#manifest-unknown-properties "Direct link to manifest-unknown-properties")
+
+Criteria: This exception is never granted.
 
 The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has a property that is not recognised by Flatpak Builder.
 
 ### manifest-json-warnings[​](#manifest-json-warnings "Direct link to manifest-json-warnings")
 
+Criteria: This exception is never granted.
+
 The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has some invalid JSON structure.
 
 ### manifest-invalid-yaml[​](#manifest-invalid-yaml "Direct link to manifest-invalid-yaml")
+
+Criteria: This exception is never granted.
 
 The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) or any YAML files relative to it, has invalid YAML structure. YAML structure supported by `ruamel.yaml` is considered to be valid.
 
 ### manifest-invalid-json[​](#manifest-invalid-json "Direct link to manifest-invalid-json")
 
+Criteria: This exception is never granted.
+
 The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) or any JSON files relative to it, has invalid JSON structure. Manifest must be valid JSON per RFC 7159.
 
 ### manifest-toplevel-build-network-access[​](#manifest-toplevel-build-network-access "Direct link to manifest-toplevel-build-network-access")
+
+Criteria: This exception is never granted.
 
 The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has network access during build in the toplevel.
 
 ### metainfo-svg-screenshots[​](#metainfo-svg-screenshots "Direct link to metainfo-svg-screenshots")
 
+Criteria: This exception is never granted.
+
 There is a SVG or SVGZ screenshot link in the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename).
 
 ### metainfo-launchable-tag-wrong-value[​](#metainfo-launchable-tag-wrong-value "Direct link to metainfo-launchable-tag-wrong-value")
+
+Criteria: This exception is never granted.
 
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) has the wrong value in the `launchable` tag.
 
@@ -1272,11 +1454,15 @@ Please see the [MetaInfo guidelines](/docs/for-app-authors/metainfo-guidelines.m
 
 ### metainfo-missing-component-tag[​](#metainfo-missing-component-tag "Direct link to metainfo-missing-component-tag")
 
+Criteria: This exception is never granted.
+
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing the initial `component` tag.
 
 All MetaInfo files must start with the [component tag](/docs/for-app-authors/metainfo-guidelines.md#header) with a proper `type` attribute.
 
 ### metainfo-missing-launchable-tag[​](#metainfo-missing-launchable-tag "Direct link to metainfo-missing-launchable-tag")
+
+Criteria: This exception is never granted.
 
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing the `launchable` tag.
 
@@ -1284,19 +1470,27 @@ All MetaInfo files for desktop applications must have the [launchable tag](/docs
 
 ### metainfo-missing-screenshots[​](#metainfo-missing-screenshots "Direct link to metainfo-missing-screenshots")
 
+Criteria: This exception is never granted.
+
 The [MetaInfo file](/docs/for-app-authors/metainfo-guidelines.md#path-and-filename) is missing screenshots or the screenshots are not properly defined under the `screenshots/screenshot/image` tag.
 
 Please see the [Metainfo guide](/docs/for-app-authors/metainfo-guidelines.md#screenshots) on how to define screenshots in the Metainfo file.
 
 ### module-module\_name-build-network-access[​](#module-module_name-build-network-access "Direct link to module-module_name-build-network-access")
 
+Criteria: This exception is never granted.
+
 The module `module_name` has network access during build in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html).
 
 ### module-module\_name-source-dest-filename-is-path[​](#module-module_name-source-dest-filename-is-path "Direct link to module-module_name-source-dest-filename-is-path")
 
+Criteria: This exception is never granted.
+
 The `dest-filename` property in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is a path. It must be a filename only.
 
 ### module-module\_name-source-git-branch[​](#module-module_name-source-git-branch "Direct link to module-module_name-source-git-branch")
+
+Criteria: Granted on sufficient explanation being provided only if the upstream source does not create tags or releases and provided that it is not being updated too often.
 
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) with type `git`, uses `branch` with a branch name in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html).
 
@@ -1304,9 +1498,13 @@ It should use either `commit`, or `tag` and `commit` or a `tag` in place of `bra
 
 ### module-module\_name-checker-tracks-commits[​](#module-module_name-checker-tracks-commits "Direct link to module-module_name-checker-tracks-commits")
 
+Criteria: Granted on sufficient explanation being provided only if the upstream source does not create tags or releases and provided that it is not being updated too often.
+
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is tracking commits in `x-checker-data`. Tracking or updating a module on each commit is not allowed. See the [stable release section](/docs/for-app-authors/requirements.md#stable-releases).
 
 ### module-module\_name-source-git-no-tag-commit-branch[​](#module-module_name-source-git-no-tag-commit-branch "Direct link to module-module_name-source-git-no-tag-commit-branch")
+
+Criteria: This exception is never granted.
 
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has type `git`, but, either specifies no `commit` or `tag` property or the `branch` property does not point to a commit hash.
 
@@ -1316,11 +1514,15 @@ This is done for reproducibility.
 
 ### module-module\_name-source-git-no-url[​](#module-module_name-source-git-no-url "Direct link to module-module_name-source-git-no-url")
 
+Criteria: This exception is never granted.
+
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has type `git`, but no `url` property.
 
 It must point to a web resource and use `url` property.
 
 ### module-module\_name-source-git-url-not-http[​](#module-module_name-source-git-url-not-http "Direct link to module-module_name-source-git-url-not-http")
+
+Criteria: This exception is never granted.
 
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has type `git`, but `url` property does not use a http/https link.
 
@@ -1328,11 +1530,15 @@ The `url` property must use a `http` or a `https` link.
 
 ### module-module\_name-autotools-non-release-build[​](#module-module_name-autotools-non-release-build "Direct link to module-module_name-autotools-non-release-build")
 
+Criteria: This exception is never granted.
+
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) using buildsystem `autotools` sets `--enable-debug=no`.
 
 This is not allowed.
 
 ### no-exportable-icon-installed[​](#no-exportable-icon-installed "Direct link to no-exportable-icon-installed")
+
+Criteria: This exception is never granted.
 
 This means that no exportable icons were found in the [proper location](https://docs.flatpak.org/en/latest/conventions.html#application-icons).
 
@@ -1342,11 +1548,15 @@ They may end with extension suffixes like `.png`, `.svg` or `.svgz`.
 
 ### non-svg-icon-in-scalable-folder[​](#non-svg-icon-in-scalable-folder "Direct link to non-svg-icon-in-scalable-folder")
 
+Criteria: This exception is never granted.
+
 An icon file with an extension other than `.svg, .svgz` was installed to `$FLATPAK_DEST/share/icons/hicolor/scalable/apps` (`builddir/share/icons/hicolor/scalable/apps` for the local build directory).
 
 The scalable folder is only reserved for SVG icons.
 
 ### non-png-icon-in-hicolor-size-folder[​](#non-png-icon-in-hicolor-size-folder "Direct link to non-png-icon-in-hicolor-size-folder")
+
+Criteria: This exception is never granted.
 
 An icon file with an extension other than `.png` was installed to `$FLATPAK_DEST/share/icons/hicolor/$size/apps` (`builddir/share/icons/hicolor/$size/apps` for the local build directory).
 
@@ -1354,11 +1564,15 @@ The sized folders are only reserved for PNG icons.
 
 ### toplevel-cleanup-debug[​](#toplevel-cleanup-debug "Direct link to toplevel-cleanup-debug")
 
+Criteria: This exception is never granted.
+
 The toplevel `cleanup` property in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has `/lib/debug` or a subdirectory of it.
 
 This must not be cleaned up as it is used to generate debug data for the Flatpak by [Flatpak Builder](https://docs.flatpak.org/en/latest/flatpak-builder.html).
 
 ### toplevel-no-command[​](#toplevel-no-command "Direct link to toplevel-no-command")
+
+Criteria: This exception is never granted.
 
 The toplevel `command` property in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is absent.
 
@@ -1366,11 +1580,15 @@ This property is required.
 
 ### toplevel-no-modules[​](#toplevel-no-modules "Direct link to toplevel-no-modules")
 
+Criteria: This exception is never granted.
+
 The [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) has no `modules` property.
 
 This property is required.
 
 ### toplevel-command-is-path[​](#toplevel-command-is-path "Direct link to toplevel-command-is-path")
+
+Criteria: This exception is never granted.
 
 The toplevel `command` property in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is a path.
 
@@ -1378,11 +1596,15 @@ This must be just the name of the main binary of the application and the binary 
 
 ### toplevel-unnecessary-branch[​](#toplevel-unnecessary-branch "Direct link to toplevel-unnecessary-branch")
 
+Criteria: This exception is never granted.
+
 The toplevel `branch` property in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is unnecessary for applications.
 
 On Flathub, the branch is automatically set by the build service using `--default-branch` argument.
 
 ### desktop-file-low-quality-category[​](#desktop-file-low-quality-category "Direct link to desktop-file-low-quality-category")
+
+Criteria: This exception is never granted.
 
 The [desktop file](https://docs.flatpak.org/en/latest/conventions.html#desktop-files) has one or more [low-quality categories](/docs/for-app-authors/metainfo-guidelines.md#categories-and-keywords) and no proper (non low-quality) category.
 
@@ -1390,11 +1612,15 @@ If this error is accompanied with `appstream-missing-categories`, it means that 
 
 ### module-module\_name-source-md5-deprecated[​](#module-module_name-source-md5-deprecated "Direct link to module-module_name-source-md5-deprecated")
 
+Criteria: This exception is never granted.
+
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is using the deprecated and insecure `md5` checksum.
 
 It is recommended to switch to `sha256` or `sha512`.
 
 ### module-module\_name-source-sha1-deprecated[​](#module-module_name-source-sha1-deprecated "Direct link to module-module_name-source-sha1-deprecated")
+
+Criteria: This exception is never granted.
 
 A module in the [Flatpak manifest](https://docs.flatpak.org/en/latest/manifests.html) is using the deprecated `sha1` checksum.
 
@@ -1402,13 +1628,19 @@ It is recommended to switch to `sha256` or `sha512`.
 
 ### module-module\_name-cleanup-debug[​](#module-module_name-cleanup-debug "Direct link to module-module_name-cleanup-debug")
 
+Criteria: This exception is never granted.
+
 The module `module_name` has a `cleanup` with `/lib/debug` or a subdirectory of it.
 
 ### module-module\_name-source-dir-not-allowed[​](#module-module_name-source-dir-not-allowed "Direct link to module-module_name-source-dir-not-allowed")
 
+Criteria: This exception is never granted.
+
 The module `module_name` has a `type: dir` source. Please consider replacing it with `type: file` or other kinds of sources.
 
 ### module-module\_name-multiple-git-sources-stacked[​](#module-module_name-multiple-git-sources-stacked "Direct link to module-module_name-multiple-git-sources-stacked")
+
+Criteria: This exception is never granted.
 
 The module `module_name` is stacking multiple sources of `type: git`. Git sources cannot be stacked together.
 
@@ -1445,6 +1677,8 @@ modules:
 ```
 
 ### runtime-is-eol-id-branch[​](#runtime-is-eol-id-branch "Direct link to runtime-is-eol-id-branch")
+
+Criteria: Granted on sufficient explanation being provided for not updating to supported runtime version and only if the application is maintained by upstream.
 
 The Flatpak package is using a runtime that is [End-of-Life](/docs/for-app-authors/runtimes.md#currently-hosted-runtimes).
 
@@ -1517,7 +1751,7 @@ Current and prospective maintainers on Flathub are expected to:
 
 * Understand the Flathub repository layout and branch structure as discussed below.
 
-* Follow the established [update workflow](/docs/for-app-authors/updates.md#creating-updates) which involves submitting updates and other changes via pull requests, and merging them only after successful builds and appropriate testing.
+* Follow the established [update workflow](/docs/for-app-authors/maintenance.md#creating-updates) which involves submitting updates and other changes via pull requests, and merging them only after successful builds and appropriate testing.
 
 * Test the builds produced in pull requests before merging the pull request.
 
@@ -1549,11 +1783,307 @@ All of those branches along with `main`, `stable`, `beta/*` and `stable/*` are a
 
 Other git branch names are free to use.
 
-### Creating new git branches for publishing[​](#creating-new-git-branches-for-publishing "Direct link to Creating new git branches for publishing")
+## Creating updates[​](#creating-updates "Direct link to Creating updates")
+
+Flathub builds and publishes app updates after a change is made to an app's manifest.
+
+Updating an application on Flathub (unless it is a direct-upload) is done by submitting a pull request to the application repository on GitHub.
+
+Once the pull request is submitted, a [test build](/docs/for-app-authors/maintenance.md#test-builds) will be triggered against it and once that is successful a comment with a link to install the test build will be posted.
+
+The maintainers should install the test build and see if it is working and meets expectations.
+
+Once it is ready maintainers can merge the pull request which will automatically create an [official build](/docs/for-app-authors/maintenance.md#official-builds).
+
+The official build, if successful, will be directly published to Flathub. The exact time to publish can vary depending on the publish queue.
+
+## Automating updates[​](#automating-updates "Direct link to Automating updates")
+
+Flathub runs a global [External Data Checker action](https://github.com/flathub-infra/flatpak-external-data-checker/) for all repositories in the GitHub organisation every two hours. This works only for the default branch of the GitHub repository.
+
+If the manifest has `x-checker-data` defined for sources and they have an update, the action will submit a PR with the update which can be similarly tested and merged by maintainers as explained above.
+
+### Automatically merging updates[​](#automatically-merging-updates "Direct link to Automatically merging updates")
+
+danger
+
+Automatically merging PRs ensures each update builds, but does not guarantee the app will launch correctly. It is highly recommended to avoid automatically merging updates to ensure each build that is going to be published is tested by the maintainer.
+
+important
+
+Automatically merging PRs or having a high volume of updates significantly puts strain on Flathub infrastructure, so it is restricted and granted only when necessary. Please see the [requirements and process](/docs/for-app-authors/maintenance.md#automerge-request) below.
+
+Automerge can be done by enabling [GitHub automerge](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request) or adding `"automerge-flathubbot-prs": true` true to `flathub.json`.
+
+flathub.json
+
+```
+{
+
+  "automerge-flathubbot-prs": true
+
+}
+```
+
+The former can be paired with a custom GitHub action to automatically merge PRs or can be used by a maintainer to set a PR to automatically merge manually once CI passes. The benefit is the maintainer does not need to wait and be around for CI status to pass.
+
+The latter, delegates the automerge to the global External data checker action and the PR will be automatically merged in the next run of the action (which is usually every 1-2 hours).
+
+`automerge-flathubbot-prs` requires a [linter exception](/docs/for-app-authors/linter.md#exceptions) for `flathub-json-automerge-enabled`.
+
+### Automerge request[​](#automerge-request "Direct link to Automerge request")
+
+Both GitHub automerge and `automerge-flathubbot-prs` is only granted if the volume of updates is not execissive and/or the application in question is [verified](/docs/for-app-authors/verification.md). The only exception granted here is if an application is using a rotating [extra-data source](https://docs.flatpak.org/en/latest/module-sources.html#extra-data).
+
+Please open an issue in the [flathub repository](https://github.com/flathub/flathub/issues) if GitHub automerge is needed and please open an [linter exception](/docs/for-app-authors/linter.md#exceptions) for `flathub-json-automerge-enabled` if `automerge-flathubbot-prs` is needed.
+
+### Custom workflows[​](#custom-workflows "Direct link to Custom workflows")
+
+Maintainers can also use custom GitHub workflows to create update pull requests for their application. Some exaples are given below.
+
+Please ensure that custom workflows are restricted to reasonable intervals for example once a week and not hourly or daily.
+
+If using a custom workflow, please ensure to opt-out of the global External data checker action.
+
+flathub.json
+
+```
+{
+
+  "disable-external-data-checker": true
+
+}
+```
+
+#### Custom workflow to run external-data-checker on multiple branches[​](#custom-workflow-to-run-external-data-checker-on-multiple-branches "Direct link to Custom workflow to run external-data-checker on multiple branches")
+
+.github/workflows/update.yaml
+
+```
+
+
+name: Check for updates
+
+on:
+
+  schedule:
+
+    - cron: '0 14 * * 1' # Run once a week, on Monday, at 14:00
+
+  workflow_dispatch: {}
+
+jobs:
+
+  flatpak-external-data-checker:
+
+    runs-on: ubuntu-latest
+
+    if: github.repository_owner == 'flathub'
+
+    strategy:
+
+      matrix:
+
+        branch: [ branch/23.08, branch/24.08, beta ]
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+        with:
+
+          ref: ${{ matrix.branch }}
+
+      - uses: docker://ghcr.io/flathub/flatpak-external-data-checker:latest
+
+        env:
+
+          GIT_AUTHOR_NAME: Flatpak External Data Checker
+
+          GIT_COMMITTER_NAME: Flatpak External Data Checker
+
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+          EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        with:
+
+          args: --update --never-fork <MANIFEST FILENAME>
+```
+
+#### Custom workflow with custom update script and setting GitHub automerge[​](#custom-workflow-with-custom-update-script-and-setting-github-automerge "Direct link to Custom workflow with custom update script and setting GitHub automerge")
+
+.github/workflows/update.yaml
+
+```
+name: Check for updates
+
+
+
+on:
+
+  schedule:
+
+    - cron: '0 5 * * 0'
+
+  workflow_dispatch: {}
+
+
+
+jobs:
+
+  flatpak-external-data-checker:
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 20
+
+    permissions:
+
+      contents: write
+
+      pull-requests: write
+
+
+
+    if: github.repository_owner == 'flathub'
+
+
+
+    strategy:
+
+      matrix:
+
+        branch:
+
+          - branch/24.08
+
+          - branch/25.08
+
+
+
+    steps:
+
+      # actions/checkout v4.2.2
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+        with:
+
+          ref: ${{ matrix.branch }}
+
+
+
+      - uses: docker://ghcr.io/flathub-infra/flatpak-external-data-checker:latest@sha256:ea7b3bf6c05ff4536b5450a1ef451d157be544b95fb6abf56a32a80da4819526
+
+        with:
+
+          args: --update --edit-only com.example.bar.yml
+
+
+
+      - name: Custom update script
+
+        run: |
+
+          python .github/scripts/update.py
+
+
+
+      - name: Create pull request
+
+        if: ${{ success() }}
+
+        id: create-pr
+
+        # peter-evans/create-pull-request v7.0.8
+
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e
+
+        with:
+
+          branch-suffix: random
+
+          commit-message: Update modules
+
+          title: Update modules
+
+          body: Update modules
+
+          delete-branch: true
+
+          sign-commits: true
+
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+
+
+
+      - name: Pause for a while
+
+        if: ${{ steps.create-pr.outputs.pull-request-number }}
+
+        run: sleep 180
+
+
+
+      - name: Set auto-merge
+
+        if: ${{ steps.create-pr.outputs.pull-request-number }}
+
+        run: gh pr merge --merge --auto ${{ steps.create-pr.outputs.pull-request-number }}
+
+        env:
+
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          GH_REPO: ${{ github.repository }}
+```
+
+#### Custom triggered from an external repository[​](#custom-triggered-from-an-external-repository "Direct link to Custom triggered from an external repository")
+
+A custom workflow in the Flathub GitHub repository can be triggered from an external repository too. Moreover PRs can be sent from an external repository to the Flathub repository. In both cases the GitHub token used must have `write` access to both the Flathub repository and the external repository. The maintainer can use their personal token for this.
+
+This is useful to create a Flathub update PR immediately on upstream tag creation etc.
+
+```
+- name: Trigger workflow in flathub-infra/actions-images
+
+# 4.0.1
+
+uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697
+
+with:
+
+  repository: flathub/com.example.foo
+
+  event-type: trigger-workflow
+
+  token: ${{ secrets.TRIGGER_WORKFLOW_TOKEN }}
+```
+
+The above will trigger a workflow from an external repository in to the Flathub repository which has `trigger-workflow` dispatch event defined.
+
+```
+on:
+
+  repository_dispatch:
+
+    types: [trigger-workflow]
+```
+
+Similarly, `peter-evans/create-pull-request` can be used to send a PR from an external repo to the Flathub repository with an update.
+
+## Creating new git branches for publishing[​](#creating-new-git-branches-for-publishing "Direct link to Creating new git branches for publishing")
 
 The process is described below.
 
-#### Creating the beta branch[​](#creating-the-beta-branch "Direct link to Creating the beta branch")
+### Creating the beta branch[​](#creating-the-beta-branch "Direct link to Creating the beta branch")
 
 important
 
@@ -1593,7 +2123,7 @@ git push
 
 Once pushed, the branch protections on the `beta` branch will be active and any future change to this branch will have to go through the usual pull request workflow.
 
-#### Creating new branches for extensions or baseapps[​](#creating-new-branches-for-extensions-or-baseapps "Direct link to Creating new branches for extensions or baseapps")
+### Creating new branches for extensions or baseapps[​](#creating-new-branches-for-extensions-or-baseapps "Direct link to Creating new branches for extensions or baseapps")
 
 important
 
@@ -2992,9 +3522,7 @@ Console softwares will not be accepted. Exceptions may be given to Flatpak or Fl
 
 Submissions that offer very minimal functionality consisting of simple scripts, single or simple sources and/or exists as a thin wrapper or launcher around other tools will not be accepted.
 
-Simple web wrapper applications that embed a web engine and load a remote website without adding significant functionality or meaningful desktop integration will not be accepted.
-
-Exceptions can be given on a case by case basis.
+Simple web wrapper applications that embed local or remote content in a web engine without providing significant polish, functionality, or meaningful desktop integration will not be accepted.
 
 #### Extensions[​](#extensions "Direct link to Extensions")
 
@@ -3056,6 +3584,10 @@ Submissions must demonstrate a meaningful history of development or existence, e
 
 Flatpak extensions that add support for new languages, language specific tooling etc. or BaseApps will need a clear use case defined and prospective users to be accepted.
 
+BaseApps and Extensions must be built against a runtime that provides a stable ABI and performs ABI checks as part of their releases.
+
+BaseApps and Extensions must themselves maintain a stable ABI in a given branch and must not depend or use any private ABI from the runtime, for their contents. Certain things such as extensions providing themes may be exempt from this rule.
+
 ### Trust and history[​](#trust-and-history "Direct link to Trust and history")
 
 Submission decisions may take a submitter's prior conduct into account.
@@ -3068,17 +3600,19 @@ Submissions that impersonate, engage or encourage to engage in unlawful activiti
 
 ### Generative AI policy[​](#generative-ai-policy "Direct link to Generative AI policy")
 
+This policy applies to both the application being submitted to Flathub and the Flathub submission itself, including the manifest, metadata, patches, build scripts, and pull request. For the purpose of this policy, applications include BaseApps, extensions, and any other artifacts that can be produced by flatpak-builder.
+
 Submission pull requests must not be generated, opened, or automated using AI tools or agents. Please also do not request review from any AI tools in the submission PR. Automated Copilot reviews on GitHub can be disabled by the submitter by going [here](https://github.com/settings/copilot/coding_agent) and changing `Repository access` to exclude the repo or disabling the global "Automatic Copilot code review" found [here](https://github.com/settings/copilot/features).
 
-Submissions or changes where most of the code is written by or using AI without any meaningful human input, review, justification or moderation of the code are not allowed.
+Applications containing AI-generated or AI-assisted code, documentation, or other content are not allowed.
 
-Submissions or changes having low-quality AI-generated or AI-assisted code are not allowed.
-
-Submissions or changes containing copyrighted, license-incompatible, or ethically questionable code are not allowed.
+Applications or changes containing copyrighted, license-incompatible, or ethically questionable code are not allowed.
 
 These submissions can be rejected without any further review.
 
 Repeatedly violating these policies may result in a permanent ban from future submissions and activities.
+
+Exceptions may be granted for mature, well-maintained projects.
 
 ## Application ID[​](#application-id "Direct link to Application ID")
 
@@ -3145,10 +3679,6 @@ For example, the repository URL for the ID `io.github.example_foo.bar` will be `
 [BaseApps](https://docs.flatpak.org/en/latest/dependencies.html#baseapps) must have `BaseApp` as the last component of the Flatpak ID and for the rest of the ID, the above rules apply.
 
 [Flatpak extensions](https://docs.flatpak.org/en/latest/extension.html) must prefix their ID with the extension point ID, which is either defined in one of the [runtimes](/docs/for-app-authors/runtimes.md) or in an app. If the extension point is defined in an app, it must use the app's ID as a prefix. They are exempt from the [domain control rules](/docs/for-app-authors/requirements.md#control-over-domain-or-repository).
-
-BaseApps and Extensions must be built against a runtime that provides a stable ABI and performs ABI checks as part of their releases.
-
-BaseApps and Extensions must themselves maintain a stable ABI in a given branch and must not depend or use any private ABI from the runtime, for their contents. Certain things such as extensions providing themes may be exempt from this rule.
 
 ## Renaming Flatpak ID[​](#renaming-flatpak-id "Direct link to Renaming Flatpak ID")
 
@@ -3771,29 +4301,6 @@ Please don't hesitate to ask for help. General queries can be made on the [Matri
 
 ---
 
-# Updates
-
-Flathub builds and publishes app updates after a change is made to an app's manifest. The exact time to publish can vary depending on the backlog.
-
-## Creating updates[​](#creating-updates "Direct link to Creating updates")
-
-Updating an application on Flathub (unless it is a direct-upload) is done by submitting a pull request to the application repository on GitHub. Once the pull request is submitted, a [test build](/docs/for-app-authors/maintenance.md#test-builds) will be triggered against it. Once that is successful and the CI passes, the maintainers can merge the pull request which will create an [official build](/docs/for-app-authors/maintenance.md#official-builds).
-
-The official build, if successful, is directly published to the Flathub repository.
-
-Pull requests with updates can be automated with [External Data Checker](/docs/for-app-authors/external-data-checker.md) or by using a custom workflow that will submit a pull request to the Flathub repository.
-
-Any action from Flathub and `peter-evans/create-pull-request` is allowed to be used.
-
-This can be used in place of the regular global x-checker action to support updating your dependency manifests or metainfo files. Please remember to [disable](/docs/for-app-authors/external-data-checker.md#disable) the global x-checker action if you are using this to generate application updates and restrict scheduled jobs to once a week to not overload Flathub's CI.
-
-## For users[​](#for-users "Direct link to For users")
-
-Neither Flathub nor Flatpak dictate the update policy on end-user machines. Instead, their OS and app store client (like GNOME Software or KDE Discover) determine the available options, and ultimately it's up to the user's preferences.
-
-
----
-
 # Useful links
 
 * [Use the GitHub search for code that might help you](https://github.com/search?q=org%3Aflathub+search\&type=code)
@@ -3897,6 +4404,108 @@ Furthermore, Flathub enhances app visibility through promotions on its official 
 ## Submitting apps[​](#submitting-apps "Direct link to Submitting apps")
 
 Please follow the [submission requirements](/docs/for-app-authors/requirements.md) and the [submission guide](/docs/for-app-authors/submission.md) to start distributing your app!
+
+
+---
+
+# Becoming a Flathub Team Member
+
+Flathub, as a centralized application repository, relies on a dedicated team of mainly volunteer contributors to maintain the quality, security, and consistency of the repository.
+
+These contributors are generally responsible for tasks including, but not limited to:
+
+* Reviewing new application submissions.
+* Reviewing [Build Moderation](/docs/for-app-authors/maintenance.md#build-moderation) requests.
+* Performing [Quality Guideline](/docs/for-app-authors/metainfo-guidelines/quality-guidelines.md) reviews for applications.
+* Triaging and responding to issues or queries from application developers.
+* Updating, adopting maintenance of, or contributing to Flatpaks when necessary.
+* Auditing existing applications to ensure compliance with current Flathub guidelines and best practices.
+
+As Flathub continues to grow, expanding the contributor base becomes important for distributing the workload effectively and improving sustainability.
+
+While there is no strict requirement, members are generally expected to remain active in their areas of responsibility, stay up to date with Flathub policies and announcements, and engage with the community.
+
+Please note that memberships are entirely voluntary and there are not any benefits or compensations available currently.
+
+The criteria described here may change in the future without prior notice, but such changes will generally not be applied retroactively to existing members.
+
+important
+
+Please ensure that at least one approval is obtained before making any changes to the policies defined here.
+
+## Team Membership Process[​](#team-membership-process "Direct link to Team Membership Process")
+
+New membership requests must be sponsored by an existing member who will open an issue in the [memberships repository](https://github.com/flathub-infra/memberships) linking relevant activity and/or contributions.
+
+Please note that all requests are evaluated on a case-by-case basis and may take additional factors into consideration. Requests may also be denied when necessary.
+
+A request is approved after receiving at least one approval from an existing member unless it receives two denials, otherwise, the request will remain open until a conclusion is reached. Approvals or denials from the member opening the request will not count.
+
+## Membership Criteria[​](#membership-criteria "Direct link to Membership Criteria")
+
+### Reviewer Team[​](#reviewer-team "Direct link to Reviewer Team")
+
+Members in the Reviewer Team are primarily responsible for reviewing, approving and merging new submissions.
+
+Criteria:
+
+* Past examples of performing a reasonable number of non-trivial new submission reviews within the last 3 months of the request.
+* Familiarity with Flathub requirements, Flatpak permission system and general knowledge about software building and distribution practices.
+
+### Trusted Maintainer Team[​](#trusted-maintainer-team "Direct link to Trusted Maintainer Team")
+
+Members of the Trusted Maintainer Team are granted access to all Flathub submission repositories, including relevant access to the developer portal in the website.
+
+They are primarily responsible for assisting with the maintenance and continuity of Flatpaks in situations where the original maintainer is unavailable or unresponsive.
+
+Criteria:
+
+* Past experience of maintaining a reasonable number of Flatpaks in the Flathub application repositories, within the last 3 months of the request.
+* Past examples of assisting with package adoption, co-maintenance, or maintenance efforts with adherence to proper maintenance practices.
+* Familiarity with Flathub requirements, Flatpak permission system, general knowledge about software building, distribution practices and Flathub-related tooling.
+
+### Build Moderation Team[​](#build-moderation-team "Direct link to Build Moderation Team")
+
+Members of the Build Moderation Team are responsible for reviewing build and moderation requests, approving or denying them as appropriate, and providing clarification or follow-up when developers raise questions.
+
+Criteria:
+
+* Members of any of the above teams are eligible
+* Familiarity with Flathub requirements and Flatpak permission system.
+
+### Quality Moderation Team[​](#quality-moderation-team "Direct link to Quality Moderation Team")
+
+Members of the Quality Moderation Team are responsible for reviewing applications for compliance with the [Quality Guidelines](/docs/for-app-authors/metainfo-guidelines/quality-guidelines.md) and responding to clarification requests from application developers.
+
+Criteria:
+
+* General knowledge and awareness about the Linux application ecosystem
+* Experience in application design and UI/UX design or research
+* Familiarity with Flathub guidelines
+
+### `flathub-infra` repositories[​](#flathub-infra-repositories "Direct link to flathub-infra-repositories")
+
+Most of the tooling and infrastructure used by Flathub is maintained in the `flathub-infra` organisation.
+
+Access to the repositories there is granted based on contributions to the relevant project for a reasonable period of time through all of pull requests, reviews, issue triaging, and familiarity with the associated project and its workflows.
+
+Access may initially be limited to the triage or write permission and may later be expanded based on requirements and continued maintenance activity.
+
+### `shared-modules` repository[​](#shared-modules-repository "Direct link to shared-modules-repository")
+
+This repository contains manifests for commonly used Flatpak modules that can be consumed as a git submodule.
+
+Write access is granted to contributors willing to maintain one or more modules in the repository and the access may be revoked if the contributor no longer maintains the relevant modules or if those modules are removed from the repository. Permissions are granted once the account is added to the CODEOWNERS file.
+
+### Flathub application repository[​](#flathub-application-repository "Direct link to Flathub application repository")
+
+Please see [Maintainer access to Flathub application repository](/docs/for-app-authors/maintenance.md#maintainer-access-to-flathub-application-repository).
+
+## Revocation of Membership[​](#revocation-of-membership "Direct link to Revocation of Membership")
+
+In the event of prolonged inactivity, team membership may be revoked.
+
+Inactivity is defined as the absence of any meaningful activity in the relevant GitHub repositories or namespaces for a period exceeding one year.
 
 
 ---

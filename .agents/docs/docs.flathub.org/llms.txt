@@ -10,7 +10,6 @@
 - [Section overview](/docs/category/for-app-authors.md)
 - [Section overview](/docs/category/for-team-members.md)
 - [Section overview](/docs/category/for-users.md)
-- [External Data Checker](/docs/for-app-authors/external-data-checker.md): The Flatpak External Data Checker
 - [GitHub actions](/docs/for-app-authors/github-actions.md): Using GitHub actions on your own repository
 - [Flatpak builder lint](/docs/for-app-authors/linter.md): Flatpak builder lint is a linter for Flatpak manifests and builds. It is
 - [Maintenance](/docs/for-app-authors/maintenance.md): This is a guide on how to maintain an application once it is published
@@ -20,10 +19,10 @@
 - [Runtimes](/docs/for-app-authors/runtimes.md): Runtimes supply the essential dependencies required by applications, and
 - [Shared Modules](/docs/for-app-authors/shared-modules.md): A small number of dependencies that are frequently used by applications
 - [Submission](/docs/for-app-authors/submission.md): App submissions are extremely welcome and the process is straightforward.
-- [Updates](/docs/for-app-authors/updates.md): Flathub builds and publishes app updates after a change is made to an
 - [Useful links](/docs/for-app-authors/useful-links.md): - Use the GitHub search for code that might help you
 - [Verification](/docs/for-app-authors/verification.md): What is verification?
 - [Why Flathub?](/docs/for-app-authors/why-flathub.md): What Flathub offers
+- [Becoming a Flathub Team Member](/docs/for-team-members/becoming-a-team-member.md): Flathub, as a centralized application repository, relies on a dedicated
 - [Historical documents](/docs/for-team-members/historical.md): These were migrated from the wiki.
 - [Review](/docs/for-team-members/review.md): Reviews happen via comments on GitHub PR's where we also have
 - [Bisecting regressions in application builds](/docs/for-users/bisecting.md): In case the newest builds of an application introduce regressions, you

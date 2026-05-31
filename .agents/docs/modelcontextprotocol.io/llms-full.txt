@@ -1,1451 +1,3 @@
-# Example Clients
-Source: https://modelcontextprotocol.io/clients
-
-A list of applications that support MCP integrations
-
-This page showcases applications that support the Model Context Protocol (MCP). Each client may support different MCP features:
-
-| Feature          | Description                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| <FeatureBadge /> | Server-exposed data and content                                                                              |
-| <FeatureBadge /> | Pre-defined templates for LLM interactions                                                                   |
-| <FeatureBadge /> | Executable functions that LLMs can invoke                                                                    |
-| <FeatureBadge /> | Support for tools/prompts/resources changed notifications                                                    |
-| <FeatureBadge /> | Server-provided guidance for LLMs                                                                            |
-| <FeatureBadge /> | Server-initiated LLM completions                                                                             |
-| <FeatureBadge /> | Filesystem boundary definitions                                                                              |
-| <FeatureBadge /> | User information requests                                                                                    |
-| <FeatureBadge /> | [Client ID Metadata Document](specification/latest/basic/authorization#client-id-metadata-documents) support |
-| <FeatureBadge /> | [Dynamic Client Registration](specification/latest/basic/authorization#dynamic-client-registration) support  |
-| <FeatureBadge /> | [OAuth Client Credentials](/extensions/auth/oauth-client-credentials) extension support                      |
-| <FeatureBadge /> | [Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization) extension support      |
-| <FeatureBadge /> | Long-running operation tracking                                                                              |
-| <FeatureBadge /> | Interactive HTML interfaces                                                                                  |
-
-<Note>
-  This list is maintained by the community. If you notice any inaccuracies or would like to add or update information about MCP support in your application, please [submit a pull request](https://github.com/modelcontextprotocol/modelcontextprotocol/pulls).
-</Note>
-
-## Client details
-
-<ClientFilter />
-
-<McpClient name="5ire">
-  5ire is an open source cross-platform desktop AI assistant that supports tools through MCP servers.
-
-  **Key features:**
-
-  * Built-in MCP servers can be quickly enabled and disabled.
-  * Users can add more servers by modifying the configuration file.
-  * It is open-source and user-friendly, suitable for beginners.
-  * Future support for MCP will be continuously improved.
-</McpClient>
-
-<McpClient name="AgentAI">
-  AgentAI is a Rust library designed to simplify the creation of AI agents. The library includes seamless integration with MCP Servers.
-
-  **Key features:**
-
-  * Multi-LLM – We support most LLM APIs (OpenAI, Anthropic, Gemini, Ollama, and all OpenAI API Compatible).
-  * Built-in support for MCP Servers.
-  * Create agentic flows in a type- and memory-safe language like Rust.
-
-  **Learn more:**
-
-  * [Example of MCP Server integration](https://github.com/AdamStrojek/rust-agentai/blob/master/examples/tools_mcp.rs)
-</McpClient>
-
-<McpClient name="AgenticFlow">
-  AgenticFlow is a no-code AI platform that helps you build agents that handle sales, marketing, and creative tasks around the clock. Connect 2,500+ APIs and 10,000+ tools securely via MCP.
-
-  **Key features:**
-
-  * No-code AI agent creation and workflow building.
-  * Access a vast library of 10,000+ tools and 2,500+ APIs through MCP.
-  * Simple 3-step process to connect MCP servers.
-  * Securely manage connections and revoke access anytime.
-
-  **Learn more:**
-
-  * [AgenticFlow MCP Integration](https://agenticflow.ai/mcp)
-</McpClient>
-
-<McpClient name="AIQL TUUI">
-  AIQL TUUI is a native, cross-platform desktop AI chat application with MCP support. It supports multiple AI providers (e.g., Anthropic, Cloudflare, Deepseek, OpenAI, Qwen), local AI models (via vLLM, Ray, etc.), and aggregated API platforms (such as Deepinfra, Openrouter, and more).
-
-  **Key features:**
-
-  * **Dynamic LLM API & Agent Switching**: Seamlessly toggle between different LLM APIs and agents on the fly.
-  * **Comprehensive Capabilities Support**: Built-in support for tools, prompts, resources, and sampling methods.
-  * **Configurable Agents**: Enhanced flexibility with selectable and customizable tools via agent settings.
-  * **Advanced Sampling Control**: Modify sampling parameters and leverage multi-round sampling for optimal results.
-  * **Cross-Platform Compatibility**: Fully compatible with macOS, Windows, and Linux.
-  * **Free & Open-Source (FOSS)**: Permissive licensing allows modifications and custom app bundling.
-
-  **Learn more:**
-
-  * [TUUI document](https://www.tuui.com/)
-  * [AIQL GitHub repository](https://github.com/AI-QL)
-</McpClient>
-
-<McpClient name="Amazon Q CLI">
-  Amazon Q CLI is an open-source, agentic coding assistant for terminals.
-
-  **Key features:**
-
-  * Full support for MCP servers.
-  * Edit prompts using your preferred text editor.
-  * Access saved prompts instantly with `@`.
-  * Control and organize AWS resources directly from your terminal.
-  * Tools, profiles, context management, auto-compact, and so much more!
-
-  **Get Started**
-
-  ```bash theme={null}
-  brew install amazon-q
-  ```
-</McpClient>
-
-<McpClient name="Amazon Q IDE">
-  Amazon Q IDE is an open-source, agentic coding assistant for IDEs.
-
-  **Key features:**
-
-  * Support for the VSCode, JetBrains, Visual Studio, and Eclipse IDEs.
-  * Control and organize AWS resources directly from your IDE.
-  * Manage permissions for each MCP tool via the IDE user interface.
-</McpClient>
-
-<McpClient name="Amp">
-  Amp is an agentic coding tool built by Sourcegraph. It runs in VS Code (and compatible forks like Cursor, Windsurf, and VSCodium), JetBrains IDEs, Neovim, and as a command-line tool. It's also multiplayer — you can share threads and collaborate with your team.
-
-  **Key features:**
-
-  * Granular control over enabled tools and permissions
-  * Support for MCP servers defined in VS Code `mcp.json`
-</McpClient>
-
-<McpClient name="Apidog">
-  Apidog, an all-in-one API development and testing platform, features a built-in MCP Client designed for debugging and testing MCP Servers.
-
-  **Key features:**
-
-  * **Full Feature Support**: Debug Tools, Prompts, and Resources of MCP servers with a user-friendly GUI.
-  * **Dual Transport Modes**: Supports both STDIO for local processes and HTTP for remote servers.
-  * **Easy Setup**: Automatically parses MCP configuration files and supports direct command or URL input.
-  * **Authentication**: Supports OAuth 2.0, API Key, Bearer Token, and other methods for secure connections.
-</McpClient>
-
-<McpClient name="Apify MCP Tester">
-  Apify MCP Tester is an open-source client that connects to any MCP server using Server-Sent Events (SSE).
-  It is a standalone Apify Actor designed for testing MCP servers over SSE, with support for Authorization headers.
-  It uses plain JavaScript (old-school style) and is hosted on Apify, allowing you to run it without any setup.
-
-  **Key features:**
-
-  * Connects to any MCP server via SSE.
-  * Works with the [Apify MCP Server](https://mcp.apify.com) to interact with one or more Apify [Actors](https://apify.com/store).
-  * Dynamically utilizes tools based on context and user queries (if supported by the server).
-</McpClient>
-
-<McpClient name="Apigene MCP Client">
-  Apigene MCP Client is an AI-powered conversational interface that enables seamless interaction with multiple applications, APIs, and MCP servers through natural language. It provides a unified interface for deploying agents across different AI platforms with optimized performance and governance.
-
-  **Key features:**
-
-  * **Multi-LLM Compatibility**: Works seamlessly with all leading AI platforms including Claude, OpenAI (ChatGPT), Gemini, xAI, and OpenRouter. Deploy the same agent across different platforms without modification.
-  * **Optimized for Cost & Performance**: Dynamic tool loading loads tools only when needed, enabling thousands of tools without context bloat. Tool output optimization provides up to 99% payload reduction via compact JSON representation. Parallel execution runs multiple tool calls simultaneously for 10x faster responses.
-  * **Unified Multi-Tool Interface**: Mesh multiple APIs and MCP servers into a single agent. Interact with all tools seamlessly from one Copilot interface without glue code or framework-specific logic.
-  * **Governed Access & Audit**: Fine-grained access control defines exactly which operations each user or agent can perform. Complete audit trail tracks every tool call with timestamps, inputs, and outputs for compliance.
-
-  **Learn more:**
-
-  * [Apigene Copilot Documentation](https://docs.apigene.ai/user-guide/copilot)
-</McpClient>
-
-<McpClient name="Archestra">
-  Archestra is an enterprise AI platform that combines an LLM proxy, MCP registry/orchestrator, MCP gateway, agent runtime, and chat UI into a single control plane for building, routing, and securing AI workflows.
-
-  **Key features:**
-
-  * Unified MCP gateway that exposes a single endpoint for orchestrating tools across remote and self-hosted MCP servers.
-  * Supports MCP Apps for inline, interactive tool UIs in chat.
-  * Supports DCR and CIMD for MCP-native OAuth 2.1 client registration.
-  * Supports the Enterprise-Managed Authorization extension for centrally managed enterprise identity flows.
-  * Includes an LLM proxy with deterministic, context-aware tool guardrails to reduce prompt-injection and data-exfiltration risk.
-  * Adds per-team cost tracking, usage limits, and optimization controls for model traffic.
-</McpClient>
-
-<McpClient name="Augment Code">
-  Augment Code is an AI-powered coding platform for VS Code and JetBrains with autonomous agents, chat, and completions. Both local and remote agents are backed by full codebase awareness and native support for MCP, enabling enhanced context through external sources and tools.
-
-  **Key features:**
-
-  * Full MCP support in local and remote agents.
-  * Add additional context through MCP servers.
-  * Automate your development workflows with MCP tools.
-  * Works in VS Code and JetBrains IDEs.
-</McpClient>
-
-<McpClient name="Avatar Shell">
-  Avatar-Shell is an electron-based MCP client application that prioritizes avatar conversations and media output such as images.
-
-  **Key features:**
-
-  * MCP tools and resources can be used
-  * Supports avatar-to-avatar communication via socket.io.
-  * Supports the mixed use of multiple LLM APIs.
-  * The daemon mechanism allows for flexible scheduling.
-</McpClient>
-
-<McpClient name="BeeAI Framework">
-  BeeAI Framework is an open-source framework for building, deploying, and serving powerful agentic workflows at scale. The framework includes the **MCP Tool**, a native feature that simplifies the integration of MCP servers into agentic workflows.
-
-  **Key features:**
-
-  * Seamlessly incorporate MCP tools into agentic workflows.
-  * Quickly instantiate framework-native tools from connected MCP client(s).
-  * Planned future support for agentic MCP capabilities.
-
-  **Learn more:**
-
-  * [Example of using MCP tools in agentic workflow](https://i-am-bee.github.io/beeai-framework/#/typescript/tools?id=using-the-mcptool-class)
-</McpClient>
-
-<McpClient name="BoltAI">
-  BoltAI is a native, all-in-one AI chat client with MCP support. BoltAI supports multiple AI providers (OpenAI, Anthropic, Google AI...), including local AI models (via Ollama, LM Studio or LMX)
-
-  **Key features:**
-
-  * MCP Tool integrations: once configured, user can enable individual MCP server in each chat
-  * MCP quick setup: import configuration from Claude Desktop app or Cursor editor
-  * Invoke MCP tools inside any app with AI Command feature
-  * Integrate with remote MCP servers in the mobile app
-
-  **Learn more:**
-
-  * [BoltAI docs](https://boltai.com/docs/plugins/mcp-servers)
-  * [BoltAI website](https://boltai.com)
-</McpClient>
-
-<McpClient name="Bob Shell">
-  Bob Shell brings IBM Bob's AI capabilities to your command line.
-
-  **Key features:**
-
-  * Custom slash commands for workflow automation and team standardization
-  * Checkpointing system with automatic Git snapshots before file changes
-  * Trusted folders security to control project access and capabilities
-  * Sandboxing support (macOS Seatbelt, Docker, Podman) for isolated operations
-  * Specialized modes (Code, Ask, Plan, Advanced) for different workflows
-</McpClient>
-
-<McpClient name="Call Chirp">
-  Call Chirp uses AI to capture every critical detail from your business conversations, automatically syncing insights to your CRM and project tools so you never miss another deal-closing moment.
-
-  **Key features:**
-
-  * Save transcriptions from Zoom, Google Meet, and more
-  * MCP Tools for voice AI agents
-  * Remote MCP servers support
-</McpClient>
-
-<McpClient name="Chatbox">
-  Chatbox is a better UI and desktop app for ChatGPT, Claude, and other LLMs, available on Windows, Mac, Linux, and the web. It's open-source and has garnered 37K stars on GitHub.
-
-  **Key features:**
-
-  * Tools support for MCP servers
-  * Support both local and remote MCP servers
-  * Built-in MCP servers marketplace
-</McpClient>
-
-<McpClient name="ChatFrame">
-  ChatFrame is a cross-platform desktop chatbot that unifies access to multiple AI language models, supports custom tool integration via MCP servers, and enables RAG conversations with your local files—all in a single, polished app for macOS and Windows.
-
-  **Key features:**
-
-  * Unified access to top LLM providers (OpenAI, Anthropic, DeepSeek, xAI, and more) in one interface
-  * Built-in retrieval-augmented generation (RAG) for instant, private search across your PDFs, text, and code files
-  * Plug-in system for custom tools via Model Context Protocol (MCP) servers
-  * Multimodal chat: supports images, text, and live interactive artifacts
-</McpClient>
-
-<McpClient name="ChatGPT">
-  ChatGPT is OpenAI's AI assistant that provides MCP support for remote servers to conduct deep research and to power MCP-based apps.
-
-  **Key features:**
-
-  * Support for MCP via connections UI in settings
-  * Access to search tools from configured MCP servers for deep research
-  * Support for MCP Apps, allowing ChatGPT to connect to MCP-based applications
-  * Enterprise-grade security and compliance features
-</McpClient>
-
-<McpClient name="ChatWise">
-  ChatWise is a desktop-optimized, high-performance chat application that lets you bring your own API keys. It supports a wide range of LLMs and integrates with MCP to enable tool workflows.
-
-  **Key features:**
-
-  * Tools support for MCP servers
-  * Offer built-in tools like web search, artifacts and image generation.
-</McpClient>
-
-<McpClient name="Chorus">
-  Chorus is a native Mac app for chatting with AIs. Chat with multiple models at once, run tools and MCPs, create projects, quick chat, bring your own key, all in a blazing fast, keyboard shortcut friendly app.
-
-  **Key features:**
-
-  * MCP support with one-click install
-  * Built in tools, like web search, terminal, and image generation
-  * Chat with multiple models at once (cloud or local)
-  * Create projects with scoped memory
-  * Quick chat with an AI that can see your screen
-</McpClient>
-
-<McpClient name="Claude Code">
-  Claude Code is an interactive agentic coding tool from Anthropic that helps you code faster through natural language commands. It supports MCP integration for resources, prompts, tools, and roots, and also functions as an MCP server to integrate with other clients.
-
-  **Key features:**
-
-  * Full support for resources, prompts, tools, and roots from MCP servers
-  * Offers its own tools through an MCP server for integrating with other MCP clients
-</McpClient>
-
-<McpClient name="Claude Desktop App">
-  Claude Desktop provides comprehensive support for MCP, enabling deep integration with local tools and data sources.
-
-  **Key features:**
-
-  * Full support for resources, allowing attachment of local files and data
-  * Support for prompt templates
-  * Tool integration for executing commands and scripts
-  * Local server connections for enhanced privacy and security
-</McpClient>
-
-<McpClient name="Claude.ai">
-  Claude.ai is Anthropic's web-based AI assistant that provides MCP support for remote servers.
-
-  **Key features:**
-
-  * Support for remote MCP servers via integrations UI in settings
-  * Access to tools, prompts, and resources from configured MCP servers
-  * Seamless integration with Claude's conversational interface
-  * Enterprise-grade security and compliance features
-</McpClient>
-
-<McpClient name="Cline">
-  Cline is an autonomous coding agent in VS Code that edits files, runs commands, uses a browser, and more–with your permission at each step.
-
-  **Key features:**
-
-  * Create and add tools through natural language (e.g. "add a tool that searches the web")
-  * Share custom MCP servers Cline creates with others via the `~/Documents/Cline/MCP` directory
-  * Displays configured MCP servers along with their tools, resources, and any error logs
-</McpClient>
-
-<McpClient name="CodeGPT">
-  CodeGPT is a popular VS Code and Jetbrains extension that brings AI-powered coding assistance to your editor. It supports integration with MCP servers for tools, allowing users to leverage external AI capabilities directly within their development workflow.
-
-  **Key features:**
-
-  * Use MCP tools from any configured MCP server
-  * Seamless integration with VS Code and Jetbrains UI
-  * Supports multiple LLM providers and custom endpoints
-
-  **Learn more:**
-
-  * [CodeGPT Documentation](https://docs.codegpt.co/)
-</McpClient>
-
-<McpClient name="Codex">
-  Codex is a lightweight AI-powered coding agent from OpenAI that runs in your terminal.
-
-  **Key features:**
-
-  * Support for MCP tools (listing and invocation)
-  * Support for MCP resources (list, read, and templates)
-  * Elicitation support (routes requests to TUI for user input)
-  * Supports STDIO and HTTP streaming transports with OAuth
-  * Also available as VS Code extension
-</McpClient>
-
-<McpClient name="Continue">
-  Continue is an open-source AI code assistant, with built-in support for MCP Tools, Resource, Prompts, and Apps
-
-  **Key features:**
-
-  * Type "@" to mention MCP resources
-  * Prompt templates surface as slash commands
-  * Use both built-in and MCP tools directly in chat
-  * Limited MCP Apps support for displaying MCP UIs
-  * Supports VS Code and JetBrains IDEs, with any LLM
-</McpClient>
-
-<McpClient name="Copilot-MCP">
-  Copilot-MCP enables AI coding assistance via MCP.
-
-  **Key features:**
-
-  * Support for MCP tools and resources
-  * Integration with development workflows
-  * Extensible AI capabilities
-</McpClient>
-
-<McpClient name="Cursor">
-  Cursor is an AI code editor.
-
-  **Key features:**
-
-  * Support for MCP tools in Cursor Composer
-  * Support for roots
-  * Support for prompts
-  * Support for elicitation
-  * Support for both STDIO and SSE
-</McpClient>
-
-<McpClient name="Daydreams">
-  Daydreams is a generative agent framework for executing anything onchain
-
-  **Key features:**
-
-  * Supports MCP Servers in config
-  * Exposes MCP Client
-</McpClient>
-
-<McpClient name="ECA - Editor Code Assistant">
-  ECA is a Free and open-source editor-agnostic tool that aims to easily link LLMs and Editors, giving the best UX possible for AI pair programming using a well-defined protocol
-
-  **Key features:**
-
-  * **Editor-agnostic**: protocol for any editor to integrate.
-  * **Single configuration**: Configure eca making it work the same in any editor via global or local configs.
-  * **Chat** interface: ask questions, review code, work together to code.
-  * **Agentic**: let LLM work as an agent with its native tools and MCPs you can configure.
-  * **Context**: support: giving more details about your code to the LLM, including MCP resources and prompts.
-  * **Multi models**: Login to OpenAI, Anthropic, Copilot, Ollama local models and many more.
-  * **OpenTelemetry**: Export metrics of tools, prompts, server usage.
-</McpClient>
-
-<McpClient name="Emacs Mcp">
-  Emacs Mcp is an Emacs client designed to interface with MCP servers, enabling seamless connections and interactions. It provides MCP tool invocation support for AI plugins like [gptel](https://github.com/karthink/gptel) and [llm](https://github.com/ahyatt/llm), adhering to Emacs' standard tool invocation format. This integration enhances the functionality of AI tools within the Emacs ecosystem.
-
-  **Key features:**
-
-  * Provides MCP tool support for Emacs.
-</McpClient>
-
-<McpClient name="fast-agent">
-  fast-agent is a Python Agent framework, with simple declarative support for creating Agents and Workflows, with full multi-modal support for Anthropic and OpenAI models.
-
-  **Key features:**
-
-  * PDF and Image support, based on MCP Native types
-  * Interactive front-end to develop and diagnose Agent applications, including passthrough and playback simulators
-  * Built in support for "Building Effective Agents" workflows.
-  * Deploy Agents as MCP Servers
-</McpClient>
-
-<McpClient name="Firebender">
-  Firebender is an IntelliJ plugin that offers a world-class coding agent with MCP integration for tool calling.
-
-  **Key features:**
-
-  * Tool integration for executing commands and scripts via STDIO, SSE indirectly supported via mcp-remote npm package.
-  * Local server connections for enhanced privacy and security
-  * MCPs can be installed via project rules or local workstation rules files.
-  * Individual tools within MCPs can be turned off.
-</McpClient>
-
-<McpClient name="FlowDown">
-  FlowDown is a blazing fast and smooth client app for using AI/LLM, with a strong emphasis on privacy and user experience. It supports MCP servers to extend its capabilities with external tools, allowing users to build powerful, customized workflows.
-
-  **Key features:**
-
-  * **Seamless MCP Integration**: Easily connect to MCP servers to utilize a wide range of external tools.
-  * **Privacy-First Design**: Your data stays on your device. We don't collect any user data, ensuring complete privacy.
-  * **Lightweight & Efficient**: A compact and optimized design ensures a smooth and responsive experience with any AI model.
-  * **Broad Compatibility**: Works with all OpenAI-compatible service providers and supports local offline models through MLX.
-  * **Rich User Experience**: Features beautifully formatted Markdown, blazing-fast text rendering, and intelligent, automated chat titling.
-
-  **Learn more:**
-
-  * [FlowDown website](https://flowdown.ai/)
-  * [FlowDown documentation](https://apps.qaq.wiki/docs/flowdown/)
-</McpClient>
-
-<McpClient name="FLUJO">
-  Think n8n + ChatGPT. FLUJO is a desktop application that integrates with MCP to provide a workflow-builder interface for AI interactions. Built with Next.js and React, it supports both online and offline (ollama) models, it manages API Keys and environment variables centrally and can install MCP Servers from GitHub. FLUJO has a ChatCompletions endpoint and flows can be executed from other AI applications like Cline, Roo or Claude.
-
-  **Key features:**
-
-  * Environment & API Key Management
-  * Model Management
-  * MCP Server Integration
-  * Workflow Orchestration
-  * Chat Interface
-</McpClient>
-
-<McpClient name="Gemini CLI">
-  Gemini CLI is an open-source AI agent that brings the power of Gemini directly into your terminal.
-</McpClient>
-
-<McpClient name="GenAIScript">
-  Programmatically assemble prompts for LLMs using GenAIScript (in JavaScript). Orchestrate LLMs, tools, and data in JavaScript.
-
-  **Key features:**
-
-  * JavaScript toolbox to work with prompts
-  * Abstraction to make it easy and productive
-  * Seamless Visual Studio Code integration
-</McpClient>
-
-<McpClient name="Genkit">
-  Genkit is a cross-language SDK for building and integrating GenAI features into applications. The [genkitx-mcp](https://github.com/firebase/genkit/tree/main/js/plugins/mcp) plugin enables consuming MCP servers as a client or creating MCP servers from Genkit tools and prompts.
-
-  **Key features:**
-
-  * Client support for tools and prompts (resources partially supported)
-  * Rich discovery with support in Genkit's Dev UI playground
-  * Seamless interoperability with Genkit's existing tools and prompts
-  * Works across a wide variety of GenAI models from top providers
-</McpClient>
-
-<McpClient name="GitHub Copilot CLI">
-  GitHub Copilot CLI runs a GitHub-native agent in your terminal that works directly with your issues and pull requests, executes across a `/fleet` of parallelized subagents, and carries you from `/plan` to merged code.
-
-  **Key features:**
-
-  * Work with issues, branches, and pull requests through GitHub's native `/mcp` server.
-  * Use `/model` and `/fleet` to execute in parallel or run multiple models at once.
-  * Start with a `/plan`, refine work in your `/IDE`, and ship a pull request on GitHub.
-  * Extend Copilot CLI with custom MCP server integrations, skills, and plugins.
-  * Runs on macOS, Linux, and Windows and inherits organization Copilot policies and governance settings.
-</McpClient>
-
-<McpClient name="GitHub Copilot coding agent">
-  Delegate tasks to GitHub Copilot coding agent and let it work in the background while you stay focused on the highest-impact and most interesting work
-
-  **Key features:**
-
-  * Delegate tasks to Copilot from GitHub Issues, Visual Studio Code, GitHub Copilot Chat or from your favorite MCP host using the GitHub MCP Server
-  * Tailor Copilot to your project by [customizing the agent's development environment](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/customizing-the-development-environment-for-copilot-coding-agent#preinstalling-tools-or-dependencies-in-copilots-environment) or [writing custom instructions](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/best-practices-for-using-copilot-to-work-on-tasks#adding-custom-instructions-to-your-repository)
-  * [Augment Copilot's context and capabilities with MCP tools](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/extending-copilot-coding-agent-with-mcp), with support for both local and remote MCP servers
-</McpClient>
-
-<McpClient name="Glama">
-  Glama is a comprehensive AI workspace and integration platform that offers a unified interface to leading LLM providers, including OpenAI, Anthropic, and others. It supports the Model Context Protocol (MCP) ecosystem, enabling developers and enterprises to easily discover, build, and manage MCP servers.
-
-  **Key features:**
-
-  * Integrated [MCP Server Directory](https://glama.ai/mcp/servers)
-  * Integrated [MCP Tool Directory](https://glama.ai/mcp/tools)
-  * Host MCP servers and access them via the Chat or SSE endpoints
-    – Ability to chat with multiple LLMs and MCP servers at once
-  * Upload and analyze local files and data
-  * Full-text search across all your chats and data
-</McpClient>
-
-<McpClient name="goose">
-  goose is an open source AI agent that supercharges your software development by automating coding tasks.
-
-  **Key features:**
-
-  * Expose MCP functionality to goose through tools.
-  * MCPs can be installed directly via the [extensions directory](https://block.github.io/goose/v1/extensions/), CLI, or UI.
-  * goose allows you to extend its functionality by [building your own MCP servers](https://block.github.io/goose/docs/tutorials/custom-extensions).
-  * Includes built-in extensions for development, memory, computer control, and auto-visualization.
-</McpClient>
-
-<McpClient name="gptme">
-  gptme is a open-source terminal-based personal AI assistant/agent, designed to assist with programming tasks and general knowledge work.
-
-  **Key features:**
-
-  * CLI-first design with a focus on simplicity and ease of use
-  * Rich set of built-in tools for shell commands, Python execution, file operations, and web browsing
-  * Local-first approach with support for multiple LLM providers
-  * Open-source, built to be extensible and easy to modify
-</McpClient>
-
-<McpClient name="HyperAgent">
-  HyperAgent is Playwright supercharged with AI. With HyperAgent, you no longer need brittle scripts, just powerful natural language commands. Using MCP servers, you can extend the capability of HyperAgent, without having to write any code.
-
-  **Key features:**
-
-  * AI Commands: Simple APIs like page.ai(), page.extract() and executeTask() for any AI automation
-  * Fallback to Regular Playwright: Use regular Playwright when AI isn't needed
-  * Stealth Mode – Avoid detection with built-in anti-bot patches
-  * Cloud Ready – Instantly scale to hundreds of sessions via [Hyperbrowser](https://www.hyperbrowser.ai/)
-  * MCP Client – Connect to tools like Composio for full workflows (e.g. writing web data to Google Sheets)
-</McpClient>
-
-<McpClient name="IBM Bob">
-  IBM Bob is an AI SDLC partner that enables AI coding assistance via MCP. Built with security-first principles and enterprise-grade deployment flexibility, Bob integrates security into development workflows through shift-left practices, helping accelerate modernization while maintaining governance and compliance.
-
-  **Key features:**
-
-  * Support for MCP tools and resources with fine-grained control
-  * Global and project-level MCP server configuration
-  * STDIO and SSE transport support for local and remote servers
-  * Individual tool enable/disable for optimized context usage
-  * Auto-approval capabilities for trusted tools
-  * Built-in MCP server creation through natural language
-  * Enterprise-grade security with shift-left integration
-  * Integration with development workflows
-</McpClient>
-
-<McpClient name="Inspector">
-  Inspector is a visual editor for your codebase. It connects to Cursor, Claude Code, and Codex so you can edit your frontend visually. Move elements, change text, and ship real code without touching CSS.
-
-  **Key features:**
-
-  * Design Mode: Move elements, edit text, and zoom in to interact with your front-end like Figma.
-  * Agent Connect: Plug in Cursor, Claude Code, or Codex.
-  * Version Control: Stage changes and open PRs from Inspector.
-  * MCP Client: Connect any MCP Server you want!
-</McpClient>
-
-<McpClient name="Jenova">
-  Jenova is the best MCP client for non-technical users, especially on mobile.
-
-  **Key features:**
-
-  * 30+ pre-integrated MCP servers with one-click integration of custom servers
-  * MCP recommendation capability that suggests the best servers for specific tasks
-  * Multi-agent architecture with leading tool use reliability and scalability, supporting unlimited concurrent MCP server connections through RAG-powered server metadata
-  * Model agnostic platform supporting any leading LLMs (OpenAI, Anthropic, Google, etc.)
-  * Unlimited chat history and global persistent memory powered by RAG
-  * Easy creation of custom agents with custom models, instructions, knowledge bases, and MCP servers
-  * Local MCP server (STDIO) support coming soon with desktop apps
-</McpClient>
-
-<McpClient name="JetBrains AI Assistant">
-  JetBrains AI Assistant plugin provides AI-powered features for software development available in all JetBrains IDEs.
-
-  **Key features:**
-
-  * Unlimited code completion powered by Mellum, JetBrains' proprietary AI model.
-  * Context-aware AI chat that understands your code and helps you in real time.
-  * Access to top-tier models from OpenAI, Anthropic, and Google.
-  * Offline mode with connected local LLMs via Ollama or LM Studio.
-  * Deep integration into IDE workflows, including code suggestions in the editor, VCS assistance, runtime error explanation, and more.
-</McpClient>
-
-<McpClient name="JetBrains Junie">
-  Junie is JetBrains' AI coding agent for JetBrains IDEs and Android Studio.
-
-  **Key features:**
-
-  * Connects to MCP servers over **stdio** to use external tools and data sources.
-  * Per-command approval with an optional allowlist.
-  * Config via `mcp.json` (global `~/.junie/mcp.json` or project `.junie/mcp/`).
-</McpClient>
-
-<McpClient name="Joey">
-  Joey is a mobile-first MCP client for **iOS and Android** (also available on macOS, Windows, and Linux) that connects to AI models via OpenRouter and remote MCP servers over Streamable HTTP.
-
-  **Key features:**
-
-  * **Mobile MCP support** — use MCP servers directly from your phone or tablet on iOS and Android.
-  * Connects to remote MCP servers over **Streamable HTTP** with OAuth support.
-  * Supports multiple MCP servers per conversation with tool calling.
-  * MCP sampling and elicitation support for interactive server-initiated workflows.
-  * Image and audio attachments with SSE streaming responses.
-</McpClient>
-
-<McpClient name="Kilo Code">
-  Kilo Code is an autonomous coding AI dev team in VS Code that edits files, runs commands, uses a browser, and more.
-
-  **Key features:**
-
-  * Create and add tools through natural language (e.g. "add a tool that searches the web")
-  * Discover MCP servers via the MCP Marketplace
-  * One click MCP server installs via MCP Marketplace
-  * Displays configured MCP servers along with their tools, resources, and any error logs
-</McpClient>
-
-<McpClient name="Klavis AI Slack/Discord/Web">
-  Klavis AI is an Open-Source Infra to Use, Build & Scale MCPs with ease.
-
-  **Key features:**
-
-  * Slack/Discord/Web MCP clients for using MCPs directly
-  * Simple web UI dashboard for easy MCP configuration
-  * Direct OAuth integration with Slack & Discord Clients and MCP Servers for secure user authentication
-  * SSE transport support
-
-  **Learn more:**
-
-  * [Demo video showing MCP usage in Slack/Discord](https://youtu.be/9-QQAhrQWw8)
-</McpClient>
-
-<McpClient name="Langdock">
-  Langdock is the enterprise-ready solution for rolling out AI to all of your employees while enabling your developers to build and deploy custom AI workflows on top.
-
-  **Key features:**
-
-  * Remote MCP Server (SSE & Streamable HTTP) support, connect to any MCP server via OAuth, API Key, or without authentication.
-  * MCP Tool discovery and management, including tool confirmation UI.
-  * Enterprise-grade security and compliance features
-</McpClient>
-
-<McpClient name="Langflow">
-  Langflow is an open-source visual builder that lets developers rapidly prototype and build AI applications, it integrates with the Model Context Protocol (MCP) as both an MCP server and an MCP client.
-
-  **Key features:**
-
-  * Full support for using MCP server tools to build agents and flows.
-  * Export agents and flows as MCP server
-  * Local & remote server connections for enhanced privacy and security
-
-  **Learn more:**
-
-  * [Demo video showing how to use Langflow as both an MCP client & server](https://www.youtube.com/watch?v=pEjsaVVPjdI)
-</McpClient>
-
-<McpClient name="LibreChat">
-  LibreChat is an open-source, customizable AI chat UI that supports multiple AI providers, now including MCP integration.
-
-  **Key features:**
-
-  * Extend current tool ecosystem, including [Code Interpreter](https://www.librechat.ai/docs/features/code_interpreter) and Image generation tools, through MCP servers
-  * Add tools to customizable [Agents](https://www.librechat.ai/docs/features/agents), using a variety of LLMs from top providers
-  * Open-source and self-hostable, with secure multi-user support
-  * Future roadmap includes expanded MCP feature support
-</McpClient>
-
-<McpClient name="LM Studio">
-  LM Studio is a cross-platform desktop app for discovering, downloading, and running open-source LLMs locally. You can now connect local models to tools via Model Context Protocol (MCP).
-
-  **Key features:**
-
-  * Use MCP servers with local models on your computer. Add entries to `mcp.json` and save to get started.
-  * Tool confirmation UI: when a model calls a tool, you can confirm the call in the LM Studio app.
-  * Cross-platform: runs on macOS, Windows, and Linux, one-click installer with no need to fiddle in the command line
-  * Supports GGUF (llama.cpp) or MLX models with GPU acceleration
-  * GUI & terminal mode: use the LM Studio app or CLI (lms) for scripting and automation
-
-  **Learn more:**
-
-  * [Docs: Using MCP in LM Studio](https://lmstudio.ai/docs/app/plugins/mcp)
-  * [Create a 'Add to LM Studio' button for your server](https://lmstudio.ai/docs/app/plugins/mcp/deeplink)
-  * [Announcement blog: LM Studio + MCP](https://lmstudio.ai/blog/mcp)
-</McpClient>
-
-<McpClient name="LM-Kit.NET">
-  LM-Kit.NET is a local-first Generative AI SDK for .NET (C# / VB.NET) that can act as an **MCP client**. Current MCP support: **Tools only**.
-
-  **Key features:**
-
-  * Consume MCP server tools over HTTP/JSON-RPC 2.0 (initialize, list tools, call tools).
-  * Programmatic tool discovery and invocation via `McpClient`.
-  * Easy integration in .NET agents and applications.
-
-  **Learn more:**
-
-  * [Docs: Using MCP in LM-Kit.NET](https://docs.lm-kit.com/lm-kit-net/api/LMKit.Mcp.Client.McpClient.html)
-  * [Creating AI agents](https://lm-kit.com/solutions/ai-agents)
-  * Product page: [LM-Kit.NET](https://lm-kit.com/products/lm-kit-net/)
-</McpClient>
-
-<McpClient name="Lutra">
-  Lutra is an AI agent that transforms conversations into actionable, automated workflows.
-
-  **Key features:**
-
-  * Easy MCP Integration: Connecting Lutra to MCP servers is as simple as providing the server URL; Lutra handles the rest behind the scenes.
-  * Chat to Take Action: Lutra understands your conversational context and goals, automatically integrating with your existing apps to perform tasks.
-  * Reusable Playbooks: After completing a task, save the steps as reusable, automated workflows—simplifying repeatable processes and reducing manual effort.
-  * Shareable Automations: Easily share your saved playbooks with teammates to standardize best practices and accelerate collaborative workflows.
-
-  **Learn more:**
-
-  * [Lutra AI agent explained (video)](https://www.youtube.com/watch?v=W5ZpN0cMY70)
-</McpClient>
-
-<McpClient name="MCP Bundler for MacOS">
-  MCP Bundler is perfect local proxy for your MCP workflow. The app centralizes all your MCP servers — toggle, group, turn off capabilities instantly. Switch bundles on the fly inside the MCP Bundler.
-
-  **Key features:**
-
-  * Unified Control Panel: Manage all your MCP servers — both Local STDIO and Remote HTTP/SSE — from one clear macOS window. Start, stop, or edit them instantly without touching configs.
-  * One Click, All Connected: Launch or disable entire MCP setups with one toggle. Switch bundles per project or workspace and keep your AI tools synced automatically.
-  * Per-Tool Control: Enable or hide individual tools inside each server. Keep your bundles clean, lightweight, and tailored for every AI workflow.
-  * Instant Health & Logs: Real-time health indicators and request logs show exactly what's running. Diagnose and fix connection issues without leaving the app.
-  * Auto-Generate MCP Config: Copy a ready-made JSON snippet for any client in seconds. No manual wiring — connect your Bundler as a single MCP endpoint.
-
-  **Learn more:**
-
-  * [MCP Bundler in action (video)](https://www.youtube.com/watch?v=CEHVSShw_NU)
-</McpClient>
-
-<McpClient name="MCPBundles">
-  MCPBundles provides MCPBundle Studio, a browser-based MCP client for testing and executing MCP tools on remote MCP servers.
-
-  **Key features:**
-
-  * Discover and inspect available tools with parameter schemas and descriptions
-  * Supports OAuth and API key authentication for secure provider connections
-  * Execute MCP tools with form-based and chat based input
-  * Implements Apps for rendering interactive UI responses from tools
-  * Streamable HTTP transport for remote MCP server connections
-</McpClient>
-
-<McpClient name="mcp-agent">
-  mcp-agent is a simple, composable framework to build agents using Model Context Protocol.
-
-  **Key features:**
-
-  * Automatic connection management of MCP servers.
-  * Expose tools from multiple servers to an LLM.
-  * Implements every pattern defined in [Building Effective Agents](https://www.anthropic.com/research/building-effective-agents).
-  * Supports workflow pause/resume signals, such as waiting for human feedback.
-</McpClient>
-
-<McpClient name="mcp-client-chatbot">
-  mcp-client-chatbot is a local-first chatbot built with Vercel's Next.js, AI SDK, and Shadcn UI.
-
-  **Key features:**
-
-  * It supports standard MCP tool calling and includes both a custom MCP server and a standalone UI for testing MCP tools outside the chat flow.
-  * All MCP tools are provided to the LLM by default, but the project also includes an optional `@toolname` mention feature to make tool invocation more explicit—particularly useful when connecting to multiple MCP servers with many tools.
-  * Visual workflow builder that lets you create custom tools by chaining LLM nodes and MCP tools together. Published workflows become callable as `@workflow_name` tools in chat, enabling complex multi-step automation sequences.
-</McpClient>
-
-<McpClient name="mcp-use">
-  mcp-use is an open source python library to very easily connect any LLM to any MCP server both locally and remotely.
-
-  **Key features:**
-
-  * Very simple interface to connect any LLM to any MCP.
-  * Support the creation of custom agents, workflows.
-  * Supports connection to multiple MCP servers simultaneously.
-  * Supports all langchain supported models, also locally.
-  * Offers efficient tool orchestration and search functionalities.
-</McpClient>
-
-<McpClient name="mcpc MCP CLI client">
-  `mcpc` is a universal command-line client for MCP. It maps MCP operations to intuitive CLI commands, giving AI coding agents full protocol access through a single `Bash()` tool call. It works with any MCP server over Streamable HTTP or stdio, with or without a config file. Agents discover commands through `--help` without needing external skills, while MCP handles remote concerns like server discovery, authentication, payments, and access control.
-
-  **Key features:**
-
-  * **Code mode in the shell:** `--json` output composes with `jq`, `xargs`, and shell pipelines for writing MCP workflows as shell scripts, which can be more accurate and token-efficient than tool calling. `--schema` validates tool schemas against snapshots to detect breaking changes.
-  * **Progressive tool discovery:** `grep` searches tools, resources, and prompts across all active sessions with regex, so agents load only relevant tools into context.
-  * **Full MCP coverage:** tools, resources (including subscriptions and templates), prompts, instructions, async tasks with progress tracking and cancellation, list-change notifications, pagination, and logging control.
-  * **Persistent sessions:** maintain multiple simultaneous server connections via named `@sessions`, with automatic reconnection and health monitoring.
-  * **Authentication:** OAuth 2.1 with PKCE and dynamic client registration, bearer tokens, multiple named profiles per server, and secure credential storage in the OS keychain.
-  * **AI sandboxing:** built-in MCP proxy server (`--proxy`) exposes authenticated sessions to AI-generated code without leaking credentials.
-  * **Interactive shell:** `shell` command provides a REPL with command history, arrow-key navigation, and in-session help for exploratory server testing.
-  * **x402 payments (experimental):** autonomous USDC payments on Base blockchain, letting AI agents pay for tool calls via the HTTP 402 protocol.
-  * **Lightweight and cross-platform:** no LLM required, minimal dependencies, production-ready. Runs on macOS, Windows, and Linux. Install via `npm install -g @apify/mcpc`.
-</McpClient>
-
-<McpClient name="MCPHub">
-  MCPHub is a powerful Neovim plugin that integrates MCP (Model Context Protocol) servers into your workflow.
-
-  **Key features:**
-
-  * Install, configure and manage MCP servers with an intuitive UI.
-  * Built-in Neovim MCP server with support for file operations (read, write, search, replace), command execution, terminal integration, LSP integration, buffers, and diagnostics.
-  * Create Lua-based MCP servers directly in Neovim.
-  * Integrates with popular Neovim chat plugins Avante.nvim and CodeCompanion.nvim
-</McpClient>
-
-<McpClient name="MCPJam">
-  MCPJam Inspector is the local development client for ChatGPT apps, MCP ext-apps, and MCP servers.
-
-  **Key features:**
-
-  * Local emulator for ChatGPT Apps SDK and MCP ext-apps. No more ChatGPT subscription or ngrok needed.
-  * OAuth debugger to visually inspect MCP server OAuth at every step.
-  * LLM playground to chat with your MCP server against any LLM. We provide our own API tokens for free.
-  * Connect, test, and inspect any MCP server that's local or remote. Manually invoke MCP tools, resource, prompts, etc. View all JSON-RPC logs.
-  * Supports all transports - STDIO, SSE, and Streamable HTTP.
-</McpClient>
-
-<McpClient name="MCPOmni-Connect">
-  MCPOmni-Connect is a versatile command-line interface (CLI) client designed to connect to various Model Context Protocol (MCP) servers using both stdio and SSE transport.
-
-  **Key features:**
-
-  * Support for resources, prompts, tools, and sampling
-  * Agentic mode with ReAct and orchestrator capabilities
-  * Seamless integration with OpenAI models and other LLMs
-  * Dynamic tool and resource management across multiple servers
-  * Support for both stdio and SSE transport protocols
-  * Comprehensive tool orchestration and resource analysis capabilities
-</McpClient>
-
-<McpClient name="Memex">
-  Memex is the first MCP client and MCP server builder - all-in-one desktop app. Unlike traditional MCP clients that only consume existing servers, Memex can create custom MCP servers from natural language prompts, immediately integrate them into its toolkit, and use them to solve problems—all within a single conversation.
-
-  **Key features:**
-
-  * **Prompt-to-MCP Server**: Generate fully functional MCP servers from natural language descriptions
-  * **Self-Testing & Debugging**: Autonomously test, debug, and improve created MCP servers
-  * **Universal MCP Client**: Works with any MCP server through intuitive, natural language integration
-  * **Curated MCP Directory**: Access to tested, one-click installable MCP servers (Neon, Netlify, GitHub, Context7, and more)
-  * **Multi-Server Orchestration**: Leverage multiple MCP servers simultaneously for complex workflows
-
-  **Learn more:**
-
-  * [Memex Launch 2: MCP Teams and Agent API](https://memex.tech/blog/memex-launch-2-mcp-teams-and-agent-api-private-preview-125f)
-</McpClient>
-
-<McpClient name="Memgraph Lab">
-  [Memgraph Lab](https://memgraph.com/lab) is a visualization and management tool for Memgraph graph databases. Its [GraphChat](https://memgraph.com/docs/memgraph-lab/features/graphchat) feature lets you query graph data using natural language, with MCP server integrations to extend your AI workflows.
-
-  **Key features:**
-
-  * Build GraphRAG workflows powered by knowledge graphs as the data backbone
-  * Connect remote MCP servers via `SSE` or `Streamable HTTP`
-  * Support for MCP resources, prompts, tools, sampling, elicitation, and instructions
-  * Create multiple agents with different configurations for easy comparison and debugging
-  * Works with various LLM providers (OpenAI, Azure OpenAI, Anthropic, Gemini, Ollama, DeepSeek)
-  * Available as a Desktop app or Docker container
-
-  **Learn more:**
-
-  * [Memgraph Lab: MCP integration](https://memgraph.com/docs/memgraph-lab/features/graphchat#mcp-servers)
-</McpClient>
-
-<McpClient name="Microsoft Copilot Studio">
-  Microsoft Copilot Studio is a robust SaaS platform designed for building custom AI-driven applications and intelligent agents, empowering developers to create, deploy, and manage sophisticated AI solutions.
-
-  **Key features:**
-
-  * Support for MCP tools
-  * Extend Copilot Studio agents with MCP servers
-  * Leveraging Microsoft unified, governed, and secure API management solutions
-</McpClient>
-
-<McpClient name="MindPal">
-  MindPal is a no-code platform for building and running AI agents and multi-agent workflows for business processes.
-
-  **Key features:**
-
-  * Build custom AI agents with no-code
-  * Connect any SSE MCP server to extend agent tools
-  * Create multi-agent workflows for complex business processes
-  * User-friendly for both technical and non-technical professionals
-  * Ongoing development with continuous improvement of MCP support
-
-  **Learn more:**
-
-  * [MindPal MCP Documentation](https://docs.mindpal.io/agent/mcp)
-</McpClient>
-
-<McpClient name="Mistral AI: Le Chat">
-  Mistral AI: Le Chat is Mistral AI assistant with MCP support for remote servers and enterprise workflows.
-
-  **Key features:**
-
-  * Remote MCP server integration
-  * Enterprise-grade security
-  * Low-latency, high-throughput interactions with structured data
-
-  **Learn more:**
-
-  * [Mistral MCP Documentation](https://help.mistral.ai/en/collections/911943-connectors)
-</McpClient>
-
-<McpClient name="modelcontextchat.com">
-  modelcontextchat.com is a web-based MCP client designed for working with remote MCP servers, featuring comprehensive authentication support and integration with OpenRouter.
-
-  **Key features:**
-
-  * Web-based interface for remote MCP server connections
-  * Header-based Authorization support for secure server access
-  * OAuth authentication integration
-  * OpenRouter API Key support for accessing various LLM providers
-  * No installation required - accessible from any web browser
-</McpClient>
-
-<McpClient name="MooPoint">
-  MooPoint is a web-based AI chat platform built for developers and advanced users, letting you interact with multiple large language models (LLMs) through a single, unified interface. Connect your own API keys (OpenAI, Anthropic, and more) and securely manage custom MCP server integrations.
-
-  **Key features:**
-
-  * Accessible from any PC or smartphone—no installation required
-  * Choose your preferred LLM provider
-  * Supports `SSE`, `Streamable HTTP`, `npx`, and `uvx` MCP servers
-  * OAuth and sampling support
-  * New features added daily
-</McpClient>
-
-<McpClient name="Msty Studio">
-  Msty Studio is a privacy-first AI productivity platform that seamlessly integrates local and online language models (LLMs) into customizable workflows. Designed for both technical and non-technical users, Msty Studio offers a suite of tools to enhance AI interactions, automate tasks, and maintain full control over data and model behavior.
-
-  **Key features:**
-
-  * **Toolbox & Toolsets**: Connect AI models to local tools and scripts using MCP-compliant configurations. Group tools into Toolsets to enable dynamic, multi-step workflows within conversations.
-  * **Turnstiles**: Create automated, multi-step AI interactions, allowing for complex data processing and decision-making flows.
-  * **Real-Time Data Integration**: Enhance AI responses with up-to-date information by integrating real-time web search capabilities.
-  * **Split Chats & Branching**: Engage in parallel conversations with multiple models simultaneously, enabling comparative analysis and diverse perspectives.
-
-  **Learn more:**
-
-  * [Msty Studio Documentation](https://docs.msty.studio/features/toolbox/tools)
-</McpClient>
-
-<McpClient name="Needle">
-  Needle is a RAG workflow platform that also works as an MCP client, letting you connect and use MCP servers in seconds.
-
-  **Key features:**
-
-  * **Instant MCP integration:** Connect any remote MCP server to your collection in seconds
-  * **Built-in RAG:** Automatically get retrieval-augmented generation out of the box
-  * **Secure OAuth:** Safe, token-based authorization when connecting to servers
-  * **Smart previews:** See what each MCP server can do and selectively enable the tools you need
-
-  **Learn more:**
-
-  * [Getting Started](https://docs.needle.app/docs/guides/hello-needle/getting-started/)
-</McpClient>
-
-<McpClient name="NVIDIA Agent Intelligence (AIQ) toolkit">
-  NVIDIA Agent Intelligence (AIQ) toolkit is a flexible, lightweight, and unifying library that allows you to easily connect existing enterprise agents to data sources and tools across any framework.
-
-  **Key features:**
-
-  * Acts as an MCP **client** to consume remote tools
-  * Acts as an MCP **server** to expose tools
-  * Framework agnostic and compatible with LangChain, CrewAI, Semantic Kernel, and custom agents
-  * Includes built-in observability and evaluation tools
-
-  **Learn more:**
-
-  * [AIQ toolkit MCP documentation](https://docs.nvidia.com/aiqtoolkit/latest/workflows/mcp/index.html)
-</McpClient>
-
-<McpClient name="opencode">
-  OpenCode is an open source AI coding agent. It’s available as a terminal-based interface, desktop app, or IDE extension.
-
-  **Key features:**
-
-  * Support for MCP tools
-  * Support for MCP resources in the cli using `@` prefix
-  * Support for MCP prompts in the cli as slash commands using `/` prefix
-</McpClient>
-
-<McpClient name="OpenSumi">
-  OpenSumi is a framework helps you quickly build AI Native IDE products.
-
-  **Key features:**
-
-  * Supports MCP tools in OpenSumi
-  * Supports built-in IDE MCP servers and custom MCP servers
-</McpClient>
-
-<McpClient name="oterm">
-  oterm is a terminal client for Ollama allowing users to create chats/agents.
-
-  **Key features:**
-
-  * Support for multiple fully customizable chat sessions with Ollama connected with tools.
-  * Support for MCP tools.
-</McpClient>
-
-<McpClient name="Postman">
-  Postman is the most popular API client and now supports MCP server testing and debugging.
-
-  **Key features:**
-
-  * Full support of all major MCP features (tools, prompts, resources, and subscriptions)
-  * Fast, seamless UI for debugging MCP capabilities
-  * MCP config integration (Claude, VSCode, etc.) for fast first-time experience in testing MCPs
-  * Integration with history, variables, and collections for reuse and collaboration
-</McpClient>
-
-<McpClient name="Proxyman">
-  Proxyman is a native macOS app for HTTP debugging and network monitoring. It now includes an MCP Server that enables AI assistants (Claude, Cursor, and other MCP-compatible tools) to directly interact with Proxyman for inspecting HTTP traffic, creating debugging rules, and controlling the app through natural language.
-
-  **Key features:**
-
-  * **AI-Powered Debugging**: Ask AI to analyze captured traffic, find specific requests, or explain API responses
-  * **Hands-Free Rule Creation**: Create breakpoints, map local/remote rules through conversation
-  * **Traffic Inspection Tools**: Get flows, flow details, export cURL commands, and filter traffic with multiple criteria
-  * **Session Control**: Clear sessions, toggle recording, and manage SSL proxying domains
-  * **Secure by Design**: Localhost-only server with per-session token authentication
-
-  **Learn more:**
-
-  * [Proxyman MCP Documentation](https://docs.proxyman.com/mcp)
-  * [Proxyman Website](https://proxyman.com)
-</McpClient>
-
-<McpClient name="Qoder">
-  Qoder is a next-generation agentic coding platform by Alibaba, engineered for real-world software development. By combining enhanced context engineering with autonomous agents, it provides deep awareness of very large codebases and can support workflows ranging from co-pilot assistance to fully autonomous coding.
-
-  **Key features:**
-
-  * **Agent Mode**: High-efficiency single-agent collaboration that autonomously decides actions from project context, including cross-file refactoring, debugging, and feature iteration.
-  * **Experts Mode**: Multi-agent orchestration that decomposes complex requirements and delegates to a virtual expert team (Design, Implementation, Testing, QA) for parallel execution.
-  * **Quest Mode**: Fully autonomous end-to-end coding from goal definition through requirement clarification, planning, execution, and validation with a comprehensive final report.
-  * **Engineering Knowledge Engine**: Repo Wiki-powered architecture understanding that gives agents full codebase awareness and alignment with project standards.
-  * **Memory Engine**: Persistent memory for developer preferences, project conventions, and historical interactions to improve alignment over time.
-</McpClient>
-
-<McpClient name="RecurseChat">
-  RecurseChat is a powerful, fast, local-first chat client with MCP support. RecurseChat supports multiple AI providers including LLaMA.cpp, Ollama, and OpenAI, Anthropic.
-
-  **Key features:**
-
-  * Local AI: Support MCP with Ollama models.
-  * MCP Tools: Individual MCP server management. Easily visualize the connection states of MCP servers.
-  * MCP Import: Import configuration from Claude Desktop app or JSON
-
-  **Learn more:**
-
-  * [RecurseChat docs](https://recurse.chat/docs/features/mcp/)
-</McpClient>
-
-<McpClient name="Replit">
-  Replit Agent is an AI-powered software development tool that builds and deploys applications through natural language. It supports MCP integration, enabling users to extend the agent's capabilities with custom tools and data sources.
-
-  **Learn more:**
-
-  * [Replit MCP Documentation](https://docs.replit.com/replitai/mcp/overview)
-  * [MCP Install Links](https://docs.replit.com/replitai/mcp/install-links)
-</McpClient>
-
-<McpClient name="Roo Code">
-  Roo Code enables AI coding assistance via MCP.
-
-  **Key features:**
-
-  * Support for MCP tools and resources
-  * Integration with development workflows
-  * Extensible AI capabilities
-</McpClient>
-
-<McpClient name="Runbear">
-  [Runbear](https://runbear.io) is an AI agent platform for Slack and Microsoft Teams that acts as a managed MCP host. It enables teams to connect 2,000+ tools (HubSpot, Linear, NetSuite, etc.) to their chat workspace using the Model Context Protocol.
-
-  **Key features:**
-
-  * **Managed MCP Servers**: Out-of-the-box support for HubSpot, Linear, and more.
-  * **Secure Hosting**: SOC 2 Type II compliant environment for MCP operations.
-  * **Cross-Platform**: Access your MCP tools from Slack, Teams, and HubSpot.
-  * **Vast Integration Library**: Connect to 2,000+ tools via native integrations and custom MCP servers.
-</McpClient>
-
-<McpClient name="rtrvr.ai">
-  [rtrvr.ai](https://rtrvr.ai) is AI Web Agent Chrome Extension that autonomously runs complex browser workflows, retrieves data to Sheets, and calls API's/MCP Servers – all with just prompting and within your own browser!
-
-  **Key features:**
-
-  * Easy MCP Integration within your browser: Just open the Chrome Extension, add the server URL, and prompt server calls with the web as context!
-  * Remote control your browser by turning your browser into MCP Server: Just copy/paste MCP URL into any MCP Client (no npx needed), and trigger agentic browser workflows!
-  * Prompt our agent to execute workflows combining web agentic actions with MCP tool calls; find someone's email on the web and then send them an email with Zapier MCP.
-  * Reusable and Schedulable Automations: After running a workflow, easily rerun or put on a schedule to execute in the background while you do other tasks in your browser.
-</McpClient>
-
-<McpClient name="Shortwave">
-  Shortwave is an AI-powered email client that supports MCP tools to enhance email productivity and workflow automation.
-
-  **Key features:**
-
-  * MCP tool integration for enhanced email workflows
-  * Rich UI for adding, managing and interacting with a wide range of MCP servers
-  * Support for both remote (Streamable HTTP and SSE) and local (Stdio) MCP servers
-  * AI assistance for managing your emails, calendar, tasks and other third-party services
-</McpClient>
-
-<McpClient name="Simtheory">
-  Simtheory is an agentic AI workspace that unifies multiple AI models, tools, and capabilities under a single subscription. It provides comprehensive MCP support through its MCP Store, allowing users to extend their workspace with productivity tools and integrations.
-
-  **Key features:**
-
-  * **MCP Store**: Marketplace for productivity tools and MCP server integrations
-  * **Parallel Tasking**: Run multiple AI tasks simultaneously with MCP tool support
-  * **Model Catalogue**: Access to frontier models with MCP tool integration
-  * **Hosted MCP Servers**: Plug-and-play MCP integrations with no technical setup
-  * **Advanced MCPs**: Specialized tools like Tripo3D (3D creation), Podcast Maker, and Video Maker
-  * **Enterprise Ready**: Flexible workspaces with granular access control for MCP tools
-
-  **Learn more:**
-
-  * [Simtheory website](https://simtheory.ai)
-</McpClient>
-
-<McpClient name="Slack MCP Client">
-  Slack MCP Client acts as a bridge between Slack and Model Context Protocol (MCP) servers. Using Slack as the interface, it enables large language models (LLMs) to connect and interact with various MCP servers through standardized MCP tools.
-
-  **Key features:**
-
-  * **Supports Popular LLM Providers:** Integrates seamlessly with leading large language model providers such as OpenAI, Anthropic, and Ollama, allowing users to leverage advanced conversational AI and orchestration capabilities within Slack.
-  * **Dynamic and Secure Integration:** Supports dynamic registration of MCP tools, works in both channels and direct messages and manages credentials securely via environment variables or Kubernetes secrets.
-  * **Easy Deployment and Extensibility:** Offers official Docker images, a Helm chart for Kubernetes, and Docker Compose for local development, making it simple to deploy, configure, and extend with additional MCP servers or tools.
-</McpClient>
-
-<McpClient name="Smithery Playground">
-  Smithery Playground is a developer-first MCP client for exploring, testing and debugging MCP servers against LLMs. It provides detailed traces of MCP RPCs to help troubleshoot implementation issues.
-
-  **Key features:**
-
-  * One-click connect to MCP servers via URL or from Smithery's registry
-  * Develop MCP servers that are running on localhost
-  * Inspect tools, prompts, resources, and sampling configurations with live previews
-  * Run conversational or raw tool calls to verify MCP behavior before shipping
-  * Full OAuth MCP-spec support
-</McpClient>
-
-<McpClient name="SpinAI">
-  SpinAI is an open-source TypeScript framework for building observable AI agents. The framework provides native MCP compatibility, allowing agents to seamlessly integrate with MCP servers and tools.
-
-  **Key features:**
-
-  * Built-in MCP compatibility for AI agents
-  * Open-source TypeScript framework
-  * Observable agent architecture
-  * Native support for MCP tools integration
-</McpClient>
-
-<McpClient name="Superinterface">
-  Superinterface is AI infrastructure and a developer platform to build in-app AI assistants with support for MCP, interactive components, client-side function calling and more.
-
-  **Key features:**
-
-  * Use tools from MCP servers in assistants embedded via React components or script tags
-  * SSE transport support
-  * Use any AI model from any AI provider (OpenAI, Anthropic, Ollama, others)
-</McpClient>
-
-<McpClient name="Superjoin">
-  Superjoin brings the power of MCP directly into Google Sheets extension. With Superjoin, users can access and invoke MCP tools and agents without leaving their spreadsheets, enabling powerful AI workflows and automation right where their data lives.
-
-  **Key features:**
-
-  * Native Google Sheets add-on providing effortless access to MCP capabilities
-  * Supports OAuth 2.1 and header-based authentication for secure and flexible connections
-  * Compatible with both SSE and Streamable HTTP transport for efficient, real-time streaming communication
-  * Fully web-based, cross-platform client requiring no additional software installation
-</McpClient>
-
-<McpClient name="Swarms">
-  Swarms is a production-grade multi-agent orchestration framework that supports MCP integration for dynamic tool discovery and execution.
-
-  **Key features:**
-
-  * Connects to MCP servers via SSE transport for real-time tool integration
-  * Automatic tool discovery and loading from MCP servers
-  * Support for distributed tool functionality across multiple agents
-  * Enterprise-ready with high availability and observability features
-  * Modular architecture supporting multiple AI model providers
-
-  **Learn more:**
-
-  * [Swarms MCP Integration Documentation](https://docs.swarms.world/en/latest/swarms/tools/tools_examples/)
-</McpClient>
-
-<McpClient name="systemprompt">
-  systemprompt is a voice-controlled mobile app that manages your MCP servers. Securely leverage MCP agents from your pocket. Available on iOS and Android.
-
-  **Key features:**
-
-  * **Native Mobile Experience**: Access and manage your MCP servers anytime, anywhere on both Android and iOS devices
-  * **Advanced AI-Powered Voice Recognition**: Sophisticated voice recognition engine enhanced with cutting-edge AI and Natural Language Processing (NLP), specifically tuned to understand complex developer terminology and command structures
-  * **Unified Multi-MCP Server Management**: Effortlessly manage and interact with multiple Model Context Protocol (MCP) servers from a single, centralized mobile application
-</McpClient>
-
-<McpClient name="Tambo">
-  Tambo is a platform for building custom chat experiences in React, with integrated custom user interface components.
-
-  **Key features:**
-
-  * Hosted platform with React SDK for integrating chat or other LLM-based experiences into your own app.
-  * Support for selection of arbitrary React components in the chat experience, with state management and tool calling.
-  * Support for MCP servers, from Tambo's servers or directly from the browser.
-  * Supports OAuth 2.1 and custom header-based authentication.
-  * Support for MCP tools and sampling, with additional MCP features coming soon.
-</McpClient>
-
-<McpClient name="Tencent CloudBase AI DevKit">
-  Tencent CloudBase AI DevKit is a tool for building AI agents in minutes, featuring zero-code tools, secure data integration, and extensible plugins via MCP.
-
-  **Key features:**
-
-  * Support for MCP tools
-  * Extend agents with MCP servers
-  * MCP servers hosting: serverless hosting and authentication support
-</McpClient>
-
-<McpClient name="TheiaAI/TheiaIDE">
-  Theia AI is a framework for building AI-enhanced tools and IDEs. The [AI-powered Theia IDE](https://eclipsesource.com/blogs/2024/10/08/introducting-ai-theia-ide/) is an open and flexible development environment built on Theia AI.
-
-  **Key features:**
-
-  * **Tool Integration**: Theia AI enables AI agents, including those in the Theia IDE, to utilize MCP servers for seamless tool interaction.
-  * **Customizable Prompts**: The Theia IDE allows users to define and adapt prompts, dynamically integrating MCP servers for tailored workflows.
-  * **Custom agents**: The Theia IDE supports creating custom agents that leverage MCP capabilities, enabling users to design dedicated workflows on the fly.
-
-  Theia AI and Theia IDE's MCP integration provide users with flexibility, making them powerful platforms for exploring and adapting MCP.
-
-  **Learn more:**
-
-  * [Theia IDE and Theia AI MCP Announcement](https://eclipsesource.com/blogs/2024/12/19/theia-ide-and-theia-ai-support-mcp/)
-  * [Download the AI-powered Theia IDE](https://theia-ide.org/)
-</McpClient>
-
-<McpClient name="Tome">
-  Tome is an open source cross-platform desktop app designed for working with local LLMs and MCP servers. It is designed to be beginner friendly and abstract away the nitty gritty of configuration for people getting started with MCP.
-
-  **Key features:**
-
-  * MCP servers are managed by Tome so there is no need to install uv or npm or configure JSON
-  * Users can quickly add or remove MCP servers via UI
-  * Any tool-supported local model on Ollama is compatible
-</McpClient>
-
-<McpClient name="TypingMind App">
-  TypingMind is an advanced frontend for LLMs with MCP support. TypingMind supports all popular LLM providers like OpenAI, Gemini, Claude, and users can use with their own API keys.
-
-  **Key features:**
-
-  * **MCP Tool Integration**: Once MCP is configured, MCP tools will show up as plugins that can be enabled/disabled easily via the main app interface.
-  * **Assign MCP Tools to Agents**: TypingMind allows users to create AI agents that have a set of MCP servers assigned.
-  * **Remote MCP servers**: Allows users to customize where to run the MCP servers via its MCP Connector configuration, allowing the use of MCP tools across multiple devices (laptop, mobile devices, etc.) or control MCP servers from a remote private server.
-
-  **Learn more:**
-
-  * [TypingMind MCP Document](https://www.typingmind.com/mcp)
-  * [Download TypingMind (PWA)](https://www.typingmind.com/)
-</McpClient>
-
-<McpClient name="v0">
-  v0 turns your ideas into fullstack apps, no code required. Describe what you want with natural language, and v0 builds it for you. v0 can search the web, inspect sites, automatically fix errors, and integrate with external tools.
-
-  **Key features:**
-
-  * **Visual to Code**: Create high-fidelity UIs from your wireframes or mockups
-  * **One-Click Deploy**: Deploy with one click to a secure, scalable infrastructure
-  * **Web Search**: Search the web for current information and get cited results
-  * **Site Inspector**: Inspect websites to understand their structure and content
-  * **Auto Error Fixing**: Automatically fix errors in your code with intelligent diagnostics
-  * **MCP Integrations**: Connect to MCP servers from the Vercel Marketplace for zero-config setup, or add your own custom MCP servers
-
-  **Learn more:**
-
-  * [v0 Website](https://v0.app)
-</McpClient>
-
-<McpClient name="VS Code GitHub Copilot">
-  VS Code integrates MCP with GitHub Copilot [agents](https://code.visualstudio.com/docs/copilot/agents/overview), which plan, write code, and verify results across your project. Install MCP servers from the built-in gallery or configure them in workspace (`.vscode/mcp.json`) or user settings, with secure handling of keys via input variables.
-
-  **Key features:**
-
-  * MCP server gallery in the Extensions view for one-click install and discovery
-  * Support for stdio, SSE, and streamable HTTP transports
-  * Sandbox mode for stdio servers on macOS and Linux to restrict file system and network access
-  * MCP Apps for interactive UI components like forms and visualizations rendered in chat
-  * Per-session tool selection, editable inputs, and auto-approve toggle
-  * Enterprise management of MCP server access via GitHub policies
-  * Settings Sync support to share MCP configuration across devices
-</McpClient>
-
-<McpClient name="VT Code">
-  VT Code is a terminal coding agent that integrates with Model Context Protocol (MCP) servers, focusing on predictable tool permissions and robust transport controls.
-
-  **Key features:**
-
-  * Connect to MCP servers over stdio; optional experimental RMCP/streamable HTTP support
-  * Configurable per-provider concurrency, startup/tool timeouts, and retries via `vtcode.toml`
-  * Pattern-based allowlists for tools, resources, and prompts with provider-level overrides
-
-  **Learn more:**
-
-  * [MCP Integration Guide](https://github.com/vinhnx/vtcode/blob/main/docs/guides/mcp-integration.md)
-</McpClient>
-
-<McpClient name="Warp">
-  Warp is the intelligent terminal with AI and your dev team's knowledge built-in. With natural language capabilities integrated directly into an agentic command line, Warp enables developers to code, automate, and collaborate more efficiently -- all within a terminal that features a modern UX.
-
-  **Key features:**
-
-  * **Agent Mode with MCP support**: invoke tools and access data from MCP servers using natural language prompts
-  * **Flexible server management**: add and manage CLI or SSE-based MCP servers via Warp's built-in UI
-  * **Live tool/resource discovery**: view tools and resources from each running MCP server
-  * **Configurable startup**: set MCP servers to start automatically with Warp or launch them manually as needed
-</McpClient>
-
-<McpClient name="WhatsMCP">
-  WhatsMCP is an MCP client for WhatsApp. WhatsMCP lets you interact with your AI stack from the comfort of a WhatsApp chat.
-
-  **Key features:**
-
-  * Supports MCP tools
-  * SSE transport, full OAuth2 support
-  * Chat flow management for WhatsApp messages
-  * One click setup for connecting to your MCP servers
-  * In chat management of MCP servers
-  * Oauth flow natively supported in WhatsApp
-</McpClient>
-
-<McpClient name="Windsurf Editor">
-  Windsurf Editor is an agentic IDE that combines AI assistance with developer workflows. It features an innovative AI Flow system that enables both collaborative and independent AI interactions while maintaining developer control.
-
-  **Key features:**
-
-  * Revolutionary AI Flow paradigm for human-AI collaboration
-  * Intelligent code generation and understanding
-  * Rich development tools with multi-model support
-</McpClient>
-
-<McpClient name="Witsy">
-  Witsy is an AI desktop assistant, supporting Anthropic models and MCP servers as LLM tools.
-
-  **Key features:**
-
-  * Multiple MCP servers support
-  * Tool integration for executing commands and scripts
-  * Local server connections for enhanced privacy and security
-  * Easy-install from Smithery.ai
-  * Open-source, available for macOS, Windows and Linux
-</McpClient>
-
-<McpClient name="Zed">
-  Zed is a high-performance code editor with built-in MCP support, focusing on prompt templates and tool integration.
-
-  **Key features:**
-
-  * Prompt templates surface as slash commands in the editor
-  * Tool integration for enhanced coding workflows
-  * Tight integration with editor features and workspace context
-  * Does not support MCP resources
-</McpClient>
-
-<McpClient name="Zencoder">
-  Zencoder is a coding agent that's available as an extension for VS Code and JetBrains family of IDEs, meeting developers where they already work. It comes with RepoGrokking (deep contextual codebase understanding), agentic pipeline, and the ability to create and share custom agents.
-
-  **Key features:**
-
-  * RepoGrokking - deep contextual understanding of codebases
-  * Agentic pipeline - runs, tests, and executes code before outputting it
-  * Zen Agents platform - ability to build and create custom agents and share with the team
-  * Integrated MCP tool library with one-click installations
-  * Specialized agents for Unit and E2E Testing
-
-  **Learn more:**
-
-  * [Zencoder Documentation](https://docs.zencoder.ai)
-</McpClient>
-
-## Adding MCP support to your application
-
-If you've added MCP support to your application, we encourage you to submit a pull request to add it to this list. MCP integration can provide your users with powerful contextual AI capabilities and make your application part of the growing MCP ecosystem.
-
-Benefits of adding MCP support:
-
-* Enable users to bring their own context and tools
-* Join a growing ecosystem of interoperable AI applications
-* Provide users with flexible integration options
-* Support local-first AI workflows
-
-To get started with implementing MCP in your application, check out our [Python](https://github.com/modelcontextprotocol/python-sdk) or [TypeScript SDK Documentation](https://github.com/modelcontextprotocol/typescript-sdk)
-
-
 # Build an MCP client
 Source: https://modelcontextprotocol.io/docs/develop/build-client
 
@@ -3495,10 +2047,6 @@ Before you begin, it helps to have gone through our [Build an MCP Server](/docs/
   <Card title="Example servers" icon="grid" href="/examples">
     Check out our gallery of official MCP servers and implementations
   </Card>
-
-  <Card title="Example clients" icon="cubes" href="/clients">
-    View the list of clients that support MCP integrations
-  </Card>
 </CardGroup>
 
 
@@ -3518,7 +2066,7 @@ We'll build a server that exposes two tools: `get_alerts` and `get_forecast`. Th
 </Frame>
 
 <Note>
-  Servers can connect to any client. We've chosen Claude for Desktop here for simplicity, but we also have guides on [building your own client](/docs/develop/build-client) as well as a [list of other clients here](/clients).
+  Servers can connect to any client. We've chosen Claude for Desktop here for simplicity, but we also have a guide on [building your own client](/docs/develop/build-client).
 </Note>
 
 ### Core MCP Concepts
@@ -6907,7 +5455,7 @@ Learn how to extend Claude Desktop with local MCP servers to enable file system 
 
 Model Context Protocol (MCP) servers extend AI applications' capabilities by providing secure, controlled access to local resources and tools. Many clients support MCP, enabling diverse integration possibilities across different platforms and applications.
 
-This guide demonstrates how to connect to local MCP servers using Claude Desktop as an example, one of the [many clients that support MCP](/clients). While we focus on Claude Desktop's implementation, the concepts apply broadly to other MCP-compatible clients. By the end of this tutorial, Claude will be able to interact with files on your computer, create new documents, organize folders, and search through your file system—all with your explicit permission for each action.
+This guide demonstrates how to connect to local MCP servers using Claude Desktop as an example, one of the many clients that support MCP. While we focus on Claude Desktop's implementation, the concepts apply broadly to other MCP-compatible clients. By the end of this tutorial, Claude will be able to interact with files on your computer, create new documents, organize folders, and search through your file system—all with your explicit permission for each action.
 
 <Frame>
   <img alt="Claude Desktop with filesystem integration showing file management capabilities" />
@@ -7193,7 +5741,7 @@ Learn how to connect Claude to remote MCP servers and extend its capabilities wi
 
 Remote MCP servers extend AI applications' capabilities beyond your local environment, providing access to internet-hosted tools, services, and data sources. By connecting to remote MCP servers, you transform AI assistants from helpful tools into informed teammates capable of handling complex, multi-step projects with real-time access to external resources.
 
-Many clients now support remote MCP servers, enabling a wide range of integration possibilities. This guide demonstrates how to connect to remote MCP servers using [Claude](https://claude.ai/) as an example, one of the [many clients that support MCP](/clients). While we focus on Claude's implementation through Custom Connectors, the concepts apply broadly to other MCP-compatible clients.
+Many clients now support remote MCP servers, enabling a wide range of integration possibilities. This guide demonstrates how to connect to remote MCP servers using [Claude](https://claude.ai/) as an example, one of the many clients that support MCP. While we focus on Claude's implementation through Custom Connectors, the concepts apply broadly to other MCP-compatible clients.
 
 ## Understanding Remote MCP Servers
 
@@ -7339,7 +5887,7 @@ Depending on where you sit in the ecosystem, MCP can have a range of benefits.
 
 ## Broad ecosystem support
 
-MCP is an open protocol supported across a wide range of clients and servers. AI assistants like [Claude](https://claude.com/docs/connectors/building) and [ChatGPT](https://developers.openai.com/api/docs/mcp/), development tools like [Visual Studio Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers), [Cursor](https://cursor.com/docs/context/mcp), [MCPJam](https://docs.mcpjam.com/getting-started), and [many others](/clients) all support MCP — making it easy to build once and integrate everywhere.
+MCP is an open protocol supported across a wide range of clients and servers. AI assistants like [Claude](https://claude.com/docs/connectors/building) and [ChatGPT](https://developers.openai.com/api/docs/mcp/), development tools like [Visual Studio Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers), [Cursor](https://cursor.com/docs/context/mcp), [MCPJam](https://docs.mcpjam.com/getting-started), and many others all support MCP — making it easy to build once and integrate everywhere.
 
 ## Start Building
 
@@ -8377,6 +6925,22 @@ Revisions may be marked as:
 
 The **current** protocol version is [**2025-11-25**](/specification/2025-11-25/).
 
+## Feature States
+
+Individual features of the specification may additionally be marked as
+**Deprecated** under the
+[feature lifecycle and deprecation policy](/community/feature-lifecycle):
+the feature remains part of the specification, but is scheduled for removal.
+Deprecated features document a migration path (or state that none is required)
+and remain in the specification for at least twelve months, or at least
+ninety days under the policy's
+[expedited-removal exception](/community/feature-lifecycle#expedited-removal),
+before they become eligible for removal, after which they may be **Removed**
+in a future revision.
+
+Features that are currently Deprecated are listed in the
+[deprecated features registry](/specification/draft/deprecated).
+
 ## Negotiation
 
 Version negotiation happens during
@@ -8624,7 +7188,7 @@ When servers fail to connect:
 
 ## Debugging in Claude Desktop
 
-Claude Desktop is [one of many MCP clients](/clients). It is available on
+Claude Desktop is one of many MCP clients. It is available on
 macOS and Windows.
 
 ### Checking server status
@@ -11530,7 +10094,7 @@ best for your use case.
 
 MCP Apps are currently supported by [Claude](https://claude.ai),
 [Claude Desktop](https://claude.ai/download),
-[VS Code GitHub Copilot](https://code.visualstudio.com/), [Goose](https://block.github.io/goose/), [Postman](https://postman.com), and [MCPJam](https://www.mcpjam.com/). See the
+[VS Code GitHub Copilot](https://code.visualstudio.com/), [Goose](https://block.github.io/goose/), [Postman](https://postman.com), [MCPJam](https://www.mcpjam.com/), and [Archestra.AI](https://www.archestra.ai/). See the
 [client matrix](/extensions/client-matrix) for the full list of extension support across clients.
 
 If you're building an MCP client and want to support MCP Apps, you have two options:
@@ -12178,9 +10742,10 @@ This matrix shows which MCP clients support each [official extension](/extension
 | [MCPJam](https://www.mcpjam.com/)                        |               <CHECK />               |                                                                       |                                                                      |
 | [ChatGPT](https://chatgpt.com/)                          |               <CHECK />               |                                                                       |                                                                      |
 | [Cursor](https://cursor.com/)                            |               <CHECK />               |                                                                       |                                                                      |
+| [Archestra.AI](https://www.archestra.ai/)                |               <CHECK />               |                                                                       |                               <CHECK />                              |
 
 <Note>
-  Auth extension support (OAuth Client Credentials and Enterprise-Managed Authorization) is tracked separately from the core MCP authorization features (DCR, CIMD) shown on the [clients page](/clients). Check each extension's specification and the [ext-auth repository](https://github.com/modelcontextprotocol/ext-auth) for the latest implementation status.
+  Auth extension support (OAuth Client Credentials and Enterprise-Managed Authorization) is tracked separately from the core MCP authorization features (DCR, CIMD). Check each extension's specification and the [ext-auth repository](https://github.com/modelcontextprotocol/ext-auth) for the latest implementation status.
 </Note>
 
 ## Adding extension support to your client
@@ -21324,6 +19889,143 @@ MCP standardizes patterns that have already proven valuable. We look for convent
 We encourage the use of [MCP extensions](/extensions/overview) as a way to experiment with new patterns that may eventually lead to standardization.
 
 
+# Feature Lifecycle and Deprecation Policy
+Source: https://modelcontextprotocol.io/community/feature-lifecycle
+
+How individual MCP specification features move through Active, Deprecated, and Removed states, and the timeline implementers can plan against.
+
+This policy defines a lifecycle for individual features within the Model
+Context Protocol specification. It defines three feature states (Active,
+Deprecated, Removed), the criteria and procedure for moving between them, a
+minimum window between deprecation and removal, and the documentation required
+at each transition.
+
+This policy was adopted via
+[SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596).
+
+## Scope
+
+This policy governs **features** of the MCP core specification: protocol
+messages, capabilities, transports, schema types, and normative behavioral
+requirements. The revision lifecycle of the specification document itself
+(Draft, Current, Final) is defined in the [versioning guide](/docs/learn/versioning).
+
+## Feature States
+
+A specification feature is in exactly one of three states:
+
+| State          | Meaning                                                                                                                                                       | Implementer expectation                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Active**     | The feature is part of the Current specification revision.                                                                                                    | Implement per the feature's normative requirements.                                                                         |
+| **Deprecated** | The feature remains in the specification but is scheduled for removal. A migration path is documented (see below).                                            | New implementations should not adopt the feature. Existing implementations should migrate before the earliest removal date. |
+| **Removed**    | The feature has been deleted from `draft` and will be absent from the next Current revision. It remains documented in the Final revision it last appeared in. | Implementations targeting that next Current revision must not depend on the feature.                                        |
+
+A Deprecated feature MAY be restored to Active by a SEP that supersedes the
+deprecation SEP and documents the changed circumstances. Restoration follows
+the same approval path as deprecation. If the feature is later deprecated
+again, the minimum deprecation window in
+[Deprecating a feature](#deprecating-a-feature) is measured afresh from the
+revision in which the new deprecation takes effect.
+
+### SDKs
+
+Removal from the specification does not oblige an SDK to drop the feature from
+releases. That timeline is governed by the SDK's own revision-support policy.
+
+## Deprecating a Feature
+
+A feature may be proposed for deprecation when:
+
+* it has been superseded by another feature that covers the same use cases,
+* it presents a security, privacy, or interoperability risk that cannot be
+  mitigated in place,
+* ecosystem telemetry or SDK maintainer consensus indicates negligible adoption
+  relative to its maintenance cost,
+* or any other reasons the Core Maintainers deem appropriate.
+
+Deprecation is a specification change and therefore requires a SEP per the
+[SEP guidelines](/community/sep-guidelines). The deprecation SEP must:
+
+1. Identify the feature by name and link to its definition in `schema.ts`
+   (where applicable) and the specification prose.
+2. State the rationale against the criteria above.
+3. Document the migration path, or state explicitly that none is required. If
+   the migration path names a replacement feature, that feature must be Active
+   in the revision in which the deprecation takes effect; the replacement and
+   the deprecation may land in the same revision.
+4. Specify the **minimum deprecation window**: the number of months, at least
+   twelve, that the feature must remain Deprecated before it is eligible for
+   removal. The window is measured from the release of the specification
+   revision in which the feature is first marked Deprecated, not from the date
+   the SEP reaches Final. The feature becomes eligible for removal in the first
+   specification revision released as Current on or after the window elapses;
+   that point is the feature's **earliest removal**.
+
+When the deprecation SEP is accepted and reaches Final, the deprecation is scheduled.
+
+* The feature's entry in `schema.ts` gains a `@deprecated` JSDoc tag
+  referencing the deprecation SEP and the revision in which the deprecation
+  takes effect.
+* The specification prose for the feature gains a deprecation notice with the
+  same information.
+* The `changelog.mdx` for that revision gains an entry under a "Deprecated"
+  heading. "Deprecated" and "Removed" are standing changelog headings alongside
+  the existing Major/Minor/Other groupings.
+* The feature is added to the
+  [deprecated registry](#the-deprecated-registry) with its deprecation SEP, the
+  revision in which it became Deprecated, its migration path, and its earliest
+  removal.
+
+The feature becomes Deprecated when the revision carrying these changes is released
+and becomes the new Current revision (see [versioning guide](/docs/learn/versioning)).
+The minimum deprecation window is counted from that release.
+
+## The Deprecated Registry
+
+[`docs/specification/draft/deprecated.mdx`](/specification/draft/deprecated) is
+a single page listing every feature in a Deprecated or Removed state. It is
+the canonical answer to "what is on its way out, and by when," so that an
+implementer does not have to reconstruct that picture from deprecation entries
+spread across revision changelogs.
+
+## Tier 1 SDK Obligations
+
+Once the revision in which a feature becomes Deprecated is
+released as Current, Tier 1 SDKs:
+
+* Must mark the corresponding API surface deprecated using the language's
+  native mechanism (for example `@Deprecated` in Java, `[Obsolete]` in .NET,
+  `@deprecated` JSDoc in TypeScript, the `Deprecated:` doc convention in Go) in
+  their next release, referencing the deprecation SEP and the earliest removal
+  date where the mechanism permits.
+* Should emit a runtime warning when a deprecated feature is exercised, using
+  the language's idiomatic mechanism (for example Python's
+  `DeprecationWarning`, Node.js's `process.emitWarning`, or a configurable
+  logger).
+
+## Removing a Feature
+
+1. Once a feature is set for removal, the removal is executed at the discretion
+   of the Core Maintainers after the minimum deprecation window has elapsed.
+2. The removal needs to be documented in the `changelog.mdx` and [registry](#the-deprecated-registry).
+3. A SEP is required for any change to the original deprecation or removal SEP, for
+   example extending or shortening the timeline
+   ([Expedited removal](#expedited-removal)) or restoring the feature to Active
+   ([Feature states](#feature-states)).
+
+## Expedited Removal
+
+The twelve-month floor may be shortened when the feature presents an active
+security risk, meaning a vulnerability with a published security advisory or
+documented in-the-wild exploitation for which no in-place mitigation exists.
+Shortening the window requires Core Maintainer approval under the
+[governance decision process](/community/governance#decision-process), recorded
+in the deprecation SEP or, where the risk surfaces after that SEP is already
+Final, in a short expedited-removal SEP that references it. The shortened
+window must still provide at least ninety days between the feature becoming
+Deprecated and its earliest removal.
+
+
 # File Uploads Charter
 Source: https://modelcontextprotocol.io/community/file-uploads/charter
 
@@ -21772,6 +20474,117 @@ The Interceptors Working Group exists to standardize how context operations are 
 | Date       | Change          |
 | ---------- | --------------- |
 | 2026-04-21 | Initial charter |
+
+
+# Registry Charter
+Source: https://modelcontextprotocol.io/community/registry/charter
+
+Charter for the MCP Registry Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Registry Working Group exists to build and maintain the official MCP Registry — an open catalog and API for publicly available MCP servers — so that clients, sub-registries, and end users can discover, evaluate, and install servers with confidence. The WG owns the registry service, the `server.json` schema, the registry API specification, and the sub-registry ecosystem that further distributes server metadata.
+
+## Scope
+
+### In Scope
+
+* **Registry Service**: Operation, reliability, and evolution of the hosted registry at `registry.modelcontextprotocol.io`, including uptime, monitoring, and incident response.
+* **Registry API Specification**: The OpenAPI spec defining how any registry (official or private) exposes server metadata.
+* **`server.json` Schema**: The standardized format for describing MCP server identity, packages, runtime configuration, and capabilities — coordinated with the Server Card WG to keep Server Card a coherent subset.
+* **Client SDKs**: Generated or hand-maintained client libraries that make it easy for clients and sub-registries to integrate with the registry API.
+* **Publishing & Trust**: Authentication flows (GitHub OAuth, GitHub OIDC, DNS/HTTP verification), namespace ownership, moderation tooling, and community-driven flagging.
+* **Adoption & Outreach**: Documentation, onboarding guides, and outreach to drive catalog coverage.
+* **Issue Triage & Automation**: Labeling system, triage, and contributor workflow for the registry repo.
+
+### Out of Scope
+
+* Any runtime-related MCP protocol specification aspects (owned by Core Maintainers and other WGs).
+* Server Card format and discovery mechanism (owned by the Server Card WG; this WG coordinates on `server.json` alignment).
+* Ranking/choosing between MCP server implementations on behalf of MCP clients or end-users.
+* Hosting, distributing, or executing MCP server code or binaries — the registry is a metadata catalog, not a package registry.
+* Any commitment to delivering an enterprise-ready or reusable registry implementation. The codebase supports this instance only and is not intended for external deployments.
+
+### Related Groups
+
+* **Server Card WG** — `server.json` and Server Card must stay aligned; the registry will expose Server Cards + local package-related metadata for published entries. Tight coordination required to avoid schema divergence.
+
+## Leadership
+
+| Role | Name               | Organization | GitHub                                     | Term    |
+| ---- | ------------------ | ------------ | ------------------------------------------ | ------- |
+| Lead | Tadas Antanavicius | PulseMCP     | [@tadasant](https://github.com/tadasant)   | Initial |
+| Lead | Radoslav Dimitrov  | Stacklok     | [@rdimitrov](https://github.com/rdimitrov) | Initial |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+| Name               | Organization | GitHub                                           | Discord    | Level     | Maintainer? |
+| ------------------ | ------------ | ------------------------------------------------ | ---------- | --------- | ----------- |
+| Tadas Antanavicius | PulseMCP     | [@tadasant](https://github.com/tadasant)         | tadasant\_ | Lead      | Yes         |
+| Radoslav Dimitrov  | Stacklok     | [@rdimitrov](https://github.com/rdimitrov)       | dimitrovr  | Lead      | Yes         |
+| Bob Dickinson      | TeamSpark    | [@BobDickinson](https://github.com/BobDickinson) | rddthree   | WG Member | Yes         |
+| Preeti Dewani      | Ravenmail    | [@pree-dew](https://github.com/pree-dew)         | pree\_dew  | WG Member | No          |
+
+## Emeritus Membership
+
+| Name         | Organization | GitHub                                     | Discord   | Level     | Maintainer? |
+| ------------ | ------------ | ------------------------------------------ | --------- | --------- | ----------- |
+| Adam Jones   | Anthropic    | [@domdomegg](https://github.com/domdomegg) | domdomegg | WG Member | Yes         |
+| Toby Padilla | GitHub       | [@toby](https://github.com/toby)           |           | WG Member | Yes         |
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                                           |
+| --------------- | --------- | -------- | ------------------------------------------------- |
+| Working Session | Weekly    | 30 min   | Technical discussion, triage, and proposal review |
+
+Discord: `#registry-dev`
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                                  | Status      | Target Date | Champion                                 |
+| --------------------------------------------------------------------- | ----------- | ----------- | ---------------------------------------- |
+| Server Card / `server.json` alignment                                 | In Progress | Q2 2026     | [@tadasant](https://github.com/tadasant) |
+| Uptime & monitoring automation                                        | Planned     | Q2 2026     | TBD                                      |
+| Issue triage automation & labeling system                             | Planned     | Q2 2026     | TBD                                      |
+| Adoption outreach to popular server maintainers                       | Ideating    | Q3 2026     | TBD                                      |
+| Cataloging specification support by clients and sub-registry products | Ideating    | Q3 2026     | TBD                                      |
+| Client SDK generation / publication                                   | Ideating    | Q3 2026     | TBD                                      |
+| Registry API v1 GA                                                    | Ideating    | TBD         | TBD                                      |
+
+### Success Criteria
+
+* Registry uptime ≥ 99.9% with automated monitoring and alerting.
+* `server.json` schema and Server Card format aligned with no unintentional divergence.
+* Majority of popular, publicly available MCP servers published to the registry.
+* At least one client SDK (generated or maintained) available for registry consumers.
+* Registry API v1 specification finalized and stable.
+* Active sub-registry ecosystem consuming the official registry API.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-08 | Initial charter |
 
 
 # SDK Tiering System
@@ -22378,229 +21191,6 @@ Discord: [#server-card-wg](https://discord.com/channels/1358869848138059966/1399
 | Date       | Change          |
 | ---------- | --------------- |
 | 2026-03-26 | Initial charter |
-
-
-# Skills Over MCP Charter
-Source: https://modelcontextprotocol.io/community/skills-over-mcp/charter
-
-Charter for the MCP Skills Over MCP Working Group.
-
-## Group Type
-
-**Working Group**
-
-## Mission Statement
-
-The Skills Over MCP Working Group defines how "agent skills" — rich, structured
-instructions for agent workflows — are discovered, distributed, and consumed through MCP.
-Native skills support in host applications demonstrates strong demand, and the group
-emerged from discussion on [SEP-2076 — Agent Skills as a First-Class MCP Primitive](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2076),
-which raised open questions about whether existing MCP primitives suffice or what
-conventions to standardize. The WG produces specification extensions, reference
-implementations, and coordination artifacts because solutions touch the protocol spec,
-registry schema, SDK implementations, and client behavior. The WG's current direction
-is captured in [SEP-2640 — Skills Extension](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)
-(Resources-based, Extensions Track).
-
-## Scope
-
-### In Scope
-
-* **Specification Work**: SEPs defining how skills are represented, discovered, and
-  consumed within MCP — including the Skills Extension (Extensions Track) and related
-  protocol changes
-* **Reference Implementations**: SDK components and reference servers demonstrating
-  skill discovery and consumption patterns
-* **Cross-Cutting Concerns**: Coordination with Registry WG (skills discovery/distribution,
-  registry schema changes), Agents WG (skill activation, server metadata consumption),
-  Primitive Grouping WG (progressive disclosure patterns), and external projects including
-  the [Agent Skills](https://agentskills.io/) spec (content format and well-known URI
-  discovery), FastMCP, and PydanticAI
-* **Documentation**: Specification sections and guidance covering skill authoring,
-  discovery, and consumption
-
-### Out of Scope
-
-* **Registry schema decisions**: Schema ownership belongs to the Registry WG; this WG
-  contributes requirements but does not own the schema
-* **Client implementation mandates**: We can document patterns but not require specific
-  client behavior
-* **Plugin/bundle packaging**: Installable bundles (skills + servers + subagents +
-  configuration as a single artifact) — surfaced by use cases but belongs to a broader
-  packaging effort
-
-### Related Groups
-
-* **Agents WG** — How agents consume server metadata, skill activation
-* **Registry WG** — Skills discovery/distribution, registry schema changes
-* **Primitive Grouping WG** — Progressive disclosure patterns
-
-## Leadership
-
-| Role | Name            | Organization                | GitHub                                   | Term    |
-| ---- | --------------- | --------------------------- | ---------------------------------------- | ------- |
-| Lead | Ola Hungerford  | Nordstrom / MCP Maintainer  | [@olaservo](https://github.com/olaservo) | Initial |
-| Lead | Peter Alexander | Anthropic / Core Maintainer | [@pja-ant](https://github.com/pja-ant)   | Initial |
-
-## Authority & Decision Rights
-
-| Decision Type                       | Authority Level                                        |
-| ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
-
-## Membership
-
-| Name                     | Organization                    | GitHub                                                 | Discord | Level       |
-| ------------------------ | ------------------------------- | ------------------------------------------------------ | ------- | ----------- |
-| Ola Hungerford           | Nordstrom / MCP Maintainer      | [@olaservo](https://github.com/olaservo)               |         | Lead        |
-| Peter Alexander          | Anthropic / Core Maintainer     | [@pja-ant](https://github.com/pja-ant)                 |         | Lead        |
-| Yu Yi                    | Google                          | [@erain](https://github.com/erain)                     |         | Participant |
-| Sunish Sheth             | Databricks                      | [@sunishsheth2009](https://github.com/sunishsheth2009) |         | Participant |
-| Keith A Groves           | Hyix                            | [@keithagroves](https://github.com/keithagroves)       |         | Participant |
-| Peder Holdgaard Pedersen | Saxo Bank / MCP Maintainer      | [@pederhp](https://github.com/pederhp)                 |         | Participant |
-| Sam Morrow               | GitHub                          | [@SamMorrowDrums](https://github.com/SamMorrowDrums)   |         | Participant |
-| Jacob MacDonald          | Google                          | [@jakemac53](https://github.com/jakemac53)             |         | Participant |
-| Jonathan Hefner          | Independent / MCP Maintainer    | [@jonathanhefner](https://github.com/jonathanhefner)   |         | Participant |
-| Luca Chang               | AWS / MCP Maintainer            | [@LucaButBoring](https://github.com/LucaButBoring)     |         | Participant |
-| Bob Dickinson            | TeamSpark.ai / MCP Maintainer   | [@BobDickinson](https://github.com/BobDickinson)       |         | Participant |
-| Radoslav Dimitrov        | Stacklok / MCP Maintainer       | [@rdimitrov](https://github.com/rdimitrov)             |         | Participant |
-| Juan Antonio Osorio      | Stacklok                        | [@JAORMX](https://github.com/JAORMX)                   |         | Participant |
-| Kaxil Naik               | Astronomer / Apache Airflow PMC | [@kaxil](https://github.com/kaxil)                     |         | Participant |
-| Cliff Hall               | Futurescale                     | [@cliffhall](https://github.com/cliffhall)             |         | Participant |
-| Haoyu Wang               | Google                          | [@helloeve](https://github.com/helloeve)               |         | Participant |
-
-## Operations
-
-| Meeting         | Frequency         | Duration   | Purpose                                                                             |
-| --------------- | ----------------- | ---------- | ----------------------------------------------------------------------------------- |
-| Working Session | Weekly (Tuesdays) | 60 minutes | Technical discussion, pattern evaluation, proposal review; open to all participants |
-
-Default start time is 9:00 AM Pacific. Sessions may occasionally be scheduled earlier to better accommodate non-US time zones.
-
-Meetings are published at [meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io). Agendas are posted in advance per MCP meeting policy. Meeting notes are published to [Meeting Notes — Skills Over MCP WG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-skills-over-mcp-wg).
-
-Discord: [#skills-over-mcp-wg](https://discord.com/channels/1358869848138059966/1464745826629976084)
-
-## Resources
-
-* Experimental findings and reference implementations: [modelcontextprotocol/experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills)
-* Project board: [Skills Over MCP WG](https://github.com/orgs/modelcontextprotocol/projects/38/views/1)
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-Full live tracking is on the [Skills Over MCP WG project board](https://github.com/orgs/modelcontextprotocol/projects/38/views/1). Headline workstreams:
-
-| Item                                                                                                              | Status      | Target Date | Champion                                                                                     |
-| ----------------------------------------------------------------------------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------------- |
-| [Skills Extension SEP](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640) (Extensions Track) | In Review   |             | [@pja-ant](https://github.com/pja-ant)                                                       |
-| Skills Extension reference implementation                                                                         | In Review   |             | [@olaservo](https://github.com/olaservo)                                                     |
-| Agent Skills spec coordination                                                                                    | In Progress |             | [@jonathanhefner](https://github.com/jonathanhefner), [@pja-ant](https://github.com/pja-ant) |
-| Registry skills.json proposal                                                                                     | In Progress |             | [@JAORMX](https://github.com/JAORMX)                                                         |
-
-### Success Criteria
-
-* **Short-term**: Documented consensus on requirements and evaluation of existing approaches
-* **Medium-term**: Clear recommendation (convention vs. protocol extension vs. both) — the draft Skills Extension SEP represents the WG's current direction: a formal extension using existing Resources primitives
-* **Long-term**: Interoperable skill distribution across MCP servers and clients
-
-## Changelog
-
-| Date       | Change                                                                                                                                                                                                                                                                                                           |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-04-25 | Linked SEP-2640 in Active Work Items; added @helloeve (Google) as Participant                                                                                                                                                                                                                                    |
-| 2026-04-16 | Converted from Interest Group to Working Group                                                                                                                                                                                                                                                                   |
-| 2026-04-14 | Initial charter (formalized from [experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills) repo README, which served as the de facto charter before the charter process was established via [SEP-2149](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2149)) |
-| 2026-02-01 | IG formed; experimental repo created                                                                                                                                                                                                                                                                             |
-
-
-# Triggers and Events Charter
-Source: https://modelcontextprotocol.io/community/triggers-events/charter
-
-Charter for the MCP Triggers and Events Working Group.
-
-## Group Type
-
-**Working Group**
-
-## Mission Statement
-
-The Triggers and Events Working Group exists to define how MCP servers proactively notify clients of state changes. Today, clients learn about server-side updates by polling or holding an SSE connection open. This WG will specify a standardized callback mechanism—webhooks or similar—that lets servers push notifications when new data is available, with defined ordering guarantees that hold across all transports.
-
-## Scope
-
-### In Scope
-
-* **Specification Work**: SEPs defining the trigger/callback mechanism, subscription lifecycle, delivery semantics, and event ordering guarantees.
-* **Reference Implementations**: SDK components demonstrating server-initiated notifications and client-side callback handling.
-* **Cross-Cutting Concerns**: Coordination with the Transports WG on transport-specific delivery behavior, and with the Agents WG where task completion notifications intersect with event triggers.
-* **Documentation**: Specification sections covering event-driven patterns and migration guidance from polling-based approaches.
-
-### Out of Scope
-
-* Changes to the transport wire format or session model (owned by the Transports WG).
-* General-purpose pub/sub infrastructure beyond what the MCP protocol requires.
-* Modifications to existing notification primitives (`notifications/resources/updated`, `notifications/tools/list_changed`, etc.) that do not relate to proactive server-initiated delivery.
-
-### Related Groups
-
-* **Transports WG** — delivery and ordering guarantees depend on transport capabilities; callback semantics must be coherent across stdio, Streamable HTTP, and future transports.
-* **Agents WG** — [SEP-1686 (Tasks)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686) identifies webhook-style task completion notifications as a future consideration; this WG owns that mechanism.
-
-## Leadership
-
-| Role | Name            | Organization        | GitHub                                           | Term    |
-| ---- | --------------- | ------------------- | ------------------------------------------------ | ------- |
-| Lead | Clare Liguori   | Amazon Web Services | [@clareliguori](https://github.com/clareliguori) | Initial |
-| Lead | Peter Alexander | Anthropic           | [@pja-ant](https://github.com/pja-ant)           | Initial |
-
-## Authority & Decision Rights
-
-| Decision Type                       | Authority Level                                        |
-| ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
-
-## Operations
-
-| Meeting         | Frequency | Duration | Purpose                               |
-| --------------- | --------- | -------- | ------------------------------------- |
-| Working Session | Weekly    | 30 min   | Technical discussion, proposal review |
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-| Item                                    | Status   | Target Date | Champion |
-| --------------------------------------- | -------- | ----------- | -------- |
-| SEP: Events in MCP v1 RFC               | Ideating | End April   | TBD      |
-| Reference implementation in Tier-1 SDKs | —        | End April   | TBD      |
-
-### Success Criteria
-
-* An accepted SEP defining the trigger/callback mechanism and its subscription lifecycle.
-* Reference implementations in at least two Tier-1 SDKs.
-* Conformance test coverage for the new primitives.
-
-## Changelog
-
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-03-24 | Initial charter |
 
 
 # Working and Interest Groups
@@ -30855,6 +29445,8 @@ These headers are **required** for compliance with the MCP version in which they
 
 > **Rationale**: This requirement prevents potential security vulnerabilities and error conditions that could arise when different components in the network rely on different sources of truth. For example, a load balancer or gateway might use the header values to make routing decisions, while the MCP server uses the body values for execution. This requirement applies to any network intermediary that processes the message body, as well as the MCP server itself.
 
+> **Implementation Note**: When validating integer parameter values, servers SHOULD compare the header value and the body value numerically rather than as strings (e.g., `42.0` and `42` are considered equal).
+
 **Case Sensitivity**: Header names (called "field names" in [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#name-field-names)) are case-insensitive. Clients and servers MUST use case-insensitive comparisons for header names.
 
 #### Example: tools/call Request
@@ -30973,11 +29565,13 @@ The `x-mcp-header` property specifies the name portion used to construct the hea
 **Constraints on `x-mcp-header` values**:
 
 * MUST NOT be empty
-* MUST contain only ASCII characters (excluding space and `:`)
+* MUST match HTTP field-name token syntax (`1*tchar`, [RFC 9110 Section 5.1](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1))
+* MUST NOT contain control characters, including carriage return (CR, `\r`) or line feed (LF, `\n`)
 * MUST be case-insensitively unique among all `x-mcp-header` values in the `inputSchema`
-* MUST only be applied to parameters with primitive types (number, string, boolean)
+* MUST only be applied to parameters with primitive types (integer, string, boolean). Parameters with type `number` are not permitted. Integer values MUST be within the safe range for JavaScript (−2^53+1 to 2^53−1)
+* MAY be applied to properties at any nesting depth within the `inputSchema`, not only top-level properties
 
-Clients MUST reject tool definitions where any `x-mcp-header` value violates these constraints. Rejection means the client MUST exclude the invalid tool from the result of `tools/list`. Clients SHOULD log a warning when rejecting a tool definition, including the tool name and the reason for rejection. This behavior ensures that a single malformed tool definition does not prevent other valid tools from being used.
+Clients using the Streamable HTTP transport MUST reject tool definitions where any `x-mcp-header` value violates these constraints. Rejection means the client MUST exclude the invalid tool from the result of `tools/list`. Clients SHOULD log a warning when rejecting a tool definition, including the tool name and the reason for rejection. This behavior ensures that a single malformed tool definition does not prevent other valid tools from being used. Clients using other transports (e.g., stdio) MAY ignore `x-mcp-header` annotations entirely.
 
 **Example Tool Definition**:
 
@@ -31203,7 +29797,7 @@ Clients MUST apply the following encoding rules in order:
 
 1. **Type conversion**: Convert the parameter value to its string representation:
    * `string`: Use the value as-is
-   * `number`: Convert to decimal string representation (e.g., `42`, `3.14`)
+   * `integer`: Convert to decimal string representation (e.g., `42`, `-7`)
    * `boolean`: Convert to lowercase `"true"` or `"false"`
 
 2. **Whitespace check**: If the string starts or ends with whitespace (space or tab):
@@ -31224,16 +29818,19 @@ When a value cannot be safely represented as a plain ASCII header value, clients
 Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 ```
 
-The prefix `=?base64?` and suffix `?=` indicate that the value is Base64-encoded. Servers and intermediaries that need to inspect these values MUST decode them accordingly.
+The prefix `=?base64?` and suffix `?=` indicate that the value is Base64-encoded. These markers are case-sensitive and MUST appear exactly as shown (lowercase). Servers and intermediaries that need to inspect these values MUST decode them accordingly.
+
+To avoid ambiguity, clients MUST also Base64-encode any plain-ASCII value that matches the sentinel pattern (i.e., starts with `=?base64?` and ends with `?=`).
 
 **Examples**:
 
-| Original Value   | Reason                  | Encoded Header Value                                  |
-| ---------------- | ----------------------- | ----------------------------------------------------- |
-| `"us-west1"`     | Plain ASCII             | `Mcp-Param-Region: us-west1`                          |
-| `"Hello, 世界"`    | Contains non-ASCII      | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
-| `" padded "`     | Leading/trailing spaces | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
-| `"line1\nline2"` | Contains newline        | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
+| Original Value         | Reason                   | Encoded Header Value                                  |
+| ---------------------- | ------------------------ | ----------------------------------------------------- |
+| `"us-west1"`           | Plain ASCII              | `Mcp-Param-Region: us-west1`                          |
+| `"Hello, 世界"`          | Contains non-ASCII       | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
+| `" padded "`           | Leading/trailing spaces  | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
+| `"line1\nline2"`       | Contains newline         | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
+| `"=?base64?literal?="` | Matches sentinel pattern | `Mcp-Param-Val: =?base64?PT9iYXNlNjQ/bGl0ZXJhbD89?=`  |
 
 #### Client Behavior
 
@@ -31244,6 +29841,8 @@ When constructing a `tools/call` request via HTTP transport, the client MUST:
 3. Inspect the tool's `inputSchema` for properties marked with `x-mcp-header` and extract the value for each parameter
 4. Encode the values according to the rules in [Value Encoding](#value-encoding)
 5. Append a `Mcp-Param-{Name}: {Value}` header to the request:
+
+> **Implementation Note**: If the client does not have the tool's `inputSchema` (e.g., `tools/list` has not yet been called) or the cached schema is stale (e.g., its TTL has expired), the client SHOULD send the request without custom `Mcp-Param-*` headers. If the server rejects the request because required custom headers are missing, the client SHOULD call `tools/list` to obtain the current `inputSchema`, then retry the original request with the appropriate headers. Clients MAY pre-load tool definitions via other means (e.g., from a previous session or configuration) to enable header emission without a prior `tools/list` call.
 
 #### Server Behavior
 
@@ -31282,6 +29881,8 @@ This error code is in the JSON-RPC implementation-defined server error range (`-
 * A header value contains invalid characters
 
 > **Note**: Intermediaries MUST return an appropriate HTTP error status (e.g., `400 Bad Request`) for validation failures but are not required to return a JSON-RPC error response.
+
+> **Note**: Intermediaries that enforce policy based on mirrored headers (e.g., routing or rate-limiting by tenant) SHOULD verify that the `MCP-Protocol-Version` header indicates a version that requires header–body validation. If the version is older or the header is absent, the intermediary SHOULD reject the request rather than trusting unvalidated header values.
 
 **Custom Header Handling**:
 
@@ -32225,7 +30826,13 @@ export interface InputResponseRequestParams extends RequestParams {
 }
 ```
 
-Since this change creates a polymorphic response for method calls like 'tools/call', we are introducing a new field to `Result` which indicate the `ResultType`. The client should parse this field to determine the type of the Result contained in the message. If this field is not provided the Client should assume a `ResultType` of "complete" for backwards compatibility. The schema change will look like this:
+Since this change creates a polymorphic response for method calls like `tools/call`, we are introducing a new field to `Result` which indicate the `ResultType`. The client should parse this field to determine the type of the `Result` contained in the message. If this field is not provided, the Client should assume a `ResultType` of `"complete"` for backwards compatibility.
+
+Extensions **MAY** add additional `ResultType` values. The set of supported `ResultType` values **MUST** be created from the set defined in the core protocol and include any additional values of supported extensions that are advertised via capabilities.
+
+The Client **SHOULD** treat unrecognized values as invalid protocol responses.
+
+The schema change will look like this:
 
 ```typescript theme={null}
 /**
@@ -32242,7 +30849,8 @@ export interface Result {
 
 export type ResultType =
   | "complete" // the request completed successfully and the result contains the final content.
-  | "input_required"; // the request is incomplete and the result contains an {@link InputRequiredResult} object
+  | "input_required" // the request is incomplete and the result contains an {@link InputRequiredResult} object
+  | string; // open to extensions
 ```
 
 We anticipate this field will be useful for future extensibility, as it allows us to introduce new types of results and can also apply to `tasks` as well.
@@ -35789,7 +34397,7 @@ A request that is eligible for task-augmentation may return one of two distinct 
 
 ```typescript theme={null}
 // "task" is introduced by this extension.
-type ResultType = "complete" | "input_required" | "task";
+type ResultType = "complete" | "input_required" | "task" | string;
 ```
 
 Servers **MUST** set `resultType` to `"task"` when returning a `CreateTaskResult` so that clients can distinguish it from a standard result. Servers **MUST NOT** set `resultType` to `"task"` on result types other than `CreateTaskResult`.
@@ -36465,6 +35073,9 @@ Servers **MUST** return standard JSON-RPC errors for the following protocol erro
   * Servers **MUST** return this error for `tasks/get`.
   * Servers **SHOULD** return this error for `tasks/update` and `tasks/cancel`.
 * Internal errors: `-32603` (Internal error)
+* Missing required client capabilities: `-32003` (Missing Required Client Capability)
+  * Servers **MUST** return this error for non-declaring clients requesting task notifications on `subscriptions/listen`.
+  * Servers **MUST** return this error for non-declaring clients issuing `tasks/get`, `tasks/update`, and `tasks/cancel` requests.
 
 Servers **SHOULD** provide informative error messages to describe the cause of errors.
 
@@ -36609,13 +35220,12 @@ The two flows maintain separate state despite sharing field names. The MRTR phas
 
 ## Backward Compatibility
 
-The experimental tasks feature in the `2025-11-25` release is **not wire-compatible** with this extension. Specifically:
+The experimental tasks feature in the `2025-11-25` release is **not wire-compatible** with this extension. Implementations that need to interoperate with both surfaces can shim at the SDK level by implementing the experimental and extension flows in parallel and dispatching on the negotiated protocol version and the client capability the peer declared. The following table summarizes the expected behavior for each permutation:
 
-* `tasks/result` is removed. Clients calling `tasks/result` against a server with this extension in the `2026-06-30` specification **MUST** receive `-32601` (Method Not Found).
-* The `task` parameter on `CallToolRequest` is removed. Servers receiving requests with a `task` parameter under this extension in the `2026-06-30` specification **MUST** ignore it (treat the field as unknown) rather than using it as an opt-in.
-* The `tasks.requests.*` and `tasks.cancel`/`tasks.list` capability declarations are not part of this extension. A server that previously advertised these **MUST** migrate to declaring `io.modelcontextprotocol/tasks` as of the `2026-06-30` specification and **MUST NOT** continue to advertise the legacy capabilities under any protocol version that includes this extension.
-
-Implementations that need to bridge legacy clients can shim at the SDK level: a server can implement both the experimental and extension surfaces in parallel, dispatching based on which capability and protocol version the client negotiated.
+| Protocol Version | `tasks.*` (legacy)                                                                                                                                                                                                                                                                                                                                                                                               | `io.modelcontextprotocol/tasks`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2025-11-25`     | Legacy experimental tasks per the `2025-11-25` specification. The client opts into task augmentation per request via the `task` parameter on `CallToolRequest`; the server uses `tasks/result`, `tasks/get`, `tasks/cancel`, and (where supported) `tasks/list` per that specification. This extension does not apply.                                                                                           | This extension is not defined under the `2025-11-25` protocol version. Servers **MUST NOT** treat this capability as enabling tasks under that protocol version; requests proceed as if the client had declared no task capability at all.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `2026-06-30`     | The legacy capability is not part of this extension. Servers **MUST** treat clients declaring only the legacy capability as non-declaring with respect to this extension. Servers that simultaneously support the `2025-11-25` Tasks specification alongside this extension **SHOULD** continue to permit `tasks/get` and `tasks/cancel` requests from such clients to operate on tasks created under that flow. | The canonical case. Full task lifecycle as specified in this document, with the following wire-level differences from the `2025-11-25` experimental feature:<ul><li>`tasks/result` is removed; clients calling it **MUST** receive `-32601` (Method Not Found).</li><li>The `task` parameter on `CallToolRequest` is removed; servers **MUST** ignore it (treat the field as unknown) rather than using it as an opt-in.</li><li>The `tasks.requests.*`, `tasks.cancel`, and `tasks.list` capability declarations are not part of this extension. Servers that previously advertised these **MUST** migrate to declaring `io.modelcontextprotocol/tasks`, and **MUST NOT** continue to advertise the legacy capabilities under any protocol version that includes this extension.</li></ul> |
 
 A server that returns the standard `CallToolResult` shape — i.e., never elects to create a task — remains fully spec-compliant under this extension. Clients that have negotiated the extension **MUST** handle both result shapes for any augmented request.
 
@@ -37799,6 +36409,326 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 | <Badge>Withdrawn</Badge>  | SEP withdrawn by the author                              |
 | <Badge>Superseded</Badge> | SEP replaced by a newer SEP                              |
 | <Badge>Dormant</Badge>    | SEP without a sponsor, closed after 6 months             |
+
+
+# Skills Over MCP Charter
+Source: https://modelcontextprotocol.io/community/skills-over-mcp/charter
+
+Charter for the MCP Skills Over MCP Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Skills Over MCP Working Group defines how "agent skills" — rich, structured
+instructions for agent workflows — are discovered, distributed, and consumed through MCP.
+Native skills support in host applications demonstrates strong demand, and the group
+emerged from discussion on [SEP-2076 — Agent Skills as a First-Class MCP Primitive](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2076),
+which raised open questions about whether existing MCP primitives suffice or what
+conventions to standardize. The WG produces specification extensions, reference
+implementations, and coordination artifacts because solutions touch the protocol spec,
+registry schema, SDK implementations, and client behavior. The WG's current direction
+is captured in [SEP-2640 — Skills Extension](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)
+(Resources-based, Extensions Track).
+
+## Scope
+
+### In Scope
+
+* **Specification Work**: SEPs defining how skills are represented, discovered, and
+  consumed within MCP — including the Skills Extension (Extensions Track) and related
+  protocol changes
+* **Reference Implementations**: SDK components and reference servers demonstrating
+  skill discovery and consumption patterns
+* **Cross-Cutting Concerns**: Coordination with Registry WG (skills discovery/distribution,
+  registry schema changes), Agents WG (skill activation, server metadata consumption),
+  Primitive Grouping WG (progressive disclosure patterns), and external projects including
+  the [Agent Skills](https://agentskills.io/) spec (content format and well-known URI
+  discovery), FastMCP, and PydanticAI
+* **Documentation**: Specification sections and guidance covering skill authoring,
+  discovery, and consumption
+
+### Out of Scope
+
+* **Registry schema decisions**: Schema ownership belongs to the Registry WG; this WG
+  contributes requirements but does not own the schema
+* **Client implementation mandates**: We can document patterns but not require specific
+  client behavior
+* **Plugin/bundle packaging**: Installable bundles (skills + servers + subagents +
+  configuration as a single artifact) — surfaced by use cases but belongs to a broader
+  packaging effort
+
+### Related Groups
+
+* **Agents WG** — How agents consume server metadata, skill activation
+* **Registry WG** — Skills discovery/distribution, registry schema changes
+* **Primitive Grouping WG** — Progressive disclosure patterns
+
+## Leadership
+
+| Role | Name            | Organization                | GitHub                                   | Term    |
+| ---- | --------------- | --------------------------- | ---------------------------------------- | ------- |
+| Lead | Ola Hungerford  | Nordstrom / MCP Maintainer  | [@olaservo](https://github.com/olaservo) | Initial |
+| Lead | Peter Alexander | Anthropic / Core Maintainer | [@pja-ant](https://github.com/pja-ant)   | Initial |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+| Name                     | Organization                    | GitHub                                                 | Discord | Level       |
+| ------------------------ | ------------------------------- | ------------------------------------------------------ | ------- | ----------- |
+| Ola Hungerford           | Nordstrom / MCP Maintainer      | [@olaservo](https://github.com/olaservo)               |         | Lead        |
+| Peter Alexander          | Anthropic / Core Maintainer     | [@pja-ant](https://github.com/pja-ant)                 |         | Lead        |
+| Yu Yi                    | Google                          | [@erain](https://github.com/erain)                     |         | Participant |
+| Sunish Sheth             | Databricks                      | [@sunishsheth2009](https://github.com/sunishsheth2009) |         | Participant |
+| Keith A Groves           | Hyix                            | [@keithagroves](https://github.com/keithagroves)       |         | Participant |
+| Peder Holdgaard Pedersen | Saxo Bank / MCP Maintainer      | [@pederhp](https://github.com/pederhp)                 |         | Participant |
+| Sam Morrow               | GitHub                          | [@SamMorrowDrums](https://github.com/SamMorrowDrums)   |         | Participant |
+| Jacob MacDonald          | Google                          | [@jakemac53](https://github.com/jakemac53)             |         | Participant |
+| Jonathan Hefner          | Independent / MCP Maintainer    | [@jonathanhefner](https://github.com/jonathanhefner)   |         | Participant |
+| Luca Chang               | AWS / MCP Maintainer            | [@LucaButBoring](https://github.com/LucaButBoring)     |         | Participant |
+| Bob Dickinson            | TeamSpark.ai / MCP Maintainer   | [@BobDickinson](https://github.com/BobDickinson)       |         | Participant |
+| Radoslav Dimitrov        | Stacklok / MCP Maintainer       | [@rdimitrov](https://github.com/rdimitrov)             |         | Participant |
+| Juan Antonio Osorio      | Stacklok                        | [@JAORMX](https://github.com/JAORMX)                   |         | Participant |
+| Kaxil Naik               | Astronomer / Apache Airflow PMC | [@kaxil](https://github.com/kaxil)                     |         | Participant |
+| Cliff Hall               | Futurescale                     | [@cliffhall](https://github.com/cliffhall)             |         | Participant |
+| Haoyu Wang               | Google                          | [@helloeve](https://github.com/helloeve)               |         | Participant |
+| Sambhav Kothari          | Bloomberg / MCP Maintainer      | [@sambhav](https://github.com/sambhav)                 |         | Participant |
+
+## Operations
+
+| Meeting         | Frequency         | Duration   | Purpose                                                                             |
+| --------------- | ----------------- | ---------- | ----------------------------------------------------------------------------------- |
+| Working Session | Weekly (Tuesdays) | 60 minutes | Technical discussion, pattern evaluation, proposal review; open to all participants |
+
+Default start time is 9:00 AM Pacific. Sessions may occasionally be scheduled earlier to better accommodate non-US time zones.
+
+Meetings are published at [meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io). Agendas are posted in advance per MCP meeting policy. Meeting notes are published to [Meeting Notes — Skills Over MCP WG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-skills-over-mcp-wg).
+
+Discord: [#skills-over-mcp-wg](https://discord.com/channels/1358869848138059966/1464745826629976084)
+
+## Resources
+
+* Experimental findings and reference implementations: [modelcontextprotocol/experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills)
+* Project board: [Skills Over MCP WG](https://github.com/orgs/modelcontextprotocol/projects/38/views/1)
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+Full live tracking is on the [Skills Over MCP WG project board](https://github.com/orgs/modelcontextprotocol/projects/38/views/1). Headline workstreams:
+
+| Item                                                                                                              | Status      | Target Date | Champion                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------------- |
+| [Skills Extension SEP](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640) (Extensions Track) | In Review   |             | [@pja-ant](https://github.com/pja-ant)                                                       |
+| Skills Extension reference implementation                                                                         | In Review   |             | [@olaservo](https://github.com/olaservo)                                                     |
+| Agent Skills spec coordination                                                                                    | In Progress |             | [@jonathanhefner](https://github.com/jonathanhefner), [@pja-ant](https://github.com/pja-ant) |
+| Registry skills.json proposal                                                                                     | In Progress |             | [@JAORMX](https://github.com/JAORMX)                                                         |
+
+### Success Criteria
+
+* **Short-term**: Documented consensus on requirements and evaluation of existing approaches
+* **Medium-term**: Clear recommendation (convention vs. protocol extension vs. both) — the draft Skills Extension SEP represents the WG's current direction: a formal extension using existing Resources primitives
+* **Long-term**: Interoperable skill distribution across MCP servers and clients
+
+## Changelog
+
+| Date       | Change                                                                                                                                                                                                                                                                                                           |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-25 | Linked SEP-2640 in Active Work Items; added @helloeve (Google) as Participant                                                                                                                                                                                                                                    |
+| 2026-04-16 | Converted from Interest Group to Working Group                                                                                                                                                                                                                                                                   |
+| 2026-04-14 | Initial charter (formalized from [experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills) repo README, which served as the de facto charter before the charter process was established via [SEP-2149](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2149)) |
+| 2026-02-01 | IG formed; experimental repo created                                                                                                                                                                                                                                                                             |
+
+
+# Tool Annotations Charter
+Source: https://modelcontextprotocol.io/community/tool-annotations/charter
+
+Charter for the MCP Tool Annotations Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Tool Annotations Interest Group explores the role of tool annotations in enabling safe, usable agentic systems across the MCP ecosystem. Today, six independent SEPs propose annotation changes, each solving real problems but lacking the coherent, cross-cutting perspective that a dedicated group can bring. The IG gathers use cases from server and client authors, evaluates existing and proposed annotations, and considers the long-term future of the annotation model, including whether runtime annotations, tool response annotations, and other extensions belong in the protocol.
+
+## Scope
+
+### In Scope
+
+* **Evaluation of existing annotations**: Assess whether the current set of tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) adequately serves server and client authors
+* **Discussion of proposed annotations**: Review and provide feedback on SEPs proposing new or modified tool annotations (trust/sensitivity, agency, model preferences, and others)
+* **Future of the annotation model**: Explore whether runtime annotations, tool response annotations, or structural changes to the annotation system are worth adding to the protocol
+* **Use-case gathering**: Collect real-world use cases from server authors, client authors, and host applications to ground annotation decisions in practical needs
+* **Problem statements and recommendations**: Produce recommendations for Working Groups or SEP authors on annotation design, coherence, and prioritization
+
+### Out of Scope
+
+* **Binding specification changes**: The IG produces recommendations, not binding decisions; specification changes are made through the SEP process
+* **Implementation work**: Building SDK features or reference implementations (may be explored in the [experimental repo](https://github.com/modelcontextprotocol/experimental-ext-tool-annotations) but is not the IG's primary purpose)
+* **Non-annotation tool changes**: Changes to tool discovery, invocation, or lifecycle that do not relate to annotations
+* **Resource annotations**: While related, resource-level annotation work is tracked separately unless it directly intersects with tool annotation design
+
+### Related Groups
+
+* **Security IG** - Trust and sensitivity annotations ([SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913)) span both groups' interests
+* **[Skills Over MCP WG](/community/skills-over-mcp/charter)** - Skill-level metadata may interact with tool annotations for discovery and filtering
+
+## Leadership
+
+| Role        | Name           | Organization | GitHub                                               | Term    |
+| ----------- | -------------- | ------------ | ---------------------------------------------------- | ------- |
+| Facilitator | Sam Morrow     | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | Initial |
+| Facilitator | Robert Reichel | OpenAI       | [@rreichel3](https://github.com/rreichel3)           | Initial |
+
+## Membership
+
+| Name                    | Organization | GitHub                                               | Discord | Level       |
+| ----------------------- | ------------ | ---------------------------------------------------- | ------- | ----------- |
+| Sam Morrow              | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | Facilitator |
+| Robert Reichel          | OpenAI       | [@rreichel3](https://github.com/rreichel3)           |         | Facilitator |
+| Matt Carey              | Cloudflare   | [@mattzcarey](https://github.com/mattzcarey)         |         | Participant |
+| Kapil Sharma            | Microsoft    | [@kapil8811](https://github.com/kapil8811)           |         | Participant |
+| Connor Peet             | Microsoft    | [@connor4312](https://github.com/connor4312)         |         | Participant |
+| Ola Hungerford          | Nordstrom    | [@olaservo](https://github.com/olaservo)             |         | Participant |
+| Gökhan Arkan            | GitHub       | [@gokhanarkan](https://github.com/gokhanarkan)       |         | Participant |
+| Joanna Krzek-Lubowiecka | GitHub       | [@joannakl](https://github.com/joannakl)             |         | Participant |
+
+## Operations
+
+| Meeting    | Frequency | Duration | Purpose                                        |
+| ---------- | --------- | -------- | ---------------------------------------------- |
+| Discussion | TBD       | TBD      | Use-case sharing, annotation review, open Q\&A |
+
+Discord: [#tool-annotations-ig](https://discord.com/channels/1358869848138059966/1482836798517543073)
+
+## Discussion Topics
+
+The following SEPs and themes form the IG's initial discussion agenda. This list is not exhaustive and will evolve as the group identifies new areas of interest.
+
+### Active SEPs Under Discussion
+
+| SEP                                                                                | Title                              | Status | Author                                                                                           |
+| ---------------------------------------------------------------------------------- | ---------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| [SEP-1862](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1862) | Tool Resolution (preflight checks) | Draft  | [@SamMorrowDrums](https://github.com/SamMorrowDrums)                                             |
+| [SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913) | Trust and Sensitivity Annotations  | Draft  | [@SamMorrowDrums](https://github.com/SamMorrowDrums), [@rreichel3](https://github.com/rreichel3) |
+| [SEP-1984](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1984) | Comprehensive Tool Annotations     | Draft  | [@sambhav](https://github.com/sambhav)                                                           |
+| [SEP-2417](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2417) | Model Preferences for Tools        | Draft  | [@ProductOfAmerica](https://github.com/ProductOfAmerica)                                         |
+
+### Open Questions
+
+* Should runtime annotations (annotations that change between invocations) be added to the protocol?
+* Are additional static annotations worth standardizing, and which serve both server and client authors?
+* Should tool *response* annotations be added to the protocol?
+* How should annotations interact with trust, security, and human-in-the-loop requirements?
+* What is the right level of granularity - a few well-defined hints vs. a richer, extensible vocabulary?
+
+## Resources
+
+* [Tool Annotations as Risk Vocabulary](https://blog.modelcontextprotocol.io/posts/2026-03-16-tool-annotations/) - blog post framing the motivation for this work
+* [Experimental repo](https://github.com/modelcontextprotocol/experimental-ext-tool-annotations) - repository for the Tool Annotations Interest Group
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-20 | Initial charter |
+
+
+# Triggers and Events Charter
+Source: https://modelcontextprotocol.io/community/triggers-events/charter
+
+Charter for the MCP Triggers and Events Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Triggers and Events Working Group exists to define how MCP servers proactively notify clients of state changes. Today, clients learn about server-side updates by polling or holding an SSE connection open. This WG will specify a standardized callback mechanism—webhooks or similar—that lets servers push notifications when new data is available, with defined ordering guarantees that hold across all transports.
+
+## Scope
+
+### In Scope
+
+* **Specification Work**: SEPs defining the trigger/callback mechanism, subscription lifecycle, delivery semantics, and event ordering guarantees.
+* **Reference Implementations**: SDK components demonstrating server-initiated notifications and client-side callback handling.
+* **Cross-Cutting Concerns**: Coordination with the Transports WG on transport-specific delivery behavior, and with the Agents WG where task completion notifications intersect with event triggers.
+* **Documentation**: Specification sections covering event-driven patterns and migration guidance from polling-based approaches.
+
+### Out of Scope
+
+* Changes to the transport wire format or session model (owned by the Transports WG).
+* General-purpose pub/sub infrastructure beyond what the MCP protocol requires.
+* Modifications to existing notification primitives (`notifications/resources/updated`, `notifications/tools/list_changed`, etc.) that do not relate to proactive server-initiated delivery.
+
+### Related Groups
+
+* **Transports WG** — delivery and ordering guarantees depend on transport capabilities; callback semantics must be coherent across stdio, Streamable HTTP, and future transports.
+* **Agents WG** — [SEP-1686 (Tasks)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686) identifies webhook-style task completion notifications as a future consideration; this WG owns that mechanism.
+
+## Leadership
+
+| Role | Name            | Organization        | GitHub                                           | Term    |
+| ---- | --------------- | ------------------- | ------------------------------------------------ | ------- |
+| Lead | Clare Liguori   | Amazon Web Services | [@clareliguori](https://github.com/clareliguori) | Initial |
+| Lead | Peter Alexander | Anthropic           | [@pja-ant](https://github.com/pja-ant)           | Initial |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                               |
+| --------------- | --------- | -------- | ------------------------------------- |
+| Working Session | Weekly    | 30 min   | Technical discussion, proposal review |
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                    | Status   | Target Date | Champion |
+| --------------------------------------- | -------- | ----------- | -------- |
+| SEP: Events in MCP v1 RFC               | Ideating | End April   | TBD      |
+| Reference implementation in Tier-1 SDKs | —        | End April   | TBD      |
+
+### Success Criteria
+
+* An accepted SEP defining the trigger/callback mechanism and its subscription lifecycle.
+* Reference implementations in at least two Tier-1 SDKs.
+* Conformance test coverage for the new primitives.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-03-24 | Initial charter |
 
 
 # Roadmap
