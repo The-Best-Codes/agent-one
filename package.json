@@ -1,6 +1,6 @@
 {
   "name": "agent-one",
-  "version": "0.0.21",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
