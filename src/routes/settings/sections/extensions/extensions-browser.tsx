@@ -111,7 +111,7 @@ export function ExtensionsBrowser({
   return (
     <div
       ref={parentRef}
-      className="max-h-96 scroll-py-1 overflow-x-hidden overflow-y-auto"
+      className="max-h-none min-h-0 flex-1 scroll-py-1 overflow-x-hidden overflow-y-auto"
       aria-label="Extensions"
     >
       {filteredItems.length === 0 ? (

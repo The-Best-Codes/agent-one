@@ -363,11 +363,11 @@ export default function ExtensionsSection() {
   }, [onlyInstalled, query, showDeviceExtensions, showOnlineExtensions]);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="flex min-h-0 flex-1 flex-col">
+      <CardHeader className="shrink-0">
         <h2 className="text-base leading-none font-semibold">Extensions</h2>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
         <SettingsTarget id="setting-extensions-beta-notice">
           <Alert>
             <IconFlask />

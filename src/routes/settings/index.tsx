@@ -15,6 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { cn } from "@/lib/utils";
 
 import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
@@ -43,6 +44,11 @@ export default function SettingsRoute() {
       return sections[0].id;
     }
   }, [tabParam, activeSection]);
+
+  const fillHeight = useMemo(
+    () => sections.find((section) => section.id === displayedSection)?.fillHeight === true,
+    [displayedSection],
+  );
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
@@ -110,7 +116,16 @@ export default function SettingsRoute() {
   };
 
   return (
-    <main ref={rootRef} role="main" className="bg-background min-h-screen">
+    <main
+      ref={rootRef}
+      role="main"
+      className={cn(
+        "bg-background min-h-svh",
+        fillHeight
+          ? "flex h-svh min-h-0 flex-col overflow-hidden"
+          : "md:h-svh md:min-h-0 md:overflow-hidden",
+      )}
+    >
       <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
@@ -154,8 +169,18 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
-        <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
+      <div
+        className={cn(
+          "mx-auto w-full max-w-5xl p-4 md:flex md:h-full md:min-h-0 md:flex-col md:p-6",
+          fillHeight && "flex min-h-0 flex-1 flex-col",
+        )}
+      >
+        <div
+          className={cn(
+            "flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row md:overflow-hidden",
+            fillHeight && "min-h-0 flex-1 overflow-hidden",
+          )}
+        >
           <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
             <div className="flex flex-col gap-2">
               <div className="mb-2">
@@ -179,20 +204,35 @@ export default function SettingsRoute() {
             </div>
           </ScrollArea>
 
-          <ScrollArea
-            ref={scrollViewportRef}
-            type="always"
-            className="-m-0.5 flex-1 md:min-h-0"
-            viewportClassName="p-0.5"
-          >
-            <div
-              role="tabpanel"
-              tabIndex={0}
-              className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
-            >
-              <SettingsContent activeSection={displayedSection} />
+          {fillHeight ? (
+            <div className="-m-0.5 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-0.5">
+              <div
+                role="tabpanel"
+                tabIndex={0}
+                className={cn(
+                  "focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1",
+                  "flex min-h-0 min-w-0 flex-1 flex-col",
+                )}
+              >
+                <SettingsContent activeSection={displayedSection} fillHeight />
+              </div>
             </div>
-          </ScrollArea>
+          ) : (
+            <ScrollArea
+              ref={scrollViewportRef}
+              type="always"
+              className="-m-0.5 flex-1 md:min-h-0"
+              viewportClassName="p-0.5"
+            >
+              <div
+                role="tabpanel"
+                tabIndex={0}
+                className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
+              >
+                <SettingsContent activeSection={displayedSection} />
+              </div>
+            </ScrollArea>
+          )}
         </div>
       </div>
     </main>

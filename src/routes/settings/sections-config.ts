@@ -15,6 +15,7 @@ interface SettingsSection {
   label: string;
   icon?: string;
   component: ComponentType;
+  fillHeight?: boolean;
 }
 
 const componentMap: Record<SectionId, ComponentType> = {
