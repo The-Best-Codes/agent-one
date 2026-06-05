@@ -40,6 +40,7 @@ export interface ModelData {
   id: string;
   name: string;
   provider: string;
+  providerId: string;
   model: LanguageModel;
   supportsToolUse: boolean;
   contextWindow?: number;
@@ -140,6 +141,7 @@ function mapDirectoryModels(
     id: `${providerId}-${model.id}`,
     name: model.name ?? model.id,
     provider: providerName,
+    providerId,
     model: createModel(model.id),
     supportsToolUse: model.supportsTools,
     contextWindow: model.contextWindow,
@@ -160,6 +162,7 @@ function mapCustomProviderModels(
       id: `custom-${provider.id}-${model.id}`,
       name: model.name || model.id,
       provider: provider.name,
+      providerId: provider.id,
       model: instance.languageModel(model.id),
       supportsToolUse: model.supportsTools,
       contextWindow: model.contextWindow,
@@ -179,6 +182,7 @@ function mapLocalProviderModels(
       id: `local-${provider.id}-${model.id}`,
       name: model.name || model.id,
       provider: provider.name,
+      providerId: provider.id,
       model: instance.languageModel(model.id),
       supportsToolUse: model.supportsTools,
       contextWindow: model.contextWindow,

@@ -3,6 +3,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
+import { ProviderLogo } from "@/components/a1/provider-logo";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -36,7 +37,9 @@ interface ModelSelectorProps {
   loading?: boolean;
 }
 
-type VirtualRow = { type: "heading"; provider: string } | { type: "item"; model: ModelData };
+type VirtualRow =
+  | { type: "heading"; provider: string; providerId: string }
+  | { type: "item"; model: ModelData };
 
 interface ModelListProps {
   rows: VirtualRow[];
@@ -62,16 +65,17 @@ const ModelList: FC<ModelListProps> = ({
 }) => {
   const [stickyState, setStickyState] = useState<{
     provider: string;
+    providerId: string;
     translateY: number;
     scrollbarWidth: number;
   } | null>(null);
 
   const headingOffsets = useMemo(() => {
-    const offsets: { provider: string; offset: number }[] = [];
+    const offsets: { provider: string; providerId: string; offset: number }[] = [];
     let offset = 2;
     for (const row of rows) {
       if (row.type === "heading") {
-        offsets.push({ provider: row.provider, offset });
+        offsets.push({ provider: row.provider, providerId: row.providerId, offset });
       }
       offset += row.type === "heading" ? HEADING_HEIGHT : ITEM_HEIGHT;
     }
@@ -88,13 +92,13 @@ const ModelList: FC<ModelListProps> = ({
       return;
     }
 
-    let currentHeading: string | null = null;
+    let currentHeading: { provider: string; providerId: string } | null = null;
     let nextHeadingOffset: number | null = null;
 
     for (let i = 0; i < headingOffsets.length; i++) {
       const h = headingOffsets[i];
       if (h.offset < scrollTop) {
-        currentHeading = h.provider;
+        currentHeading = h;
         nextHeadingOffset = headingOffsets[i + 1]?.offset ?? null;
       }
     }
@@ -113,7 +117,12 @@ const ModelList: FC<ModelListProps> = ({
     }
 
     const scrollbarWidth = el.offsetWidth - el.clientWidth;
-    setStickyState({ provider: currentHeading, translateY, scrollbarWidth });
+    setStickyState({
+      provider: currentHeading.provider,
+      providerId: currentHeading.providerId,
+      translateY,
+      scrollbarWidth,
+    });
   }, [parentRef, headingOffsets]);
 
   useEffect(() => {
@@ -194,6 +203,12 @@ const ModelList: FC<ModelListProps> = ({
                     >
                       <div className="flex w-full min-w-0 flex-1 items-center justify-center gap-1">
                         {isSelected && <IconCheck />}
+                        <ProviderLogo
+                          id={model.providerId}
+                          title={model.provider}
+                          className="size-4!"
+                          imageClassName="p-0"
+                        />
                         <div className="scrollbar-size-xs w-full overflow-x-auto">
                           <span className="font-medium whitespace-nowrap">{model.name}</span>
                         </div>
@@ -282,7 +297,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     const result: VirtualRow[] = [];
     const entries = Array.from(groups.entries());
     entries.forEach(([provider, models]) => {
-      result.push({ type: "heading", provider });
+      result.push({ type: "heading", provider, providerId: models[0]?.providerId ?? provider });
       for (const model of models) {
         result.push({ type: "item", model });
       }
