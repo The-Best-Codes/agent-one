@@ -1,9 +1,10 @@
 import { IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { memo, useMemo, useState, type ReactNode } from "react";
+import { memo, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,92 @@ interface SharedProviderEditorProps {
   onEnabledChange: (enabled: boolean) => void;
 }
 
+const getProviderLogoUrl = (providerId: string) =>
+  `https://raw.githubusercontent.com/The-Best-Codes/ai-model-directory/refs/heads/main/data/providers/${providerId}/logo-raw.svg`;
+
+const getProviderFallback = (title: string) => title.trim().slice(0, 1).toUpperCase() || "?";
+
+const parseSvgColors = (svgText: string) => {
+  const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
+  const colorValues = Array.from(doc.querySelectorAll("*"))
+    .flatMap((element) => [
+      element.getAttribute("fill"),
+      element.getAttribute("stroke"),
+      ...Array.from(
+        element.getAttribute("style")?.matchAll(/(?:fill|stroke):\s*([^;]+)/gi) ?? [],
+        (match) => match[1],
+      ),
+    ])
+    .filter((color): color is string => Boolean(color))
+    .map((color) => color.trim().toLowerCase())
+    .filter(
+      (color) => color && color !== "none" && color !== "transparent" && color !== "currentcolor",
+    );
+
+  return colorValues;
+};
+
+const getColorLuminance = (color: string) => {
+  const hex = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i)?.[1];
+  const rgb = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+
+  const channels = hex
+    ? hex.length === 3
+      ? hex.split("").map((value) => Number.parseInt(value + value, 16))
+      : [0, 2, 4].map((index) => Number.parseInt(hex.slice(index, index + 2), 16))
+    : rgb?.slice(1, 4).map(Number);
+
+  if (!channels || channels.length !== 3 || channels.some(Number.isNaN)) {
+    return undefined;
+  }
+
+  const [red, green, blue] = channels.map((value) => value / 255);
+
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+};
+
+const getLogoBackground = (svgText: string) => {
+  const luminances = parseSvgColors(svgText)
+    .map(getColorLuminance)
+    .filter((luminance): luminance is number => luminance !== undefined);
+
+  if (luminances.length === 0) {
+    return "bg-white";
+  }
+
+  const averageLuminance =
+    luminances.reduce((total, luminance) => total + luminance, 0) / luminances.length;
+
+  return averageLuminance > 0.7 ? "bg-neutral-950" : "bg-white";
+};
+
+function ProviderLogo({ id, title }: { id: string; title: string }) {
+  const [logoBackground, setLogoBackground] = useState("bg-background");
+  const logoUrl = getProviderLogoUrl(id);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(logoUrl, { signal: controller.signal })
+      .then((response) => (response.ok ? response.text() : ""))
+      .then((svgText) => {
+        if (svgText) {
+          setLogoBackground(getLogoBackground(svgText));
+        }
+      })
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, [logoUrl]);
+
+  return (
+    <Avatar size="sm" className={logoBackground}>
+      <AvatarImage src={logoUrl} alt="" className="object-contain" />
+      <AvatarFallback>{getProviderFallback(title)}</AvatarFallback>
+    </Avatar>
+  );
+}
+
 interface BuiltInProviderListItemProps {
   providerId: ProviderId;
   label: string;
@@ -106,7 +193,10 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
     <AccordionItem value={id}>
       <AccordionTrigger className="px-1 py-2 hover:no-underline">
         <div className="flex flex-1 items-center justify-between gap-2 pr-2">
-          <span>{title}</span>
+          <span className="flex items-center gap-2">
+            <ProviderLogo id={id} title={title} />
+            <span>{title}</span>
+          </span>
           <Switch
             id={`enabled-${id}`}
             checked={enabled}
