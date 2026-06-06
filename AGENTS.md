@@ -36,7 +36,7 @@ If you are an AI agent, please follow the instructions in this file to ensure yo
 - **This is a production app.** Ensure backward compatibility between versions when applicable - meaning, consider whether any migrations are needed so that the app will correctly handle outdated data from older versions.
 - Any time you use the Tauri SQL plugin, if you are creating new tables in the TypeScript codebase, you're almost certainly doing it wrong. You can create and apply migrations in `src-tauri/migrations/` (and update `src-tauri/lib.rs`) instead.
 - Follow the project `PHILOSOPHY.md`.
-- Never use a subagent (sometimes called an explorer or explore agent) unless the user explicitly told you to use one. If you **must** use a subagent, pause and ask the user if it's okay.
+- Never use a subagent (or a task / explore agent) unless the user explicitly told you to use one. If you **must** use a subagent, pause and ask the user if it's okay.
 - After making changes, consider adding a new entry to the changelog for the current pending release. To find the current pending release, view the current version in `src-tauri/tauri.conf.json`, then look for a file in `src/assets/release-notes/x.x.x.md` where `x.x.x` is the _next_ version, not the current version.
 - **Important:** Because settings are synchronized across devices, synced settings from older versions of the app may not conform to how the app works today. Later, this will be addressed. In the meantime, **when changing, adding, or removing settings**, **always** ensure that the new setting logic is compatible with setting values from older versions of the app.
 
