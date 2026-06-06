@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -20,6 +21,7 @@ import {
   chatSortAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
+  extractReasoningEnabledAtom,
   markdownRenderingAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
@@ -50,6 +52,9 @@ export default function ChatsSection() {
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
   const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(smoothStreamEnabledAtom);
+  const [extractReasoningEnabled, setExtractReasoningEnabled] = useAtom(
+    extractReasoningEnabledAtom,
+  );
   const [experimentalThrottleEnabled, setExperimentalThrottleEnabled] = useAtom(
     experimentalThrottleEnabledAtom,
   );
@@ -71,6 +76,8 @@ export default function ChatsSection() {
   const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
   const isRegenerateOnSaveDefault = regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
   const isSmoothStreamDefault = smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
+  const isExtractReasoningDefault =
+    extractReasoningEnabled === DEFAULT_SETTINGS.EXTRACT_REASONING_ENABLED;
   const isExperimentalThrottleEnabledDefault =
     experimentalThrottleEnabled === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED;
   const isExperimentalThrottleValueDefault =
@@ -468,6 +475,43 @@ export default function ChatsSection() {
                     resetSetting("SMOOTH_STREAM_ENABLED");
                   }}
                   disabled={isSmoothStreamDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-extract-reasoning">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Extract Reasoning from Think Tags</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Automatically extract <Kbd>&lt;think&gt;</Kbd> tag content from model responses
+                  and display it as a collapsible reasoning section. Does not apply to past messages
+                  or non-reasoning models.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={extractReasoningEnabled}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "extract_reasoning_toggled", {
+                      enabled: checked,
+                    });
+                    setExtractReasoningEnabled(checked);
+                  }}
+                  aria-label="Toggle extract reasoning from think tags"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_extract_reasoning");
+                    resetSetting("EXTRACT_REASONING_ENABLED");
+                  }}
+                  disabled={isExtractReasoningDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />

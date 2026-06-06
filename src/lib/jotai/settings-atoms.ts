@@ -120,6 +120,11 @@ export const smoothStreamEnabledAtom = createSettingAtom(
   DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED,
 );
 
+export const extractReasoningEnabledAtom = createSettingAtom(
+  "EXTRACT_REASONING_ENABLED",
+  DEFAULT_SETTINGS.EXTRACT_REASONING_ENABLED,
+);
+
 export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,

@@ -8,7 +8,7 @@ import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
-import { smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
+import { extractReasoningEnabledAtom, smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -23,6 +23,7 @@ export function useChat(
   options?: CustomChatOptions,
 ) {
   const smoothStreamEnabled = useAtomValue(smoothStreamEnabledAtom);
+  const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
   const systemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
   const { getTools } = useTools();
@@ -34,6 +35,7 @@ export function useChat(
         modelId,
         modelConfig,
         smoothStreamEnabled,
+        extractReasoningEnabled,
         getTools,
         getSystemPrompt,
         getApiKeysLoadedPromise,
@@ -61,6 +63,14 @@ export function useChat(
   }, [smoothStreamEnabled, transport]);
 
   useEffect(() => {
+    transport.updateExtractReasoningEnabled(extractReasoningEnabled);
+    logger.verbose(
+      "Updated chat transport with extract reasoning setting:",
+      extractReasoningEnabled,
+    );
+  }, [extractReasoningEnabled, transport]);
+
+  useEffect(() => {
     transport.updateSystemPrompt(getSystemPrompt);
     logger.verbose("Updated chat transport with new system prompt");
   }, [getSystemPrompt, transport]);
@@ -80,7 +90,8 @@ export function useChat(
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
     transport.updateSmoothStreamEnabled(smoothStreamEnabled);
-  }, [model, modelId, modelConfig, smoothStreamEnabled, transport]);
+    transport.updateExtractReasoningEnabled(extractReasoningEnabled);
+  }, [model, modelId, modelConfig, smoothStreamEnabled, extractReasoningEnabled, transport]);
 
   const sendMessage = useCallback<typeof chatResult.sendMessage>(
     async (message, sendOptions) => {

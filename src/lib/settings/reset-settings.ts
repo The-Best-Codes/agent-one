@@ -16,6 +16,7 @@ import {
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
+  extractReasoningEnabledAtom,
   fontAtom,
   inputStyleAtom,
   keyboardShortcutsAtom,
@@ -65,6 +66,7 @@ export function resetAllSettings(): void {
   store.set(experimentalThrottleEnabledAtom, RESET);
   store.set(experimentalThrottleValueAtom, RESET);
   store.set(smoothStreamEnabledAtom, RESET);
+  store.set(extractReasoningEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
   store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
@@ -151,6 +153,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SMOOTH_STREAM_ENABLED":
       store.set(smoothStreamEnabledAtom, RESET);
+      break;
+    case "EXTRACT_REASONING_ENABLED":
+      store.set(extractReasoningEnabledAtom, RESET);
       break;
     case "REGENERATE_ON_SAVE":
       store.set(regenerateOnSaveAtom, RESET);
