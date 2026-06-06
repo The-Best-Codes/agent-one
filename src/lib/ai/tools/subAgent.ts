@@ -1,13 +1,15 @@
 import type { Tool, ToolExecutionOptions } from "@ai-sdk/provider-utils";
 import {
   convertToModelMessages,
+  extractReasoningMiddleware,
+  type LanguageModel,
   readUIMessageStream,
   stepCountIs,
   streamText,
-  type LanguageModel,
   type ModelMessage,
   type ToolSet,
   type UIMessage,
+  wrapLanguageModel,
 } from "ai";
 import { z } from "zod";
 
@@ -30,6 +32,7 @@ export interface SubAgentExecutionContext {
   model: LanguageModel;
   modelConfig: ModelConfig;
   systemPrompt: string;
+  extractReasoningEnabled: boolean;
   getTools: () => Promise<ToolSet>;
 }
 
@@ -251,6 +254,14 @@ async function* streamSubAgentRun({
   const subAgentMessages: UIMessage[] = [];
   let finalMessage: UIMessage | undefined;
 
+  const wrappedModel =
+    context.extractReasoningEnabled && typeof context.model !== "string"
+      ? wrapLanguageModel({
+          model: context.model as Parameters<typeof wrapLanguageModel>[0]["model"],
+          middleware: extractReasoningMiddleware({ tagName: "think" }),
+        })
+      : context.model;
+
   while (true) {
     abortSignal?.throwIfAborted();
 
@@ -266,7 +277,7 @@ async function* streamSubAgentRun({
           });
 
     const result = streamText({
-      model: context.model,
+      model: wrappedModel,
       temperature: context.modelConfig.temperature,
       maxOutputTokens: context.modelConfig.maxTokens,
       topP: context.modelConfig.topP,

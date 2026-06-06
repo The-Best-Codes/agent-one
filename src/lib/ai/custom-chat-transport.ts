@@ -3,6 +3,7 @@ import {
   type ChatRequestOptions,
   type ChatTransport,
   convertToModelMessages,
+  extractReasoningMiddleware,
   type LanguageModel,
   smoothStream,
   stepCountIs,
@@ -10,6 +11,7 @@ import {
   streamText,
   type ToolSet,
   type UIMessageChunk,
+  wrapLanguageModel,
 } from "ai";
 
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
@@ -28,6 +30,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private modelId: string | null;
   private modelConfig: ModelConfig;
   private smoothStreamEnabled: boolean;
+  private extractReasoningEnabled: boolean;
   private getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
   private getSystemPrompt: () => string;
   private getApiKeysLoadedPromise: () => Promise<void>;
@@ -37,6 +40,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     modelId: string | null,
     modelConfig: ModelConfig,
     smoothStreamEnabled: boolean,
+    extractReasoningEnabled: boolean,
     getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>,
     getSystemPrompt: () => string,
     getApiKeysLoadedPromise: () => Promise<void>,
@@ -45,6 +49,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     this.modelId = modelId;
     this.modelConfig = modelConfig;
     this.smoothStreamEnabled = smoothStreamEnabled;
+    this.extractReasoningEnabled = extractReasoningEnabled;
     this.getTools = getTools;
     this.getSystemPrompt = getSystemPrompt;
     this.getApiKeysLoadedPromise = getApiKeysLoadedPromise;
@@ -70,6 +75,14 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     logger.verbose("CustomChatTransport smoothStreamEnabled updated to:", smoothStreamEnabled);
   }
 
+  updateExtractReasoningEnabled(extractReasoningEnabled: boolean) {
+    this.extractReasoningEnabled = extractReasoningEnabled;
+    logger.verbose(
+      "CustomChatTransport extractReasoningEnabled updated to:",
+      extractReasoningEnabled,
+    );
+  }
+
   updateSystemPrompt(getSystemPrompt: () => string) {
     this.getSystemPrompt = getSystemPrompt;
     logger.verbose("CustomChatTransport system prompt updated");
@@ -90,20 +103,30 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messageId: string | undefined;
     } & ChatRequestOptions,
   ): Promise<ReadableStream<UIMessageChunk>> {
-    const model = this.model;
+    const baseModel = this.model;
     const modelId = this.modelId;
     const modelConfig = this.modelConfig;
     const smoothStreamEnabled = this.smoothStreamEnabled;
+    const extractReasoningEnabled = this.extractReasoningEnabled;
 
-    if (!model) {
+    if (!baseModel) {
       throw new Error("Cannot send messages: no model selected. Please select a model first.");
     }
 
+    const model =
+      extractReasoningEnabled && typeof baseModel !== "string"
+        ? wrapLanguageModel({
+            model: baseModel as Parameters<typeof wrapLanguageModel>[0]["model"],
+            middleware: extractReasoningMiddleware({ tagName: "think" }),
+          })
+        : baseModel;
+
     await this.getApiKeysLoadedPromise();
     const subAgentContext: SubAgentExecutionContext = {
-      model,
+      model: baseModel,
       modelConfig,
       systemPrompt: this.getSystemPrompt(),
+      extractReasoningEnabled,
       getTools: () => this.getTools({ subAgentContext }),
     };
     const tools = await this.getTools({ subAgentContext });
