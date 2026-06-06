@@ -182,7 +182,7 @@ export default function SettingsRoute() {
           )}
         >
           <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 pl-0.5">
               <div className="mb-2">
                 <Button
                   variant="outline"
