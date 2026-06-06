@@ -14,21 +14,12 @@ import type { MemoryToolConfig } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
 
-const memoryOperationSchema = z.discriminatedUnion("operation", [
-  z.object({
-    operation: z.literal("add"),
-    entries: z.array(z.string().min(1)).min(1).max(20),
-  }),
-  z.object({
-    operation: z.literal("remove"),
-    entries: z.array(z.string().min(1)).min(1).max(20),
-  }),
-  z.object({
-    operation: z.literal("replace"),
-    oldEntry: z.string().min(1),
-    newEntry: z.string().min(1),
-  }),
-]);
+const memoryOperationSchema = z.object({
+  operation: z.enum(["add", "remove", "replace"]),
+  entries: z.array(z.string().min(1)).max(20).optional(),
+  oldEntry: z.string().optional(),
+  newEntry: z.string().optional(),
+});
 
 function getMemorySummary(entries: string[]) {
   return entries.length === 0
@@ -51,7 +42,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
       if (input.operation === "add") {
         const added: string[] = [];
 
-        for (const rawEntry of input.entries) {
+        for (const rawEntry of input.entries ?? []) {
           const entry = sanitizeMemoryEntry(rawEntry);
           if (!entry || hasMemoryEntry(entries, entry)) continue;
           entries = sanitizeMemoryEntries([...entries, entry]);
@@ -70,7 +61,7 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
       }
 
       if (input.operation === "remove") {
-        const normalizedEntries = input.entries.map((entry) => sanitizeMemoryEntry(entry));
+        const normalizedEntries = (input.entries ?? []).map((entry) => sanitizeMemoryEntry(entry));
         const nextEntries = sanitizeMemoryEntries(removeMemoryEntries(entries, normalizedEntries));
         const removed = entries.filter((entry) => !hasMemoryEntry(nextEntries, entry));
         const nextMemory = nextEntries;
@@ -84,8 +75,8 @@ export const createMemoryTool = (config: MemoryToolConfig) =>
         };
       }
 
-      const oldEntry = sanitizeMemoryEntry(input.oldEntry);
-      const newEntry = sanitizeMemoryEntry(input.newEntry);
+      const oldEntry = sanitizeMemoryEntry(input.oldEntry ?? "");
+      const newEntry = sanitizeMemoryEntry(input.newEntry ?? "");
       const withoutOld = removeMemoryEntries(entries, [oldEntry]);
       const replaced = withoutOld.length !== entries.length;
       const nextEntries = sanitizeMemoryEntries(
