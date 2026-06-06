@@ -80,7 +80,14 @@ const getModelScope = createOpenAICompatibleFactory(
 );
 const getNanoGpt = createOpenAICompatibleFactory("nano-gpt", "https://nano-gpt.com/api/v1");
 const getNovita = createOpenAICompatibleFactory("novita", "https://api.novita.ai/openai");
-const getOpencodeZen = createOpenAICompatibleFactory("opencode-zen", "https://opencode.ai/zen/v1");
+const getOpencodeZen = createOpenAICompatibleFactory(
+  "opencode-zen",
+  "https://opencode.ai/zen/v1",
+  undefined,
+  {
+    emptyApiKey: "public",
+  },
+);
 const getOvhcloud = createOpenAICompatibleFactory(
   "ovhcloud",
   "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
