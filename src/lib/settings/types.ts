@@ -411,6 +411,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MODELSCOPE_API_KEY: "",
   NANO_GPT_API_KEY: "",
   NOVITA_API_KEY: "",
+  OPENCODE_ZEN_API_KEY: "",
   OVHCLOUD_API_KEY: "",
   POE_API_KEY: "",
   REQUESTY_API_KEY: "",
