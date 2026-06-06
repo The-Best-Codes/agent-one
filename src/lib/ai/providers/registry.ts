@@ -80,6 +80,7 @@ const getModelScope = createOpenAICompatibleFactory(
 );
 const getNanoGpt = createOpenAICompatibleFactory("nano-gpt", "https://nano-gpt.com/api/v1");
 const getNovita = createOpenAICompatibleFactory("novita", "https://api.novita.ai/openai");
+const getOpencodeZen = createOpenAICompatibleFactory("opencode-zen", "https://opencode.ai/zen/v1");
 const getOvhcloud = createOpenAICompatibleFactory(
   "ovhcloud",
   "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
@@ -398,12 +399,20 @@ export const PROVIDER_REGISTRY = [
     priority: 35,
   },
   {
+    id: "opencode-zen",
+    label: "OpenCode Zen",
+    storageKey: "OPENCODE_ZEN_API_KEY",
+    envKey: "AGENT_ONE_OPENCODE_ZEN_API_KEY",
+    factory: getOpencodeZen as ProviderFactory,
+    priority: 36,
+  },
+  {
     id: "openrouter",
     label: "OpenRouter",
     storageKey: "OPENROUTER_API_KEY",
     envKey: "AGENT_ONE_OPENROUTER_API_KEY",
     factory: getOpenRouter as ProviderFactory,
-    priority: 36,
+    priority: 37,
   },
   {
     id: "ovhcloud",
@@ -411,7 +420,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "OVHCLOUD_API_KEY",
     envKey: "AGENT_ONE_OVHCLOUD_API_KEY",
     factory: getOvhcloud as ProviderFactory,
-    priority: 37,
+    priority: 38,
   },
   {
     id: "perplexity",
@@ -419,7 +428,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "PERPLEXITY_API_KEY",
     envKey: "AGENT_ONE_PERPLEXITY_API_KEY",
     factory: getPerplexity as ProviderFactory,
-    priority: 38,
+    priority: 39,
   },
   {
     id: "poe",
@@ -427,7 +436,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "POE_API_KEY",
     envKey: "AGENT_ONE_POE_API_KEY",
     factory: getPoe as ProviderFactory,
-    priority: 39,
+    priority: 40,
   },
   {
     id: "requesty",
@@ -435,7 +444,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "REQUESTY_API_KEY",
     envKey: "AGENT_ONE_REQUESTY_API_KEY",
     factory: getRequesty as ProviderFactory,
-    priority: 40,
+    priority: 41,
   },
   {
     id: "synthetic",
@@ -443,7 +452,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "SYNTHETIC_API_KEY",
     envKey: "AGENT_ONE_SYNTHETIC_API_KEY",
     factory: getSynthetic as ProviderFactory,
-    priority: 41,
+    priority: 42,
   },
   {
     id: "tetrate",
@@ -451,7 +460,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "TARS_API_KEY",
     envKey: "AGENT_ONE_TARS_API_KEY",
     factory: getTetrate as ProviderFactory,
-    priority: 42,
+    priority: 43,
   },
   {
     id: "togetherai",
@@ -459,7 +468,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "TOGETHERAI_API_KEY",
     envKey: "AGENT_ONE_TOGETHERAI_API_KEY",
     factory: getTogetherAI as ProviderFactory,
-    priority: 43,
+    priority: 44,
   },
   {
     id: "venice",
@@ -467,7 +476,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "VENICE_API_KEY",
     envKey: "AGENT_ONE_VENICE_API_KEY",
     factory: getVenice as ProviderFactory,
-    priority: 44,
+    priority: 45,
   },
   {
     id: "vercel",
@@ -475,7 +484,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "AI_GATEWAY_API_KEY",
     envKey: "AGENT_ONE_AI_GATEWAY_API_KEY",
     factory: getVercel as ProviderFactory,
-    priority: 45,
+    priority: 46,
   },
   {
     id: "wandb",
@@ -483,7 +492,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "WANDB_API_KEY",
     envKey: "AGENT_ONE_WANDB_API_KEY",
     factory: getWandb as ProviderFactory,
-    priority: 46,
+    priority: 47,
   },
   {
     id: "xai",
@@ -491,7 +500,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "XAI_API_KEY",
     envKey: "AGENT_ONE_XAI_API_KEY",
     factory: getXai as ProviderFactory,
-    priority: 47,
+    priority: 48,
   },
   {
     id: "zenmux",
@@ -499,7 +508,7 @@ export const PROVIDER_REGISTRY = [
     storageKey: "ZENMUX_API_KEY",
     envKey: "AGENT_ONE_ZENMUX_API_KEY",
     factory: getZenmux as ProviderFactory,
-    priority: 48,
+    priority: 49,
   },
 ] as const satisfies readonly ProviderDefinition[];
 
