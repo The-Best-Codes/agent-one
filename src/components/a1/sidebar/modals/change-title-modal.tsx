@@ -17,7 +17,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitleAI } from "@/lib/ai/title-generator";
-import { titleGenerationAtom } from "@/lib/jotai/settings-atoms";
+import { extractReasoningEnabledAtom, titleGenerationAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -43,6 +43,7 @@ const ChangeTitleForm = ({
   const { saveChatTitle, loadChatMetadata, loadChatMessages } = usePersistence();
   const { getModelById } = useModelCatalog();
   const titleGenerationSettings = useAtomValue(titleGenerationAtom);
+  const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
 
   const handleSave = () => {
     if (title.trim() && title.trim() !== currentTitle) {
@@ -69,6 +70,7 @@ const ChangeTitleForm = ({
           messages,
           titleGenerationSettings.fallbackPhrase,
           "none",
+          extractReasoningEnabled,
         );
         setTitle(generatedTitle);
       }

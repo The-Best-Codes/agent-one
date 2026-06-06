@@ -13,6 +13,7 @@ import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitle, hasMessageTextContent } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
+  extractReasoningEnabledAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   titleGenerationAtom,
@@ -46,6 +47,7 @@ export const ChatInstance = memo(
     const experimentalThrottleEnabled = useAtomValue(experimentalThrottleEnabledAtom);
     const experimentalThrottleValue = useAtomValue(experimentalThrottleValueAtom);
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
+    const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
     const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
     const chatIds = useAtomValue(chatIdsAtom);
     const suppressAutoSubmitAfterAbortRef = useRef(false);
@@ -95,7 +97,13 @@ export const ChatInstance = memo(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
           saveChatTitleState({ chatId, titleState: "generating" });
-          generateChatTitle(model, titleMessages, titleGenerationSettings)
+          generateChatTitle(
+            model,
+            titleMessages,
+            titleGenerationSettings,
+            undefined,
+            extractReasoningEnabled,
+          )
             .then((generatedTitle) => {
               if (chatIds.includes(chatId)) {
                 saveChatTitle({ chatId, title: generatedTitle });
@@ -115,6 +123,7 @@ export const ChatInstance = memo(
       chatId,
       model,
       chatIds,
+      extractReasoningEnabled,
       loadChatMetadata,
       saveChat,
       saveChatTitle,
