@@ -735,7 +735,7 @@ export default function AppearanceSection() {
                       </PopoverContent>
                     </Popover>
                     {pendingCustomBackgrounds.some((background) => background.url === url) ? (
-                      <span className="absolute inset-0 p-3">
+                      <span className="absolute inset-0">
                         <Skeleton className="h-full w-full rounded-[inherit]" />
                       </span>
                     ) : null}
