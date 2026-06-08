@@ -119,3 +119,7 @@ lmnt
 LMNT
 ELEVENLABS
 Lmnt
+quicktype
+Opencode
+opencode
+OPENCODE
