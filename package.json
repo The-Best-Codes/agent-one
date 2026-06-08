@@ -17,7 +17,9 @@
     "test:unit-test": "vitest run",
     "test:unit-test:ui": "vitest run --ui",
     "test:e2e": "playwright test",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "update:model-list": "bun scripts/update-model-directory.js",
+    "update:mcp-registry": "bun scripts/update-mcp-registry.js && bunx quicktype -l ts --just-types --prefer-types --prefer-unions --no-enums -t McpRegistryEntry -o src/assets/mcp-registry/types.ts src/assets/mcp-registry/mcp-registry.json && bun run fmt"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.81",
