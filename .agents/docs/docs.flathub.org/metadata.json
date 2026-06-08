@@ -1,4 +1,3 @@
 {
-  "llms": "https://docs.flathub.org/llms.txt",
-  "llms-full": "https://docs.flathub.org/llms-full.txt"
+  "update": "bunx --bun degit flathub-infra/documentation/docs/ docs/ --force"
 }

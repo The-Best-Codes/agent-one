@@ -5111,7 +5111,7 @@ recommendation.
 Based on discovery, the skill recommends one of four paths and scaffolds
 accordingly:
 
-**Remote [Streamable HTTP](/specification/draft/basic/transports#streamable-http)**
+**Remote [Streamable HTTP](/specification/draft/basic/transports/streamable-http)**
 is the default for anything wrapping a cloud API. Zero install friction, one
 deployment serves all users, and OAuth flows work properly because the server
 can handle redirects and token storage. The reference skill includes scaffolds
@@ -5129,7 +5129,7 @@ can install it without setting up Node or Python. Use this path when the server
 must touch the user's machine: reading local files, driving desktop apps, or
 talking to localhost services. The skill hands off to `build-mcpb`.
 
-**Local [stdio](/specification/draft/basic/transports#stdio)** remains available
+**Local [stdio](/specification/draft/basic/transports/stdio)** remains available
 for prototyping, with a noted upgrade path to MCPB when you're ready to
 distribute.
 
@@ -8084,7 +8084,7 @@ For our testing purposes, we will create an extremely simple MCP server that exp
   </Tab>
 
   <Tab title="Python">
-    You can see the complete Python project in the [sample repository](https://github.com/localden/min-py-mcp-auth).
+    You can see the complete Python project in the [sample repository](https://github.com/modelcontextprotocol/python-sdk/tree/main/examples/servers/simple-auth).
 
     To simplify our authorization interaction, in Python scenarios we rely on [FastMCP](https://gofastmcp.com/getting-started/welcome). Many of the conventions around authorization, like the endpoints and token validation logic, are consistent across languages, but some offer simpler ways of integrating them in production scenarios.
 
@@ -10089,7 +10089,7 @@ best for your use case.
 ## Client support
 
 <Note>
-  MCP Apps is an extension to the [core MCP specification](/specification). Host support varies by client.
+  MCP Apps is an extension to the [core MCP specification](/specification/latest). Host support varies by client.
 </Note>
 
 MCP Apps are currently supported by [Claude](https://claude.ai),
@@ -10769,7 +10769,7 @@ Optional extensions to the Model Context Protocol
 
 MCP extensions are optional additions to the specification that define capabilities beyond the core protocol. Extensions enable functionality that may be modular (e.g., distinct features like authentication), specialized (e.g., industry-specific logic), or experimental (e.g., features being incubated for potential core inclusion).
 
-Extensions are identified using a unique *extension identifier* with the format: `{vendor-prefix}/{extension-name}`, e.g. `io.modelcontextprotocol/oauth-client-credentials`. Official extensions use the `io.modelcontextprotocol` vendor prefix.
+Extensions are identified using a unique *extension identifier* with the format: `{vendor-prefix}/{extension-name}`, e.g. `io.modelcontextprotocol/oauth-client-credentials`. Identifiers follow the same rules as [`_meta` keys](/specification/draft/basic/index#meta), with a mandatory prefix. Official extensions use the `io.modelcontextprotocol` vendor prefix.
 
 <Tip>
   If you're building a third-party extension, use a reversed domain name you own as the vendor prefix to avoid collisions (similar to Java package naming). For example, a company owning `example.com` would use `com.example/` as their prefix (e.g., `com.example/my-extension`).
@@ -11060,7 +11060,7 @@ state does not change.
 
 ## Notifications
 
-Servers can push status updates via `notifications/tasks/status`. Clients opt
+Servers can push status updates via `notifications/tasks`. Clients opt
 into these through the `subscriptions/listen` mechanism. Each notification
 carries the full task state, eliminating the need for an extra `tasks/get`
 round-trip.
@@ -11165,7 +11165,7 @@ To return tasks from your server:
 ## Client support
 
 <Note>
-  MCP Tasks is an extension to the [core MCP specification](/specification). Host
+  MCP Tasks is an extension to the [core MCP specification](/specification/latest). Host
   support varies by client.
 </Note>
 
@@ -11347,7 +11347,7 @@ example:
 * Emitting resource subscription notifications requires the server to declare
   subscription support
 * Tool invocation requires the server to declare tool capabilities
-* [Sampling](/specification/2025-11-25/client) requires the client to declare support in its
+* [Sampling](/specification/2025-11-25/client/sampling) requires the client to declare support in its
   capabilities
 
 This capability negotiation ensures clients and servers have a clear understanding of
@@ -20003,6 +20003,9 @@ released as Current, Tier 1 SDKs:
   `DeprecationWarning`, Node.js's `process.emitWarning`, or a configurable
   logger).
 
+A Tier 1 SDK that consistently fails to surface a Deprecated feature is subject to the
+[Tier Relegation Process](/community/sdk-tiers#tier-relegation).
+
 ## Removing a Feature
 
 1. Once a feature is set for removal, the removal is executed at the discretion
@@ -20012,6 +20015,8 @@ released as Current, Tier 1 SDKs:
    example extending or shortening the timeline
    ([Expedited removal](#expedited-removal)) or restoring the feature to Active
    ([Feature states](#feature-states)).
+
+Features may remain Deprecated, without removal, for much longer than the minimum deprecation window.
 
 ## Expedited Removal
 
@@ -20025,118 +20030,19 @@ Final, in a short expedited-removal SEP that references it. The shortened
 window must still provide at least ninety days between the feature becoming
 Deprecated and its earliest removal.
 
+## Roles
 
-# File Uploads Charter
-Source: https://modelcontextprotocol.io/community/file-uploads/charter
+| Action                                         | Who                                                                                             |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Propose deprecation, extension, or restoration | Any contributor, per the SEP process                                                            |
+| Sponsor                                        | A Maintainer or Core Maintainer, per the SEP process                                            |
+| Approve a deprecation SEP                      | Core Maintainers, per the [governance decision process](/community/governance#decision-process) |
+| Decide a removal during release preparation    | Core Maintainers, per the [governance decision process](/community/governance#decision-process) |
+| Approve an extension or restoration SEP        | Core Maintainers, per the [governance decision process](/community/governance#decision-process) |
+| Approve expedited removal                      | Core Maintainers, per the [governance decision process](/community/governance#decision-process) |
 
-Charter for the MCP File Uploads Working Group.
-
-## Group Type
-
-**Working Group**
-
-## Mission Statement
-
-The File Uploads Working Group exists to define how MCP tools and elicitation requests declare file
-inputs so that hosts can present native file pickers and pass user-selected file content to servers.
-Today, servers that need a file from the user resort to prose instructions asking for base64 strings
-or local paths, which produces inconsistent UX and pushes encoding details onto end users. This WG
-will specify a minimal, schema-level mechanism for declaring file inputs and the wire format for
-delivering them, anchored on [SEP-2356](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356).
-
-## Scope
-
-### In Scope
-
-* **Specification Work**: SEPs defining declarative file input descriptors on tool input schemas and
-  elicitation request schemas, the wire encoding for file content, and host-side handling
-  requirements.
-* **Reference Implementations**: SDK types and helpers for `FileInputDescriptor`, data URI encoding,
-  and a sample host flow demonstrating picker invocation and value substitution.
-* **Cross-Cutting Concerns**: Coordination with the MCP Apps WG where embedded UI surfaces present
-  their own file pickers, and with the Security WG on host-side validation requirements.
-* **Documentation**: Specification sections covering file input declaration and a migration guide
-  for servers currently using ad-hoc base64 instructions.
-
-### Out of Scope
-
-* Server-to-client file delivery, which is already covered by Resources and `BlobResourceContents`.
-* Changes to the transport layer or session model.
-
-The WG may evaluate approaches such as streaming, chunked transfer, or presigned upload URLs as part
-of its design work; whether those land in the initial SEP or a follow-up is a WG decision rather
-than a charter constraint.
-
-### Related Groups
-
-* **MCP Apps WG** — embedded app UIs may surface their own file pickers; the descriptor format
-  should be reusable in that context.
-* **Security WG** — host-side validation requirements for user-supplied file content (the SEP
-  references [OWASP ASVS V5](https://owasp.org/www-project-application-security-verification-standard/)
-  for general upload hygiene).
-* **Tool Annotations IG** — file input descriptors are a form of input-parameter metadata and should
-  remain consistent with the broader annotation taxonomy.
-
-## Leadership
-
-| Role | Name           | Organization | GitHub                                   | Term    |
-| ---- | -------------- | ------------ | ---------------------------------------- | ------- |
-| Lead | Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) | Initial |
-
-Sponsored by Den Delimarsky ([@localden](https://github.com/localden)) and Nick Cooper
-([@nickcoai](https://github.com/nickcoai)).
-
-## Authority & Decision Rights
-
-| Decision Type                       | Authority Level                                        |
-| ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
-
-## Membership
-
-| Name           | Organization | GitHub                                   | Discord | Level     |
-| -------------- | ------------ | ---------------------------------------- | ------- | --------- |
-| Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) |         | Lead      |
-| Nick Cooper    | OpenAI       | [@nickcoai](https://github.com/nickcoai) |         | WG Member |
-| Olivier Chafik | Anthropic    | [@ochafik](https://github.com/ochafik)   |         | WG Member |
-
-## Operations
-
-| Meeting         | Frequency | Duration | Purpose                               |
-| --------------- | --------- | -------- | ------------------------------------- |
-| Working Session | Biweekly  | 30 min   | Technical discussion, proposal review |
-
-Discord: `#file-uploads-wg`
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-| Item                                                                                                        | Status | Target Date | Champion                               |
-| ----------------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
-| [SEP-2356: Declarative file inputs](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356) | Draft  | End May     | [@ochafik](https://github.com/ochafik) |
-| TypeScript SDK reference implementation                                                                     | —      | End May     | [@ochafik](https://github.com/ochafik) |
-| Reference implementation in a second Tier-1 SDK                                                             | —      | End June    | TBD                                    |
-
-### Success Criteria
-
-* An accepted SEP defining the file input descriptor and wire encoding.
-* Reference implementations in at least two Tier-1 SDKs.
-* At least one production host rendering a native file picker from the descriptor.
-* Conformance test coverage for the new schema keyword.
-
-## Changelog
-
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-04-23 | Initial charter |
+Lead Maintainers retain veto authority over each of the approvals
+above, per the [governance roles](/community/governance#roles) definition.
 
 
 # Governance and Stewardship
@@ -20269,324 +20175,6 @@ The nomination process, sponsorship requirements, review timeline, and inactivit
 Refer to [the maintainer list](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md).
 
 
-# Inspector V2 Working Group Charter
-Source: https://modelcontextprotocol.io/community/inspector-v2/charter
-
-Charter for the Inspector V2 Working Group, a Working Group of the Model Context Protocol community.
-
-## Group Type
-
-Working Group
-
-## Mission Statement
-
-The Inspector V2 Working Group is building Inspector V2, a new web-based MCP inspector redesigned from the ground up for maintainability and reliability. The group delivers a shared Inspector Core architecture that maximizes code reuse across Web, CLI, and TUI implementations, together with a comprehensive testing apparatus. This effort requires cross-maintainer collaboration because it spans UI, protocol tooling, and test infrastructure that no single maintainer owns today.
-
-## Scope
-
-### In Scope
-
-* The `modelcontextprotocol/inspector` repository, including:
-* **Inspector Core** — a new shared-code architecture that provides common MCP and protocol interfaces for all Inspector front-ends.
-* **Web Inspector UI** — browser-based inspector built on Mantine and TypeScript.
-* **CLI Inspector** — command-line interface sharing Inspector Core.
-* **TUI Inspector** — terminal UI sharing Inspector Core.
-* **Testing apparatus** — shared test harnesses, fixtures, and integration tests across all Inspector surfaces.
-* Deprecation and migration of the existing Inspector on `main` to a `v1.x` maintenance branch.
-* Adoption of MCP TypeScript SDK V2 inside Inspector Core once available.
-
-### Out of Scope
-
-* The core MCP specification.
-* MCP SDK maintenance (TypeScript, Python, or any other language SDK).
-* MCP server implementations.
-
-### Related Groups
-
-* **SDK WG** — Inspector Core consumes the TypeScript SDK; coordination required for SDK V2 adoption.
-* **MCP Apps WG** — shared surface area around client/app ergonomics and inspection workflows.
-* **Auth WG** — authentication flows exercised by Inspector when connecting to protected servers.
-* **Registry WG** — discovery and metadata surfaces that Inspector presents to users.
-
-## Leadership
-
-| Role    | Name           | Organization | GitHub                                           | Term    |
-| ------- | -------------- | ------------ | ------------------------------------------------ | ------- |
-| WG Lead | Cliff Hall     | Futurescale  | [@cliffhall](https://github.com/cliffhall)       | Ongoing |
-| WG Lead | Ola Hungerford | Nordstrom    | [@olaservo](https://github.com/olaservo)         | Ongoing |
-| WG Lead | Bob Dickinson  | TeamSpark.ai | [@BobDickinson](https://github.com/BobDickinson) | Ongoing |
-
-## Authority & Decision Rights
-
-| Decision Type                       | Authority Level                                        |
-| ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
-
-## Membership
-
-| Name           | Organization | GitHub                                           | Discord     | Level      |
-| -------------- | ------------ | ------------------------------------------------ | ----------- | ---------- |
-| Cliff Hall     | Futurescale  | [@cliffhall](https://github.com/cliffhall)       | seaofarrows | Maintainer |
-| Ola Hungerford | Nordstrom    | [@olaservo](https://github.com/olaservo)         | olaservo    | Maintainer |
-| Bob Dickinson  | TeamSpark.ai | [@BobDickinson](https://github.com/BobDickinson) | rddthree    | Maintainer |
-| Tobin South    | Anthropic    | [@tobinsouth](https://github.com/tobinsouth)     | tobinsouth  | Member     |
-
-## Operations
-
-| Meeting         | Frequency                                  | Duration   | Purpose                               |
-| --------------- | ------------------------------------------ | ---------- | ------------------------------------- |
-| Working Session | Weekly, Wednesdays 11:00 America/New\_York | 60 minutes | Technical discussion, proposal review |
-
-Meetings are held at [meet.modelcontextprotocol.io/tag/inspector-v2-wg](https://meet.modelcontextprotocol.io/tag/inspector-v2-wg). Agendas are posted at least 7 days in advance per current MCP meeting policy. Meeting notes are published to the [Meeting Notes — Inspector V2 WG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-inspector-v2-wg) discussion category in the `modelcontextprotocol/modelcontextprotocol` repository.
-
-**Communication channels**
-
-* Primary channel: `#inspector-v2-wg` on the MCP Discord.
-* Async discussion: GitHub Discussions in `modelcontextprotocol/inspector`.
-* Quarterly updates: posted to the WG's GitHub Discussions category.
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-| Work Item                                                                               | Status                       | Owner(s)                   |
-| --------------------------------------------------------------------------------------- | ---------------------------- | -------------------------- |
-| Web Inspector UI (Mantine / TypeScript) — dumb components with real MCP/Core interfaces | In Progress                  | Cliff Hall, Ola Hungerford |
-| Inspector Core shared-code architecture                                                 | In Progress                  | Bob Dickinson              |
-| CLI Inspector and TUI Inspector                                                         | In Progress                  | Bob Dickinson              |
-| Migration of existing Inspector on `main` to `v1.x` maintenance branch                  | Planning                     | WG Leads                   |
-| Testing apparatus across Core, Web, CLI, and TUI                                        | Planning                     | WG Leads                   |
-| Inspector Core adoption of MCP TypeScript SDK V2                                        | Blocked (gated by TS SDK WG) | Bob Dickinson              |
-
-### Success Criteria
-
-1. **End of Q1** — Web UI complete with "dumb" components wired to real MCP/Inspector Core interfaces.
-2. **End of Q1** — Inspector Core architecture finalized.
-3. **End of Q2** — Inspector Core merged to `v2/main` and working end-to-end with the Web UI.
-4. **End of Q2** — CLI and TUI Inspectors merged to `v2/main` and working end-to-end with Inspector Core.
-5. **End of Q2** — Existing Inspector on `main` moved to the `v1.x` branch and officially deprecated.
-6. **End of Q2** — New Inspector family (Web, CLI, TUI) published and generally available.
-7. **End of Q3** — Inspector Core running on MCP TypeScript SDK V2 (gated by the TypeScript SDK WG's delivery schedule).
-
-## Changelog
-
-| Date       | Change                                           | Author               |
-| ---------- | ------------------------------------------------ | -------------------- |
-| 2026-04-11 | Initial charter adopted for SEP-2149 compliance. | Cliff Hall (Co-Lead) |
-
-
-# Interceptors Charter
-Source: https://modelcontextprotocol.io/community/interceptors/charter
-
-Charter for the MCP Interceptors Working Group.
-
-## Group Type
-
-**Working Group**
-
-## Mission Statement
-
-The Interceptors Working Group exists to standardize how context operations are intercepted, validated, and transformed at key points in the agentic lifecycle. This covers MCP-defined operations such as tool invocations, resource access, prompt handling, sampling, and elicitation, as well as any other operation that shapes agent context — including LLM completions and custom application-specific workflows. The ecosystem is developing a sprawling landscape of sidecars, proxies, and gateways for cross-cutting concerns that are largely non-reusable and non-interoperable, creating an M × N integration problem. The WG will produce specification extensions and reference implementations that define interceptors as a new MCP primitive with two types — validators (inspect and return pass/fail decisions) and mutators (transform context payloads) — discoverable and invocable through MCP's existing JSON-RPC patterns across deployment models including in-process, sidecar, and remote service.
-
-## Scope
-
-### In Scope
-
-* **Specification Work**: SEPs defining the interceptor primitive — validator and mutator types, lifecycle event hooks for MCP operations (tool calls, resource reads, prompt gets, sampling, elicitation) and extensible to non-MCP context operations (LLM completions, custom workflows), trust-boundary-aware execution model, priority-based chain ordering, and audit mode semantics.
-* **Reference Implementations**: Multi-language SDK libraries for building interceptors, sample interceptors (PII redaction, schema validation, audit logging), a common interceptor sidecar/proxy runtime, and a CLI client for interceptor invocation and testing.
-* **Cross-Cutting Concerns**: Transport-level interception points, gateway-based deployment patterns, and interplay with routing and policy layers (see Related Groups).
-* **Documentation**: Specification sections covering interceptor authoring, deployment models (in-process, sidecar, remote service), chain configuration, and migration guidance from ad-hoc middleware approaches.
-
-### Out of Scope
-
-* Client-specific hook implementation details (e.g., Claude Code's internal hook execution engine) — the WG standardizes the protocol-level interface, not host internals.
-* Transport-layer wire format or session model changes (owned by the Transports WG).
-* General-purpose middleware or proxy infrastructure beyond what the MCP protocol requires.
-
-### Related Groups
-
-* **Transports WG** — interceptors operate on MCP message flows whose delivery behavior depends on the transport; coordination needed on transport-level interception points.
-* **Gateways IG** — gateways are a key deployment model for interceptors; coordination needed on gateway-based interceptor patterns and shared concerns around routing, policy, and observability.
-
-## Leadership
-
-| Role | Name                     | Organization | GitHub                                       | Term    |
-| ---- | ------------------------ | ------------ | -------------------------------------------- | ------- |
-| Lead | Sambhav Kothari          | Bloomberg    | [@sambhav](https://github.com/sambhav)       | Initial |
-| Lead | Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)       | Initial |
-| Lead | Kurt Degiorgio           | Bloomberg    | [@degiorgio](https://github.com/degiorgio)   | Initial |
-| Lead | Uk-Jae Jeong             | Bloomberg    | [@jeongukjae](https://github.com/jeongukjae) | Initial |
-
-## Authority & Decision Rights
-
-| Decision Type                       | Authority Level                                        |
-| ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
-
-## Operations
-
-| Meeting         | Frequency | Duration   | Purpose                               |
-| --------------- | --------- | ---------- | ------------------------------------- |
-| Working Session | Biweekly  | 60 minutes | Technical discussion, proposal review |
-
-## Resources
-
-* Experimental extension repository: [modelcontextprotocol/experimental-ext-interceptors](https://github.com/modelcontextprotocol/experimental-ext-interceptors)
-* Motivation: [SEP-1763](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1763)
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-| Item                                                                  | Status      | Target Date | Champion |
-| --------------------------------------------------------------------- | ----------- | ----------- | -------- |
-| SEP-1763: Interceptors                                                | Draft       |             | TBD      |
-| Sample interceptors (PII redaction, schema validation, audit logging) | In Progress |             | TBD      |
-| Common interceptor sidecar runtime                                    | Ideating    |             | TBD      |
-| CLI client for interceptor invocation and testing                     | Ideating    |             | TBD      |
-| Reference implementation in Go SDK                                    | In Progress |             | TBD      |
-| Reference implementation in C# SDK                                    | In Progress |             | TBD      |
-
-### Success Criteria
-
-* An accepted SEP defining the interceptor primitive (validators, mutators), lifecycle event hooks, and trust-boundary-aware chain execution.
-* Reference implementations in at least two Tier-1 SDKs (Go, C#).
-* A common interceptor sidecar runtime enabling platform teams to deploy interceptors without modifying individual MCP servers.
-* CLI tooling for interceptor invocation and testing.
-* Demonstrated interoperability across deployment models (in-process, sidecar, remote service).
-
-## Changelog
-
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-04-21 | Initial charter |
-
-
-# Registry Charter
-Source: https://modelcontextprotocol.io/community/registry/charter
-
-Charter for the MCP Registry Working Group.
-
-## Group Type
-
-**Working Group**
-
-## Mission Statement
-
-The Registry Working Group exists to build and maintain the official MCP Registry — an open catalog and API for publicly available MCP servers — so that clients, sub-registries, and end users can discover, evaluate, and install servers with confidence. The WG owns the registry service, the `server.json` schema, the registry API specification, and the sub-registry ecosystem that further distributes server metadata.
-
-## Scope
-
-### In Scope
-
-* **Registry Service**: Operation, reliability, and evolution of the hosted registry at `registry.modelcontextprotocol.io`, including uptime, monitoring, and incident response.
-* **Registry API Specification**: The OpenAPI spec defining how any registry (official or private) exposes server metadata.
-* **`server.json` Schema**: The standardized format for describing MCP server identity, packages, runtime configuration, and capabilities — coordinated with the Server Card WG to keep Server Card a coherent subset.
-* **Client SDKs**: Generated or hand-maintained client libraries that make it easy for clients and sub-registries to integrate with the registry API.
-* **Publishing & Trust**: Authentication flows (GitHub OAuth, GitHub OIDC, DNS/HTTP verification), namespace ownership, moderation tooling, and community-driven flagging.
-* **Adoption & Outreach**: Documentation, onboarding guides, and outreach to drive catalog coverage.
-* **Issue Triage & Automation**: Labeling system, triage, and contributor workflow for the registry repo.
-
-### Out of Scope
-
-* Any runtime-related MCP protocol specification aspects (owned by Core Maintainers and other WGs).
-* Server Card format and discovery mechanism (owned by the Server Card WG; this WG coordinates on `server.json` alignment).
-* Ranking/choosing between MCP server implementations on behalf of MCP clients or end-users.
-* Hosting, distributing, or executing MCP server code or binaries — the registry is a metadata catalog, not a package registry.
-* Any commitment to delivering an enterprise-ready or reusable registry implementation. The codebase supports this instance only and is not intended for external deployments.
-
-### Related Groups
-
-* **Server Card WG** — `server.json` and Server Card must stay aligned; the registry will expose Server Cards + local package-related metadata for published entries. Tight coordination required to avoid schema divergence.
-
-## Leadership
-
-| Role | Name               | Organization | GitHub                                     | Term    |
-| ---- | ------------------ | ------------ | ------------------------------------------ | ------- |
-| Lead | Tadas Antanavicius | PulseMCP     | [@tadasant](https://github.com/tadasant)   | Initial |
-| Lead | Radoslav Dimitrov  | Stacklok     | [@rdimitrov](https://github.com/rdimitrov) | Initial |
-
-## Authority & Decision Rights
-
-| Decision Type                       | Authority Level                                        |
-| ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
-
-## Membership
-
-| Name               | Organization | GitHub                                           | Discord    | Level     | Maintainer? |
-| ------------------ | ------------ | ------------------------------------------------ | ---------- | --------- | ----------- |
-| Tadas Antanavicius | PulseMCP     | [@tadasant](https://github.com/tadasant)         | tadasant\_ | Lead      | Yes         |
-| Radoslav Dimitrov  | Stacklok     | [@rdimitrov](https://github.com/rdimitrov)       | dimitrovr  | Lead      | Yes         |
-| Bob Dickinson      | TeamSpark    | [@BobDickinson](https://github.com/BobDickinson) | rddthree   | WG Member | Yes         |
-| Preeti Dewani      | Ravenmail    | [@pree-dew](https://github.com/pree-dew)         | pree\_dew  | WG Member | No          |
-
-## Emeritus Membership
-
-| Name         | Organization | GitHub                                     | Discord   | Level     | Maintainer? |
-| ------------ | ------------ | ------------------------------------------ | --------- | --------- | ----------- |
-| Adam Jones   | Anthropic    | [@domdomegg](https://github.com/domdomegg) | domdomegg | WG Member | Yes         |
-| Toby Padilla | GitHub       | [@toby](https://github.com/toby)           |           | WG Member | Yes         |
-
-## Operations
-
-| Meeting         | Frequency | Duration | Purpose                                           |
-| --------------- | --------- | -------- | ------------------------------------------------- |
-| Working Session | Weekly    | 30 min   | Technical discussion, triage, and proposal review |
-
-Discord: `#registry-dev`
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-| Item                                                                  | Status      | Target Date | Champion                                 |
-| --------------------------------------------------------------------- | ----------- | ----------- | ---------------------------------------- |
-| Server Card / `server.json` alignment                                 | In Progress | Q2 2026     | [@tadasant](https://github.com/tadasant) |
-| Uptime & monitoring automation                                        | Planned     | Q2 2026     | TBD                                      |
-| Issue triage automation & labeling system                             | Planned     | Q2 2026     | TBD                                      |
-| Adoption outreach to popular server maintainers                       | Ideating    | Q3 2026     | TBD                                      |
-| Cataloging specification support by clients and sub-registry products | Ideating    | Q3 2026     | TBD                                      |
-| Client SDK generation / publication                                   | Ideating    | Q3 2026     | TBD                                      |
-| Registry API v1 GA                                                    | Ideating    | TBD         | TBD                                      |
-
-### Success Criteria
-
-* Registry uptime ≥ 99.9% with automated monitoring and alerting.
-* `server.json` schema and Server Card format aligned with no unintentional divergence.
-* Majority of popular, publicly available MCP servers published to the registry.
-* At least one client SDK (generated or maintained) available for registry consumers.
-* Registry API v1 specification finalized and stable.
-* Active sub-registry ecosystem consuming the official registry API.
-
-## Changelog
-
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-04-08 | Initial charter |
-
-
 # SDK Tiering System
 Source: https://modelcontextprotocol.io/community/sdk-tiers
 
@@ -20661,6 +20249,7 @@ Conformance scores are calculated against **applicable required tests** only:
 * Excluding tests marked as pending or skipped
 * Excluding tests for experimental features
 * Excluding legacy backward-compatibility tests (unless the SDK claims legacy support)
+* Excluding tests labeled `disputed` in the conformance repository, until the dispute is resolved
 
 Conformance testing validates that SDKs correctly implement the protocol by running standardized test
 scenarios and checking protocol message exchanges. See [Tier Relegation](#tier-relegation) for how
@@ -20684,6 +20273,8 @@ continuously for 4 weeks:
 
 * **Tier 1 → Tier 2**: Any conformance test fails
 * **Tier 2 → Tier 3**: More than 20% of conformance tests fail
+
+An SDK may also be relegated if issues remain unaddressed for two months.
 
 ## Issue Triage Labels
 
@@ -20730,98 +20321,6 @@ Use these exact label names across all repositories to enable consistent reporti
   message exchange, or use of core primitives (tools, resources, prompts)
 
 
-# SDK Working Group Charter
-Source: https://modelcontextprotocol.io/community/sdk/charter
-
-Charter for the MCP SDK Working Group.
-
-## Group Type
-
-**Working Group**
-
-## Mission Statement
-
-The SDK Working Group exists to keep the official MCP SDKs consistent, conformant, and current with the specification. It coordinates implementation of new protocol versions across languages, governs the [SDK Tiering System](/community/sdk-tiers), and establishes shared design patterns where sensible, so that developers get a coherent experience across SDKs while each remains idiomatic to its language.
-
-## Scope
-
-### In Scope
-
-* **SDK Tiering**: Operating the [SDK Tiering System](/community/sdk-tiers), including reviewing tier advancement requests, applying relegation criteria, and maintaining the published tier assignments.
-* **Official SDK Roster**: Evaluating proposals to add new official SDKs or retire existing ones.
-* **Release Coordination**: Aligning Tier-1 SDK release plans with specification version dates so that protocol features land in SDKs on the timelines their tier requires.
-* **Cross-SDK Design Guidance**: Recommending common patterns for SDK API surface, versioning, deprecation, error handling, and extension packaging, so that SDKs remain recognisably similar across languages while staying idiomatic.
-* **Conformance Integration**: Working with the Conformance Testing project to ensure each official SDK runs the conformance suite and publishes results.
-* **Maintainer Coordination**: Providing a forum for per-language SDK maintainers to share implementation experience and surface specification ambiguities back to Core Maintainers.
-
-### Out of Scope
-
-* **Per-SDK day-to-day maintenance**: Issue triage, PR review, and releases for an individual SDK remain the responsibility of that SDK's maintainers as listed in [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md).
-* **Specification authorship**: Protocol changes are proposed through the [SEP process](/community/sep-guidelines) and owned by the relevant working group or Core Maintainers. The SDK WG implements accepted SEPs; it does not own spec sections.
-* **Conformance test authoring**: The conformance test suite itself is owned by the [Conformance Testing](https://github.com/modelcontextprotocol/conformance) project.
-* **Third-party and community SDKs**: SDKs outside the [modelcontextprotocol](https://github.com/modelcontextprotocol) organization are not governed by this group.
-
-### Related Groups
-
-* **Transports WG**: Transport implementations are a substantial part of every SDK. The SDK WG coordinates with the Transports WG on rollout sequencing when transport SEPs land.
-* **Conformance Testing**: Tier assignments depend on conformance scores. The SDK WG consumes conformance results and feeds back gaps in test coverage.
-* **All specification-producing WGs**: The SDK WG is a downstream consumer of accepted SEPs and coordinates reference-implementation timing with the originating group.
-
-## Leadership
-
-| Role | Name             | Organization | GitHub                                                 | Term    |
-| ---- | ---------------- | ------------ | ------------------------------------------------------ | ------- |
-| Lead | Felix Weinberger | Anthropic    | [@felixweinberger](https://github.com/felixweinberger) | Ongoing |
-
-## Authority & Decision Rights
-
-| Decision Type                            | Authority Level                                |
-| ---------------------------------------- | ---------------------------------------------- |
-| Meeting logistics & scheduling           | WG Leads (autonomous)                          |
-| Proposal prioritization within WG        | WG Leads (autonomous)                          |
-| SDK tier advancement or relegation       | WG consensus                                   |
-| Cross-SDK design guidance                | WG consensus (advisory to per-SDK maintainers) |
-| Per-SDK releases, versioning, API design | That SDK's maintainers (autonomous)            |
-| Adding or retiring an official SDK       | WG consensus → Core Maintainer approval        |
-| Changes to the tiering criteria          | WG consensus → Core Maintainer approval        |
-| Scope expansion                          | Core Maintainer approval required              |
-| WG Member approval                       | WG Member sponsors                             |
-
-## Membership
-
-WG Members are the maintainers of each official SDK as recorded in [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) and the corresponding roles in [modelcontextprotocol/access](https://github.com/modelcontextprotocol/access). Maintainers of any official SDK are WG Members by default.
-
-## Operations
-
-| Meeting         | Frequency | Duration | Purpose                                              |
-| --------------- | --------- | -------- | ---------------------------------------------------- |
-| Working Session | Biweekly  | 45 min   | Release coordination, tier reviews, cross-SDK design |
-
-Communication happens in the `#general-sdk-dev` Discord channel and the SDK Working Group category in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions).
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-| Item                                                | Status      | Target Date | Champion            |
-| --------------------------------------------------- | ----------- | ----------- | ------------------- |
-| 2026-06-30 spec support across Tier-1 SDKs          | Planning    | 2026 Q3     | Per-SDK maintainers |
-| Cross-SDK guidance for stateless transport adoption | In progress | 2026 Q2     | WG Leads            |
-| Quarterly tier review                               | Recurring   | Quarterly   | WG Leads            |
-
-### Success Criteria
-
-* All official SDKs have a published tier and a passing conformance run on their default branch.
-* Tier-1 SDKs ship support for each released specification version within the timeline their tier requires.
-* Tier advancement and relegation decisions are recorded with rationale in GitHub Discussions.
-
-## Changelog
-
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-04-28 | Initial charter |
-
-
 # SEP Guidelines
 Source: https://modelcontextprotocol.io/community/sep-guidelines
 
@@ -20859,11 +20358,12 @@ Not sure? Ask in [Discord](/community/communication#discord) before starting sig
 
 ## SEP Types
 
-There are three kinds of SEP:
+There are four kinds of SEP:
 
 1. **Standards Track** - Describes a new feature or implementation for the Model Context Protocol, or an interoperability standard supported outside the core specification.
 2. **Informational** - Describes a design issue or provides guidelines/information to the community without proposing a new feature.
 3. **Process** - Describes a process surrounding MCP or proposes a change to a process (like this document).
+4. **Extensions Track** - Describes a protocol extension. Follows the same review and acceptance process as Standards Track SEPs, but indicates that the proposal is for an extension rather than a protocol addition. See [Creating Extensions](/extensions/overview#creating-extensions) for the extension lifecycle.
 
 ## SEP Workflow
 
@@ -21091,106 +20591,6 @@ Bad reasons:
 ## Copyright
 
 This document is placed in the public domain or under the CC0-1.0-Universal license, whichever is more permissive.
-
-
-# Server Card Charter
-Source: https://modelcontextprotocol.io/community/server-card/charter
-
-Charter for the MCP Server Card Working Group.
-
-## Group Type
-
-**Working Group**
-
-## Mission Statement
-
-The Server Card Working Group exists to define mechanisms that facilitate discovery and usage of MCP servers via common discovery mechanisms, and to provide guidance on how this fits into broader AI standardization efforts around discovery. Concretely, the WG will define what constitutes an MCP Server Card, the standardized document format a Server Card must follow, and how clients discover a Server Card for a given server.
-
-## Scope
-
-### In Scope
-
-* **Specification Work**: SEPs or extensions defining what constitutes an MCP Server Card and the specific format of the Server Card document.
-* **Discovery Mechanism**: Specification of how an MCP Server Card document is discovered (well-known URL, resource-based discovery, etc.).
-* **Cross-Ecosystem Coordination**: A recommendation to the [AI Card](https://github.com/Agent-Card/ai-card) effort on how to interact with MCP Server Cards.
-* **Documentation**: Specification sections and guidance covering Server Card authoring and consumption.
-
-### Out of Scope
-
-* Changes to the MCP initialization handshake or transport layer.
-* A general-purpose MCP server registry or catalog (owned by the Registry WG).
-* Internationalization of Server Card content until an MCP-wide i18n approach is defined.
-
-### Related Groups
-
-* **Registry WG** — Server Card format should stay as close as possible to a subset of `server.json`; coordination required to avoid divergence.
-* **AI Card effort** (external) — ongoing discussion on whether and how an AI Catalog can link directly to an MCP Server Card.
-
-## Leadership
-
-| Role | Name              | Organization | GitHub                                               | Term                         |
-| ---- | ----------------- | ------------ | ---------------------------------------------------- | ---------------------------- |
-| Lead | David Soria Parra | Anthropic    | [@dsp-ant](https://github.com/dsp-ant)               | 6 months (ends Aug 14, 2026) |
-| Lead | Sam Morrow Drums  | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | 6 months (ends Aug 14, 2026) |
-
-## Authority & Decision Rights
-
-| Decision Type                       | Authority Level                                        |
-| ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
-
-## Membership
-
-| Name               | Organization | GitHub                                               | Discord | Level     |
-| ------------------ | ------------ | ---------------------------------------------------- | ------- | --------- |
-| David Soria Parra  | Anthropic    | [@dsp-ant](https://github.com/dsp-ant)               |         | Lead      |
-| Sam Morrow Drums   | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | Lead      |
-| Tadas Antanavicius |              | [@tadasant](https://github.com/tadasant)             |         | WG Member |
-
-## Operations
-
-| Meeting         | Frequency | Duration | Purpose                               |
-| --------------- | --------- | -------- | ------------------------------------- |
-| Working Session | Weekly    | 60 min   | Technical discussion, proposal review |
-
-Discord: [#server-card-wg](https://discord.com/channels/1358869848138059966/1399986204405141534)
-
-## Deliverables & Success Metrics
-
-### Active Work Items
-
-| Item                                                                                                | Status | Target Date | Champion                               |
-| --------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
-| [SEP-2127: MCP Server Card](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127) | Draft  | Apr 3, 2026 | [@dsp-ant](https://github.com/dsp-ant) |
-
-### Success Criteria
-
-### Active Work Items
-
-| Item                                    | Status | Target Date | Champion |
-| --------------------------------------- | ------ | ----------- | -------- |
-| SEP 2127: MCP Server Cards              | Draft  | End March   | @dsp-ant |
-| Reference implementation in Tier-1 SDKs | —      | End April   | TBD      |
-
-### Success Criteria
-
-* Spec changes accepted by Core Maintainers.
-* SDK implementations available.
-* Real-world clients with reach implementing the proposal.
-* Real-world servers with reach implementing the proposal.
-
-## Changelog
-
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-03-26 | Initial charter |
 
 
 # Working and Interest Groups
@@ -27392,7 +26792,7 @@ Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12
 
 <div>
   <Badge>
-    Draft
+    Final
   </Badge>
 
   <Badge>
@@ -27404,7 +26804,7 @@ Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2106                                                                                                                                                                          |
 | **Title**     | Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12                                                                                                           |
-| **Status**    | Draft                                                                                                                                                                         |
+| **Status**    | Final                                                                                                                                                                         |
 | **Type**      | Standards Track                                                                                                                                                               |
 | **Created**   | 2026-01-06                                                                                                                                                                    |
 | **Author(s)** | John McBride ([@jpmcb](https://github.com/jpmcb)) — original proposal; Ola Hungerford ([@olaservo](https://github.com/olaservo)) — current shepherd, post-SEP-1850 conversion |
@@ -29075,7 +28475,7 @@ Standardize Resource Not Found Error Code
 
 <div>
   <Badge>
-    Draft
+    Final
   </Badge>
 
   <Badge>
@@ -29087,7 +28487,7 @@ Standardize Resource Not Found Error Code
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2164                                                                            |
 | **Title**     | Standardize Resource Not Found Error Code                                       |
-| **Status**    | Draft                                                                           |
+| **Status**    | Final                                                                           |
 | **Type**      | Standards Track                                                                 |
 | **Created**   | 2026-01-28                                                                      |
 | **Author(s)** | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
@@ -29179,7 +28579,7 @@ OIDC-Flavored Refresh Token Guidance
 
 <div>
   <Badge>
-    Accepted
+    Final
   </Badge>
 
   <Badge>
@@ -29191,7 +28591,7 @@ OIDC-Flavored Refresh Token Guidance
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2207                                                                            |
 | **Title**     | OIDC-Flavored Refresh Token Guidance                                            |
-| **Status**    | Accepted                                                                        |
+| **Status**    | Final                                                                           |
 | **Type**      | Standards Track                                                                 |
 | **Created**   | 2026-02-04                                                                      |
 | **Author(s)** | Wils Dawson ([@wdawson](https://github.com/wdawson))                            |
@@ -30493,7 +29893,7 @@ Multi Round-Trip Requests
 
 <div>
   <Badge>
-    Accepted
+    Final
   </Badge>
 
   <Badge>
@@ -30505,7 +29905,7 @@ Multi Round-Trip Requests
 | ------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2322                                                                                                                      |
 | **Title**     | Multi Round-Trip Requests                                                                                                 |
-| **Status**    | Accepted                                                                                                                  |
+| **Status**    | Final                                                                                                                     |
 | **Type**      | Standards Track                                                                                                           |
 | **Created**   | 2026-02-03                                                                                                                |
 | **Author(s)** | Mark D. Roth ([@markdroth](https://github.com/markdroth)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)), |
@@ -31886,7 +31286,7 @@ Recommend Issuer (iss) Parameter in MCP Auth Responses
 
 <div>
   <Badge>
-    In-Review
+    Final
   </Badge>
 
   <Badge>
@@ -31898,7 +31298,7 @@ Recommend Issuer (iss) Parameter in MCP Auth Responses
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2468                                                                            |
 | **Title**     | Recommend Issuer (iss) Parameter in MCP Auth Responses                          |
-| **Status**    | In-Review                                                                       |
+| **Status**    | Final                                                                           |
 | **Type**      | Standards Track                                                                 |
 | **Created**   | 2026-03-25                                                                      |
 | **Author(s)** | Emily Lauber ([@EmLauber](https://github.com/EmLauber))                         |
@@ -31991,7 +31391,7 @@ Require Conformance Tests for Standards Track SEPs to Reach Final Status
 
 <div>
   <Badge>
-    Draft
+    Final
   </Badge>
 
   <Badge>
@@ -32003,7 +31403,7 @@ Require Conformance Tests for Standards Track SEPs to Reach Final Status
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2484                                                                            |
 | **Title**     | Require Conformance Tests for Standards Track SEPs to Reach Final Status        |
-| **Status**    | Draft                                                                           |
+| **Status**    | Final                                                                           |
 | **Type**      | Process                                                                         |
 | **Created**   | 2026-03-27                                                                      |
 | **Author(s)** | Paul Carleton ([@pcarleton](https://github.com/pcarleton))                      |
@@ -32189,7 +31589,7 @@ TTL for List Results
 
 <div>
   <Badge>
-    Accepted
+    Final
   </Badge>
 
   <Badge>
@@ -32201,7 +31601,7 @@ TTL for List Results
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2549                                                                            |
 | **Title**     | TTL for List Results                                                            |
-| **Status**    | Accepted                                                                        |
+| **Status**    | Final                                                                           |
 | **Type**      | Standards Track                                                                 |
 | **Created**   | 2026-04-09                                                                      |
 | **Author(s)** | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                   |
@@ -32710,7 +32110,7 @@ Make MCP Stateless
 
 <div>
   <Badge>
-    Accepted
+    Final
   </Badge>
 
   <Badge>
@@ -32722,7 +32122,7 @@ Make MCP Stateless
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2575                                                                                                                            |
 | **Title**     | Make MCP Stateless                                                                                                              |
-| **Status**    | Accepted                                                                                                                        |
+| **Status**    | Final                                                                                                                           |
 | **Type**      | Standards Track                                                                                                                 |
 | **Created**   | 2025-06-18                                                                                                                      |
 | **Author(s)** | Jonathan Hefner ([@jonathanhefner](https://github.com/jonathanhefner)), Mark Roth ([@markdroth](https://github.com/markdroth)), |
@@ -33844,7 +33244,7 @@ Specification Feature Lifecycle and Deprecation Policy
 
 <div>
   <Badge>
-    Draft
+    Final
   </Badge>
 
   <Badge>
@@ -33856,7 +33256,7 @@ Specification Feature Lifecycle and Deprecation Policy
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2596                                                                            |
 | **Title**     | Specification Feature Lifecycle and Deprecation Policy                          |
-| **Status**    | Draft                                                                           |
+| **Status**    | Final                                                                           |
 | **Type**      | Process                                                                         |
 | **Created**   | 2026-04-17                                                                      |
 | **Author(s)** | Den Delimarsky ([@localden](https://github.com/localden))                       |
@@ -36346,56 +35746,53 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 
 ## Summary
 
-* **Final**: 32
-* **Draft**: 4
-* **Accepted**: 4
-* **In-review**: 1
+* **Final**: 41
 
 ## All SEPs
 
-| SEP                                                                                  | Title                                                                         | Status                   | Type             | Created    |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ------------------------ | ---------------- | ---------- |
-| [SEP-2663](/seps/2663-tasks-extension)                                               | Tasks Extension                                                               | <Badge>Final</Badge>     | Extensions Track | 2026-04-27 |
-| [SEP-2596](/seps/2596-spec-feature-lifecycle-and-deprecation)                        | Specification Feature Lifecycle and Deprecation Policy                        | <Badge>Draft</Badge>     | Process          | 2026-04-17 |
-| [SEP-2577](/seps/2577-deprecate-roots-sampling-and-logging)                          | Deprecate Roots, Sampling, and Logging                                        | <Badge>Final</Badge>     | Standards Track  | 2026-04-14 |
-| [SEP-2575](/seps/2575-stateless-mcp)                                                 | Make MCP Stateless                                                            | <Badge>Accepted</Badge>  | Standards Track  | 2025-06-18 |
-| [SEP-2567](/seps/2567-sessionless-mcp)                                               | Sessionless MCP via Explicit State Handles                                    | <Badge>Final</Badge>     | Standards Track  | 2026-03-11 |
-| [SEP-2549](/seps/2549-TTL-for-list-results)                                          | TTL for List Results                                                          | <Badge>Accepted</Badge>  | Standards Track  | 2026-04-09 |
-| [SEP-2484](/seps/2484-conformance-tests-required-for-final-seps)                     | Require Conformance Tests for Standards Track SEPs to Reach Final Status      | <Badge>Draft</Badge>     | Process          | 2026-03-27 |
-| [SEP-2468](/seps/2468-recommend-issuer-claim-for-auth)                               | Recommend Issuer (iss) Parameter in MCP Auth Responses                        | <Badge>In-Review</Badge> | Standards Track  | 2026-03-25 |
-| [SEP-2322](/seps/2322-MRTR)                                                          | Multi Round-Trip Requests                                                     | <Badge>Accepted</Badge>  | Standards Track  | 2026-02-03 |
-| [SEP-2260](/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests) | Require Server requests to be associated with a Client request.               | <Badge>Final</Badge>     | Standards Track  | 2026-02-16 |
-| [SEP-2243](/seps/2243-http-standardization)                                          | HTTP Header Standardization for Streamable HTTP Transport                     | <Badge>Final</Badge>     | Standards Track  | 2026-02-04 |
-| [SEP-2207](/seps/2207-oidc-refresh-token-guidance)                                   | OIDC-Flavored Refresh Token Guidance                                          | <Badge>Accepted</Badge>  | Standards Track  | 2026-02-04 |
-| [SEP-2164](/seps/2164-resource-not-found-error)                                      | Standardize Resource Not Found Error Code                                     | <Badge>Draft</Badge>     | Standards Track  | 2026-01-28 |
-| [SEP-2149](/seps/2149-working-group-charter-template)                                | MCP Group Governance and Charter Template                                     | <Badge>Final</Badge>     | Process          | 2025-01-15 |
-| [SEP-2148](/seps/2148-contributor-ladder)                                            | MCP Contributor Ladder                                                        | <Badge>Final</Badge>     | Process          | 2026-01-15 |
-| [SEP-2133](/seps/2133-extensions)                                                    | Extensions                                                                    | <Badge>Final</Badge>     | Standards Track  | 2025-01-21 |
-| [SEP-2106](/seps/2106-json-schema-2020-12)                                           | Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12           | <Badge>Draft</Badge>     | Standards Track  | 2026-01-06 |
-| [SEP-2085](/seps/2085-governance-succession-and-amendment)                           | Governance Succession and Amendment Procedures                                | <Badge>Final</Badge>     | Process          | 2025-12-05 |
-| [SEP-1865](/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp)                  | MCP Apps - Interactive User Interfaces for MCP                                | <Badge>Final</Badge>     | Extensions Track | 2025-11-21 |
-| [SEP-1850](/seps/1850-pr-based-sep-workflow)                                         | PR-Based SEP Workflow                                                         | <Badge>Final</Badge>     | Process          | 2025-11-20 |
-| [SEP-1730](/seps/1730-sdks-tiering-system)                                           | SDKs Tiering System                                                           | <Badge>Final</Badge>     | Standards Track  | 2025-10-29 |
-| [SEP-1699](/seps/1699-support-sse-polling-via-server-side-disconnect)                | Support SSE polling via server-side disconnect                                | <Badge>Final</Badge>     | Standards Track  | 2025-10-22 |
-| [SEP-1686](/seps/1686-tasks)                                                         | Tasks                                                                         | <Badge>Final</Badge>     | Standards Track  | 2025-10-20 |
-| [SEP-1613](/seps/1613-establish-json-schema-2020-12-as-default-dialect-f)            | Establish JSON Schema 2020-12 as Default Dialect for MCP                      | <Badge>Final</Badge>     | Standards Track  | 2025-10-06 |
-| [SEP-1577](/seps/1577--sampling-with-tools)                                          | Sampling With Tools                                                           | <Badge>Final</Badge>     | Standards Track  | 2025-09-30 |
-| [SEP-1330](/seps/1330-elicitation-enum-schema-improvements-and-standards)            | Elicitation Enum Schema Improvements and Standards Compliance                 | <Badge>Final</Badge>     | Standards Track  | 2025-08-11 |
-| [SEP-1319](/seps/1319-decouple-request-payload-from-rpc-methods-definiti)            | Decouple Request Payload from RPC Methods Definition                          | <Badge>Final</Badge>     | Standards Track  | 2025-08-08 |
-| [SEP-1303](/seps/1303-input-validation-errors-as-tool-execution-errors)              | Input Validation Errors as Tool Execution Errors                              | <Badge>Final</Badge>     | Standards Track  | 2025-08-05 |
-| [SEP-1302](/seps/1302-formalize-working-groups-and-interest-groups-in-mc)            | Formalize Working Groups and Interest Groups in MCP Governance                | <Badge>Final</Badge>     | Standards Track  | 2025-08-05 |
-| [SEP-1046](/seps/1046-support-oauth-client-credentials-flow-in-authoriza)            | Support OAuth client credentials flow in authorization                        | <Badge>Final</Badge>     | Standards Track  | 2025-07-23 |
-| [SEP-1036](/seps/1036-url-mode-elicitation-for-secure-out-of-band-intera)            | URL Mode Elicitation for secure out-of-band interactions                      | <Badge>Final</Badge>     | Standards Track  | 2025-07-22 |
-| [SEP-1034](/seps/1034--support-default-values-for-all-primitive-types-in)            | Support default values for all primitive types in elicitation schemas         | <Badge>Final</Badge>     | Standards Track  | 2025-07-22 |
-| [SEP-1024](/seps/1024-mcp-client-security-requirements-for-local-server-)            | MCP Client Security Requirements for Local Server Installation                | <Badge>Final</Badge>     | Standards Track  | 2025-07-22 |
-| [SEP-994](/seps/994-shared-communication-practicesguidelines)                        | Shared Communication Practices/Guidelines                                     | <Badge>Final</Badge>     | Process          | 2025-07-17 |
-| [SEP-991](/seps/991-enable-url-based-client-registration-using-oauth-c)              | Enable URL-based Client Registration using OAuth Client ID Metadata Documents | <Badge>Final</Badge>     | Standards Track  | 2025-07-07 |
-| [SEP-990](/seps/990-enable-enterprise-idp-policy-controls-during-mcp-o)              | Enable enterprise IdP policy controls during MCP OAuth flows                  | <Badge>Final</Badge>     | Standards Track  | 2025-06-04 |
-| [SEP-986](/seps/986-specify-format-for-tool-names)                                   | Specify Format for Tool Names                                                 | <Badge>Final</Badge>     | Standards Track  | 2025-07-16 |
-| [SEP-985](/seps/985-align-oauth-20-protected-resource-metadata-with-rf)              | Align OAuth 2.0 Protected Resource Metadata with RFC 9728                     | <Badge>Final</Badge>     | Standards Track  | 2025-07-16 |
-| [SEP-973](/seps/973-expose-additional-metadata-for-implementations-res)              | Expose additional metadata for Implementations, Resources, Tools and Prompts  | <Badge>Final</Badge>     | Standards Track  | 2025-07-15 |
-| [SEP-932](/seps/932-model-context-protocol-governance)                               | Model Context Protocol Governance                                             | <Badge>Final</Badge>     | Process          | 2025-07-08 |
-| [SEP-414](/seps/414-request-meta)                                                    | Document OpenTelemetry Trace Context Propagation Conventions                  | <Badge>Final</Badge>     | Standards Track  | 2025-04-25 |
+| SEP                                                                                  | Title                                                                         | Status               | Type             | Created    |
+| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | -------------------- | ---------------- | ---------- |
+| [SEP-2663](/seps/2663-tasks-extension)                                               | Tasks Extension                                                               | <Badge>Final</Badge> | Extensions Track | 2026-04-27 |
+| [SEP-2596](/seps/2596-spec-feature-lifecycle-and-deprecation)                        | Specification Feature Lifecycle and Deprecation Policy                        | <Badge>Final</Badge> | Process          | 2026-04-17 |
+| [SEP-2577](/seps/2577-deprecate-roots-sampling-and-logging)                          | Deprecate Roots, Sampling, and Logging                                        | <Badge>Final</Badge> | Standards Track  | 2026-04-14 |
+| [SEP-2575](/seps/2575-stateless-mcp)                                                 | Make MCP Stateless                                                            | <Badge>Final</Badge> | Standards Track  | 2025-06-18 |
+| [SEP-2567](/seps/2567-sessionless-mcp)                                               | Sessionless MCP via Explicit State Handles                                    | <Badge>Final</Badge> | Standards Track  | 2026-03-11 |
+| [SEP-2549](/seps/2549-TTL-for-list-results)                                          | TTL for List Results                                                          | <Badge>Final</Badge> | Standards Track  | 2026-04-09 |
+| [SEP-2484](/seps/2484-conformance-tests-required-for-final-seps)                     | Require Conformance Tests for Standards Track SEPs to Reach Final Status      | <Badge>Final</Badge> | Process          | 2026-03-27 |
+| [SEP-2468](/seps/2468-recommend-issuer-claim-for-auth)                               | Recommend Issuer (iss) Parameter in MCP Auth Responses                        | <Badge>Final</Badge> | Standards Track  | 2026-03-25 |
+| [SEP-2322](/seps/2322-MRTR)                                                          | Multi Round-Trip Requests                                                     | <Badge>Final</Badge> | Standards Track  | 2026-02-03 |
+| [SEP-2260](/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests) | Require Server requests to be associated with a Client request.               | <Badge>Final</Badge> | Standards Track  | 2026-02-16 |
+| [SEP-2243](/seps/2243-http-standardization)                                          | HTTP Header Standardization for Streamable HTTP Transport                     | <Badge>Final</Badge> | Standards Track  | 2026-02-04 |
+| [SEP-2207](/seps/2207-oidc-refresh-token-guidance)                                   | OIDC-Flavored Refresh Token Guidance                                          | <Badge>Final</Badge> | Standards Track  | 2026-02-04 |
+| [SEP-2164](/seps/2164-resource-not-found-error)                                      | Standardize Resource Not Found Error Code                                     | <Badge>Final</Badge> | Standards Track  | 2026-01-28 |
+| [SEP-2149](/seps/2149-working-group-charter-template)                                | MCP Group Governance and Charter Template                                     | <Badge>Final</Badge> | Process          | 2025-01-15 |
+| [SEP-2148](/seps/2148-contributor-ladder)                                            | MCP Contributor Ladder                                                        | <Badge>Final</Badge> | Process          | 2026-01-15 |
+| [SEP-2133](/seps/2133-extensions)                                                    | Extensions                                                                    | <Badge>Final</Badge> | Standards Track  | 2025-01-21 |
+| [SEP-2106](/seps/2106-json-schema-2020-12)                                           | Tools `inputSchema` & `outputSchema` Conform to JSON Schema 2020-12           | <Badge>Final</Badge> | Standards Track  | 2026-01-06 |
+| [SEP-2085](/seps/2085-governance-succession-and-amendment)                           | Governance Succession and Amendment Procedures                                | <Badge>Final</Badge> | Process          | 2025-12-05 |
+| [SEP-1865](/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp)                  | MCP Apps - Interactive User Interfaces for MCP                                | <Badge>Final</Badge> | Extensions Track | 2025-11-21 |
+| [SEP-1850](/seps/1850-pr-based-sep-workflow)                                         | PR-Based SEP Workflow                                                         | <Badge>Final</Badge> | Process          | 2025-11-20 |
+| [SEP-1730](/seps/1730-sdks-tiering-system)                                           | SDKs Tiering System                                                           | <Badge>Final</Badge> | Standards Track  | 2025-10-29 |
+| [SEP-1699](/seps/1699-support-sse-polling-via-server-side-disconnect)                | Support SSE polling via server-side disconnect                                | <Badge>Final</Badge> | Standards Track  | 2025-10-22 |
+| [SEP-1686](/seps/1686-tasks)                                                         | Tasks                                                                         | <Badge>Final</Badge> | Standards Track  | 2025-10-20 |
+| [SEP-1613](/seps/1613-establish-json-schema-2020-12-as-default-dialect-f)            | Establish JSON Schema 2020-12 as Default Dialect for MCP                      | <Badge>Final</Badge> | Standards Track  | 2025-10-06 |
+| [SEP-1577](/seps/1577--sampling-with-tools)                                          | Sampling With Tools                                                           | <Badge>Final</Badge> | Standards Track  | 2025-09-30 |
+| [SEP-1330](/seps/1330-elicitation-enum-schema-improvements-and-standards)            | Elicitation Enum Schema Improvements and Standards Compliance                 | <Badge>Final</Badge> | Standards Track  | 2025-08-11 |
+| [SEP-1319](/seps/1319-decouple-request-payload-from-rpc-methods-definiti)            | Decouple Request Payload from RPC Methods Definition                          | <Badge>Final</Badge> | Standards Track  | 2025-08-08 |
+| [SEP-1303](/seps/1303-input-validation-errors-as-tool-execution-errors)              | Input Validation Errors as Tool Execution Errors                              | <Badge>Final</Badge> | Standards Track  | 2025-08-05 |
+| [SEP-1302](/seps/1302-formalize-working-groups-and-interest-groups-in-mc)            | Formalize Working Groups and Interest Groups in MCP Governance                | <Badge>Final</Badge> | Standards Track  | 2025-08-05 |
+| [SEP-1046](/seps/1046-support-oauth-client-credentials-flow-in-authoriza)            | Support OAuth client credentials flow in authorization                        | <Badge>Final</Badge> | Standards Track  | 2025-07-23 |
+| [SEP-1036](/seps/1036-url-mode-elicitation-for-secure-out-of-band-intera)            | URL Mode Elicitation for secure out-of-band interactions                      | <Badge>Final</Badge> | Standards Track  | 2025-07-22 |
+| [SEP-1034](/seps/1034--support-default-values-for-all-primitive-types-in)            | Support default values for all primitive types in elicitation schemas         | <Badge>Final</Badge> | Standards Track  | 2025-07-22 |
+| [SEP-1024](/seps/1024-mcp-client-security-requirements-for-local-server-)            | MCP Client Security Requirements for Local Server Installation                | <Badge>Final</Badge> | Standards Track  | 2025-07-22 |
+| [SEP-994](/seps/994-shared-communication-practicesguidelines)                        | Shared Communication Practices/Guidelines                                     | <Badge>Final</Badge> | Process          | 2025-07-17 |
+| [SEP-991](/seps/991-enable-url-based-client-registration-using-oauth-c)              | Enable URL-based Client Registration using OAuth Client ID Metadata Documents | <Badge>Final</Badge> | Standards Track  | 2025-07-07 |
+| [SEP-990](/seps/990-enable-enterprise-idp-policy-controls-during-mcp-o)              | Enable enterprise IdP policy controls during MCP OAuth flows                  | <Badge>Final</Badge> | Standards Track  | 2025-06-04 |
+| [SEP-986](/seps/986-specify-format-for-tool-names)                                   | Specify Format for Tool Names                                                 | <Badge>Final</Badge> | Standards Track  | 2025-07-16 |
+| [SEP-985](/seps/985-align-oauth-20-protected-resource-metadata-with-rf)              | Align OAuth 2.0 Protected Resource Metadata with RFC 9728                     | <Badge>Final</Badge> | Standards Track  | 2025-07-16 |
+| [SEP-973](/seps/973-expose-additional-metadata-for-implementations-res)              | Expose additional metadata for Implementations, Resources, Tools and Prompts  | <Badge>Final</Badge> | Standards Track  | 2025-07-15 |
+| [SEP-932](/seps/932-model-context-protocol-governance)                               | Model Context Protocol Governance                                             | <Badge>Final</Badge> | Process          | 2025-07-08 |
+| [SEP-414](/seps/414-request-meta)                                                    | Document OpenTelemetry Trace Context Propagation Conventions                  | <Badge>Final</Badge> | Standards Track  | 2025-04-25 |
 
 ## SEP Status Definitions
 
@@ -36409,6 +35806,725 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 | <Badge>Withdrawn</Badge>  | SEP withdrawn by the author                              |
 | <Badge>Superseded</Badge> | SEP replaced by a newer SEP                              |
 | <Badge>Dormant</Badge>    | SEP without a sponsor, closed after 6 months             |
+
+
+# Authorization Charter
+Source: https://modelcontextprotocol.io/community/auth/charter
+
+Charter for the MCP Authorization Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Authorization Interest Group provides a venue for MCP implementers, identity-provider vendors, and security practitioners to surface real-world authorization challenges encountered when deploying MCP clients and servers. The group gathers use cases, documents gaps in the current OAuth 2.1–based authorization specification, and incubates validated problems until they are scoped well enough to propose a focused Working Group via the standard [group-creation process](/community/working-interest-groups#creating-a-working-group) to drive the corresponding [SEPs](/community/sep-guidelines).
+
+## Scope
+
+### In Scope
+
+* **Deployment experience reports**: how implementers have integrated the current authorization spec (OAuth 2.1, [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) Protected Resource Metadata, [RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) Dynamic Client Registration, Client ID Metadata Documents) with real authorization servers, and where it falls short
+* **Enterprise identity integration**: requirements and friction points when connecting MCP servers to enterprise IdPs (Okta, Entra ID, Ping, Keycloak, etc.), including SSO, tenant isolation, and admin consent flows
+* **Delegated and agentic access**: use cases for on-behalf-of token exchange, downstream resource access, audience restriction, and consent when an MCP client acts through chains of agents or tools
+* **Scope and permission granularity**: whether and how MCP servers should advertise fine-grained scopes (per-tool, per-resource) and how clients should request and present them
+* **Credentials for non-HTTP transports**: patterns for stdio, WebSocket, and future transports where the HTTP authorization spec does not directly apply
+* **Client identity and registration**: operator experience with Dynamic Client Registration, Client ID Metadata Documents, software statements, and pre-registered clients
+* **Threat modelling input**: cataloguing authorization-related attack surfaces (token confusion, confused-deputy, audience mismatch, redirect handling) to inform Security Best Practices documentation
+* **Proposing Working Groups**: once a problem is validated and scoped, the IG submits a Working Group creation proposal via the standard `#wg-ig-group-creation` process; approval remains with community moderators and core maintainers
+* **Problem statements and requirements**: use-case catalogues and recommendations published to GitHub Discussions for consumption by SEP authors and Working Groups
+
+### Out of Scope
+
+* **Authentication of end users to MCP clients**: how a host application authenticates its own users is a host concern, not a protocol concern
+* **Transport security (TLS, mTLS, certificate handling)**: belongs to the Transports WG
+* **Server identity, provenance, and trust signalling**: belongs to the Server Card / Registry efforts
+* **End-user product configuration walk-throughs**: the IG discusses patterns, not step-by-step setup for individual IdP products. Vendor-reported constraints on what an authorization server can or cannot implement *are* in scope as deployment experience
+* **Competitively sensitive or non-public business information**, per the [MCP Antitrust Policy](/community/antitrust)
+
+### Related Groups
+
+* **Transports WG**: authorization is currently specified at the HTTP transport level; changes to transports affect where credentials are carried
+* **Agents WG**: delegated/on-behalf-of access and consent for multi-agent chains overlap heavily with agentic use cases
+* **[Server Card WG](/community/server-card/charter) / [Registry](/community/registry/charter)**: client and server identity, discovery metadata, and trust establishment intersect with how authorization servers and resource servers are located and verified
+* **SDK Maintainers**: SDKs ship the auth client implementations; IG findings should inform cross-SDK auth ergonomics
+
+## Leadership
+
+| Role        | Name          | Organization | GitHub                                     | Term    |
+| ----------- | ------------- | ------------ | ------------------------------------------ | ------- |
+| Facilitator | Aaron Parecki | Okta         | [@aaronpk](https://github.com/aaronpk)     | Initial |
+| Facilitator | Darin McAdams | Amazon       | [@D-McAdams](https://github.com/D-McAdams) | Initial |
+| Facilitator | Paul Carleton | Anthropic    | [@pcarleton](https://github.com/pcarleton) | Initial |
+
+## Membership
+
+Open to anyone; no formal membership or approval step is required to join the channel, attend calls, or contribute.
+
+Join the `#auth-ig` channel on the [MCP Contributors Discord](/community/communication#discord) or open a thread in the Authorization category of [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions). If your topic clearly matches one of the Working Groups in the table below, you can post directly in that WG's channel. Calls are open and attendance is optional — async participation via Discord and GitHub is equally valued.
+
+## Operations
+
+| Meeting         | Frequency     | Duration | Purpose                                                                      |
+| --------------- | ------------- | -------- | ---------------------------------------------------------------------------- |
+| Discussion Call | Every 2 weeks | 45 min   | Use-case sharing, problem triage, WG proposal decisions, implementer reports |
+
+Discord: [#auth-ig](https://discord.com/channels/1358869848138059966/1360835991749001368)
+
+### Working Group Incubation
+
+A topic graduates to a Working Group proposal when it has a written problem statement in GitHub Discussions and rough consensus on a bi-weekly call (recorded in published notes). A facilitator then files the standard WG creation template in `#wg-ig-group-creation`, citing that discussion. The IG's role ends at the proposal; approval remains with community moderators and core maintainers.
+
+## Deliverables & Success Metrics
+
+The IG incubates problems until they are well-scoped, then proposes focused Working Groups to drive specific SEPs. Each spawned WG maintains its own charter; this list is a directory, not a substitute. The IG stewards [modelcontextprotocol/ext-auth](https://github.com/modelcontextprotocol/ext-auth), where individual WGs land authorization extension specifications via PR.
+
+| Working Group              | Discord                        | Focus                                                                                                                                                                               | Status    | Charter |
+| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
+| Client Registration        | `#auth-wg-client-registration` | Dynamic Client Registration, Client ID Metadata Documents, software statements, and pre-registered client workflows                                                                 | Completed | —       |
+| Mix-up Protection          | `#auth-wg-mixup-protection`    | Mitigating OAuth authorization-server mix-up and token-audience confusion attacks                                                                                                   | Completed | —       |
+| Profiles                   | `#auth-wg-profiles`            | Extension specifications for additional grant types and token-binding mechanisms (Client Credentials, Enterprise-Managed Authorization, DPoP, Workload Identity Federation)         | Completed | —       |
+| Tool Scopes                | `#auth-wg-tool-scopes`         | Per-tool OAuth scope advertisement, step-up authorization / scope challenge, and client-side scope accumulation — mechanics within the OAuth scope-string model                     | Active    | Pending |
+| Fine-Grained Authorization | `#auth-wg-fine-grained-authz`  | Authorization granularity beyond scope strings — Rich Authorization Requests ([RFC 9396](https://www.rfc-editor.org/rfc/rfc9396)), remediation hints, and multi-credential handling | Active    | Pending |
+| Improve DevX               | `#auth-wg-improve-devx`        | Best-practices guidance and tutorials for building secure MCP clients and servers, beyond the normative spec                                                                        | Completed | —       |
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-06-02 | Initial charter |
+
+
+# File Uploads Charter
+Source: https://modelcontextprotocol.io/community/file-uploads/charter
+
+Charter for the MCP File Uploads Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The File Uploads Working Group exists to define how MCP tools and elicitation requests declare file
+inputs so that hosts can present native file pickers and pass user-selected file content to servers.
+Today, servers that need a file from the user resort to prose instructions asking for base64 strings
+or local paths, which produces inconsistent UX and pushes encoding details onto end users. This WG
+will specify a minimal, schema-level mechanism for declaring file inputs and the wire format for
+delivering them, anchored on [SEP-2356](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356).
+
+## Scope
+
+### In Scope
+
+* **Specification Work**: SEPs defining declarative file input descriptors on tool input schemas and
+  elicitation request schemas, the wire encoding for file content, and host-side handling
+  requirements.
+* **Reference Implementations**: SDK types and helpers for `FileInputDescriptor`, data URI encoding,
+  and a sample host flow demonstrating picker invocation and value substitution.
+* **Cross-Cutting Concerns**: Coordination with the MCP Apps WG where embedded UI surfaces present
+  their own file pickers, and with the Security WG on host-side validation requirements.
+* **Documentation**: Specification sections covering file input declaration and a migration guide
+  for servers currently using ad-hoc base64 instructions.
+
+### Out of Scope
+
+* Server-to-client file delivery, which is already covered by Resources and `BlobResourceContents`.
+* Changes to the transport layer or session model.
+
+The WG may evaluate approaches such as streaming, chunked transfer, or presigned upload URLs as part
+of its design work; whether those land in the initial SEP or a follow-up is a WG decision rather
+than a charter constraint.
+
+### Related Groups
+
+* **MCP Apps WG** — embedded app UIs may surface their own file pickers; the descriptor format
+  should be reusable in that context.
+* **Security WG** — host-side validation requirements for user-supplied file content (the SEP
+  references [OWASP ASVS V5](https://owasp.org/www-project-application-security-verification-standard/)
+  for general upload hygiene).
+* **Tool Annotations IG** — file input descriptors are a form of input-parameter metadata and should
+  remain consistent with the broader annotation taxonomy.
+
+## Leadership
+
+| Role | Name           | Organization | GitHub                                   | Term    |
+| ---- | -------------- | ------------ | ---------------------------------------- | ------- |
+| Lead | Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) | Initial |
+
+Sponsored by Den Delimarsky ([@localden](https://github.com/localden)) and Nick Cooper
+([@nickcoai](https://github.com/nickcoai)).
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+| Name           | Organization | GitHub                                   | Discord | Level     |
+| -------------- | ------------ | ---------------------------------------- | ------- | --------- |
+| Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) |         | Lead      |
+| Nick Cooper    | OpenAI       | [@nickcoai](https://github.com/nickcoai) |         | WG Member |
+| Olivier Chafik | Anthropic    | [@ochafik](https://github.com/ochafik)   |         | WG Member |
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                               |
+| --------------- | --------- | -------- | ------------------------------------- |
+| Working Session | Biweekly  | 30 min   | Technical discussion, proposal review |
+
+Discord: `#file-uploads-wg`
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                                                                        | Status | Target Date | Champion                               |
+| ----------------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
+| [SEP-2356: Declarative file inputs](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356) | Draft  | End May     | [@ochafik](https://github.com/ochafik) |
+| TypeScript SDK reference implementation                                                                     | —      | End May     | [@ochafik](https://github.com/ochafik) |
+| Reference implementation in a second Tier-1 SDK                                                             | —      | End June    | TBD                                    |
+
+### Success Criteria
+
+* An accepted SEP defining the file input descriptor and wire encoding.
+* Reference implementations in at least two Tier-1 SDKs.
+* At least one production host rendering a native file picker from the descriptor.
+* Conformance test coverage for the new schema keyword.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-23 | Initial charter |
+
+
+# Inspector V2 Working Group Charter
+Source: https://modelcontextprotocol.io/community/inspector-v2/charter
+
+Charter for the Inspector V2 Working Group, a Working Group of the Model Context Protocol community.
+
+## Group Type
+
+Working Group
+
+## Mission Statement
+
+The Inspector V2 Working Group is building Inspector V2, a new web-based MCP inspector redesigned from the ground up for maintainability and reliability. The group delivers a shared Inspector Core architecture that maximizes code reuse across Web, CLI, and TUI implementations, together with a comprehensive testing apparatus. This effort requires cross-maintainer collaboration because it spans UI, protocol tooling, and test infrastructure that no single maintainer owns today.
+
+## Scope
+
+### In Scope
+
+* The `modelcontextprotocol/inspector` repository, including:
+* **Inspector Core** — a new shared-code architecture that provides common MCP and protocol interfaces for all Inspector front-ends.
+* **Web Inspector UI** — browser-based inspector built on Mantine and TypeScript.
+* **CLI Inspector** — command-line interface sharing Inspector Core.
+* **TUI Inspector** — terminal UI sharing Inspector Core.
+* **Testing apparatus** — shared test harnesses, fixtures, and integration tests across all Inspector surfaces.
+* Deprecation and migration of the existing Inspector on `main` to a `v1.x` maintenance branch.
+* Adoption of MCP TypeScript SDK V2 inside Inspector Core once available.
+
+### Out of Scope
+
+* The core MCP specification.
+* MCP SDK maintenance (TypeScript, Python, or any other language SDK).
+* MCP server implementations.
+
+### Related Groups
+
+* **SDK WG** — Inspector Core consumes the TypeScript SDK; coordination required for SDK V2 adoption.
+* **MCP Apps WG** — shared surface area around client/app ergonomics and inspection workflows.
+* **Auth WG** — authentication flows exercised by Inspector when connecting to protected servers.
+* **Registry WG** — discovery and metadata surfaces that Inspector presents to users.
+
+## Leadership
+
+| Role    | Name           | Organization | GitHub                                           | Term    |
+| ------- | -------------- | ------------ | ------------------------------------------------ | ------- |
+| WG Lead | Cliff Hall     | Futurescale  | [@cliffhall](https://github.com/cliffhall)       | Ongoing |
+| WG Lead | Ola Hungerford | Nordstrom    | [@olaservo](https://github.com/olaservo)         | Ongoing |
+| WG Lead | Bob Dickinson  | TeamSpark.ai | [@BobDickinson](https://github.com/BobDickinson) | Ongoing |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+| Name           | Organization | GitHub                                           | Discord     | Level      |
+| -------------- | ------------ | ------------------------------------------------ | ----------- | ---------- |
+| Cliff Hall     | Futurescale  | [@cliffhall](https://github.com/cliffhall)       | seaofarrows | Maintainer |
+| Ola Hungerford | Nordstrom    | [@olaservo](https://github.com/olaservo)         | olaservo    | Maintainer |
+| Bob Dickinson  | TeamSpark.ai | [@BobDickinson](https://github.com/BobDickinson) | rddthree    | Maintainer |
+| Tobin South    | Anthropic    | [@tobinsouth](https://github.com/tobinsouth)     | tobinsouth  | Member     |
+
+## Operations
+
+| Meeting         | Frequency                                  | Duration   | Purpose                               |
+| --------------- | ------------------------------------------ | ---------- | ------------------------------------- |
+| Working Session | Weekly, Wednesdays 11:00 America/New\_York | 60 minutes | Technical discussion, proposal review |
+
+Meetings are held at [meet.modelcontextprotocol.io/tag/inspector-v2-wg](https://meet.modelcontextprotocol.io/tag/inspector-v2-wg). Agendas are posted at least 7 days in advance per current MCP meeting policy. Meeting notes are published to the [Meeting Notes — Inspector V2 WG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-inspector-v2-wg) discussion category in the `modelcontextprotocol/modelcontextprotocol` repository.
+
+**Communication channels**
+
+* Primary channel: `#inspector-v2-wg` on the MCP Discord.
+* Async discussion: GitHub Discussions in `modelcontextprotocol/inspector`.
+* Quarterly updates: posted to the WG's GitHub Discussions category.
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Work Item                                                                               | Status                       | Owner(s)                   |
+| --------------------------------------------------------------------------------------- | ---------------------------- | -------------------------- |
+| Web Inspector UI (Mantine / TypeScript) — dumb components with real MCP/Core interfaces | In Progress                  | Cliff Hall, Ola Hungerford |
+| Inspector Core shared-code architecture                                                 | In Progress                  | Bob Dickinson              |
+| CLI Inspector and TUI Inspector                                                         | In Progress                  | Bob Dickinson              |
+| Migration of existing Inspector on `main` to `v1.x` maintenance branch                  | Planning                     | WG Leads                   |
+| Testing apparatus across Core, Web, CLI, and TUI                                        | Planning                     | WG Leads                   |
+| Inspector Core adoption of MCP TypeScript SDK V2                                        | Blocked (gated by TS SDK WG) | Bob Dickinson              |
+
+### Success Criteria
+
+1. **End of Q1** — Web UI complete with "dumb" components wired to real MCP/Inspector Core interfaces.
+2. **End of Q1** — Inspector Core architecture finalized.
+3. **End of Q2** — Inspector Core merged to `v2/main` and working end-to-end with the Web UI.
+4. **End of Q2** — CLI and TUI Inspectors merged to `v2/main` and working end-to-end with Inspector Core.
+5. **End of Q2** — Existing Inspector on `main` moved to the `v1.x` branch and officially deprecated.
+6. **End of Q2** — New Inspector family (Web, CLI, TUI) published and generally available.
+7. **End of Q3** — Inspector Core running on MCP TypeScript SDK V2 (gated by the TypeScript SDK WG's delivery schedule).
+
+## Changelog
+
+| Date       | Change                                           | Author               |
+| ---------- | ------------------------------------------------ | -------------------- |
+| 2026-04-11 | Initial charter adopted for SEP-2149 compliance. | Cliff Hall (Co-Lead) |
+
+
+# Interceptors Charter
+Source: https://modelcontextprotocol.io/community/interceptors/charter
+
+Charter for the MCP Interceptors Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Interceptors Working Group exists to standardize how context operations are intercepted, validated, and transformed at key points in the agentic lifecycle. This covers MCP-defined operations such as tool invocations, resource access, prompt handling, sampling, and elicitation, as well as any other operation that shapes agent context — including LLM completions and custom application-specific workflows. The ecosystem is developing a sprawling landscape of sidecars, proxies, and gateways for cross-cutting concerns that are largely non-reusable and non-interoperable, creating an M × N integration problem. The WG will produce specification extensions and reference implementations that define interceptors as a new MCP primitive with two types — validators (inspect and return pass/fail decisions) and mutators (transform context payloads) — discoverable and invocable through MCP's existing JSON-RPC patterns across deployment models including in-process, sidecar, and remote service.
+
+## Scope
+
+### In Scope
+
+* **Specification Work**: SEPs defining the interceptor primitive — validator and mutator types, lifecycle event hooks for MCP operations (tool calls, resource reads, prompt gets, sampling, elicitation) and extensible to non-MCP context operations (LLM completions, custom workflows), trust-boundary-aware execution model, priority-based chain ordering, and audit mode semantics.
+* **Reference Implementations**: Multi-language SDK libraries for building interceptors, sample interceptors (PII redaction, schema validation, audit logging), a common interceptor sidecar/proxy runtime, and a CLI client for interceptor invocation and testing.
+* **Cross-Cutting Concerns**: Transport-level interception points, gateway-based deployment patterns, and interplay with routing and policy layers (see Related Groups).
+* **Documentation**: Specification sections covering interceptor authoring, deployment models (in-process, sidecar, remote service), chain configuration, and migration guidance from ad-hoc middleware approaches.
+
+### Out of Scope
+
+* Client-specific hook implementation details (e.g., Claude Code's internal hook execution engine) — the WG standardizes the protocol-level interface, not host internals.
+* Transport-layer wire format or session model changes (owned by the Transports WG).
+* General-purpose middleware or proxy infrastructure beyond what the MCP protocol requires.
+
+### Related Groups
+
+* **Transports WG** — interceptors operate on MCP message flows whose delivery behavior depends on the transport; coordination needed on transport-level interception points.
+* **Gateways IG** — gateways are a key deployment model for interceptors; coordination needed on gateway-based interceptor patterns and shared concerns around routing, policy, and observability.
+
+## Leadership
+
+| Role | Name                     | Organization | GitHub                                       | Term    |
+| ---- | ------------------------ | ------------ | -------------------------------------------- | ------- |
+| Lead | Sambhav Kothari          | Bloomberg    | [@sambhav](https://github.com/sambhav)       | Initial |
+| Lead | Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)       | Initial |
+| Lead | Kurt Degiorgio           | Bloomberg    | [@degiorgio](https://github.com/degiorgio)   | Initial |
+| Lead | Uk-Jae Jeong             | Bloomberg    | [@jeongukjae](https://github.com/jeongukjae) | Initial |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Operations
+
+| Meeting         | Frequency | Duration   | Purpose                               |
+| --------------- | --------- | ---------- | ------------------------------------- |
+| Working Session | Biweekly  | 60 minutes | Technical discussion, proposal review |
+
+## Resources
+
+* Experimental extension repository: [modelcontextprotocol/experimental-ext-interceptors](https://github.com/modelcontextprotocol/experimental-ext-interceptors)
+* Motivation: [SEP-1763](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1763)
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                                  | Status      | Target Date | Champion |
+| --------------------------------------------------------------------- | ----------- | ----------- | -------- |
+| SEP-1763: Interceptors                                                | Draft       |             | TBD      |
+| Sample interceptors (PII redaction, schema validation, audit logging) | In Progress |             | TBD      |
+| Common interceptor sidecar runtime                                    | Ideating    |             | TBD      |
+| CLI client for interceptor invocation and testing                     | Ideating    |             | TBD      |
+| Reference implementation in Go SDK                                    | In Progress |             | TBD      |
+| Reference implementation in C# SDK                                    | In Progress |             | TBD      |
+
+### Success Criteria
+
+* An accepted SEP defining the interceptor primitive (validators, mutators), lifecycle event hooks, and trust-boundary-aware chain execution.
+* Reference implementations in at least two Tier-1 SDKs (Go, C#).
+* A common interceptor sidecar runtime enabling platform teams to deploy interceptors without modifying individual MCP servers.
+* CLI tooling for interceptor invocation and testing.
+* Demonstrated interoperability across deployment models (in-process, sidecar, remote service).
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-21 | Initial charter |
+
+
+# Registry Charter
+Source: https://modelcontextprotocol.io/community/registry/charter
+
+Charter for the MCP Registry Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Registry Working Group exists to build and maintain the official MCP Registry — an open catalog and API for publicly available MCP servers — so that clients, sub-registries, and end users can discover, evaluate, and install servers with confidence. The WG owns the registry service, the `server.json` schema, the registry API specification, and the sub-registry ecosystem that further distributes server metadata.
+
+## Scope
+
+### In Scope
+
+* **Registry Service**: Operation, reliability, and evolution of the hosted registry at `registry.modelcontextprotocol.io`, including uptime, monitoring, and incident response.
+* **Registry API Specification**: The OpenAPI spec defining how any registry (official or private) exposes server metadata.
+* **`server.json` Schema**: The standardized format for describing MCP server identity, packages, runtime configuration, and capabilities — coordinated with the Server Card WG to keep Server Card a coherent subset.
+* **Client SDKs**: Generated or hand-maintained client libraries that make it easy for clients and sub-registries to integrate with the registry API.
+* **Publishing & Trust**: Authentication flows (GitHub OAuth, GitHub OIDC, DNS/HTTP verification), namespace ownership, moderation tooling, and community-driven flagging.
+* **Adoption & Outreach**: Documentation, onboarding guides, and outreach to drive catalog coverage.
+* **Issue Triage & Automation**: Labeling system, triage, and contributor workflow for the registry repo.
+
+### Out of Scope
+
+* Any runtime-related MCP protocol specification aspects (owned by Core Maintainers and other WGs).
+* Server Card format and discovery mechanism (owned by the Server Card WG; this WG coordinates on `server.json` alignment).
+* Ranking/choosing between MCP server implementations on behalf of MCP clients or end-users.
+* Hosting, distributing, or executing MCP server code or binaries — the registry is a metadata catalog, not a package registry.
+* Any commitment to delivering an enterprise-ready or reusable registry implementation. The codebase supports this instance only and is not intended for external deployments.
+
+### Related Groups
+
+* **Server Card WG** — `server.json` and Server Card must stay aligned; the registry will expose Server Cards + local package-related metadata for published entries. Tight coordination required to avoid schema divergence.
+
+## Leadership
+
+| Role | Name               | Organization | GitHub                                     | Term    |
+| ---- | ------------------ | ------------ | ------------------------------------------ | ------- |
+| Lead | Tadas Antanavicius | PulseMCP     | [@tadasant](https://github.com/tadasant)   | Initial |
+| Lead | Radoslav Dimitrov  | Stacklok     | [@rdimitrov](https://github.com/rdimitrov) | Initial |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+| Name               | Organization | GitHub                                           | Discord    | Level     | Maintainer? |
+| ------------------ | ------------ | ------------------------------------------------ | ---------- | --------- | ----------- |
+| Tadas Antanavicius | PulseMCP     | [@tadasant](https://github.com/tadasant)         | tadasant\_ | Lead      | Yes         |
+| Radoslav Dimitrov  | Stacklok     | [@rdimitrov](https://github.com/rdimitrov)       | dimitrovr  | Lead      | Yes         |
+| Bob Dickinson      | TeamSpark    | [@BobDickinson](https://github.com/BobDickinson) | rddthree   | WG Member | Yes         |
+| Preeti Dewani      | Ravenmail    | [@pree-dew](https://github.com/pree-dew)         | pree\_dew  | WG Member | No          |
+
+## Emeritus Membership
+
+| Name         | Organization | GitHub                                     | Discord   | Level     | Maintainer? |
+| ------------ | ------------ | ------------------------------------------ | --------- | --------- | ----------- |
+| Adam Jones   | Anthropic    | [@domdomegg](https://github.com/domdomegg) | domdomegg | WG Member | Yes         |
+| Toby Padilla | GitHub       | [@toby](https://github.com/toby)           |           | WG Member | Yes         |
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                                           |
+| --------------- | --------- | -------- | ------------------------------------------------- |
+| Working Session | Weekly    | 30 min   | Technical discussion, triage, and proposal review |
+
+Discord: `#registry-dev`
+
+## Resources
+
+* Registry service repository: [modelcontextprotocol/registry](https://github.com/modelcontextprotocol/registry)
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                                  | Status      | Target Date | Champion                                 |
+| --------------------------------------------------------------------- | ----------- | ----------- | ---------------------------------------- |
+| Server Card / `server.json` alignment                                 | In Progress | Q2 2026     | [@tadasant](https://github.com/tadasant) |
+| Uptime & monitoring automation                                        | Planned     | Q2 2026     | TBD                                      |
+| Issue triage automation & labeling system                             | Planned     | Q2 2026     | TBD                                      |
+| Adoption outreach to popular server maintainers                       | Ideating    | Q3 2026     | TBD                                      |
+| Cataloging specification support by clients and sub-registry products | Ideating    | Q3 2026     | TBD                                      |
+| Client SDK generation / publication                                   | Ideating    | Q3 2026     | TBD                                      |
+| Registry API v1 GA                                                    | Ideating    | TBD         | TBD                                      |
+
+### Success Criteria
+
+* Registry uptime ≥ 99.9% with automated monitoring and alerting.
+* `server.json` schema and Server Card format aligned with no unintentional divergence.
+* Majority of popular, publicly available MCP servers published to the registry.
+* At least one client SDK (generated or maintained) available for registry consumers.
+* Registry API v1 specification finalized and stable.
+* Active sub-registry ecosystem consuming the official registry API.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-08 | Initial charter |
+
+
+# SDK Working Group Charter
+Source: https://modelcontextprotocol.io/community/sdk/charter
+
+Charter for the MCP SDK Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The SDK Working Group exists to keep the official MCP SDKs consistent, conformant, and current with the specification. It coordinates implementation of new protocol versions across languages, governs the [SDK Tiering System](/community/sdk-tiers), and establishes shared design patterns where sensible, so that developers get a coherent experience across SDKs while each remains idiomatic to its language.
+
+## Scope
+
+### In Scope
+
+* **SDK Tiering**: Operating the [SDK Tiering System](/community/sdk-tiers), including reviewing tier advancement requests, applying relegation criteria, and maintaining the published tier assignments.
+* **Official SDK Roster**: Evaluating proposals to add new official SDKs or retire existing ones.
+* **Release Coordination**: Aligning Tier-1 SDK release plans with specification version dates so that protocol features land in SDKs on the timelines their tier requires.
+* **Cross-SDK Design Guidance**: Recommending common patterns for SDK API surface, versioning, deprecation, error handling, and extension packaging, so that SDKs remain recognisably similar across languages while staying idiomatic.
+* **Conformance Integration**: Working with the Conformance Testing project to ensure each official SDK runs the conformance suite and publishes results.
+* **Maintainer Coordination**: Providing a forum for per-language SDK maintainers to share implementation experience and surface specification ambiguities back to Core Maintainers.
+
+### Out of Scope
+
+* **Per-SDK day-to-day maintenance**: Issue triage, PR review, and releases for an individual SDK remain the responsibility of that SDK's maintainers as listed in [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md).
+* **Specification authorship**: Protocol changes are proposed through the [SEP process](/community/sep-guidelines) and owned by the relevant working group or Core Maintainers. The SDK WG implements accepted SEPs; it does not own spec sections.
+* **Conformance test authoring**: The conformance test suite itself is owned by the [Conformance Testing](https://github.com/modelcontextprotocol/conformance) project.
+* **Third-party and community SDKs**: SDKs outside the [modelcontextprotocol](https://github.com/modelcontextprotocol) organization are not governed by this group.
+
+### Related Groups
+
+* **Transports WG**: Transport implementations are a substantial part of every SDK. The SDK WG coordinates with the Transports WG on rollout sequencing when transport SEPs land.
+* **Conformance Testing**: Tier assignments depend on conformance scores. The SDK WG consumes conformance results and feeds back gaps in test coverage.
+* **All specification-producing WGs**: The SDK WG is a downstream consumer of accepted SEPs and coordinates reference-implementation timing with the originating group.
+
+## Leadership
+
+| Role | Name             | Organization | GitHub                                                 | Term    |
+| ---- | ---------------- | ------------ | ------------------------------------------------------ | ------- |
+| Lead | Felix Weinberger | Anthropic    | [@felixweinberger](https://github.com/felixweinberger) | Ongoing |
+
+## Authority & Decision Rights
+
+| Decision Type                            | Authority Level                                |
+| ---------------------------------------- | ---------------------------------------------- |
+| Meeting logistics & scheduling           | WG Leads (autonomous)                          |
+| Proposal prioritization within WG        | WG Leads (autonomous)                          |
+| SDK tier advancement or relegation       | WG consensus                                   |
+| Cross-SDK design guidance                | WG consensus (advisory to per-SDK maintainers) |
+| Per-SDK releases, versioning, API design | That SDK's maintainers (autonomous)            |
+| Adding or retiring an official SDK       | WG consensus → Core Maintainer approval        |
+| Changes to the tiering criteria          | WG consensus → Core Maintainer approval        |
+| Scope expansion                          | Core Maintainer approval required              |
+| WG Member approval                       | WG Member sponsors                             |
+
+## Membership
+
+WG Members are the maintainers of each official SDK as recorded in [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) and the corresponding roles in [modelcontextprotocol/access](https://github.com/modelcontextprotocol/access). Maintainers of any official SDK are WG Members by default.
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                                              |
+| --------------- | --------- | -------- | ---------------------------------------------------- |
+| Working Session | Biweekly  | 45 min   | Release coordination, tier reviews, cross-SDK design |
+
+Communication happens in the `#general-sdk-dev` Discord channel and the SDK Working Group category in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions).
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                | Status      | Target Date | Champion            |
+| --------------------------------------------------- | ----------- | ----------- | ------------------- |
+| 2026-06-30 spec support across Tier-1 SDKs          | Planning    | 2026 Q3     | Per-SDK maintainers |
+| Cross-SDK guidance for stateless transport adoption | In progress | 2026 Q2     | WG Leads            |
+| Quarterly tier review                               | Recurring   | Quarterly   | WG Leads            |
+
+### Success Criteria
+
+* All official SDKs have a published tier and a passing conformance run on their default branch.
+* Tier-1 SDKs ship support for each released specification version within the timeline their tier requires.
+* Tier advancement and relegation decisions are recorded with rationale in GitHub Discussions.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-28 | Initial charter |
+
+
+# Server Card Charter
+Source: https://modelcontextprotocol.io/community/server-card/charter
+
+Charter for the MCP Server Card Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Server Card Working Group exists to define mechanisms that facilitate discovery and usage of MCP servers via common discovery mechanisms, and to provide guidance on how this fits into broader AI standardization efforts around discovery. Concretely, the WG will define what constitutes an MCP Server Card, the standardized document format a Server Card must follow, and how clients discover a Server Card for a given server.
+
+## Scope
+
+### In Scope
+
+* **Specification Work**: SEPs or extensions defining what constitutes an MCP Server Card and the specific format of the Server Card document.
+* **Discovery Mechanism**: Specification of how an MCP Server Card document is discovered (well-known URL, resource-based discovery, etc.).
+* **Cross-Ecosystem Coordination**: A recommendation to the [AI Card](https://github.com/Agent-Card/ai-card) effort on how to interact with MCP Server Cards.
+* **Documentation**: Specification sections and guidance covering Server Card authoring and consumption.
+
+### Out of Scope
+
+* Changes to the MCP initialization handshake or transport layer.
+* A general-purpose MCP server registry or catalog (owned by the Registry WG).
+* Internationalization of Server Card content until an MCP-wide i18n approach is defined.
+
+### Related Groups
+
+* **Registry WG** — Server Card format should stay as close as possible to a subset of `server.json`; coordination required to avoid divergence.
+* **AI Card effort** (external) — ongoing discussion on whether and how an AI Catalog can link directly to an MCP Server Card.
+
+## Leadership
+
+| Role | Name              | Organization | GitHub                                               | Term                         |
+| ---- | ----------------- | ------------ | ---------------------------------------------------- | ---------------------------- |
+| Lead | David Soria Parra | Anthropic    | [@dsp-ant](https://github.com/dsp-ant)               | 6 months (ends Aug 14, 2026) |
+| Lead | Sam Morrow Drums  | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | 6 months (ends Aug 14, 2026) |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+| Name               | Organization | GitHub                                               | Discord | Level     |
+| ------------------ | ------------ | ---------------------------------------------------- | ------- | --------- |
+| David Soria Parra  | Anthropic    | [@dsp-ant](https://github.com/dsp-ant)               |         | Lead      |
+| Sam Morrow Drums   | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | Lead      |
+| Tadas Antanavicius |              | [@tadasant](https://github.com/tadasant)             |         | WG Member |
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                               |
+| --------------- | --------- | -------- | ------------------------------------- |
+| Working Session | Weekly    | 60 min   | Technical discussion, proposal review |
+
+Discord: [#server-card-wg](https://discord.com/channels/1358869848138059966/1399986204405141534)
+
+## Resources
+
+* Experimental extension repository: [modelcontextprotocol/experimental-ext-server-card](https://github.com/modelcontextprotocol/experimental-ext-server-card)
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                                                                | Status | Target Date | Champion                               |
+| --------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
+| [SEP-2127: MCP Server Card](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127) | Draft  | Apr 3, 2026 | [@dsp-ant](https://github.com/dsp-ant) |
+
+### Success Criteria
+
+### Active Work Items
+
+| Item                                    | Status | Target Date | Champion |
+| --------------------------------------- | ------ | ----------- | -------- |
+| SEP 2127: MCP Server Cards              | Draft  | End March   | @dsp-ant |
+| Reference implementation in Tier-1 SDKs | —      | End April   | TBD      |
+
+### Success Criteria
+
+* Spec changes accepted by Core Maintainers.
+* SDK implementations available.
+* Real-world clients with reach implementing the proposal.
+* Real-world servers with reach implementing the proposal.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-03-26 | Initial charter |
 
 
 # Skills Over MCP Charter
@@ -36708,6 +36824,10 @@ The Triggers and Events Working Group exists to define how MCP servers proactive
 | Meeting         | Frequency | Duration | Purpose                               |
 | --------------- | --------- | -------- | ------------------------------------- |
 | Working Session | Weekly    | 30 min   | Technical discussion, proposal review |
+
+## Resources
+
+* Incubation repository: [modelcontextprotocol/experimental-ext-triggers-events](https://github.com/modelcontextprotocol/experimental-ext-triggers-events)
 
 ## Deliverables & Success Metrics
 
