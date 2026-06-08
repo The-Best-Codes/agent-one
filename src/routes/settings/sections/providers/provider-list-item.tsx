@@ -1,6 +1,6 @@
 import { IconAlertTriangle, IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { memo, useMemo, useState, type ReactNode } from "react";
+import { memo, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
@@ -215,6 +215,7 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
   const setApiKey = useSetAtom(getApiKeyAtom(providerId));
   const setupDismissed = useAtomValue(providerSetupDismissedAtom);
   const dismissSetup = useSetAtom(providerSetupDismissedAtom);
+  const wasInitiallyEnabled = useRef(storedConfig.enabled);
 
   const updateConfig = (updates: Partial<ProviderConfig>) => {
     setConfigAtom((previous) => ({
@@ -223,7 +224,8 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
     }));
   };
 
-  const showSetupButton = storedConfig.enabled && !setupDismissed[providerId];
+  const showSetupButton =
+    storedConfig.enabled && !wasInitiallyEnabled.current && !setupDismissed[providerId];
   const handleSetupDismiss = () => {
     dismissSetup((prev) => ({ ...prev, [providerId]: true }));
   };
@@ -265,6 +267,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const setupDismissed = useAtomValue(providerSetupDismissedAtom);
   const dismissSetup = useSetAtom(providerSetupDismissedAtom);
+  const wasInitiallyEnabled = useRef(provider?.enabled ?? false);
 
   if (!provider) {
     return null;
@@ -274,7 +277,8 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
     updateProvider(provider.id, updates);
   };
 
-  const showSetupButton = provider.enabled && !setupDismissed[provider.id];
+  const showSetupButton =
+    provider.enabled && !wasInitiallyEnabled.current && !setupDismissed[provider.id];
   const handleSetupDismiss = () => {
     dismissSetup((prev) => ({ ...prev, [provider.id]: true }));
   };
@@ -364,12 +368,14 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
   const updateProvider = useSetAtom(updateLocalProviderAtom);
   const setupDismissed = useAtomValue(providerSetupDismissedAtom);
   const dismissSetup = useSetAtom(providerSetupDismissedAtom);
+  const wasInitiallyEnabled = useRef(provider?.enabled ?? false);
 
   if (!provider) {
     return null;
   }
 
-  const showSetupButton = provider.enabled && !setupDismissed[provider.id];
+  const showSetupButton =
+    provider.enabled && !wasInitiallyEnabled.current && !setupDismissed[provider.id];
   const handleSetupDismiss = () => {
     dismissSetup((prev) => ({ ...prev, [provider.id]: true }));
   };
