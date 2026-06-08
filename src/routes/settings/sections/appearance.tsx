@@ -235,7 +235,9 @@ export default function AppearanceSection() {
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isUiTintStrengthDefault = uiTintStrength === DEFAULT_SETTINGS.UI_TINT_STRENGTH;
   const isChatBackgroundDefault =
-    JSON.stringify(chatBackground) === JSON.stringify(DEFAULT_SETTINGS.CHAT_BACKGROUND);
+    chatBackground.tint === DEFAULT_SETTINGS.CHAT_BACKGROUND.tint &&
+    chatBackground.blur === DEFAULT_SETTINGS.CHAT_BACKGROUND.blur &&
+    chatBackground.dim === DEFAULT_SETTINGS.CHAT_BACKGROUND.dim;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
   const isCollapsedSidebarLayoutDefault =
     collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
@@ -634,7 +636,12 @@ export default function AppearanceSection() {
                   size="icon"
                   onClick={() => {
                     trackSettingsInteraction("appearance", "reset_chat_background");
-                    resetSetting("CHAT_BACKGROUND");
+                    setChatBackground((prev) => ({
+                      ...prev,
+                      tint: DEFAULT_SETTINGS.CHAT_BACKGROUND.tint,
+                      blur: DEFAULT_SETTINGS.CHAT_BACKGROUND.blur,
+                      dim: DEFAULT_SETTINGS.CHAT_BACKGROUND.dim,
+                    }));
                   }}
                   disabled={isChatBackgroundDefault}
                   aria-label="Reset chat background"
@@ -690,17 +697,16 @@ export default function AppearanceSection() {
                       onOpenChange={(open) => setRemovingCustomUrl(open ? url : null)}
                     >
                       <PopoverTrigger asChild>
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          className="bg-background/80 hover:bg-background absolute top-1 right-1 inline-flex size-7 items-center justify-center rounded-md"
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="bg-background/80 hover:bg-background absolute top-1 right-1"
                           aria-label="Remove custom background"
                           onMouseDown={(event) => event.stopPropagation()}
                           onClick={(event) => event.stopPropagation()}
-                          onKeyDown={(event) => event.stopPropagation()}
                         >
                           <IconX data-icon="inline-start" />
-                        </span>
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent align="end">
                         <PopoverHeader>
