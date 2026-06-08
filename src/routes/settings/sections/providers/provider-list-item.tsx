@@ -15,6 +15,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   getBuiltInProviderModels,
   type ProviderModelMetadata,
@@ -65,6 +66,7 @@ interface SharedProviderEditorProps {
   showApiKey?: boolean;
   autoFetchOnMount?: boolean;
   showSetupButton?: boolean;
+  showMissingKeyWarning?: boolean;
   onSetupDismiss?: () => void;
   onOpenChange?: (id: string) => void;
   onEnabledChange: (enabled: boolean) => void;
@@ -112,6 +114,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
   showApiKey = true,
   autoFetchOnMount = false,
   showSetupButton = false,
+  showMissingKeyWarning = false,
   onSetupDismiss,
   onOpenChange,
   onEnabledChange,
@@ -123,6 +126,16 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
           <span className="flex items-center gap-2">
             <ProviderLogo id={id} title={title} />
             <span>{title}</span>
+            {showMissingKeyWarning && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">
+                    <IconAlertTriangle className="size-4" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>No API key set</TooltipContent>
+              </Tooltip>
+            )}
           </span>
           <span className="flex items-center gap-2">
             {showSetupButton && onSetupDismiss && (
@@ -226,6 +239,7 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
 
   const showSetupButton =
     storedConfig.enabled && !wasInitiallyEnabled.current && !setupDismissed[providerId];
+  const showMissingKeyWarning = storedConfig.enabled && !storedApiKey && !hasEnvKey;
   const handleSetupDismiss = () => {
     dismissSetup((prev) => ({ ...prev, [providerId]: true }));
   };
@@ -249,6 +263,7 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
       emptyDescription="Add a model to override built-in metadata or to register an extra model for this provider."
       onEnabledChange={(enabled) => updateConfig({ enabled })}
       showSetupButton={showSetupButton}
+      showMissingKeyWarning={showMissingKeyWarning}
       onSetupDismiss={handleSetupDismiss}
       onOpenChange={onOpenChange}
     />
@@ -279,6 +294,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
 
   const showSetupButton =
     provider.enabled && !wasInitiallyEnabled.current && !setupDismissed[provider.id];
+  const showMissingKeyWarning = provider.enabled && !apiKey;
   const handleSetupDismiss = () => {
     dismissSetup((prev) => ({ ...prev, [provider.id]: true }));
   };
@@ -290,6 +306,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
         title={provider.name}
         enabled={provider.enabled}
         showSetupButton={showSetupButton}
+        showMissingKeyWarning={showMissingKeyWarning}
         onSetupDismiss={handleSetupDismiss}
         apiKey={apiKey}
         onApiKeyChange={(nextApiKey) => void setApiKey(provider.id, nextApiKey)}
