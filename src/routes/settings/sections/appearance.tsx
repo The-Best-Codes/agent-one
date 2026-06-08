@@ -318,7 +318,7 @@ export default function AppearanceSection() {
     void removeManagedBackgroundFile(url);
     setChatBackground((prev) => {
       const customUrls = (prev.customUrls ?? []).filter((customUrl) => customUrl !== url);
-      const customThumbnails = { ...(prev.customThumbnails ?? {}) };
+      const customThumbnails = { ...prev.customThumbnails };
       delete customThumbnails[url];
       const isRemovingActive = prev.preset === "custom" && prev.customUrl === url;
 
@@ -367,7 +367,6 @@ export default function AppearanceSection() {
 
       const appLocalDataPath = await appLocalDataDir();
       const imageAbsolutePath = await join(appLocalDataPath, imageRelativePath);
-      const thumbnailAbsolutePath = await join(appLocalDataPath, thumbnailRelativePath);
       const imageUrl = resolveChatBackgroundAssetUrl(imageAbsolutePath);
 
       setPendingCustomBackgrounds((prev) => [{ url: imageAbsolutePath }, ...prev]);
@@ -384,7 +383,7 @@ export default function AppearanceSection() {
           customUrl: imageAbsolutePath,
           customUrls,
           customThumbnails: {
-            ...(prev.customThumbnails ?? {}),
+            ...prev.customThumbnails,
           },
           preset: "custom",
         };
@@ -396,8 +395,7 @@ export default function AppearanceSection() {
           ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
           ...prev,
           customThumbnails: {
-            ...(prev.customThumbnails ?? {}),
-            [imageAbsolutePath]: thumbnailAbsolutePath,
+            ...prev.customThumbnails,
           },
         }));
       } catch {
@@ -405,7 +403,7 @@ export default function AppearanceSection() {
           ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
           ...prev,
           customThumbnails: {
-            ...(prev.customThumbnails ?? {}),
+            ...prev.customThumbnails,
             [imageAbsolutePath]: imageAbsolutePath,
           },
         }));
