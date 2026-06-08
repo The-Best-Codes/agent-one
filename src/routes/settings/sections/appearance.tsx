@@ -1,19 +1,13 @@
-import {
-  IconCheck,
-  IconLink,
-  IconPhotoOff,
-  IconPhotoPlus,
-  IconRestore,
-  IconUpload,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCheck, IconPhotoOff, IconPhotoPlus, IconRestore, IconX } from "@tabler/icons-react";
+import { appLocalDataDir, extname, join } from "@tauri-apps/api/path";
+import { open } from "@tauri-apps/plugin-dialog";
+import { BaseDirectory, mkdir, readFile, remove, writeFile } from "@tauri-apps/plugin-fs";
 import { useAtom } from "jotai";
 import { useCallback, useRef, useState } from "react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -32,10 +26,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { chatBackgroundPresets, cssImageUrl } from "@/lib/chat-backgrounds";
+import {
+  chatBackgroundPresets,
+  cssImageUrl,
+  resolveChatBackgroundAssetUrl,
+} from "@/lib/chat-backgrounds";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   chatBackgroundAtom,
@@ -134,10 +133,59 @@ const colorThemeOptions = [
   },
 ];
 
-async function createImageThumbnail(url: string) {
+const CUSTOM_BACKGROUND_DIR = "chat-backgrounds";
+const CUSTOM_BACKGROUND_IMAGE_DIR = `${CUSTOM_BACKGROUND_DIR}/images`;
+const CUSTOM_BACKGROUND_THUMBNAIL_DIR = `${CUSTOM_BACKGROUND_DIR}/thumbnails`;
+
+type PendingCustomBackground = {
+  url: string;
+};
+
+function createCustomBackgroundId() {
+  return `${Date.now()}-${crypto.randomUUID()}`;
+}
+
+function sanitizeExtension(extension: string) {
+  const trimmed = extension.trim().toLowerCase();
+  return trimmed && /^[a-z0-9]+$/.test(trimmed) ? trimmed : "jpg";
+}
+
+async function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: number) {
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+
+        reject(new Error("Failed to generate image blob."));
+      },
+      type,
+      quality,
+    );
+  });
+}
+
+async function writeManagedFile(path: string, data: Uint8Array) {
+  await writeFile(path, data, { baseDir: BaseDirectory.AppLocalData });
+}
+
+async function ensureCustomBackgroundDirs() {
+  await mkdir(CUSTOM_BACKGROUND_IMAGE_DIR, {
+    baseDir: BaseDirectory.AppLocalData,
+    recursive: true,
+  });
+  await mkdir(CUSTOM_BACKGROUND_THUMBNAIL_DIR, {
+    baseDir: BaseDirectory.AppLocalData,
+    recursive: true,
+  });
+}
+
+async function createThumbnailFile(sourceUrl: string, destinationPath: string) {
   const image = new Image();
   image.crossOrigin = "anonymous";
-  image.src = url;
+  image.src = sourceUrl;
 
   await image.decode();
 
@@ -145,14 +193,19 @@ async function createImageThumbnail(url: string) {
   canvas.width = 320;
   canvas.height = 180;
   const context = canvas.getContext("2d");
-  if (!context) return url;
+  if (!context) {
+    throw new Error("Failed to create thumbnail canvas context.");
+  }
 
   const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
   const width = image.naturalWidth * scale;
   const height = image.naturalHeight * scale;
   context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
 
-  return canvas.toDataURL("image/jpeg", 0.72);
+  const thumbnailBlob = await canvasToBlob(canvas, "image/jpeg", 0.72);
+  const thumbnailBytes = new Uint8Array(await thumbnailBlob.arrayBuffer());
+
+  await writeManagedFile(destinationPath, thumbnailBytes);
 }
 
 export default function AppearanceSection() {
@@ -166,9 +219,11 @@ export default function AppearanceSection() {
   const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
   const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
   const [collapsedSidebarLayout, setCollapsedSidebarLayout] = useAtom(collapsedSidebarLayoutAtom);
-  const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
+  const [pendingCustomBackgrounds, setPendingCustomBackgrounds] = useState<
+    PendingCustomBackground[]
+  >([]);
   const [removingCustomUrl, setRemovingCustomUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const addingCustomBackgroundRef = useRef(false);
 
   const activeColorRef = useCallback((node: HTMLButtonElement | null) => {
     if (node) {
@@ -204,37 +259,18 @@ export default function AppearanceSection() {
     setChatBackground((prev) => ({ ...DEFAULT_SETTINGS.CHAT_BACKGROUND, ...prev, ...updates }));
   };
 
-  const addCustomBackground = async (url: string) => {
-    const trimmedUrl = url.trim();
-    if (!trimmedUrl) return;
+  const removeManagedBackgroundFile = async (url: string) => {
+    const thumbnailUrl = chatBackground.customThumbnails?.[url];
 
-    const thumbnailUrl = await createImageThumbnail(trimmedUrl).catch(() => trimmedUrl);
-
-    trackSettingsInteraction("appearance", "custom_chat_background_added");
-    setChatBackground((prev) => {
-      const currentUrls = prev.customUrls ?? [];
-      const customUrls = currentUrls.includes(trimmedUrl)
-        ? currentUrls
-        : [trimmedUrl, ...currentUrls];
-      const customThumbnails = {
-        ...(prev.customThumbnails ?? {}),
-        [trimmedUrl]: thumbnailUrl,
-      };
-
-      return {
-        ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
-        ...prev,
-        customUrl: trimmedUrl,
-        customUrls,
-        customThumbnails,
-        preset: "custom",
-      };
-    });
-    setCustomBackgroundUrl("");
+    await Promise.all([
+      remove(url).catch(() => undefined),
+      thumbnailUrl ? remove(thumbnailUrl).catch(() => undefined) : Promise.resolve(undefined),
+    ]);
   };
 
   const removeCustomBackground = (url: string) => {
     trackSettingsInteraction("appearance", "custom_chat_background_removed");
+    void removeManagedBackgroundFile(url);
     setChatBackground((prev) => {
       const customUrls = (prev.customUrls ?? []).filter((customUrl) => customUrl !== url);
       const customThumbnails = { ...(prev.customThumbnails ?? {}) };
@@ -250,14 +286,92 @@ export default function AppearanceSection() {
         preset: isRemovingActive ? "none" : prev.preset,
       };
     });
+    setPendingCustomBackgrounds((prev) => prev.filter((background) => background.url !== url));
   };
 
-  const handleCustomFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleAddCustomBackground = async () => {
+    if (addingCustomBackgroundRef.current) return;
 
-    void addCustomBackground(URL.createObjectURL(file));
-    event.target.value = "";
+    addingCustomBackgroundRef.current = true;
+
+    try {
+      const selectedPath = await open({
+        multiple: false,
+        directory: false,
+        filters: [
+          {
+            name: "Image",
+            extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "avif"],
+          },
+        ],
+      });
+
+      if (typeof selectedPath !== "string") {
+        return;
+      }
+
+      await ensureCustomBackgroundDirs();
+
+      const extension = sanitizeExtension((await extname(selectedPath)).replace(/^\./, ""));
+      const id = createCustomBackgroundId();
+      const imageRelativePath = `${CUSTOM_BACKGROUND_IMAGE_DIR}/${id}.${extension}`;
+      const thumbnailRelativePath = `${CUSTOM_BACKGROUND_THUMBNAIL_DIR}/${id}.jpg`;
+
+      const imageBytes = await readFile(selectedPath);
+      await writeManagedFile(imageRelativePath, imageBytes);
+
+      const appLocalDataPath = await appLocalDataDir();
+      const imageAbsolutePath = await join(appLocalDataPath, imageRelativePath);
+      const thumbnailAbsolutePath = await join(appLocalDataPath, thumbnailRelativePath);
+      const imageUrl = resolveChatBackgroundAssetUrl(imageAbsolutePath);
+
+      setPendingCustomBackgrounds((prev) => [{ url: imageAbsolutePath }, ...prev]);
+      trackSettingsInteraction("appearance", "custom_chat_background_added");
+      setChatBackground((prev) => {
+        const currentUrls = prev.customUrls ?? [];
+        const customUrls = currentUrls.includes(imageAbsolutePath)
+          ? currentUrls
+          : [imageAbsolutePath, ...currentUrls];
+
+        return {
+          ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+          ...prev,
+          customUrl: imageAbsolutePath,
+          customUrls,
+          customThumbnails: {
+            ...(prev.customThumbnails ?? {}),
+          },
+          preset: "custom",
+        };
+      });
+
+      try {
+        await createThumbnailFile(imageUrl, thumbnailRelativePath);
+        setChatBackground((prev) => ({
+          ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+          ...prev,
+          customThumbnails: {
+            ...(prev.customThumbnails ?? {}),
+            [imageAbsolutePath]: thumbnailAbsolutePath,
+          },
+        }));
+      } catch {
+        setChatBackground((prev) => ({
+          ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+          ...prev,
+          customThumbnails: {
+            ...(prev.customThumbnails ?? {}),
+            [imageAbsolutePath]: imageAbsolutePath,
+          },
+        }));
+      } finally {
+        setPendingCustomBackgrounds((prev) =>
+          prev.filter((background) => background.url !== imageAbsolutePath),
+        );
+      }
+    } finally {
+      addingCustomBackgroundRef.current = false;
+    }
   };
 
   return (
@@ -530,59 +644,15 @@ export default function AppearanceSection() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex aspect-video h-auto flex-col gap-1"
-                    >
-                      <IconPhotoPlus data-icon="inline-start" />
-                      Add Custom
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-80">
-                    <PopoverHeader>
-                      <PopoverTitle>Add custom background</PopoverTitle>
-                      <PopoverDescription>
-                        Upload an image or load one from a URL.
-                      </PopoverDescription>
-                    </PopoverHeader>
-                    <div className="flex flex-col gap-3">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleCustomFileChange}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="justify-start"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <IconUpload data-icon="inline-start" />
-                        Upload an image
-                      </Button>
-                      <div className="flex gap-2">
-                        <Input
-                          value={customBackgroundUrl}
-                          onChange={(event) => setCustomBackgroundUrl(event.target.value)}
-                          placeholder="https://example.com/background.jpg"
-                          aria-label="Custom chat background image URL"
-                        />
-                        <Button
-                          type="button"
-                          onClick={() => void addCustomBackground(customBackgroundUrl)}
-                        >
-                          <IconLink data-icon="inline-start" />
-                          Load
-                        </Button>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex aspect-video h-auto flex-col gap-1"
+                  onClick={() => void handleAddCustomBackground()}
+                >
+                  <IconPhotoPlus data-icon="inline-start" />
+                  Add Custom
+                </Button>
 
                 <Button
                   type="button"
@@ -593,8 +663,8 @@ export default function AppearanceSection() {
                   <IconPhotoOff data-icon="inline-start" />
                   None
                   {chatBackground.preset === "none" && (
-                    <span className="bg-background/40 text-foreground absolute inset-0 flex items-center justify-center">
-                      <IconCheck data-icon="inline-start" />
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
+                      <IconCheck className="size-8" data-icon="inline-start" />
                     </span>
                   )}
                 </Button>
@@ -606,7 +676,11 @@ export default function AppearanceSection() {
                     variant="outline"
                     className="relative aspect-video h-auto overflow-hidden bg-cover bg-center p-0"
                     style={{
-                      backgroundImage: cssImageUrl(chatBackground.customThumbnails?.[url] ?? url),
+                      backgroundImage: cssImageUrl(
+                        resolveChatBackgroundAssetUrl(
+                          chatBackground.customThumbnails?.[url] ?? url,
+                        ),
+                      ),
                     }}
                     onClick={() => updateChatBackground({ preset: "custom", customUrl: url })}
                     title="Custom background"
@@ -621,6 +695,7 @@ export default function AppearanceSection() {
                           tabIndex={0}
                           className="bg-background/80 hover:bg-background absolute top-1 right-1 inline-flex size-7 items-center justify-center rounded-md"
                           aria-label="Remove custom background"
+                          onMouseDown={(event) => event.stopPropagation()}
                           onClick={(event) => event.stopPropagation()}
                           onKeyDown={(event) => event.stopPropagation()}
                         >
@@ -638,14 +713,18 @@ export default function AppearanceSection() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setRemovingCustomUrl(null)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setRemovingCustomUrl(null);
+                            }}
                           >
                             Cancel
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => {
+                            onClick={(event) => {
+                              event.stopPropagation();
                               removeCustomBackground(url);
                               setRemovingCustomUrl(null);
                             }}
@@ -655,9 +734,14 @@ export default function AppearanceSection() {
                         </div>
                       </PopoverContent>
                     </Popover>
+                    {pendingCustomBackgrounds.some((background) => background.url === url) ? (
+                      <span className="absolute inset-0 p-3">
+                        <Skeleton className="h-full w-full rounded-[inherit]" />
+                      </span>
+                    ) : null}
                     {chatBackground.preset === "custom" && chatBackground.customUrl === url && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/35 text-white">
-                        <IconCheck data-icon="inline-start" />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
+                        <IconCheck className="size-8" data-icon="inline-start" />
                       </span>
                     )}
                     <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
@@ -679,8 +763,8 @@ export default function AppearanceSection() {
                     title={preset.label}
                   >
                     {chatBackground.preset === value && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/35 text-white">
-                        <IconCheck data-icon="inline-start" />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
+                        <IconCheck className="size-8" data-icon="inline-start" />
                       </span>
                     )}
                     <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">

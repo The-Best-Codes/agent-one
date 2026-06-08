@@ -1,3 +1,5 @@
+import { convertFileSrc } from "@tauri-apps/api/core";
+
 import type { ChatBackgroundPresetOption, ChatBackgroundSettings } from "@/lib/settings/types";
 
 export const chatBackgroundPresets: Record<
@@ -58,9 +60,15 @@ export function cssImageUrl(url: string) {
   return `url("${url.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}")`;
 }
 
+export function resolveChatBackgroundAssetUrl(url: string) {
+  if (!url) return "";
+
+  return /^(data:|https?:|asset:|tauri:|blob:|file:)/.test(url) ? url : convertFileSrc(url);
+}
+
 export function getChatBackgroundUrl(settings: ChatBackgroundSettings) {
   if (settings.preset === "custom") {
-    return settings.customUrl.trim();
+    return resolveChatBackgroundAssetUrl(settings.customUrl.trim());
   }
 
   if (settings.preset === "none") {
