@@ -13,7 +13,7 @@ export const chatBackgroundPresets: Record<
       "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=320&q=35",
   },
   mist: {
-    label: "Morning Mist",
+    label: "Valley",
     url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=80",
     thumbnailUrl:
       "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=320&q=35",
@@ -25,7 +25,7 @@ export const chatBackgroundPresets: Record<
       "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=320&q=35",
   },
   desert: {
-    label: "Desert",
+    label: "Morning Mist",
     url: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=2400&q=80",
     thumbnailUrl:
       "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=320&q=35",
