@@ -35,7 +35,7 @@ export type ChatBackgroundPresetOption =
   | "aurora"
   | "mist"
   | "forest"
-  | "desert"
+  | "valley"
   | "ocean"
   | "mountain"
   | "sunset"
