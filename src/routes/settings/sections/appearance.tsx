@@ -1,11 +1,28 @@
-import { IconCheck, IconRestore } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconLink,
+  IconPhotoOff,
+  IconPhotoPlus,
+  IconRestore,
+  IconUpload,
+  IconX,
+} from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -18,8 +35,10 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { chatBackgroundPresets, cssImageUrl } from "@/lib/chat-backgrounds";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
+  chatBackgroundAtom,
   collapsedSidebarLayoutAtom,
   colorThemeAtom,
   fontAtom,
@@ -32,6 +51,7 @@ import {
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import {
+  type ChatBackgroundPresetOption,
   type CollapsedSidebarLayoutOption,
   DEFAULT_SETTINGS,
   type InputStyleOption,
@@ -114,7 +134,29 @@ const colorThemeOptions = [
   },
 ];
 
+async function createImageThumbnail(url: string) {
+  const image = new Image();
+  image.crossOrigin = "anonymous";
+  image.src = url;
+
+  await image.decode();
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 320;
+  canvas.height = 180;
+  const context = canvas.getContext("2d");
+  if (!context) return url;
+
+  const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+  const width = image.naturalWidth * scale;
+  const height = image.naturalHeight * scale;
+  context.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+
+  return canvas.toDataURL("image/jpeg", 0.72);
+}
+
 export default function AppearanceSection() {
+  const [chatBackground, setChatBackground] = useAtom(chatBackgroundAtom);
   const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
   const [font, setFont] = useAtom(fontAtom);
   const [roundness, setRoundness] = useAtom(roundnessAtom);
@@ -124,6 +166,9 @@ export default function AppearanceSection() {
   const [markdownHighlighting, setMarkdownHighlighting] = useAtom(markdownHighlightingAtom);
   const [inputStyle, setInputStyle] = useAtom(inputStyleAtom);
   const [collapsedSidebarLayout, setCollapsedSidebarLayout] = useAtom(collapsedSidebarLayoutAtom);
+  const [customBackgroundUrl, setCustomBackgroundUrl] = useState("");
+  const [removingCustomUrl, setRemovingCustomUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const activeColorRef = useCallback((node: HTMLButtonElement | null) => {
     if (node) {
@@ -134,6 +179,8 @@ export default function AppearanceSection() {
   const isMarkdownHighlightingDefault =
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isUiTintStrengthDefault = uiTintStrength === DEFAULT_SETTINGS.UI_TINT_STRENGTH;
+  const isChatBackgroundDefault =
+    JSON.stringify(chatBackground) === JSON.stringify(DEFAULT_SETTINGS.CHAT_BACKGROUND);
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
   const isCollapsedSidebarLayoutDefault =
     collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
@@ -151,6 +198,66 @@ export default function AppearanceSection() {
   const handleResetCollapsedSidebarLayout = () => {
     trackSettingsInteraction("appearance", "reset_collapsed_sidebar_layout");
     resetSetting("COLLAPSED_SIDEBAR_LAYOUT");
+  };
+
+  const updateChatBackground = (updates: Partial<typeof DEFAULT_SETTINGS.CHAT_BACKGROUND>) => {
+    setChatBackground((prev) => ({ ...DEFAULT_SETTINGS.CHAT_BACKGROUND, ...prev, ...updates }));
+  };
+
+  const addCustomBackground = async (url: string) => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return;
+
+    const thumbnailUrl = await createImageThumbnail(trimmedUrl).catch(() => trimmedUrl);
+
+    trackSettingsInteraction("appearance", "custom_chat_background_added");
+    setChatBackground((prev) => {
+      const currentUrls = prev.customUrls ?? [];
+      const customUrls = currentUrls.includes(trimmedUrl)
+        ? currentUrls
+        : [trimmedUrl, ...currentUrls];
+      const customThumbnails = {
+        ...(prev.customThumbnails ?? {}),
+        [trimmedUrl]: thumbnailUrl,
+      };
+
+      return {
+        ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+        ...prev,
+        customUrl: trimmedUrl,
+        customUrls,
+        customThumbnails,
+        preset: "custom",
+      };
+    });
+    setCustomBackgroundUrl("");
+  };
+
+  const removeCustomBackground = (url: string) => {
+    trackSettingsInteraction("appearance", "custom_chat_background_removed");
+    setChatBackground((prev) => {
+      const customUrls = (prev.customUrls ?? []).filter((customUrl) => customUrl !== url);
+      const customThumbnails = { ...(prev.customThumbnails ?? {}) };
+      delete customThumbnails[url];
+      const isRemovingActive = prev.preset === "custom" && prev.customUrl === url;
+
+      return {
+        ...DEFAULT_SETTINGS.CHAT_BACKGROUND,
+        ...prev,
+        customUrls,
+        customThumbnails,
+        customUrl: isRemovingActive ? "" : prev.customUrl,
+        preset: isRemovingActive ? "none" : prev.preset,
+      };
+    });
+  };
+
+  const handleCustomFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    void addCustomBackground(URL.createObjectURL(file));
+    event.target.value = "";
   };
 
   return (
@@ -388,6 +495,240 @@ export default function AppearanceSection() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          </SettingsTarget>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Chat Background</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <SettingsTarget id="setting-chat-background">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label className="text-sm font-medium">Background Image</Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Pick a preset or add your own image behind the main chat area.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("appearance", "reset_chat_background");
+                    resetSetting("CHAT_BACKGROUND");
+                  }}
+                  disabled={isChatBackgroundDefault}
+                  aria-label="Reset chat background"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex aspect-video h-auto flex-col gap-1"
+                    >
+                      <IconPhotoPlus data-icon="inline-start" />
+                      Add Custom
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-80">
+                    <PopoverHeader>
+                      <PopoverTitle>Add custom background</PopoverTitle>
+                      <PopoverDescription>
+                        Upload an image or load one from a URL.
+                      </PopoverDescription>
+                    </PopoverHeader>
+                    <div className="flex flex-col gap-3">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleCustomFileChange}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="justify-start"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <IconUpload data-icon="inline-start" />
+                        Upload an image
+                      </Button>
+                      <div className="flex gap-2">
+                        <Input
+                          value={customBackgroundUrl}
+                          onChange={(event) => setCustomBackgroundUrl(event.target.value)}
+                          placeholder="https://example.com/background.jpg"
+                          aria-label="Custom chat background image URL"
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => void addCustomBackground(customBackgroundUrl)}
+                        >
+                          <IconLink data-icon="inline-start" />
+                          Load
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="relative flex aspect-video h-auto flex-col gap-1 overflow-hidden"
+                  onClick={() => updateChatBackground({ preset: "none" })}
+                >
+                  <IconPhotoOff data-icon="inline-start" />
+                  None
+                  {chatBackground.preset === "none" && (
+                    <span className="bg-background/40 text-foreground absolute inset-0 flex items-center justify-center">
+                      <IconCheck data-icon="inline-start" />
+                    </span>
+                  )}
+                </Button>
+
+                {(chatBackground.customUrls ?? []).map((url) => (
+                  <Button
+                    key={url}
+                    type="button"
+                    variant="outline"
+                    className="relative aspect-video h-auto overflow-hidden bg-cover bg-center p-0"
+                    style={{
+                      backgroundImage: cssImageUrl(chatBackground.customThumbnails?.[url] ?? url),
+                    }}
+                    onClick={() => updateChatBackground({ preset: "custom", customUrl: url })}
+                    title="Custom background"
+                  >
+                    <Popover
+                      open={removingCustomUrl === url}
+                      onOpenChange={(open) => setRemovingCustomUrl(open ? url : null)}
+                    >
+                      <PopoverTrigger asChild>
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          className="bg-background/80 hover:bg-background absolute top-1 right-1 inline-flex size-7 items-center justify-center rounded-md"
+                          aria-label="Remove custom background"
+                          onClick={(event) => event.stopPropagation()}
+                          onKeyDown={(event) => event.stopPropagation()}
+                        >
+                          <IconX data-icon="inline-start" />
+                        </span>
+                      </PopoverTrigger>
+                      <PopoverContent align="end">
+                        <PopoverHeader>
+                          <PopoverTitle>Delete this background?</PopoverTitle>
+                          <PopoverDescription>
+                            This removes it from your custom list.
+                          </PopoverDescription>
+                        </PopoverHeader>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setRemovingCustomUrl(null)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              removeCustomBackground(url);
+                              setRemovingCustomUrl(null);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    {chatBackground.preset === "custom" && chatBackground.customUrl === url && (
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/35 text-white">
+                        <IconCheck data-icon="inline-start" />
+                      </span>
+                    )}
+                    <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
+                      Custom
+                    </span>
+                  </Button>
+                ))}
+
+                {Object.entries(chatBackgroundPresets).map(([value, preset]) => (
+                  <Button
+                    key={value}
+                    type="button"
+                    variant="outline"
+                    className="relative aspect-video h-auto overflow-hidden bg-cover bg-center p-0"
+                    style={{ backgroundImage: cssImageUrl(preset.thumbnailUrl) }}
+                    onClick={() =>
+                      updateChatBackground({ preset: value as ChatBackgroundPresetOption })
+                    }
+                    title={preset.label}
+                  >
+                    {chatBackground.preset === value && (
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/35 text-white">
+                        <IconCheck data-icon="inline-start" />
+                      </span>
+                    )}
+                    <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
+                      {preset.label}
+                    </span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-chat-background-effects">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm tabular-nums">Tint: {chatBackground.tint ?? 0}%</Label>
+                <Slider
+                  value={[chatBackground.tint ?? DEFAULT_SETTINGS.CHAT_BACKGROUND.tint]}
+                  onValueChange={(value) => updateChatBackground({ tint: value[0] })}
+                  min={0}
+                  max={70}
+                  step={5}
+                  aria-label="Chat background tint"
+                  disabled={chatBackground.preset === "none"}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm tabular-nums">Blur: {chatBackground.blur ?? 0}px</Label>
+                <Slider
+                  value={[chatBackground.blur ?? DEFAULT_SETTINGS.CHAT_BACKGROUND.blur]}
+                  onValueChange={(value) => updateChatBackground({ blur: value[0] })}
+                  min={0}
+                  max={20}
+                  step={1}
+                  aria-label="Chat background blur"
+                  disabled={chatBackground.preset === "none"}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm tabular-nums">Dim: {chatBackground.dim ?? 0}%</Label>
+                <Slider
+                  value={[chatBackground.dim ?? DEFAULT_SETTINGS.CHAT_BACKGROUND.dim]}
+                  onValueChange={(value) => updateChatBackground({ dim: value[0] })}
+                  min={0}
+                  max={70}
+                  step={5}
+                  aria-label="Chat background dim"
+                  disabled={chatBackground.preset === "none"}
+                />
               </div>
             </div>
           </SettingsTarget>

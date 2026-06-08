@@ -29,7 +29,28 @@ export type InputStyleOption = "docked" | "floating";
 export type CollapsedSidebarLayoutOption = "row" | "column";
 export type ChatVirtualizationModeOption = "off" | "threshold";
 export type ChatSortOption = "created-at" | "updated-at";
+export type ChatBackgroundPresetOption =
+  | "none"
+  | "custom"
+  | "aurora"
+  | "mist"
+  | "forest"
+  | "desert"
+  | "ocean"
+  | "mountain"
+  | "sunset"
+  | "night";
 export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume";
+
+export interface ChatBackgroundSettings {
+  preset: ChatBackgroundPresetOption;
+  customUrl: string;
+  customUrls: string[];
+  customThumbnails: Record<string, string>;
+  tint: number;
+  blur: number;
+  dim: number;
+}
 
 export interface TtsOpenAISettings {
   model: string;
@@ -215,6 +236,7 @@ export interface DefaultSettings extends ApiKeySettings {
   SHOW_CHAT_STATUS_INDICATOR: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
   CHAT_SORT: ChatSortOption;
+  CHAT_BACKGROUND: ChatBackgroundSettings;
   TTS: TtsSettings;
   TITLE_GENERATION: TitleGenerationSettings;
   THEME: ThemeOption;
@@ -257,6 +279,15 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
   CHAT_SORT: "created-at",
+  CHAT_BACKGROUND: {
+    preset: "none",
+    customUrl: "",
+    customUrls: [],
+    customThumbnails: {},
+    tint: 20,
+    blur: 0,
+    dim: 12,
+  },
   TTS: {
     provider: "",
     openai: {

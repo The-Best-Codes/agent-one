@@ -5,6 +5,7 @@ import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
 import type { DefaultSettings } from "@/lib/settings/types";
 import {
   type AnalyticsIdentityOption,
+  type ChatBackgroundSettings,
   type ChatSortOption,
   type ColorThemeOption,
   DEFAULT_SETTINGS,
@@ -213,6 +214,11 @@ export const showMessageActionRowAtom = createSettingAtom<MessageActionRowOption
 export const chatSortAtom = createSettingAtom<ChatSortOption>(
   "CHAT_SORT",
   DEFAULT_SETTINGS.CHAT_SORT,
+);
+
+export const chatBackgroundAtom = createSettingAtom<ChatBackgroundSettings>(
+  "CHAT_BACKGROUND",
+  DEFAULT_SETTINGS.CHAT_BACKGROUND,
 );
 
 export const ttsSettingsAtom = createSettingAtom<TtsSettings>("TTS", DEFAULT_SETTINGS.TTS);

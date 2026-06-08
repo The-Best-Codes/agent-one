@@ -11,12 +11,14 @@ import { MessageParts } from "@/components/a1/messages";
 import { Sidebar } from "@/components/a1/sidebar";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatLoading, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { cssImageUrl, getChatBackgroundUrl } from "@/lib/chat-backgrounds";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import {
   clearEditingMessagesAtom,
   editingMessageIdsAtom,
 } from "@/lib/jotai/chat-message-editing-atoms";
 import {
+  chatBackgroundAtom,
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
 } from "@/lib/jotai/settings-atoms";
@@ -31,6 +33,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const [delayPassed, setDelayPassed] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const editingMessageIds = useAtomValue(editingMessageIdsAtom);
+  const chatBackground = useAtomValue(chatBackgroundAtom);
   const chatVirtualizationMode = useAtomValue(chatVirtualizationModeAtom);
   const chatVirtualizationThreshold = useAtomValue(chatVirtualizationThresholdAtom);
   const clearEditingMessages = useSetAtom(clearEditingMessagesAtom);
@@ -82,6 +85,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const initialInputValue = searchParams.get("initialMessage") || undefined;
   const shouldVirtualizeMessages =
     chatVirtualizationMode !== "off" && messages.length >= chatVirtualizationThreshold;
+  const chatBackgroundUrl = getChatBackgroundUrl(chatBackground);
   const messageItems = useMemo(
     () =>
       messages.map((message, index) => (
@@ -115,10 +119,26 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
       {chatId && <ChatUsageStatus />}
 
       <div
-        className="flex min-w-0 flex-1 flex-col items-center justify-center"
+        className="relative flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden"
         data-testid="chat-main"
       >
-        <div className="flex h-full w-full max-w-3xl flex-1 flex-col">
+        {chatBackgroundUrl && (
+          <>
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: cssImageUrl(chatBackgroundUrl),
+                filter: `blur(${chatBackground.blur}px)`,
+                transform: chatBackground.blur > 0 ? "scale(1.04)" : undefined,
+              }}
+            />
+            <div
+              className="bg-background absolute inset-0"
+              style={{ opacity: (chatBackground.tint + chatBackground.dim) / 100 }}
+            />
+          </>
+        )}
+        <div className="relative flex h-full w-full max-w-3xl flex-1 flex-col">
           {isChatLoading && showSpinner ? (
             <div className="flex flex-1 items-center justify-center">
               <Spinner className="text-muted-foreground size-8" />

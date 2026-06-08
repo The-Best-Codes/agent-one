@@ -8,6 +8,7 @@ import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
   analyticsIdentityAtom,
+  chatBackgroundAtom,
   chatSortAtom,
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
@@ -72,6 +73,7 @@ export function resetAllSettings(): void {
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
   store.set(chatSortAtom, RESET);
+  store.set(chatBackgroundAtom, RESET);
   store.set(ttsSettingsAtom, RESET);
   store.set(themeAtom, RESET);
   store.set(colorThemeAtom, RESET);
@@ -171,6 +173,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "CHAT_SORT":
       store.set(chatSortAtom, RESET);
+      break;
+    case "CHAT_BACKGROUND":
+      store.set(chatBackgroundAtom, RESET);
       break;
     case "TTS":
       store.set(ttsSettingsAtom, RESET);
