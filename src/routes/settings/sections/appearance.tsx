@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -280,7 +281,9 @@ export default function AppearanceSection() {
     chatBackground.dim === chatBackgroundDefaults.dim &&
     (chatBackground.x ?? chatBackgroundDefaults.x) === chatBackgroundDefaults.x &&
     (chatBackground.y ?? chatBackgroundDefaults.y) === chatBackgroundDefaults.y &&
-    (chatBackground.zoom ?? chatBackgroundDefaults.zoom) === chatBackgroundDefaults.zoom;
+    (chatBackground.zoom ?? chatBackgroundDefaults.zoom) === chatBackgroundDefaults.zoom &&
+    (chatBackground.backgroundShade ?? chatBackgroundDefaults.backgroundShade) ===
+      chatBackgroundDefaults.backgroundShade;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
   const isCollapsedSidebarLayoutDefault =
     collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
@@ -685,6 +688,7 @@ export default function AppearanceSection() {
                       x: chatBackgroundDefaults.x,
                       y: chatBackgroundDefaults.y,
                       zoom: chatBackgroundDefaults.zoom,
+                      backgroundShade: chatBackgroundDefaults.backgroundShade,
                     }));
                   }}
                   disabled={isChatBackgroundDefault}
@@ -903,6 +907,35 @@ export default function AppearanceSection() {
                 max={200}
                 step={5}
                 aria-label="Chat background zoom"
+                disabled={chatBackground.preset === "none"}
+                orientation="horizontal"
+              />
+            </div>
+          </SettingsTarget>
+
+          <Separator orientation="horizontal" />
+
+          <SettingsTarget id="setting-chat-background-overlay">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row items-center justify-between gap-2">
+                <div className="flex flex-1 flex-col items-start">
+                  <Label className="text-sm font-medium">Chat Background Shade</Label>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Places a shade over the background image on chat pages to improve text
+                    readability when a chat is open.
+                  </p>
+                </div>
+              </div>
+              <ChatBackgroundSlider
+                label="Shade Opacity"
+                value={chatBackground.backgroundShade}
+                defaultValue={chatBackgroundDefaults.backgroundShade}
+                suffix="%"
+                onCommit={(value) => updateChatBackground({ backgroundShade: value })}
+                min={0}
+                max={100}
+                step={5}
+                aria-label="Chat background shade opacity"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />

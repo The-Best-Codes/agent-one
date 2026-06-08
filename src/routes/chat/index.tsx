@@ -92,6 +92,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const chatBackgroundX = chatBackground.x ?? 50;
   const chatBackgroundY = chatBackground.y ?? 50;
   const chatBackgroundZoom = chatBackground.zoom ?? 100;
+  const chatBackgroundShade = chatBackground.backgroundShade ?? 30;
   const messageItems = useMemo(
     () =>
       messages.map((message, index) => (
@@ -139,6 +140,12 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               filter: `blur(${chatBackgroundBlur}px) brightness(${100 - chatBackgroundDim}%) opacity(${100 - chatBackgroundTint}%)`,
               transform: `scale(${chatBackgroundZoom / 100})`,
             }}
+          />
+        )}
+        {chatBackgroundUrl && chatId && chatBackgroundShade > 0 && (
+          <div
+            className="bg-background absolute inset-0"
+            style={{ opacity: chatBackgroundShade / 100 }}
           />
         )}
         <div className="relative flex h-full w-full max-w-3xl flex-1 flex-col">

@@ -6,6 +6,12 @@ export const chatBackgroundPresets: Record<
   Exclude<ChatBackgroundPresetOption, "none" | "custom">,
   { label: string; url: string; thumbnailUrl: string }
 > = {
+  abstract: {
+    label: "Abstract",
+    url: "https://images.unsplash.com/photo-1689005046800-38a1f4f47a51?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1689005046800-38a1f4f47a51?auto=format&fit=crop&w=320&q=35",
+  },
   mist: {
     label: "Morning Mist",
     url: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=2400&q=80",

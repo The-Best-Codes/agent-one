@@ -32,6 +32,7 @@ export type ChatSortOption = "created-at" | "updated-at";
 export type ChatBackgroundPresetOption =
   | "none"
   | "custom"
+  | "abstract"
   | "aurora"
   | "mist"
   | "forest"
@@ -54,6 +55,7 @@ export interface ChatBackgroundSettings {
   x: number;
   y: number;
   zoom: number;
+  backgroundShade: number;
 }
 
 export interface TtsOpenAISettings {
@@ -294,6 +296,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     x: 50,
     y: 50,
     zoom: 100,
+    backgroundShade: 55,
   },
   TTS: {
     provider: "",
