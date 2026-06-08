@@ -18,6 +18,12 @@ export const chatBackgroundPresets: Record<
     thumbnailUrl:
       "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=320&q=35",
   },
+  island: {
+    label: "Island",
+    url: "https://images.unsplash.com/photo-1553114836-026cecec9778?auto=format&fit=crop&w=2400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1553114836-026cecec9778?auto=format&fit=crop&w=320&q=35",
+  },
   aurora: {
     label: "Aurora",
     url: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=2400&q=80",
@@ -38,9 +44,9 @@ export const chatBackgroundPresets: Record<
   },
   ocean: {
     label: "Ocean",
-    url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2400&q=80",
+    url: "https://images.unsplash.com/photo-1598941288672-af25bcc7b223?auto=format&fit=crop&w=2400&q=80",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=320&q=35",
+      "https://images.unsplash.com/photo-1598941288672-af25bcc7b223?auto=format&fit=crop&w=320&q=35",
   },
   mountain: {
     label: "Mountain",

@@ -39,7 +39,8 @@ export type ChatBackgroundPresetOption =
   | "ocean"
   | "mountain"
   | "sunset"
-  | "night";
+  | "night"
+  | "island";
 export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume";
 
 export interface ChatBackgroundSettings {
