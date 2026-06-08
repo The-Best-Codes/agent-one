@@ -86,6 +86,12 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const shouldVirtualizeMessages =
     chatVirtualizationMode !== "off" && messages.length >= chatVirtualizationThreshold;
   const chatBackgroundUrl = getChatBackgroundUrl(chatBackground);
+  const chatBackgroundBlur = chatBackground.blur ?? 0;
+  const chatBackgroundDim = chatBackground.dim ?? 0;
+  const chatBackgroundTint = chatBackground.tint ?? 0;
+  const chatBackgroundX = chatBackground.x ?? 50;
+  const chatBackgroundY = chatBackground.y ?? 50;
+  const chatBackgroundZoom = chatBackground.zoom ?? 100;
   const messageItems = useMemo(
     () =>
       messages.map((message, index) => (
@@ -123,24 +129,17 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
         data-testid="chat-main"
       >
         {chatBackgroundUrl && (
-          <>
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: cssImageUrl(chatBackgroundUrl),
-                filter: `blur(${chatBackground.blur}px)`,
-                transform: chatBackground.blur > 0 ? "scale(1.04)" : undefined,
-              }}
-            />
-            <div
-              className="bg-background absolute inset-0"
-              style={{ opacity: chatBackground.tint / 100 }}
-            />
-            <div
-              className="absolute inset-0 bg-black"
-              style={{ opacity: chatBackground.dim / 100 }}
-            />
-          </>
+          <div
+            className="absolute inset-0 bg-cover"
+            style={{
+              backgroundImage: cssImageUrl(chatBackgroundUrl),
+              backgroundPosition: `${chatBackgroundX}% ${chatBackgroundY}%`,
+              backgroundRepeat: "no-repeat",
+              backgroundSize: chatBackgroundZoom === 100 ? "cover" : `${chatBackgroundZoom}% auto`,
+              filter: `blur(${chatBackgroundBlur}px) brightness(${100 - chatBackgroundDim}%) opacity(${100 - chatBackgroundTint}%)`,
+              transform: chatBackgroundBlur > 0 ? "scale(1.04)" : undefined,
+            }}
+          />
         )}
         <div className="relative flex h-full w-full max-w-3xl flex-1 flex-col">
           {isChatLoading && showSpinner ? (

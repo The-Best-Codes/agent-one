@@ -50,6 +50,9 @@ export interface ChatBackgroundSettings {
   tint: number;
   blur: number;
   dim: number;
+  x: number;
+  y: number;
+  zoom: number;
 }
 
 export interface TtsOpenAISettings {
@@ -287,6 +290,9 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     tint: 20,
     blur: 0,
     dim: 12,
+    x: 50,
+    y: 50,
+    zoom: 100,
   },
   TTS: {
     provider: "",

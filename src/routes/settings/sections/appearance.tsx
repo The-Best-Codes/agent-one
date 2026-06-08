@@ -3,7 +3,7 @@ import { appLocalDataDir, extname, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { BaseDirectory, mkdir, readFile, remove, writeFile } from "@tauri-apps/plugin-fs";
 import { useAtom } from "jotai";
-import { useCallback, useRef, useState } from "react";
+import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -136,9 +136,51 @@ const colorThemeOptions = [
 const CUSTOM_BACKGROUND_DIR = "chat-backgrounds";
 const CUSTOM_BACKGROUND_IMAGE_DIR = `${CUSTOM_BACKGROUND_DIR}/images`;
 const CUSTOM_BACKGROUND_THUMBNAIL_DIR = `${CUSTOM_BACKGROUND_DIR}/thumbnails`;
+const chatBackgroundDefaults = DEFAULT_SETTINGS.CHAT_BACKGROUND;
 
 type PendingCustomBackground = {
   url: string;
+};
+
+const ChatBackgroundSlider = ({
+  label,
+  value,
+  defaultValue,
+  suffix,
+  onCommit,
+  ...props
+}: {
+  label: string;
+  value: number | undefined;
+  defaultValue: number;
+  suffix: string;
+  onCommit: (value: number) => void;
+} & Omit<
+  ComponentProps<typeof Slider>,
+  "defaultValue" | "value" | "onValueChange" | "onValueCommit"
+>) => {
+  const [draggingValue, setDraggingValue] = useState<number | null>(null);
+  const displayValue = [draggingValue ?? value ?? defaultValue];
+
+  useEffect(() => setDraggingValue(null), [value]);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label className="text-sm tabular-nums">
+        {label}: {displayValue[0]}
+        {suffix}
+      </Label>
+      <Slider
+        value={displayValue}
+        onValueChange={(nextValue) => setDraggingValue(nextValue[0])}
+        onValueCommit={(nextValue) => {
+          setDraggingValue(null);
+          onCommit(nextValue[0]);
+        }}
+        {...props}
+      />
+    </div>
+  );
 };
 
 function createCustomBackgroundId() {
@@ -235,9 +277,12 @@ export default function AppearanceSection() {
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isUiTintStrengthDefault = uiTintStrength === DEFAULT_SETTINGS.UI_TINT_STRENGTH;
   const isChatBackgroundDefault =
-    chatBackground.tint === DEFAULT_SETTINGS.CHAT_BACKGROUND.tint &&
-    chatBackground.blur === DEFAULT_SETTINGS.CHAT_BACKGROUND.blur &&
-    chatBackground.dim === DEFAULT_SETTINGS.CHAT_BACKGROUND.dim;
+    chatBackground.tint === chatBackgroundDefaults.tint &&
+    chatBackground.blur === chatBackgroundDefaults.blur &&
+    chatBackground.dim === chatBackgroundDefaults.dim &&
+    (chatBackground.x ?? chatBackgroundDefaults.x) === chatBackgroundDefaults.x &&
+    (chatBackground.y ?? chatBackgroundDefaults.y) === chatBackgroundDefaults.y &&
+    (chatBackground.zoom ?? chatBackgroundDefaults.zoom) === chatBackgroundDefaults.zoom;
   const isInputStyleDefault = inputStyle === DEFAULT_SETTINGS.INPUT_STYLE;
   const isCollapsedSidebarLayoutDefault =
     collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
@@ -638,9 +683,12 @@ export default function AppearanceSection() {
                     trackSettingsInteraction("appearance", "reset_chat_background");
                     setChatBackground((prev) => ({
                       ...prev,
-                      tint: DEFAULT_SETTINGS.CHAT_BACKGROUND.tint,
-                      blur: DEFAULT_SETTINGS.CHAT_BACKGROUND.blur,
-                      dim: DEFAULT_SETTINGS.CHAT_BACKGROUND.dim,
+                      tint: chatBackgroundDefaults.tint,
+                      blur: chatBackgroundDefaults.blur,
+                      dim: chatBackgroundDefaults.dim,
+                      x: chatBackgroundDefaults.x,
+                      y: chatBackgroundDefaults.y,
+                      zoom: chatBackgroundDefaults.zoom,
                     }));
                   }}
                   disabled={isChatBackgroundDefault}
@@ -784,42 +832,84 @@ export default function AppearanceSection() {
 
           <SettingsTarget id="setting-chat-background-effects">
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm tabular-nums">Tint: {chatBackground.tint ?? 0}%</Label>
-                <Slider
-                  value={[chatBackground.tint ?? DEFAULT_SETTINGS.CHAT_BACKGROUND.tint]}
-                  onValueChange={(value) => updateChatBackground({ tint: value[0] })}
-                  min={0}
-                  max={70}
-                  step={5}
-                  aria-label="Chat background tint"
-                  disabled={chatBackground.preset === "none"}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm tabular-nums">Blur: {chatBackground.blur ?? 0}px</Label>
-                <Slider
-                  value={[chatBackground.blur ?? DEFAULT_SETTINGS.CHAT_BACKGROUND.blur]}
-                  onValueChange={(value) => updateChatBackground({ blur: value[0] })}
-                  min={0}
-                  max={20}
-                  step={1}
-                  aria-label="Chat background blur"
-                  disabled={chatBackground.preset === "none"}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm tabular-nums">Dim: {chatBackground.dim ?? 0}%</Label>
-                <Slider
-                  value={[chatBackground.dim ?? DEFAULT_SETTINGS.CHAT_BACKGROUND.dim]}
-                  onValueChange={(value) => updateChatBackground({ dim: value[0] })}
-                  min={0}
-                  max={70}
-                  step={5}
-                  aria-label="Chat background dim"
-                  disabled={chatBackground.preset === "none"}
-                />
-              </div>
+              <ChatBackgroundSlider
+                label="Tint"
+                value={chatBackground.tint}
+                defaultValue={chatBackgroundDefaults.tint}
+                suffix="%"
+                onCommit={(value) => updateChatBackground({ tint: value })}
+                min={0}
+                max={70}
+                step={5}
+                aria-label="Chat background tint"
+                disabled={chatBackground.preset === "none"}
+                orientation="horizontal"
+              />
+              <ChatBackgroundSlider
+                label="Blur"
+                value={chatBackground.blur}
+                defaultValue={chatBackgroundDefaults.blur}
+                suffix="px"
+                onCommit={(value) => updateChatBackground({ blur: value })}
+                min={0}
+                max={20}
+                step={1}
+                aria-label="Chat background blur"
+                disabled={chatBackground.preset === "none"}
+                orientation="horizontal"
+              />
+              <ChatBackgroundSlider
+                label="Dim"
+                value={chatBackground.dim}
+                defaultValue={chatBackgroundDefaults.dim}
+                suffix="%"
+                onCommit={(value) => updateChatBackground({ dim: value })}
+                min={0}
+                max={70}
+                step={5}
+                aria-label="Chat background dim"
+                disabled={chatBackground.preset === "none"}
+                orientation="horizontal"
+              />
+              <ChatBackgroundSlider
+                label="X"
+                value={chatBackground.x}
+                defaultValue={chatBackgroundDefaults.x}
+                suffix="%"
+                onCommit={(value) => updateChatBackground({ x: value })}
+                min={0}
+                max={100}
+                step={1}
+                aria-label="Chat background horizontal position"
+                disabled={chatBackground.preset === "none"}
+                orientation="horizontal"
+              />
+              <ChatBackgroundSlider
+                label="Y"
+                value={chatBackground.y}
+                defaultValue={chatBackgroundDefaults.y}
+                suffix="%"
+                onCommit={(value) => updateChatBackground({ y: value })}
+                min={0}
+                max={100}
+                step={1}
+                aria-label="Chat background vertical position"
+                disabled={chatBackground.preset === "none"}
+                orientation="horizontal"
+              />
+              <ChatBackgroundSlider
+                label="Zoom"
+                value={chatBackground.zoom}
+                defaultValue={chatBackgroundDefaults.zoom}
+                suffix="%"
+                onCommit={(value) => updateChatBackground({ zoom: value })}
+                min={100}
+                max={200}
+                step={5}
+                aria-label="Chat background zoom"
+                disabled={chatBackground.preset === "none"}
+                orientation="horizontal"
+              />
             </div>
           </SettingsTarget>
         </CardContent>
