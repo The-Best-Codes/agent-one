@@ -63,6 +63,13 @@ export const providerModelsAtomFamily = atomFamily((providerId: ProviderId) =>
   atom((get) => normalizeProviderConfig(get(providerConfigAtoms[providerId])).models),
 );
 
+export const providerSetupDismissedAtom = atomWithStorage<Record<string, boolean>>(
+  `${SETTING_PREFIX}PROVIDER_SETUP_DISMISSED`,
+  {},
+  undefined,
+  { getOnInit: true },
+);
+
 export const hasEnabledProviderAtom = atom((get) => {
   const builtInEnabled = PROVIDER_REGISTRY.some(
     (p) => get(providerConfigAtoms[p.id as ProviderId]).enabled,

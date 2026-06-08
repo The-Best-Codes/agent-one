@@ -1,4 +1,4 @@
-import { IconTrash } from "@tabler/icons-react";
+import { IconAlertTriangle, IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { memo, useMemo, useState, type ReactNode } from "react";
 
@@ -32,7 +32,11 @@ import {
   type CustomProvider,
 } from "@/lib/jotai/custom-provider-atoms";
 import { getLocalProviderAtom, updateLocalProviderAtom } from "@/lib/jotai/local-provider-atoms";
-import { getProviderConfigAtom, type ProviderConfig } from "@/lib/jotai/provider-atoms";
+import {
+  getProviderConfigAtom,
+  providerSetupDismissedAtom,
+  type ProviderConfig,
+} from "@/lib/jotai/provider-atoms";
 
 import { ModelList } from "./model-list";
 import { DeleteProviderDialog } from "./provider-dialogs";
@@ -60,6 +64,9 @@ interface SharedProviderEditorProps {
   footer?: ReactNode;
   showApiKey?: boolean;
   autoFetchOnMount?: boolean;
+  showSetupButton?: boolean;
+  onSetupDismiss?: () => void;
+  onOpenChange?: (id: string) => void;
   onEnabledChange: (enabled: boolean) => void;
 }
 
@@ -67,15 +74,18 @@ interface BuiltInProviderListItemProps {
   providerId: ProviderId;
   label: string;
   hasEnvKey: boolean;
+  onOpenChange?: (id: string) => void;
 }
 
 interface CustomProviderListItemProps {
   providerId: string;
   onDelete: () => void;
+  onOpenChange?: (id: string) => void;
 }
 
 interface LocalProviderListItemProps {
   providerId: string;
+  onOpenChange?: (id: string) => void;
 }
 
 const ProviderAccordionItem = memo(function ProviderAccordionItem({
@@ -101,6 +111,9 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
   footer,
   showApiKey = true,
   autoFetchOnMount = false,
+  showSetupButton = false,
+  onSetupDismiss,
+  onOpenChange,
   onEnabledChange,
 }: SharedProviderEditorProps) {
   return (
@@ -111,19 +124,35 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
             <ProviderLogo id={id} title={title} />
             <span>{title}</span>
           </span>
-          <Switch
-            id={`enabled-${id}`}
-            checked={enabled}
-            onCheckedChange={(checked) => {
-              trackSettingsInteraction("providers", "provider_enabled_toggled", {
-                provider_id: id,
-                enabled: checked,
-              });
-              onEnabledChange(checked);
-            }}
-            onClick={(event) => event.stopPropagation()}
-            aria-label={`Enable ${title}`}
-          />
+          <span className="flex items-center gap-2">
+            {showSetupButton && onSetupDismiss && (
+              <Button
+                size="xs"
+                variant="default"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSetupDismiss();
+                  onOpenChange?.(id);
+                }}
+              >
+                <IconAlertTriangle data-icon="inline-start" />
+                Setup Provider
+              </Button>
+            )}
+            <Switch
+              id={`enabled-${id}`}
+              checked={enabled}
+              onCheckedChange={(checked) => {
+                trackSettingsInteraction("providers", "provider_enabled_toggled", {
+                  provider_id: id,
+                  enabled: checked,
+                });
+                onEnabledChange(checked);
+              }}
+              onClick={(event) => event.stopPropagation()}
+              aria-label={`Enable ${title}`}
+            />
+          </span>
         </div>
       </AccordionTrigger>
       <AccordionContent className="overflow-auto px-1 pb-3">
@@ -177,18 +206,26 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
   providerId,
   label,
   hasEnvKey,
+  onOpenChange,
 }: BuiltInProviderListItemProps) {
   const storedConfig = useAtomValue(getProviderConfigAtom(providerId));
   const storedApiKey = useAtomValue(getApiKeyAtom(providerId));
   const builtInModels = useMemo(() => getBuiltInProviderModels(providerId), [providerId]);
   const setConfigAtom = useSetAtom(getProviderConfigAtom(providerId));
   const setApiKey = useSetAtom(getApiKeyAtom(providerId));
+  const setupDismissed = useAtomValue(providerSetupDismissedAtom);
+  const dismissSetup = useSetAtom(providerSetupDismissedAtom);
 
   const updateConfig = (updates: Partial<ProviderConfig>) => {
     setConfigAtom((previous) => ({
       ...previous,
       ...updates,
     }));
+  };
+
+  const showSetupButton = storedConfig.enabled && !setupDismissed[providerId];
+  const handleSetupDismiss = () => {
+    dismissSetup((prev) => ({ ...prev, [providerId]: true }));
   };
 
   return (
@@ -209,6 +246,9 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
       emptyTitle="No model overrides"
       emptyDescription="Add a model to override built-in metadata or to register an extra model for this provider."
       onEnabledChange={(enabled) => updateConfig({ enabled })}
+      showSetupButton={showSetupButton}
+      onSetupDismiss={handleSetupDismiss}
+      onOpenChange={onOpenChange}
     />
   );
 });
@@ -216,12 +256,15 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
 export const CustomProviderListItem = memo(function CustomProviderListItem({
   providerId,
   onDelete,
+  onOpenChange,
 }: CustomProviderListItemProps) {
   const provider = useAtomValue(getCustomProviderAtom(providerId));
   const apiKey = useAtomValue(getCustomProviderApiKeyAtom(providerId));
   const updateProvider = useSetAtom(updateCustomProviderAtom);
   const setApiKey = useSetAtom(setCustomProviderApiKeyAtom);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const setupDismissed = useAtomValue(providerSetupDismissedAtom);
+  const dismissSetup = useSetAtom(providerSetupDismissedAtom);
 
   if (!provider) {
     return null;
@@ -231,12 +274,19 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
     updateProvider(provider.id, updates);
   };
 
+  const showSetupButton = provider.enabled && !setupDismissed[provider.id];
+  const handleSetupDismiss = () => {
+    dismissSetup((prev) => ({ ...prev, [provider.id]: true }));
+  };
+
   return (
     <>
       <ProviderAccordionItem
         id={provider.id}
         title={provider.name}
         enabled={provider.enabled}
+        showSetupButton={showSetupButton}
+        onSetupDismiss={handleSetupDismiss}
         apiKey={apiKey}
         onApiKeyChange={(nextApiKey) => void setApiKey(provider.id, nextApiKey)}
         headers={provider.headers}
@@ -289,6 +339,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
           </Button>
         }
         onEnabledChange={(enabled) => update({ enabled })}
+        onOpenChange={onOpenChange}
       />
 
       <DeleteProviderDialog
@@ -307,19 +358,29 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
 
 export const LocalProviderListItem = memo(function LocalProviderListItem({
   providerId,
+  onOpenChange,
 }: LocalProviderListItemProps) {
   const provider = useAtomValue(getLocalProviderAtom(providerId));
   const updateProvider = useSetAtom(updateLocalProviderAtom);
+  const setupDismissed = useAtomValue(providerSetupDismissedAtom);
+  const dismissSetup = useSetAtom(providerSetupDismissedAtom);
 
   if (!provider) {
     return null;
   }
+
+  const showSetupButton = provider.enabled && !setupDismissed[provider.id];
+  const handleSetupDismiss = () => {
+    dismissSetup((prev) => ({ ...prev, [provider.id]: true }));
+  };
 
   return (
     <ProviderAccordionItem
       id={provider.id}
       title={provider.name}
       enabled={provider.enabled}
+      showSetupButton={showSetupButton}
+      onSetupDismiss={handleSetupDismiss}
       apiKey=""
       onApiKeyChange={() => {}}
       headers={provider.headers}
@@ -347,6 +408,7 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
         </FieldGroup>
       }
       onEnabledChange={(enabled) => updateProvider(provider.id, { enabled })}
+      onOpenChange={onOpenChange}
     />
   );
 });

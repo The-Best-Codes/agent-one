@@ -1,6 +1,6 @@
 import { IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
@@ -59,6 +59,19 @@ export function ProvidersList() {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
+  const [openBuiltInItem, setOpenBuiltInItem] = useState("");
+  const [openLocalItem, setOpenLocalItem] = useState("");
+  const [openCustomItem, setOpenCustomItem] = useState("");
+
+  const handleBuiltInOpenChange = useCallback((value: string | string[]) => {
+    setOpenBuiltInItem(typeof value === "string" ? value : (value[0] ?? ""));
+  }, []);
+  const handleLocalOpenChange = useCallback((value: string | string[]) => {
+    setOpenLocalItem(typeof value === "string" ? value : (value[0] ?? ""));
+  }, []);
+  const handleCustomOpenChange = useCallback((value: string | string[]) => {
+    setOpenCustomItem(typeof value === "string" ? value : (value[0] ?? ""));
+  }, []);
 
   const localProviderIds = useAtomValue(localProviderIdsAtom);
   const rawTtsSettings = useAtomValue(ttsSettingsAtom);
@@ -167,13 +180,20 @@ export function ProvidersList() {
             />
 
             {filteredBuiltInProviders.length > 0 ? (
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                value={openBuiltInItem}
+                onValueChange={handleBuiltInOpenChange}
+              >
                 {filteredBuiltInProviders.map((provider) => (
                   <BuiltInProviderListItem
                     key={provider.id}
                     providerId={provider.id}
                     label={provider.label}
                     hasEnvKey={hasEnvKey(provider.id)}
+                    onOpenChange={setOpenBuiltInItem}
                   />
                 ))}
               </Accordion>
@@ -207,9 +227,19 @@ export function ProvidersList() {
             />
 
             {filteredLocalProviderIds.length > 0 ? (
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                value={openLocalItem}
+                onValueChange={handleLocalOpenChange}
+              >
                 {filteredLocalProviderIds.map((providerId) => (
-                  <LocalProviderListItem key={providerId} providerId={providerId} />
+                  <LocalProviderListItem
+                    key={providerId}
+                    providerId={providerId}
+                    onOpenChange={setOpenLocalItem}
+                  />
                 ))}
               </Accordion>
             ) : (
@@ -261,12 +291,19 @@ export function ProvidersList() {
                 </EmptyContent>
               </Empty>
             ) : filteredCustomProviderIds.length > 0 ? (
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                value={openCustomItem}
+                onValueChange={handleCustomOpenChange}
+              >
                 {filteredCustomProviderIds.map((providerId) => (
                   <CustomProviderListItem
                     key={providerId}
                     providerId={providerId}
                     onDelete={() => handleDeleteProvider(providerId)}
+                    onOpenChange={setOpenCustomItem}
                   />
                 ))}
               </Accordion>
