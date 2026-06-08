@@ -48,23 +48,37 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   examples?: Array<PurpleExample | string> | ExamplesClass;
   keywords?: string[];
   notes?: string[] | string;
-  publisher?: ContactElement | string;
-  tool?: string;
+  publisher?: AuthorElement | string;
+  tool?: PurpleTool | string;
   version?: string;
+  signup_url?: string;
+  status_url?: string;
+  support_url?: string;
+  vendor?: Maintainer | string;
+  verified_via?: string;
+  accuracy?: Accuracy;
+  agent_card?: string;
+  capabilities?: string[] | CapabilitiesClass | string;
+  categories?: Array<CategoryClass | string>;
+  diagnostics?: string;
+  homepage?: string;
+  llms_txt?: string;
+  openapi?: string;
+  pricing?: PricingClass | string;
+  skill?: string;
+  tool_count?: number;
+  tools?: Array<FluffyTool | string> | ToolsClass | number | string;
   network?: string;
   proof?: string;
   protocols?: string[];
   stats?: string;
-  categories?: Array<CategoryClass | string>;
   dataSources?: string[];
   languages?: string[];
-  pricing?: PricingClass | string;
   privacyPolicy?: string;
   prompts?: string[];
   regions?: string[];
-  support?: SupportClass | string;
+  support?: ContactClass | string;
   termsOfService?: string;
-  tools?: Array<PurpleTool | string> | ToolsClass | number | string;
   oauthDiscoveryUrl?: string;
   supportsOAuth?: boolean;
   tags?: string[];
@@ -77,10 +91,8 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   premiumPaymentMethod?: string;
   premiumTools?: string[];
   authentication?: AuthenticationClass | string;
-  capabilities?: string[] | CapabilitiesClass | string;
   documentationUrl?: string;
   toolCategories?: string[] | ToolCategoriesClass;
-  openapi?: string;
   protocolVersion?: Date;
   quotasManifest?: string;
   resources?: Array<ResourceClass | string>;
@@ -100,9 +112,7 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   supportUrl?: string;
   alternateEnvironments?: AlternateEnvironment[];
   discovery?: DiscoveryClass | string;
-  agent_card?: string;
   billing?: Billing;
-  homepage?: string;
   llms?: string;
   mcp_descriptor?: string;
   mcp_server_card?: string;
@@ -114,11 +124,12 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   longDescription?: string;
   preferredTransport?: string;
   quickstart?: QuickstartClass | string;
+  publisher_url?: string;
+  smithery_listing?: string;
   chains?: Chains;
   toolCount?: number;
   logo?: string;
   privacy_policy?: string;
-  support_url?: string;
   terms_of_service?: string;
   server_card_url?: string;
   title?: string;
@@ -128,9 +139,11 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   canonicalUtm?: string;
   distributionPlan?: string;
   highlights?: string[];
+  optOutContact?: string;
   paidTools?: string[];
   paymentModel?: string;
   privacyUrl?: string;
+  publicDocsRepo?: string;
   authorizationUrl?: string;
   "com.eztexting/sub-endpoints"?: COMEztextingSubEndpoints;
   websiteUrl?: string;
@@ -152,15 +165,24 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   promptCount?: number;
   resourceCount?: number;
   dataset?: Dataset;
+  attestation?: Attestation;
+  on_chain?: string;
+  zero_storage?: boolean;
   authorization?: Authorization;
-  contact?: SupportClass | string;
+  contact?: ContactClass | string;
   features?: string[] | FeaturesClass;
   spec?: string;
   x402?: string;
+  "com.unstoppabledomains"?: COMUnstoppabledomains;
+  buildInfo?: BuildInfo;
+  access?: string;
+  annotations?: string;
+  coverage?: string;
+  lenses?: string[];
+  primitives?: string[];
   country?: string;
   descriptionLong?: string;
   rateLimit?: RateLimit;
-  vendor?: Maintainer | string;
   toolHints?: ToolHint[];
   tool_version?: string;
   install_page?: string;
@@ -168,9 +190,8 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   auth_summary?: string;
   manifest_url?: string;
   resource_count?: number;
-  tool_count?: number;
   "io.bitquery"?: IoBitquery;
-  author?: AuthorClass | string;
+  author?: AuthorAuthor | string;
   repository?: string;
   competitive_alternatives?: string[];
   differentiators_against_alternatives?: string[];
@@ -219,7 +240,6 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   deployment?: Deployment;
   requires?: string;
   how_to_pay?: string;
-  llms_txt?: string;
   mcp_discovery?: string;
   payment_activation?: string;
   payment_ledger?: string;
@@ -237,7 +257,7 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   agentRecipes?: string;
   agentWrapperSchemas?: string;
   allowedUse?: string;
-  attribution?: string;
+  attribution?: AttributionClass | string;
   fullOpenApi?: string;
   howAiAgentsShouldUseMvr?: string;
   minimalSandboxOpenApi?: string;
@@ -255,7 +275,6 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   localOnly?: boolean;
   maintainer?: Maintainer;
   supported_transports?: string[];
-  buildInfo?: BuildInfo;
   recommendedPrompts?: string[];
   summary?: string;
   buildTags?: string[];
@@ -270,20 +289,23 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   productId?: string;
   purchaseUrl?: string;
   architectures?: string[];
-  platforms?: string[];
+  platforms?: string[] | PlatformsClass;
   useCases?: string[];
   discovery_endpoint?: string;
   health_endpoint?: string;
   ave_records?: number;
   owasp_mcp_mapping?: boolean;
   threat_intel_api?: string;
+  authors?: AuthorElement[];
+  docs_url?: string;
+  tool_categories?: ToolCategory[];
   securityContact?: string;
   tiers?: Tiers;
   benchmarks?: Benchmarks;
   paper_url?: string;
   capabilitiesSummary?: CapabilitiesSummary;
   installationNote?: string;
-  runtime?: Runtime;
+  runtime?: IoModelcontextprotocolRegistryPublisherProvidedRuntime;
   iconUrl?: string;
   "com.dailyaiagents.federation"?: COMDailyaiagentsFederation;
   "io.github.derekslinz"?: AIAgenticterminal;
@@ -293,7 +315,7 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   recommendedInstallDoc?: string;
   tools_summary?: string;
   framework?: string;
-  maintainers?: Array<ContactElement | string>;
+  maintainers?: Array<AuthorElement | string>;
   type?: string;
   permissions?: string;
   rateLimits?: string;
@@ -303,6 +325,8 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   hostedEndpoint?: string;
   quality_gate?: string;
   toolCatalog?: string;
+  leagues?: string[];
+  sampleFloors?: string;
   deprecated?: boolean;
   deprecation_reason?: string;
   sibling_packages?: string[];
@@ -315,11 +339,11 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   originalAuthor?: string;
   install_guide?: string;
   discovery_manifest?: string;
-  docs_url?: string;
   methodology_url?: string;
   openapi_spec?: string;
   rate_limit?: string;
   use_cases?: string[];
+  "io.github.lucyfox199818-collab.codex-binance-agent"?: IoGithubLucyfox199818CollabCodexBinanceAgent;
   billingNotes?: string[];
   compatibilityNotes?: string[];
   endpoints?: IoModelcontextprotocolRegistryPublisherProvidedEndpoints;
@@ -327,6 +351,7 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   payments?: Payments;
   performanceNotes?: string[];
   product?: string;
+  scope?: string;
   mcpbRelease?: string;
   free_tier?: boolean | FreeTierClass;
   tools_preview?: string[];
@@ -334,7 +359,6 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   dataTypes?: string[];
   "com.mindstone.rebel"?: COMMindstoneRebel;
   hardened?: boolean;
-  coverage?: string;
   eventCatalog?: string;
   openApi?: string;
   publisherCountry?: string;
@@ -353,9 +377,15 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   aliases?: string[];
   canonical_owner?: string;
   domain?: string;
+  apis?: string[];
+  description?: string;
+  freeToUse?: boolean;
+  noAuthRequired?: boolean;
   did?: string;
   tools_canonical?: string[];
-  contacts?: ContactElement[];
+  disclaimer?: string;
+  prerequisites?: string;
+  contacts?: AuthorElement[];
   agent_routing?: AgentRouting;
   canonical_site?: string;
   discoverability?: Discoverability;
@@ -386,9 +416,6 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   submissionState?: string;
   verificationCommands?: string[];
   platform?: string;
-  signup_url?: string;
-  status_url?: string;
-  verified_via?: string;
   badgeKit?: string;
   highIntentPages?: string[];
   rss?: string;
@@ -398,15 +425,24 @@ export type IoModelcontextprotocolRegistryPublisherProvided = {
   transports_supported?: string[];
   auth_request?: string;
   leadIntent?: string;
+  readOnly?: boolean;
+  security_posture?: string;
+  spec_version?: Date;
   aiPowered?: AIPowered;
   docsUrl?: string;
   llmsTxtUrl?: string;
+  "tech.zenfin/listing"?: TechZenfinListing;
   auth_method?: string;
   recipe_prompts?: number;
   tier_count?: number;
   tier_names?: string[];
   distribution_channels?: DistributionChannels;
   intelligence_categories?: IntelligenceCategories;
+};
+
+export type Accuracy = {
+  live_widget: string;
+  public_page: string;
 };
 
 export type AgentRouting = {
@@ -449,6 +485,18 @@ export type AlternateEnvironment = {
   label: string;
   network: string;
   url: string;
+};
+
+export type Attestation = {
+  algorithm: string;
+  canonicalization: string;
+  public_key_url: string;
+};
+
+export type AttributionClass = {
+  emitted_by_tool: string;
+  purpose: string;
+  token_format: string;
 };
 
 export type AuthAuth = {
@@ -516,7 +564,7 @@ export type AuthenticationStdio = {
   type: string;
 };
 
-export type AuthorClass = {
+export type AuthorAuthor = {
   email: string;
   name: string;
   organization?: string;
@@ -530,6 +578,12 @@ export type Authorization = {
   notes: string;
   scopes: string[];
   type: string;
+};
+
+export type AuthorElement = {
+  email?: string;
+  name: string;
+  url?: string;
 };
 
 export type Benchmarks = {
@@ -561,6 +615,8 @@ export type PublisherClass = {
 };
 
 export type BuildInfo = {
+  commit?: string;
+  publishedFrom?: string;
   imageSha256?: string;
   release?: string;
   timestamp?: Date;
@@ -597,6 +653,10 @@ export type BuiltWith = {
 };
 
 export type CapabilitiesClass = {
+  mcpApps?: boolean;
+  mcpAppsExtension?: string;
+  selfRegister?: string;
+  structuredOutputs?: boolean;
   chunking_strategies?: string[];
   embedding_providers?: string[];
   languages_supported?: number;
@@ -726,6 +786,14 @@ export type COMMindstoneRebel = {
   catalogIds?: string[];
 };
 
+export type COMUnstoppabledomains = {
+  documentationUrl: string;
+  privacyPolicyUrl: string;
+  serverDisplayName: string;
+  supportEmail: string;
+  supportUrl: string;
+};
+
 export type ComplianceClass = {
   acp: string;
   ap2: string;
@@ -734,15 +802,9 @@ export type ComplianceClass = {
   ucp: string;
 };
 
-export type SupportClass = {
+export type ContactClass = {
   email: string;
   url: string;
-};
-
-export type ContactElement = {
-  email?: string;
-  name: string;
-  url?: string;
 };
 
 export type Dataset = {
@@ -1018,6 +1080,12 @@ export type IoBitquery = {
   use_cases_url: string;
 };
 
+export type IoGithubLucyfox199818CollabCodexBinanceAgent = {
+  defaultSafetyMode: string;
+  documentationLanguage: string[];
+  registeredTools: number;
+};
+
 export type LaunchReadiness = {
   evidence_doc: string;
   live_evidence_required: boolean;
@@ -1034,12 +1102,15 @@ export type LicenseClass = {
 };
 
 export type Links = {
-  changelog: string;
-  developerPortal: string;
-  documentation: string;
+  changelog?: string;
+  developerPortal?: string;
+  documentation?: string;
   homepage: string;
-  issues: string;
-  source: string;
+  issues?: string;
+  source?: string;
+  docs?: string;
+  repository?: string;
+  support?: string;
 };
 
 export type LocalizedDescriptions = {
@@ -1132,12 +1203,24 @@ export type Option = {
   proof: string;
 };
 
+export type PlatformsClass = {
+  end_user_platform: string;
+  os: string[];
+  runtime: PlatformsRuntime;
+};
+
+export type PlatformsRuntime = {
+  node: string;
+};
+
 export type Price = {
   IN: string;
   global: string;
 };
 
 export type PricingClass = {
+  free_daily_queries?: number;
+  tiers?: Tier[];
   freeTier?: boolean;
   model?: string;
   url?: string;
@@ -1173,6 +1256,11 @@ export type PricingClass = {
   unit_price_jpy_ex_tax?: number;
   unit_price_jpy_inc_tax?: number;
   upgrade_url?: string;
+};
+
+export type Tier = {
+  name: string;
+  usd_per_month: number | string;
 };
 
 export type PublicIntrospection = {
@@ -1212,7 +1300,7 @@ export type ResourceClass = {
   url: string;
 };
 
-export type Runtime = {
+export type IoModelcontextprotocolRegistryPublisherProvidedRuntime = {
   minVersion?: string;
   type?: string;
   launch?: Launch;
@@ -1268,6 +1356,15 @@ export type Sponsor = {
   relationship: string;
 };
 
+export type TechZenfinListing = {
+  auth: string;
+  categories: string[];
+  data_boundary: string;
+  one_liner: string;
+  short_description: string;
+  supported_clients: string[];
+};
+
 export type Tiers = {
   free?: string[];
   paid?: string[];
@@ -1281,6 +1378,11 @@ export type Tiers = {
 export type PaidPriceUsd = {
   monthly: number;
   yearly: number;
+};
+
+export type PurpleTool = {
+  name: string;
+  version: string;
 };
 
 export type ToolCategoriesClass = {
@@ -1317,7 +1419,13 @@ export type ToolHint = {
   name: string;
 };
 
-export type PurpleTool = {
+export type ToolCategory = {
+  count: number;
+  examples: string[];
+  name: string;
+};
+
+export type FluffyTool = {
   description?: string;
   name: string;
   price?: string;
@@ -1453,7 +1561,7 @@ export type ProjectRef = {
 export type DateStyle = {
   description: string;
   default?: string;
-  choices: string[];
+  choices?: string[];
   isRequired?: boolean;
 };
 
@@ -1615,6 +1723,7 @@ export type FluffyVariables = {
   token?: ApifyAPIToken;
   INFOBIP_API_KEY?: ApifyAPIToken;
   NEURA_RELAY_MCP_TOKEN?: ApifyAPIToken;
+  partglyph_api_key?: ApifyAPIToken;
   IFR_COWORKER_TOKEN?: ApifyAPIToken;
   XQUIK_API_KEY?: SgpDirectoryAPIKey;
   CATHEDRAL_API_KEY?: ApifyAPIToken;
@@ -1623,6 +1732,7 @@ export type FluffyVariables = {
   BRIGHTSEC_API_KEY?: ApifyAPIToken;
   EVERALICE_API_KEY?: ApifyAPIToken;
   FIRSTDATA_API_KEY?: ApifyAPIToken;
+  agent_name?: ApifyAPIToken;
   indicate_api_key?: ApifyAPIToken;
   NETDATA_CLOUD_API_TOKEN?: SgpDirectoryAPIKey;
   mcp_access_token?: ApifyAPIToken;
@@ -1639,10 +1749,11 @@ export type RemoteVariables = {
   shop_id?: ShopID;
   API_KEY?: APIKey;
   instance?: APIKey;
-  tenant?: AgentID;
+  tenant?: DateStyle;
   baseUrl?: APIHost;
   "server-name"?: AgentID;
   tenantId?: ProjectRef;
+  property_slug?: AgentID;
   env?: APIHost;
   tenant_id?: AgentID;
   agent_id?: AgentID;
@@ -1651,9 +1762,13 @@ export type RemoteVariables = {
   qovery_token?: ApifyAPIToken;
   host?: APIHost;
   SGP_DIRECTORY_API_KEY?: SgpDirectoryAPIKey;
+  server_name?: AgentID;
   tenant_name?: AgentID;
   token?: ApifyAPIToken;
+  team_id?: AgentID;
   AUTH_TOKEN?: ApifyAPIToken;
+  owner?: AgentID;
+  repo?: AgentID;
   prior_api_key?: ApifyAPIToken;
   arquestra_token?: ApifyAPIToken;
   supabase_project_ref?: AgentID;
@@ -1662,8 +1777,10 @@ export type RemoteVariables = {
   server_host?: AgentID;
   artel_host?: APIKey;
   apifyToken?: ApifyAPIToken;
+  slug?: AgentID;
   SKYVERN_API_KEY?: ApifyAPIToken;
   PROJECT_REF?: ProjectRef;
+  ibkr_mcp_host?: AgentID;
   company_code?: ProjectRef;
   AVA_API_KEY?: ApifyAPIToken;
   oauth_token?: ApifyAPIToken;
@@ -1672,13 +1789,15 @@ export type RemoteVariables = {
   builder_id?: ApifyAPIToken;
   oauth_client_id?: OauthClientID;
   oauth_client_secret?: ApifyAPIToken;
+  project_id?: AgentID;
   atlas_api_key?: ApifyAPIToken;
   APIFY_TOKEN?: ApifyAPIToken;
   dateStyle?: DateStyle;
   includeCoordinates?: APIKey;
   mapLanguage?: DateStyle;
   temperatureUnit?: DateStyle;
-  site_domain?: APIHost;
+  site_domain?: DateStyle;
+  helpdesk_host?: AgentID;
   port?: MCPPath;
   marmot_host?: AgentID;
   metabase_host?: AgentID;
