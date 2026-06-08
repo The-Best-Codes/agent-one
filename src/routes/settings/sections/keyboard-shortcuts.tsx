@@ -177,6 +177,7 @@ export default function KeyboardShortcutsSection() {
                 <Switch
                   checked={enabledInInputsDefault}
                   onCheckedChange={setEnabledInInputsDefault}
+                  aria-label="Activate shortcuts in input fields"
                 />
                 <Button
                   variant="ghost"
