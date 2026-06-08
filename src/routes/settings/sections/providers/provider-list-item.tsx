@@ -136,7 +136,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                 }}
               >
                 <IconAlertTriangle data-icon="inline-start" />
-                Setup Provider
+                Set Up Provider
               </Button>
             )}
             <Switch
