@@ -137,7 +137,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               style={{ opacity: chatBackground.tint / 100 }}
             />
             <div
-              className="bg-black absolute inset-0"
+              className="absolute inset-0 bg-black"
               style={{ opacity: chatBackground.dim / 100 }}
             />
           </>
