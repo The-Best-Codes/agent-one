@@ -12,6 +12,12 @@ export const chatBackgroundPresets: Record<
     thumbnailUrl:
       "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=320&q=35",
   },
+  night: {
+    label: "Night Sky",
+    url: "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=2400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=320&q=35",
+  },
   aurora: {
     label: "Aurora",
     url: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=2400&q=80",
@@ -47,12 +53,6 @@ export const chatBackgroundPresets: Record<
     url: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=2400&q=80",
     thumbnailUrl:
       "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=320&q=35",
-  },
-  night: {
-    label: "Night Sky",
-    url: "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=2400&q=80",
-    thumbnailUrl:
-      "https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=320&q=35",
   },
 };
 
