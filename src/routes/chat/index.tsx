@@ -135,9 +135,9 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               backgroundImage: cssImageUrl(chatBackgroundUrl),
               backgroundPosition: `${chatBackgroundX}% ${chatBackgroundY}%`,
               backgroundRepeat: "no-repeat",
-              backgroundSize: chatBackgroundZoom === 100 ? "cover" : `${chatBackgroundZoom}% auto`,
+              backgroundSize: "cover",
               filter: `blur(${chatBackgroundBlur}px) brightness(${100 - chatBackgroundDim}%) opacity(${100 - chatBackgroundTint}%)`,
-              transform: chatBackgroundBlur > 0 ? "scale(1.04)" : undefined,
+              transform: `scale(${chatBackgroundZoom / 100})`,
             }}
           />
         )}

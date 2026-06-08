@@ -3,7 +3,7 @@ import { appLocalDataDir, extname, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { BaseDirectory, mkdir, readFile, remove, writeFile } from "@tauri-apps/plugin-fs";
 import { useAtom } from "jotai";
-import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
+import { type ComponentProps, useCallback, useRef, useState } from "react";
 
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
@@ -161,8 +161,6 @@ const ChatBackgroundSlider = ({
 >) => {
   const [draggingValue, setDraggingValue] = useState<number | null>(null);
   const displayValue = [draggingValue ?? value ?? defaultValue];
-
-  useEffect(() => setDraggingValue(null), [value]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -833,7 +831,7 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-chat-background-effects">
             <div className="grid gap-4 md:grid-cols-3">
               <ChatBackgroundSlider
-                label="Tint"
+                label="Opacity"
                 value={chatBackground.tint}
                 defaultValue={chatBackgroundDefaults.tint}
                 suffix="%"
