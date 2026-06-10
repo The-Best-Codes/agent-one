@@ -1,10 +1,9 @@
 import { IconRocket } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 
 import packageJson from "@/../package.json";
 import { getReleaseNotes } from "@/assets/release-notes";
-import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +14,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { releaseNotesLastSeenVersionAtom } from "@/lib/jotai/atoms";
+
+const MemoizedMarkdown = lazy(() =>
+  import("@/components/a1/markdown/memoized-markdown").then((module) => ({
+    default: module.MemoizedMarkdown,
+  })),
+);
 
 export function ReleaseNotesDialog() {
   const [lastSeenVersion, setLastSeenVersion] = useAtom(releaseNotesLastSeenVersionAtom);
@@ -59,12 +64,14 @@ export function ReleaseNotesDialog() {
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto">
           <div className="prose prose-sm prose-neutral dark:prose-invert px-1">
-            <MemoizedMarkdown
-              allowInternalLinks
-              content={releaseNotesData.content}
-              id="release-notes"
-              messageRole="assistant"
-            />
+            <Suspense fallback={null}>
+              <MemoizedMarkdown
+                allowInternalLinks
+                content={releaseNotesData.content}
+                id="release-notes"
+                messageRole="assistant"
+              />
+            </Suspense>
           </div>
         </div>
         <DialogFooter>

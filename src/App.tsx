@@ -1,5 +1,5 @@
 import { useAtomValue } from "jotai";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Outlet, Route, Routes, useLocation } from "react-router";
 import { Toaster } from "sonner";
 
@@ -13,20 +13,22 @@ import {
   trackGoogleAnalyticsPageView,
 } from "@/lib/google-analytics";
 import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
-import ChatRoute from "@/routes/chat";
-import IndexRoute from "@/routes/index";
-import NotFoundRoute from "@/routes/not-found";
-import OnboardingRoute from "@/routes/onboarding";
-import SettingsRoute from "@/routes/settings";
-import TestsRoute from "@/routes/tests";
-import ChatStressTestRoute from "@/routes/tests/chat-stress";
-import LocalDatabaseTestRoute from "@/routes/tests/local-database";
-import NotificationsTestRoute from "@/routes/tests/notifications";
+import SuspenseFallback from "@/routes/suspense-fallback";
 
 import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
 import { DeepLinkHandler } from "./deep-link-handler";
 import { KbdRegistry } from "./kbd-shortcuts";
+
+const ChatRoute = lazy(() => import("@/routes/chat"));
+const IndexRoute = lazy(() => import("@/routes/index"));
+const NotFoundRoute = lazy(() => import("@/routes/not-found"));
+const OnboardingRoute = lazy(() => import("@/routes/onboarding"));
+const SettingsRoute = lazy(() => import("@/routes/settings"));
+const TestsRoute = lazy(() => import("@/routes/tests"));
+const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
+const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
+const NotificationsTestRoute = lazy(() => import("@/routes/tests/notifications"));
 
 function AppLayout() {
   return (
@@ -71,20 +73,22 @@ function App() {
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<IndexRoute />} />
-          <Route path="/chat" element={<ChatRoute />} />
-          <Route path="/chat/:id" element={<ChatRoute />} />
-          <Route path="/onboarding" element={<OnboardingRoute />} />
-          <Route path="/settings" element={<SettingsRoute />} />
-          <Route path="/tests" element={<TestsRoute />} />
-          <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
-          <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
-          <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
-          <Route path="*" element={<NotFoundRoute />} />
-        </Route>
-      </Routes>
+      <Suspense fallback={<SuspenseFallback />}>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<IndexRoute />} />
+            <Route path="/chat" element={<ChatRoute />} />
+            <Route path="/chat/:id" element={<ChatRoute />} />
+            <Route path="/onboarding" element={<OnboardingRoute />} />
+            <Route path="/settings" element={<SettingsRoute />} />
+            <Route path="/tests" element={<TestsRoute />} />
+            <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
+            <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
+            <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
+            <Route path="*" element={<NotFoundRoute />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
