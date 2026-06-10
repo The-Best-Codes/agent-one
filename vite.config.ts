@@ -133,7 +133,7 @@ export default defineConfig(() => ({
       exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]workers[/\\]/],
     }),
     tailwindcss(),
-    visualizer({
+    process.env.VISUALIZE && visualizer({
       open: false,
       emitFile: false,
       filename: "dist/stats.html",
