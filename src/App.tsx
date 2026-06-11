@@ -13,11 +13,6 @@ import {
   trackGoogleAnalyticsPageView,
 } from "@/lib/google-analytics";
 import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
-
-import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
-import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
-import { DeepLinkHandler } from "./deep-link-handler";
-import { KbdRegistry } from "./kbd-shortcuts";
 import ChatRoute from "@/routes/chat";
 import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
@@ -27,6 +22,11 @@ import TestsRoute from "@/routes/tests";
 import ChatStressTestRoute from "@/routes/tests/chat-stress";
 import LocalDatabaseTestRoute from "@/routes/tests/local-database";
 import NotificationsTestRoute from "@/routes/tests/notifications";
+
+import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
+import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
+import { DeepLinkHandler } from "./deep-link-handler";
+import { KbdRegistry } from "./kbd-shortcuts";
 
 function AppLayout() {
   return (
