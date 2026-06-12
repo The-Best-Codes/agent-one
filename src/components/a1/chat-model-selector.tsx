@@ -240,7 +240,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
-  const { isLoading: isAuthLoading, billingLoading } = useWebAuth();
+  const { user, isLoading: isAuthLoading, customerState } = useWebAuth();
 
   if (!loading && staleModel !== currentModel) {
     setStaleModel(currentModel);
@@ -383,7 +383,12 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
-  if (isApiKeysLoading || isAuthLoading || billingLoading || shouldShowLoadingSkeleton) {
+  if (
+    isApiKeysLoading ||
+    isAuthLoading ||
+    (Boolean(user) && !customerState) ||
+    shouldShowLoadingSkeleton
+  ) {
     return (
       <Skeleton
         className={cn(
