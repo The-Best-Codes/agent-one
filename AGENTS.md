@@ -1,6 +1,6 @@
 # AGENTS.md
 
-If you are an AI agent, please follow the instructions in this file to ensure you align with the project's expectations for AI agents.
+If you are an AI agent, please follow the instructions in this file to ensure you align with AgentOne's (this project) expectations for AI agents.
 
 ## Useful Commands
 
