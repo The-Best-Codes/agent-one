@@ -48,7 +48,7 @@
 - [Authorization Extensions](https://modelcontextprotocol.io/extensions/auth/overview.md): Supplementary authorization mechanisms for the Model Context Protocol
 - [Extension Support Matrix](https://modelcontextprotocol.io/extensions/client-matrix.md): Which MCP clients implement which official extensions
 - [Extensions Overview](https://modelcontextprotocol.io/extensions/overview.md): Optional extensions to the Model Context Protocol
-- [MCP Tasks](https://modelcontextprotocol.io/extensions/tasks/overview.md): Asynchronous task execution for long-running MCP operations
+- [Tasks](https://modelcontextprotocol.io/extensions/tasks/overview.md): Asynchronous task execution for long-running MCP operations
 - [The MCP Registry](https://modelcontextprotocol.io/registry/about.md)
 - [How to Authenticate When Publishing to the Official MCP Registry](https://modelcontextprotocol.io/registry/authentication.md)
 - [Frequently Asked Questions](https://modelcontextprotocol.io/registry/faq.md)
