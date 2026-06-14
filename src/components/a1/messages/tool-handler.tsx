@@ -17,6 +17,7 @@ import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
 import { MessagePartToolWebSearch } from "./tools/tool-webSearch";
+import { MessagePartToolWikipedia } from "./tools/tool-wikipedia";
 
 const logger = getLogger(import.meta.url);
 
@@ -42,6 +43,8 @@ export const MessageToolHandler = memo(
         return <MessagePartToolGetUrlContent part={part} />;
       case "tool-webSearch":
         return <MessagePartToolWebSearch part={part} />;
+      case "tool-wikipedia":
+        return <MessagePartToolWikipedia part={part} />;
       case "tool-memory":
         return <MessagePartToolMemory part={part} />;
       case "tool-editFile":

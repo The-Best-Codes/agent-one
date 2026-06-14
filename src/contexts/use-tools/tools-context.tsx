@@ -15,6 +15,7 @@ import {
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
+  createWikipediaTool,
 } from "@/lib/ai/tools";
 import {
   buildMcpServerSlugMap,
@@ -397,6 +398,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           ...toolConfigs.getUrlContent,
         },
         webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
+        wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
         memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
         editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
         createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
@@ -424,6 +426,9 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       }
       if (mergedEnabledTools.webSearch) {
         filteredStaticTools.webSearch = createWebSearchTool(mergedToolConfigs.webSearch);
+      }
+      if (mergedEnabledTools.wikipedia) {
+        filteredStaticTools.wikipedia = createWikipediaTool(mergedToolConfigs.wikipedia);
       }
       if (mergedEnabledTools.memory) {
         filteredStaticTools.memory = createMemoryTool(mergedToolConfigs.memory);

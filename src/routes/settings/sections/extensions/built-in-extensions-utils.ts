@@ -27,6 +27,11 @@ export const BUILT_IN_TOOLS: Record<
     description: "Find information online",
     searchTerms: "search web internet results",
   },
+  wikipedia: {
+    name: "Wikipedia",
+    description: "Search Wikipedia and read article summaries, content, links, and categories",
+    searchTerms: "wikipedia encyclopedia knowledge article reference",
+  },
   memory: {
     name: "Memory",
     description: "Maintain concise long-term user memory",

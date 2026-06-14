@@ -10,3 +10,4 @@ export { createSubAgentTool } from "./subAgent";
 export { createViewFileTool } from "./viewFile";
 export { createWaitTool } from "./waitNumberMilliseconds";
 export { createWebSearchTool } from "./webSearch";
+export { createWikipediaTool } from "./wikipedia";

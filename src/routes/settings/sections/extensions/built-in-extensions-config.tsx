@@ -32,6 +32,7 @@ function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
       ...toolConfigs.getUrlContent,
     },
     webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
+    wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
     memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
     editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
     createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
@@ -333,6 +334,29 @@ export function BuiltInExtensionsConfig() {
                   <div className="text-muted-foreground text-xs">
                     Subagents inherit the current model and enabled tools, but cannot spawn other
                     subagents.
+                  </div>
+                )}
+
+                {toolId === "wikipedia" && (
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="wikipedia-maxresults" className="text-xs">
+                      Default Max Results
+                    </Label>
+                    <Input
+                      id="wikipedia-maxresults"
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={mergedToolConfigs.wikipedia.defaultMaxResults}
+                      onChange={(e) =>
+                        updateToolConfig("wikipedia", {
+                          defaultMaxResults: Math.max(
+                            1,
+                            Math.min(parseInt(e.target.value) || 10, 50),
+                          ),
+                        })
+                      }
+                    />
                   </div>
                 )}
 

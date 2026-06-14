@@ -144,6 +144,7 @@ export type ToolId =
   | "waitNumberMilliseconds"
   | "getUrlContent"
   | "webSearch"
+  | "wikipedia"
   | "memory"
   | "editFile"
   | "createFile"
@@ -203,6 +204,11 @@ export interface ExecuteCommandToolConfig {
   defaultTimeoutMs: number;
 }
 
+export interface WikipediaToolConfig {
+  requiresApproval: boolean;
+  defaultMaxResults: number;
+}
+
 export interface SubAgentToolConfig {
   requiresApproval: boolean;
 }
@@ -212,6 +218,7 @@ export interface ToolConfigs {
   waitNumberMilliseconds: WaitToolConfig;
   getUrlContent: GetUrlContentToolConfig;
   webSearch: WebSearchToolConfig;
+  wikipedia: WikipediaToolConfig;
   memory: MemoryToolConfig;
   editFile: EditFileToolConfig;
   createFile: CreateFileToolConfig;
@@ -352,6 +359,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     waitNumberMilliseconds: true,
     getUrlContent: true,
     webSearch: true,
+    wikipedia: true,
     memory: true,
     editFile: true,
     createFile: true,
@@ -381,6 +389,10 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       maxConcurrent: 3,
       defaultMaxResults: 20,
       defaultMaxPages: 2,
+    },
+    wikipedia: {
+      requiresApproval: false,
+      defaultMaxResults: 10,
     },
     memory: {
       requiresApproval: false,
