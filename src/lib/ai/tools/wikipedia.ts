@@ -9,13 +9,9 @@ const logger = getLogger(import.meta.url);
 
 const API = "https://en.wikipedia.org/w/api.php";
 
-const HEADERS = {
-  "User-Agent": "AgentOne/1.0 (https://github.com/The-Best-Codes/agent-one)",
-};
-
 async function api(params: Record<string, string>, abortSignal?: AbortSignal): Promise<unknown> {
   const url = `${API}?${new URLSearchParams({ ...params, format: "json", origin: "*" })}`;
-  const res = await raceWithAbort(fetch(url, { headers: HEADERS }), abortSignal);
+  const res = await raceWithAbort(fetch(url), abortSignal);
   if (!res.ok) throw new Error(`Wikipedia API: ${res.status} ${res.statusText}`);
   return res.json();
 }
