@@ -30,6 +30,7 @@ interface ManagedMCPServer {
 
 interface LoadingOperation {
   controller: AbortController;
+  configHash: string;
   promise: Promise<void>;
 }
 
@@ -469,8 +470,12 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
 
   const existingLoad = loadingOperations.get(server.id);
   if (existingLoad) {
-    await existingLoad.promise;
-    return serverCache.get(server.id)?.tools || {};
+    if (existingLoad.configHash !== configHash) {
+      abortMcpServerLoad(server.id);
+    } else {
+      await existingLoad.promise;
+      return serverCache.get(server.id)?.tools || {};
+    }
   }
 
   const controller = new AbortController();
@@ -508,7 +513,7 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
     }
   })();
 
-  loadingOperations.set(server.id, { controller, promise });
+  loadingOperations.set(server.id, { controller, configHash, promise });
 
   try {
     await promise;

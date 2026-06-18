@@ -297,6 +297,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   toolInfo,
                   tools: wrappedTools,
                 };
+                if (loadId !== loadIdRef.current) return;
                 Object.assign(allTools, prefixMcpToolNames(result.tools, result.serverSlug));
                 setMcpTools({ ...allTools });
                 setMcpServerLoadStates((prev) => ({
@@ -314,6 +315,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   `Failed to load MCP tools for ${serverTypeLabel} server ${server.name}:`,
                   error,
                 );
+                if (loadId !== loadIdRef.current) return;
                 abortMcpServerLoad(server.id);
                 closeServerCache(server.id);
                 setMcpServerLoadStates((prev) => {
