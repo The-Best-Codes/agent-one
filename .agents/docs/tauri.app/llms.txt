@@ -65,6 +65,7 @@ Each section contains links to detailed markdown files that provide comprehensiv
 - [Configuration Files](https://v2.tauri.app/develop/configuration-files)
 - [Debug](https://v2.tauri.app/develop/debug)
 - [CrabNebula DevTools](https://v2.tauri.app/develop/debug/crabnebula-devtools)
+- [Linux Graphics Issues](https://v2.tauri.app/develop/debug/linux-graphics)
 - [Debug in Neovim](https://v2.tauri.app/develop/debug/neovim)
 - [Debug in JetBrains IDEs](https://v2.tauri.app/develop/debug/rustrover)
 - [Debug in VS Code](https://v2.tauri.app/develop/debug/vscode)

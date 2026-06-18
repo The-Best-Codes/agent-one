@@ -18618,14 +18618,14 @@ Source: https://modelcontextprotocol.io/community/charter-template
 
 Template for MCP Working Group and Interest Group charters.
 
-Every MCP Working Group and Interest Group must maintain a charter document following this structure. Charters are stored at `docs/community/<group-name>/charter.mdx` in the [modelcontextprotocol repository](https://github.com/modelcontextprotocol/modelcontextprotocol) and added to `docs/docs.json`.
+Every MCP Working Group and Interest Group must maintain a charter document following this structure. Charters are stored at `docs/community/working-groups/<group-name>.mdx` or `docs/community/interest-groups/<group-name>.mdx` in the [modelcontextprotocol repository](https://github.com/modelcontextprotocol/modelcontextprotocol) and added to `docs/docs.json`.
 
 The charter captures information specific to your group. Governance rules — leadership requirements, decision-making process, meeting requirements, escalation paths — are defined in the [Working and Interest Groups](/community/working-interest-groups) documentation and apply automatically. Do not repeat them here.
 
 Sections marked **(WG only)** are required for Working Groups and optional for Interest Groups.
 
 <Note>
-  Copy the markdown below into `docs/community/<group-name>/charter.mdx` and replace the placeholder text.
+  Copy the markdown below into `docs/community/working-groups/<group-name>.mdx` (or `interest-groups/` for an IG) and replace the placeholder text.
 </Note>
 
 ***
@@ -20824,8 +20824,8 @@ The quarterly updates are provided as a document posted in the [GitHub Discussio
 **Working Group Formation:**
 
 * There must be a widely acknowledged concern requiring coordination
-* PR for creation of WG into `docs/community/<name>/overview.mdx`, gated by CODEOWNERS requiring approval by Maintainers
-* PR for charter into `docs/community/<name>/charter.mdx`, gated by CODEOWNERS requiring approval from Core Maintainers
+* PR for creation of WG into `docs/community/working-groups/<name>/overview.mdx`, gated by CODEOWNERS requiring approval by Maintainers
+* PR for charter into `docs/community/working-groups/<name>.mdx`, gated by CODEOWNERS requiring approval from Core Maintainers
 * Initial member list approved by WG Lead
 
 **Interest Group Formation:**
@@ -35809,7 +35809,7 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 
 
 # Authorization Charter
-Source: https://modelcontextprotocol.io/community/auth/charter
+Source: https://modelcontextprotocol.io/community/interest-groups/auth
 
 Charter for the MCP Authorization Interest Group.
 
@@ -35845,9 +35845,10 @@ The Authorization Interest Group provides a venue for MCP implementers, identity
 
 ### Related Groups
 
+* **[Enterprise-Managed Authorization IG](/community/interest-groups/enterprise-managed-authorization)**: coordinates IdP, client, and server interoperability testing for the EMA extension produced by the Profiles WG; spec-change requests surfaced there are routed back to this group
 * **Transports WG**: authorization is currently specified at the HTTP transport level; changes to transports affect where credentials are carried
 * **Agents WG**: delegated/on-behalf-of access and consent for multi-agent chains overlap heavily with agentic use cases
-* **[Server Card WG](/community/server-card/charter) / [Registry](/community/registry/charter)**: client and server identity, discovery metadata, and trust establishment intersect with how authorization servers and resource servers are located and verified
+* **[Server Card WG](/community/working-groups/server-card) / [Registry](/community/working-groups/registry)**: client and server identity, discovery metadata, and trust establishment intersect with how authorization servers and resource servers are located and verified
 * **SDK Maintainers**: SDKs ship the auth client implementations; IG findings should inform cross-SDK auth ergonomics
 
 ## Leadership
@@ -35896,8 +35897,302 @@ The IG incubates problems until they are well-scoped, then proposes focused Work
 | 2026-06-02 | Initial charter |
 
 
+# Enterprise-Managed Authorization Charter
+Source: https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization
+
+Charter for the MCP Enterprise-Managed Authorization Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Enterprise-Managed Authorization Interest Group provides a venue for identity-provider vendors, MCP client implementers, and MCP server operators to coordinate on real-world adoption of the [Enterprise-Managed Authorization extension](/extensions/auth/enterprise-managed-authorization) (`io.modelcontextprotocol/enterprise-managed-authorization`). The extension's ID-JAG flow only delivers value when an enterprise IdP, an MCP client, and an MCP server's authorization server all interoperate end to end — this group exists to gather deployment experience, surface compatibility gaps between independent implementations, and feed validated problems back to the [Authorization IG](/community/interest-groups/auth) and the [ext-auth](https://github.com/modelcontextprotocol/ext-auth) specification.
+
+## Scope
+
+### In Scope
+
+* **Interoperability reports**: documented results of pairing specific IdPs, MCP clients, and MCP authorization servers through the full ID-JAG exchange, including what worked, what required workarounds, and what failed
+* **Conformance scenario input**: identifying the assertions an EMA conformance suite should make (ID-JAG validation, audience and issuer checks, claim mapping, account linking, error handling) and contributing scenarios to the [conformance](https://github.com/modelcontextprotocol/conformance) repository
+* **Deployment patterns**: comparing notes on tenant isolation, admin-consent flows, JIT provisioning, claim-to-permission mapping, and token-lifetime choices observed in production rollouts
+* **IdP capability gaps**: cataloguing where existing IdP products cannot yet issue or validate ID-JAGs as specified, so implementers know what to expect and IdP vendors have a shared backlog
+* **Spec clarification requests**: collecting ambiguities and underspecified behaviour discovered during implementation and routing them to the [ext-auth](https://github.com/modelcontextprotocol/ext-auth) repository as issues or PRs
+
+### Out of Scope
+
+* **Other authorization profiles**: Client Credentials, DPoP, Workload Identity Federation, and the core OAuth 2.1 flow belong to the [Authorization IG](/community/interest-groups/auth)
+* **General enterprise deployment topics**: networking, packaging, and host-application rollout concerns that are not specific to the ID-JAG flow
+* **End-user product configuration walk-throughs**: the IG discusses patterns, not step-by-step setup for individual IdP or client products. Vendor-reported constraints on what an IdP can or cannot implement *are* in scope as deployment experience
+* **Competitively sensitive or non-public business information**, per the [MCP Antitrust Policy](/community/antitrust)
+
+### Related Groups
+
+* **[Authorization IG](/community/interest-groups/auth)**: parent group for all MCP authorization work; EMA spec changes are incubated there and this IG's findings feed its agenda
+* **[Security IG](/community/interest-groups/security)**: token-audience confusion, issuer validation, and account-linking risks in the ID-JAG flow sit at the boundary between the two groups
+* **SDK Maintainers**: SDKs ship the EMA client implementation; interop findings inform cross-SDK behaviour and defaults
+
+## Leadership
+
+| Role        | Name          | Organization | GitHub                                     | Term    |
+| ----------- | ------------- | ------------ | ------------------------------------------ | ------- |
+| Facilitator | Paul Carleton | Anthropic    | [@pcarleton](https://github.com/pcarleton) | Initial |
+| Facilitator | Aaron Parecki | Okta         | [@aaronpk](https://github.com/aaronpk)     | Initial |
+
+Sponsored by Den Delimarsky ([@localden](https://github.com/localden), Lead Maintainer).
+
+## Membership
+
+Open to anyone; no formal membership or approval step is required to join the channel, attend calls, or contribute. The group particularly seeks participants from enterprise IdP vendors, MCP client implementers shipping EMA support, and MCP server operators integrating with an enterprise IdP.
+
+Join the `#enterprise-managed-auth-ig` channel on the [MCP Contributors Discord](/community/communication#discord) or open a thread in the Authorization category of [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions). Calls are open and attendance is optional — async participation via Discord and GitHub is equally valued.
+
+## Operations
+
+| Meeting      | Frequency     | Duration | Purpose                                                               |
+| ------------ | ------------- | -------- | --------------------------------------------------------------------- |
+| Interop Call | Every 2 weeks | 45 min   | Deployment reports, compatibility-matrix review, spec-feedback triage |
+
+An agenda is shared in `#enterprise-managed-auth-ig` ahead of each call. Meeting notes are posted to the Authorization category in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions).
+
+Discord: [#enterprise-managed-auth-ig](https://discord.com/channels/1358869848138059966/1516754292294287360) · [invite](https://discord.gg/xw55W9Sw5s)
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-06-16 | Initial charter |
+
+
+# Security Charter
+Source: https://modelcontextprotocol.io/community/interest-groups/security
+
+Charter for the MCP Security Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Security Interest Group catalogs MCP-specific threats, reviews security-relevant proposals, and
+scopes validated problems into focused Working Groups or [SEPs](/community/sep-guidelines).
+
+## Scope
+
+### In Scope
+
+* **Threat modeling**: developing and maintaining a shared, layered view of MCP attack surfaces
+  spanning admission and identity, caller governance, runtime behavior, interception and enforcement,
+  and auditability, to give individual proposals a common frame of reference
+* **Server identity, attestation, and admission**: requirements for establishing that a server is
+  what it claims to be before a client dispatches to it, including signed assertions, trust roots,
+  and the boundary between protocol-level and registry-level verification
+* **Supply chain and provenance**: integrity of locally executed server binaries and packages
+  (typosquatting, unpinned dependencies, unsigned artifacts) and how clients can verify what they
+  spawn
+* **Runtime drift and post-admission change**: treatment of tool, schema, or behavior changes after
+  a server has been approved, and whether such changes are versioning, re-approval, or security
+  events
+* **Auditability and observability**: requirements for tamper-evident records of what a tool call
+  did and under what authority, for compliance and incident review
+* **Transport-adjacent security**: secrets handling, process isolation, and unauthenticated surface
+  area for stdio and other non-HTTP transports where the HTTP authorization specification does not
+  apply
+* **Security Best Practices documentation**: authoring and reviewing entries in the
+  [Security Best Practices](/docs/tutorials/security/security_best_practices) guidance, including
+  liaising with external bodies such as OWASP GenAI and CoSAI on MCP-specific content
+* **Vulnerability disclosure routing**: providing a known point of contact for reporters who have
+  filed a private security advisory against an MCP repository and need help reaching the right
+  maintainer
+
+### Out of Scope
+
+* **Authorization protocol mechanics**: OAuth flows, scopes, client registration, and token handling
+  belong to the [Authorization IG](/community/interest-groups/auth) and its spawned Working Groups
+* **Transport wire security**: TLS, mTLS, and certificate handling belong to the Transports WG
+* **Tool annotation design**: the annotation model itself belongs to the
+  [Tool Annotations IG](/community/interest-groups/tool-annotations). This group provides security
+  requirements as input
+* **Registry service operation**: running and securing the hosted Registry service belongs to the
+  [Registry WG](/community/working-groups/registry). This group provides threat input on provenance and
+  publishing
+* **Product-specific hardening guides**: step-by-step configuration for individual host applications
+  or cloud platforms is documentation for those products rather than protocol work
+* **Competitively sensitive or non-public business information**, per the
+  [MCP Antitrust Policy](/community/antitrust)
+
+### Related Groups
+
+* **[Authorization IG](/community/interest-groups/auth)**: token confusion, audience mismatch, and SSRF in
+  metadata discovery sit at the boundary between the two groups
+* **[Tool Annotations IG](/community/interest-groups/tool-annotations)**: trust and sensitivity annotations
+  ([SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913)) span both
+  groups
+* **[Interceptors WG](/community/working-groups/interceptors)**: interceptors are the primary enforcement
+  point for runtime security decisions surfaced here
+* **[Server Card WG](/community/working-groups/server-card) / [Registry WG](/community/working-groups/registry)**:
+  server identity, provenance, and discovery metadata intersect with admission and supply-chain
+  concerns
+* **Transports WG**: stdio process isolation and unauthenticated method surface
+* **SDK Maintainers**: coordinated handling of SDK security advisories and cross-SDK security
+  defaults
+
+## Leadership
+
+| Role        | Name           | Organization | GitHub                                     | Term    |
+| ----------- | -------------- | ------------ | ------------------------------------------ | ------- |
+| Facilitator | Den Delimarsky | Anthropic    | [@localden](https://github.com/localden)   | Initial |
+| Facilitator | Paul Carleton  | Anthropic    | [@pcarleton](https://github.com/pcarleton) | Initial |
+
+## Membership
+
+| Name                     | Organization | GitHub                                               | Discord          | Level       |
+| ------------------------ | ------------ | ---------------------------------------------------- | ---------------- | ----------- |
+| Sam Morrow               | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | `sammorrowdrums` | Participant |
+| Ola Hungerford           | Nordstrom    | [@olaservo](https://github.com/olaservo)             | `olaservo`       | Participant |
+| Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)               | `pederhp`        | Participant |
+| Stefano Ortolani         | Broadcom     | [@ostefano](https://github.com/ostefano)             | `ostefano.`      | Participant |
+
+Open to anyone. Join the `#security-ig` channel on the
+[MCP Contributors Discord](/community/communication#discord). Calls are open and active
+participation is highly encouraged. The group is looking for contributors who will engage with
+proposals and help drive work forward rather than observe.
+
+## Operations
+
+| Meeting      | Frequency     | Duration | Purpose                                                                 |
+| ------------ | ------------- | -------- | ----------------------------------------------------------------------- |
+| Office Hours | Every 2 weeks | 45 min   | Threat review, proposal triage, deployment reports, WG-proposal scoping |
+
+An agenda is shared in `#security-ig` ahead of each call.
+
+Discord: [#security-ig](https://discord.com/channels/1358869848138059966/1379811011669921883)
+
+Meeting notes are posted to the
+[Meeting Notes - Security IG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-security-ig)
+category in GitHub Discussions.
+
+## Discussion Topics
+
+The following items form the IG's current discussion agenda. This list is not exhaustive and will
+evolve as the group identifies new areas of interest.
+
+| Item                                                                               | Name                                                                                                                        | Status      | Champion                                                 |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------- |
+| [SEP-2809](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2809) | Attested Tool-Server Admission (ATSA)                                                                                       | Draft       | [@metereconsulting](https://github.com/metereconsulting) |
+| —                                                                                  | SDK vulnerability disclosure                                                                                                | In progress | Facilitators                                             |
+| —                                                                                  | Runtime drift: `list_changed` semantics after approval                                                                      | Open        | —                                                        |
+| —                                                                                  | Supply-chain integrity: protocol, registry, or companion standard                                                           | Open        | —                                                        |
+| —                                                                                  | Tool identity across servers                                                                                                | Open        | —                                                        |
+| —                                                                                  | Capability declarations: hints or contracts (joint with [Tool Annotations IG](/community/interest-groups/tool-annotations)) | Open        | —                                                        |
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-06-13 | Initial charter |
+
+
+# Tool Annotations Charter
+Source: https://modelcontextprotocol.io/community/interest-groups/tool-annotations
+
+Charter for the MCP Tool Annotations Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Tool Annotations Interest Group explores the role of tool annotations in enabling safe, usable agentic systems across the MCP ecosystem. Today, six independent SEPs propose annotation changes, each solving real problems but lacking the coherent, cross-cutting perspective that a dedicated group can bring. The IG gathers use cases from server and client authors, evaluates existing and proposed annotations, and considers the long-term future of the annotation model, including whether runtime annotations, tool response annotations, and other extensions belong in the protocol.
+
+## Scope
+
+### In Scope
+
+* **Evaluation of existing annotations**: Assess whether the current set of tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) adequately serves server and client authors
+* **Discussion of proposed annotations**: Review and provide feedback on SEPs proposing new or modified tool annotations (trust/sensitivity, agency, model preferences, and others)
+* **Future of the annotation model**: Explore whether runtime annotations, tool response annotations, or structural changes to the annotation system are worth adding to the protocol
+* **Use-case gathering**: Collect real-world use cases from server authors, client authors, and host applications to ground annotation decisions in practical needs
+* **Problem statements and recommendations**: Produce recommendations for Working Groups or SEP authors on annotation design, coherence, and prioritization
+
+### Out of Scope
+
+* **Binding specification changes**: The IG produces recommendations, not binding decisions; specification changes are made through the SEP process
+* **Implementation work**: Building SDK features or reference implementations (may be explored in the [experimental repo](https://github.com/modelcontextprotocol/experimental-ext-tool-annotations) but is not the IG's primary purpose)
+* **Non-annotation tool changes**: Changes to tool discovery, invocation, or lifecycle that do not relate to annotations
+* **Resource annotations**: While related, resource-level annotation work is tracked separately unless it directly intersects with tool annotation design
+
+### Related Groups
+
+* **Security IG** - Trust and sensitivity annotations ([SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913)) span both groups' interests
+* **[Skills Over MCP WG](/community/working-groups/skills-over-mcp)** - Skill-level metadata may interact with tool annotations for discovery and filtering
+
+## Leadership
+
+| Role        | Name           | Organization | GitHub                                               | Term    |
+| ----------- | -------------- | ------------ | ---------------------------------------------------- | ------- |
+| Facilitator | Sam Morrow     | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | Initial |
+| Facilitator | Robert Reichel | OpenAI       | [@rreichel3](https://github.com/rreichel3)           | Initial |
+
+## Membership
+
+| Name                    | Organization | GitHub                                               | Discord | Level       |
+| ----------------------- | ------------ | ---------------------------------------------------- | ------- | ----------- |
+| Sam Morrow              | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | Facilitator |
+| Robert Reichel          | OpenAI       | [@rreichel3](https://github.com/rreichel3)           |         | Facilitator |
+| Matt Carey              | Cloudflare   | [@mattzcarey](https://github.com/mattzcarey)         |         | Participant |
+| Kapil Sharma            | Microsoft    | [@kapil8811](https://github.com/kapil8811)           |         | Participant |
+| Connor Peet             | Microsoft    | [@connor4312](https://github.com/connor4312)         |         | Participant |
+| Ola Hungerford          | Nordstrom    | [@olaservo](https://github.com/olaservo)             |         | Participant |
+| Gökhan Arkan            | GitHub       | [@gokhanarkan](https://github.com/gokhanarkan)       |         | Participant |
+| Joanna Krzek-Lubowiecka | GitHub       | [@joannakl](https://github.com/joannakl)             |         | Participant |
+
+## Operations
+
+| Meeting    | Frequency | Duration | Purpose                                        |
+| ---------- | --------- | -------- | ---------------------------------------------- |
+| Discussion | TBD       | TBD      | Use-case sharing, annotation review, open Q\&A |
+
+Discord: [#tool-annotations-ig](https://discord.com/channels/1358869848138059966/1482836798517543073)
+
+## Discussion Topics
+
+The following SEPs and themes form the IG's initial discussion agenda. This list is not exhaustive and will evolve as the group identifies new areas of interest.
+
+### Active SEPs Under Discussion
+
+| SEP                                                                                | Title                              | Status | Author                                                                                           |
+| ---------------------------------------------------------------------------------- | ---------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| [SEP-1862](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1862) | Tool Resolution (preflight checks) | Draft  | [@SamMorrowDrums](https://github.com/SamMorrowDrums)                                             |
+| [SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913) | Trust and Sensitivity Annotations  | Draft  | [@SamMorrowDrums](https://github.com/SamMorrowDrums), [@rreichel3](https://github.com/rreichel3) |
+| [SEP-1984](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1984) | Comprehensive Tool Annotations     | Draft  | [@sambhav](https://github.com/sambhav)                                                           |
+| [SEP-2417](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2417) | Model Preferences for Tools        | Draft  | [@ProductOfAmerica](https://github.com/ProductOfAmerica)                                         |
+
+### Open Questions
+
+* Should runtime annotations (annotations that change between invocations) be added to the protocol?
+* Are additional static annotations worth standardizing, and which serve both server and client authors?
+* Should tool *response* annotations be added to the protocol?
+* How should annotations interact with trust, security, and human-in-the-loop requirements?
+* What is the right level of granularity - a few well-defined hints vs. a richer, extensible vocabulary?
+
+## Resources
+
+* [Tool Annotations as Risk Vocabulary](https://blog.modelcontextprotocol.io/posts/2026-03-16-tool-annotations/) - blog post framing the motivation for this work
+* [Experimental repo](https://github.com/modelcontextprotocol/experimental-ext-tool-annotations) - repository for the Tool Annotations Interest Group
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-04-20 | Initial charter |
+
+
 # File Uploads Charter
-Source: https://modelcontextprotocol.io/community/file-uploads/charter
+Source: https://modelcontextprotocol.io/community/working-groups/file-uploads
 
 Charter for the MCP File Uploads Working Group.
 
@@ -36010,7 +36305,7 @@ Discord: `#file-uploads-wg`
 
 
 # Inspector V2 Working Group Charter
-Source: https://modelcontextprotocol.io/community/inspector-v2/charter
+Source: https://modelcontextprotocol.io/community/working-groups/inspector-v2
 
 Charter for the Inspector V2 Working Group, a Working Group of the Model Context Protocol community.
 
@@ -36123,7 +36418,7 @@ Meetings are held at [meet.modelcontextprotocol.io/tag/inspector-v2-wg](https://
 
 
 # Interceptors Charter
-Source: https://modelcontextprotocol.io/community/interceptors/charter
+Source: https://modelcontextprotocol.io/community/working-groups/interceptors
 
 Charter for the MCP Interceptors Working Group.
 
@@ -36217,7 +36512,7 @@ The Interceptors Working Group exists to standardize how context operations are 
 
 
 # Registry Charter
-Source: https://modelcontextprotocol.io/community/registry/charter
+Source: https://modelcontextprotocol.io/community/working-groups/registry
 
 Charter for the MCP Registry Working Group.
 
@@ -36332,7 +36627,7 @@ Discord: `#registry-dev`
 
 
 # SDK Working Group Charter
-Source: https://modelcontextprotocol.io/community/sdk/charter
+Source: https://modelcontextprotocol.io/community/working-groups/sdk
 
 Charter for the MCP SDK Working Group.
 
@@ -36424,7 +36719,7 @@ Communication happens in the `#general-sdk-dev` Discord channel and the SDK Work
 
 
 # Server Card Charter
-Source: https://modelcontextprotocol.io/community/server-card/charter
+Source: https://modelcontextprotocol.io/community/working-groups/server-card
 
 Charter for the MCP Server Card Working Group.
 
@@ -36528,7 +36823,7 @@ Discord: [#server-card-wg](https://discord.com/channels/1358869848138059966/1399
 
 
 # Skills Over MCP Charter
-Source: https://modelcontextprotocol.io/community/skills-over-mcp/charter
+Source: https://modelcontextprotocol.io/community/working-groups/skills-over-mcp
 
 Charter for the MCP Skills Over MCP Working Group.
 
@@ -36670,104 +36965,8 @@ Full live tracking is on the [Skills Over MCP WG project board](https://github.c
 | 2026-02-01 | IG formed; experimental repo created                                                                                                                                                                                                                                                                             |
 
 
-# Tool Annotations Charter
-Source: https://modelcontextprotocol.io/community/tool-annotations/charter
-
-Charter for the MCP Tool Annotations Interest Group.
-
-## Group Type
-
-**Interest Group**
-
-## Mission Statement
-
-The Tool Annotations Interest Group explores the role of tool annotations in enabling safe, usable agentic systems across the MCP ecosystem. Today, six independent SEPs propose annotation changes, each solving real problems but lacking the coherent, cross-cutting perspective that a dedicated group can bring. The IG gathers use cases from server and client authors, evaluates existing and proposed annotations, and considers the long-term future of the annotation model, including whether runtime annotations, tool response annotations, and other extensions belong in the protocol.
-
-## Scope
-
-### In Scope
-
-* **Evaluation of existing annotations**: Assess whether the current set of tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`) adequately serves server and client authors
-* **Discussion of proposed annotations**: Review and provide feedback on SEPs proposing new or modified tool annotations (trust/sensitivity, agency, model preferences, and others)
-* **Future of the annotation model**: Explore whether runtime annotations, tool response annotations, or structural changes to the annotation system are worth adding to the protocol
-* **Use-case gathering**: Collect real-world use cases from server authors, client authors, and host applications to ground annotation decisions in practical needs
-* **Problem statements and recommendations**: Produce recommendations for Working Groups or SEP authors on annotation design, coherence, and prioritization
-
-### Out of Scope
-
-* **Binding specification changes**: The IG produces recommendations, not binding decisions; specification changes are made through the SEP process
-* **Implementation work**: Building SDK features or reference implementations (may be explored in the [experimental repo](https://github.com/modelcontextprotocol/experimental-ext-tool-annotations) but is not the IG's primary purpose)
-* **Non-annotation tool changes**: Changes to tool discovery, invocation, or lifecycle that do not relate to annotations
-* **Resource annotations**: While related, resource-level annotation work is tracked separately unless it directly intersects with tool annotation design
-
-### Related Groups
-
-* **Security IG** - Trust and sensitivity annotations ([SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913)) span both groups' interests
-* **[Skills Over MCP WG](/community/skills-over-mcp/charter)** - Skill-level metadata may interact with tool annotations for discovery and filtering
-
-## Leadership
-
-| Role        | Name           | Organization | GitHub                                               | Term    |
-| ----------- | -------------- | ------------ | ---------------------------------------------------- | ------- |
-| Facilitator | Sam Morrow     | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | Initial |
-| Facilitator | Robert Reichel | OpenAI       | [@rreichel3](https://github.com/rreichel3)           | Initial |
-
-## Membership
-
-| Name                    | Organization | GitHub                                               | Discord | Level       |
-| ----------------------- | ------------ | ---------------------------------------------------- | ------- | ----------- |
-| Sam Morrow              | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | Facilitator |
-| Robert Reichel          | OpenAI       | [@rreichel3](https://github.com/rreichel3)           |         | Facilitator |
-| Matt Carey              | Cloudflare   | [@mattzcarey](https://github.com/mattzcarey)         |         | Participant |
-| Kapil Sharma            | Microsoft    | [@kapil8811](https://github.com/kapil8811)           |         | Participant |
-| Connor Peet             | Microsoft    | [@connor4312](https://github.com/connor4312)         |         | Participant |
-| Ola Hungerford          | Nordstrom    | [@olaservo](https://github.com/olaservo)             |         | Participant |
-| Gökhan Arkan            | GitHub       | [@gokhanarkan](https://github.com/gokhanarkan)       |         | Participant |
-| Joanna Krzek-Lubowiecka | GitHub       | [@joannakl](https://github.com/joannakl)             |         | Participant |
-
-## Operations
-
-| Meeting    | Frequency | Duration | Purpose                                        |
-| ---------- | --------- | -------- | ---------------------------------------------- |
-| Discussion | TBD       | TBD      | Use-case sharing, annotation review, open Q\&A |
-
-Discord: [#tool-annotations-ig](https://discord.com/channels/1358869848138059966/1482836798517543073)
-
-## Discussion Topics
-
-The following SEPs and themes form the IG's initial discussion agenda. This list is not exhaustive and will evolve as the group identifies new areas of interest.
-
-### Active SEPs Under Discussion
-
-| SEP                                                                                | Title                              | Status | Author                                                                                           |
-| ---------------------------------------------------------------------------------- | ---------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
-| [SEP-1862](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1862) | Tool Resolution (preflight checks) | Draft  | [@SamMorrowDrums](https://github.com/SamMorrowDrums)                                             |
-| [SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913) | Trust and Sensitivity Annotations  | Draft  | [@SamMorrowDrums](https://github.com/SamMorrowDrums), [@rreichel3](https://github.com/rreichel3) |
-| [SEP-1984](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1984) | Comprehensive Tool Annotations     | Draft  | [@sambhav](https://github.com/sambhav)                                                           |
-| [SEP-2417](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2417) | Model Preferences for Tools        | Draft  | [@ProductOfAmerica](https://github.com/ProductOfAmerica)                                         |
-
-### Open Questions
-
-* Should runtime annotations (annotations that change between invocations) be added to the protocol?
-* Are additional static annotations worth standardizing, and which serve both server and client authors?
-* Should tool *response* annotations be added to the protocol?
-* How should annotations interact with trust, security, and human-in-the-loop requirements?
-* What is the right level of granularity - a few well-defined hints vs. a richer, extensible vocabulary?
-
-## Resources
-
-* [Tool Annotations as Risk Vocabulary](https://blog.modelcontextprotocol.io/posts/2026-03-16-tool-annotations/) - blog post framing the motivation for this work
-* [Experimental repo](https://github.com/modelcontextprotocol/experimental-ext-tool-annotations) - repository for the Tool Annotations Interest Group
-
-## Changelog
-
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-04-20 | Initial charter |
-
-
 # Triggers and Events Charter
-Source: https://modelcontextprotocol.io/community/triggers-events/charter
+Source: https://modelcontextprotocol.io/community/working-groups/triggers-events
 
 Charter for the MCP Triggers and Events Working Group.
 

@@ -1155,7 +1155,7 @@ fn main() {
 
 :::danger
 
-This command is not a substitude for this guide! Please read the _whole_ page regardless of whether you chose to use the command.
+This command is not a substitute for this guide! Please read the _whole_ page regardless of whether you chose to use the command.
 
 :::
 
@@ -1503,7 +1503,7 @@ tauri::Builder::default()
 
 ### Migrate to File System Plugin
 
-The Rust `App::get_cli_matches` JavaScript `@tauri-apps/api/fs` APIs have been removed. Use the [`std::fs`](https://doc.rust-lang.org/std/fs/) for Rust and `@tauri-apps/plugin-fs` plugin for JavaScript instead:
+The Rust `tauri::api::file` and JavaScript `@tauri-apps/api/fs` APIs have been removed. Use [`std::fs`](https://doc.rust-lang.org/std/fs/) for Rust and the `@tauri-apps/plugin-fs` plugin for JavaScript instead:
 
 1. Add to cargo dependencies:
 
@@ -6740,7 +6740,7 @@ tauri = { version = "2.0.0", features = [ ] }
 
 The most important parts to take note of are the `tauri-build` and `tauri` dependencies. Generally, they must both be on the same latest minor versions as the Tauri CLI, but this is not strictly required. If you encounter issues while trying to run your app you should check that any Tauri versions (`tauri` and `tauri-cli`) are on the latest versions for their respective minor releases.
 
-Cargo version numbers use [Semantic Versioning]. Running `cargo update` in the `src-tauri` folder will pull the latest available Semver-compatible versions of all dependencies. For example, if you specify `2.0.0` as the version for `tauri-build`, Cargo will detect and download version `2.0.0.0` because it is the latest Semver-compatible version available. Tauri will update the major version number whenever a breaking change is introduced, meaning you should always be capable of safely upgrading to the latest minor and patch versions without fear of your code breaking.
+Cargo version numbers use [Semantic Versioning]. Running `cargo update` in the `src-tauri` folder will pull the latest available Semver-compatible versions of all dependencies. For example, if you specify `2.0.0` as the version for `tauri-build`, Cargo will detect and download version `2.0.1` because it is the latest Semver-compatible version available. Tauri will update the major version number whenever a breaking change is introduced, meaning you should always be capable of safely upgrading to the latest minor and patch versions without fear of your code breaking.
 
 If you want to use a specific crate version you can use exact versions instead by prepending `=` to the version number of the dependency:
 
@@ -6768,8 +6768,8 @@ An example of a barebones `package.json` file for a Tauri project might look a l
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.0.0.0",
-    "@tauri-apps/cli": "^2.0.0.0"
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/cli": "^2.0.0"
   }
 }
 ```
@@ -6997,6 +6997,53 @@ In this case we only initialize the devtools plugin for debug applications, whic
 :::
 
 For more information, see the [CrabNebula DevTools](https://docs.crabnebula.dev/devtools/get-started/) documentation.
+
+# Linux Graphics Issues
+
+On Linux, Tauri renders through WebKitGTK. On some setups, most often NVIDIA GPUs, WebKitGTK and the graphics driver disagree and you get anything from a blank window to subtle rendering problems. This page collects the known symptoms and workarounds. See [tauri-apps/tauri#9394](https://github.com/tauri-apps/tauri/issues/9394) for the original reports.
+
+## Common symptoms
+
+- The window opens but stays blank or white.
+- The window flickers, especially while resizing.
+- The app dies on resize with no useful error output.
+- Console shows `AcceleratedSurfaceDMABuf was unable to construct a complete framebuffer`.
+- Console shows `Gdk-Message: Error 71 (Protocol error) dispatching to Wayland display.`
+
+Most of these come from the WebKitGTK DMABUF renderer requesting buffer formats the NVIDIA driver does not provide. See the [WebKitGTK bug tracker](https://bugs.webkit.org/show_bug.cgi?id=261874) and the [NVIDIA forums](https://forums.developer.nvidia.com/t/geforce-rtx-4070-flickering-issue-when-using-the-dmabuf-renderer-in-webkitgtk/274741) for upstream discussion.
+
+## Workarounds
+
+Try these in order. The earlier ones keep hardware acceleration.
+
+1. Make sure kernel mode setting is on. NVIDIA drivers older than 545 often need `nvidia_drm.modeset=1` as a kernel parameter.
+2. Set `__NV_DISABLE_EXPLICIT_SYNC=1`. This often fixes the Wayland `Error 71` crash without a performance cost.
+3. Set `WEBKIT_DISABLE_DMABUF_RENDERER=1`. Fixes the DMABUF framebuffer error and the `Error 71` crash, at the cost of the faster rendering path.
+4. Set `WEBKIT_DISABLE_COMPOSITING_MODE=1`. Last resort for the silent crash on resize. This disables accelerated compositing entirely.
+
+You can set these in your shell to test, or set them in `main()` before the webview is created so users do not have to:
+
+```rust
+fn main() {
+  // Workaround for WebKitGTK on NVIDIA, see tauri-apps/tauri#9394
+  #[cfg(target_os = "linux")]
+  std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+
+  tauri::Builder::default()
+    // ...
+}
+```
+
+Only ship an unconditional override like this if you have verified your app is affected. It disables a faster path for everyone, including users on working setups.
+
+## Silent failures: WebGL and canvas
+
+Not every problem crashes or shows an error. WebGL and canvas content can silently land on a slow path while the rest of the app looks fine. Two things make this hard to detect from inside your frontend:
+
+- WebGL2 context creation succeeds even when the result is backed by a software rasterizer or a slow presentation path. There is no error to catch.
+- WebKitGTK masks the WebGL renderer string for fingerprinting protection. `WEBGL_debug_renderer_info` reports `Apple GPU` on every Linux machine, so you cannot check what is actually behind the context.
+
+In practice this shows up as high input latency or low frame rates in WebGL heavy views (terminal emulators, editors, maps, charts), while the same code is fast in a regular browser. If your app has a WebGL rendering path, give it a non WebGL fallback on Linux and consider exposing a setting so users can switch, instead of trusting the context to tell you.
 
 # Debug in Neovim
 
@@ -8992,7 +9039,7 @@ You may need to embed external binaries to add additional functionality to your 
 
 Binaries are executables written in any programming language. Common use cases are Python CLI applications or API servers bundled using `pyinstaller`.
 
-To bundle the binaries of your choice, you can add the `externalBin` property to the `tauri > bundle` object in your `tauri.conf.json`.
+To bundle the binaries of your choice, you can add the `externalBin` property to the `bundle` object in your `tauri.conf.json`.
 The `externalBin` configuration expects a list of strings targeting binaries either with absolute or relative paths.
 
 Here is a Tauri configuration snippet to illustrate a sidecar configuration:
@@ -12185,6 +12232,25 @@ cargo tauri bundle --config src-tauri/tauri.microsoftstore.conf.json"
 This is particularly useful when setting up your CI/CD to upload your app to the Microsoft Store while having a separate configuration
 for the Windows installer you distribute outside the app store.
 
+### Silent install
+
+The Microsoft Store requires Win32 installers to support silent installation. If your installer does not install silently,
+your submission is rejected with an error such as:
+
+```
+10.2.9.2 Security - Package Submissions | Win32 products must install silently.
+```
+
+When you register your installer in Partner Center you must provide the [silent install parameters] so the Store can run it
+unattended. Tauri's NSIS `-setup.exe` installer installs silently with the `/S` flag (note the uppercase `S`):
+
+```
+MyApp_x64-setup.exe /S
+```
+
+Enter `/S` as the silent install argument in the installer parameters of your Microsoft Store product.
+If you distribute the MSI installer instead, use the standard `msiexec` flag `/quiet`.
+
 ### Publisher
 
 Your application [publisher] name cannot match the application product name.
@@ -12223,6 +12289,7 @@ and link it in your application page in the Microsoft Store website.
 [code signed]: /distribute/sign/windows/
 [Offline Installer]: /distribute/windows-installer/#offline-installer
 [official publish documentation]: https://learn.microsoft.com/en-us/windows/apps/publish/
+[silent install parameters]: https://learn.microsoft.com/en-us/windows/uwp/publish/msiexe/provide-package-details
 [publisher]: /reference/config/#publisher
 
 # CrabNebula Cloud
@@ -16937,24 +17004,30 @@ By default, all plugin commands are blocked and cannot be accessed. You must def
 
 See the [Capabilities Overview](/security/capabilities/) for more information and the [step by step guide](/learn/security/using-plugin-permissions/) to use plugin permissions.
 
-```json title="src-tauri/capabilities/default.json" ins={6}
+```json title="src-tauri/capabilities/default.json" ins={7,11}
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "main-capability",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:window:default", "core:window:allow-start-dragging"]
+  "permissions": [
+    "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging"
+  ]
 }
 ```
 
-| Permission                                   | Description                                                                    |
-| -------------------------------------------- | ------------------------------------------------------------------------------ |
-| `core:window:default`                        | Default permissions for the plugin. Except `window:allow-start-dragging`.      |
-| `core:window:allow-close`                    | Enables the close command without any pre-configured scope.                    |
-| `core:window:allow-minimize`                 | Enables the minimize command without any pre-configured scope.                 |
-| `core:window:allow-start-dragging`           | Enables the start_dragging command without any pre-configured scope.           |
-| `core:window:allow-toggle-maximize`          | Enables the toggle_maximize command without any pre-configured scope.          |
-| `core:window:allow-internal-toggle-maximize` | Enables the internal_toggle_maximize command without any pre-configured scope. |
+| Permission                                   | Description                                                                                     |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `core:window:default`                        | Default permissions for the plugin. This includes `core:window:allow-internal-toggle-maximize`. |
+| `core:window:allow-close`                    | Enables the close command without any pre-configured scope.                                     |
+| `core:window:allow-minimize`                 | Enables the minimize command without any pre-configured scope.                                  |
+| `core:window:allow-start-dragging`           | Enables the start_dragging command without any pre-configured scope.                            |
+| `core:window:allow-toggle-maximize`          | Enables the toggle_maximize command without any pre-configured scope.                           |
+| `core:window:allow-internal-toggle-maximize` | Enables the internal_toggle_maximize command without any pre-configured scope.                  |
 
 #### CSS
 
