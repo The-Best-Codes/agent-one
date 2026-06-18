@@ -18,6 +18,7 @@ import {
   createWikipediaTool,
 } from "@/lib/ai/tools";
 import {
+  abortMcpServerLoad,
   buildMcpServerSlugMap,
   closeServerCache,
   getToolDisplayName,
@@ -263,7 +264,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         for (const chunk of chunks) {
           if (loadId !== loadIdRef.current) return;
 
-          const results = await Promise.all(
+          await Promise.all(
             chunk.map(async (server) => {
               try {
                 const tools = await Promise.race([
@@ -288,7 +289,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   server.requiresApproval ?? false,
                   server.toolApprovalOverrides,
                 );
-                return {
+                const result = {
                   server,
                   serverSlug: slugMap.get(server.id) ?? server.id,
                   status: "loaded" as const,
@@ -296,54 +297,41 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   toolInfo,
                   tools: wrappedTools,
                 };
+                Object.assign(allTools, prefixMcpToolNames(result.tools, result.serverSlug));
+                setMcpTools({ ...allTools });
+                setMcpServerLoadStates((prev) => ({
+                  ...prev,
+                  [server.id]: {
+                    status: "loaded",
+                    toolCount: result.toolNames.length,
+                    toolNames: result.toolNames,
+                    tools: result.toolInfo,
+                  },
+                }));
               } catch (error) {
                 const serverTypeLabel = server.type === "stdio" ? "STDIO" : "HTTP";
                 logger.error(
                   `Failed to load MCP tools for ${serverTypeLabel} server ${server.name}:`,
                   error,
                 );
+                abortMcpServerLoad(server.id);
                 closeServerCache(server.id);
-                return {
-                  server,
-                  serverSlug: slugMap.get(server.id) ?? server.id,
-                  error: error instanceof Error ? error.message : "Unknown error",
-                  status: "error" as const,
-                  toolNames: [],
-                  toolInfo: [],
-                  tools: {},
-                };
-              }
-            }),
-          );
-
-          for (const result of results) {
-            Object.assign(allTools, prefixMcpToolNames(result.tools, result.serverSlug));
-          }
-
-          setMcpServerLoadStates((prev) => {
-            const next = { ...prev };
-
-            for (const result of results) {
-              const previous = prev[result.server.id];
-              next[result.server.id] =
-                result.status === "loaded"
-                  ? {
-                      status: "loaded",
-                      toolCount: result.toolNames.length,
-                      toolNames: result.toolNames,
-                      tools: result.toolInfo,
-                    }
-                  : {
+                setMcpServerLoadStates((prev) => {
+                  const previous = prev[server.id];
+                  return {
+                    ...prev,
+                    [server.id]: {
                       status: "error",
                       toolCount: previous?.toolCount ?? 0,
                       toolNames: previous?.toolNames ?? [],
                       tools: previous?.tools ?? [],
-                      error: result.error,
-                    };
-            }
-
-            return next;
-          });
+                      error: error instanceof Error ? error.message : "Unknown error",
+                    },
+                  };
+                });
+              }
+            }),
+          );
         }
 
         if (loadId !== loadIdRef.current) return;
