@@ -305,7 +305,12 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               icon={
                 <div className="relative">
                   {showSpinnerIcon ? (
-                    <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
+                    <Spinner
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
+                        isMainAccordionOpen && "scale-0 opacity-0",
+                      )}
+                    />
                   ) : (
                     <IconTerminal2
                       className={cn(
@@ -314,14 +319,12 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                       )}
                     />
                   )}
-                  {!showSpinnerIcon && (
-                    <IconChevronDown
-                      className={cn(
-                        "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
-                        isMainAccordionOpen && "scale-100 opacity-100",
-                      )}
-                    />
-                  )}
+                  <IconChevronDown
+                    className={cn(
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
+                      isMainAccordionOpen && "scale-100 opacity-100",
+                    )}
+                  />
                 </div>
               }
               iconPosition="left"
