@@ -71,6 +71,8 @@ You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) 
 - `winget install NASM.NASM`
 - Also, make sure `git` is installed
 
+On macOS, you will also need to install cmake. You can install brew and run `brew install cmake`.
+
 ### Signing Updates
 
 See https://tauri.app/plugin/updater/.
