@@ -11,3 +11,6 @@ export { createViewFileTool } from "./viewFile";
 export { createWaitTool } from "./waitNumberMilliseconds";
 export { createWebSearchTool } from "./webSearch";
 export { createWikipediaTool } from "./wikipedia";
+export { createListSettingsTool } from "./listSettings";
+export { createGetSettingTool } from "./getSetting";
+export { createUpdateSettingTool } from "./updateSetting";

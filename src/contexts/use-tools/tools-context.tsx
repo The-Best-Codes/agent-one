@@ -16,6 +16,9 @@ import {
   createWaitTool,
   createWebSearchTool,
   createWikipediaTool,
+  createListSettingsTool,
+  createGetSettingTool,
+  createUpdateSettingTool,
 } from "@/lib/ai/tools";
 import {
   abortMcpServerLoad,
@@ -399,6 +402,15 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           ...toolConfigs.executeCommand,
         },
         subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
+        listSettings: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.listSettings,
+          ...toolConfigs.listSettings,
+        },
+        getSetting: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.getSetting, ...toolConfigs.getSetting },
+        updateSetting: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
+          ...toolConfigs.updateSetting,
+        },
       };
 
       if (mergedEnabledTools.dateTime) {
@@ -444,6 +456,17 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         filteredStaticTools.subAgent = createSubAgentTool(
           mergedToolConfigs.subAgent,
           options.subAgentContext,
+        );
+      }
+      if (mergedEnabledTools.listSettings) {
+        filteredStaticTools.listSettings = createListSettingsTool(mergedToolConfigs.listSettings);
+      }
+      if (mergedEnabledTools.getSetting) {
+        filteredStaticTools.getSetting = createGetSettingTool(mergedToolConfigs.getSetting);
+      }
+      if (mergedEnabledTools.updateSetting) {
+        filteredStaticTools.updateSetting = createUpdateSettingTool(
+          mergedToolConfigs.updateSetting,
         );
       }
 
