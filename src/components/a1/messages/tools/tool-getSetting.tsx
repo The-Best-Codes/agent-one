@@ -1,10 +1,24 @@
-import { IconSettings, IconCircleX, IconX, IconCircleCheck } from "@tabler/icons-react";
+import {
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconSettings,
+  IconX,
+} from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 interface GetSettingInput {
   key: string;
@@ -14,6 +28,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
   const callId = part.toolCallId;
   const input = part.input as GetSettingInput;
   const approvalHandler = useChatApprovalHandler();
+  const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
   const key = input?.key || "unknown setting";
 
@@ -80,7 +95,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
       );
     }
 
-    case "output-error":
+    case "output-error": {
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         return (
           <div key={callId} className="flex items-center gap-1">
@@ -91,12 +106,53 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           </div>
         );
       }
+
       return (
-        <div key={callId} className="text-destructive flex items-center gap-1 text-sm font-bold">
-          <IconCircleX className="size-4 shrink-0" />
-          <span>Error getting setting: {part.errorText}</span>
-        </div>
+        <Accordion
+          type="single"
+          collapsible
+          onValueChange={(value) => setIsErrorAccordionOpen(value === callId)}
+          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
+        >
+          <AccordionItem
+            value={callId}
+            className={cn(
+              "group/get-setting-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+              isErrorAccordionOpen && "border border-b! p-2",
+            )}
+          >
+            <AccordionTrigger
+              icon={
+                <div className="relative">
+                  <IconCircleX
+                    className={cn(
+                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/get-setting-accordion:scale-0 group-hover/get-setting-accordion:opacity-0",
+                      isErrorAccordionOpen && "scale-0 opacity-0",
+                    )}
+                  />
+                  <IconChevronDown
+                    className={cn(
+                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/get-setting-accordion:scale-100 group-hover/get-setting-accordion:opacity-100",
+                      isErrorAccordionOpen && "scale-100 opacity-100",
+                    )}
+                  />
+                </div>
+              }
+              iconPosition="left"
+              shouldRotateIcon={true}
+              className="justify-start gap-1 p-0 font-bold hover:no-underline"
+            >
+              <span className="text-destructive max-w-2xl truncate">Error reading setting</span>
+            </AccordionTrigger>
+            <AccordionContent className="p-0 pt-2">
+              <div className="text-destructive/80 text-sm font-normal">
+                {part?.errorText || "Unknown error"}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       );
+    }
 
     default:
       return (
