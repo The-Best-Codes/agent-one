@@ -1,4 +1,10 @@
-import { IconSettings, IconCircleX, IconX, IconCircleCheck } from "@tabler/icons-react";
+import {
+  IconSettings,
+  IconCircleX,
+  IconX,
+  IconCircleCheck,
+  IconSettingsCheck,
+} from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +38,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div className="flex items-center gap-1">
             <IconSettings className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to update setting "{key}" to "{value}"
+              AgentOne wants to update "{key}" setting to {value}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -61,7 +67,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Update setting denied ({key})
+            Update "{key}" setting denied
           </span>
         </div>
       );
@@ -76,7 +82,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
         >
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
-            Updating setting "{key}" to "{value}"...
+            Updating "{key}" setting to {value}...
           </span>
         </div>
       );
@@ -89,9 +95,9 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           key={callId}
           className="text-foreground flex flex-row items-center gap-1.5 text-sm font-bold"
         >
-          <IconCircleCheck className="size-4 shrink-0" />
+          <IconSettingsCheck className="size-4 shrink-0" />
           <span className="max-w-2xl truncate">
-            Updated setting "{key}" to "{JSON.stringify(output?.value)}"
+            Updated "{key}" setting to {JSON.stringify(output?.value)}
           </span>
         </div>
       );
@@ -103,7 +109,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Update setting cancelled
+              Updating setting was cancelled
             </span>
           </div>
         );
