@@ -177,6 +177,6 @@ export const createWikipediaTool = (config: WikipediaToolConfig) =>
         };
       }
 
-      return { error: `Unknown action: "${input.action}"` };
+      return { error: "Unknown action" };
     },
   });
