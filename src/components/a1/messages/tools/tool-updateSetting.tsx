@@ -89,7 +89,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           key={callId}
           className="text-foreground flex flex-row items-center gap-1.5 text-sm font-bold"
         >
-          <IconCircleCheck className="size-4 shrink-0 text-green-500" />
+          <IconCircleCheck className="size-4 shrink-0" />
           <span className="max-w-2xl truncate">
             Updated setting "{key}" to "{JSON.stringify(output?.value)}"
           </span>
