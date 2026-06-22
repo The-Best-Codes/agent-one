@@ -1,10 +1,4 @@
-import {
-  IconChevronDown,
-  IconCircleCheck,
-  IconCircleX,
-  IconTool,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCircleCheck, IconCircleX, IconTool, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
@@ -19,7 +13,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+
+import { ToolErrorAccordion } from "./tool-error-accordion";
 
 interface ToolCallPartProps {
   part: ToolUIPart;
@@ -141,51 +136,13 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         );
       }
       return (
-        <Accordion
-          type="single"
-          collapsible
-          onValueChange={(value) => setIsErrorAccordionOpen(value === callId)}
-          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
-        >
-          <AccordionItem
-            value={callId}
-            className={cn(
-              "group/tool-call-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
-              isErrorAccordionOpen && "border border-b! p-2",
-            )}
-          >
-            <AccordionTrigger
-              icon={
-                <div className="relative">
-                  <IconCircleX
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/tool-call-accordion:scale-0 group-hover/tool-call-accordion:opacity-0",
-                      isErrorAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
-                  <IconChevronDown
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/tool-call-accordion:scale-100 group-hover/tool-call-accordion:opacity-100",
-                      isErrorAccordionOpen && "scale-100 opacity-100",
-                    )}
-                  />
-                </div>
-              }
-              iconPosition="left"
-              shouldRotateIcon={true}
-              className="justify-start gap-1 p-0 font-bold hover:no-underline"
-            >
-              <span className="text-destructive max-w-2xl truncate">
-                Unknown tool "{toolName}" error
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
-              <div className="text-destructive/80 text-sm font-normal">
-                {part?.errorText || "Unknown error"}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <ToolErrorAccordion
+          callId={callId}
+          errorText={part.errorText}
+          isOpen={isErrorAccordionOpen}
+          onOpenChange={setIsErrorAccordionOpen}
+          title={<>Unknown tool "{toolName}" error</>}
+        />
       );
 
     default:
