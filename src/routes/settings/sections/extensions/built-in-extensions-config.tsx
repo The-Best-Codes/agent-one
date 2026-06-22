@@ -43,6 +43,18 @@ function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
       ...toolConfigs.executeCommand,
     },
     subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
+    listSettings: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.listSettings,
+      ...toolConfigs.listSettings,
+    },
+    getSetting: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.getSetting,
+      ...toolConfigs.getSetting,
+    },
+    updateSetting: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
+      ...toolConfigs.updateSetting,
+    },
   };
 }
 

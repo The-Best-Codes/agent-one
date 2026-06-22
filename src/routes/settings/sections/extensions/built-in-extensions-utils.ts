@@ -67,6 +67,21 @@ export const BUILT_IN_TOOLS: Record<
     description: "Delegate focused work to a streamed subagent",
     searchTerms: "subagent delegate nested agent parallel work",
   },
+  listSettings: {
+    name: "List Settings",
+    description: "List all available configuration setting keys",
+    searchTerms: "settings list keys config configuration options",
+  },
+  getSetting: {
+    name: "Get Setting",
+    description: "Get the current value and possible options of a specific setting",
+    searchTerms: "settings get value options inspect configuration",
+  },
+  updateSetting: {
+    name: "Update Setting",
+    description: "Update a setting key's value",
+    searchTerms: "settings update change set write value configuration",
+  },
 };
 
 export const TOOL_IDS = Object.keys(BUILT_IN_TOOLS) as ToolId[];

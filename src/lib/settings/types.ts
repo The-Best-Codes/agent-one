@@ -1,34 +1,79 @@
 // If you update this file, check if you also need to update reset-settings.ts in this directory
+// Also check metadata.ts, which exposes the settings to the AI agent
 
 import type { ProviderStorageKey } from "@/lib/ai/providers/registry";
 import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
 import { defaultKeyboardShortcuts } from "@/lib/kbd-registry";
 
-export type MarkdownRenderingOption = "user" | "assistant" | "both" | "neither";
-export type SubmitKeyOption = "enter" | "ctrl-enter";
-export type ThemeOption = "light" | "dark" | "system";
-export type ColorThemeOption =
-  | "default"
-  | "red"
-  | "blue"
-  | "yellow"
-  | "green"
-  | "orange"
-  | "rose"
-  | "violet";
-export type UiTintOption = ColorThemeOption;
-export type UiTintStrengthOption = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-export type RoundnessOption = "none" | "sm" | "md" | "lg";
-export type FontOption = "default" | "system" | "mono";
-export type TextScaleOption = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-export type NotificationOption = "always" | "when-unfocused" | "never";
-export type AnalyticsIdentityOption = "off" | "anonymous" | "user-id";
-export type StopButtonBehaviorOption = "at-stopping-point" | "immediate";
-export type MessageActionRowOption = "hover" | "always" | "never";
-export type InputStyleOption = "docked" | "floating";
-export type CollapsedSidebarLayoutOption = "row" | "column";
-export type ChatVirtualizationModeOption = "off" | "threshold";
-export type ChatSortOption = "created-at" | "updated-at";
+export const MARKDOWN_RENDERING_OPTIONS = ["user", "assistant", "both", "neither"] as const;
+export type MarkdownRenderingOption = (typeof MARKDOWN_RENDERING_OPTIONS)[number];
+
+export const SUBMIT_KEY_OPTIONS = ["enter", "ctrl-enter"] as const;
+export type SubmitKeyOption = (typeof SUBMIT_KEY_OPTIONS)[number];
+
+export const THEME_OPTIONS = ["light", "dark", "system"] as const;
+export type ThemeOption = (typeof THEME_OPTIONS)[number];
+
+export const COLOR_THEME_OPTIONS = [
+  "default",
+  "red",
+  "blue",
+  "yellow",
+  "green",
+  "orange",
+  "rose",
+  "violet",
+] as const;
+export type ColorThemeOption = (typeof COLOR_THEME_OPTIONS)[number];
+
+export const UI_TINT_OPTIONS = [
+  "default",
+  "red",
+  "blue",
+  "yellow",
+  "green",
+  "orange",
+  "rose",
+  "violet",
+] as const;
+export type UiTintOption = (typeof UI_TINT_OPTIONS)[number];
+
+export const UI_TINT_STRENGTH_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+export type UiTintStrengthOption = (typeof UI_TINT_STRENGTH_OPTIONS)[number];
+
+export const ROUNDNESS_OPTIONS = ["none", "sm", "md", "lg"] as const;
+export type RoundnessOption = (typeof ROUNDNESS_OPTIONS)[number];
+
+export const FONT_OPTIONS = ["default", "system", "mono", "roboto"] as const;
+export type FontOption = (typeof FONT_OPTIONS)[number];
+
+export const TEXT_SCALE_OPTIONS = ["xs", "sm", "md", "lg", "xl", "2xl"] as const;
+export type TextScaleOption = (typeof TEXT_SCALE_OPTIONS)[number];
+
+export const NOTIFICATION_SETTING_OPTIONS = ["always", "when-unfocused", "never"] as const;
+export type NotificationOption = (typeof NOTIFICATION_SETTING_OPTIONS)[number];
+
+export const ANALYTICS_IDENTITY_OPTIONS = ["off", "anonymous", "user-id"] as const;
+export type AnalyticsIdentityOption = (typeof ANALYTICS_IDENTITY_OPTIONS)[number];
+
+export const STOP_BUTTON_BEHAVIOR_OPTIONS = ["at-stopping-point", "immediate"] as const;
+export type StopButtonBehaviorOption = (typeof STOP_BUTTON_BEHAVIOR_OPTIONS)[number];
+
+export const SHOW_MESSAGE_ACTION_ROW_OPTIONS = ["hover", "always", "never"] as const;
+export type MessageActionRowOption = (typeof SHOW_MESSAGE_ACTION_ROW_OPTIONS)[number];
+
+export const INPUT_STYLE_OPTIONS = ["docked", "floating"] as const;
+export type InputStyleOption = (typeof INPUT_STYLE_OPTIONS)[number];
+
+export const COLLAPSED_SIDEBAR_LAYOUT_OPTIONS = ["row", "column"] as const;
+export type CollapsedSidebarLayoutOption = (typeof COLLAPSED_SIDEBAR_LAYOUT_OPTIONS)[number];
+
+export const CHAT_VIRTUALIZATION_MODE_OPTIONS = ["off", "threshold"] as const;
+export type ChatVirtualizationModeOption = (typeof CHAT_VIRTUALIZATION_MODE_OPTIONS)[number];
+
+export const CHAT_SORT_OPTIONS = ["created-at", "updated-at"] as const;
+export type ChatSortOption = (typeof CHAT_SORT_OPTIONS)[number];
+
 export type ChatBackgroundPresetOption =
   | "none"
   | "custom"
@@ -151,7 +196,10 @@ export type ToolId =
   | "deleteFile"
   | "viewFile"
   | "executeCommand"
-  | "subAgent";
+  | "subAgent"
+  | "listSettings"
+  | "getSetting"
+  | "updateSetting";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -213,6 +261,18 @@ export interface SubAgentToolConfig {
   requiresApproval: boolean;
 }
 
+export interface ListSettingsToolConfig {
+  requiresApproval: boolean;
+}
+
+export interface GetSettingToolConfig {
+  requiresApproval: boolean;
+}
+
+export interface UpdateSettingToolConfig {
+  requiresApproval: boolean;
+}
+
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
@@ -226,6 +286,9 @@ export interface ToolConfigs {
   viewFile: ViewFileToolConfig;
   executeCommand: ExecuteCommandToolConfig;
   subAgent: SubAgentToolConfig;
+  listSettings: ListSettingsToolConfig;
+  getSetting: GetSettingToolConfig;
+  updateSetting: UpdateSettingToolConfig;
 }
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
@@ -367,6 +430,9 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     viewFile: true,
     executeCommand: true,
     subAgent: true,
+    listSettings: true,
+    getSetting: true,
+    updateSetting: true,
   },
   TOOL_CONFIGS: {
     dateTime: {
@@ -415,6 +481,15 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
       defaultTimeoutMs: 120000,
     },
     subAgent: {
+      requiresApproval: true,
+    },
+    listSettings: {
+      requiresApproval: false,
+    },
+    getSetting: {
+      requiresApproval: false,
+    },
+    updateSetting: {
       requiresApproval: true,
     },
   },
