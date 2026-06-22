@@ -79,7 +79,7 @@ export const BUILT_IN_TOOLS: Record<
   },
   updateSetting: {
     name: "Update Setting",
-    description: "Update a setting key's value (requires approval by default)",
+    description: "Update a setting key's value",
     searchTerms: "settings update change set write value configuration",
   },
 };
