@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { getDefaultStore, type Atom } from "jotai";
 import { z } from "zod";
 
-import { getInspectableKeys, getSettingAtom, getSettingMetadata } from "@/lib/settings/metadata";
+import { getSettingAtom, getSettingMetadata, isInspectableKey } from "@/lib/settings/metadata";
 import type { GetSettingToolConfig } from "@/lib/settings/types";
 
 export const createGetSettingTool = (config: GetSettingToolConfig) =>
@@ -17,7 +17,7 @@ export const createGetSettingTool = (config: GetSettingToolConfig) =>
     }),
     execute: async (input) => {
       const { key } = input;
-      if (!getInspectableKeys().includes(key)) {
+      if (!isInspectableKey(key)) {
         throw new Error(`Setting key "${key}" is not valid or inspectable.`);
       }
 

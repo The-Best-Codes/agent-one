@@ -1,35 +1,90 @@
-import * as atoms from "@/lib/jotai/settings-atoms";
+import type { Atom } from "jotai";
+
+import {
+  analyticsIdentityAtom,
+  chatSortAtom,
+  chatVirtualizationModeAtom,
+  chatVirtualizationThresholdAtom,
+  collapsedSidebarLayoutAtom,
+  colorThemeAtom,
+  experimentalThrottleEnabledAtom,
+  experimentalThrottleValueAtom,
+  extractReasoningEnabledAtom,
+  fontAtom,
+  inputStyleAtom,
+  keyboardShortcutsEnabledInInputsAtom,
+  markdownHighlightingAtom,
+  markdownRenderingAtom,
+  maxCodeblockCharsAtom,
+  maxMessageLengthAtom,
+  maxToolResultCharsAtom,
+  mcpParallelLoadLimitAtom,
+  notificationSettingAtom,
+  regenerateOnSaveAtom,
+  roundnessAtom,
+  showChatStatusIndicatorAtom,
+  showMessageActionRowAtom,
+  smoothStreamEnabledAtom,
+  stopButtonBehaviorAtom,
+  submitKeyAtom,
+  systemPromptAppendixAtom,
+  textScaleAtom,
+  themeAtom,
+  uiTintAtom,
+  uiTintStrengthAtom,
+  userNameAtom,
+} from "@/lib/jotai/settings-atoms";
 
 import { DEFAULT_SETTINGS } from "./types";
 import * as types from "./types";
 
-function keyToAtomName(key: string): string {
-  if (key === "TTS") return "ttsSettingsAtom";
-  const camelCase = key.toLowerCase().replace(/_([a-z])/g, (_, char) => char.toUpperCase());
-  return `${camelCase}Atom`;
+const inspectableSettingAtoms = {
+  ANALYTICS_IDENTITY: analyticsIdentityAtom,
+  CHAT_SORT: chatSortAtom,
+  CHAT_VIRTUALIZATION_MODE: chatVirtualizationModeAtom,
+  CHAT_VIRTUALIZATION_THRESHOLD: chatVirtualizationThresholdAtom,
+  COLLAPSED_SIDEBAR_LAYOUT: collapsedSidebarLayoutAtom,
+  COLOR_THEME: colorThemeAtom,
+  EXPERIMENTAL_THROTTLE_ENABLED: experimentalThrottleEnabledAtom,
+  EXPERIMENTAL_THROTTLE_VALUE: experimentalThrottleValueAtom,
+  EXTRACT_REASONING_ENABLED: extractReasoningEnabledAtom,
+  FONT: fontAtom,
+  INPUT_STYLE: inputStyleAtom,
+  KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: keyboardShortcutsEnabledInInputsAtom,
+  MARKDOWN_HIGHLIGHTING: markdownHighlightingAtom,
+  MARKDOWN_RENDERING: markdownRenderingAtom,
+  MAX_CODEBLOCK_CHARS: maxCodeblockCharsAtom,
+  MAX_MESSAGE_LENGTH: maxMessageLengthAtom,
+  MAX_TOOL_RESULT_CHARS: maxToolResultCharsAtom,
+  MCP_PARALLEL_LOAD_LIMIT: mcpParallelLoadLimitAtom,
+  NOTIFICATION_SETTING: notificationSettingAtom,
+  REGENERATE_ON_SAVE: regenerateOnSaveAtom,
+  ROUNDNESS: roundnessAtom,
+  SHOW_CHAT_STATUS_INDICATOR: showChatStatusIndicatorAtom,
+  SHOW_MESSAGE_ACTION_ROW: showMessageActionRowAtom,
+  SMOOTH_STREAM_ENABLED: smoothStreamEnabledAtom,
+  STOP_BUTTON_BEHAVIOR: stopButtonBehaviorAtom,
+  SUBMIT_KEY: submitKeyAtom,
+  SYSTEM_PROMPT_APPENDIX: systemPromptAppendixAtom,
+  TEXT_SCALE: textScaleAtom,
+  THEME: themeAtom,
+  UI_TINT: uiTintAtom,
+  UI_TINT_STRENGTH: uiTintStrengthAtom,
+  USER_NAME: userNameAtom,
+} satisfies Record<string, Atom<unknown>>;
+
+type InspectableSettingKey = keyof typeof inspectableSettingAtoms;
+
+function getSettingOptions(key: InspectableSettingKey): readonly unknown[] | undefined {
+  return (types as unknown as Record<string, readonly unknown[] | undefined>)[`${key}_OPTIONS`];
+}
+
+export function isInspectableKey(key: string): key is InspectableSettingKey {
+  return key in inspectableSettingAtoms;
 }
 
 export function getInspectableKeys(): string[] {
-  return Object.keys(DEFAULT_SETTINGS).filter((key) => {
-    // Exclude security tokens, complex maps, and objects
-    if (
-      key.endsWith("_API_KEY") ||
-      key.endsWith("_TOKEN") ||
-      key === "ABLIT_KEY" ||
-      key === "AGENT_ONE_API_KEY" ||
-      key === "KEYBOARD_SHORTCUTS" ||
-      key === "MCP_SERVERS" ||
-      key === "TOOL_CONFIGS" ||
-      key === "ENABLED_TOOLS" ||
-      key === "CHAT_BACKGROUND" ||
-      key === "MEMORY"
-    ) {
-      return false;
-    }
-
-    const atomName = keyToAtomName(key);
-    return atomName in atoms;
-  });
+  return Object.keys(inspectableSettingAtoms);
 }
 
 export interface SettingMetadata {
@@ -40,32 +95,23 @@ export interface SettingMetadata {
 }
 
 export function getSettingMetadata(key: string): SettingMetadata | null {
-  if (!getInspectableKeys().includes(key)) {
+  if (!isInspectableKey(key)) {
     return null;
   }
 
-  const defaultValue = DEFAULT_SETTINGS[key as keyof typeof DEFAULT_SETTINGS];
-  const optionKey = `${key}_OPTIONS`;
-  const options = (types as Record<string, unknown>)[optionKey] as readonly unknown[] | undefined;
-
-  let type: string = typeof defaultValue;
-  if (options) {
-    type = "enum";
-  } else if (Array.isArray(defaultValue)) {
-    type = "array";
-  }
+  const defaultValue = DEFAULT_SETTINGS[key];
+  const options = getSettingOptions(key);
 
   return {
     key,
-    type,
-    options: options || (type === "boolean" ? [true, false] : null),
+    type: options ? "enum" : typeof defaultValue,
+    options: options || (typeof defaultValue === "boolean" ? [true, false] : null),
     defaultValue,
   };
 }
 
 export function getSettingAtom(key: string) {
-  const atomName = keyToAtomName(key);
-  return (atoms as Record<string, unknown>)[atomName];
+  return isInspectableKey(key) ? inspectableSettingAtoms[key] : null;
 }
 
 export function validateSettingValue(
@@ -81,7 +127,7 @@ export function validateSettingValue(
     if (!metadata.options.includes(value)) {
       return {
         success: false,
-        error: `Value ${JSON.stringify(value)} is not a valid option. Valid options are: ${metadata.options.map((o) => JSON.stringify(o)).join(", ")}`,
+        error: `Value ${JSON.stringify(value)} is not a valid option. Valid options are: ${metadata.options.map((option) => JSON.stringify(option)).join(", ")}`,
       };
     }
     return { success: true };

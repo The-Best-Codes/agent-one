@@ -1,4 +1,5 @@
 // If you update this file, check if you also need to update reset-settings.ts in this directory
+// Also check metadata.ts, which exposes the settings to the AI agent
 
 import type { ProviderStorageKey } from "@/lib/ai/providers/registry";
 import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
