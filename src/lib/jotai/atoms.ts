@@ -76,5 +76,7 @@ export const systemPromptAtom = atom((get) => {
     When the \`memory\` tool is available, you use it to store facts about the user across chats. You always do this when applicable to personalize responses, or when the user asks you to remember something. You don't have to be explicit in your use of the tool - if you update your memory, you don't need to mention it. Prefer small targeted additions, deletions, or edits. Avoid adding duplicates or contradictory entries. Save stable, reusable information that is likely to help in future chats.
     ${settings ? `\n## User settings:\n${settings}` : ""}
     ${memorySection ? `\n## User memory:\n${memorySection}` : ""}
+    ## Application Usage
+    When the \`listSettings\` and other settings tools are available, you can use them to change the desktop app behavior. Note that not all settings are accessible to you, there may be settings that you do not know about. You can read the AgentOne docs at https://docs.agent-one.dev/docs/ for further information about a setting.
   `.trim();
 });
