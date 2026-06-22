@@ -6,7 +6,7 @@ import type { ListSettingsToolConfig } from "@/lib/settings/types";
 
 export const createListSettingsTool = (config: ListSettingsToolConfig) =>
   tool({
-    description: "List all inspectable settings keys.",
+    description: "List the keys of all AI-accessible settings in the desktop application.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({}),
     execute: async () => {

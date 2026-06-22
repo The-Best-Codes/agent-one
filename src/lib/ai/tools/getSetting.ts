@@ -8,7 +8,7 @@ import type { GetSettingToolConfig } from "@/lib/settings/types";
 export const createGetSettingTool = (config: GetSettingToolConfig) =>
   tool({
     description:
-      "Get the current value and metadata (including possible options) of a specific setting key.",
+      "Get the current value and metadata (including possible options) of a specific AI-accessible setting key in the desktop application.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       key: z

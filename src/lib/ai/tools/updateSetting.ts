@@ -7,7 +7,7 @@ import type { UpdateSettingToolConfig } from "@/lib/settings/types";
 
 export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
   tool({
-    description: "Update a specific setting key's value.",
+    description: "Update a specific AI-accessible setting key's value.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       key: z
