@@ -13,7 +13,29 @@ on:
         default: false
 
 jobs:
+  create-release:
+    if: ${{ !inputs.snap-only }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Create release draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(head -n1 .version | tr -d '[:space:]')
+          TAG="agent-one-v${VERSION}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --draft \
+              --title "AgentOne v${VERSION}" \
+              --notes "See the assets below this release to download and install this version."
+          fi
+
   release-tauri:
+    needs: create-release
     if: ${{ !inputs.snap-only }}
     permissions:
       contents: write
