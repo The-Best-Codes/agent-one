@@ -320,26 +320,48 @@ export function BuiltInExtensionsConfig() {
                 )}
 
                 {toolId === "executeCommand" && (
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="executeCommand-timeout" className="text-xs">
-                      Default Timeout (ms)
-                    </Label>
-                    <Input
-                      id="executeCommand-timeout"
-                      type="number"
-                      min={1000}
-                      max={600000}
-                      value={mergedToolConfigs.executeCommand.defaultTimeoutMs}
-                      onChange={(e) =>
-                        updateToolConfig("executeCommand", {
-                          defaultTimeoutMs: Math.max(
-                            1000,
-                            Math.min(parseInt(e.target.value) || 120000, 600000),
-                          ),
-                        })
-                      }
-                    />
-                  </div>
+                  <>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="executeCommand-timeout" className="text-xs">
+                        Default Timeout (ms)
+                      </Label>
+                      <Input
+                        id="executeCommand-timeout"
+                        type="number"
+                        min={1000}
+                        max={600000}
+                        value={mergedToolConfigs.executeCommand.defaultTimeoutMs}
+                        onChange={(e) =>
+                          updateToolConfig("executeCommand", {
+                            defaultTimeoutMs: Math.max(
+                              1000,
+                              Math.min(parseInt(e.target.value) || 120000, 600000),
+                            ),
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="executeCommand-scrollback" className="text-xs">
+                        Max Scrollback (chars)
+                      </Label>
+                      <Input
+                        id="executeCommand-scrollback"
+                        type="number"
+                        min={1000}
+                        max={500000}
+                        value={mergedToolConfigs.executeCommand.maxScrollbackChars}
+                        onChange={(e) =>
+                          updateToolConfig("executeCommand", {
+                            maxScrollbackChars: Math.max(
+                              1000,
+                              Math.min(parseInt(e.target.value) || 25000, 500000),
+                            ),
+                          })
+                        }
+                      />
+                    </div>
+                  </>
                 )}
 
                 {toolId === "subAgent" && (

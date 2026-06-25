@@ -250,6 +250,7 @@ export interface ViewFileToolConfig {
 export interface ExecuteCommandToolConfig {
   requiresApproval: boolean;
   defaultTimeoutMs: number;
+  maxScrollbackChars: number;
 }
 
 export interface WikipediaToolConfig {
@@ -479,6 +480,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     executeCommand: {
       requiresApproval: true,
       defaultTimeoutMs: 120000,
+      maxScrollbackChars: 25000,
     },
     subAgent: {
       requiresApproval: true,

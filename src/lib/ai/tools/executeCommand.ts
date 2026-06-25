@@ -181,15 +181,21 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
         return controller.signal;
       })();
 
+      const truncateScrollback = (text: string) => {
+        const maxChars = config.maxScrollbackChars;
+        if (maxChars <= 0 || text.length <= maxChars) return text;
+        return text.slice(-maxChars);
+      };
+
       const { handle, result } = spawnCommand(input.command, {
         signal: combinedSignal,
         onStdout: (data) => {
-          stdout += data;
+          stdout = truncateScrollback(stdout + data);
           updateLiveState(toolCallId, (state) => ({ ...state, stdout }));
           push({ type: "stdout", data });
         },
         onStderr: (data) => {
-          stderr += data;
+          stderr = truncateScrollback(stderr + data);
           updateLiveState(toolCallId, (state) => ({ ...state, stderr }));
           push({ type: "stderr", data });
         },
