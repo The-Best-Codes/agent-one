@@ -40,11 +40,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     async (accessToken: string): Promise<"valid" | "invalid" | "error"> => {
       try {
         setAuthToken(accessToken);
-        const { data, error } = await authClient.getSession({
-          fetchOptions: {
-            headers: { Authorization: `Bearer ${accessToken}` },
-          },
-        });
+        const { data, error } = await authClient.getSession();
         if (data?.user) {
           setUser({
             id: data.user.id,
