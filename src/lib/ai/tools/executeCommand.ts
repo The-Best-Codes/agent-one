@@ -184,7 +184,9 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       const truncateScrollback = (text: string) => {
         const maxChars = config.maxScrollbackChars;
         if (maxChars <= 0 || text.length <= maxChars) return text;
-        return text.slice(-maxChars);
+        const marker = `[truncated to ${maxChars} characters]\n`;
+        const available = Math.max(0, maxChars - marker.length);
+        return marker + text.slice(-available);
       };
 
       const { handle, result } = spawnCommand(input.command, {
