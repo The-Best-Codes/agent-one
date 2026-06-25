@@ -119,3 +119,18 @@ jobs:
             --clobber
 
           echo "Successfully mirrored $TAG to $TARGET_REPO"
+
+      - name: Revalidate download page and release cache
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            "https://www.agent-one.dev/api/revalidate" \
+            -H "Authorization: Bearer ${{ secrets.REVALIDATION_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{"paths":["/download"],"tags":["latest-release"]}')
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "Successfully revalidated website download page."
+          else
+            echo "Revalidation failed with HTTP $RESPONSE"
+            exit 1
+          fi
