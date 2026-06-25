@@ -1,4 +1,4 @@
-import type { Tool, ToolExecutionOptions } from "@ai-sdk/provider-utils";
+import type { Context, Tool, ToolExecutionOptions } from "@ai-sdk/provider-utils";
 import {
   convertToModelMessages,
   extractReasoningMiddleware,
@@ -404,7 +404,7 @@ export const createSubAgentTool = (
     inputSchema: z.object({
       task: z.string().min(1).describe("The task for the subagent to complete"),
     }),
-    execute: async function* (input: SubAgentInput, options: ToolExecutionOptions) {
+    execute: async function* (input: SubAgentInput, options: ToolExecutionOptions<Context>) {
       logger.verbose("Executing subAgent tool with input:", input);
 
       setLiveState(options.toolCallId, {
