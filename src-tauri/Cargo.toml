@@ -1,6 +1,6 @@
 [package]
 name = "agent-one"
-version = "1.0.1"
+version = "1.0.2"
 description = "AgentOne is a powerful AI agent that gives you freedom to choose your models and control your data."
 authors = ["you"]
 edition = "2021"
