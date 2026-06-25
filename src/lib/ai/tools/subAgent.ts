@@ -4,7 +4,7 @@ import {
   extractReasoningMiddleware,
   type LanguageModel,
   readUIMessageStream,
-  stepCountIs,
+  isStepCount,
   streamText,
   type ModelMessage,
   type ToolSet,
@@ -289,8 +289,8 @@ async function* streamSubAgentRun({
       abortSignal,
       tools,
       toolChoice: "auto",
-      stopWhen: stepCountIs(context.modelConfig.maxSteps ?? 20),
-      system: buildSubAgentInstructions(context.systemPrompt),
+      stopWhen: isStepCount(context.modelConfig.maxSteps ?? 20),
+      instructions: buildSubAgentInstructions(context.systemPrompt),
     });
 
     let latestMessage: UIMessage | undefined;

@@ -6,7 +6,7 @@ import {
   extractReasoningMiddleware,
   type LanguageModel,
   smoothStream,
-  stepCountIs,
+  isStepCount,
   type StopCondition,
   streamText,
   type ToolSet,
@@ -132,7 +132,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     const tools = await this.getTools({ subAgentContext });
 
     const stopWhenCondition: StopCondition<ToolSet> =
-      modelConfig.maxSteps === undefined ? () => false : stepCountIs(modelConfig.maxSteps);
+      modelConfig.maxSteps === undefined ? () => false : isStepCount(modelConfig.maxSteps);
 
     const result = streamText({
       model,
@@ -149,7 +149,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       toolChoice: "auto",
       stopWhen: stopWhenCondition,
       // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
-      system: this.getSystemPrompt(),
+      instructions: this.getSystemPrompt(),
       ...(smoothStreamEnabled && {
         experimental_transform: smoothStream(),
       }),

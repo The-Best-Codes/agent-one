@@ -3,7 +3,7 @@ import { createHume, type HumeSpeechModelOptions } from "@ai-sdk/hume";
 import { createLMNT, type LMNTSpeechModelOptions } from "@ai-sdk/lmnt";
 import { createOpenAI, type OpenAISpeechModelOptions } from "@ai-sdk/openai";
 import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
-import { experimental_generateSpeech as generateSpeech } from "ai";
+import { generateSpeech } from "ai";
 
 import type { TtsProviderId, TtsSettings } from "@/lib/settings/types";
 
