@@ -106,7 +106,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               AgentOne wants to spawn a subagent
             </span>
           </div>
-          <div className="bg-secondary rounded px-2 py-1 text-xs break-words">{task}</div>
+          <div className="bg-secondary rounded px-2 py-1 text-xs wrap-break-word">{task}</div>
           <div className="flex items-center justify-end gap-2">
             <Button
               size="sm"
@@ -165,7 +165,12 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               icon={
                 <div className="relative">
                   {showSpinnerIcon ? (
-                    <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
+                    <Spinner
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-0 group-hover/subagent-accordion:opacity-0",
+                        isExpanded && "scale-0 opacity-0",
+                      )}
+                    />
                   ) : (
                     <IconHierarchy3
                       className={cn(
@@ -174,14 +179,12 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
                       )}
                     />
                   )}
-                  {!showSpinnerIcon && (
-                    <IconChevronDown
-                      className={cn(
-                        "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-100 group-hover/subagent-accordion:opacity-100",
-                        isExpanded && "scale-100 opacity-100",
-                      )}
-                    />
-                  )}
+                  <IconChevronDown
+                    className={cn(
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-100 group-hover/subagent-accordion:opacity-100",
+                      isExpanded && "scale-100 opacity-100",
+                    )}
+                  />
                 </div>
               }
               iconPosition="left"
