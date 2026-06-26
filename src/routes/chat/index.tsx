@@ -93,25 +93,6 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const chatBackgroundY = chatBackground.y ?? 50;
   const chatBackgroundZoom = chatBackground.zoom ?? 100;
   const chatBackgroundShade = chatBackground.backgroundShade ?? 30;
-  const messageItems = useMemo(
-    () =>
-      messages.map((message, index) => (
-        <div
-          key={message.id}
-          className={cn(
-            "flex",
-            message.role === "user"
-              ? "justify-end"
-              : index === messages.length - 1
-                ? "justify-start"
-                : "mb-1 justify-start",
-          )}
-        >
-          <MessageParts message={message} isLastMessage={message.id === lastMessageId} />
-        </div>
-      )),
-    [lastMessageId, messages],
-  );
   const keepMountedIndexes = useMemo(
     () =>
       editingMessageIds
@@ -157,16 +138,52 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
             <AutoScrollContainer
               ref={scrollRef}
               className="max-h-full min-h-0 flex-1 pt-2 pr-0 pb-2"
-              virtualizedItems={shouldVirtualizeMessages ? messageItems : undefined}
-              virtualizedKeepMounted={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
-              contentUpdateKey={shouldVirtualizeMessages ? messages : undefined}
+              items={shouldVirtualizeMessages ? messages : undefined}
+              renderItem={
+                shouldVirtualizeMessages
+                  ? (item, index) => {
+                      const msg = item as (typeof messages)[number];
+                      return (
+                        <div
+                          className={cn(
+                            "flex",
+                            msg.role === "user"
+                              ? "justify-end"
+                              : index === messages.length - 1
+                                ? "justify-start"
+                                : "mb-1 justify-start",
+                          )}
+                        >
+                          <MessageParts message={msg} isLastMessage={msg.id === lastMessageId} />
+                        </div>
+                      );
+                    }
+                  : undefined
+              }
+              getItemKey={shouldVirtualizeMessages ? (index) => messages[index]!.id : undefined}
+              keepMountedIndexes={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
               overflowingClassName="md:pr-2"
               scrollableClassName="pr-2 h-full"
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
               {messages.length === 0 && <NoMessagesGreeting />}
-              {!shouldVirtualizeMessages && messageItems}
+              {!shouldVirtualizeMessages &&
+                messages.map((message, index) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex",
+                      message.role === "user"
+                        ? "justify-end"
+                        : index === messages.length - 1
+                          ? "justify-start"
+                          : "mb-1 justify-start",
+                    )}
+                  >
+                    <MessageParts message={message} isLastMessage={message.id === lastMessageId} />
+                  </div>
+                ))}
               {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
             </AutoScrollContainer>
           )}

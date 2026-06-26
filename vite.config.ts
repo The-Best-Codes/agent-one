@@ -121,7 +121,6 @@ const vendorManualChunks = {
     "consola",
     "@tanstack/virtual-core",
     "@tanstack/react-virtual",
-    "virtua",
   ],
 };
 

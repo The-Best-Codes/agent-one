@@ -115,7 +115,6 @@
     "typescript-eslint": "^8.62.0",
     "vaul": "^1.1.2",
     "venice-ai-sdk-provider": "^2.1.1",
-    "virtua": "^0.49.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
