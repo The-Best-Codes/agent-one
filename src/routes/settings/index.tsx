@@ -12,7 +12,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useOverflow } from "@/hooks/use-overflow";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
@@ -60,6 +60,9 @@ export default function SettingsRoute() {
   };
 
   const scrollViewportRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const isOverflowing = useOverflow(scrollViewportRef);
+  const isSidebarOverflowing = useOverflow(sidebarRef);
   const previousSectionRef = useRef(displayedSection);
 
   useEffect(() => {
@@ -95,9 +98,7 @@ export default function SettingsRoute() {
 
     if (sectionChanged) {
       rootRef.current?.scrollIntoView({ block: "start" });
-      scrollViewportRef.current
-        ?.querySelector("[data-slot='scroll-area-viewport']")
-        ?.scrollTo({ top: 0 });
+      scrollViewportRef.current?.scrollTo({ top: 0 });
       window.requestAnimationFrame(() => {
         rootRef.current?.scrollIntoView({ block: "start" });
       });
@@ -181,7 +182,13 @@ export default function SettingsRoute() {
             fillHeight && "min-h-0 flex-1 overflow-hidden",
           )}
         >
-          <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
+          <div
+            ref={sidebarRef}
+            className={cn(
+              "hidden w-48 shrink-0 overflow-auto scroll-fade md:flex md:flex-col lg:w-64",
+              isSidebarOverflowing && "pr-2",
+            )}
+          >
             <div className="flex flex-col gap-2 pl-0.5">
               <div className="mb-2">
                 <Button
@@ -202,10 +209,10 @@ export default function SettingsRoute() {
                 onSectionChange={handleSectionChange}
               />
             </div>
-          </ScrollArea>
+          </div>
 
           {fillHeight ? (
-            <div className="-m-0.5 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-0.5">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
               <div
                 role="tabpanel"
                 tabIndex={0}
@@ -218,11 +225,9 @@ export default function SettingsRoute() {
               </div>
             </div>
           ) : (
-            <ScrollArea
+            <div
               ref={scrollViewportRef}
-              type="always"
-              className="-m-0.5 flex-1 md:min-h-0"
-              viewportClassName="p-0.5"
+              className={cn("flex-1 overflow-auto scroll-fade md:min-h-0", isOverflowing && "pr-2")}
             >
               <div
                 role="tabpanel"
@@ -231,7 +236,7 @@ export default function SettingsRoute() {
               >
                 <SettingsContent activeSection={displayedSection} />
               </div>
-            </ScrollArea>
+            </div>
           )}
         </div>
       </div>
