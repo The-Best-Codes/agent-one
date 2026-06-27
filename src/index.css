@@ -773,16 +773,6 @@
   animation: settings-target-fade-out 1000ms ease-out forwards;
 }
 
-@keyframes text-gradient-shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
 @keyframes progress-indeterminate {
   0% {
     transform: translateX(-100%);
@@ -797,42 +787,6 @@
   &::-webkit-scrollbar {
     @apply size-0.5;
   }
-}
-
-@utility text-gradient-shimmer {
-  font-optical-sizing: auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  -webkit-text-stroke: transparent;
-  color: transparent;
-  background-size: var(--text-gradient-shimmer-background-size, 200% 100%);
-  animation: text-gradient-shimmer var(--text-gradient-shimmer-duration, 5s)
-    var(--text-gradient-shimmer-timing-function, linear)
-    var(--text-gradient-shimmer-iteration-count, infinite);
-}
-
-@utility shimmer-duration-* {
-  --text-gradient-shimmer-duration: calc(--value(integer) * 1ms);
-  --text-gradient-shimmer-duration: --value([*]);
-}
-
-@utility shimmer-* {
-  --text-gradient-shimmer-timing-function: --value(
-    "linear",
-    "ease",
-    "ease-in",
-    "ease-out",
-    "ease-in-out",
-    "step-start",
-    "step-end"
-  );
-  --text-gradient-shimmer-timing-function: --value(--ease-*, [*]);
-}
-
-@utility shimmer-repeat-* {
-  --text-gradient-shimmer-iteration-count: --value("infinite");
-  --text-gradient-shimmer-iteration-count: --value(integer, [*]);
 }
 
 @utility accordion-details-animated {

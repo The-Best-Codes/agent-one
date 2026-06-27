@@ -430,7 +430,7 @@ export const VirtualizedChatList = ({
         ref={parentRef}
         className={cn(
           "flex-1",
-          showList ? "overflow-y-auto" : "overflow-hidden",
+          showList ? "overflow-y-auto scroll-fade" : "overflow-hidden",
           isOverflowing && showList && "pr-2",
         )}
       >
