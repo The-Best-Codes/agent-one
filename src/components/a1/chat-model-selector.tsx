@@ -363,7 +363,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const triggerContent = displayedModel ? (
     <>
       <div className="min-w-0 flex-1">
-        <div className="scrollbar-size-xs w-full overflow-x-auto" tabIndex={0}>
+        <div className="scrollbar-size-xs scroll-fade-x w-full overflow-x-auto" tabIndex={0}>
           <div className="w-full text-left whitespace-nowrap">
             <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
             <span className="font-medium">{displayedModel.name}</span>
