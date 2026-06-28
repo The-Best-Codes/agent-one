@@ -446,7 +446,7 @@ export default function AppearanceSection() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <ScrollArea className="max-w-full md:max-w-64">
+                <ScrollArea className="max-w-full md:max-w-64" viewportClassName="scroll-fade-x">
                   <ScrollBar className="w-full" orientation="horizontal" />
                   <div className="flex flex-row flex-nowrap gap-2">
                     {colorThemeOptions.map((option) => (
@@ -482,7 +482,7 @@ export default function AppearanceSection() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <ScrollArea className="max-w-full md:max-w-64">
+                <ScrollArea className="max-w-full md:max-w-64" viewportClassName="scroll-fade-x">
                   <ScrollBar className="w-full" orientation="horizontal" />
                   <div className="flex flex-row flex-nowrap gap-2">
                     {colorThemeOptions.map((option) => (
