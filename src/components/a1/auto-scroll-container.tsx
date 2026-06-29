@@ -21,29 +21,20 @@ const BUTTON_HIDDEN_OFFSET = 36;
 
 export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
-
-  // Data-driven virtualization (TanStack Virtual)
   items?: readonly unknown[];
   renderItem?: (item: unknown, index: number) => ReactNode;
   getItemKey?: (index: number) => Key;
   estimateItemSize?: (index: number) => number;
   overscan?: number;
   keepMountedIndexes?: readonly number[];
-
-  // Scroll button
   scrollButtonClassName?: string;
   scrollButtonChildren?: ReactNode;
   scrollButtonProps?: Omit<React.ComponentProps<"button">, "className" | "children" | "onClick">;
   buttonScrollBehavior?: "smooth" | "instant";
-
-  // Styling
   scrollableClassName?: string;
   overflowingClassName?: string;
-  /** Scroll behavior for programmatic scroll-to-bottom. Defaults to "instant". */
   behavior?: "smooth" | "instant";
-  /** Distance from bottom (in px) where button starts sliding out. Defaults to 50px. */
   slideStartDistance?: number;
-  /** Distance from bottom (in px) where button is fully hidden. Defaults to AT_BOTTOM_THRESHOLD (10px). */
   slideEndDistance?: number;
 }
 
@@ -81,9 +72,8 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     const prevAtEndRef = useRef(true);
     const isVirtualized = items != null && items.length > 0;
 
-    // Virtualized path: TanStack Virtual
     const virtualizer = useVirtualizer({
-      count: items?.length ?? 0,
+      count: isVirtualized ? items.length : 0,
       getScrollElement: () => parentRef.current,
       estimateSize: estimateItemSize,
       getItemKey,
@@ -103,44 +93,49 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
               return Array.from(set).sort((a, b) => a - b);
             }
           : undefined,
-      onChange: (instance) => {
-        const atEnd = instance.isAtEnd(AT_BOTTOM_THRESHOLD);
-        if (atEnd !== prevAtEndRef.current) {
-          prevAtEndRef.current = atEnd;
-          setButtonOffset(atEnd ? BUTTON_HIDDEN_OFFSET : 0);
-        }
-      },
     });
 
-    // Non-virtualized auto-scroll (MutationObserver + scroll tracking)
+    const handleScroll = useCallback(() => {
+      const container = parentRef.current;
+      if (!container) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
+
+      prevAtEndRef.current = atBottom;
+
+      let offset = BUTTON_HIDDEN_OFFSET;
+      if (isOverflowing) {
+        if (distanceFromBottom > slideStartDistance) {
+          offset = 0;
+        } else if (distanceFromBottom <= slideEndDistance) {
+          offset = BUTTON_HIDDEN_OFFSET;
+        } else {
+          const slideRange = slideStartDistance - slideEndDistance;
+          const slideProgress = (slideStartDistance - distanceFromBottom) / slideRange;
+          offset = slideProgress * BUTTON_HIDDEN_OFFSET;
+        }
+      }
+
+      setButtonOffset(offset);
+    }, [isOverflowing, slideStartDistance, slideEndDistance]);
+
+    useLayoutEffect(() => {
+      const container = parentRef.current;
+      if (!container) return;
+
+      container.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+
+      return () => {
+        container.removeEventListener("scroll", handleScroll);
+      };
+    }, [handleScroll]);
+
     useLayoutEffect(() => {
       const container = parentRef.current;
       if (!container || isVirtualized) return;
-
-      const handleScroll = () => {
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-        const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
-
-        prevAtEndRef.current = atBottom;
-
-        let offset = BUTTON_HIDDEN_OFFSET;
-        if (isOverflowing) {
-          if (distanceFromBottom <= slideStartDistance) {
-            if (distanceFromBottom <= slideEndDistance) {
-              offset = BUTTON_HIDDEN_OFFSET;
-            } else {
-              const slideRange = slideStartDistance - slideEndDistance;
-              const slideProgress = (slideStartDistance - distanceFromBottom) / slideRange;
-              offset = slideProgress * BUTTON_HIDDEN_OFFSET;
-            }
-          }
-        } else {
-          offset = BUTTON_HIDDEN_OFFSET;
-        }
-
-        setButtonOffset(offset);
-      };
 
       const observerCallback = () => {
         if (prevAtEndRef.current) {
@@ -151,25 +146,19 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         }
       };
 
-      container.scrollTo({ top: container.scrollHeight, behavior: "instant" });
-
       const mutationObserver = new MutationObserver(observerCallback);
       mutationObserver.observe(container, { childList: true, subtree: true });
 
-      container.addEventListener("scroll", handleScroll, { passive: true });
-
-      handleScroll();
-
       return () => {
         mutationObserver.disconnect();
-        container.removeEventListener("scroll", handleScroll);
       };
-    }, [isOverflowing, isVirtualized, slideStartDistance, slideEndDistance]);
+    }, [isVirtualized, handleScroll]);
 
-    // Virtualized initial scroll-to-end
     useLayoutEffect(() => {
       if (isVirtualized) {
         virtualizer.scrollToEnd({ behavior: "instant" });
+      } else {
+        parentRef.current?.scrollTo({ top: parentRef.current.scrollHeight, behavior: "instant" });
       }
     }, [isVirtualized, virtualizer]);
 
