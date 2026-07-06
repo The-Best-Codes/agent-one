@@ -81,6 +81,7 @@ Each section contains links to detailed markdown files that provide comprehensiv
 - [Continuous Integration](https://v2.tauri.app/develop/tests/webdriver/ci): WebDriver Testing
 - [Selenium](https://v2.tauri.app/develop/tests/webdriver/example/selenium)
 - [WebdriverIO](https://v2.tauri.app/develop/tests/webdriver/example/webdriverio)
+- [Manual setup](https://v2.tauri.app/develop/tests/webdriver/manual-setup): Driving tauri-driver directly without the WebdriverIO Tauri service
 - [Updating Dependencies](https://v2.tauri.app/develop/updating-dependencies)
 
 ## Distribute

@@ -6905,7 +6905,7 @@ The flow enables dynamic information gathering. Servers can request specific dat
   method: "elicitation/create",
   params: {
     message: "Please confirm your Barcelona vacation booking details:",
-    schema: {
+    requestedSchema: {
       type: "object",
       properties: {
         confirmBooking: {
@@ -7442,7 +7442,7 @@ Build MCP servers and clients using our official SDKs. SDKs are classified into 
 | <Icon icon="swift" />   Swift                                                    | [modelcontextprotocol/swift-sdk](https://github.com/modelcontextprotocol/swift-sdk)           | <Badge>Tier 3</Badge> |
 | <Icon icon="gem" />   [Ruby](https://ruby.sdk.modelcontextprotocol.io)           | [modelcontextprotocol/ruby-sdk](https://github.com/modelcontextprotocol/ruby-sdk)             | <Badge>Tier 3</Badge> |
 | <Icon icon="php" />   [PHP](https://php.sdk.modelcontextprotocol.io)             | [modelcontextprotocol/php-sdk](https://github.com/modelcontextprotocol/php-sdk)               | <Badge>Tier 3</Badge> |
-| <Icon icon="square-k" />   [Kotlin](https://kotlin.sdk.modelcontextprotocol.io)  | [modelcontextprotocol/kotlin-sdk](https://github.com/modelcontextprotocol/kotlin-sdk)         |    <Badge>TBD</Badge> |
+| <Icon icon="square-k" />   [Kotlin](https://kotlin.sdk.modelcontextprotocol.io)  | [modelcontextprotocol/kotlin-sdk](https://github.com/modelcontextprotocol/kotlin-sdk)         | <Badge>Tier 3</Badge> |
 
 See [SDK Tiering System](/community/sdk-tiers) for details on what each tier means.
 
@@ -9717,6 +9717,150 @@ processes:
   * Use unix domain sockets or other Interprocess Communication (IPC)
     mechanisms with restricted access
 
+### OAuth Authorization URL Validation
+
+OAuth authorization URLs provided by malicious MCP servers can exploit client-side URL handling vulnerabilities, leading to Cross-Site Scripting (XSS) attacks and Remote Code Execution (RCE).
+
+#### Attack Description
+
+During the OAuth authorization flow, MCP servers provide authorization URLs that clients open in browsers or handle programmatically. Malicious servers can exploit insufficient URL validation in MCP clients through the following attack vectors:
+
+**JavaScript URL Injection (XSS)**
+
+1. A malicious MCP server provides a `javascript:` URL as the authorization endpoint
+2. The MCP client passes this URL directly to `window.open()` or similar browser APIs
+3. The browser executes the JavaScript code embedded in the URL
+4. The attacker gains JavaScript execution context within the client application, potentially leading to session hijacking, credential theft, or further exploitation
+
+**Command Injection via Shell Execution**
+
+1. A malicious MCP server provides a URL containing shell command injection payloads
+2. The MCP client uses shell commands (e.g., `cmd.exe`, PowerShell, or shell scripts) to open the URL
+3. The shell interprets parts of the URL as additional commands to execute
+4. The attacker achieves arbitrary code execution on the user's system
+
+**stdio Transport Privilege Escalation**
+
+When XSS vulnerabilities are combined with `stdio` transport capabilities,
+attackers can escalate web-based attacks to full system compromise. See
+[stdio Transport Security in Proxy Scenarios](#stdio-transport-security-in-proxy-scenarios)
+for detailed attack vectors and mitigations.
+
+```mermaid theme={null}
+sequenceDiagram
+    participant MaliciousMCP as Malicious MCP Server
+    participant Client as MCP Client
+    participant Proxy as MCP Proxy
+    participant System as Host System
+
+    MaliciousMCP->>Client: Malicious authorization URL (javascript:)
+    Client->>Client: Execute JavaScript (XSS)
+    Client->>Client: Extract proxy auth token
+    Client->>Proxy: Malicious stdio command request
+    Note over Client,Proxy: Using stolen authentication token
+    Proxy->>System: Execute arbitrary command
+    System-->>Proxy: Command output
+    Proxy-->>Client: Command result
+    Client-->>MaliciousMCP: Exfiltrate data/establish persistence
+```
+
+#### Risks
+
+OAuth authorization URL vulnerabilities introduce several critical security risks:
+
+* **Cross-Site Scripting (XSS)**. Malicious JavaScript execution can lead to session hijacking, credential theft, and unauthorized actions within the client application.
+* **Remote Code Execution (RCE)**. Command injection through shell execution allows attackers to run arbitrary code with user privileges.
+* **Privilege Escalation**. XSS combined with `stdio` transport can escalate web-based attacks to full system compromise.
+* **Data Exfiltration**. Attackers can access sensitive data, configuration files, and credentials stored on the user's system.
+* **Persistence**. Attackers can install malware, create backdoors, or modify system configurations for persistent access.
+
+#### Mitigation
+
+**URL Scheme Validation**
+
+MCP clients **MUST** validate authorization URLs and reject dangerous schemes:
+
+* **MUST** only allow `http://` and `https://` schemes for authorization URLs.
+  The `http://` scheme is acceptable only for loopback addresses (such as
+  `localhost`, `127.0.0.1`, or `::1`) during local development; authorization
+  servers in production **MUST** use `https://`.
+* **MUST** reject `javascript:`, `data:`, `file:`, `vbscript:`, and other potentially dangerous schemes
+* **SHOULD** use allowlist-based validation rather than blocklist-based approaches
+
+**Secure URL Opening**
+
+MCP clients **MUST** avoid shell execution when opening URLs:
+
+* **MUST NOT** use shell commands (e.g., `cmd.exe`, `sh`, PowerShell) to open URLs
+* **SHOULD** use platform-specific, non-shell URL opening mechanisms
+
+**Content Security Policy (CSP)**
+
+Web-based MCP clients **SHOULD** implement Content Security Policy headers to prevent JavaScript execution:
+
+* Set `script-src 'self'` to prevent execution of inline JavaScript
+* Use `default-src 'self'` to restrict resource loading
+* Consider `script-src 'nonce-<random>'` for dynamic content that requires inline scripts
+
+**Input Sanitization**
+
+MCP clients **MUST** sanitize and validate all URLs received from MCP servers:
+
+* Implement strict URL parsing and validation
+* Reject URLs with special characters that could be interpreted by shells
+* Consider using dedicated URL sanitization libraries
+* Log suspicious authorization URLs for security monitoring
+
+### stdio Transport Security in Proxy Scenarios
+
+The `stdio` transport itself is not inherently vulnerable. However, in proxy architectures where a separate proxy service manages `stdio` connections and can spawn MCP servers as child processes, it can provide a critical escalation path from web-based attacks to full system compromise.
+
+#### Attack Description
+
+**Important**: This attack vector only applies to MCP implementations that use a proxy architecture, not to direct `stdio` transport usage.
+
+In proxy-based MCP implementations, a local proxy service sits between the client and MCP servers, spawning servers as child processes via the `stdio` transport. This architecture creates a privileged escalation path when combined with client-side vulnerabilities:
+
+1. Attacker achieves XSS or other client-side code execution (e.g., through OAuth URL vulnerabilities)
+2. Using the attack vector above, the malicious actor accesses the MCP proxy authentication token established between the client and the proxy from the client's environment
+3. Malicious actor makes authenticated requests to the local MCP proxy service
+4. Proxy spawns arbitrary commands via the `stdio` transport (believing they are legitimate MCP server commands)
+5. Attacker achieves Remote Code Execution with user privileges
+
+#### Risks
+
+* **Privilege Escalation**. Web-based vulnerabilities (XSS) can escalate to arbitrary code execution on the host system through proxy command execution
+* **Authentication Bypass**. Stolen proxy authentication tokens allow unauthorized access to stdio process spawning capabilities
+* **System Compromise**. Attackers can execute any command that the MCP proxy process has privileges to run
+
+#### Mitigation
+
+The primary defense is to prevent classes of vulnerabilities that enable this attack vector:
+
+* Implement the mitigations described in [OAuth Authorization URL Validation](#oauth-authorization-url-validation)
+* Use Content Security Policy (CSP) to prevent JavaScript execution from untrusted sources
+* Validate and sanitize all input from MCP servers before processing
+
+Since XSS fundamentally compromises the client's security context, focus on limiting the damage:
+
+**stdio Transport Restrictions**
+
+MCP proxy services **SHOULD** implement additional security controls for `stdio` transport:
+
+* Implement sandboxing or containerization for spawned processes
+* Restrict file system access for spawned MCP servers
+* Log all `stdio` transport usage for security monitoring
+* Require additional authorization for potentially dangerous commands
+
+**Client-Side Protections**
+
+MCP clients **SHOULD** implement defense-in-depth measures:
+
+* Isolate proxy communication in a separate security context when possible
+* Use principle of least privilege for proxy process permissions
+* Implement process-level sandboxing for the proxy service itself
+* Consider running the proxy in a container or restricted environment
+
 ### Scope Minimization
 
 Poor scope design increases token compromise impact, elevates user
@@ -10745,7 +10889,7 @@ To require enterprise-managed authorization:
 
 2. **Map IdP claims to permissions** — ID-JAG tokens carry claims (scope and resource information) that your server uses to determine who the employee is and what the employee can access. Define your authorization logic based on these claims.
 
-3. **Handle Account Linking** - ID-JAG tokens will always contain a subject claim and may additionally contain an email claim that can be used to
+3. **Handle Account Linking** - ID-JAG tokens will always contain a subject claim and may additionally contain an email claim that can be used to link the enterprise identity to an existing account in your system. Use the subject claim as the primary stable identifier for the user, and fall back to the email claim for matching against pre-existing accounts that were created before enterprise-managed authorization was configured.
 
 ## Client support
 
@@ -10762,7 +10906,7 @@ Check the [client matrix](/extensions/client-matrix) for current implementation 
     Source code and reference implementations
   </Card>
 
-  <Card title="Full specification" icon="file-lines" href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/draft/enterprise-managed-authorization.mdx">
+  <Card title="Full specification" icon="file-lines" href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/stable/enterprise-managed-authorization.mdx">
     Technical specification with normative requirements
   </Card>
 
@@ -19020,70 +19164,6 @@ The following MCP operations support pagination:
 Invalid cursors **SHOULD** result in an error with code -32602 (Invalid params).
 
 
-# Antitrust Policy
-Source: https://modelcontextprotocol.io/community/antitrust
-
-MCP Project Antitrust Policy for participants and contributors
-
-**Effective: September 29, 2025**
-
-<Note>
-  This policy applies when participating in MCP meetings, Working Groups,
-  Interest Groups, and other collaborative forums where competitors may be
-  present. Most individual contributors working on code or documentation don't
-  need to worry about this in day-to-day work - it's primarily relevant for
-  group discussions about standards and specifications.
-</Note>
-
-## Introduction
-
-The goal of the Model Context Protocol open source project (the "Project") is to develop a universal standard for model-to-world interactions, including enabling LLMs and agents to seamlessly connect with and utilize external data sources and tools. The purpose of this Antitrust Policy (the "Policy") is to avoid antitrust risks in carrying out this pro-competitive mission.
-
-Participants in and contributors to the Project (collectively, "participants") will use their best reasonable efforts to comply in all respects with all applicable state and federal antitrust and trade regulation laws, and applicable antitrust/competition laws of other countries (collectively, the "Antitrust Laws").
-
-The goal of Antitrust Laws is to encourage vigorous competition. Nothing in this Policy prohibits or limits the ability of participants to make, sell or use any product, or otherwise to compete in the marketplace. This Policy provides general guidance on compliance with Antitrust Law. Participants should contact their respective legal counsel to address specific questions.
-
-This Policy is conservative and is intended to promote compliance with the Antitrust Laws, not to create duties or obligations beyond what the Antitrust Laws actually require. In the event of any inconsistency between this Policy and the Antitrust Laws, the Antitrust Laws preempt and control.
-
-## Participation
-
-Technical participation in the Project shall be open to all, subject only to compliance with the provisions of the Project's charter and other governance documents.
-
-## Conduct of Meetings
-
-At meetings among actual or potential competitors, there is a risk that participants in those meetings may improperly disclose or discuss information in violation of the Antitrust Laws or otherwise act in an anti-competitive manner. To avoid this risk, participants must adhere to the following policies when participating in Project-related or sponsored meetings, conference calls, or other forums (collectively, "Project Meetings").
-
-Participants must not, in fact or appearance, discuss or exchange information regarding:
-
-* An individual company's current or projected prices, price changes, price differentials, markups, discounts, allowances, terms and conditions of sale, including credit terms, etc., or data that bear on prices, including profits, margins or cost.
-* Industry-wide pricing policies, price levels, price changes, differentials, or the like.
-* Actual or projected changes in industry production, capacity or inventories.
-* Matters relating to bids or intentions to bid for particular products, procedures for responding to bid invitations or specific contractual arrangements.
-* Plans of individual companies concerning the design, characteristics, production, distribution, marketing or introduction dates of particular products, including proposed territories or customers.
-* Matters relating to actual or potential individual suppliers that might have the effect of excluding them from any market or of influencing the business conduct of firms toward such suppliers.
-* Matters relating to actual or potential customers that might have the effect of influencing the business conduct of firms toward such customers.
-* Individual company current or projected cost of procurement, development or manufacture of any product.
-* Individual company market shares for any product or for all products.
-* Confidential or otherwise sensitive business plans or strategy.
-
-In connection with all Project Meetings, participants must do the following:
-
-* Adhere to prepared agendas.
-* Insist that meeting minutes be prepared and distributed to all participants, and that meeting minutes accurately reflect the matters that transpired.
-* Consult with their respective counsel on all antitrust questions related to Project Meetings.
-* Protest against any discussions that appear to violate these policies or the Antitrust Laws, leave any meeting in which such discussions continue, and either insist that such protest be noted in the minutes.
-
-## Requirements/Standard Setting
-
-The Project may establish standards, technical requirements and/or specifications for use (collectively, "requirements"). Participants shall not enter into agreements that prohibit or restrict any participant from establishing or adopting any other requirements. Participants shall not undertake any efforts, directly or indirectly, to prevent any firm from manufacturing, selling, or supplying any product not conforming to a requirement.
-
-The Project shall not promote standardization of commercial terms, such as terms for license and sale.
-
-## Contact Information
-
-To contact the Project regarding matters addressed by this Antitrust Policy, please send an email to [antitrust@modelcontextprotocol.io](mailto:antitrust@modelcontextprotocol.io), and reference "Antitrust Policy" in the subject line.
-
-
 # Group Charter Template
 Source: https://modelcontextprotocol.io/community/charter-template
 
@@ -19908,8 +19988,8 @@ The key is that you understand and can stand behind your contribution:
 * **You know why** - You can articulate why the change is needed
 * **You've verified it** - You've tested or validated that it works as intended
 
-You can read more about our stance in
-[our spec contribution guidelines](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CONTRIBUTING.md#ai-contributions).
+You can read the full policy in
+[AI\_POLICY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/AI_POLICY.md).
 
 ## Code of Conduct
 
@@ -20790,6 +20870,75 @@ Use these exact label names across all repositories to enable consistent reporti
 * **Security vulnerabilities** with CVSS score ≥ 7.0 (High or Critical severity)
 * **Core functionality failures** that prevent basic MCP operations: connection establishment,
   message exchange, or use of core primitives (tools, resources, prompts)
+
+
+# Security Policy
+Source: https://modelcontextprotocol.io/community/security
+
+How to report security vulnerabilities in the Model Context Protocol specification and SDKs, what is in and out of scope, and how SDK maintainers coordinate disclosure.
+
+This page summarizes how security reports are handled across the Model Context Protocol
+project. The full policy, including the trust model and the complete list of behaviors that
+are intentional and not eligible as vulnerabilities, lives in
+[SECURITY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md)
+in the specification repository.
+
+## Reporting a vulnerability
+
+Report security issues through GitHub Security Advisories on the affected repository.
+Private vulnerability reporting is enabled on the specification repository and on every
+official SDK repository in the [modelcontextprotocol](https://github.com/modelcontextprotocol)
+organization.
+
+Do not report security issues through public issues, discussions, or pull requests.
+
+## SDK disclosure and cross-SDK coordination
+
+When a report is filed against an SDK, the maintainers of that SDK assess whether the same
+issue affects other official SDKs. Many MCP vulnerabilities stem from shared patterns,
+transport implementations, or spec-level behavior that multiple SDKs implement the same
+way. The receiving maintainers coordinate with the maintainers of other potentially
+affected SDKs to determine which are impacted and to what degree, so that fixes and
+advisories can be released together rather than leaving some SDKs exposed after others have
+published.
+
+If the root cause is a defect in the specification rather than an implementation bug, the
+coordinating maintainers will discuss this with the specification maintainers.
+
+CVEs are assigned through GitHub's CNA as part of the GHSA workflow.
+
+## Scope
+
+The following are considered security vulnerabilities when they arise from flaws in the
+specification or official SDKs: protocol-level vulnerabilities, authentication or
+authorization bypasses, implementation bugs such as injection or memory-safety issues,
+sandbox escapes, session hijacking, token leakage, and cross-tenant access.
+
+The full
+[SECURITY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md)
+documents the MCP trust model and a list of intentional behaviors that are not
+vulnerabilities. One of the most common is stdio peer attacks, summarized below.
+
+### Stdio transport trust boundary
+
+When using the stdio transport, the client spawns the server as a local subprocess and both
+might run with equivalent environment-level privilege. The SDK does not defend either peer
+against a malicious counterpart across the stdio channel: a malicious server already has
+arbitrary code execution by virtue of being run, and a malicious client already has full
+process control over the server it spawned.
+
+Reports whose only impact is that one stdio peer can crash, hang, exhaust resources of, or
+otherwise deny service to the other are out of scope and should be filed as regular issues
+rather than as a GHSA. If the affected SDK code is reachable via any of the supported
+remote transports, or results in a sandbox escape, the report remains in scope. Deployments
+that run stdio servers at reduced privilege are responsible for enforcing isolation at that
+boundary. The SDK's stdio transport is not a sandbox.
+
+## Security Interest Group
+
+The [Security Interest Group](/community/interest-groups/security) is the venue for
+discussing MCP-specific threats, reviewing security-relevant proposals, and routing
+disclosure questions that don't fit a single repository.
 
 
 # SEP Guidelines
@@ -24411,8 +24560,7 @@ export type TitledSingleSelectEnumSchema = {
 
 // Combined single selection enumeration
 export type SingleSelectEnumSchema =
-  | UntitledSingleSelectEnumSchema
-  | TitledSingleSelectEnumSchema;
+  UntitledSingleSelectEnumSchema | TitledSingleSelectEnumSchema;
 ```
 
 ### 3. Introduce Multiple Selection Enums (with Titled and Untitled varieties)
@@ -24450,8 +24598,7 @@ export type TitledMultiSelectEnumSchema = {
 
 // Combined Multiple select enumeration
 export type MultiSelectEnumSchema =
-  | UntitledMultiSelectEnumSchema
-  | TitledMultiSelectEnumSchema;
+  UntitledMultiSelectEnumSchema | TitledMultiSelectEnumSchema;
 ```
 
 ### 4. Combine All Varieties as `EnumSchema`
@@ -24461,9 +24608,7 @@ The final `EnumSchema` rolls up the legacy, multi-select, and single-select sche
 ```typescript theme={null}
 // Combined legacy, multiple, and single select enumeration
 export type EnumSchema =
-  | SingleSelectEnumSchema
-  | MultiSelectEnumSchema
-  | LegacyEnumSchema;
+  SingleSelectEnumSchema | MultiSelectEnumSchema | LegacyEnumSchema;
 ```
 
 ### 5. Extend ElicitResult
@@ -24888,15 +25033,9 @@ In the "Possible Follow ups" Section below, we give examples of features that we
   type SamplingMessage = UserMessage | AssistantMessage; // NEW
 
   type AssistantMessageContent =
-    | TextContent
-    | ImageContent
-    | AudioContent
-    | ToolUseContent;
+    TextContent | ImageContent | AudioContent | ToolUseContent;
   type UserMessageContent =
-    | TextContent
-    | ImageContent
-    | AudioContent
-    | ToolResultContent;
+    TextContent | ImageContent | AudioContent | ToolResultContent;
   interface AssistantMessage {
     // NEW
     role: "assistant";
@@ -29713,7 +29852,7 @@ When constructing a `tools/call` request via HTTP transport, the client MUST:
 4. Encode the values according to the rules in [Value Encoding](#value-encoding)
 5. Append a `Mcp-Param-{Name}: {Value}` header to the request:
 
-> **Implementation Note**: If the client does not have the tool's `inputSchema` (e.g., `tools/list` has not yet been called) or the cached schema is stale (e.g., its TTL has expired), the client SHOULD send the request without custom `Mcp-Param-*` headers. If the server rejects the request because required custom headers are missing, the client SHOULD call `tools/list` to obtain the current `inputSchema`, then retry the original request with the appropriate headers. Clients MAY pre-load tool definitions via other means (e.g., from a previous session or configuration) to enable header emission without a prior `tools/list` call.
+> **Implementation Note**: Clients MUST construct `Mcp-Param-*` headers using the most recently obtained `inputSchema` for the tool. A client that has never obtained the tool's `inputSchema` SHOULD send the request without `Mcp-Param-*` headers. If the server rejects the request because required `Mcp-Param-*` headers are missing or do not match the body, the client SHOULD call `tools/list` to obtain the current `inputSchema`, then retry the original request with the appropriate headers. Clients MAY pre-load tool definitions via other means (e.g., from a previous session or configuration) to enable header emission without a prior `tools/list` call.
 
 #### Server Behavior
 
@@ -30028,7 +30167,7 @@ This section defines edge cases that conformance tests MUST cover to ensure inte
 | Invalid Base64 characters | `=?base64?SGVs!!!bG8=?=` | Server MUST reject with 400 and error code `-32001`; Intermediary MAY reject with 400 status code |
 | Missing prefix            | `SGVsbG8=`               | Server treats as literal value, not Base64                                                        |
 | Missing suffix            | `=?base64?SGVsbG8=`      | Server treats as literal value, not Base64                                                        |
-| Malformed wrapper         | `=?BASE64?SGVsbG8=?=`    | Server MUST accept (case-insensitive prefix)                                                      |
+| Non-lowercase prefix      | `=?BASE64?SGVsbG8=?=`    | Server treats as literal value, not Base64                                                        |
 
 #### Null and Missing Values
 
@@ -30577,18 +30716,14 @@ how that would look in the typescript MCP schema:
 
 ```typescript theme={null}
 export type InputRequest =
-  | CreateMessageRequest
-  | ElicitRequest
-  | ListRootsRequest;
+  CreateMessageRequest | ElicitRequest | ListRootsRequest;
 
 export interface InputRequests {
   [key: string]: InputRequest;
 }
 
 export type InputResponse =
-  | CreateMessageResult
-  | ElicitResult
-  | ListRootsResult;
+  CreateMessageResult | ElicitResult | ListRootsResult;
 
 export interface InputResponses {
   [key: string]: InputResponse;
@@ -34396,11 +34531,7 @@ export interface CancelledTask extends Task {
  * including terminal results or pending input requests.
  */
 export type DetailedTask =
-  | WorkingTask
-  | InputRequiredTask
-  | CompletedTask
-  | FailedTask
-  | CancelledTask;
+  WorkingTask | InputRequiredTask | CompletedTask | FailedTask | CancelledTask;
 ```
 
 ### Task Creation
@@ -36279,6 +36410,70 @@ Specification Enhancement Proposals (SEPs) are the primary mechanism for proposi
 | <Badge>Dormant</Badge>    | SEP without a sponsor, closed after 6 months             |
 
 
+# Antitrust Policy
+Source: https://modelcontextprotocol.io/community/antitrust
+
+MCP Project Antitrust Policy for participants and contributors
+
+**Effective: September 29, 2025**
+
+<Note>
+  This policy applies when participating in MCP meetings, Working Groups,
+  Interest Groups, and other collaborative forums where competitors may be
+  present. Most individual contributors working on code or documentation don't
+  need to worry about this in day-to-day work - it's primarily relevant for
+  group discussions about standards and specifications.
+</Note>
+
+## Introduction
+
+The goal of the Model Context Protocol open source project (the "Project") is to develop a universal standard for model-to-world interactions, including enabling LLMs and agents to seamlessly connect with and utilize external data sources and tools. The purpose of this Antitrust Policy (the "Policy") is to avoid antitrust risks in carrying out this pro-competitive mission.
+
+Participants in and contributors to the Project (collectively, "participants") will use their best reasonable efforts to comply in all respects with all applicable state and federal antitrust and trade regulation laws, and applicable antitrust/competition laws of other countries (collectively, the "Antitrust Laws").
+
+The goal of Antitrust Laws is to encourage vigorous competition. Nothing in this Policy prohibits or limits the ability of participants to make, sell or use any product, or otherwise to compete in the marketplace. This Policy provides general guidance on compliance with Antitrust Law. Participants should contact their respective legal counsel to address specific questions.
+
+This Policy is conservative and is intended to promote compliance with the Antitrust Laws, not to create duties or obligations beyond what the Antitrust Laws actually require. In the event of any inconsistency between this Policy and the Antitrust Laws, the Antitrust Laws preempt and control.
+
+## Participation
+
+Technical participation in the Project shall be open to all, subject only to compliance with the provisions of the Project's charter and other governance documents.
+
+## Conduct of Meetings
+
+At meetings among actual or potential competitors, there is a risk that participants in those meetings may improperly disclose or discuss information in violation of the Antitrust Laws or otherwise act in an anti-competitive manner. To avoid this risk, participants must adhere to the following policies when participating in Project-related or sponsored meetings, conference calls, or other forums (collectively, "Project Meetings").
+
+Participants must not, in fact or appearance, discuss or exchange information regarding:
+
+* An individual company's current or projected prices, price changes, price differentials, markups, discounts, allowances, terms and conditions of sale, including credit terms, etc., or data that bear on prices, including profits, margins or cost.
+* Industry-wide pricing policies, price levels, price changes, differentials, or the like.
+* Actual or projected changes in industry production, capacity or inventories.
+* Matters relating to bids or intentions to bid for particular products, procedures for responding to bid invitations or specific contractual arrangements.
+* Plans of individual companies concerning the design, characteristics, production, distribution, marketing or introduction dates of particular products, including proposed territories or customers.
+* Matters relating to actual or potential individual suppliers that might have the effect of excluding them from any market or of influencing the business conduct of firms toward such suppliers.
+* Matters relating to actual or potential customers that might have the effect of influencing the business conduct of firms toward such customers.
+* Individual company current or projected cost of procurement, development or manufacture of any product.
+* Individual company market shares for any product or for all products.
+* Confidential or otherwise sensitive business plans or strategy.
+
+In connection with all Project Meetings, participants must do the following:
+
+* Adhere to prepared agendas.
+* Insist that meeting minutes be prepared and distributed to all participants, and that meeting minutes accurately reflect the matters that transpired.
+* Consult with their respective counsel on all antitrust questions related to Project Meetings.
+* Protest against any discussions that appear to violate these policies or the Antitrust Laws, leave any meeting in which such discussions continue, and either insist that such protest be noted in the minutes.
+
+## Requirements/Standard Setting
+
+The Project may establish standards, technical requirements and/or specifications for use (collectively, "requirements"). Participants shall not enter into agreements that prohibit or restrict any participant from establishing or adopting any other requirements. Participants shall not undertake any efforts, directly or indirectly, to prevent any firm from manufacturing, selling, or supplying any product not conforming to a requirement.
+
+The Project shall not promote standardization of commercial terms, such as terms for license and sale.
+
+## Contact Information
+
+To contact the Project regarding matters addressed by this Antitrust Policy, please send an email to [antitrust@modelcontextprotocol.io](mailto:antitrust@modelcontextprotocol.io), and reference "Antitrust Policy" in the subject line.
+
+
 # Authorization Charter
 Source: https://modelcontextprotocol.io/community/interest-groups/auth
 
@@ -36434,6 +36629,259 @@ Discord: [#enterprise-managed-auth-ig](https://discord.com/channels/135886984813
 | Date       | Change          |
 | ---------- | --------------- |
 | 2026-06-16 | Initial charter |
+
+
+# Financial Services Charter
+Source: https://modelcontextprotocol.io/community/interest-groups/financial-services
+
+Charter for the MCP Financial Services Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Financial Services Interest Group brings together stakeholders from regulated financial
+institutions to identify where MCP needs to adapt for compliance, auditability, and risk-controlled
+deployment. It gathers use cases and requirements from the financial sector, develops and validates
+domain-specific extensions, and scopes problems with broad applicability into [SEPs](/community/sep-guidelines)
+or Working Groups so that innovations proven in regulated environments can benefit the wider MCP
+ecosystem.
+
+## Scope
+
+### In Scope
+
+* **Compliance and auditability**: requirements for tamper-evident, portable records of what a tool
+  call did, under what authority, and against which policy, so that MCP interactions can satisfy
+  regulatory audit and incident-review obligations
+* **Data lineage and provenance**: source attribution, citation, and consent metadata for data
+  surfaced through MCP, so that downstream consumers can establish where information came from and
+  on what basis it may be used
+* **Guardrails and attestation**: verification frameworks and cryptographic attestations that let a
+  regulated institution gain assurance about server identity, tool behavior, and the integrity of
+  responses before acting on them
+* **Policy enforcement**: declarative policies for tool usage and data handling, and the points at
+  which they are enforced, so that institutions can encode regulatory and internal-control
+  constraints as machine-checkable rules
+* **Finance-specific extensions**: developing, maintaining, and gathering implementation experience
+  on MCP extensions that address the above in the FSIG repository, including reference
+  implementations and conformance testing
+* **Interoperability across institutions**: common patterns and standards that allow regulated
+  institutions to interoperate without each reinventing compliance plumbing
+* **SEP promotion**: identifying extensions with applicability beyond financial services and
+  shepherding them toward the core specification with core-maintainer sponsorship
+* **Regulatory liaison**: translating constraints from regulators and industry bodies into concrete
+  technical requirements and input for other groups
+
+### Out of Scope
+
+* **Competitively sensitive or non-public business information**: pricing, costs, margins, customer
+  lists, market segmentation, and competitive strategy, per the [MCP Antitrust Policy](/community/antitrust)
+* **General security threat modeling**: MCP-wide attack-surface analysis belongs to the
+  [Security IG](/community/interest-groups/security). This group provides financial-sector requirements as
+  input and consumes its threat models
+* **Authorization protocol mechanics**: OAuth flows, scopes, client registration, and token handling
+  belong to the [Authorization IG](/community/interest-groups/auth)
+* **Product-specific compliance guides**: step-by-step configuration for an individual host
+  application, cloud platform, or institution is documentation for that product rather than protocol
+  work
+* **Non-technical business discussions**: legal interpretation, procurement, and commercial terms
+
+### Related Groups
+
+* **[Security IG](/community/interest-groups/security)**: attestation, auditability, and guardrails are
+  shared concerns; the FSIG supplies regulated-deployment requirements and consumes the IG's threat
+  models
+* **[Authorization IG](/community/interest-groups/auth)**: identity and access control for sensitive
+  financial data sit at the boundary between the two groups
+* **[Tool Annotations IG](/community/interest-groups/tool-annotations)**: trust and sensitivity annotations
+  are directly relevant to financial tool exposure; the FSIG provides requirements as input
+* **[Interceptors WG](/community/working-groups/interceptors)**: interceptors are a primary enforcement point
+  for the policy and guardrail requirements surfaced here
+* **[Registry WG](/community/working-groups/registry)**: server provenance and publishing metadata intersect
+  with financial supply-chain and admission concerns
+
+## Leadership
+
+| Role        | Name                     | Organization | GitHub                                 | Term    |
+| ----------- | ------------------------ | ------------ | -------------------------------------- | ------- |
+| Facilitator | Sambhav Kothari          | Bloomberg    | [@sambhav](https://github.com/sambhav) | Initial |
+| Facilitator | Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP) | Initial |
+
+## Membership
+
+| Name       | Organization | GitHub                               | Discord | Level       |
+| ---------- | ------------ | ------------------------------------ | ------- | ----------- |
+| Xin Fu     | Bloomberg    | [@imfing](https://github.com/imfing) | *TBD*   | Participant |
+| Kengo Arao | Bloomberg    | [@KengoA](https://github.com/KengoA) | *TBD*   | Participant |
+
+Open to anyone. Join the `#financial-services-ig` channel on the
+[MCP Contributors Discord](/community/communication#discord). Calls are open and no approval is
+required to attend or contribute. The group especially welcomes contributors from regulated
+institutions who can bring real-world deployment constraints and help drive proposals forward.
+
+## Operations
+
+| Meeting         | Frequency     | Duration | Purpose                                                   |
+| --------------- | ------------- | -------- | --------------------------------------------------------- |
+| Working Session | Every 2 weeks | 60 min   | Use-case review, extension and proposal work, SEP scoping |
+
+Meetings are held 16:00–17:00 London (BST/GMT). An agenda is shared in `#financial-services-ig`
+ahead of each call, and notes with decisions and action items are published afterwards.
+
+Discord: [#financial-services-ig](https://discord.gg/NzkBHsrGf)
+
+## Discussion Topics
+
+The following items form the IG's current agenda. This list is not exhaustive and will evolve as the
+group identifies new areas of interest.
+
+| Item | Name                                                                          | Status | Champion |
+| ---- | ----------------------------------------------------------------------------- | ------ | -------- |
+| —    | Regulatory audit & attestation: portable, verifiable event/claim models       | Open   | —        |
+| —    | Data lineage & citation: provenance, consent metadata, source attribution     | Open   | —        |
+| —    | Guardrails & security: verification frameworks and cryptographic attestations | Open   | —        |
+| —    | Policy enforcement: declarative policies for tool usage and data handling     | Open   | —        |
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-06-25 | Initial charter |
+
+
+# Primitive Grouping Charter
+Source: https://modelcontextprotocol.io/community/interest-groups/primitive-grouping
+
+Charter for the MCP Primitive Grouping Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Primitive Grouping Interest Group explores how MCP Primitives (Tools, Resources, Prompts, Tasks) might be organized, beyond the flat lists maintained by the protocol, and how such organization might benefit both MCP servers and clients. The group documents diverse requirements from clients, servers, and gateways, supports reference extensions of varied organization strategies, and feeds recommendations into the [SEP process](/community/sep-guidelines) rather than picking a single canonical pattern early.
+
+## Scope
+
+### In Scope
+
+* **Requirements gathering**: documenting use cases and constraints
+* **Pattern exploration**: testing and evaluating various approaches
+* **Proof of concepts**: maintaining a shared repository of reference implementations and experimental findings
+
+### Out of Scope
+
+* **Approving spec changes**: this IG does not have authority to approve protocol changes; recommendations flow through the SEP process
+* **Implementation mandates**: the group can document patterns but cannot require specific client or server behavior
+
+### Related Groups
+
+* **[Tool Annotations IG](/community/interest-groups/tool-annotations)** - annotation-based filtering and selection of primitives intersects with how primitives are organized and surfaced
+* **[Skills Over MCP WG](/community/working-groups/skills-over-mcp)** - the MCP-and-Skills effort is evaluating how capabilities are discovered and organized, which overlaps with grouping
+* **[Registry WG](/community/working-groups/registry)** - organizing MCP servers (beyond this group's mandate) is evaluated here
+* **[Security IG](/community/interest-groups/security)** - organizing and disclosing primitives by privilege level is a security concern outside this group's scope
+
+## Problem Statement
+
+Flat lists of MCP primitives can be long and cumbersome to work with for several reasons. Many such problems are within the scope of this group, but some are not.
+
+**Within Scope**
+
+* **Context overload** - when loaded into the context of an LLM, a primitive list can overwhelm the model and lead to confusion and poor selection
+* **Inefficient operations** - long lists in the context consume many tokens, which increases processing cost and response latency
+* **Poor developer experience** - the lack of organizational tools for primitives makes them harder to manage and maintain
+
+**Beyond Scope**
+
+* **Organization for security** - organizing and disclosing primitives to clients based on their privilege level is an important problem but beyond this group's mandate
+* **Organizing MCP servers** - the MCP Registry and MCP-and-Skills groups are evaluating how different servers should be organized to improve the client experience
+
+## Goals
+
+1. **Documenting requirements and experiences** - document diverse requirements for the different clients, servers, and gateways that implement these extensions. We will **not** try to find consensus early on, but aim to document the trade-offs based on feedback from real-world experience.
+2. **Reference extensions** - many possible organization mechanisms are emerging, and it may be too early to select one canonical pattern. Different servers are implementing similar features, but the lack of standardization limits clients' ability to leverage them effectively. This group will support reference extensions of varied organization strategies, e.g., grouping, tool-search, code-mode.
+3. **Evangelizing standards** - invite feedback from developers and maintainers of large MCP servers and clients to migrate away from bespoke implementations toward standardized extensions.
+
+## Organization Strategies
+
+See [Approaches](https://github.com/modelcontextprotocol/experimental-ext-grouping/blob/main/docs/approaches.md) for detailed descriptions of each strategy, including prior art, examples, and discussion links.
+
+## IG Principles
+
+1. **Document discussions** - the IG aims to document the trade-offs and discussions rather than dictate one specific implementation. Prefer GitHub Discussions on the IG repository over prolonged Discord threads. Meeting notes from synchronous IG calls are also uploaded to GitHub Discussions for future reference.
+2. **Experimental extensions** - the repository houses experimental extensions for different approaches. Extensions SHOULD support at least Python and TypeScript implementations and include (1) end-to-end working demonstrations and (2) detailed instructions for how others can integrate with them.
+3. **Feedback from deployments** - the IG solicits deployment experiences and feedback from users of extensions to prioritize feature development and changes.
+
+## Leadership
+
+| Role        | Name        | Organization             | GitHub                                               | Term    |
+| ----------- | ----------- | ------------------------ | ---------------------------------------------------- | ------- |
+| Facilitator | Tapan Chugh | University of Washington | [@chughtapan](https://github.com/chughtapan)         | Initial |
+| Facilitator | Sam Morrow  | GitHub                   | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | Initial |
+
+## Membership
+
+| Name        | Organization             | GitHub                                               | Discord | Level       |
+| ----------- | ------------------------ | ---------------------------------------------------- | ------- | ----------- |
+| Tapan Chugh | University of Washington | [@chughtapan](https://github.com/chughtapan)         |         | Facilitator |
+| Sam Morrow  | GitHub                   | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | Facilitator |
+| Cliff Hall  | Futurescale              | [@cliffhall](https://github.com/cliffhall)           |         | Maintainer  |
+
+## Operations
+
+| Meeting    | Frequency | Duration | Purpose                                                        |
+| ---------- | --------- | -------- | -------------------------------------------------------------- |
+| Discussion | TBD       | TBD      | Requirements alignment, approach review, experimental findings |
+
+Open to anyone. Join the [#primitive-grouping-ig](https://discord.com/channels/1358869848138059966/1425903819186770064) channel on the [MCP Contributors Discord](/community/communication#discord).
+
+## Discussion Topics
+
+The following items form the IG's current work agenda. This list is not exhaustive and will evolve as the group identifies new areas of interest.
+
+| Item                               | Status      | Champion         | Notes                                                             |
+| ---------------------------------- | ----------- | ---------------- | ----------------------------------------------------------------- |
+| Requirements alignment             | In Progress | All facilitators | Review approaches, identify common requirements and gaps          |
+| Experimental findings repo section | Proposed    | TBD              | Dedicated repo section for implementations and evaluation results |
+| MCP Grouping Convention v0.1       | Proposed    | TBD              | Documented pattern (not spec) for grouping of primitives          |
+
+## Lifecycle
+
+**Current Status: Active Exploration**
+
+### Graduation Criteria (IG → WG)
+
+This IG may propose becoming a Working Group if:
+
+* Clear consensus emerges on an approach requiring sustained spec work
+* Cross-cutting coordination requires formal authority delegation
+* At least two Core Maintainers sponsor WG formation
+
+### Retirement Criteria
+
+* Problem space resolved (conventions established, absorbed into other WGs)
+* Insufficient participation to maintain momentum
+* Community consensus that grouping doesn't belong in MCP protocol scope
+
+## Success Criteria
+
+* **Short-term**: documented consensus on requirements and evaluation of existing approaches
+* **Medium-term**: clear recommendation (convention vs. protocol extension vs. both)
+* **Long-term**: interoperable grouping convention across MCP servers and clients
+
+## Resources
+
+* [Experimental repo](https://github.com/modelcontextprotocol/experimental-ext-grouping) - incubation space for the Primitive Grouping Interest Group
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-06-18 | Initial charter |
 
 
 # Security Charter

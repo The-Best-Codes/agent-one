@@ -252,7 +252,21 @@ The following example assumes you are creating a new project. If you've already 
 
         This will create a `src-tauri` directory in your project with the necessary Tauri configuration files.
 
-    5. Verify your Tauri app is working by running the development server:
+    5. Configure the `server.watch.ignored` option in `vite.config.ts` to prevent Vite from watching the `src-tauri` directory:
+
+        ```js title="vite.config.ts"
+        import { defineConfig } from "vite";
+
+        export default defineConfig({
+          server: {
+            watch: {
+              ignored: ["**/src-tauri/**"],
+            },
+          },
+        });
+        ```
+
+    6. Verify your Tauri app is working by running the development server:
 
         <CommandTabs
             npm="npx tauri dev"
@@ -3130,12 +3144,6 @@ GitHub workflow that builds Tauri binaries for all platforms. Even allows creati
 [View on GitHub](https://github.com/tauri-apps/tauri-vscode)
 
 This project enhances the Visual Studio Code interface with several nice-to-have features.
-
-### vue-cli-plugin-tauri
-
-[View on GitHub](https://github.com/tauri-apps/vue-cli-plugin-tauri)
-
-Allows you to very quickly install Tauri in a vue-cli project.
 
 ## Plugins
 
@@ -9467,8 +9475,9 @@ However, make sure to use the type alias as it is, and not wrap it in a [`Mutex`
 Tauri offers support for both unit and integration testing utilizing a mock runtime. Under the mock runtime, native
 webview libraries are not executed. [See more about the mock runtime here].
 
-Tauri also provides support for end-to-end testing support utilizing the WebDriver protocol. Both desktop and mobile
-work with it, except for macOS which does not provide a desktop WebDriver client. [See more about WebDriver support here].
+Tauri also provides support for end-to-end testing utilizing the WebDriver protocol. [WebdriverIO Tauri testing]
+supports Windows, Linux, and macOS; the WebDriver protocol can also be driven directly on Windows and Linux, as macOS
+provides no desktop WebDriver client. [See more about WebDriver support here].
 
 We offer [tauri-action] to help run GitHub actions, but any sort of CI/CD runner can be used with Tauri as long as each
 platform has the required libraries installed to compile against.
@@ -9476,6 +9485,7 @@ platform has the required libraries installed to compile against.
 [See more about the mock runtime here]: /develop/tests/mocking/
 [See more about WebDriver support here]: /develop/tests/webdriver/
 [tauri-action]: https://github.com/tauri-apps/tauri-action
+[webdriverio tauri testing]: https://webdriver.io/docs/desktop-testing/tauri
 
 # Mock Tauri APIs
 
@@ -9602,6 +9612,14 @@ mockIPC(async (cmd, args) => {
 });
 ```
 
+:::note[See also]
+
+`mockIPC` fakes `invoke` under the mock runtime — no real webview or Rust backend runs. To mock the same commands in
+**end-to-end** tests, against a running app or your frontend in a browser, [`@wdio/tauri-service`] provides an equivalent
+`browser.tauri.mock()`. See [WebDriver testing].
+
+:::
+
 ### Mocking Events
 
 <SinceVersion version="2.7.0" />
@@ -9674,82 +9692,103 @@ test('invoke', async () => {
 [`clearmocks()`]: /reference/javascript/api/namespacemocks/#clearmocks
 [vitest]: https://vitest.dev
 [Event System]: /develop/calling-frontend/#event-system
+[`@wdio/tauri-service`]: https://webdriver.io/docs/desktop-testing/tauri
+[webdriver testing]: /develop/tests/webdriver/
 
 # WebDriver
 
-[WebDriver] is a standardized interface to interact with web documents primarily intended for automated testing.
-Tauri supports the [WebDriver] interface by leveraging the native platform's [WebDriver] server underneath a
-cross-platform wrapper [`tauri-driver`]. On desktop, only Windows and Linux are supported due to macOS not having
-a WKWebView driver tool available. iOS and Android work through Appium 2, but the process is not currently streamlined.
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 
-## System Dependencies
+[WebDriver] is a standardized interface to interact with web documents, primarily intended for automated testing. The
+recommended way to use it with Tauri is [WebdriverIO] and the [`@wdio/tauri-service`], which works on **Windows, Linux,
+and macOS**. Maintained under the WebdriverIO project, it provides Tauri API access through `browser.tauri.execute()`,
+command (IPC) mocking, frontend and backend log capture, and multiremote.
 
-Install the latest [`tauri-driver`] or update an existing installation by running:
+By default the service runs an **embedded WebDriver server** inside your app, so no external driver is needed on any
+platform — and this is how macOS is supported. It can also drive the platform's native WebDriver through [`tauri-driver`]
+on Windows and Linux, or [CrabNebula]'s cross-platform fork of `tauri-driver` on all platforms (a paid API key is
+required for macOS). Whichever route you choose, the service detects your application binary, and on the `tauri-driver`
+route it keeps the Edge WebDriver in sync on Windows for you.
+
+The quickest way to scaffold a project is the WebdriverIO starter:
 
 ```shell
-cargo install tauri-driver --locked
+npm create wdio@latest ./
 ```
 
-Because we currently utilize the platform's native [WebDriver] server, there are some requirements for running
-[`tauri-driver`] on supported platforms.
+Pick **Desktop Testing** and choose **Tauri** at the framework prompt. A minimal configuration looks like this:
 
-### Linux
-
-We use `WebKitWebDriver` on Linux platforms. Check if this binary exists already by running the `which WebKitWebDriver` command as
-some distributions bundle it with the regular WebKit package. Other platforms may have a separate package for them, such
-as `webkit2gtk-driver` on Debian-based distributions.
-
-### Windows
-
-Make sure to grab the version of [Microsoft Edge Driver] that matches your Windows Edge version that the application is
-being built and tested on. This should almost always be the latest stable version on up-to-date Windows installs. If the
-two versions do not match, you may experience your WebDriver testing suite hanging while trying to connect.
-
-You can use the [msedgedriver-tool](https://github.com/chippers/msedgedriver-tool) to download the appropriate Microsoft Edge Driver:
-
-```powershell
-cargo install --git https://github.com/chippers/msedgedriver-tool
-& "$HOME/.cargo/bin/msedgedriver-tool.exe"
+```typescript
+export const config: WebdriverIO.Config = {
+  services: [
+    [
+      'tauri',
+      {
+        appBinaryPath: './src-tauri/target/release/my-tauri-app',
+        driverProvider: 'embedded',
+      },
+    ],
+  ],
+};
 ```
 
-The download contains a binary called `msedgedriver.exe`. [`tauri-driver`] looks for that binary in the `$PATH` so make
-sure it's either available on the path or use the `--native-driver` option on [`tauri-driver`]. You may want to download this automatically as part of the CI setup process to ensure the Edge, and Edge Driver versions
-stay in sync on Windows CI machines. A guide on how to do this may be added at a later date.
+Setting this up uses two small Tauri plugins, both optional depending on your requirements:
+
+- **`tauri-plugin-wdio-webdriver`** runs the embedded WebDriver server. It's required for the `embedded` provider (the
+  default) — the service drives your app through it, with no external driver, and it's how macOS is supported. You can
+  skip it if you want to use the `external` or `crabnebula` provider instead.
+- **`tauri-plugin-wdio`** enables backend access including: `browser.tauri.execute()`, command (IPC) mocking, and log
+  capture.
+
+See [Plugin Setup] for the full steps, and the [CrabNebula setup guide] if you use that provider.
+
+For fast, renderer-only tests there is also a **browser mode** that runs your Tauri frontend in plain Chrome against a
+Vite dev server — no Tauri binary, driver, or plugin required. It intercepts `invoke()` calls so you can mock commands
+and assert on their arguments with the same WDIO API. See the [browser mode guide].
+
+<LinkCard
+  title="WebdriverIO Tauri documentation"
+  description="Full setup, configuration, and API reference for @wdio/tauri-service"
+  href="https://webdriver.io/docs/desktop-testing/tauri"
+/>
 
 ## Example Applications
 
-Below are step-by-step guides to show how to create a minimal example application that
-is tested with WebDriver.
-
-If you prefer to see the result of the guide and look over a finished minimal codebase that utilizes it, you
-can look at https://github.com/tauri-apps/webdriver-example.
-
-import { LinkCard, CardGrid } from '@astrojs/starlight/components';
-
-<CardGrid>
-  <LinkCard
-    title="Selenium"
-    href="/develop/tests/webdriver/example/selenium/"
-  />
-  <LinkCard
-    title="WebdriverIO"
-    href="/develop/tests/webdriver/example/webdriverio/"
-  />
-</CardGrid>
+Complete, runnable examples that use the service live in the
+[WebdriverIO desktop-mobile repository][example fixtures].
 
 ## Continuous Integration (CI)
 
-The above examples also comes with a CI script to test with GitHub Actions, but you may still be interested in the below WebDriver CI guide as it explains the concept a bit more.
+The WebDriver CI guide explains how to run these tests under GitHub Actions and the concepts behind it.
 
 <LinkCard
   title="Continuous Integration (CI)"
   href="/develop/tests/webdriver/ci/"
 />
 
+## Driving `tauri-driver` directly
+
+If you are not using Node.js, prefer [Selenium], or are integrating WebDriver into a custom test harness, you can drive
+[`tauri-driver`] directly instead of using the service. Driven directly, only Windows and Linux are supported on
+desktop, as macOS has no WKWebView driver tool available (use the service's embedded WebDriver server for macOS).
+
+<LinkCard
+  title="Manual WebDriver setup"
+  description="Install and drive tauri-driver yourself (Windows and Linux only)"
+  href="/develop/tests/webdriver/manual-setup/"
+/>
+
 [webdriver]: https://www.w3.org/TR/webdriver/
+[webdriverio]: https://webdriver.io/
+[`@wdio/tauri-service`]: https://webdriver.io/docs/desktop-testing/tauri
+[plugin setup]: https://webdriver.io/docs/desktop-testing/tauri/plugin-setup
+[crabnebula]: https://crabnebula.dev
+[crabnebula setup guide]: https://webdriver.io/docs/desktop-testing/tauri/crabnebula-setup
+[browser mode guide]: https://github.com/webdriverio/desktop-mobile/blob/main/packages/tauri-service/docs/browser-mode.md
+[example fixtures]: https://github.com/webdriverio/desktop-mobile/tree/main/fixtures/e2e-apps/tauri
+[selenium]: /develop/tests/webdriver/example/selenium/
 [`tauri-driver`]: https://crates.io/crates/tauri-driver
 [tauri-driver]: https://crates.io/crates/tauri-driver
-[microsoft edge driver]: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
 
 # Continuous Integration
 
@@ -10107,7 +10146,7 @@ tests!
 With [Selenium] and some hooking up to a test suite, we just enabled e2e testing without modifying our Tauri
 application at all!
 
-[prerequisites instructions]: /develop/tests/webdriver/
+[prerequisites instructions]: /develop/tests/webdriver/manual-setup/
 [selenium]: https://selenium.dev/
 [finished example project]: https://github.com/tauri-apps/webdriver-example
 [mocha]: https://mochajs.org/
@@ -10121,6 +10160,14 @@ import CommandTabs from '@components/CommandTabs.astro';
 :::note
 
 Make sure to go through the [prerequisites instructions] to be able to follow this guide.
+
+:::
+
+:::tip[Using the WebdriverIO Tauri service?]
+
+This guide wires [WebdriverIO] up to [`tauri-driver`] by hand so you can see how the pieces fit together. Most projects
+should use the [`@wdio/tauri-service`] instead, which automates all of this and supports macOS — see the
+[WebDriver overview].
 
 :::
 
@@ -10383,12 +10430,97 @@ We see the Spec Reporter tell us that all 3 tests from the `test/specs/example.e
 Using the [WebdriverIO] test suite, we just easily enabled e2e testing for our Tauri application from just a few lines
 of configuration and a single command to run it! Even better, we didn't have to modify the application at all.
 
-[prerequisites instructions]: /develop/tests/webdriver/
+[prerequisites instructions]: /develop/tests/webdriver/manual-setup/
+[webdriver overview]: /develop/tests/webdriver/
 [webdriverio]: https://webdriver.io/
+[`tauri-driver`]: https://crates.io/crates/tauri-driver
+[`@wdio/tauri-service`]: https://webdriver.io/docs/desktop-testing/tauri
 [finished example project]: https://github.com/tauri-apps/webdriver-example
 [mocha]: https://mochajs.org/
 [webdriver documentation]: https://webdriver.io/docs/configurationfile
 [webdriverio api docs]: https://webdriver.io/docs/api
+
+# Manual setup
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+This page covers driving [`tauri-driver`] directly, without the [`@wdio/tauri-service`]. Reach for it if you are not
+using Node.js, prefer [Selenium], or are integrating WebDriver into a custom test harness. For most projects the service
+is the easier path — it automates everything below and additionally supports macOS. See the [WebDriver overview] to get
+started with it.
+
+When driving `tauri-driver` directly, only Windows and Linux are supported on desktop, as macOS has no WKWebView driver
+tool available. iOS and Android work through Appium 2, but the process is not currently streamlined.
+
+## System Dependencies
+
+Install the latest [`tauri-driver`] or update an existing installation by running:
+
+```shell
+cargo install tauri-driver --locked
+```
+
+Because we currently utilize the platform's native [WebDriver] server, there are some requirements for running
+[`tauri-driver`] on supported platforms.
+
+### Linux
+
+We use `WebKitWebDriver` on Linux platforms. Check if this binary exists already by running the `which WebKitWebDriver` command as
+some distributions bundle it with the regular WebKit package. Other platforms may have a separate package for them, such
+as `webkit2gtk-driver` on Debian-based distributions.
+
+### Windows
+
+Make sure to grab the version of [Microsoft Edge Driver] that matches your Windows Edge version that the application is
+being built and tested on. This should almost always be the latest stable version on up-to-date Windows installs. If the
+two versions do not match, you may experience your WebDriver testing suite hanging while trying to connect.
+
+You can use the [msedgedriver-tool](https://github.com/chippers/msedgedriver-tool) to download the appropriate Microsoft Edge Driver:
+
+```powershell
+cargo install --git https://github.com/chippers/msedgedriver-tool
+& "$HOME/.cargo/bin/msedgedriver-tool.exe"
+```
+
+The download contains a binary called `msedgedriver.exe`. [`tauri-driver`] looks for that binary in the `$PATH` so make
+sure it's either available on the path or use the `--native-driver` option on [`tauri-driver`]. You may want to download this automatically as part of the CI setup process to ensure the Edge, and Edge Driver versions
+stay in sync on Windows CI machines. A guide on how to do this may be added at a later date.
+
+## Example Applications
+
+Below are step-by-step guides to show how to create a minimal example application that
+is tested with WebDriver.
+
+If you prefer to see the result of the guide and look over a finished minimal codebase that utilizes it, you
+can look at https://github.com/tauri-apps/webdriver-example.
+
+<CardGrid>
+  <LinkCard
+    title="Selenium"
+    href="/develop/tests/webdriver/example/selenium/"
+  />
+  <LinkCard
+    title="WebdriverIO"
+    href="/develop/tests/webdriver/example/webdriverio/"
+  />
+</CardGrid>
+
+## Continuous Integration (CI)
+
+The above examples also comes with a CI script to test with GitHub Actions, but you may still be interested in the below WebDriver CI guide as it explains the concept a bit more.
+
+<LinkCard
+  title="Continuous Integration (CI)"
+  href="/develop/tests/webdriver/ci/"
+/>
+
+[webdriver]: https://www.w3.org/TR/webdriver/
+[webdriver overview]: /develop/tests/webdriver/
+[`@wdio/tauri-service`]: https://webdriver.io/docs/desktop-testing/tauri
+[selenium]: /develop/tests/webdriver/example/selenium/
+[`tauri-driver`]: https://crates.io/crates/tauri-driver
+[tauri-driver]: https://crates.io/crates/tauri-driver
+[microsoft edge driver]: https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/
 
 # Updating Dependencies
 
@@ -12369,12 +12501,12 @@ This workflow will build and release your app for Windows x64, Linux x64, Linux 
 
 The steps this workflow takes are:
 
-1. Checkout the repository using `actions/checkout@v4`.
+1. Checkout the repository using `actions/checkout@v7`.
 2. Install Linux system dependencies required to build the app.
-3. Set up Node.js LTS and a cache for global npm/yarn/pnpm package data using `actions/setup-node@v4`.
+3. Set up Node.js LTS and a cache for global npm/yarn/pnpm package data using `actions/setup-node@v6`.
 4. Set up Rust and a cache for Rust's build artifacts using `dtolnay/rust-toolchain@stable` and `swatinem/rust-cache@v2`.
 5. Install the frontend dependencies and, if not configured as [`beforeBuildCommand`](/reference/config/#beforebuildcommand), run the web app's build script.
-6. Lastly, it uses `tauri-apps/tauri-action@v0` to run `tauri build`, generate the artifacts, and create a GitHub release.
+6. Lastly, it uses `tauri-apps/tauri-action@v1` to run `tauri build`, generate the artifacts, and create a GitHub release.
 
 ```yaml
 name: 'publish'
@@ -12406,22 +12538,22 @@ jobs:
 
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-22.04-arm' # This must match the platform value defined above.
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
 
       - name: setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
-          cache: 'yarn' # Set this to npm, yarn or pnpm.
+          cache: 'npm' # Set this to npm, yarn or pnpm.
 
       - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
+        uses: dtolnay/rust-toolchain@stable
         with:
           # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
@@ -12429,17 +12561,18 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
+          # This matches tauri's default project layout. Change this if you have a different layout.
           workspaces: './src-tauri -> target'
 
       - name: install frontend dependencies
         # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
-        run: yarn install # change this to npm or pnpm depending on which one you use.
+        run: npm install # change this to npm, yarn or pnpm depending on which one you use.
 
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          tagName: app-v__VERSION__ # the action automatically replaces __VERSION__ with the app version.
           releaseName: 'App v__VERSION__'
           releaseBody: 'See the assets to download this version and install.'
           releaseDraft: true

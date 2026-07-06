@@ -107,10 +107,14 @@ the trade-offs outweigh the benefits of distributing them via Flatpak.
 #### Duplicate submissions
 
 Multiple submissions of the same application (in terms of functionality,
-content, visuals, or user experience) each built with different
-frameworks or toolkits will not be accepted. Multiple submissions of a
-forked app with minimal changes in the fork (in terms of functionality,
-content, visuals, or user experience) will not be accepted.
+content, visuals, or user experience) or multiple submissions where
+each one is built with different frameworks or toolkits will not be
+accepted. Multiple submissions of a forked app with minimal changes in
+the fork
+(in terms of functionality, content, visuals, or user experience) will
+not be accepted. Exceptions can be granted if each version already
+has an established userbase and there is demand from users to have
+multiple versions available.
 
 #### Conflicting submissions
 
@@ -188,6 +192,42 @@ A pattern of policy violations, uncooperative behaviour, multiple
 abandoned or poorly maintained apps, misleading practices, or failure to
 address security and compliance issues may result in rejection of
 current or new submissions.
+
+### Monetisation policy
+
+This policy is applicable where an application, directly requires
+payment from the user. This includes purchasing the application
+itself, unlocking features, or buying in-app items.
+
+The following are excluded from the scope of this policy:
+
+- Any voluntary, non-mandatory forms of payments such as donations.
+
+- Payments made through the application that are independent of
+  the app itself.
+
+If the policy is applicable:
+
+- Monetisation must provide a clear and non-negligible benefit or
+  functionality to the user and they cannot be charged multiple times
+  for the same benefit unless operating on a subscription model.
+
+- Prices must be set reasonably and must be relative to the value and
+  the features provided by the application. Other paid applications
+  providing the similar features can be used as a reference point.
+
+- Any monetisation requirements or benefits must be disclosed upfront
+  unambiguously and should be clearly visible to the users.
+
+- The prices, and the benefits provided to the users must not be
+  altered in a way that would substantially degrade the user
+  experience upon acceptance.
+
+- Reviewers must be able to access and test the application's full
+  functionality during the review process if necessary.
+
+If the application is being maintained or submitted by third party
+unrelated to upstream, certain relaxations may be made.
 
 ### Misleading, malicious or illegal submissions
 
@@ -377,7 +417,12 @@ All content hosted on Flathub must allow legal redistribution, and the
 license must be correctly specified in the app's [MetaInfo file](/docs/for-app-authors/metainfo-guidelines/#license).
 
 Non-redistributable sources must use [extra-data](https://docs.flatpak.org/en/latest/module-sources.html#extra-data)
-source type. Any part of the application such as the name or icon must
+source type. Note that if the submission is being opened by the
+upstream authors or developers, there is generally no need to
+use `extra-data` sources as redistribution permissions are implicitly
+granted in this case.
+
+Any part of the application such as the name or icon must
 not violate any trademarks and must be distinct.
 
 License must be correctly declared in the metainfo file and must
@@ -651,7 +696,7 @@ the Flatpak manifest.
 
 There is [no network access](/docs/for-app-authors/requirements#no-network-access-during-build)
 during the build process so all dependencies used by the application
-must be supplied in the specified in the manifest as sources
+must be supplied by specifying them in the manifest as sources
 with publicly accessible URLs so that they can be downloaded before
 the build starts.
 
