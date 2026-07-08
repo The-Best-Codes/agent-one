@@ -31,6 +31,14 @@ const getColorLuminance = (color: string) => {
   const hex = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i)?.[1];
   const rgb = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
 
+  if (color === "white") {
+    return 1;
+  }
+
+  if (color === "black") {
+    return 0;
+  }
+
   const channels = hex
     ? hex.length === 3
       ? hex.split("").map((value) => Number.parseInt(value + value, 16))
@@ -53,6 +61,10 @@ const getLogoBackground = (svgText: string) => {
 
   if (luminances.length === 0) {
     return "bg-white";
+  }
+
+  if (luminances.some((luminance) => luminance > 0.7)) {
+    return "bg-neutral-950";
   }
 
   const averageLuminance =
