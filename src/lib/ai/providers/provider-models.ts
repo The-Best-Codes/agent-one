@@ -1,4 +1,4 @@
-import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
+import type { ModelDirectoryData, ModelRecord } from "@/lib/ai/models/model-directory";
 
 export interface ProviderModelMetadata {
   id: string;
@@ -42,7 +42,10 @@ export function normalizeProviderModelMetadata(
   };
 }
 
-export function getBuiltInProviderModels(providerId: string) {
+export function getBuiltInProviderModels(
+  providerId: string,
+  modelDirectoryData: ModelDirectoryData,
+) {
   return Object.values(modelDirectoryData[providerId]?.models ?? {}).map(
     mapDirectoryModelToMetadata,
   );

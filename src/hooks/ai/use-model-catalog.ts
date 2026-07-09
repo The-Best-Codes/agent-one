@@ -3,12 +3,12 @@ import { useAtomValue } from "jotai";
 import { atom } from "jotai";
 import { useMemo } from "react";
 
-import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
 import {
   getBillingUsageSummary,
   hasAgentOneCreditsAvailable,
 } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import { modelDirectoryDataAtom, type ModelRecord } from "@/lib/ai/models/model-directory";
 import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
 import { createLocalProvider } from "@/lib/ai/providers/local-provider-factory";
 import {
@@ -88,7 +88,10 @@ const PREFERRED_MODELS_BY_PROVIDER: Partial<Record<ProviderId, string[]>> = {
   "fireworks-ai": ["fireworks-ai-accounts/fireworks/models/kimi-k2p5"],
 };
 
-function getProviderModels(providerId: string): ModelRecord[] {
+function getProviderModels(
+  modelDirectoryData: Record<string, { models: Record<string, ModelRecord> }>,
+  providerId: string,
+): ModelRecord[] {
   const provider = modelDirectoryData[providerId];
   if (!provider) {
     return [];
@@ -118,6 +121,7 @@ function toModelRecord(model: ProviderModelMetadata): ModelRecord {
 }
 
 function mapDirectoryModels(
+  modelDirectoryData: Record<string, { models: Record<string, ModelRecord> }>,
   providerId: string,
   providerName: string,
   createModel: (modelId: string) => LanguageModel,
@@ -125,7 +129,7 @@ function mapDirectoryModels(
   filter?: (model: ModelRecord) => boolean,
 ): ModelData[] {
   const modelMap = new Map(
-    getProviderModels(providerId)
+    getProviderModels(modelDirectoryData, providerId)
       .map(mapDirectoryModelToMetadata)
       .map((model) => [model.id, model] as const),
   );
@@ -228,10 +232,12 @@ const availableModelsAtom = atom((get) => {
   const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
+  const modelDirectoryData = get(modelDirectoryDataAtom);
   const providers = get(providerInstancesAtom);
 
   const builtInModels = PROVIDER_REGISTRY.flatMap((provider) =>
     mapDirectoryModels(
+      modelDirectoryData,
       provider.id,
       provider.label,
       providers[provider.id].languageModel,
@@ -256,10 +262,12 @@ const availableChatModelsAtom = atom((get) => {
   const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
+  const modelDirectoryData = get(modelDirectoryDataAtom);
   const providers = get(providerInstancesAtom);
 
   const builtInModels = PROVIDER_REGISTRY.flatMap((provider) =>
     mapDirectoryModels(
+      modelDirectoryData,
       provider.id,
       provider.label,
       providers[provider.id].languageModel,
@@ -289,12 +297,14 @@ const availableImageModelsAtom = atom((get) => {
   const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
+  const modelDirectoryData = get(modelDirectoryDataAtom);
   const providers = get(providerInstancesAtom);
 
   const builtInModels = PROVIDER_REGISTRY.filter(
     (provider) => provider.id === "google" || provider.id === "openrouter",
   ).flatMap((provider) =>
     mapDirectoryModels(
+      modelDirectoryData,
       provider.id,
       provider.label,
       providers[provider.id].languageModel,

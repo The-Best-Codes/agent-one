@@ -1,6 +1,7 @@
 import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
+import { resetModelDirectory } from "@/lib/ai/models/model-directory";
 import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/registry";
 import type { TtsProviderId } from "@/lib/settings/types";
 
@@ -103,6 +104,8 @@ export function resetAllSettings(): void {
   for (const providerId of TTS_PROVIDER_IDS) {
     void store.set(getApiKeyBaseAtom(`tts-${providerId}`), RESET);
   }
+
+  void resetModelDirectory();
 }
 
 function isProviderStorageKey(key: string): key is ProviderStorageKey {

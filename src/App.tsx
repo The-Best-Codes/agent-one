@@ -4,6 +4,7 @@ import { BrowserRouter, Outlet, Route, Routes, useLocation } from "react-router"
 import { Toaster } from "sonner";
 
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
+import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
@@ -65,6 +66,7 @@ function App() {
   return (
     <BrowserRouter>
       <GoogleAnalyticsTracker />
+      <ModelDirectoryStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
       <DeepLinkHandler />

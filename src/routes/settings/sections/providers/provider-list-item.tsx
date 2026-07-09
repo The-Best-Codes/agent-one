@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { modelDirectoryDataAtom } from "@/lib/ai/models/model-directory";
 import {
   getBuiltInProviderModels,
   type ProviderModelMetadata,
@@ -223,7 +224,11 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
 }: BuiltInProviderListItemProps) {
   const storedConfig = useAtomValue(getProviderConfigAtom(providerId));
   const storedApiKey = useAtomValue(getApiKeyAtom(providerId));
-  const builtInModels = useMemo(() => getBuiltInProviderModels(providerId), [providerId]);
+  const modelDirectoryData = useAtomValue(modelDirectoryDataAtom);
+  const builtInModels = useMemo(
+    () => getBuiltInProviderModels(providerId, modelDirectoryData),
+    [modelDirectoryData, providerId],
+  );
   const setConfigAtom = useSetAtom(getProviderConfigAtom(providerId));
   const setApiKey = useSetAtom(getApiKeyAtom(providerId));
   const setupDismissed = useAtomValue(providerSetupDismissedAtom);

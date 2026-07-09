@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import modelDirectoryDataRaw from "./model-directory.json";
+export { MODEL_DIRECTORY_SOURCE_URL, normalizeModelDirectory } from "./shared.js";
 
 // eslint-disable-next-line no-control-regex
 const controlCharacterPattern = /[\u0000-\u001f\u007f]/;
@@ -56,26 +57,22 @@ const modalitiesSchema = z
   })
   .strict();
 
-const modelSchema = z
-  .object({
-    id: safeStringSchema(200),
-    name: safeStringSchema(500).optional(),
-    features: featuresSchema.optional(),
-    pricing: pricingSchema.optional(),
-    limit: limitSchema.optional(),
-    modalities: modalitiesSchema.optional(),
-  })
-  .strict();
+const modelSchema = z.looseObject({
+  id: safeStringSchema(200),
+  name: safeStringSchema(500).optional(),
+  features: featuresSchema.optional(),
+  pricing: pricingSchema.optional(),
+  limit: limitSchema.optional(),
+  modalities: modalitiesSchema.optional(),
+});
 
-const providerSchema = z
-  .object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    models: z.record(z.string(), modelSchema),
-  })
-  .strict();
+const providerSchema = z.looseObject({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  models: z.record(z.string(), modelSchema),
+});
 
-const modelDirectorySchema = z.record(z.string(), providerSchema);
+export const modelDirectorySchema = z.record(z.string(), providerSchema);
 
 export type ModelRecord = z.infer<typeof modelSchema>;
 export type ProviderEntry = z.infer<typeof providerSchema>;

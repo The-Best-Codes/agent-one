@@ -53,6 +53,13 @@ export const lastVacuumTimestampAtom = atomWithStorage<number>(
   { getOnInit: true },
 );
 
+export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
+  "agent-one-last-model-directory-sync-timestamp",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);
