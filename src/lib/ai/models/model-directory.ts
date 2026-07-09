@@ -65,14 +65,6 @@ function countModels(data: ModelDirectoryData): number {
   );
 }
 
-function normalizeRemoteData(raw: unknown): ModelDirectoryData {
-  const parsed = modelDirectorySchema.safeParse(raw);
-  if (!parsed.success) {
-    throw new Error(`Invalid model directory format: ${parsed.error.message}`);
-  }
-  return parsed.data;
-}
-
 async function persistOverride(data: ModelDirectoryData): Promise<void> {
   await writeTextFile(MODEL_DIRECTORY_FILENAME, JSON.stringify(data), {
     baseDir: BaseDirectory.AppLocalData,
@@ -112,7 +104,7 @@ export async function updateModelDirectory(): Promise<ModelDirectoryUpdateResult
       return { ok: false, error: `Request failed with status ${response.status}` };
     }
 
-    normalized = normalizeRemoteData(normalizeModelDirectory(await response.json()));
+    normalized = modelDirectorySchema.parse(normalizeModelDirectory(await response.json()));
   } catch (error) {
     return {
       ok: false,
