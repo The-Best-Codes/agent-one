@@ -745,6 +745,11 @@
   ::selection {
     @apply bg-primary text-primary-foreground;
   }
+
+  .prose-quoteless blockquote p:first-of-type::before,
+  .prose-quoteless blockquote p:first-of-type::after {
+    content: none !important;
+  }
 }
 
 @keyframes settings-target-pulse {

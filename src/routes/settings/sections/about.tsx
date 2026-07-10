@@ -230,7 +230,7 @@ export default function AboutSection() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="prose prose-sm prose-neutral dark:prose-invert max-w-none">
+                  <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless max-w-none">
                     <MemoizedMarkdown
                       allowInternalLinks
                       content={selectedReleaseNotes}

@@ -34,7 +34,7 @@ export const MessagePartText = ({
     <div
       className={cn(
         "max-w-full rounded-md text-base",
-        shouldRenderMarkdown && "prose dark:prose-invert prose-sm prose-neutral",
+        shouldRenderMarkdown && "prose dark:prose-invert prose-sm prose-neutral prose-quoteless",
       )}
     >
       {shouldUsePerformantRenderer ? (
