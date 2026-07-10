@@ -155,7 +155,15 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
       );
 
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">Memory update denied</span>
+          </div>
+        );
+      }
       return (
         <div
           key={callId}
@@ -165,6 +173,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           <span className="max-w-2xl truncate">{getActionLabel(input)}</span>
         </div>
       );
+    }
 
     case "output-available":
       return (

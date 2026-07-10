@@ -238,9 +238,37 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         </div>
       );
 
-    // TODO: Determine if a dedicated UI for approval-responded is needed. For now, it's not.
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              {urlCount === 1 ? (
+                <>
+                  Browsing{" "}
+                  {input?.urls?.[0] ? (
+                    <a
+                      href={input.urls[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+                    >
+                      {formatUrl(input.urls[0])}
+                    </a>
+                  ) : (
+                    "a website"
+                  )}{" "}
+                  denied
+                </>
+              ) : (
+                `Browsing ${urlCount} URLs denied`
+              )}
+            </span>
+          </div>
+        );
+      }
       return (
         <div
           key={callId}
@@ -271,6 +299,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           </span>
         </div>
       );
+    }
 
     case "output-available": {
       const results = output?.results || [];

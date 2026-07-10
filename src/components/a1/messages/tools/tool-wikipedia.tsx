@@ -129,13 +129,22 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       );
 
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">{label} denied</span>
+          </div>
+        );
+      }
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate text-sm font-bold">{label}...</span>
         </div>
       );
+    }
 
     case "output-available": {
       const result = part.output as WikipediaOutput;

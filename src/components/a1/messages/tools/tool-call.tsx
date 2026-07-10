@@ -76,7 +76,17 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       );
 
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4" />
+            <span className="text-muted-foreground text-sm font-bold">
+              Tool "{toolName}" denied
+            </span>
+          </div>
+        );
+      }
       return (
         <Accordion type="single" collapsible className="bg-secondary my-1 w-full rounded-md">
           <AccordionItem value={callId}>
@@ -99,6 +109,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           </AccordionItem>
         </Accordion>
       );
+    }
 
     case "output-available":
       return (

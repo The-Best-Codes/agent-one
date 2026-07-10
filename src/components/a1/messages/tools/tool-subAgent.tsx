@@ -87,6 +87,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
     if (liveState?.status === "waiting-approval") {
       return `Subagent waiting for ${pendingApprovals.length === 1 ? "approval" : "approvals"}`;
     }
+    if (part.state === "approval-responded" && part.approval?.approved === false) {
+      return "Subagent denied";
+    }
     if (isStreaming || part.state === "approval-responded" || part.state === "input-available") {
       return "Subagent running";
     }
@@ -147,6 +150,14 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
     case "approval-responded":
     case "input-available":
     case "output-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">Subagent denied</span>
+          </div>
+        );
+      }
       return (
         <Accordion
           type="single"

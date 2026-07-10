@@ -108,6 +108,16 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
 
     case "approval-responded":
     case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              Web search for "{query}" denied
+            </span>
+          </div>
+        );
+      }
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />

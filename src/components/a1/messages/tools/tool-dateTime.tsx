@@ -76,7 +76,17 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       );
 
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              Time and date check denied
+            </span>
+          </div>
+        );
+      }
       return (
         <div
           key={callId}
@@ -86,6 +96,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <span className="max-w-2xl truncate">Checking time and date...</span>
         </div>
       );
+    }
 
     case "output-available":
       return (
