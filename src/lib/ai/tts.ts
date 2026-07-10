@@ -1,4 +1,5 @@
 import { createElevenLabs, type ElevenLabsSpeechModelOptions } from "@ai-sdk/elevenlabs";
+import { createGoogle } from "@ai-sdk/google";
 import { createHume, type HumeSpeechModelOptions } from "@ai-sdk/hume";
 import { createLMNT, type LMNTSpeechModelOptions } from "@ai-sdk/lmnt";
 import { createOpenAI, type OpenAISpeechModelOptions } from "@ai-sdk/openai";
@@ -57,6 +58,16 @@ export const TTS_PROVIDER_OPTIONS = [
     models: ["default"],
     voices: [],
   },
+  {
+    id: "google",
+    label: "Google Gemini",
+    models: [
+      "gemini-2.5-flash-preview-tts",
+      "gemini-2.5-pro-preview-tts",
+      "gemini-3.1-flash-tts-preview",
+    ],
+    voices: ["Kore", "Aoede", "Fenrir", "Leda", "Orus", "Puck", "Stan", "Zephyr"],
+  },
 ] as const satisfies ReadonlyArray<{
   id: TtsProviderId;
   label: string;
@@ -78,6 +89,8 @@ export function getSelectedTtsModel(settings: TtsSettings): string {
       return settings.lmnt.model;
     case "hume":
       return settings.hume.model;
+    case "google":
+      return settings.google.model;
     default:
       return "";
   }
@@ -124,6 +137,13 @@ export function normalizeTtsSettings(settings: LegacyTtsSettings | undefined): T
       voice: settings?.hume?.voice?.trim() || "d8ab67c6-953d-4bd8-9370-8fa53a0f1453",
       speed: settings?.hume?.speed ?? 1,
       instructions: settings?.hume?.instructions ?? "",
+    },
+    google: {
+      model:
+        settings?.google?.model?.trim() || settings?.model?.trim() || getDefaultTtsModel("google"),
+      voice: settings?.google?.voice?.trim() || "Kore",
+      speed: settings?.google?.speed ?? 1,
+      instructions: settings?.google?.instructions ?? "",
     },
   };
 }
@@ -267,6 +287,27 @@ export async function generateTtsAudio(
         providerOptions: {
           hume: {} satisfies HumeSpeechModelOptions,
         },
+        abortSignal,
+      });
+
+      return {
+        uint8Array: result.audio.uint8Array,
+        mediaType: result.audio.mediaType,
+      };
+    }
+
+    case "google": {
+      const provider = createGoogle({
+        apiKey: apiKeys.google || "unset",
+        fetch: tauriFetch,
+      });
+
+      const result = await generateSpeech({
+        model: provider.speech(model),
+        text,
+        voice: settings.google.voice,
+        speed: undefined,
+        instructions: settings.google.instructions || undefined,
         abortSignal,
       });
 

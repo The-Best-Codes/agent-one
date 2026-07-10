@@ -29,6 +29,7 @@ export function TtsButton({
     elevenlabs: useAtomValue(apiKeyAtomFamily("tts-elevenlabs")),
     lmnt: useAtomValue(apiKeyAtomFamily("tts-lmnt")),
     hume: useAtomValue(apiKeyAtomFamily("tts-hume")),
+    google: useAtomValue(apiKeyAtomFamily("tts-google")),
   };
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const isCurrentMessage = ttsState.messageId === messageId;
@@ -84,6 +85,7 @@ export function TtsButton({
           elevenlabs: apiKeys.elevenlabs,
           lmnt: apiKeys.lmnt,
           hume: apiKeys.hume,
+          google: apiKeys.google,
         },
         abortController.signal,
       );

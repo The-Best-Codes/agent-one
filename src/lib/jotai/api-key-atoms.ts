@@ -16,7 +16,8 @@ type ApiKeyStorageKey =
   | "OPENAI_TTS_API_KEY"
   | "ELEVENLABS_API_KEY"
   | "LMNT_API_KEY"
-  | "HUME_API_KEY";
+  | "HUME_API_KEY"
+  | "GOOGLE_GENERATIVE_AI_TTS_API_KEY";
 
 type ApiKeyId = ProviderId | `tts-${TtsProviderId}`;
 
@@ -25,6 +26,7 @@ const TTS_API_KEY_STORAGE_KEYS = {
   "tts-elevenlabs": "ELEVENLABS_API_KEY",
   "tts-lmnt": "LMNT_API_KEY",
   "tts-hume": "HUME_API_KEY",
+  "tts-google": "GOOGLE_GENERATIVE_AI_TTS_API_KEY",
 } as const satisfies Record<`tts-${TtsProviderId}`, ApiKeyStorageKey>;
 
 function createApiKeyAtoms(storageKey: ApiKeyStorageKey) {

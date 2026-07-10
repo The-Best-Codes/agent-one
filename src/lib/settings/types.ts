@@ -87,7 +87,7 @@ export type ChatBackgroundPresetOption =
   | "sunset"
   | "night"
   | "island";
-export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume";
+export type TtsProviderId = "openai" | "elevenlabs" | "lmnt" | "hume" | "google";
 
 export interface ChatBackgroundSettings {
   preset: ChatBackgroundPresetOption;
@@ -137,12 +137,20 @@ export interface TtsHumeSettings {
   instructions: string;
 }
 
+export interface TtsGoogleSettings {
+  model: string;
+  voice: string;
+  speed: number;
+  instructions: string;
+}
+
 export interface TtsSettings {
   provider: TtsProviderId | "";
   openai: TtsOpenAISettings;
   elevenlabs: TtsElevenLabsSettings;
   lmnt: TtsLmntSettings;
   hume: TtsHumeSettings;
+  google: TtsGoogleSettings;
 }
 
 export type TitleGenerationMethodOption =
@@ -398,6 +406,12 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     hume: {
       model: "default",
       voice: "d8ab67c6-953d-4bd8-9370-8fa53a0f1453",
+      speed: 1,
+      instructions: "",
+    },
+    google: {
+      model: "gemini-3.1-flash-tts-preview",
+      voice: "Kore",
       speed: 1,
       instructions: "",
     },

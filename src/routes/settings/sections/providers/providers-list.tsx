@@ -101,6 +101,7 @@ export function ProvidersList() {
   const setElevenLabsTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-elevenlabs"));
   const setLmntTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-lmnt"));
   const setHumeTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-hume"));
+  const setGoogleTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-google"));
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const selectedTtsProvider = TTS_PROVIDER_OPTIONS.find(
     (provider) => provider.id === ttsSettings.provider,
@@ -110,6 +111,7 @@ export function ProvidersList() {
   const elevenLabsTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-elevenlabs"));
   const lmntTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-lmnt"));
   const humeTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-hume"));
+  const googleTtsApiKey = useAtomValue(apiKeyAtomFamily("tts-google"));
 
   const updateTtsSettings = (updates: Partial<typeof ttsSettings>) => {
     setTtsSettings({
@@ -415,6 +417,10 @@ export function ProvidersList() {
                       updateTtsSettings({
                         hume: { ...ttsSettings.hume, model },
                       });
+                    } else if (ttsSettings.provider === "google") {
+                      updateTtsSettings({
+                        google: { ...ttsSettings.google, model },
+                      });
                     }
                   }}
                   disabled={!selectedTtsProvider}
@@ -481,6 +487,19 @@ export function ProvidersList() {
                     value={humeTtsApiKey}
                     onChange={setHumeTtsApiKey}
                     placeholder="Enter your Hume API key"
+                    showSaveCancel
+                  />
+                </Field>
+              ) : null}
+
+              {ttsSettings.provider === "google" ? (
+                <Field>
+                  <FieldLabel htmlFor="tts-google-api-key">API Key</FieldLabel>
+                  <SecretInput
+                    id="tts-google-api-key"
+                    value={googleTtsApiKey}
+                    onChange={setGoogleTtsApiKey}
+                    placeholder="Enter your Google Generative AI API key"
                     showSaveCancel
                   />
                 </Field>
@@ -806,6 +825,69 @@ export function ProvidersList() {
                         })
                       }
                       placeholder="Optional, for example: upbeat and friendly"
+                    />
+                  </Field>
+                </>
+              ) : null}
+
+              {ttsSettings.provider === "google" ? (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor="tts-google-voice">Voice</FieldLabel>
+                    <Select
+                      value={ttsSettings.google.voice}
+                      onValueChange={(voice) =>
+                        updateTtsSettings({
+                          google: { ...ttsSettings.google, voice },
+                        })
+                      }
+                    >
+                      <SelectTrigger id="tts-google-voice" className="w-full md:max-w-96">
+                        <SelectValue placeholder="Choose a voice" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {TTS_PROVIDER_OPTIONS.find(
+                            (provider) => provider.id === "google",
+                          )?.voices.map((voice) => (
+                            <SelectItem key={voice} value={voice}>
+                              {voice}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="tts-google-speed">Speech Rate</FieldLabel>
+                    <Input
+                      id="tts-google-speed"
+                      type="number"
+                      min="0.25"
+                      max="4"
+                      step="0.05"
+                      value={ttsSettings.google.speed}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          google: {
+                            ...ttsSettings.google,
+                            speed: Number(event.target.value) || 1,
+                          },
+                        })
+                      }
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="tts-google-instructions">How It Should Sound</FieldLabel>
+                    <Textarea
+                      id="tts-google-instructions"
+                      value={ttsSettings.google.instructions}
+                      onChange={(event) =>
+                        updateTtsSettings({
+                          google: { ...ttsSettings.google, instructions: event.target.value },
+                        })
+                      }
+                      placeholder="Optional, for example: warm, calm, and conversational"
                     />
                   </Field>
                 </>
