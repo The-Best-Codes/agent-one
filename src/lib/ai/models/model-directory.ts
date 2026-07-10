@@ -8,15 +8,14 @@ import {
   normalizeModelDirectory,
   type ModelDirectoryData,
 } from "@/assets/model-lists";
+import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/atoms";
 
 export type { ModelDirectoryData, ModelRecord } from "@/assets/model-lists";
 
 const MODEL_DIRECTORY_FILENAME = "model-directory-override.json";
-const BUNDLED_FETCHED_AT = 0;
 export const MODEL_DIRECTORY_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 export const modelDirectoryOverrideAtom = atom<ModelDirectoryData | null>(null);
-export const modelDirectoryFetchedAtAtom = atom(BUNDLED_FETCHED_AT);
 
 export const modelDirectoryDataAtom = atom(
   (get) => get(modelDirectoryOverrideAtom) ?? bundledModelDirectoryData,
@@ -26,7 +25,7 @@ export const modelDirectoryStatusAtom = atom((get) => {
   const data = get(modelDirectoryDataAtom);
   return {
     usingDownloadedList: get(modelDirectoryOverrideAtom) !== null,
-    fetchedAt: get(modelDirectoryFetchedAtAtom),
+    fetchedAt: get(lastModelDirectorySyncTimestampAtom),
     providerCount: Object.keys(data).length,
     modelCount: countModels(data),
   };
@@ -125,7 +124,7 @@ export async function updateModelDirectory(): Promise<ModelDirectoryUpdateResult
   }
 
   store.set(modelDirectoryOverrideAtom, filtered);
-  store.set(modelDirectoryFetchedAtAtom, fetchedAt);
+  store.set(lastModelDirectorySyncTimestampAtom, fetchedAt);
 
   return {
     ok: true,
@@ -138,7 +137,7 @@ export async function updateModelDirectory(): Promise<ModelDirectoryUpdateResult
 export async function resetModelDirectory(): Promise<void> {
   const store = getDefaultStore();
   store.set(modelDirectoryOverrideAtom, null);
-  store.set(modelDirectoryFetchedAtAtom, BUNDLED_FETCHED_AT);
+  store.set(lastModelDirectorySyncTimestampAtom, 0);
 
   try {
     if (await exists(MODEL_DIRECTORY_FILENAME, { baseDir: BaseDirectory.AppLocalData })) {

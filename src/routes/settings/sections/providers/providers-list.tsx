@@ -30,7 +30,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  MODEL_DIRECTORY_SYNC_INTERVAL_MS,
   modelDirectoryStatusAtom,
   resetModelDirectory,
   updateModelDirectory,
@@ -39,7 +38,6 @@ import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS, getSelectedTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
-import { lastModelDirectorySyncTimestampAtom } from "@/lib/jotai/atoms";
 import {
   deleteCustomProviderApiKeyAtom,
   setCustomProviderApiKeyAtom,
@@ -103,7 +101,6 @@ export function ProvidersList() {
   const setElevenLabsTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-elevenlabs"));
   const setLmntTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-lmnt"));
   const setHumeTtsApiKey = useSetAtom(apiKeyAtomFamily("tts-hume"));
-  const setLastModelDirectorySyncTimestamp = useSetAtom(lastModelDirectorySyncTimestampAtom);
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const selectedTtsProvider = TTS_PROVIDER_OPTIONS.find(
     (provider) => provider.id === ttsSettings.provider,
@@ -187,13 +184,11 @@ export function ProvidersList() {
     toast.success("Model list updated", {
       description: `${result.providerCount ?? 0} providers, ${result.modelCount ?? 0} models loaded.`,
     });
-    setLastModelDirectorySyncTimestamp(result.fetchedAt ?? Date.now());
   };
 
   const handleResetModelDirectory = async () => {
     trackSettingsInteraction("providers", "model_directory_reset");
     await resetModelDirectory();
-    setLastModelDirectorySyncTimestamp(Date.now() - MODEL_DIRECTORY_SYNC_INTERVAL_MS);
     toast.success("Model list reset to bundled version");
   };
 

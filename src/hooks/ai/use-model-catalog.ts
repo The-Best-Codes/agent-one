@@ -8,7 +8,11 @@ import {
   hasAgentOneCreditsAvailable,
 } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import { modelDirectoryDataAtom, type ModelRecord } from "@/lib/ai/models/model-directory";
+import {
+  modelDirectoryDataAtom,
+  type ModelDirectoryData,
+  type ModelRecord,
+} from "@/lib/ai/models/model-directory";
 import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
 import { createLocalProvider } from "@/lib/ai/providers/local-provider-factory";
 import {
@@ -89,7 +93,7 @@ const PREFERRED_MODELS_BY_PROVIDER: Partial<Record<ProviderId, string[]>> = {
 };
 
 function getProviderModels(
-  modelDirectoryData: Record<string, { models: Record<string, ModelRecord> }>,
+  modelDirectoryData: ModelDirectoryData,
   providerId: string,
 ): ModelRecord[] {
   const provider = modelDirectoryData[providerId];
@@ -121,7 +125,7 @@ function toModelRecord(model: ProviderModelMetadata): ModelRecord {
 }
 
 function mapDirectoryModels(
-  modelDirectoryData: Record<string, { models: Record<string, ModelRecord> }>,
+  modelDirectoryData: ModelDirectoryData,
   providerId: string,
   providerName: string,
   createModel: (modelId: string) => LanguageModel,

@@ -32,9 +32,7 @@ export function ModelDirectoryStartupSync() {
         return;
       }
 
-      if (result.ok) {
-        store.set(lastModelDirectorySyncTimestampAtom, result.fetchedAt ?? Date.now());
-      } else {
+      if (!result.ok) {
         logger.warn("Failed to update model directory on startup", result.error);
       }
     })().catch((error) => {
