@@ -9,6 +9,7 @@ import {
   isStepCount,
   type StopCondition,
   streamText,
+  toUIMessageStream,
   type ToolSet,
   type UIMessageChunk,
   wrapLanguageModel,
@@ -163,7 +164,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     let totalUsage = createEmptyMessageTokenUsage();
 
-    return result.toUIMessageStream({
+    return toUIMessageStream({
+      stream: result.stream,
+      tools,
       messageMetadata: ({ part }) => {
         if (part.type !== "finish-step") {
           return undefined;

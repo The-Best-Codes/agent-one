@@ -6,6 +6,7 @@ import {
   readUIMessageStream,
   isStepCount,
   streamText,
+  toUIMessageStream,
   type ModelMessage,
   type ToolSet,
   type UIMessage,
@@ -296,7 +297,7 @@ async function* streamSubAgentRun({
     let latestMessage: UIMessage | undefined;
 
     for await (const message of readUIMessageStream({
-      stream: result.toUIMessageStream(),
+      stream: toUIMessageStream({ stream: result.stream, tools }),
       message: subAgentMessages.at(-1),
     })) {
       latestMessage = cloneMessage(message);
