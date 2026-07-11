@@ -123,6 +123,12 @@ export const MainChatInput = ({
     editorViewRef.current?.focus();
   });
 
+  useKeyboardShortcut("stopResponse", () => {
+    if (status === "streaming" || status === "submitted") {
+      stop();
+    }
+  });
+
   const handleEditorChange = (newValue: string) => {
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {

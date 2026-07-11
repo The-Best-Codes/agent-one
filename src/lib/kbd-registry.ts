@@ -35,6 +35,12 @@ export const keyboardShortcutDefinitions = [
     description: "Show or hide the chat sidebar.",
     defaultShortcut: "ctrl+b",
   },
+  {
+    id: "stopResponse",
+    label: "Stop response",
+    description: "Stop the current AI response.",
+    defaultShortcut: "shift+esc",
+  },
 ] as const;
 
 export type KeyboardShortcutId = (typeof keyboardShortcutDefinitions)[number]["id"];
