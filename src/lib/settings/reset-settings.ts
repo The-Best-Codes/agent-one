@@ -33,6 +33,7 @@ import {
   mcpServersAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
+  remendEnabledAtom,
   roundnessAtom,
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
@@ -76,6 +77,7 @@ export function resetAllSettings(): void {
   store.set(smoothStreamEnabledAtom, RESET);
   store.set(extractReasoningEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
+  store.set(remendEnabledAtom, RESET);
   store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
@@ -170,6 +172,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "REGENERATE_ON_SAVE":
       store.set(regenerateOnSaveAtom, RESET);
+      break;
+    case "REMEND_ENABLED":
+      store.set(remendEnabledAtom, RESET);
       break;
     case "STOP_BUTTON_BEHAVIOR":
       store.set(stopButtonBehaviorAtom, RESET);

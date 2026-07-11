@@ -1,4 +1,5 @@
 import type { UIMessage } from "ai";
+import { useAtomValue } from "jotai";
 import { marked } from "marked";
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
@@ -15,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { remendEnabledAtom } from "@/lib/jotai/settings-atoms";
 
 import { CodeBlock } from "./codeblock";
 
@@ -24,8 +26,8 @@ type MarkdownBlock = {
   lang?: string;
 };
 
-function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
-  const completedMarkdown = remend(markdown);
+function parseMarkdownIntoBlocks(markdown: string, remendEnabled: boolean): MarkdownBlock[] {
+  const completedMarkdown = remendEnabled ? remend(markdown) : markdown;
   const tokens = marked.lexer(completedMarkdown);
   const blocks: MarkdownBlock[] = [];
 
@@ -51,18 +53,19 @@ const MemoizedMarkdownBlock = memo(
     allowInternalLinks,
     block,
     messageRole,
+    remendEnabled,
   }: {
     allowInternalLinks?: boolean;
     block: MarkdownBlock;
     messageRole: UIMessage["role"];
+    remendEnabled: boolean;
   }) => {
     const { type, content, lang } = block;
 
     if (type === "code") {
       return <CodeBlock content={content} lang={lang} messageRole={messageRole} />;
     } else {
-      // TODO: Allow enabling and disabling remend in settings
-      const completedContent = remend(content);
+      const completedContent = remendEnabled ? remend(content) : content;
       return (
         <ReactMarkdown
           remarkPlugins={[remarkBreaks, remarkGfm]}
@@ -111,7 +114,8 @@ const MemoizedMarkdownBlock = memo(
       prevProps.block.type === nextProps.block.type &&
       prevProps.block.content === nextProps.block.content &&
       prevProps.block.lang === nextProps.block.lang &&
-      prevProps.allowInternalLinks === nextProps.allowInternalLinks
+      prevProps.allowInternalLinks === nextProps.allowInternalLinks &&
+      prevProps.remendEnabled === nextProps.remendEnabled
     );
   },
 );
@@ -130,13 +134,18 @@ export const MemoizedMarkdown = memo(
     id: string;
     messageRole: UIMessage["role"];
   }) => {
-    const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
+    const remendEnabled = useAtomValue(remendEnabledAtom);
+    const blocks = useMemo(
+      () => parseMarkdownIntoBlocks(content, remendEnabled),
+      [content, remendEnabled],
+    );
 
     return blocks.map((block, index) => (
       <MemoizedMarkdownBlock
         allowInternalLinks={allowInternalLinks}
         block={block}
         messageRole={messageRole}
+        remendEnabled={remendEnabled}
         key={`${id}-block_${index}`}
       />
     ));

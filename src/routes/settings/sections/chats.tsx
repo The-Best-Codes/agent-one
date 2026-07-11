@@ -25,6 +25,7 @@ import {
   markdownRenderingAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
+  remendEnabledAtom,
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
   smoothStreamEnabledAtom,
@@ -51,6 +52,7 @@ export default function ChatsSection() {
   const [showMessageActionRow, setShowMessageActionRow] = useAtom(showMessageActionRowAtom);
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
+  const [remendEnabled, setRemendEnabled] = useAtom(remendEnabledAtom);
   const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(smoothStreamEnabledAtom);
   const [extractReasoningEnabled, setExtractReasoningEnabled] = useAtom(
     extractReasoningEnabledAtom,
@@ -75,6 +77,7 @@ export default function ChatsSection() {
     showMessageActionRow === DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW;
   const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
   const isRegenerateOnSaveDefault = regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
+  const isRemendEnabledDefault = remendEnabled === DEFAULT_SETTINGS.REMEND_ENABLED;
   const isSmoothStreamDefault = smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
   const isExtractReasoningDefault =
     extractReasoningEnabled === DEFAULT_SETTINGS.EXTRACT_REASONING_ENABLED;
@@ -191,6 +194,41 @@ export default function ChatsSection() {
                     resetSetting("MARKDOWN_RENDERING");
                   }}
                   disabled={isMarkdownRenderingDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-remend">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Fix Streaming Markdown</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Automatically fix incomplete formatting in streamed responses.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={remendEnabled}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "remend_toggled", {
+                      enabled: checked,
+                    });
+                    setRemendEnabled(checked);
+                  }}
+                  aria-label="Toggle auto-close HTML tags"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_remend");
+                    resetSetting("REMEND_ENABLED");
+                  }}
+                  disabled={isRemendEnabledDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />

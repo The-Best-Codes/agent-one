@@ -242,3 +242,8 @@ export const keyboardShortcutsAtom = createSettingAtom<KeyboardShortcutSettings>
   "KEYBOARD_SHORTCUTS",
   DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS,
 );
+
+export const remendEnabledAtom = createSettingAtom(
+  "REMEND_ENABLED",
+  DEFAULT_SETTINGS.REMEND_ENABLED,
+);

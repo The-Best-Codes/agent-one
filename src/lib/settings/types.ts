@@ -343,6 +343,7 @@ export interface DefaultSettings extends ApiKeySettings {
   COLLAPSED_SIDEBAR_LAYOUT: CollapsedSidebarLayoutOption;
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: boolean;
   KEYBOARD_SHORTCUTS: KeyboardShortcutSettings;
+  REMEND_ENABLED: boolean;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -517,6 +518,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   COLLAPSED_SIDEBAR_LAYOUT: "row",
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: true,
   KEYBOARD_SHORTCUTS: defaultKeyboardShortcuts,
+  REMEND_ENABLED: true,
   AGENT_ONE_API_KEY: "",
   "302AI_API_KEY": "",
   ABACUS_API_KEY: "",
