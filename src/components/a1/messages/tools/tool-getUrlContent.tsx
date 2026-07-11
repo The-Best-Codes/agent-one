@@ -39,6 +39,7 @@ interface UrlResult {
   length?: number;
   truncated?: boolean;
   error?: string;
+  pending?: boolean;
 }
 
 interface GetUrlContentOutput {
@@ -67,6 +68,26 @@ const formatUrl = (url: string) => {
     return url;
   }
 };
+
+const UrlPendingDisplay = memo(({ url }: { url: string }) => (
+  <div className="flex items-center gap-1">
+    <Spinner className="text-foreground size-4 shrink-0" />
+    <span className="text-foreground max-w-2xl truncate text-sm font-bold">
+      Browsing{" "}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+      >
+        {formatUrl(url)}
+      </a>
+      ...
+    </span>
+  </div>
+));
+
+UrlPendingDisplay.displayName = "UrlPendingDisplay";
 
 const UrlResultDisplay = memo(
   ({ result, input }: { result: UrlResult; input: GetUrlContentInput }) => {
@@ -303,9 +324,37 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
 
     case "output-available": {
       const results = output?.results || [];
+      const isPreliminary = (part as { preliminary?: boolean }).preliminary === true;
+      const hasPending = results.some((r) => r.pending);
+      const isStreaming = isPreliminary && hasPending;
 
-      if (results.length === 1) {
-        return <UrlResultDisplay key={callId} result={results[0]} input={input} />;
+      if (results.length <= 1) {
+        if (isStreaming && results[0]?.pending) {
+          return (
+            <div key={callId} className="flex items-center gap-1">
+              <Spinner className="text-foreground size-4 shrink-0" />
+              <span className="text-foreground text-sm font-bold">
+                Browsing{" "}
+                {results[0] ? (
+                  <a
+                    href={results[0].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
+                  >
+                    {formatUrl(results[0].url)}
+                  </a>
+                ) : (
+                  "a website"
+                )}
+                ...
+              </span>
+            </div>
+          );
+        }
+        if (results.length === 1) {
+          return <UrlResultDisplay key={callId} result={results[0]} input={input} />;
+        }
       }
 
       const failCount = results.filter((r) => r.error).length;
@@ -314,6 +363,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         <Accordion
           type="single"
           collapsible
+          value={isMainAccordionOpen ? callId : ""}
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
           className="text-foreground flex flex-row bg-transparent p-0 text-sm"
         >
@@ -327,12 +377,21 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <IconWorld
-                    className={cn(
-                      "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
-                      isMainAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
+                  {isStreaming ? (
+                    <Spinner
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                        isMainAccordionOpen && "scale-0 opacity-0",
+                      )}
+                    />
+                  ) : (
+                    <IconWorld
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                        isMainAccordionOpen && "scale-0 opacity-0",
+                      )}
+                    />
+                  )}
                   <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
@@ -346,15 +405,21 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate tabular-nums">
-                Browsed {results.length} URL{results.length !== 1 ? "s" : ""}
+                {isStreaming
+                  ? `Browsing ${results.length} URLs...`
+                  : `Browsed ${results.length} URL${results.length !== 1 ? "s" : ""}`}
                 {failCount > 0 && ` (${failCount} failed)`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="flex flex-col gap-1">
-                {results.map((result, index) => (
-                  <UrlResultDisplay key={index} result={result} input={input} />
-                ))}
+                {results.map((result, index) =>
+                  result.pending ? (
+                    <UrlPendingDisplay key={index} url={result.url} />
+                  ) : (
+                    <UrlResultDisplay key={index} result={result} input={input} />
+                  ),
+                )}
               </div>
             </AccordionContent>
           </AccordionItem>
