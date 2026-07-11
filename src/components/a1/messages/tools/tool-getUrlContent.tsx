@@ -89,6 +89,26 @@ const UrlPendingDisplay = memo(({ url }: { url: string }) => (
 
 UrlPendingDisplay.displayName = "UrlPendingDisplay";
 
+const UrlCancelledDisplay = memo(({ url }: { url: string }) => (
+  <div className="flex items-center gap-1">
+    <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+    <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
+      Browsing{" "}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+      >
+        {formatUrl(url)}
+      </a>{" "}
+      cancelled
+    </span>
+  </div>
+));
+
+UrlCancelledDisplay.displayName = "UrlCancelledDisplay";
+
 const UrlResultDisplay = memo(
   ({ result, input }: { result: UrlResult; input: GetUrlContentInput }) => {
     if (result.error) {
@@ -431,30 +451,83 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         const singleUrl = input?.urls?.[0];
 
-        let message: string | React.ReactNode = "Browsing cancelled";
         if (urlCount === 1 && singleUrl) {
-          message = (
-            <>
-              Browsing{" "}
-              <a
-                href={singleUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
-              >
-                {formatUrl(singleUrl)}
-              </a>{" "}
-              cancelled
-            </>
+          return (
+            <div key={callId} className="flex items-center gap-1">
+              <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+              <span className="text-muted-foreground text-sm font-bold">
+                Browsing{" "}
+                <a
+                  href={singleUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+                >
+                  {formatUrl(singleUrl)}
+                </a>{" "}
+                cancelled
+              </span>
+            </div>
           );
-        } else if (urlCount > 1) {
-          message = `Browsing ${urlCount} URLs cancelled`;
+        }
+
+        if (urlCount > 1) {
+          return (
+            <Accordion
+              type="single"
+              collapsible
+              value={isMainAccordionOpen ? callId : ""}
+              onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
+              className="text-foreground flex flex-row bg-transparent p-0 text-sm"
+            >
+              <AccordionItem
+                value={callId}
+                className={cn(
+                  "group/url-content-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+                  isMainAccordionOpen && "border border-b! p-2",
+                )}
+              >
+                <AccordionTrigger
+                  icon={
+                    <div className="relative">
+                      <IconCircleX
+                        className={cn(
+                          "text-muted-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                          isMainAccordionOpen && "scale-0 opacity-0",
+                        )}
+                      />
+                      <IconChevronDown
+                        className={cn(
+                          "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
+                          isMainAccordionOpen && "scale-100 opacity-100",
+                        )}
+                      />
+                    </div>
+                  }
+                  iconPosition="left"
+                  shouldRotateIcon={true}
+                  className="justify-start gap-1 p-0 font-bold hover:no-underline"
+                >
+                  <span className="text-muted-foreground max-w-2xl truncate tabular-nums">
+                    Browsing {urlCount} URLs cancelled
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="p-0 pt-2">
+                  <div className="flex flex-col gap-1">
+                    {input?.urls?.map((url, index) => (
+                      <UrlCancelledDisplay key={index} url={url} />
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          );
         }
 
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{message}</span>
+            <span className="text-muted-foreground text-sm font-bold">Browsing cancelled</span>
           </div>
         );
       }
