@@ -125,7 +125,7 @@ export const MainChatInput = ({
 
   useKeyboardShortcut("stopResponse", () => {
     if (status === "streaming" || status === "submitted") {
-      stop();
+      void stop();
     }
   });
 
