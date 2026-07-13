@@ -39,23 +39,29 @@ jobs:
               --notes "See the assets below this release to download and install this version."
           fi
 
+  generate-matrix:
+    if: ${{ !inputs.snap-only }}
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Build build matrix
+        id: set-matrix
+        run: |
+          if [ "${{ inputs.msix-only }}" == "true" ]; then
+            echo 'matrix={"include":[{"platform":"windows-latest","args":""}]}' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix={"include":[{"platform":"macos-latest","args":"--target aarch64-apple-darwin"},{"platform":"macos-latest","args":"--target x86_64-apple-darwin"},{"platform":"ubuntu-22.04","args":""},{"platform":"windows-latest","args":""}]}' >> "$GITHUB_OUTPUT"
+          fi
+
   release-tauri:
-    needs: create-release
-    if: ${{ !inputs.snap-only && (!inputs.msix-only || matrix.platform == 'windows-latest') }}
+    needs: [create-release, generate-matrix]
+    if: ${{ !inputs.snap-only }}
     permissions:
       contents: write
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - platform: "macos-latest" # for Arm based macs (M1 and above)
-            args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs
-            args: "--target x86_64-apple-darwin"
-          - platform: "ubuntu-22.04"
-            args: ""
-          - platform: "windows-latest"
-            args: ""
+      matrix: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
 
     runs-on: ${{ matrix.platform }}
     steps:
