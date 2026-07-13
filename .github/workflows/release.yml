@@ -11,11 +11,6 @@ on:
         required: false
         type: boolean
         default: false
-      msix-only:
-        description: "Skip full build and only build the MSIX bundle (requires a previous release)"
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   create-release:
@@ -39,29 +34,23 @@ jobs:
               --notes "See the assets below this release to download and install this version."
           fi
 
-  generate-matrix:
-    if: ${{ !inputs.snap-only }}
-    runs-on: ubuntu-22.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Build build matrix
-        id: set-matrix
-        run: |
-          if [ "${{ inputs.msix-only }}" == "true" ]; then
-            echo 'matrix={"include":[{"platform":"windows-latest","args":""}]}' >> "$GITHUB_OUTPUT"
-          else
-            echo 'matrix={"include":[{"platform":"macos-latest","args":"--target aarch64-apple-darwin"},{"platform":"macos-latest","args":"--target x86_64-apple-darwin"},{"platform":"ubuntu-22.04","args":""},{"platform":"windows-latest","args":""}]}' >> "$GITHUB_OUTPUT"
-          fi
-
   release-tauri:
-    needs: [create-release, generate-matrix]
+    needs: create-release
     if: ${{ !inputs.snap-only }}
     permissions:
       contents: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
+      matrix:
+        include:
+          - platform: "macos-latest" # for Arm based macs (M1 and above)
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest" # for Intel based macs
+            args: "--target x86_64-apple-darwin"
+          - platform: "ubuntu-22.04"
+            args: ""
+          - platform: "windows-latest"
+            args: ""
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -118,29 +107,6 @@ jobs:
           args: ${{ matrix.args }}
           updaterJsonPreferNsis: true
 
-      - name: Install aarch64 Rust target for MSIX
-        if: matrix.platform == 'windows-latest'
-        run: rustup target add aarch64-pc-windows-msvc
-
-      - name: Build MSIX bundle
-        if: matrix.platform == 'windows-latest'
-        run: bun run tauri:windows:build -- --arch x64,arm64 --runner bun
-
-      - name: Upload MSIX to release assets
-        if: matrix.platform == 'windows-latest'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: pwsh
-        run: |
-          $VERSION = (Get-Content .version | ForEach-Object { $_.Trim() })
-          $TAG = "agent-one-v${VERSION}"
-          $MSIX_DIR = "src-tauri/target/msix"
-          if (Test-Path $MSIX_DIR) {
-            Get-ChildItem -Path $MSIX_DIR -Include *.msix, *.msixbundle -Recurse | ForEach-Object {
-              gh release upload "$TAG" $_.FullName --clobber
-            }
-          }
-
       - name: Upload .deb artifact for snap build
         if: matrix.platform == 'ubuntu-22.04'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -150,7 +116,7 @@ jobs:
 
   build-snap:
     needs: release-tauri
-    if: ${{ !failure() && !cancelled() && !inputs.msix-only }}
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-22.04
     permissions:
       contents: write
