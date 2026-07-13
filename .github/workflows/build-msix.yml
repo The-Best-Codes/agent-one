@@ -42,12 +42,6 @@ jobs:
       - name: Install frontend dependencies
         run: bun install --frozen-lockfile
 
-      - name: Pre-build Rust binary to triple target dir
-        run: cargo build --release --target x86_64-pc-windows-msvc --manifest-path src-tauri/Cargo.toml
-        env:
-          CARGO_INCREMENTAL: 1
-          RUST_BACKTRACE: 1
-
       - name: Build MSIX
         run: bun run tauri:windows:build -- --arch x64 --runner bun --verbose
 
