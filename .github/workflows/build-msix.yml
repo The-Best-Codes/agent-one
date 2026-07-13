@@ -43,7 +43,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Pre-build Rust binary to triple target dir
-        run: cargo build --release --target x86_64-pc-windows-msvc
+        run: cargo build --release --target x86_64-pc-windows-msvc --manifest-path src-tauri/Cargo.toml
         env:
           CARGO_INCREMENTAL: 1
           RUST_BACKTRACE: 1
