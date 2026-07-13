@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: false
+      msix-only:
+        description: "Skip full build and only build the MSIX bundle (requires a previous release)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   create-release:
@@ -36,7 +41,7 @@ jobs:
 
   release-tauri:
     needs: create-release
-    if: ${{ !inputs.snap-only }}
+    if: ${{ !inputs.snap-only && (!inputs.msix-only || matrix.platform == 'windows-latest') }}
     permissions:
       contents: write
     strategy:
@@ -107,14 +112,6 @@ jobs:
           args: ${{ matrix.args }}
           updaterJsonPreferNsis: true
 
-      - name: Get version for MSIX
-        if: matrix.platform == 'windows-latest'
-        id: msix_version
-        shell: pwsh
-        run: |
-          $VERSION = Get-Content .version | ForEach-Object { $_.Trim() }
-          echo "version=$VERSION" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
       - name: Install aarch64 Rust target for MSIX
         if: matrix.platform == 'windows-latest'
         run: rustup target add aarch64-pc-windows-msvc
@@ -129,7 +126,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
-          $TAG = "agent-one-v${{ steps.msix_version.outputs.version }}"
+          $VERSION = (Get-Content .version | ForEach-Object { $_.Trim() })
+          $TAG = "agent-one-v${VERSION}"
           $MSIX_DIR = "src-tauri/target/msix"
           if (Test-Path $MSIX_DIR) {
             Get-ChildItem -Path $MSIX_DIR -Include *.msix, *.msixbundle -Recurse | ForEach-Object {
@@ -146,7 +144,7 @@ jobs:
 
   build-snap:
     needs: release-tauri
-    if: ${{ !failure() && !cancelled() }}
+    if: ${{ !failure() && !cancelled() && !inputs.msix-only }}
     runs-on: ubuntu-22.04
     permissions:
       contents: write
