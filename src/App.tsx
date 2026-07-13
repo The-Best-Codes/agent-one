@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
+import { ReactScan } from "@/components/a1/react-scan";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
@@ -72,6 +73,7 @@ function App() {
       <DeepLinkHandler />
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
+      <ReactScan />
       <Toaster className="pointer-events-auto!" position="top-right" richColors closeButton />
       <Routes>
         <Route element={<AppLayout />}>

@@ -1,15 +1,18 @@
 import { IconAlertTriangle, IconArrowLeft } from "@tabler/icons-react";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
+import { reactScanEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export default function TestsRoute() {
   const navigate = useNavigate();
   const setOnboardingCompleted = useSetAtom(onboardingCompletedAtom);
+  const [reactScanEnabled, setReactScanEnabled] = useAtom(reactScanEnabledAtom);
 
   return (
     <div className="bg-background min-h-screen">
@@ -91,6 +94,15 @@ export default function TestsRoute() {
                 >
                   Run Test
                 </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div>
+                  <h3 className="font-medium">React Scan</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Enable react-scan to visualize component renders for the rest of this session
+                  </p>
+                </div>
+                <Switch checked={reactScanEnabled} onCheckedChange={setReactScanEnabled} />
               </div>
             </CardContent>
           </Card>
