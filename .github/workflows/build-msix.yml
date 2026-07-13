@@ -45,16 +45,22 @@ jobs:
       - name: Build MSIX
         run: bun run tauri:windows:build -- --arch x64 --runner bun --verbose
 
+      - name: Upload MSIX as workflow artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: msix-bundle
+          path: src-tauri/target/msix/*.msix*
+
       - name: Upload MSIX to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
-          $VERSION = (Get-Content .version | ForEach-Object { $_.Trim() })
+          $VERSION = (Get-Content .version | Select-Object -First 1).Trim()
           $TAG = "agent-one-v${VERSION}"
           $MSIX_DIR = "src-tauri/target/msix"
           if (Test-Path $MSIX_DIR) {
-            Get-ChildItem -Path $MSIX_DIR -Include *.msix -Recurse | ForEach-Object {
+            Get-ChildItem -Path $MSIX_DIR -Include *.msix* -Recurse | ForEach-Object {
               gh release upload "$TAG" $_.FullName --clobber
             }
           }
