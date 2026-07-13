@@ -37,7 +37,12 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "publisher": "AgentOne Developers"
+    "publisher": "AgentOne Developers",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller"
+      }
+    }
   },
   "plugins": {
     "deep-link": {
