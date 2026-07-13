@@ -1,7 +1,8 @@
 use std::{env, path::Path};
 
 const EXTERNAL_UPDATE_MARKER_PATH: &str = "/usr/lib/agent-one/updates-managed-externally";
-const EXTERNAL_UPDATE_ENV_VARS: &[&str] = &["SNAP", "SNAP_NAME", "FLATPAK_ID"];
+const EXTERNAL_UPDATE_ENV_VARS: &[&str] =
+    &["SNAP", "SNAP_NAME", "FLATPAK_ID", "PACKAGE_FAMILY_NAME"];
 const FLATPAK_INFO_PATH: &str = "/.flatpak-info";
 
 #[tauri::command]

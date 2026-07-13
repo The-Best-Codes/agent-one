@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: false
+      msix-only:
+        description: "Skip full build and only build the MSIX bundle (requires a previous release)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   create-release:
@@ -36,7 +41,7 @@ jobs:
 
   release-tauri:
     needs: create-release
-    if: ${{ !inputs.snap-only }}
+    if: ${{ !inputs.snap-only && (!inputs.msix-only || matrix.platform == 'windows-latest') }}
     permissions:
       contents: write
     strategy:
@@ -107,6 +112,29 @@ jobs:
           args: ${{ matrix.args }}
           updaterJsonPreferNsis: true
 
+      - name: Install aarch64 Rust target for MSIX
+        if: matrix.platform == 'windows-latest'
+        run: rustup target add aarch64-pc-windows-msvc
+
+      - name: Build MSIX bundle
+        if: matrix.platform == 'windows-latest'
+        run: bun run tauri:windows:build -- --arch x64,arm64 --runner bun
+
+      - name: Upload MSIX to release assets
+        if: matrix.platform == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $VERSION = (Get-Content .version | ForEach-Object { $_.Trim() })
+          $TAG = "agent-one-v${VERSION}"
+          $MSIX_DIR = "src-tauri/target/msix"
+          if (Test-Path $MSIX_DIR) {
+            Get-ChildItem -Path $MSIX_DIR -Include *.msix, *.msixbundle -Recurse | ForEach-Object {
+              gh release upload "$TAG" $_.FullName --clobber
+            }
+          }
+
       - name: Upload .deb artifact for snap build
         if: matrix.platform == 'ubuntu-22.04'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -116,7 +144,7 @@ jobs:
 
   build-snap:
     needs: release-tauri
-    if: ${{ !failure() && !cancelled() }}
+    if: ${{ !failure() && !cancelled() && !inputs.msix-only }}
     runs-on: ubuntu-22.04
     permissions:
       contents: write
