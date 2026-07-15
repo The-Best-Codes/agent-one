@@ -17,7 +17,6 @@ import { useOverflow } from "@/hooks/use-overflow";
 import { cn } from "@/lib/utils";
 
 const AT_BOTTOM_THRESHOLD = 10;
-const BUTTON_HIDDEN_OFFSET = 36;
 
 export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
@@ -34,8 +33,6 @@ export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivEl
   scrollableClassName?: string;
   overflowingClassName?: string;
   behavior?: "smooth" | "instant";
-  slideStartDistance?: number;
-  slideEndDistance?: number;
 }
 
 export type AutoScrollHandle = {
@@ -60,16 +57,14 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       overflowingClassName,
       buttonScrollBehavior = "smooth",
       behavior = "instant",
-      slideStartDistance = 50,
-      slideEndDistance = AT_BOTTOM_THRESHOLD,
       ...props
     },
     ref,
   ) => {
     const parentRef = useRef<HTMLDivElement>(null);
     const isOverflowing = useOverflow(parentRef);
-    const [buttonOffset, setButtonOffset] = useState(BUTTON_HIDDEN_OFFSET);
-    const prevAtEndRef = useRef(true);
+    const [showButton, setShowButton] = useState(false);
+    const atBottomRef = useRef(true);
     const isVirtualized = items != null && items.length > 0;
 
     const virtualizer = useVirtualizer({
@@ -103,23 +98,9 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
       const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
 
-      prevAtEndRef.current = atBottom;
-
-      let offset = BUTTON_HIDDEN_OFFSET;
-      if (isOverflowing) {
-        if (distanceFromBottom > slideStartDistance) {
-          offset = 0;
-        } else if (distanceFromBottom <= slideEndDistance) {
-          offset = BUTTON_HIDDEN_OFFSET;
-        } else {
-          const slideRange = slideStartDistance - slideEndDistance;
-          const slideProgress = (slideStartDistance - distanceFromBottom) / slideRange;
-          offset = slideProgress * BUTTON_HIDDEN_OFFSET;
-        }
-      }
-
-      setButtonOffset(offset);
-    }, [isOverflowing, slideStartDistance, slideEndDistance]);
+      atBottomRef.current = atBottom;
+      setShowButton(isOverflowing && !atBottom);
+    }, [isOverflowing]);
 
     useLayoutEffect(() => {
       const container = parentRef.current;
@@ -138,12 +119,10 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       if (!container || isVirtualized) return;
 
       const observerCallback = () => {
-        if (prevAtEndRef.current) {
+        if (atBottomRef.current) {
           container.scrollTo({ top: container.scrollHeight, behavior: "instant" });
-          setButtonOffset(BUTTON_HIDDEN_OFFSET);
-        } else {
-          handleScroll();
         }
+        handleScroll();
       };
 
       const mutationObserver = new MutationObserver(observerCallback);
@@ -177,7 +156,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     );
 
     const handleScrollButtonClick = () => {
-      setButtonOffset(BUTTON_HIDDEN_OFFSET);
+      setShowButton(false);
       if (isVirtualized) {
         virtualizer.scrollToEnd({ behavior: buttonScrollBehavior });
       } else {
@@ -192,7 +171,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       ref,
       () => ({
         scrollToBottom: () => {
-          setButtonOffset(BUTTON_HIDDEN_OFFSET);
+          setShowButton(false);
           scrollToBottom();
         },
       }),
@@ -234,27 +213,21 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
             {children}
           </div>
         </div>
-        <div className="pointer-events-none absolute right-4 bottom-2 z-10 overflow-hidden">
-          <Button
-            data-testid="scroll-to-bottom"
-            size="icon"
-            onClick={handleScrollButtonClick}
-            className={cn(
-              "pointer-events-auto transition-transform duration-200 hover:opacity-75",
-              scrollButtonClassName,
-            )}
-            style={{
-              transform: `translateY(${buttonOffset}px)`,
-            }}
-            variant="secondary"
-            aria-label="Scroll to bottom"
-            aria-hidden={buttonOffset >= BUTTON_HIDDEN_OFFSET}
-            tabIndex={buttonOffset >= BUTTON_HIDDEN_OFFSET ? -1 : 0}
-            {...scrollButtonProps}
-          >
-            {scrollButtonChildren || <IconChevronDown data-testid="scroll-to-bottom-icon" />}
-          </Button>
-        </div>
+        {showButton && (
+          <div className="absolute right-4 bottom-2 z-10">
+            <Button
+              data-testid="scroll-to-bottom"
+              size="icon"
+              onClick={handleScrollButtonClick}
+              className={cn("hover:opacity-75", scrollButtonClassName)}
+              variant="secondary"
+              aria-label="Scroll to bottom"
+              {...scrollButtonProps}
+            >
+              {scrollButtonChildren || <IconChevronDown data-testid="scroll-to-bottom-icon" />}
+            </Button>
+          </div>
+        )}
       </div>
     );
   },
