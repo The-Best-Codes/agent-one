@@ -137,7 +137,7 @@ export const ChatInstance = memo(
 
     useEffect(() => {
       onInstanceUpdate(chatId, chat);
-    });
+    }, [chatId, chat.status, chat.messages, chat.sendMessage, chat.regenerate, onInstanceUpdate]);
 
     return null;
   },
