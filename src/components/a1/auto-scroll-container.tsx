@@ -156,7 +156,6 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     );
 
     const handleScrollButtonClick = () => {
-      setShowButton(false);
       if (isVirtualized) {
         virtualizer.scrollToEnd({ behavior: buttonScrollBehavior });
       } else {
