@@ -185,7 +185,7 @@ export default function SettingsRoute() {
           <div
             ref={sidebarRef}
             className={cn(
-              "hidden w-48 shrink-0 overflow-auto scroll-fade md:flex md:flex-col lg:w-64",
+              "hidden w-48 shrink-0 overflow-auto md:flex md:flex-col lg:w-64",
               isSidebarOverflowing && "pr-2",
             )}
           >
@@ -227,7 +227,7 @@ export default function SettingsRoute() {
           ) : (
             <div
               ref={scrollViewportRef}
-              className={cn("flex-1 overflow-auto scroll-fade md:min-h-0", isOverflowing && "pr-2")}
+              className={cn("flex-1 overflow-auto md:min-h-0", isOverflowing && "pr-2")}
             >
               <div
                 role="tabpanel"
