@@ -198,30 +198,32 @@ function AccordionTrigger({
 
 interface AccordionContentProps extends React.HTMLAttributes<HTMLDivElement> {
   wrapperClassName?: string;
-  renderWhenCollapsed?: boolean;
+  forceMount?: boolean;
 }
 
 function AccordionContent({
   wrapperClassName,
   className,
   children,
-  renderWhenCollapsed = false,
+  forceMount = false,
   ...props
 }: AccordionContentProps) {
   const { isOpen } = useAccordionItemContext();
-  const [shouldRender, setShouldRender] = React.useState(isOpen);
+  const [isMounted, setIsMounted] = React.useState(isOpen);
 
   React.useEffect(() => {
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setShouldRender(true);
-    } else if (!renderWhenCollapsed) {
+      setIsMounted(true);
+    } else if (!forceMount) {
       const timer = setTimeout(() => {
-        setShouldRender(false);
+        setIsMounted(false);
       }, 200);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, renderWhenCollapsed]);
+  }, [isOpen, forceMount]);
+
+  const shouldRender = forceMount || isMounted;
 
   if (!shouldRender) {
     return null;

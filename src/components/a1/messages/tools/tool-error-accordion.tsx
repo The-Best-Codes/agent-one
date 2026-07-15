@@ -13,7 +13,6 @@ interface ToolErrorAccordionProps {
   errorText?: string;
   isOpen: boolean | undefined;
   onOpenChange: (isOpen: boolean) => void;
-  renderWhenCollapsed?: boolean;
   title: React.ReactNode;
 }
 
@@ -22,7 +21,6 @@ export function ToolErrorAccordion({
   errorText,
   isOpen,
   onOpenChange,
-  renderWhenCollapsed,
   title,
 }: ToolErrorAccordionProps) {
   return (
@@ -62,7 +60,7 @@ export function ToolErrorAccordion({
         >
           <span className="text-destructive max-w-2xl truncate">{title}</span>
         </AccordionTrigger>
-        <AccordionContent renderWhenCollapsed={renderWhenCollapsed} className="p-0 pt-2">
+        <AccordionContent className="p-0 pt-2">
           <div className="text-destructive/80 text-sm font-normal">
             {errorText || "Unknown error"}
           </div>

@@ -202,7 +202,7 @@ export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) =
                   {labels?.errorTitle ?? `"${toolName}" tool failed`}
                 </span>
               </AccordionTrigger>
-              <AccordionContent renderWhenCollapsed={!isLongOutput} className="p-0 pt-2">
+              <AccordionContent className="p-0 pt-2">
                 {isLongOutput ? (
                   <PerformantMarkdown maxHeight="200px" content={outputText} />
                 ) : (
@@ -265,10 +265,7 @@ export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) =
                 </Tooltip>
               )}
             </AccordionTrigger>
-            <AccordionContent
-              renderWhenCollapsed={!isLongOutput}
-              className="text-muted-foreground p-0 pt-2 text-xs"
-            >
+            <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               <ScrollArea type="always" viewportClassName="max-h-96">
                 <ScrollBar orientation="horizontal"></ScrollBar>
                 <div className="flex flex-col gap-2">
