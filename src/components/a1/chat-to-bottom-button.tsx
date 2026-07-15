@@ -7,6 +7,7 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { showChatToBottomButtonAtom } from "@/lib/jotai/settings-atoms";
@@ -38,6 +39,7 @@ export function ChatToBottomButton({ onClick, className }: ChatToBottomButtonPro
           </Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
+          <ContextMenuLabel>Options</ContextMenuLabel>
           <ContextMenuItem variant="destructive" onSelect={() => setShowSetting(false)}>
             Never show this button
           </ContextMenuItem>
