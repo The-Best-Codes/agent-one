@@ -174,7 +174,7 @@ async fn callback_handler(
 
 #[tauri::command]
 pub async fn mcp_authenticate(
-    app: tauri::AppHandle,
+    app: tauri::AppHandle<tauri::Cef>,
     state: tauri::State<'_, AuthCancellationState>,
     server_id: String,
     server_url: String,
@@ -346,7 +346,10 @@ pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String>
 }
 
 #[tauri::command]
-pub async fn mcp_logout(app: tauri::AppHandle, server_id: String) -> Result<(), String> {
+pub async fn mcp_logout(
+    app: tauri::AppHandle<tauri::Cef>,
+    server_id: String,
+) -> Result<(), String> {
     let db_path = resolve_agent_db_path(&app)?;
     let cred_store = KeyringCredentialStore::new(server_id, db_path);
     cred_store.clear().await.map_err(|e| e.to_string())
@@ -354,7 +357,7 @@ pub async fn mcp_logout(app: tauri::AppHandle, server_id: String) -> Result<(), 
 
 #[tauri::command]
 pub async fn mcp_get_token(
-    app: tauri::AppHandle,
+    app: tauri::AppHandle<tauri::Cef>,
     server_id: String,
     server_url: String,
 ) -> Result<String, String> {

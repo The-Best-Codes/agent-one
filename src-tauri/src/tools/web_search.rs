@@ -6,7 +6,7 @@ use crate::utils::headless_webview::fetch_url_with_webview;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tauri::AppHandle;
+use tauri::{AppHandle, Cef};
 use tokio::sync::Semaphore;
 use tokio::time::{timeout, Duration};
 use wreq::Client;
@@ -30,7 +30,7 @@ pub struct WebSearchResponse {
 
 #[tauri::command]
 pub async fn web_search(
-    app: AppHandle,
+    app: AppHandle<Cef>,
     query: String,
     max_results: Option<usize>,
     timeout_seconds: Option<u64>,

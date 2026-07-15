@@ -5,6 +5,10 @@ mod mcp_auth;
 mod tools;
 mod utils;
 
+#[cfg_attr(
+    not(any(target_os = "android", target_os = "ios")),
+    tauri::cef_entry_point
+)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder =

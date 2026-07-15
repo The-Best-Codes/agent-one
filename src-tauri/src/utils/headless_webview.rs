@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Cef, Manager, WebviewUrl, WebviewWindowBuilder};
 use tokio::sync::{oneshot, Mutex};
 use tokio::time::{sleep, timeout, Duration};
 
@@ -39,7 +39,7 @@ pub async fn webview_html_callback(webview_id: String, html: String) -> Result<(
 }
 
 pub async fn create_fetch_webview(
-    app: AppHandle,
+    app: AppHandle<Cef>,
     url: String,
     timeout_seconds: u64,
 ) -> Result<String, String> {
@@ -79,7 +79,7 @@ pub async fn create_fetch_webview(
 }
 
 pub async fn fetch_html_from_webview(
-    app: AppHandle,
+    app: AppHandle<Cef>,
     webview_id: String,
     timeout_seconds: u64,
 ) -> Result<String, String> {
@@ -137,7 +137,7 @@ pub async fn fetch_html_from_webview(
     Ok(result)
 }
 
-pub async fn close_webview(app: AppHandle, webview_id: String) -> Result<(), String> {
+pub async fn close_webview(app: AppHandle<Cef>, webview_id: String) -> Result<(), String> {
     {
         let mut timeouts = WEBVIEW_TIMEOUTS.lock().await;
         if let Some(handle) = timeouts.remove(&webview_id) {
@@ -158,7 +158,7 @@ pub async fn close_webview(app: AppHandle, webview_id: String) -> Result<(), Str
 }
 
 pub async fn fetch_url_with_webview(
-    app: AppHandle,
+    app: AppHandle<Cef>,
     url: String,
     timeout_seconds: u64,
 ) -> Result<WebviewFetchResult, String> {
@@ -217,14 +217,17 @@ fn extract_title(html: &str) -> Option<String> {
 }
 
 #[tauri::command]
-pub fn list_webviews(app: AppHandle) -> Result<Vec<String>, String> {
+pub fn list_webviews(app: AppHandle<Cef>) -> Result<Vec<String>, String> {
     let webviews = app.webview_windows();
     let labels: Vec<String> = webviews.keys().cloned().collect();
     Ok(labels)
 }
 
 #[tauri::command]
-pub async fn force_close_webview(app: AppHandle, webview_id: String) -> Result<String, String> {
+pub async fn force_close_webview(
+    app: AppHandle<Cef>,
+    webview_id: String,
+) -> Result<String, String> {
     close_webview(app, webview_id.clone()).await?;
     Ok(format!("Webview '{}' closed successfully", webview_id))
 }
