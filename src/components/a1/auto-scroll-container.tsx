@@ -1,5 +1,4 @@
 "use client";
-import { IconChevronDown } from "@tabler/icons-react";
 import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
 import {
   forwardRef,
@@ -12,9 +11,10 @@ import {
   useState,
 } from "react";
 
-import { Button } from "@/components/ui/button";
 import { useOverflow } from "@/hooks/use-overflow";
 import { cn } from "@/lib/utils";
+
+import { ChatToBottomButton } from "./chat-to-bottom-button";
 
 const AT_BOTTOM_THRESHOLD = 10;
 
@@ -27,8 +27,6 @@ export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivEl
   overscan?: number;
   keepMountedIndexes?: readonly number[];
   scrollButtonClassName?: string;
-  scrollButtonChildren?: ReactNode;
-  scrollButtonProps?: Omit<React.ComponentProps<"button">, "className" | "children" | "onClick">;
   buttonScrollBehavior?: "smooth" | "instant";
   scrollableClassName?: string;
   overflowingClassName?: string;
@@ -52,8 +50,6 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       className,
       scrollableClassName,
       scrollButtonClassName,
-      scrollButtonChildren,
-      scrollButtonProps,
       overflowingClassName,
       buttonScrollBehavior = "smooth",
       behavior = "instant",
@@ -213,19 +209,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
           </div>
         </div>
         {showButton && (
-          <div className="absolute right-4 bottom-2 z-10">
-            <Button
-              data-testid="scroll-to-bottom"
-              size="icon"
-              onClick={handleScrollButtonClick}
-              className={cn("hover:opacity-75", scrollButtonClassName)}
-              variant="secondary"
-              aria-label="Scroll to bottom"
-              {...scrollButtonProps}
-            >
-              {scrollButtonChildren || <IconChevronDown data-testid="scroll-to-bottom-icon" />}
-            </Button>
-          </div>
+          <ChatToBottomButton onClick={handleScrollButtonClick} className={scrollButtonClassName} />
         )}
       </div>
     );

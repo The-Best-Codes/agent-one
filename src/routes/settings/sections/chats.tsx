@@ -28,6 +28,7 @@ import {
   remendEnabledAtom,
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
+  showChatToBottomButtonAtom,
   smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
@@ -67,6 +68,7 @@ export default function ChatsSection() {
   const [showChatStatusIndicator, setShowChatStatusIndicator] = useAtom(
     showChatStatusIndicatorAtom,
   );
+  const [showChatToBottomButton, setShowChatToBottomButton] = useAtom(showChatToBottomButtonAtom);
   const [chatSort, setChatSort] = useAtom(chatSortAtom);
   const [titleGeneration, setTitleGeneration] = useAtom(titleGenerationAtom);
 
@@ -89,6 +91,8 @@ export default function ChatsSection() {
     alwaysShowStopButton === DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR;
   const isShowChatStatusIndicatorDefault =
     showChatStatusIndicator === DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR;
+  const isShowChatToBottomButtonDefault =
+    showChatToBottomButton === DEFAULT_SETTINGS.SHOW_CHAT_TO_BOTTOM_BUTTON;
   const isChatSortDefault = chatSort === DEFAULT_SETTINGS.CHAT_SORT;
   const isTitleGenerationDefault =
     JSON.stringify(titleGeneration) === JSON.stringify(DEFAULT_SETTINGS.TITLE_GENERATION);
@@ -436,6 +440,41 @@ export default function ChatsSection() {
                     resetSetting("STOP_BUTTON_BEHAVIOR");
                   }}
                   disabled={isAlwaysShowStopButtonDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-show-scroll-to-bottom-button">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Chat Scroll to Bottom Button</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Show a button to quickly scroll to the bottom of the chat.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showChatToBottomButton}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "chat_scroll_to_bottom_button_toggled", {
+                      enabled: checked,
+                    });
+                    setShowChatToBottomButton(checked);
+                  }}
+                  aria-label="Toggle chat scroll to bottom button"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_chat_scroll_to_bottom_button");
+                    resetSetting("SHOW_CHAT_TO_BOTTOM_BUTTON");
+                  }}
+                  disabled={isShowChatToBottomButtonDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />

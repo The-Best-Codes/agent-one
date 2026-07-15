@@ -35,6 +35,7 @@ import {
   regenerateOnSaveAtom,
   remendEnabledAtom,
   roundnessAtom,
+  showChatToBottomButtonAtom,
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
   smoothStreamEnabledAtom,
@@ -175,6 +176,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "REMEND_ENABLED":
       store.set(remendEnabledAtom, RESET);
+      break;
+    case "SHOW_CHAT_TO_BOTTOM_BUTTON":
+      store.set(showChatToBottomButtonAtom, RESET);
       break;
     case "STOP_BUTTON_BEHAVIOR":
       store.set(stopButtonBehaviorAtom, RESET);

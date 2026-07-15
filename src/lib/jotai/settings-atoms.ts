@@ -247,3 +247,8 @@ export const remendEnabledAtom = createSettingAtom(
   "REMEND_ENABLED",
   DEFAULT_SETTINGS.REMEND_ENABLED,
 );
+
+export const showChatToBottomButtonAtom = createSettingAtom(
+  "SHOW_CHAT_TO_BOTTOM_BUTTON",
+  DEFAULT_SETTINGS.SHOW_CHAT_TO_BOTTOM_BUTTON,
+);

@@ -344,6 +344,7 @@ export interface DefaultSettings extends ApiKeySettings {
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: boolean;
   KEYBOARD_SHORTCUTS: KeyboardShortcutSettings;
   REMEND_ENABLED: boolean;
+  SHOW_CHAT_TO_BOTTOM_BUTTON: boolean;
 }
 
 export const DEFAULT_SETTINGS: DefaultSettings = {
@@ -519,6 +520,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS: true,
   KEYBOARD_SHORTCUTS: defaultKeyboardShortcuts,
   REMEND_ENABLED: true,
+  SHOW_CHAT_TO_BOTTOM_BUTTON: true,
   AGENT_ONE_API_KEY: "",
   "302AI_API_KEY": "",
   ABACUS_API_KEY: "",
