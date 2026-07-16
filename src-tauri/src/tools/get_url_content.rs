@@ -7,7 +7,7 @@ use htmd::HtmlToMarkdown;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Cef};
+use tauri::AppHandle;
 use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
@@ -29,7 +29,7 @@ pub struct UrlContentResponse {
 
 #[tauri::command]
 pub async fn get_url_content(
-    app: AppHandle<Cef>,
+    app: AppHandle,
     url: String,
     format: String,
     max_length: usize,

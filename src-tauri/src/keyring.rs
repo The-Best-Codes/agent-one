@@ -78,7 +78,7 @@ pub struct StorageResponse {
     pub error: Option<String>,
 }
 
-pub fn resolve_agent_db_path(app: &tauri::AppHandle<tauri::Cef>) -> Result<PathBuf, String> {
+pub fn resolve_agent_db_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     let app_config_dir = app
         .path()
         .app_config_dir()
@@ -384,7 +384,7 @@ async fn has_password(key: &str, db_path: &Path) -> Result<bool, String> {
 
 #[tauri::command]
 pub async fn storage_get_item(
-    app: tauri::AppHandle<tauri::Cef>,
+    app: tauri::AppHandle,
     key: String,
     default_json: String,
 ) -> Result<StorageResponse, String> {
@@ -404,7 +404,7 @@ pub async fn storage_get_item(
 
 #[tauri::command]
 pub async fn storage_set_item(
-    app: tauri::AppHandle<tauri::Cef>,
+    app: tauri::AppHandle,
     key: String,
     value_json: String,
 ) -> Result<(), String> {
@@ -413,19 +413,13 @@ pub async fn storage_set_item(
 }
 
 #[tauri::command]
-pub async fn storage_remove_item(
-    app: tauri::AppHandle<tauri::Cef>,
-    key: String,
-) -> Result<bool, String> {
+pub async fn storage_remove_item(app: tauri::AppHandle, key: String) -> Result<bool, String> {
     let db_path = resolve_agent_db_path(&app)?;
     delete_password(&key, &db_path).await
 }
 
 #[tauri::command]
-pub async fn storage_has_item(
-    app: tauri::AppHandle<tauri::Cef>,
-    key: String,
-) -> Result<bool, String> {
+pub async fn storage_has_item(app: tauri::AppHandle, key: String) -> Result<bool, String> {
     let db_path = resolve_agent_db_path(&app)?;
     has_password(&key, &db_path).await
 }
