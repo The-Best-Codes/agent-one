@@ -161,7 +161,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
-  const [longRunningNow, setLongRunningNow] = useState(() => Date.now());
+  const [showLongRunningStop, setShowLongRunningStop] = useState(false);
 
   const liveState = useSyncExternalStore(
     (listener) => subscribeExecuteCommandLiveState(callId, listener),
@@ -171,16 +171,20 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
 
   useEffect(() => {
     if (!liveState || liveState.status === "completed") {
+      setShowLongRunningStop(false);
       return;
     }
 
     const elapsed = Date.now() - liveState.startedAt;
     if (elapsed >= 1000) {
+      setShowLongRunningStop(true);
       return;
     }
 
+    setShowLongRunningStop(false);
+
     const timeout = window.setTimeout(() => {
-      setLongRunningNow(Date.now());
+      setShowLongRunningStop(true);
     }, 1000 - elapsed);
 
     return () => {
@@ -188,12 +192,6 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
     };
   }, [liveState]);
 
-  const showLongRunningStop = Boolean(
-    liveState &&
-    liveState.status !== "completed" &&
-    !liveState.timedOut &&
-    longRunningNow - liveState.startedAt >= 1000,
-  );
   const showLongRunningSkip =
     showLongRunningStop && liveState?.status === "running" && !liveState?.skipRequested;
 
