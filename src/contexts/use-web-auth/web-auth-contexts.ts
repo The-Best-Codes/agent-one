@@ -83,6 +83,7 @@ export interface WebAuthContextType {
   customerState: CustomerState | null;
   billingLoading: boolean;
   billingError: string | null;
+  refreshBilling: () => void;
   startSignIn: () => Promise<void>;
   cancelSignIn: () => void;
   signOut: () => Promise<void>;

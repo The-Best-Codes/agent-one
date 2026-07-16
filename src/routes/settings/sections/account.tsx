@@ -8,7 +8,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -67,7 +67,12 @@ export default function AccountSection() {
     customerState,
     billingLoading,
     billingError,
+    refreshBilling,
   } = useWebAuth();
+
+  useEffect(() => {
+    refreshBilling();
+  }, [refreshBilling]);
 
   const activeSubscription = useMemo(
     () =>

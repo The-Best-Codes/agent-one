@@ -35,6 +35,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [billingError, setBillingError] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
+  const loadBillingRef = useRef<((silent?: boolean) => Promise<void>) | null>(null);
 
   const fetchSession = useCallback(
     async (accessToken: string): Promise<"valid" | "invalid" | "error"> => {
@@ -130,13 +131,18 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     void loadBilling();
+    loadBillingRef.current = loadBilling;
 
-    const id = setInterval(() => {
-      void loadBilling(true);
-    }, 60_000);
+    const id = setInterval(
+      () => {
+        void loadBilling(true);
+      },
+      60 * 60 * 1000,
+    );
 
     return () => {
       cancelled = true;
+      loadBillingRef.current = null;
       clearInterval(id);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -282,12 +288,19 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
   useEffect(() => {
     if (!user) return;
 
-    const id = setInterval(() => {
-      settingsSyncManager.syncNow();
-    }, 60_000);
+    const id = setInterval(
+      () => {
+        settingsSyncManager.syncNow();
+      },
+      60 * 60 * 1000,
+    );
 
     return () => clearInterval(id);
   }, [user]);
+
+  const refreshBilling = useCallback(() => {
+    void loadBillingRef.current?.(false);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -299,6 +312,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
       customerState,
       billingLoading,
       billingError,
+      refreshBilling,
       startSignIn,
       cancelSignIn,
       signOut,
@@ -312,6 +326,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
       customerState,
       billingLoading,
       billingError,
+      refreshBilling,
       startSignIn,
       cancelSignIn,
       signOut,
