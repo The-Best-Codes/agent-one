@@ -299,7 +299,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, [user]);
 
   const refreshBilling = useCallback(() => {
-    void loadBillingRef.current?.(false);
+    void loadBillingRef.current?.(true);
   }, []);
 
   const value = useMemo(
