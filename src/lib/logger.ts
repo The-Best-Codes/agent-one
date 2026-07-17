@@ -27,7 +27,7 @@ function limitStoredLogs(logs: LogEntry[]): LogEntry[] {
 const storedLogHistoryAtom = atomWithStorage<LogEntry[]>(LOG_STORAGE_KEY, [], undefined, {
   getOnInit: true,
 });
-const currentLogHistoryAtom = atom(jotaiStore.get(storedLogHistoryAtom));
+const currentLogHistoryAtom = atom(limitStoredLogs(jotaiStore.get(storedLogHistoryAtom)));
 const storageTimeoutAtom = atom<ReturnType<typeof setTimeout>>();
 
 export const logHistoryAtom = atom(
@@ -42,12 +42,12 @@ export const logHistoryAtom = atom(
     }
 
     const previousLogs = get(currentLogHistoryAtom);
-    const logs = typeof update === "function" ? update(previousLogs) : update;
+    const logs = limitStoredLogs(typeof update === "function" ? update(previousLogs) : update);
 
     set(currentLogHistoryAtom, logs);
     set(
       storageTimeoutAtom,
-      setTimeout(() => set(storedLogHistoryAtom, limitStoredLogs(logs)), 500),
+      setTimeout(() => set(storedLogHistoryAtom, logs), 500),
     );
   },
 );
