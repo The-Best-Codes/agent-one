@@ -97,6 +97,17 @@ export default function TestsRoute() {
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
+                  <h3 className="font-medium">Log History</h3>
+                  <p className="text-muted-foreground text-sm">
+                    View persisted application logs from the current session
+                  </p>
+                </div>
+                <Button onClick={() => navigate("/tests/logs")} variant="outline">
+                  View Logs
+                </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div>
                   <h3 className="font-medium">React Scan</h3>
                   <p className="text-muted-foreground text-sm">
                     Enable react-scan to visualize component renders for the rest of this session

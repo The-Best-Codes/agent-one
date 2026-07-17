@@ -86,7 +86,11 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
 
         const result = await Promise.race([searchPromise, timeoutPromise]);
 
-        logger.verbose("Search completed:", result);
+        logger.verbose("Search completed:", {
+          query: result.query,
+          totalResults: result.total_results,
+          resultCount: result.results.length,
+        });
 
         return {
           query: result.query,
