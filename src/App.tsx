@@ -1,11 +1,12 @@
 import { useAtomValue } from "jotai";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Outlet, Route, Routes, useLocation } from "react-router";
 import { Toaster } from "sonner";
 
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
 import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-startup-sync";
 import { ReactScan } from "@/components/a1/react-scan";
+import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
@@ -20,10 +21,11 @@ import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
 import SettingsRoute from "@/routes/settings";
-import TestsRoute from "@/routes/tests";
-import ChatStressTestRoute from "@/routes/tests/chat-stress";
-import LocalDatabaseTestRoute from "@/routes/tests/local-database";
-import NotificationsTestRoute from "@/routes/tests/notifications";
+
+const TestsRoute = lazy(() => import("@/routes/tests"));
+const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
+const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
+const NotificationsTestRoute = lazy(() => import("@/routes/tests/notifications"));
 
 import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
 import { UpdateAvailableDialog } from "./components/a1/update-available-dialog";
@@ -82,10 +84,24 @@ function App() {
           <Route path="/chat/:id" element={<ChatRoute />} />
           <Route path="/onboarding" element={<OnboardingRoute />} />
           <Route path="/settings" element={<SettingsRoute />} />
-          <Route path="/tests" element={<TestsRoute />} />
-          <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
-          <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
-          <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
+          <Route
+            element={
+              <Suspense
+                fallback={
+                  <div className="flex h-svh items-center justify-center">
+                    <Spinner className="text-muted-foreground size-8" />
+                  </div>
+                }
+              >
+                <Outlet />
+              </Suspense>
+            }
+          >
+            <Route path="/tests" element={<TestsRoute />} />
+            <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
+            <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
+            <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
+          </Route>
           <Route path="*" element={<NotFoundRoute />} />
         </Route>
       </Routes>
