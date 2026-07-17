@@ -21,7 +21,33 @@ function limitStoredLogs(logs: LogEntry[]): LogEntry[] {
   while (JSON.stringify(storedLogs).length > MAX_LOG_STORAGE_SIZE && storedLogs.length > 1) {
     storedLogs.shift();
   }
+
+  if (storedLogs.length === 1) {
+    const serializedLength = JSON.stringify(storedLogs).length;
+    if (serializedLength > MAX_LOG_STORAGE_SIZE) {
+      const [log] = storedLogs;
+      storedLogs[0] = {
+        ...log,
+        message: log.message.slice(
+          0,
+          log.message.length - (serializedLength - MAX_LOG_STORAGE_SIZE),
+        ),
+      };
+    }
+  }
+
   return storedLogs;
+}
+
+function serializeLogValue(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value instanceof Error) return value.stack ?? `${value.name}: ${value.message}`;
+
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
 }
 
 const storedLogHistoryAtom = atomWithStorage<LogEntry[]>(LOG_STORAGE_KEY, [], undefined, {
@@ -74,7 +100,7 @@ function getTagFromPathOrUrl(inputPath: string): string {
 const storageReporter: ConsolaReporter = {
   log(logObj) {
     const parts = [logObj.message, ...logObj.args].filter((a) => a != null);
-    const message = parts.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ");
+    const message = parts.map(serializeLogValue).join(" ");
     jotaiStore.set(logHistoryAtom, (logHistory) => [
       ...logHistory,
       {
