@@ -96,7 +96,7 @@ const vendorManualChunks = {
     "@number-flow/react",
     "number-flow",
     "react-scan",
-    "react-grab"
+    "react-grab",
   ],
   tauri: [
     "@tauri-apps/api",
