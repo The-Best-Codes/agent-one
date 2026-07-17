@@ -34,20 +34,12 @@ export function useOverflow<T extends HTMLElement>(
       setIsOverflowing((current) => (current === nextIsOverflowing ? current : nextIsOverflowing));
     };
 
-    let frameId: number | null = null;
-    const scheduleCheck = () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-      frameId = window.requestAnimationFrame(checkOverflow);
-    };
-
     checkOverflow();
 
-    const resizeObserver = new ResizeObserver(scheduleCheck);
+    const resizeObserver = new ResizeObserver(checkOverflow);
     resizeObserver.observe(element);
 
-    const mutationObserver = new MutationObserver(scheduleCheck);
+    const mutationObserver = new MutationObserver(checkOverflow);
     mutationObserver.observe(element, {
       childList: true,
       subtree: true,
@@ -57,10 +49,6 @@ export function useOverflow<T extends HTMLElement>(
     });
 
     return () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };
