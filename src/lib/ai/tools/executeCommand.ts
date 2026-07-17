@@ -149,7 +149,7 @@ export const createExecuteCommandTool = (config: ExecuteCommandToolConfig) =>
       let stderr = "";
       let pendingStdout = "";
       let pendingStderr = "";
-      let flushTimeoutId: any = null;
+      let flushTimeoutId: ReturnType<typeof setTimeout> | null = null;
       let timedOut = false;
       let done = false;
       let exitCode: number | null = null;
