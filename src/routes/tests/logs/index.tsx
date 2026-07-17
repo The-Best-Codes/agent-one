@@ -39,6 +39,7 @@ export default function LogsTestRoute() {
 
   const totalBytes = useMemo(() => JSON.stringify(logs).length, [logs]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredLogs.length,
     getScrollElement: () => parentRef.current,
