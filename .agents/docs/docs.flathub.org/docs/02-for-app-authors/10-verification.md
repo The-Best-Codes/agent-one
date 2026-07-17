@@ -53,10 +53,10 @@ GitHub, GitLab, GNOME GitLab, and KDE GitLab may be verified by
 authenticating with Flathub using an authorized account. The following
 app ID prefixes will be matched:
 
-- **GitHub**: `io.github.`
-- **GitLab**: `io.gitlab.`
-- **GNOME GitLab**: `org.gnome.`
-- **KDE GitLab**: `org.kde.`
+  - **GitHub**: `io.github.`
+  - **GitLab**: `io.gitlab.`
+  - **GNOME GitLab**: `org.gnome.`
+  - **KDE GitLab**: `org.kde.`
 
 For GitHub, the authenticated account must be the owner of the
 repository. If the repository is owned by an organization, the account

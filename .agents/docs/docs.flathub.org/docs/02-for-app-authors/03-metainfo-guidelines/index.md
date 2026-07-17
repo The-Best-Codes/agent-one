@@ -22,7 +22,6 @@ MetaInfo file. Install `org.flatpak.Builder` from Flathub:
 ```sh
 flatpak install -y flathub org.flatpak.Builder
 ```
-
 Then the MetaInfo file validation can be performed with:
 
 ```sh
@@ -290,6 +289,7 @@ application in current `id` tag replaces the one in this tag.
 
 ## Categories and keywords
 
+
 If there’s a [launchable](#launchable) defined for a desktop application,
 categories and keywords are pulled from the desktop file. Defining them
 separately in the Metainfo file will override the contents of the
@@ -354,7 +354,7 @@ The `<project_group/>` tag can be used if the application is affiliated
 with a known software project like for example GNOME, KDE or Mozilla.
 
 The following project group tag values
-`Freedesktop, FreeDesktop, GNOME, KDE` are "protected", meaning only
+`Freedesktop, FreeDesktop, GNOME, KDE` are  "protected", meaning only
 application IDs starting with `org.freedesktop, org.gnome, org.kde`
 respectively are allowed to use them.
 
@@ -458,6 +458,7 @@ must not be in the future and versions must be [properly ordered](https://www.fr
 `appstreamcli vercmp <version 1> <version 2>` can be used to compare the
 order of two versions.
 :::
+
 
 Releases in MetaInfo should look like this:
 
@@ -581,11 +582,9 @@ by using `translate="no"`.
 ## Device support
 
 :::tip
-
 ```bash
 appstreamcli check-syscompat --details $FLATPAK_ID.metainfo.xml
 ```
-
 can be used to get an overview of the compatibility.
 :::
 
@@ -720,6 +719,7 @@ Desktop only apps typically should have:
 
 Mobile and tablet only apps typically should have:
 
+
 ```xml
 <requires>
   <control>touch</control>
@@ -731,6 +731,7 @@ Mobile and tablet only apps typically should have:
 
 Apps that support and work on mobile, tablet and desktop typically
 should have:
+
 
 ```xml
 <supports>

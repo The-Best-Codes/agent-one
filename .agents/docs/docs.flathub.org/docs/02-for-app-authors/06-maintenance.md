@@ -209,10 +209,11 @@ External data checker action.
 #### Custom workflow to run external-data-checker on multiple branches
 
 ```yaml title=".github/workflows/update.yaml"
+
 name: Check for updates
 on:
   schedule:
-    - cron: "0 14 * * 1" # Run once a week, on Monday, at 14:00
+    - cron: '0 14 * * 1' # Run once a week, on Monday, at 14:00
   workflow_dispatch: {}
 jobs:
   flatpak-external-data-checker:
@@ -220,7 +221,7 @@ jobs:
     if: github.repository_owner == 'flathub'
     strategy:
       matrix:
-        branch: [branch/23.08, branch/24.08, beta]
+        branch: [ branch/23.08, branch/24.08, beta ]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -244,7 +245,7 @@ name: Check for updates
 
 on:
   schedule:
-    - cron: "0 5 * * 0"
+    - cron: '0 5 * * 0'
   workflow_dispatch: {}
 
 jobs:
@@ -650,12 +651,12 @@ An application on Flathub can be marked as End-of-Life under the
 following conditions:
 
 1. **Upstream development has formally ceased**: This is valid when
-   upstream has formally announced EOL, archived their git repository
-   or removed upstream sources etc.
+  upstream has formally announced EOL, archived their git repository
+  or removed upstream sources etc.
 
 2. **Upstream development appears abandoned**: This is valid when
-   upstream has not formally announced EOL, but there has been no signs
-   of activity or development for at least 2 years.
+  upstream has not formally announced EOL, but there has been no signs
+  of activity or development for at least 2 years.
 
 3. **Flatpak is unmaintained or abandoned**: This is valid when the
    Flatpak on Flathub has no maintainers at all or there has been
@@ -687,7 +688,7 @@ following conditions:
 Except the first and the last case above, before marking a Flatpak as
 EOL, the following process should be followed:
 
-- Reasonable attempts should be made to contact the current Flatpak
+* Reasonable attempts should be made to contact the current Flatpak
   maintainers and, where possible or applicable, the upstream project.
 
   This process may be used to confirm the upstream EOL status,
@@ -695,13 +696,13 @@ EOL, the following process should be followed:
   still actively maintained, offer assistance to maintainers, or remind
   them about unresolved critical issues and pending runtime updates.
 
-- A notice period of one month should be provided to allow upstream
+* A notice period of one month should be provided to allow upstream
   maintainers or Flatpak maintainers or contributors to respond. This
   should preferably be done through issues or discourse posts to keep a
   record but if it is not possible any other contact methods can be
   used.
 
-- If no response is received within the notice period or there is no one
+* If no response is received within the notice period or there is no one
   to maintain or solve the issues, the application can be
   [marked as EOL](/docs/for-app-authors/maintenance#end-of-life).
 
@@ -737,17 +738,17 @@ after verification.
 
 EOL status can be reversed if:
 
-- A new maintainer volunteers to take over maintenance of the Flatpak
+* A new maintainer volunteers to take over maintenance of the Flatpak
 
-- Upstream development and Flatpak maintainance resumes.
+* Upstream development and Flatpak maintainance resumes.
 
 ### EOL policy notes
 
-- If the Flatpak appears unmaintained and is generating a large number
+* If the Flatpak appears unmaintained and is generating a large number
   of PRs with no human activity on them, certain workflows can be
   disabled.
 
-- If a Flatpak is eligible to be marked as EOL but there is interest in
+* If a Flatpak is eligible to be marked as EOL but there is interest in
   continuing to maintain it, it should not be marked as EOL or have its
   GitHub repository archived. Instead, an appropriate indication of its
   maintenance status may be displayed on the Flathub website to

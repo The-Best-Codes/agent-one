@@ -201,29 +201,29 @@ itself, unlocking features, or buying in-app items.
 
 The following are excluded from the scope of this policy:
 
-- Any voluntary, non-mandatory forms of payments such as donations.
+* Any voluntary, non-mandatory forms of payments such as donations.
 
-- Payments made through the application that are independent of
+* Payments made through the application that are independent of
   the app itself.
 
 If the policy is applicable:
 
-- Monetisation must provide a clear and non-negligible benefit or
+* Monetisation must provide a clear and non-negligible benefit or
   functionality to the user and they cannot be charged multiple times
   for the same benefit unless operating on a subscription model.
 
-- Prices must be set reasonably and must be relative to the value and
+* Prices must be set reasonably and must be relative to the value and
   the features provided by the application. Other paid applications
   providing the similar features can be used as a reference point.
 
-- Any monetisation requirements or benefits must be disclosed upfront
+* Any monetisation requirements or benefits must be disclosed upfront
   unambiguously and should be clearly visible to the users.
 
-- The prices, and the benefits provided to the users must not be
+* The prices, and the benefits provided to the users must not be
   altered in a way that would substantially degrade the user
   experience upon acceptance.
 
-- Reviewers must be able to access and test the application's full
+* Reviewers must be able to access and test the application's full
   functionality during the review process if necessary.
 
 If the application is being maintained or submitted by third party
@@ -460,21 +460,21 @@ source directory. If the licence file is not being automatically
 installed, it must be manually installed using:
 
 ```yaml
-- name: my-module
-  buildsystem: simple
-  build-commands:
-    - install -Dm0644 LICENSE -t $FLATPAK_DEST/share/licenses/$FLATPAK_ID/<my-module-name>
+  - name: my-module
+    buildsystem: simple
+    build-commands:
+      - install -Dm0644 LICENSE -t $FLATPAK_DEST/share/licenses/$FLATPAK_ID/<my-module-name>
 ```
 
 or using `post-install`:
 
 ```yaml
-- name: my-module
-  buildsystem: cmake-ninja
-  builddir: true
-  post-install:
-    - mkdir -p $FLATPAK_DEST/share/licenses/$FLATPAK_ID/<my-module-name>
-    - mv ../LICENSES/* $FLATPAK_DEST/share/licenses/$FLATPAK_ID/<my-module-name>
+  - name: my-module
+    buildsystem: cmake-ninja
+    builddir: true
+    post-install:
+      - mkdir -p $FLATPAK_DEST/share/licenses/$FLATPAK_ID/<my-module-name>
+      - mv ../LICENSES/* $FLATPAK_DEST/share/licenses/$FLATPAK_ID/<my-module-name>
 ```
 
 ## Permissions
@@ -590,27 +590,27 @@ a logical meaning and flow.
 
 #### JSON manifest style
 
-- Must be valid JSON per RFC 7159. Non-standard features such as comments
+* Must be valid JSON per RFC 7159. Non-standard features such as comments
   should be used in `"//":` or `"x-comment":` keys or consider YAML
   manifests.
-- Indentation must be 4 tabs with LF line endings.
-- Encoding must be UTF-8.
-- Files must have a trailing newline.
-- Double quotes must be used for all keys and string values.
-- Trailing commas are not allowed.
+* Indentation must be 4 tabs with LF line endings.
+* Encoding must be UTF-8.
+* Files must have a trailing newline.
+* Double quotes must be used for all keys and string values.
+* Trailing commas are not allowed.
 
 #### YAML manifest style
 
-- Must be [valid YAML](https://yaml.org/spec/1.2.2/).
-- Indentation must be 2 spaces with LF line endings.
-- Encoding must be UTF-8.
-- Files must have a trailing newline.
-- Child elements must always be indented.
-- Blank lines should be inserted between modules.
-- Values must not be vertically aligned.
-- List items must be indented consistently.
-- Strings should remain unquoted unless quoting is required.
-- Values must not be aligned.
+* Must be [valid YAML](https://yaml.org/spec/1.2.2/).
+* Indentation must be 2 spaces with LF line endings.
+* Encoding must be UTF-8.
+* Files must have a trailing newline.
+* Child elements must always be indented.
+* Blank lines should be inserted between modules.
+* Values must not be vertically aligned.
+* List items must be indented consistently.
+* Strings should remain unquoted unless quoting is required.
+* Values must not be aligned.
 
 #### Logical ordering of keys
 

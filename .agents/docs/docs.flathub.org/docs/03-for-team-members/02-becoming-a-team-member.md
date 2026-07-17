@@ -7,16 +7,16 @@ and consistency of the repository.
 These contributors are generally responsible for tasks including, but
 not limited to:
 
-- Reviewing new application submissions.
-- Reviewing [Build Moderation](/docs/for-app-authors/maintenance#build-moderation)
+* Reviewing new application submissions.
+* Reviewing [Build Moderation](/docs/for-app-authors/maintenance#build-moderation)
   requests.
-- Performing [Quality Guideline](/docs/for-app-authors/metainfo-guidelines/quality-guidelines)
+* Performing [Quality Guideline](/docs/for-app-authors/metainfo-guidelines/quality-guidelines)
   reviews for applications.
-- Triaging and responding to issues or queries from application
+* Triaging and responding to issues or queries from application
   developers.
-- Updating, adopting maintenance of, or contributing to Flatpaks when
+* Updating, adopting maintenance of, or contributing to Flatpaks when
   necessary.
-- Auditing existing applications to ensure compliance with current
+* Auditing existing applications to ensure compliance with current
   Flathub guidelines and best practices.
 
 As Flathub continues to grow, expanding the contributor base becomes
@@ -133,15 +133,15 @@ Flathub workflows and processes.
 
 A list of relevant components is provided below.
 
-- [Flathub website frontend](https://github.com/flathub-infra/website/tree/main/frontend)
+* [Flathub website frontend](https://github.com/flathub-infra/website/tree/main/frontend)
   (React, Typescript, NextJS)
-- [Flathub website backend](https://github.com/flathub-infra/website/tree/main/backend)
+* [Flathub website backend](https://github.com/flathub-infra/website/tree/main/backend)
   (Python, FastAPI)
-- [Flathub build dispatcher](https://github.com/flathub-infra/vorarbeiter)
+* [Flathub build dispatcher](https://github.com/flathub-infra/vorarbeiter)
   (Python, FastAPI)
-- [Flathub build linter](https://github.com/flathub-infra/flatpak-builder-lint)
+* [Flathub build linter](https://github.com/flathub-infra/flatpak-builder-lint)
   (Python)
-- [Flatpak external data checker](https://github.com/flathub-infra/flatpak-external-data-checker)
+* [Flatpak external data checker](https://github.com/flathub-infra/flatpak-external-data-checker)
   (Python)
 
 ### Other contributions
@@ -149,29 +149,29 @@ A list of relevant components is provided below.
 Flathub also benefits greatly from contributions to upstream projects.
 Some relevant projects are listed below.
 
-- [XDG desktop portals](https://flatpak.github.io/xdg-desktop-portal/docs/for-contributors.html)
+* [XDG desktop portals](https://flatpak.github.io/xdg-desktop-portal/docs/for-contributors.html)
   and its backends provide a collection of standard cross-platform APIs
   for desktops, toolkits and applications which allows to reduce static
   sandbox permissions and migrate to secure portal alternatives.
   Contributions here will enable Flathub apps to reduce their sandbox
   holes and make the overall app ecosystem more secure.
-- [Flatpak](https://github.com/flatpak/flatpak/blob/main/CONTRIBUTING.md)
+* [Flatpak](https://github.com/flatpak/flatpak/blob/main/CONTRIBUTING.md)
   is the core framework and tool for sandboxing, distributing and
   running Linux applications across different distributions. Flathub
   is a Flatpak-only app store.
-- [Flatpak Builder](https://github.com/flatpak/flatpak-builder/) is the
+* [Flatpak Builder](https://github.com/flatpak/flatpak-builder/) is the
   tool that automates the process of building Flatpaks from their
   manifests and managing their dependencies.
-- [Flatpak runtimes](/docs/for-app-authors/runtimes#currently-hosted-runtimes)
+* [Flatpak runtimes](/docs/for-app-authors/runtimes#currently-hosted-runtimes)
   are shared runtime environments that provide common libraries and
   the platforms that all Flatpak applications depend and build upon.
-- [Flatpak builder tools](https://github.com/flatpak/flatpak-builder-tools)
+* [Flatpak builder tools](https://github.com/flatpak/flatpak-builder-tools)
   are a collection of community-contributed scripts and modules that
   automate common Flatpak packaging tasks.
-- [Flatpak GitHub actions](https://github.com/flatpak/flatpak-github-actions)
+* [Flatpak GitHub actions](https://github.com/flatpak/flatpak-github-actions)
   is a GitHub action that allows to build and serve Flatpaks using
   GitHub workflows.
-- [Flatpak documentation](https://docs.flatpak.org/en/latest/) is
+* [Flatpak documentation](https://docs.flatpak.org/en/latest/) is
   the official documentation of Flatpak and Flatpak Builder covering
   sandboxing concepts, application packaging, and various guides.
 
@@ -199,9 +199,9 @@ approving and merging new submissions.
 
 Criteria:
 
-- Past examples of performing a reasonable number of non-trivial new
+* Past examples of performing a reasonable number of non-trivial new
   submission reviews within the last 3 months of the request.
-- Familiarity with Flathub requirements, Flatpak permission system
+* Familiarity with Flathub requirements, Flatpak permission system
   and general knowledge about software building and distribution
   practices.
 
@@ -217,12 +217,12 @@ unavailable or unresponsive.
 
 Criteria:
 
-- Past experience of maintaining a reasonable number of Flatpaks in the
+* Past experience of maintaining a reasonable number of Flatpaks in the
   Flathub application repositories, within the last 3 months of the
   request.
-- Past examples of assisting with package adoption, co-maintenance, or
+* Past examples of assisting with package adoption, co-maintenance, or
   maintenance efforts with adherence to proper maintenance practices.
-- Familiarity with Flathub requirements, Flatpak permission system,
+* Familiarity with Flathub requirements, Flatpak permission system,
   general knowledge about software building, distribution
   practices and Flathub-related tooling.
 
@@ -234,8 +234,8 @@ providing clarification or follow-up when developers raise questions.
 
 Criteria:
 
-- Members of any of the above teams are eligible
-- Familiarity with Flathub requirements and Flatpak permission system.
+* Members of any of the above teams are eligible
+* Familiarity with Flathub requirements and Flatpak permission system.
 
 ### Quality Moderation Team
 
@@ -246,9 +246,9 @@ and responding to clarification requests from application developers.
 
 Criteria:
 
-- General knowledge and awareness about the Linux application ecosystem
-- Experience in application design and UI/UX design or research
-- Familiarity with Flathub guidelines
+* General knowledge and awareness about the Linux application ecosystem
+* Experience in application design and UI/UX design or research
+* Familiarity with Flathub guidelines
 
 ### `flathub-infra` repositories
 

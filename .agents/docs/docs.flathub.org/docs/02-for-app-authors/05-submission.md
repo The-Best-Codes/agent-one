@@ -40,44 +40,44 @@ flatpak install -y flathub org.flatpak.Builder
 
 Add the Flathub repo user-wide:
 
-```bash
-flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-```
+   ```bash
+   flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+   ```
 
 Then build your manifest:
 
-```bash
-flatpak run --command=flathub-build org.flatpak.Builder --install <manifest>
-```
+   ```bash
+   flatpak run --command=flathub-build org.flatpak.Builder --install <manifest>
+   ```
 
 #### Extra data
 
 If you are using [extra-data](https://docs.flatpak.org/en/latest/module-sources.html#extra-data):
 
-```bash
-flatpak run --command=flathub-build org.flatpak.Builder <manifest>
-flatpak install --user -y ./repo $FLATPAK_ID
-```
+   ```bash
+   flatpak run --command=flathub-build org.flatpak.Builder <manifest>
+   flatpak install --user -y ./repo $FLATPAK_ID
+   ```
 
 ### Run and test
 
-```bash
-flatpak run <app id>
-```
+   ```bash
+   flatpak run <app id>
+   ```
 
 ### Run the linter
 
-Please try to run the [linter](/docs/for-app-authors/linter) once
-locally. Consult the documentation for explanation of the errors. For
-certain errors you might need an [exception](/docs/for-app-authors/linter#exceptions).
+   Please try to run the [linter](/docs/for-app-authors/linter) once
+   locally. Consult the documentation for explanation of the errors. For
+   certain errors you might need an [exception](/docs/for-app-authors/linter#exceptions).
 
-```bash
-flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest <manifest>
-```
+   ```bash
+   flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest <manifest>
+   ```
 
-```bash
-flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo
-```
+   ```bash
+   flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo
+   ```
 
 Once this is done you can open the submission pull request!
 
@@ -88,11 +88,9 @@ use the github.com web interface to create the pull request.
 
 :::tip
 If you have [GitHub CLI](https://cli.github.com/) installed run:
-
 ```bash
 gh repo fork --clone flathub/flathub && cd flathub && git checkout --track origin/new-pr
 ```
-
 and proceed directly to step 3.
 :::
 
@@ -139,6 +137,7 @@ guidelines or contain excessive AI-generated content may be
 closed without a review. In general, spammy activity, wasting
 reviewer's time may result in closing the pull request and/or a ban
 from further submissions.
+
 
 Once all comments are resolved, a _test_ build can be started on the
 pull request by commenting `bot, build`.

@@ -76,64 +76,70 @@ flatpak run --user --command=/bin/cat org.kde.minuet /app/manifest.json
 
 ```json
 {
-  "id": "org.kde.minuet",
-  "runtime": "org.kde.Platform",
-  "runtime-version": "6.9",
-  "runtime-commit": "f930fae18cfc829f51db18b9324905a3bebee0ec7e9d4d62afbb17f696fb20d0",
-  "sdk": "org.kde.Sdk",
-  "sdk-commit": "3170c974605b5af73a78bef2ae022df9b8dd7496569928a3766f0706c6c6515d",
-  "command": "minuet",
-  "modules": [
+  "id" : "org.kde.minuet",
+  "runtime" : "org.kde.Platform",
+  "runtime-version" : "6.9",
+  "runtime-commit" : "f930fae18cfc829f51db18b9324905a3bebee0ec7e9d4d62afbb17f696fb20d0",
+  "sdk" : "org.kde.Sdk",
+  "sdk-commit" : "3170c974605b5af73a78bef2ae022df9b8dd7496569928a3766f0706c6c6515d",
+  "command" : "minuet",
+  "modules" : [
     {
-      "name": "fluidsynth",
-      "buildsystem": "cmake-ninja",
-      "sources": [
+      "name" : "fluidsynth",
+      "buildsystem" : "cmake-ninja",
+      "sources" : [
         {
-          "url": "https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.6.tar.gz",
-          "sha256": "a6be90fd4842b9e7246500597180af5cf213c11bfa3998a3236dd8ff47961ea8",
-          "x-checker-data": {
-            "type": "anitya",
-            "project-id": 10437,
-            "stable-only": true,
-            "url-template": "https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$version.tar.gz"
+          "url" : "https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.4.6.tar.gz",
+          "sha256" : "a6be90fd4842b9e7246500597180af5cf213c11bfa3998a3236dd8ff47961ea8",
+          "x-checker-data" : {
+            "type" : "anitya",
+            "project-id" : 10437,
+            "stable-only" : true,
+            "url-template" : "https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v$version.tar.gz"
           },
-          "type": "archive"
+          "type" : "archive"
         }
       ]
     },
     {
-      "name": "minuet",
-      "buildsystem": "cmake-ninja",
-      "config-opts": ["-DBUILD_WITH_QT6=ON"],
-      "sources": [
+      "name" : "minuet",
+      "buildsystem" : "cmake-ninja",
+      "config-opts" : [
+        "-DBUILD_WITH_QT6=ON"
+      ],
+      "sources" : [
         {
-          "url": "https://download.kde.org/stable/release-service/25.04.2/src/minuet-25.04.2.tar.xz",
-          "sha256": "6d01871df0f666fbfc9c84bad6c7146955690e6a37b46738e98058f8a5bfb514",
-          "x-checker-data": {
-            "type": "anitya",
-            "project-id": 8763,
-            "stable-only": true,
-            "url-template": "https://download.kde.org/stable/release-service/$version/src/minuet-$version.tar.xz"
+          "url" : "https://download.kde.org/stable/release-service/25.04.2/src/minuet-25.04.2.tar.xz",
+          "sha256" : "6d01871df0f666fbfc9c84bad6c7146955690e6a37b46738e98058f8a5bfb514",
+          "x-checker-data" : {
+            "type" : "anitya",
+            "project-id" : 8763,
+            "stable-only" : true,
+            "url-template" : "https://download.kde.org/stable/release-service/$version/src/minuet-$version.tar.xz"
           },
-          "type": "archive"
+          "type" : "archive"
         },
         {
-          "path": "mr-37.patch",
-          "type": "patch"
+          "path" : "mr-37.patch",
+          "type" : "patch"
         }
       ]
     }
   ],
-  "cleanup": ["/lib64/pkgconfig", "/include", "/share/man"],
-  "finish-args": [
+  "cleanup" : [
+    "/lib64/pkgconfig",
+    "/include",
+    "/share/man"
+  ],
+  "finish-args" : [
     "--device=dri",
     "--share=ipc",
     "--socket=fallback-x11",
     "--socket=pulseaudio",
     "--socket=wayland"
   ],
-  "rename-icon": "minuet",
-  "source-date-epoch": 1321009871
+  "rename-icon" : "minuet",
+  "source-date-epoch" : 1321009871
 }
 ```
 

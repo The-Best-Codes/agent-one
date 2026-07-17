@@ -11,7 +11,7 @@ for how to do this.
 Application manifests are located in `/app/manifest.json` while runtime
 manifests can be found at `/usr/manifest.json`.
 
-Below is an _incomplete_ excerpt.
+Below is an *incomplete* excerpt.
 
 ```bash
 flatpak install flathub org.kde.Platform//6.9
@@ -20,69 +20,75 @@ flatpak run --command=cat org.kde.Platform//6.9 /usr/manifest.json
 
 ```json
 {
-  "id": "org.kde.Sdk",
-  "id-platform": "org.kde.Platform",
-  "branch": "6.9",
-  "runtime": "org.freedesktop.Platform",
-  "runtime-version": "24.08",
-  "runtime-commit": "a993292d6ff150598dad4cd1f725aeee01a668b9e721b559ea1b6f6240174d58",
-  "sdk": "org.freedesktop.Sdk",
-  "sdk-commit": "880e38dedfd737008ddd0ebbbd0daaaed26b0d20011b0ce622d411a36446d607",
-  "build-options": {
-    "env": {
-      "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+  "id" : "org.kde.Sdk",
+  "id-platform" : "org.kde.Platform",
+  "branch" : "6.9",
+  "runtime" : "org.freedesktop.Platform",
+  "runtime-version" : "24.08",
+  "runtime-commit" : "a993292d6ff150598dad4cd1f725aeee01a668b9e721b559ea1b6f6240174d58",
+  "sdk" : "org.freedesktop.Sdk",
+  "sdk-commit" : "880e38dedfd737008ddd0ebbbd0daaaed26b0d20011b0ce622d411a36446d607",
+  "build-options" : {
+    "env" : {
+      "CMAKE_BUILD_TYPE" : "RelWithDebInfo"
     }
   },
-  "modules": [
+  "modules" : [
     {
-      "name": "licence-extractor",
-      "buildsystem": "simple",
-      "sources": [
+      "name" : "licence-extractor",
+      "buildsystem" : "simple",
+      "sources" : [
         {
-          "commands": [
+          "commands" : [
             "DESTINATION=/usr/share/licenses/org.kde.Platform/$(basename `pwd`)/",
             "DESTINATION=${DESTINATION%-[0-9]*}",
             "mkdir -p $DESTINATION",
             "cp -v ${LICENSES:-LICENSES/*} $DESTINATION"
           ],
-          "dest-filename": "install-licenses.sh",
-          "type": "script"
+          "dest-filename" : "install-licenses.sh",
+          "type" : "script"
         }
       ],
-      "build-commands": ["install -m755 install-licenses.sh /usr/bin"]
+      "build-commands" : [
+        "install -m755 install-licenses.sh /usr/bin"
+      ]
     },
     {
-      "name": "qt6-qtbase",
-      "buildsystem": "cmake-ninja",
-      "config-opts": [
+      "name" : "qt6-qtbase",
+      "buildsystem" : "cmake-ninja",
+      "config-opts" : [
         "-DINSTALL_ARCHDATADIR=lib",
         "-DQT_DISABLE_RPATH=ON",
         "-DBUILD_WITH_PCH=FALSE",
         "-DQT_FEATURE_openssl_linked=ON",
         "-DQT_FEATURE_system_sqlite=ON"
       ],
-      "sources": [
+      "sources" : [
         {
-          "url": "https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtbase-everywhere-src-6.9.3.tar.xz",
-          "sha256": "c5a1a2f660356ec081febfa782998ae5ddbc5925117e64f50e4be9cd45b8dc6e",
-          "x-checker-data": {
-            "type": "anitya",
-            "project-id": 7927,
-            "stable-only": true,
-            "versions": {
-              "<": "6.10.0"
+          "url" : "https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtbase-everywhere-src-6.9.3.tar.xz",
+          "sha256" : "c5a1a2f660356ec081febfa782998ae5ddbc5925117e64f50e4be9cd45b8dc6e",
+          "x-checker-data" : {
+            "type" : "anitya",
+            "project-id" : 7927,
+            "stable-only" : true,
+            "versions" : {
+              "<" : "6.10.0"
             },
-            "url-template": "https://download.qt.io/official_releases/qt/6.9/$version/submodules/qtbase-everywhere-src-$version.tar.xz"
+            "url-template" : "https://download.qt.io/official_releases/qt/6.9/$version/submodules/qtbase-everywhere-src-$version.tar.xz"
           },
-          "type": "archive"
+          "type" : "archive"
         },
         {
-          "paths": ["patch/qtbase-find_package-paths.patch"],
-          "type": "patch"
+          "paths" : [
+            "patch/qtbase-find_package-paths.patch"
+          ],
+          "type" : "patch"
         },
         {
-          "commands": ["install-licenses.sh"],
-          "type": "shell"
+          "commands" : [
+            "install-licenses.sh"
+          ],
+          "type" : "shell"
         }
       ]
     }
@@ -90,7 +96,7 @@ flatpak run --command=cat org.kde.Platform//6.9 /usr/manifest.json
 }
 ```
 
-The the git commit from which the Flatpak originated is mentioned in
+The git commit from which the Flatpak originated is mentioned in
 the OSTree commit subject. It can be found using the
 `flatpak info` or `flatpak remote-info` commands.
 
@@ -129,9 +135,9 @@ We can see that the subject mentions
 
 The runtimes on Flathub originate from the following repositories:
 
-- `org.freedesktop.Platform` can be found in the [freedesktop-sdk](https://gitlab.com/freedesktop-sdk/freedesktop-sdk/)
-  group on gitlab.com.
-- `org.gnome.Platform` can be found in [gnome/gnome-build-meta](https://gitlab.gnome.org/GNOME/gnome-build-meta/)
-  repository on the GNOME gitlab.
-- `org.kde.Platform` can be found in [packaging/flatpak-kde-runtime](https://invent.kde.org/packaging/flatpak-kde-runtime)
-  repository on the KDE gitlab.
+  - `org.freedesktop.Platform` can be found in the [freedesktop-sdk](https://gitlab.com/freedesktop-sdk/freedesktop-sdk/)
+    group on gitlab.com.
+  - `org.gnome.Platform` can be found in [gnome/gnome-build-meta](https://gitlab.gnome.org/GNOME/gnome-build-meta/)
+    repository on the GNOME gitlab.
+  - `org.kde.Platform` can be found in [packaging/flatpak-kde-runtime](https://invent.kde.org/packaging/flatpak-kde-runtime)
+    repository on the KDE gitlab.

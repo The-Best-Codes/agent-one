@@ -428,8 +428,8 @@ under the `provides` tag. Please see the specification on how to use it.
 #### custom-invalid-tag
 
 One of the `custom` tags in the [MetaInfo file](/docs/for-app-authors/metainfo-guidelines/#path-and-filename
-does not have the `value` child tag. Custom tags can have only `value`
-as child tags.
+ does not have the `value` child tag. Custom tags can have only `value`
+ as child tags.
 
 ### appstream-id-mismatch-flatpak-id
 
@@ -515,7 +515,7 @@ Criteria: This exception is never granted.
 A `release` tag in the [AppStream catalog](/docs/for-app-authors/metainfo-guidelines/#checking-the-generated-output)
 file is missing the `timestamp` attribute.
 
-This tag is automatically generated provided the `date` attribute is
+This tag is automatically generated  provided the `date` attribute is
 correctly set for the `release` tag in metainfo. A timestamp may not
 be generated if the `release` tag in metainfo is misformatted.
 
@@ -867,7 +867,6 @@ Please consult the [Flatpak permission guide](https://docs.flatpak.org/en/latest
 and the [manual page](https://docs.flatpak.org/en/latest/flatpak-command-reference.html?highlight=filesystem#).
 
 ### finish-args-flatpak-appdata-folder-access
-
 ### finish-args-flatpak-appdata-folder-dir-access
 
 Criteria: Granted on sufficient explanation being provided.
@@ -877,7 +876,6 @@ in the manifest has `filesystem` permission to `~/.var/app` or a
 subfolder of it.
 
 ### finish-args-flatpak-system-folder-access
-
 ### finish-args-flatpak-system-folder-dir-access
 
 Criteria: Granted on sufficient explanation being provided.
@@ -887,7 +885,6 @@ in the manifest has `filesystem` permission to `/var/lib/flatpak` or
 a subfolder of it.
 
 ### finish-args-flatpak-user-folder-access
-
 ### finish-args-flatpak-user-folder-dir-access
 
 Criteria: Granted on sufficient explanation being provided.
@@ -1967,19 +1964,19 @@ Please consider unstacking them by specifying `dest`.
 
 ```yaml
 modules:
-  - name: foo
-    buildsystem: meson
-    sources:
-      - type: git
-        url: https://example.org/repo/foo.git
-        tag: <git tag>
-        commit: <commit hash>
+    - name: foo
+      buildsystem: meson
+      sources:
+        - type: git
+          url: https://example.org/repo/foo.git
+          tag: <git tag>
+          commit: <commit hash>
 
-      - type: git
-        url: https://example.org/repo/bar.git
-        tag: <git tag>
-        commit: <commit hash>
-        dest: subprojects/bar
+        - type: git
+          url: https://example.org/repo/bar.git
+          tag: <git tag>
+          commit: <commit hash>
+          dest: subprojects/bar
 ```
 
 ### runtime-is-eol-id-branch
