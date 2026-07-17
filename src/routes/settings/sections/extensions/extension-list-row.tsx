@@ -1,6 +1,6 @@
 import { IconChevronRight, IconExternalLink, IconPackage, IconTrash } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import {
   Accordion,
@@ -79,10 +79,11 @@ interface ExtensionListRowProps {
   authState?: McpAuthState;
   onEnabledChange?: (enabled: boolean) => void;
   advancedContent?: ReactNode;
+  advancedContentKey?: unknown;
   moreInfoJson?: unknown;
 }
 
-export function ExtensionListRow({
+function ExtensionListRowComponent({
   title,
   description,
   version,
@@ -234,3 +235,22 @@ export function ExtensionListRow({
     </div>
   );
 }
+
+export const ExtensionListRow = memo(ExtensionListRowComponent, (previous, next) => {
+  return (
+    previous.title === next.title &&
+    previous.description === next.description &&
+    previous.version === next.version &&
+    previous.iconUrl === next.iconUrl &&
+    previous.websiteUrl === next.websiteUrl &&
+    previous.badges === next.badges &&
+    previous.installed === next.installed &&
+    previous.installSupported === next.installSupported &&
+    previous.canUninstall === next.canUninstall &&
+    previous.enabled === next.enabled &&
+    previous.loadState === next.loadState &&
+    previous.authState === next.authState &&
+    previous.advancedContentKey === next.advancedContentKey &&
+    previous.moreInfoJson === next.moreInfoJson
+  );
+});

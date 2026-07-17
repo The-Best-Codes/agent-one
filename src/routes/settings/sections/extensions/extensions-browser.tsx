@@ -31,6 +31,7 @@ export interface ExtensionListItem {
   onUninstall?: () => void;
   onEnabledChange?: (enabled: boolean) => void;
   advancedContent?: ReactNode;
+  advancedContentKey?: unknown;
   moreInfoJson?: unknown;
 }
 
@@ -157,6 +158,7 @@ export function ExtensionsBrowser({
                     onUninstall={item.onUninstall}
                     onEnabledChange={item.onEnabledChange}
                     advancedContent={item.advancedContent}
+                    advancedContentKey={item.advancedContentKey}
                     moreInfoJson={item.moreInfoJson}
                   />
                 </div>

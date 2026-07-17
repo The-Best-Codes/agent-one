@@ -249,6 +249,7 @@ export default function ExtensionsSection() {
       canUninstall: false,
       installSupported: false,
       advancedContent: <BuiltInExtensionsConfig />,
+      advancedContentKey: "built-in",
     });
 
     // Custom servers (non-registry)
@@ -282,6 +283,7 @@ export default function ExtensionsSection() {
             onUpdate={(updates) => updateMcpServerById(server.id, updates)}
           />
         ),
+        advancedContentKey: server,
       });
     }
 
@@ -327,6 +329,7 @@ export default function ExtensionsSection() {
               onUpdate={(updates) => updateMcpServerById(server.id, updates)}
             />
           ) : undefined,
+        advancedContentKey: server,
         moreInfoJson: installed ? extension.registryEntry : undefined,
       });
     }
