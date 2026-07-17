@@ -99,7 +99,11 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
             abortSignal,
           )
             .then((result): { index: number; result: UrlResult } => {
-              logger.verbose("Fetched URL:", result);
+              logger.verbose("Fetched URL:", {
+                url: result.url,
+                title: result.title,
+                contentLength: result.content?.length,
+              });
               return {
                 index,
                 result: {

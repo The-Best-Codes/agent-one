@@ -44,7 +44,10 @@ export function useChat(
 
   useEffect(() => {
     transport.updateModel(model);
-    logger.verbose("Updated chat transport with new model:", model);
+    logger.verbose(
+      "Updated chat transport with new model:",
+      typeof model === "string" ? model : model?.modelId,
+    );
   }, [model, transport]);
 
   useEffect(() => {
