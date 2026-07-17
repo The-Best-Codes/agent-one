@@ -25,6 +25,7 @@ import SettingsRoute from "@/routes/settings";
 const TestsRoute = lazy(() => import("@/routes/tests"));
 const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
 const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
+const LogsTestRoute = lazy(() => import("@/routes/tests/logs"));
 const NotificationsTestRoute = lazy(() => import("@/routes/tests/notifications"));
 
 import { ReleaseNotesDialog } from "./components/a1/release-notes-dialog";
@@ -100,6 +101,7 @@ function App() {
             <Route path="/tests" element={<TestsRoute />} />
             <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
             <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
+            <Route path="/tests/logs" element={<LogsTestRoute />} />
             <Route path="/tests/notifications" element={<NotificationsTestRoute />} />
           </Route>
           <Route path="*" element={<NotFoundRoute />} />
