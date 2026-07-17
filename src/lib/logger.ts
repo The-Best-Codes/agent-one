@@ -1,11 +1,10 @@
 import { type ConsolaInstance, type ConsolaReporter, createConsola, LogLevels } from "consola";
-import { atom, getDefaultStore } from "jotai";
-import debounce from "lodash.debounce";
+import { atom, getDefaultStore, type SetStateAction } from "jotai";
+import { atomWithStorage, RESET } from "jotai/utils";
 
 const jotaiStore = getDefaultStore();
 
 const isNodeJs = typeof process !== "undefined" && process.versions && process.versions.node;
-const hasLocalStorage = !isNodeJs && typeof localStorage !== "undefined";
 
 const MAX_LOG_STORAGE_SIZE = 500 * 1024;
 const LOG_STORAGE_KEY = "app:log-history";
@@ -17,38 +16,41 @@ export interface LogEntry {
   message: string;
 }
 
-let logHistory: LogEntry[] = [];
-
-const logHistoryVersionAtom = atom(0);
-
-export const logHistoryAtom = atom((get) => {
-  get(logHistoryVersionAtom);
-  return logHistory;
-});
-
-if (hasLocalStorage) {
-  try {
-    const stored = localStorage.getItem(LOG_STORAGE_KEY);
-    if (stored) {
-      logHistory = JSON.parse(stored) as LogEntry[];
-    }
-  } catch {
-    logHistory = [];
+function limitStoredLogs(logs: LogEntry[]): LogEntry[] {
+  const storedLogs = [...logs];
+  while (JSON.stringify(storedLogs).length > MAX_LOG_STORAGE_SIZE && storedLogs.length > 1) {
+    storedLogs.shift();
   }
+  return storedLogs;
 }
 
-const flushLogs = debounce(() => {
-  try {
-    let serialized = JSON.stringify(logHistory);
-    while (serialized.length > MAX_LOG_STORAGE_SIZE && logHistory.length > 1) {
-      logHistory.shift();
-      serialized = JSON.stringify(logHistory);
+const storedLogHistoryAtom = atomWithStorage<LogEntry[]>(LOG_STORAGE_KEY, [], undefined, {
+  getOnInit: true,
+});
+const currentLogHistoryAtom = atom(jotaiStore.get(storedLogHistoryAtom));
+const storageTimeoutAtom = atom<ReturnType<typeof setTimeout>>();
+
+export const logHistoryAtom = atom(
+  (get) => get(currentLogHistoryAtom),
+  (get, set, update: SetStateAction<LogEntry[]> | typeof RESET) => {
+    clearTimeout(get(storageTimeoutAtom));
+
+    if (update === RESET) {
+      set(currentLogHistoryAtom, []);
+      set(storedLogHistoryAtom, RESET);
+      return;
     }
-    localStorage.setItem(LOG_STORAGE_KEY, serialized);
-  } catch {
-    // Storage unavailable or full
-  }
-}, 500);
+
+    const previousLogs = get(currentLogHistoryAtom);
+    const logs = typeof update === "function" ? update(previousLogs) : update;
+
+    set(currentLogHistoryAtom, logs);
+    set(
+      storageTimeoutAtom,
+      setTimeout(() => set(storedLogHistoryAtom, limitStoredLogs(logs)), 500),
+    );
+  },
+);
 
 function getTagFromPathOrUrl(inputPath: string): string {
   if (isNodeJs) {
@@ -73,14 +75,15 @@ const storageReporter: ConsolaReporter = {
   log(logObj) {
     const parts = [logObj.message, ...logObj.args].filter((a) => a != null);
     const message = parts.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ");
-    logHistory.push({
-      timestamp: logObj.date?.toISOString() ?? new Date().toISOString(),
-      type: logObj.type,
-      tag: logObj.tag,
-      message,
-    });
-    jotaiStore.set(logHistoryVersionAtom, (v) => v + 1);
-    flushLogs();
+    jotaiStore.set(logHistoryAtom, (logHistory) => [
+      ...logHistory,
+      {
+        timestamp: logObj.date?.toISOString() ?? new Date().toISOString(),
+        type: logObj.type,
+        tag: logObj.tag,
+        message,
+      },
+    ]);
   },
 };
 
@@ -100,12 +103,4 @@ export function getLogger(filePath: string): ConsolaInstance {
   });
   instance.addReporter(storageReporter);
   return instance.withTag(filename);
-}
-
-export function clearLogHistory(): void {
-  logHistory = [];
-  jotaiStore.set(logHistoryVersionAtom, (v) => v + 1);
-  if (hasLocalStorage) {
-    localStorage.removeItem(LOG_STORAGE_KEY);
-  }
 }

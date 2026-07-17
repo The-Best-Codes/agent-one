@@ -1,10 +1,11 @@
 import { IconArrowLeft, IconTrash } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
+import { useResetAtom } from "jotai/utils";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { clearLogHistory, logHistoryAtom } from "@/lib/logger";
+import { logHistoryAtom } from "@/lib/logger";
 
 const TYPE_COLORS: Record<string, string> = {
   error: "text-red-500",
@@ -15,10 +16,7 @@ const TYPE_COLORS: Record<string, string> = {
 export default function LogsTestRoute() {
   const navigate = useNavigate();
   const logs = useAtomValue(logHistoryAtom);
-
-  const handleClear = () => {
-    clearLogHistory();
-  };
+  const clearLogs = useResetAtom(logHistoryAtom);
 
   return (
     <div className="bg-background min-h-screen">
@@ -30,7 +28,7 @@ export default function LogsTestRoute() {
           </Button>
           <h1 className="text-2xl font-bold">Log History</h1>
           <div className="ml-auto">
-            <Button variant="destructive" size="sm" onClick={handleClear}>
+            <Button variant="destructive" size="sm" onClick={clearLogs}>
               <IconTrash data-icon="inline-start" />
               Clear
             </Button>
