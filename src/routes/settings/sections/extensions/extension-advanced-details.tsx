@@ -248,13 +248,7 @@ export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvanced
   const authState = authStates[server.id];
   const loadStates = useAtomValue(mcpServerLoadStatesAtom);
   const loadState = loadStates[server.id];
-  const [syncedServer, setSyncedServer] = useState(server);
   const [draft, setDraft] = useState(server);
-
-  if (syncedServer !== server) {
-    setSyncedServer(server);
-    setDraft(server);
-  }
 
   const hasChanges = JSON.stringify(draft) !== JSON.stringify(server);
   const updateDraft = (updates: Partial<McpServerConfig>) => {

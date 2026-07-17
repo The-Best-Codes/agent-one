@@ -279,6 +279,7 @@ export default function ExtensionsSection() {
         onUninstall: () => handleUninstallClick(server.id, server.name || "Custom Extension"),
         advancedContent: (
           <ExtensionAdvancedDetails
+            key={JSON.stringify(server)}
             server={server}
             onUpdate={(updates) => updateMcpServerById(server.id, updates)}
           />
@@ -325,6 +326,7 @@ export default function ExtensionsSection() {
         advancedContent:
           installed && server ? (
             <ExtensionAdvancedDetails
+              key={JSON.stringify(server)}
               server={server}
               onUpdate={(updates) => updateMcpServerById(server.id, updates)}
             />
