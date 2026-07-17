@@ -1,4 +1,3 @@
-import { IconBug } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 
@@ -25,24 +24,10 @@ const getRandomPhrase = (phrases: string[]) => {
   return phrases[randomIndex];
 };
 
-export const NoMessagesGreeting = ({ hasChatId }: { hasChatId?: boolean }) => {
+export const NoMessagesGreeting = () => {
   const userName = useAtomValue(userNameAtom);
   const phrases = getPhrases(userName);
   const [currentPhrase] = useState(() => getRandomPhrase(phrases));
-
-  if (hasChatId) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 pl-2">
-        <IconBug className="text-muted-foreground size-10" />
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-foreground text-lg font-medium">No messages found</p>
-          <p className="text-muted-foreground max-w-xs text-center text-sm">
-            This chat appears to have no messages. This is likely a bug.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full items-center justify-center">
