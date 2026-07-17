@@ -329,20 +329,14 @@ async fn try_get_token_with_url(
 
 #[tauri::command]
 pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String> {
-    let supported = async {
-        let auth_manager = AuthorizationManager::new(&server_url)
-            .await
-            .map_err(|e| e.to_string())?;
+    let auth_manager = AuthorizationManager::new(&server_url)
+        .await
+        .map_err(|e| e.to_string())?;
 
-        auth_manager
-            .discover_metadata()
-            .await
-            .map(|_| true)
-            .map_err(|e| e.to_string())
+    match auth_manager.discover_metadata().await {
+        Ok(metadata) => Ok(metadata.issuer.is_some()),
+        Err(_) => Ok(false),
     }
-    .await;
-
-    Ok(supported.is_ok())
 }
 
 #[tauri::command]
