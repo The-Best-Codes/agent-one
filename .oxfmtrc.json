@@ -12,6 +12,7 @@
     "src-tauri/target/",
     "src-tauri/gen/schemas",
     "bun.lock",
-    "*.log"
+    "*.log",
+    ".agents/*"
   ]
 }
