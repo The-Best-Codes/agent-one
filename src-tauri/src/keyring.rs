@@ -3,9 +3,10 @@ use std::sync::Arc;
 
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine as _;
-use chacha20poly1305::aead::{rand_core::RngCore, Aead, KeyInit, OsRng};
-use chacha20poly1305::{Key, XChaCha20Poly1305, XNonce};
+use chacha20poly1305::aead::{Aead, KeyInit};
+use chacha20poly1305::{XChaCha20Poly1305, XNonce};
 use keyring_core::{CredentialStore, Entry, Error as KeyringError};
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::Row;
@@ -195,14 +196,15 @@ fn fallback_key_ref(logical_key: &str) -> String {
 
 fn encrypt_value(plaintext: &str) -> Result<(String, String, String), String> {
     let mut key_bytes = [0u8; 32];
-    OsRng.fill_bytes(&mut key_bytes);
+    rand::rng().fill_bytes(&mut key_bytes);
 
     let mut nonce_bytes = [0u8; 24];
-    OsRng.fill_bytes(&mut nonce_bytes);
+    rand::rng().fill_bytes(&mut nonce_bytes);
 
-    let cipher = XChaCha20Poly1305::new(Key::from_slice(&key_bytes));
+    let cipher = XChaCha20Poly1305::new_from_slice(&key_bytes)
+        .map_err(|e| format!("Failed to initialize cipher: {}", e))?;
     let ciphertext = cipher
-        .encrypt(XNonce::from_slice(&nonce_bytes), plaintext.as_bytes())
+        .encrypt(&XNonce::from(nonce_bytes), plaintext.as_bytes())
         .map_err(|e| format!("Failed to encrypt fallback secret: {}", e))?;
 
     Ok((
@@ -233,8 +235,11 @@ fn decrypt_value(key_b64: &str, nonce_b64: &str, ciphertext_b64: &str) -> Result
     let cipher = XChaCha20Poly1305::new_from_slice(&key_bytes)
         .map_err(|e| format!("Failed to initialize fallback cipher: {}", e))?;
 
+    let nonce_arr: [u8; 24] = nonce_bytes
+        .try_into()
+        .map_err(|_| "Invalid nonce length".to_string())?;
     let plaintext = cipher
-        .decrypt(XNonce::from_slice(&nonce_bytes), ciphertext.as_ref())
+        .decrypt(&XNonce::from(nonce_arr), ciphertext.as_ref())
         .map_err(|e| format!("Failed to decrypt fallback secret: {}", e))?;
 
     String::from_utf8(plaintext).map_err(|e| format!("Fallback plaintext is not UTF-8: {}", e))
