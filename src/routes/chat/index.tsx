@@ -167,7 +167,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
               behavior="instant"
               buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
             >
-              {!isChatLoading && messages.length === 0 && <NoMessagesGreeting />}
+              {!isChatLoading && messages.length === 0 && !chatId && <NoMessagesGreeting />}
               {!shouldVirtualizeMessages &&
                 messages.map((message, index) => (
                   <div
