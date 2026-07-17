@@ -34,12 +34,22 @@ export function useOverflow<T extends HTMLElement>(
       setIsOverflowing((current) => (current === nextIsOverflowing ? current : nextIsOverflowing));
     };
 
+    let pendingCheck = false;
+    const scheduleCheck = () => {
+      if (pendingCheck) return;
+      pendingCheck = true;
+      queueMicrotask(() => {
+        pendingCheck = false;
+        checkOverflow();
+      });
+    };
+
     checkOverflow();
 
-    const resizeObserver = new ResizeObserver(checkOverflow);
+    const resizeObserver = new ResizeObserver(scheduleCheck);
     resizeObserver.observe(element);
 
-    const mutationObserver = new MutationObserver(checkOverflow);
+    const mutationObserver = new MutationObserver(scheduleCheck);
     mutationObserver.observe(element, {
       childList: true,
       subtree: true,
