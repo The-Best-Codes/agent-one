@@ -58,7 +58,9 @@ export const ChatInstance = memo(
         return false;
       }
 
-      return lastAssistantMessageIsCompleteWithApprovalResponses({ messages });
+      return lastAssistantMessageIsCompleteWithApprovalResponses({
+        messages,
+      });
     }, []);
 
     const chat = useChat(model, modelId, modelConfig, {
@@ -137,6 +139,8 @@ export const ChatInstance = memo(
 
     useEffect(() => {
       onInstanceUpdate(chatId, chat);
+      // TODO: Address this later?
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [chatId, chat.status, chat.messages, chat.sendMessage, chat.regenerate, onInstanceUpdate]);
 
     return null;
