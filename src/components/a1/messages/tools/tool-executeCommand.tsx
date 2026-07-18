@@ -169,6 +169,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
     () => getExecuteCommandLiveState(callId),
   );
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!liveState || liveState.status === "completed") {
       setShowLongRunningStop(false);
@@ -191,6 +192,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       window.clearTimeout(timeout);
     };
   }, [liveState]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const showLongRunningSkip =
     showLongRunningStop && liveState?.status === "running" && !liveState?.skipRequested;
