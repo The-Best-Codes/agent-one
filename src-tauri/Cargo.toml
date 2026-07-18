@@ -67,6 +67,10 @@ apple-native-keyring-store = { version = "1.0.1", features = ["keychain", "prote
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-native-keyring-store = "1.1.0"
+windows-sys = { version = "0.61.2", features = [
+  "Win32_Foundation",
+  "Win32_Storage_Packaging_Appx",
+] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 zbus-secret-service-keyring-store = { version = "1.0.0", features = ["rt-async-io-crypto-rust"] }

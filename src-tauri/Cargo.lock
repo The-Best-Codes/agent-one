@@ -70,6 +70,7 @@ dependencies = [
  "url",
  "urlencoding",
  "windows-native-keyring-store",
+ "windows-sys 0.61.2",
  "wreq",
  "wreq-util",
  "zbus-secret-service-keyring-store",
