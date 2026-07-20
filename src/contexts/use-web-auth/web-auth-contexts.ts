@@ -52,12 +52,16 @@ export function getBillingUsageSummary(
   }
 
   const credited = meters.reduce((sum, meter) => sum + meter.creditedUnits, 0);
-  const consumed = meters.reduce((sum, meter) => sum + meter.consumedUnits, 0);
   const balance = meters.reduce((sum, meter) => sum + meter.balance, 0);
 
+  // Grants are issued via negative event ingestion, which makes net consumedUnits lower than actual usage.
+  // Use the larger of credited or balance as the effective pool so grants don't produce negatives.
+  const effectivePool = Math.max(credited, balance);
+  const effectiveConsumed = Math.max(effectivePool - balance, 0);
+
   return {
-    credited,
-    consumed,
+    credited: effectivePool,
+    consumed: effectiveConsumed,
     remaining: Math.max(balance, 0),
   };
 }
