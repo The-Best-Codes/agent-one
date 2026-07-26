@@ -104,14 +104,7 @@ export function MessagePreviewRail({
         {messages.map((message, index) => {
           const distance =
             displayedIndex == null ? Number.POSITIVE_INFINITY : Math.abs(index - displayedIndex);
-          const scale =
-            visibleIndexes.has(index) || distance === 0
-              ? 1
-              : distance === 1
-                ? 0.68
-                : distance === 2
-                  ? 0.44
-                  : 0.25;
+          const scale = distance === 0 ? 1 : distance === 1 ? 0.68 : distance === 2 ? 0.44 : 0.25;
 
           return (
             <button
@@ -132,7 +125,7 @@ export function MessagePreviewRail({
                 aria-hidden="true"
                 className={cn(
                   "block h-0.5 w-12 origin-right bg-current transition-transform duration-300 ease-out motion-reduce:transition-none",
-                  displayedIndex === index && "text-foreground",
+                  (visibleIndexes.has(index) || displayedIndex === index) && "text-foreground",
                 )}
                 style={{ transform: `scaleX(${scale})` }}
               />
