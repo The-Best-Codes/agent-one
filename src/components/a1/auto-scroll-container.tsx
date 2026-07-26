@@ -34,7 +34,9 @@ export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivEl
 }
 
 export type AutoScrollHandle = {
+  getScrollElement: () => HTMLDivElement | null;
   scrollToBottom: () => void;
+  scrollToIndex: (index: number) => void;
 };
 
 export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContainerProps>(
@@ -165,12 +167,31 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     useImperativeHandle(
       ref,
       () => ({
+        getScrollElement: () => parentRef.current,
         scrollToBottom: () => {
           setShowButton(false);
           scrollToBottom();
         },
+        scrollToIndex: (index) => {
+          setShowButton(true);
+          if (isVirtualized) {
+            virtualizer.scrollToIndex(index, { align: "start", behavior: "smooth" });
+            return;
+          }
+
+          const container = parentRef.current;
+          const item = container?.querySelector<HTMLElement>(`[data-message-index="${index}"]`);
+          if (!container || !item) return;
+
+          const containerRect = container.getBoundingClientRect();
+          const itemRect = item.getBoundingClientRect();
+          container.scrollTo({
+            top: container.scrollTop + itemRect.top - containerRect.top,
+            behavior: "smooth",
+          });
+        },
       }),
-      [scrollToBottom],
+      [isVirtualized, scrollToBottom, virtualizer],
     );
 
     const virtualItems = isVirtualized ? virtualizer.getVirtualItems() : [];

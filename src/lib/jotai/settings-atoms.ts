@@ -141,6 +141,11 @@ export const showChatStatusIndicatorAtom = createSettingAtom(
   DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR,
 );
 
+export const showMessagePreviewRailAtom = createSettingAtom(
+  "SHOW_MESSAGE_PREVIEW_RAIL",
+  DEFAULT_SETTINGS.SHOW_MESSAGE_PREVIEW_RAIL,
+);
+
 export const themeAtom = createSettingAtom<ThemeOption>("THEME", DEFAULT_SETTINGS.THEME);
 
 export const colorThemeAtom = createSettingAtom<ColorThemeOption>(

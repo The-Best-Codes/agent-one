@@ -319,6 +319,7 @@ export interface DefaultSettings extends ApiKeySettings {
   REGENERATE_ON_SAVE: boolean;
   STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   SHOW_CHAT_STATUS_INDICATOR: boolean;
+  SHOW_MESSAGE_PREVIEW_RAIL: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
   CHAT_SORT: ChatSortOption;
   CHAT_BACKGROUND: ChatBackgroundSettings;
@@ -364,6 +365,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   REGENERATE_ON_SAVE: true,
   STOP_BUTTON_BEHAVIOR: "immediate",
   SHOW_CHAT_STATUS_INDICATOR: true,
+  SHOW_MESSAGE_PREVIEW_RAIL: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
   CHAT_SORT: "created-at",
   CHAT_BACKGROUND: {

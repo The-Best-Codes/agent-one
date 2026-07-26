@@ -29,6 +29,7 @@ import {
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
   showChatToBottomButtonAtom,
+  showMessagePreviewRailAtom,
   smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
@@ -69,6 +70,7 @@ export default function ChatsSection() {
     showChatStatusIndicatorAtom,
   );
   const [showChatToBottomButton, setShowChatToBottomButton] = useAtom(showChatToBottomButtonAtom);
+  const [showMessagePreviewRail, setShowMessagePreviewRail] = useAtom(showMessagePreviewRailAtom);
   const [chatSort, setChatSort] = useAtom(chatSortAtom);
   const [titleGeneration, setTitleGeneration] = useAtom(titleGenerationAtom);
 
@@ -93,6 +95,8 @@ export default function ChatsSection() {
     showChatStatusIndicator === DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR;
   const isShowChatToBottomButtonDefault =
     showChatToBottomButton === DEFAULT_SETTINGS.SHOW_CHAT_TO_BOTTOM_BUTTON;
+  const isShowMessagePreviewRailDefault =
+    showMessagePreviewRail === DEFAULT_SETTINGS.SHOW_MESSAGE_PREVIEW_RAIL;
   const isChatSortDefault = chatSort === DEFAULT_SETTINGS.CHAT_SORT;
   const isTitleGenerationDefault =
     JSON.stringify(titleGeneration) === JSON.stringify(DEFAULT_SETTINGS.TITLE_GENERATION);
@@ -475,6 +479,42 @@ export default function ChatsSection() {
                     resetSetting("SHOW_CHAT_TO_BOTTOM_BUTTON");
                   }}
                   disabled={isShowChatToBottomButtonDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-show-message-preview-rail">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Message Navigation Rail</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Show message previews and navigation on the right side of chats. Hidden in the
+                  compact layout.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={showMessagePreviewRail}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "message_preview_rail_toggled", {
+                      enabled: checked,
+                    });
+                    setShowMessagePreviewRail(checked);
+                  }}
+                  aria-label="Toggle message navigation rail"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_message_preview_rail");
+                    resetSetting("SHOW_MESSAGE_PREVIEW_RAIL");
+                  }}
+                  disabled={isShowMessagePreviewRailDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />

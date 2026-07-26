@@ -38,6 +38,7 @@ import {
   showChatToBottomButtonAtom,
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
+  showMessagePreviewRailAtom,
   smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
@@ -81,6 +82,7 @@ export function resetAllSettings(): void {
   store.set(remendEnabledAtom, RESET);
   store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
+  store.set(showMessagePreviewRailAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
   store.set(chatSortAtom, RESET);
   store.set(chatBackgroundAtom, RESET);
@@ -185,6 +187,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SHOW_CHAT_STATUS_INDICATOR":
       store.set(showChatStatusIndicatorAtom, RESET);
+      break;
+    case "SHOW_MESSAGE_PREVIEW_RAIL":
+      store.set(showMessagePreviewRailAtom, RESET);
       break;
     case "SHOW_MESSAGE_ACTION_ROW":
       store.set(showMessageActionRowAtom, RESET);
