@@ -22,6 +22,9 @@ import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
+export type ChatInstanceHelpers = UseChatHelpers<UIMessage> &
+  Pick<ReturnType<typeof useChat>, "updateMcpAppModelContext">;
+
 export const ChatInstance = memo(
   ({
     chatId,
@@ -37,7 +40,7 @@ export const ChatInstance = memo(
     modelId: string;
     modelConfig: ModelConfig;
     initialMessages: UIMessage[];
-    onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
+    onInstanceUpdate: (id: string, instance: ChatInstanceHelpers) => void;
     onStatusChange: (
       id: string,
       status: UseChatHelpers<UIMessage>["status"],

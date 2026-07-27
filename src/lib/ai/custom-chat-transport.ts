@@ -5,6 +5,7 @@ import {
   convertToModelMessages,
   extractReasoningMiddleware,
   type LanguageModel,
+  type ModelMessage,
   smoothStream,
   isStepCount,
   type StopCondition,
@@ -32,6 +33,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private modelConfig: ModelConfig;
   private smoothStreamEnabled: boolean;
   private extractReasoningEnabled: boolean;
+  private mcpAppModelContexts = new Map<string, unknown>();
   private getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
   private getSystemPrompt: () => string;
   private getApiKeysLoadedPromise: () => Promise<void>;
@@ -97,6 +99,24 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     logger.verbose("CustomChatTransport API keys loaded promise updated");
   }
 
+  updateMcpAppModelContext(viewId: string, context: unknown) {
+    this.mcpAppModelContexts.set(viewId, context);
+  }
+
+  private getMcpAppModelContextMessage(): ModelMessage | undefined {
+    if (this.mcpAppModelContexts.size === 0) {
+      return undefined;
+    }
+
+    const contexts = [...this.mcpAppModelContexts.entries()].map(
+      ([viewId, context]) => `MCP App view ${viewId}: ${JSON.stringify(context)}`,
+    );
+    return {
+      role: "user",
+      content: `Background context reported by interactive MCP Apps:\n${contexts.join("\n")}`,
+    };
+  }
+
   async sendMessages(
     options: {
       chatId: string;
@@ -137,6 +157,18 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     const stopWhenCondition: StopCondition<ToolSet> =
       modelConfig.maxSteps === undefined ? () => false : isStepCount(modelConfig.maxSteps);
+    const messages = await convertToModelMessages(options.messages);
+    const mcpAppContextMessage = this.getMcpAppModelContextMessage();
+    if (mcpAppContextMessage) {
+      let insertionIndex = messages.length;
+      for (let index = messages.length - 1; index >= 0; index--) {
+        if (messages[index].role === "user") {
+          insertionIndex = index;
+          break;
+        }
+      }
+      messages.splice(insertionIndex, 0, mcpAppContextMessage);
+    }
 
     const result = streamText({
       model,
@@ -147,7 +179,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       frequencyPenalty: modelConfig.frequencyPenalty,
       presencePenalty: modelConfig.presencePenalty,
       seed: modelConfig.seed,
-      messages: await convertToModelMessages(options.messages),
+      messages,
       abortSignal: options.abortSignal,
       tools,
       toolChoice: "auto",
