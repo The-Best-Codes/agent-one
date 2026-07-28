@@ -173,7 +173,6 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
           scrollToBottom();
         },
         scrollToIndex: (index) => {
-          setShowButton(true);
           if (isVirtualized) {
             virtualizer.scrollToIndex(index, { align: "start", behavior: "smooth" });
             return;
