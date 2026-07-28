@@ -36,6 +36,28 @@
         return html.includes("<head>") ? html.replace("<head>", "<head>" + meta) : meta + html;
       }
 
+      function injectColorSchema(html, theme) {
+        if (!theme) return html;
+        if (/<html\b[^>]*style\s*=\s*["'][^"'>]*color-scheme/i.test(html)) return html;
+        var m = html.match(/(<html\b[^>]*?style\s*=\s*["'])([^"']*)(["'])/i);
+        if (m) {
+          var existing = m[2].trim();
+          var append = existing ? existing + "; " : "";
+          return html.replace(m[0], m[1] + append + "color-scheme:" + theme + m[3]);
+        }
+        return html.replace(/(<html)\b/i, '$1 style="color-scheme:' + theme + '"');
+      }
+
+      function getParentTheme() {
+        try {
+          return window.parent.document.documentElement.classList.contains("dark")
+            ? "dark"
+            : "light";
+        } catch (_) {
+          return "light";
+        }
+      }
+
       function createAppFrame(params) {
         appFrame?.remove();
         appFrame = document.createElement("iframe");
@@ -43,7 +65,10 @@
         if (params.allow) {
           appFrame.allow = params.allow;
         }
-        appFrame.srcdoc = injectCsp(params.html, params.csp);
+        let html = params.html;
+        html = injectCsp(html, params.csp);
+        html = injectColorSchema(html, getParentTheme());
+        appFrame.srcdoc = html;
         document.body.appendChild(appFrame);
       }
 
