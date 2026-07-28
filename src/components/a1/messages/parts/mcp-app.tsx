@@ -258,9 +258,10 @@ function ConnectedMcpApp({
     if (displayMode === "fullscreen") {
       return {
         url: "/mcp-app-sandbox.html",
-        className: "fixed z-52 block rounded-b-xl bg-background",
+        className: "fixed z-52 block rounded-b-md bg-background",
         style: {
           border: 0,
+          outline: "none",
           top: fullscreenFrame.top + FULLSCREEN_HEADER_HEIGHT,
           left: fullscreenFrame.left,
           width: fullscreenFrame.width,
@@ -271,9 +272,10 @@ function ConnectedMcpApp({
     if (displayMode === "pip") {
       return {
         url: "/mcp-app-sandbox.html",
-        className: "fixed right-4 bottom-4 z-50 block rounded-md border bg-background shadow-lg",
+        className: "fixed right-4 bottom-4 z-50 block rounded-md bg-background",
         style: {
           border: 0,
+          outline: "none",
           width: "min(400px, calc(100vw - 32px))",
           height: "min(300px, calc(100vh - 32px))",
         },
@@ -281,8 +283,8 @@ function ConnectedMcpApp({
     }
     return {
       url: "/mcp-app-sandbox.html",
-      className: "block w-full rounded-md border",
-      style: { border: 0, height: inlineHeight },
+      className: "block w-full rounded-md",
+      style: { border: 0, outline: "none", height: inlineHeight },
     };
   }, [
     displayMode,
@@ -316,7 +318,7 @@ function ConnectedMcpApp({
             onClick={() => setDisplayMode("inline")}
           />
           <div
-            className="bg-background ring-foreground/10 fixed z-51 overflow-hidden rounded-xl border text-sm shadow-xl ring-1"
+            className="bg-background fixed z-51 overflow-hidden rounded-md text-sm"
             style={{
               top: fullscreenFrame.top,
               left: fullscreenFrame.left,
@@ -325,7 +327,7 @@ function ConnectedMcpApp({
             }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="bg-background/95 flex h-16 items-center justify-between gap-3 border-b px-4">
+            <div className="bg-background border-border flex h-16 items-center justify-between gap-3 border-b px-4">
               <div className="min-w-0">
                 <div className="truncate text-base font-medium">Expanded extension view</div>
                 <div className="text-muted-foreground truncate text-sm">
