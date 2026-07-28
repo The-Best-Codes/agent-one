@@ -25,9 +25,9 @@ export type Server = {
   remotes?: Remote[];
   repository?: Repository;
   websiteUrl?: string;
+  packages?: Package[];
   _meta?: ServerMeta;
   icons?: Icon[];
-  packages?: Package[];
 };
 
 export type ServerMeta = {
@@ -57,11 +57,15 @@ export type PurpleIoModelcontextprotocolRegistryPublisherProvided = {
   command?: string;
   example?: Example;
   title?: string;
+  answers?: string;
+  annotations?: Annotations;
   readOnly?: boolean;
+  auth?: string;
   summary?: string;
   price_usd?: number;
   price?: string;
-  auth?: string;
+  returns?: string;
+  task?: string;
   type?: string;
   upgrade?: string;
   args?: string[];
@@ -85,6 +89,12 @@ export type PurpleIoModelcontextprotocolRegistryPublisherProvided = {
   examples?: string[];
   default?: boolean;
   flag?: string;
+};
+
+export type Annotations = {
+  destructiveHint: boolean;
+  openWorldHint: boolean;
+  readOnlyHint: boolean;
 };
 
 export type ConfigClass = {
@@ -125,12 +135,6 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   formula?: string;
   install?: string[];
   tap?: string;
-  alsoSupported?: string[];
-  primary?: string;
-  billing?: string;
-  limit?: number;
-  period?: string;
-  scope?: string;
   channels?: Channels;
   endpoints?: string[] | EndpointsClass;
   errorCode?: number;
@@ -151,6 +155,12 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   clientId?: string;
   scopes?: string[];
   tokenUrl?: TokenURL;
+  alsoSupported?: string[];
+  primary?: string;
+  billing?: string;
+  limit?: number;
+  period?: string;
+  scope?: string;
   api_key_env?: string;
   api_key_header?: string;
   requires_api_key?: boolean;
@@ -181,6 +191,8 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   githubExamples?: string;
   llms?: string;
   openapi?: string;
+  enabled?: boolean;
+  note?: string;
   admin?: string;
   contacts?: string;
   messaging?: string;
@@ -188,21 +200,19 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   github?: string;
   name?: string;
   url?: string;
-  enabled?: boolean;
+  codingAgentSetup?: string;
+  docs?: string;
+  llmsTxt?: string;
   types?: string[];
   sources?: string[];
-  best_agent?: number;
-  evidence?: number;
-  fraud_check?: number;
-  reputation?: number;
-  risk_score?: number;
   mcpServers?: IoModelcontextprotocolRegistryPublisherProvidedMCPServers;
-  args?: any[];
+  args?: unknown[];
   node?: string;
   monthly?: number;
   yearly?: number;
   faq?: string;
-  pypi?: string;
+  pypi?: string[] | string;
+  npm?: string[];
   nervapack?: Nervapack;
   "nervapack-memory"?: Nervapack;
   company_baseline?: string;
@@ -301,6 +311,7 @@ export type EnvironmentVariable = {
 
 export type EnvironmentVariableVariables = {
   weather_choices?: Account;
+  comfyui_base_url?: AimarketHost;
   connection_string?: ApifyAPIToken;
   default_top?: AimarketHost;
   max_top?: AimarketHost;
@@ -337,6 +348,11 @@ export type SgpDirectoryAPIKey = {
   isSecret: boolean;
 };
 
+export type AimarketHost = {
+  description: string;
+  default: string;
+};
+
 export type ApifyAPIToken = {
   description?: string;
   isRequired?: boolean;
@@ -344,11 +360,6 @@ export type ApifyAPIToken = {
   format?: string;
   default?: string;
   placeholder?: string;
-};
-
-export type AimarketHost = {
-  description: string;
-  default: string;
 };
 
 export type ProjectRef = {
@@ -383,21 +394,11 @@ export type PackageArgument = {
 };
 
 export type PackageArgumentVariables = {
-  region?: HapiFQDN;
-  store_path?: HapiFQDN;
-  user_id?: HapiFQDN;
-  workingDirectory?: HapiFQDN;
+  region?: ApifyAPIToken;
+  store_path?: ApifyAPIToken;
+  user_id?: ApifyAPIToken;
+  workingDirectory?: ApifyAPIToken;
   toolFilter?: ToolFilter;
-};
-
-export type HapiFQDN = {
-  description: string;
-  isRequired?: boolean;
-  default?: string;
-  format?: string;
-  placeholder?: string;
-  isSecret?: boolean;
-  choices?: string[];
 };
 
 export type ToolFilter = {
@@ -431,34 +432,37 @@ export type RuntimeArgumentVariables = {
   PORT_CONTROL_PANEL?: AimarketHost;
   DASHBOARD_API_KEY?: SgpDirectoryAPIKey;
   SERVICE_HOST?: ProjectRef;
+  project?: ApifyAPIToken;
   config_dir?: ApifyAPIToken;
-  workbook_dir?: HapiFQDN;
+  workbook_dir?: ApifyAPIToken;
   api_key?: ApifyAPIToken;
-  models_path?: HapiFQDN;
-  encoder_file?: HapiFQDN;
-  decoder_file?: HapiFQDN;
-  tokens_file?: HapiFQDN;
+  models_path?: ApifyAPIToken;
+  encoder_file?: ApifyAPIToken;
+  decoder_file?: ApifyAPIToken;
+  tokens_file?: ApifyAPIToken;
   token?: ApifyAPIToken;
-  VAULT_PATH?: HapiFQDN;
-  config_path?: HapiFQDN;
-  data_path?: HapiFQDN;
+  VAULT_PATH?: ApifyAPIToken;
+  config_path?: ApifyAPIToken;
+  data_path?: ApifyAPIToken;
   workspace_path?: ApifyAPIToken;
-  ssh_private_key_path?: HapiFQDN;
-  ssh_known_hosts_path?: HapiFQDN;
-  gid?: HapiFQDN;
-  uid?: HapiFQDN;
-  xdg_runtime_dir?: HapiFQDN;
-  host?: HapiFQDN;
-  port?: HapiFQDN;
+  ssh_private_key_path?: ApifyAPIToken;
+  ssh_known_hosts_path?: ApifyAPIToken;
+  gid?: ApifyAPIToken;
+  uid?: ApifyAPIToken;
+  xdg_runtime_dir?: ApifyAPIToken;
+  host?: ApifyAPIToken;
+  port?: ApifyAPIToken;
   address?: Address;
   enabled?: Address;
-  inventory_path?: HapiFQDN;
+  kubeconfig_dir?: Account;
+  inventory_path?: ApifyAPIToken;
   key_path?: ApifyAPIToken;
+  audio_directory?: ApifyAPIToken;
   password?: ApifyAPIToken;
-  rpc_url?: HapiFQDN;
-  vault_path?: HapiFQDN;
-  kube_config?: HapiFQDN;
-  source_path?: HapiFQDN;
+  rpc_url?: ApifyAPIToken;
+  vault_path?: ApifyAPIToken;
+  kube_config?: ApifyAPIToken;
+  source_path?: ApifyAPIToken;
   client_id?: ApifyAPIToken;
   client_secret?: ApifyAPIToken;
   customer_id?: CustomerID;
@@ -525,31 +529,39 @@ export type RemoteHeader = {
 };
 
 export type FluffyVariables = {
-  api_key?: HapiFQDN;
+  api_key?: ApifyAPIToken;
   mcp_client_secret?: ApifyAPIToken;
-  mcp_token?: HapiFQDN;
+  PRIMATE_API_KEY?: ApifyAPIToken;
+  mcp_token?: ApifyAPIToken;
   TRILO_PAT?: ApifyAPIToken;
   CAMBER_API_KEY?: ApifyAPIToken;
-  token?: HapiFQDN;
+  chad_mcp_token?: ApifyAPIToken;
+  token?: ApifyAPIToken;
   INFOBIP_API_KEY?: ApifyAPIToken;
+  LADDRO_API_KEY?: ApifyAPIToken;
   agentfarm_token?: ApifyAPIToken;
   NEURA_RELAY_MCP_TOKEN?: ApifyAPIToken;
-  partglyph_api_key?: HapiFQDN;
+  partglyph_api_key?: ApifyAPIToken;
   IFR_COWORKER_TOKEN?: ApifyAPIToken;
-  NINELAYER_API_KEY?: ApifyAPIToken;
-  CATHEDRAL_API_KEY?: ApifyAPIToken;
-  YUOR_MCP_TOKEN?: ApifyAPIToken;
   e2a_api_key?: ApifyAPIToken;
+  NINELAYER_API_KEY?: ApifyAPIToken;
+  adtao_api_key?: ApifyAPIToken;
+  project_token?: ApifyAPIToken;
+  CATHEDRAL_API_KEY?: ApifyAPIToken;
+  UPTOCODE_API_KEY?: ApifyAPIToken;
+  AUTH_TOKEN?: ApifyAPIToken;
+  YUOR_MCP_TOKEN?: ApifyAPIToken;
   BRIGHTSEC_API_KEY?: ApifyAPIToken;
-  EVERALICE_API_KEY?: HapiFQDN;
+  EVERALICE_API_KEY?: ApifyAPIToken;
   FIRSTDATA_API_KEY?: ApifyAPIToken;
-  agent_name?: HapiFQDN;
+  agent_name?: ApifyAPIToken;
+  apiKey?: ApifyAPIToken;
   indicate_api_key?: ApifyAPIToken;
   NETDATA_CLOUD_API_TOKEN?: SgpDirectoryAPIKey;
   mcp_access_token?: SgpDirectoryAPIKey;
   pixelvault_api_key?: ApifyAPIToken;
   rendley_api_key?: ApifyAPIToken;
-  signaliz_api_key?: HapiFQDN;
+  signaliz_api_key?: ApifyAPIToken;
   RUNLOG_API_KEY?: ApifyAPIToken;
 };
 
@@ -557,17 +569,17 @@ export type RemoteVariables = {
   api_host?: APIHost;
   project_slug?: Account;
   domain?: Account;
-  HAPI_FQDN?: HapiFQDN;
+  HAPI_FQDN?: ApifyAPIToken;
   HAPI_PORT?: ApifyAPIToken;
   workspaceSlug?: Account;
-  api_key?: HapiFQDN;
-  roster_host?: APIHost;
+  api_key?: ApifyAPIToken;
+  roster_host?: ApifyAPIToken;
   ATLAS_MCP_URL?: ApifyAPIToken;
   sysname?: ProjectRef;
   shop_id?: AimarketHost;
   API_KEY?: ApifyAPIToken;
   connector_token?: ApifyAPIToken;
-  token?: HapiFQDN;
+  token?: APIHost;
   channel_key?: ApifyAPIToken;
   instance?: ApifyAPIToken;
   site_domain?: APIHost;
@@ -581,11 +593,12 @@ export type RemoteVariables = {
   tenant_id?: Account;
   apify_token?: ApifyAPIToken;
   agent_id?: Account;
-  apiKey?: HapiFQDN;
-  region?: HapiFQDN;
+  apiKey?: ApifyAPIToken;
+  region?: APIHost;
   x_playcaller_key?: ApifyAPIToken;
   qovery_token?: ApifyAPIToken;
   host?: APIHost;
+  key?: ApifyAPIToken;
   SGP_DIRECTORY_API_KEY?: SgpDirectoryAPIKey;
   server_name?: Account;
   tenant_name?: Account;
@@ -594,12 +607,14 @@ export type RemoteVariables = {
   owner?: Account;
   repo?: Account;
   api_id?: ApifyAPIToken;
+  shop?: ApifyAPIToken;
   allow_secrets?: AllowSecrets;
   read_only?: AllowSecrets;
   services_scope?: AllowSecrets;
   prior_api_key?: ApifyAPIToken;
+  organizationId?: Account;
   tenant_slug?: Account;
-  mcp_gsc_worker_domain?: APIHost;
+  mcp_gsc_worker_domain?: ApifyAPIToken;
   game?: Account;
   studio?: Account;
   namespace?: Account;
@@ -611,7 +626,8 @@ export type RemoteVariables = {
   easy8_host?: Account;
   APIFY_API_TOKEN?: ApifyAPIToken;
   server_host?: Account;
-  artel_host?: HapiFQDN;
+  HOSTNAME?: ApifyAPIToken;
+  artel_host?: ApifyAPIToken;
   hitkeep_host?: Account;
   apifyToken?: ApifyAPIToken;
   slug?: Account;
@@ -624,10 +640,10 @@ export type RemoteVariables = {
   oauth_token?: ApifyAPIToken;
   BILT_API_KEY?: ApifyAPIToken;
   site_key?: Account;
-  coder_hostname?: HapiFQDN;
-  builder_id?: HapiFQDN;
+  coder_hostname?: ApifyAPIToken;
+  builder_id?: ApifyAPIToken;
   oauth_client_id?: OauthClientID;
-  oauth_client_secret?: HapiFQDN;
+  oauth_client_secret?: ApifyAPIToken;
   hostname?: Account;
   atlas_api_key?: ApifyAPIToken;
   APIFY_TOKEN?: ApifyAPIToken;
@@ -641,17 +657,19 @@ export type RemoteVariables = {
   port?: MCPPath;
   marmot_host?: Account;
   metabase_host?: Account;
-  worker_domain?: APIHost;
+  worker_domain?: ApifyAPIToken;
   openmetadata_host?: Account;
   plexus_host?: ProjectRef;
   your_mcp_server_host?: Account;
+  realm?: Account;
   sourcegraph_hostname?: Account;
   lobster_id?: Account;
   mcpPath?: MCPPath;
-  remoteHost?: APIHost;
+  remoteHost?: ApifyAPIToken;
   endpoint?: Account;
   key_id?: ApifyAPIToken;
   key_secret?: ApifyAPIToken;
+  appId?: Account;
   api_token?: ApifyAPIToken;
   endpoint_code?: Account;
 };
@@ -663,6 +681,7 @@ export type APIHost = {
   placeholder?: string;
   default?: string;
   format?: string;
+  isSecret?: boolean;
 };
 
 export type MCPPath = {
