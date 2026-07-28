@@ -4,11 +4,13 @@ import {
   type MCPAppMetadata,
   type MCPAppSandboxConfig,
 } from "@ai-sdk/react";
+import { IconX } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { DynamicToolUIPart } from "ai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import packageJson from "@/../package.json";
+import { Button } from "@/components/ui/button";
 import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { useTheme } from "@/hooks/use-theme";
@@ -30,6 +32,7 @@ const logger = getLogger(import.meta.url);
 const hostInfo = { name: "AgentOne", version: packageJson.version };
 const DISPLAY_MODES = ["inline", "fullscreen", "pip"] as const;
 const DEFAULT_INLINE_HEIGHT = 320;
+const FULLSCREEN_HEADER_HEIGHT = 64;
 
 function getMessageText(params: unknown): string {
   if (!params || typeof params !== "object" || (params as { role?: unknown }).role !== "user") {
@@ -113,6 +116,17 @@ function ConnectedMcpApp({
     height: window.innerHeight,
   }));
   const isCancelled = part.state === "output-error";
+
+  const fullscreenFrame = useMemo(() => {
+    const padding = viewportSize.width < 640 ? 12 : 24;
+    const width = Math.max(Math.min(1400, viewportSize.width - padding * 2), 1);
+    const height = Math.max(viewportSize.height - padding * 2, 1);
+    const top = Math.max(Math.round((viewportSize.height - height) / 2), padding);
+    const left = Math.max(Math.round((viewportSize.width - width) / 2), padding);
+    const bodyHeight = Math.max(height - FULLSCREEN_HEADER_HEIGHT, 1);
+
+    return { top, left, width, height, bodyHeight };
+  }, [viewportSize.height, viewportSize.width]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -244,14 +258,20 @@ function ConnectedMcpApp({
     if (displayMode === "fullscreen") {
       return {
         url: "/mcp-app-sandbox.html",
-        className: "fixed inset-0 z-50 size-full bg-background",
-        style: { border: 0 },
+        className: "fixed z-52 block rounded-b-xl bg-background",
+        style: {
+          border: 0,
+          top: fullscreenFrame.top + FULLSCREEN_HEADER_HEIGHT,
+          left: fullscreenFrame.left,
+          width: fullscreenFrame.width,
+          height: fullscreenFrame.bodyHeight,
+        },
       };
     }
     if (displayMode === "pip") {
       return {
         url: "/mcp-app-sandbox.html",
-        className: "fixed right-4 bottom-4 z-50 rounded-md border bg-background shadow-lg",
+        className: "fixed right-4 bottom-4 z-50 block rounded-md border bg-background shadow-lg",
         style: {
           border: 0,
           width: "min(400px, calc(100vw - 32px))",
@@ -261,14 +281,21 @@ function ConnectedMcpApp({
     }
     return {
       url: "/mcp-app-sandbox.html",
-      className: "w-full rounded-md border",
+      className: "block w-full rounded-md border",
       style: { border: 0, height: inlineHeight },
     };
-  }, [displayMode, inlineHeight]);
+  }, [
+    displayMode,
+    fullscreenFrame.bodyHeight,
+    fullscreenFrame.left,
+    fullscreenFrame.top,
+    fullscreenFrame.width,
+    inlineHeight,
+  ]);
 
   const containerDimensions =
     displayMode === "fullscreen"
-      ? { width: viewportSize.width, height: viewportSize.height }
+      ? { width: fullscreenFrame.width, height: fullscreenFrame.bodyHeight }
       : displayMode === "pip"
         ? {
             width: Math.min(400, viewportSize.width - 32),
@@ -282,6 +309,40 @@ function ConnectedMcpApp({
 
   return (
     <div ref={containerRef} className="w-full">
+      {displayMode === "fullscreen" && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+            onClick={() => setDisplayMode("inline")}
+          />
+          <div
+            className="bg-background ring-foreground/10 fixed z-51 overflow-hidden rounded-xl border text-sm shadow-xl ring-1"
+            style={{
+              top: fullscreenFrame.top,
+              left: fullscreenFrame.left,
+              width: fullscreenFrame.width,
+              height: fullscreenFrame.height,
+            }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="bg-background/95 flex h-16 items-center justify-between gap-3 border-b px-4">
+              <div className="min-w-0">
+                <div className="truncate text-base font-medium">Expanded extension view</div>
+                <div className="text-muted-foreground truncate text-sm">
+                  Opened in expanded view. Press Escape or close it to return to the conversation.
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon-sm" onClick={() => setDisplayMode("inline")}>
+                  <IconX />
+                  <span className="sr-only">Close expanded MCP app</span>
+                </Button>
+              </div>
+            </div>
+            <div className="bg-background h-[calc(100%-4rem)]" />
+          </div>
+        </>
+      )}
       <MCPAppRenderer
         part={part}
         loadResource={loadResource}
