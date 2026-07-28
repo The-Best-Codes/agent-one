@@ -111,7 +111,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   const isSidebarSmall = isCollapsed || !isDesktop;
   const isColumnLayout = collapsedLayout === "column";
-  const toggleTooltip = isCollapsed ? "Open sidebar" : "Close sidebar";
+  const toggleTooltip = (isDesktop ? isCollapsed : !isDrawerOpen)
+    ? "Open sidebar"
+    : "Close sidebar";
   const tooltipSide = isColumnLayout && isSidebarSmall ? "right" : undefined;
 
   useKeyboardShortcut("focusChatSearchCollapsed", () => {
@@ -122,7 +124,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   useKeyboardShortcut("toggleSidebar", () => {
     setIsSearchModalOpen(false);
-    setIsCollapsed(!isCollapsed);
+    if (isDesktop) {
+      setIsCollapsed(!isCollapsed);
+    } else {
+      setIsDrawerOpen(!isDrawerOpen);
+    }
   });
 
   const handleNewChat = () => {
@@ -162,7 +168,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <DrawerTrigger asChild>
-            <Button variant="outline" size="icon-sm" aria-label="Expand sidebar" className="size-6">
+            <Button variant="outline" size="icon-sm" aria-label={toggleTooltip} className="size-6">
               <IconLayoutSidebar />
             </Button>
           </DrawerTrigger>
@@ -206,7 +212,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 "pointer-events-none -translate-y-2 scale-95 opacity-0",
               isColumnLayout && "flex-col",
             )}
-            inert={!isCollapsed}
+            inert={!isSidebarSmall}
           >
             <Tooltip>
               <TooltipTrigger asChild>
