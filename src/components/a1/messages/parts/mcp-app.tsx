@@ -258,13 +258,10 @@ function ConnectedMcpApp({
     if (displayMode === "fullscreen") {
       return {
         url: "/mcp-app-sandbox.html",
-        className: "fixed z-52 block rounded-b-md bg-background",
+        className: "block w-full bg-background",
         style: {
           border: 0,
           outline: "none",
-          top: fullscreenFrame.top + FULLSCREEN_HEADER_HEIGHT,
-          left: fullscreenFrame.left,
-          width: fullscreenFrame.width,
           height: fullscreenFrame.bodyHeight,
         },
       };
@@ -272,12 +269,10 @@ function ConnectedMcpApp({
     if (displayMode === "pip") {
       return {
         url: "/mcp-app-sandbox.html",
-        className: "fixed right-4 bottom-4 z-50 block rounded-md bg-background",
+        className: "block size-full bg-background",
         style: {
           border: 0,
           outline: "none",
-          width: "min(400px, calc(100vw - 32px))",
-          height: "min(300px, calc(100vh - 32px))",
         },
       };
     }
@@ -286,14 +281,7 @@ function ConnectedMcpApp({
       className: "block w-full rounded-md",
       style: { border: 0, outline: "none", height: inlineHeight },
     };
-  }, [
-    displayMode,
-    fullscreenFrame.bodyHeight,
-    fullscreenFrame.left,
-    fullscreenFrame.top,
-    fullscreenFrame.width,
-    inlineHeight,
-  ]);
+  }, [displayMode, fullscreenFrame.bodyHeight, inlineHeight]);
 
   const containerDimensions =
     displayMode === "fullscreen"
@@ -310,62 +298,92 @@ function ConnectedMcpApp({
   }
 
   return (
-    <div ref={containerRef} className="w-full">
+    <>
+      {displayMode !== "inline" && (
+        <div
+          className={
+            displayMode === "fullscreen"
+              ? "invisible w-full"
+              : "border-border bg-muted/20 flex w-full items-center justify-center rounded-md border border-dashed"
+          }
+          style={{ height: inlineHeight }}
+        >
+          {displayMode === "pip" && (
+            <Button variant="ghost" size="sm" onClick={() => setDisplayMode("inline")}>
+              Extension open in picture-in-picture
+            </Button>
+          )}
+        </div>
+      )}
       {displayMode === "fullscreen" && (
-        <>
-          <div
-            className="fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
-            onClick={() => setDisplayMode("inline")}
-          />
-          <div
-            className="bg-background fixed z-51 overflow-hidden rounded-md text-sm"
-            style={{
-              top: fullscreenFrame.top,
-              left: fullscreenFrame.left,
-              width: fullscreenFrame.width,
-              height: fullscreenFrame.height,
-            }}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="bg-background border-border flex h-16 items-center justify-between gap-3 border-b px-4">
-              <div className="min-w-0">
-                <div className="truncate text-base font-medium">Expanded extension view</div>
-                <div className="text-muted-foreground truncate text-sm">
-                  Opened in expanded view. Press Escape or close it to return to the conversation.
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon-sm" onClick={() => setDisplayMode("inline")}>
-                  <IconX />
-                  <span className="sr-only">Close expanded MCP app</span>
-                </Button>
+        <div
+          className="fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs"
+          onClick={() => setDisplayMode("inline")}
+        />
+      )}
+      <div
+        ref={containerRef}
+        className={
+          displayMode === "fullscreen"
+            ? "bg-background fixed z-51 overflow-hidden rounded-md text-sm"
+            : displayMode === "pip"
+              ? "bg-background fixed right-4 bottom-4 z-50 overflow-hidden rounded-md"
+              : "w-full"
+        }
+        style={
+          displayMode === "fullscreen"
+            ? {
+                top: fullscreenFrame.top,
+                left: fullscreenFrame.left,
+                width: fullscreenFrame.width,
+                height: fullscreenFrame.height,
+              }
+            : displayMode === "pip"
+              ? {
+                  width: "min(400px, calc(100vw - 32px))",
+                  height: "min(300px, calc(100vh - 32px))",
+                }
+              : undefined
+        }
+      >
+        {displayMode === "fullscreen" && (
+          <div className="bg-background border-border flex h-16 items-center justify-between gap-3 border-b px-4">
+            <div className="min-w-0">
+              <div className="truncate text-base font-medium">Expanded extension view</div>
+              <div className="text-muted-foreground truncate text-sm">
+                Opened in expanded view. Press Escape or close it to return to the conversation.
               </div>
             </div>
-            <div className="bg-background h-[calc(100%-4rem)]" />
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon-sm" onClick={() => setDisplayMode("inline")}>
+                <IconX />
+                <span className="sr-only">Close expanded MCP app</span>
+              </Button>
+            </div>
           </div>
-        </>
-      )}
-      <MCPAppRenderer
-        part={part}
-        loadResource={loadResource}
-        handlers={handlers}
-        sandbox={sandbox}
-        hostInfo={hostInfo}
-        hostContext={{
-          theme: resolvedTheme === "dark" ? "dark" : "light",
-          displayMode,
-          availableDisplayModes: [...DISPLAY_MODES],
-          containerDimensions,
-          platform: "desktop",
-          locale: navigator.language,
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          toolInfo: {
-            id: part.toolCallId,
-            tool: { name: part.toolName, inputSchema: { type: "object" } },
-          },
-        }}
-        fallback={fallback}
-      />
-    </div>
+        )}
+        <MCPAppRenderer
+          part={part}
+          loadResource={loadResource}
+          handlers={handlers}
+          sandbox={sandbox}
+          hostInfo={hostInfo}
+          hostContext={{
+            theme: resolvedTheme === "dark" ? "dark" : "light",
+            displayMode,
+            availableDisplayModes: [...DISPLAY_MODES],
+            containerDimensions,
+            platform: "desktop",
+            locale: navigator.language,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            toolInfo: {
+              id: part.toolCallId,
+              tool: { name: part.toolName, inputSchema: { type: "object" } },
+            },
+          }}
+          fallback={fallback}
+        />
+      </div>
+    </>
   );
 }
