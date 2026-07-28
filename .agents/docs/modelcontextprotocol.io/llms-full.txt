@@ -8414,12 +8414,18 @@ For our testing purposes, we will create an extremely simple MCP server that exp
         }
 
         const audiences: string[] = Array.isArray(data.aud) ? data.aud : [data.aud];
-        const allowed = audiences.some((a) =>
-          checkResourceAllowed({
-            requestedResource: a,
-            configuredResource: mcpServerUrl,
-          }),
-        );
+        const allowed = audiences.some((a) => {
+          try {
+            return checkResourceAllowed({
+              requestedResource: a,
+              configuredResource: mcpServerUrl,
+            });
+          } catch {
+            // Keycloak tokens include non-URL audiences (e.g. "account", "test-client").
+            // Those are never our resource, so treat them as "no match" instead of crashing.
+            return false;
+          }
+        });
         if (!allowed) {
           throw new Error(
             `None of the provided audiences are allowed. Expected ${mcpServerUrl}, got: ${audiences.join(", ")}`,
@@ -18530,6 +18536,11 @@ Embedded resources support the same [Resource annotations](/specification/2025-1
 **Structured** content is returned as a JSON object in the `structuredContent` field of a result.
 
 For backwards compatibility, a tool that returns structured content SHOULD also return the serialized JSON in a TextContent block.
+
+<Note>
+  `structuredContent` is server-produced result data and is unrelated to LLM
+  "structured outputs" (schema-constrained model generation).
+</Note>
 
 #### Output Schema
 
@@ -30201,6 +30212,12 @@ Implementation requirements:
 * **Client SDKs**: Implement the client behavior for extracting and encoding header values
 * **Validation**: Both sides must validate header/body consistency
 
+## Changes since SEP became Final
+
+This SEP is preserved as a historical record of what was accepted. The list below tracks changes made to the specification after this SEP reached Final status. Refer to the current [specification](https://modelcontextprotocol.io/specification) for the authoritative, up-to-date requirements.
+
+* **`HeaderMismatch` error code reassigned from `-32001` to `-32020`.** This SEP originally assigned `HeaderMismatch` to `-32001`. The error-code allocation update in [#2907](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2907) reassigned `HeaderMismatch` to `-32020`. All references to `-32001` above should be read as `-32020` when implementing against the current specification.
+
 
 # SEP-2260: Require Server requests to be associated with a Client request.
 Source: https://modelcontextprotocol.io/seps/2260-Require-Server-requests-to-be-associated-with-Client-requests
@@ -32374,7 +32391,7 @@ Servers MUST apply the same cacheScope to all response pages for a given list re
 
 ### Error handling
 
-* For backwards compatibility, If `ttlMs` is missing, clients SHOULD assume a default ttlMs of 0 (immediately stale) and rely on their own caching heuristics or notifications.
+* For backwards compatibility, If `ttlMs` is missing, clients SHOULD assume a default `ttlMs` of `0` (immediately stale) and rely on their own caching heuristics or notifications.
 * If `ttlMs` is present but is a negative integer, the client SHOULD ignore it and behave as if it were 0 (immediately stale).
 
 ## Rationale
@@ -32908,7 +32925,7 @@ return a JSON-RPC error response. For HTTP, the response status code MUST be
 `400 Bad Request`. The error MUST conform to the following structure:
 
 ```ts theme={null}
-export const UNSUPPORTED_PROTOCOL_VERSION = -32004;
+export const UNSUPPORTED_PROTOCOL_VERSION = -32022;
 
 export interface UnsupportedProtocolVersionError extends Omit<
   JSONRPCErrorResponse,
@@ -33114,7 +33131,7 @@ the missing capabilities. For HTTP, the response status code MUST be
 `400 Bad Request`.
 
 ```ts theme={null}
-export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32003;
+export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32021;
 
 export interface MissingRequiredClientCapabilityError extends Omit<
   JSONRPCErrorResponse,
