@@ -1,8 +1,13 @@
 import {
-  experimental_createMCPClient as createMCPClient,
-  type experimental_MCPClient as MCPClient,
+  createMCPClient,
   type JSONRPCMessage,
+  type ListToolsResult,
+  mcpAppClientCapabilities,
+  type MCPAppResource,
+  type MCPClient,
   type MCPTransport,
+  readMCPAppResource,
+  splitMCPAppTools,
   UnauthorizedError,
 } from "@ai-sdk/mcp";
 import { invoke } from "@tauri-apps/api/core";
@@ -25,6 +30,7 @@ interface ManagedMCPServer {
   client?: MCPClient;
   transport?: MCPTransport;
   tools: ToolSet;
+  appVisibleToolNames: string[];
   configHash: string;
 }
 
@@ -36,6 +42,7 @@ interface LoadingOperation {
 
 const serverCache = new Map<string, ManagedMCPServer>();
 const loadingOperations = new Map<string, LoadingOperation>();
+const appResourceCache = new Map<string, Map<string, Promise<MCPAppResource>>>();
 
 class TauriStdioMCPTransport implements MCPTransport {
   public onclose?: () => void;
@@ -365,7 +372,10 @@ function createTransport(server: McpServerConfig): MCPTransport {
   }
 }
 
-async function getPaginatedMcpTools(client: MCPClient, signal: AbortSignal): Promise<ToolSet> {
+async function getPaginatedMcpToolDefinitions(
+  client: MCPClient,
+  signal: AbortSignal,
+): Promise<ListToolsResult> {
   if (signal.aborted) {
     throw new Error("Operation aborted");
   }
@@ -395,11 +405,11 @@ async function getPaginatedMcpTools(client: MCPClient, signal: AbortSignal): Pro
     cursor = page.nextCursor;
   }
 
-  return client.toolsFromDefinitions({
+  return {
     ...firstPage,
     tools: allToolDefinitions,
     nextCursor: undefined,
-  });
+  };
 }
 
 async function getMcpClientAndTools(
@@ -408,6 +418,7 @@ async function getMcpClientAndTools(
 ): Promise<{
   client: MCPClient;
   tools: ToolSet;
+  appVisibleToolNames: string[];
   transport: MCPTransport;
   hasToken: boolean;
 }> {
@@ -426,14 +437,21 @@ async function getMcpClientAndTools(
   signal.addEventListener("abort", onAbort, { once: true });
 
   try {
-    const client = await createMCPClient({ transport });
+    const client = await createMCPClient({
+      transport,
+      clientName: "agent-one",
+      capabilities: mcpAppClientCapabilities,
+    });
 
     if (signal.aborted) {
       await transport.close();
       throw new Error("Operation aborted");
     }
 
-    const tools = await getPaginatedMcpTools(client, signal);
+    const definitions = await getPaginatedMcpToolDefinitions(client, signal);
+    const { modelVisible, appVisible } = splitMCPAppTools(definitions);
+    const tools = client.toolsFromDefinitions(modelVisible);
+    const appVisibleToolNames = appVisible.tools.map((tool) => tool.name);
 
     if (signal.aborted) {
       await transport.close();
@@ -449,7 +467,7 @@ async function getMcpClientAndTools(
     const hasToken = transport instanceof TauriHttpMCPTransport ? transport.hasToken : false;
 
     signal.removeEventListener("abort", onAbort);
-    return { client, tools, transport, hasToken };
+    return { client, tools, appVisibleToolNames, transport, hasToken };
   } catch (error) {
     signal.removeEventListener("abort", onAbort);
     throw error;
@@ -559,6 +577,7 @@ export function isServerCached(server: McpServerConfig): boolean {
 
 export function closeServerCache(serverId: string): void {
   abortMcpServerLoad(serverId);
+  appResourceCache.delete(serverId);
 
   const cached = serverCache.get(serverId);
   if (cached) {
@@ -580,10 +599,12 @@ export function invalidateServerCache(): void {
     });
   }
   serverCache.clear();
+  appResourceCache.clear();
 }
 
 const MCP_TOOL_PREFIX = "mcp__";
 const MCP_TOOL_SEPARATOR = "__";
+export const MCP_SERVER_ID_METADATA_KEY = "agentOneMcpServerId";
 
 function createAbortError(): Error {
   const abortError = new Error("The operation was aborted.");
@@ -651,13 +672,72 @@ export function buildMcpServerSlugMap(servers: McpServerConfig[]): Map<string, s
   return slugMap;
 }
 
-export function prefixMcpToolNames(tools: ToolSet, serverSlug: string): ToolSet {
+export function prefixMcpToolNames(tools: ToolSet, serverSlug: string, serverId: string): ToolSet {
   const prefixed: ToolSet = {};
   for (const [name, tool] of Object.entries(tools)) {
-    prefixed[`${MCP_TOOL_PREFIX}${serverSlug}${MCP_TOOL_SEPARATOR}${name}`] =
-      wrapMcpToolWithAbortRace(tool as Tool<unknown, unknown>);
+    const wrappedTool = wrapMcpToolWithAbortRace(tool as Tool<unknown, unknown>);
+    prefixed[`${MCP_TOOL_PREFIX}${serverSlug}${MCP_TOOL_SEPARATOR}${name}`] = {
+      ...wrappedTool,
+      metadata: {
+        ...wrappedTool.metadata,
+        [MCP_SERVER_ID_METADATA_KEY]: serverId,
+      },
+    };
   }
   return prefixed;
+}
+
+function getCachedMcpAppServer(serverId: string): ManagedMCPServer & { client: MCPClient } {
+  const server = serverCache.get(serverId);
+  if (!server?.client) {
+    throw new Error("The MCP server is no longer connected.");
+  }
+  return server as ManagedMCPServer & { client: MCPClient };
+}
+
+export function getMcpAppVisibleToolNames(serverId: string): string[] {
+  return [...getCachedMcpAppServer(serverId).appVisibleToolNames];
+}
+
+export async function loadMcpAppResource(serverId: string, uri: string): Promise<MCPAppResource> {
+  const server = getCachedMcpAppServer(serverId);
+  let serverResources = appResourceCache.get(serverId);
+  if (!serverResources) {
+    serverResources = new Map();
+    appResourceCache.set(serverId, serverResources);
+  }
+
+  const cached = serverResources.get(uri);
+  if (cached) {
+    return cached;
+  }
+
+  const resource = readMCPAppResource({ client: server.client, uri });
+  serverResources.set(uri, resource);
+
+  try {
+    return await resource;
+  } catch (error) {
+    serverResources.delete(uri);
+    throw error;
+  }
+}
+
+export async function callMcpAppTool(
+  serverId: string,
+  name: string,
+  toolArguments?: Record<string, unknown>,
+) {
+  const server = getCachedMcpAppServer(serverId);
+  if (!server.appVisibleToolNames.includes(name)) {
+    throw new Error(`Tool is not app-visible: ${name}`);
+  }
+
+  return server.client.callTool({ name, arguments: toolArguments ?? {} });
+}
+
+export function readMcpAppServerResource(serverId: string, uri: string) {
+  return getCachedMcpAppServer(serverId).client.readResource({ uri });
 }
 
 export function stripMcpToolPrefix(toolName: string): string {

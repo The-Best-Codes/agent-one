@@ -33,6 +33,8 @@ import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
+import { MessagePartMcpApp } from "./mcp-app";
+
 type DynamicToolOutputContentItem = {
   text?: string;
 };
@@ -46,7 +48,11 @@ interface DynamicToolPartProps {
   labels?: ToolDisplayLabels | null;
 }
 
-export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) => {
+export const MessagePartDynamicTool = (props: DynamicToolPartProps) => (
+  <MessagePartMcpApp part={props.part} fallback={<MessagePartDynamicToolFallback {...props} />} />
+);
+
+const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;

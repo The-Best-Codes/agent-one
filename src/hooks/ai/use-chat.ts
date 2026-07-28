@@ -112,9 +112,17 @@ export function useChat(
     [chatResult, syncTransport],
   );
 
+  const updateMcpAppModelContext = useCallback(
+    (viewId: string, context: unknown) => {
+      transport.updateMcpAppModelContext(viewId, context);
+    },
+    [transport],
+  );
+
   return {
     ...chatResult,
     sendMessage,
     regenerate,
+    updateMcpAppModelContext,
   };
 }

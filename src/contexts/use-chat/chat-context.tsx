@@ -25,11 +25,11 @@ import {
   ChatMetadataContext,
   ChatStatusContext,
 } from "./chat-contexts";
-import { ChatInstance } from "./chat-instance";
+import { ChatInstance, type ChatInstanceHelpers } from "./chat-instance";
 
 const logger = getLogger(import.meta.url);
 
-type ChatInstanceCollection = Map<string, UseChatHelpers<UIMessage>>;
+type ChatInstanceCollection = Map<string, ChatInstanceHelpers>;
 
 const DEFAULT_CHAT_METADATA: ChatMetadata = {
   title: "New chat",
@@ -201,7 +201,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const handleInstanceUpdate = useCallback(
-    (id: string, instance: UseChatHelpers<UIMessage> | null) => {
+    (id: string, instance: ChatInstanceHelpers | null) => {
       if (instance) {
         chatInstancesRef.current.set(id, instance);
       } else {
@@ -349,7 +349,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const focusedChatInstance = currentChatId
     ? chatInstancesRef.current.get(currentChatId)
     : undefined;
-  const lastFocusedChatInstanceRef = useRef<UseChatHelpers<UIMessage> | undefined>(undefined);
+  const lastFocusedChatInstanceRef = useRef<ChatInstanceHelpers | undefined>(undefined);
 
   if (focusedChatInstance) {
     lastFocusedChatInstanceRef.current = focusedChatInstance;
@@ -399,6 +399,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const instanceForFunctions = currentChatId ? stableFocusedChatInstance : defaultChat;
   const noopAsync = useCallback(async () => {}, []);
   const noopSetMessages = useCallback<UseChatHelpers<UIMessage>["setMessages"]>(() => {}, []);
+  const noopUpdateMcpAppModelContext = useCallback(() => {}, []);
   const {
     addToolOutput = noopAsync,
     addToolApprovalResponse = noopAsync,
@@ -408,6 +409,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     stop = noopAsync,
     setMessages = noopSetMessages,
     sendMessage = noopAsync,
+    updateMcpAppModelContext = noopUpdateMcpAppModelContext,
   } = instanceForFunctions ?? {};
 
   const wasBusyRef = useRef(false);
@@ -500,6 +502,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       resumeStream,
       stop,
       setMessages,
+      updateMcpAppModelContext,
     }),
     [
       isNewChat,
@@ -512,6 +515,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       resumeStream,
       stop,
       setMessages,
+      updateMcpAppModelContext,
     ],
   );
 

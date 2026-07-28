@@ -218,7 +218,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
             server.toolApprovalOverrides,
           );
           const serverSlug = slugMap.get(server.id) ?? server.id;
-          Object.assign(allTools, prefixMcpToolNames(wrappedTools, serverSlug));
+          Object.assign(allTools, prefixMcpToolNames(wrappedTools, serverSlug, server.id));
         } catch (error) {
           logger.error(`Failed to load cached MCP tools for ${server.name}:`, error);
           closeServerCache(server.id);
@@ -301,7 +301,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   tools: wrappedTools,
                 };
                 if (loadId !== loadIdRef.current) return;
-                Object.assign(allTools, prefixMcpToolNames(result.tools, result.serverSlug));
+                Object.assign(
+                  allTools,
+                  prefixMcpToolNames(result.tools, result.serverSlug, server.id),
+                );
                 setMcpTools({ ...allTools });
                 setMcpServerLoadStates((prev) => ({
                   ...prev,
