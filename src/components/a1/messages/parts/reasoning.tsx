@@ -99,7 +99,7 @@ export const MessagePartReasoning = ({
           {shouldUsePerformantRenderer ? (
             <PerformantMarkdown content={text} />
           ) : shouldRenderMarkdown ? (
-            <MemoizedMarkdown id={id} content={text} messageRole="assistant" />
+            <MemoizedMarkdown id={id} content={text} messageRole="assistant" simpleCodeBlocks />
           ) : (
             <pre
               className="text-base wrap-break-word whitespace-pre-wrap"

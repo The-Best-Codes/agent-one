@@ -54,15 +54,25 @@ const MemoizedMarkdownBlock = memo(
     block,
     messageRole,
     remendEnabled,
+    simpleCodeBlocks,
   }: {
     allowInternalLinks?: boolean;
     block: MarkdownBlock;
     messageRole: UIMessage["role"];
     remendEnabled: boolean;
+    simpleCodeBlocks?: boolean;
   }) => {
     const { type, content, lang } = block;
 
     if (type === "code") {
+      if (simpleCodeBlocks) {
+        return (
+          <pre>
+            <code>{content}</code>
+          </pre>
+        );
+      }
+
       return <CodeBlock content={content} lang={lang} messageRole={messageRole} />;
     } else {
       const completedContent = remendEnabled ? remend(content) : content;
@@ -115,7 +125,8 @@ const MemoizedMarkdownBlock = memo(
       prevProps.block.content === nextProps.block.content &&
       prevProps.block.lang === nextProps.block.lang &&
       prevProps.allowInternalLinks === nextProps.allowInternalLinks &&
-      prevProps.remendEnabled === nextProps.remendEnabled
+      prevProps.remendEnabled === nextProps.remendEnabled &&
+      prevProps.simpleCodeBlocks === nextProps.simpleCodeBlocks
     );
   },
 );
@@ -128,11 +139,13 @@ export const MemoizedMarkdown = memo(
     content,
     id,
     messageRole,
+    simpleCodeBlocks,
   }: {
     allowInternalLinks?: boolean;
     content: string;
     id: string;
     messageRole: UIMessage["role"];
+    simpleCodeBlocks?: boolean;
   }) => {
     const remendEnabled = useAtomValue(remendEnabledAtom);
     const blocks = useMemo(
@@ -146,6 +159,7 @@ export const MemoizedMarkdown = memo(
         block={block}
         messageRole={messageRole}
         remendEnabled={remendEnabled}
+        simpleCodeBlocks={simpleCodeBlocks}
         key={`${id}-block_${index}`}
       />
     ));
