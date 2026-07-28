@@ -238,6 +238,9 @@ function ConnectedMcpApp({
         onError: (error) => {
           logger.error("MCP App bridge error:", error);
         },
+        onLog: (message) => {
+          logger.verbose("MCP App bridge log:", message);
+        },
       };
     } catch (error) {
       logger.warn("Could not connect MCP App to its server:", error);
