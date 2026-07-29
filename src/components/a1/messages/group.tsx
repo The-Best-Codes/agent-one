@@ -30,8 +30,10 @@ export const MessageGroup = ({
     >
       <div
         className={cn(
-          "flex max-w-full w-full flex-col gap-2 rounded-md",
-          messageRole === "user" ? "bg-secondary text-secondary-foreground p-2" : "p-2 pr-0 pb-0",
+          "flex max-w-full flex-col gap-2 rounded-md",
+          messageRole === "user"
+            ? "bg-secondary text-secondary-foreground p-2"
+            : "p-2 pr-0 pb-0 w-full",
         )}
       >
         {children}
