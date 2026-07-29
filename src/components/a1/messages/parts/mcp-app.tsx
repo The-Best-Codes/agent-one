@@ -7,7 +7,7 @@ import {
 import { IconX } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { DynamicToolUIPart } from "ai";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ export function MessagePartMcpApp({
   return <ConnectedMcpApp part={part} serverId={serverId} fallback={fallback} />;
 }
 
-function ConnectedMcpApp({
+function ConnectedMcpAppInternal({
   part,
   serverId,
   fallback,
@@ -390,3 +390,14 @@ function ConnectedMcpApp({
     </>
   );
 }
+
+const ConnectedMcpApp = memo(
+  ConnectedMcpAppInternal,
+  (prev, next) =>
+    prev.part.toolCallId === next.part.toolCallId &&
+    prev.part.state === next.part.state &&
+    prev.part.toolName === next.part.toolName &&
+    prev.serverId === next.serverId,
+);
+
+ConnectedMcpApp.displayName = "ConnectedMcpApp";
