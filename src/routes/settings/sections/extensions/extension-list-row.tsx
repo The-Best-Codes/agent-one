@@ -1,6 +1,6 @@
 import { IconChevronRight, IconExternalLink, IconPackage, IconTrash } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { memo, useState } from "react";
+import { cloneElement, isValidElement, memo, useState } from "react";
 
 import {
   Accordion,
@@ -15,6 +15,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -104,7 +105,13 @@ function ExtensionListRowComponent({
 }: ExtensionListRowProps) {
   const hasAdvanced = Boolean(advancedContent) || moreInfoJson !== undefined;
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advancedFooter, setAdvancedFooter] = useState<ReactNode>(null);
   const toolCount = loadState?.status === "loaded" ? loadState.toolCount : null;
+  const advancedBody = isValidElement<{ setDialogFooter?: (footer: ReactNode) => void }>(
+    advancedContent,
+  )
+    ? cloneElement(advancedContent, { setDialogFooter: setAdvancedFooter })
+    : advancedContent;
 
   return (
     <div className="bg-muted/40 flex w-full flex-col gap-3 rounded-md p-4 not-dark:border">
@@ -196,7 +203,15 @@ function ExtensionListRowComponent({
       </div>
 
       {installed && hasAdvanced ? (
-        <Dialog open={advancedOpen} onOpenChange={setAdvancedOpen}>
+        <Dialog
+          open={advancedOpen}
+          onOpenChange={(open) => {
+            setAdvancedOpen(open);
+            if (!open) {
+              setAdvancedFooter(null);
+            }
+          }}
+        >
           <DialogTrigger asChild>
             <Button
               type="button"
@@ -214,7 +229,7 @@ function ExtensionListRowComponent({
             </DialogHeader>
             <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
               <div className="flex flex-col gap-4 py-1">
-                {advancedContent}
+                {advancedBody}
                 {moreInfoJson !== undefined ? (
                   <Accordion type="single" collapsible className="rounded-md border px-3">
                     <AccordionItem value="more-info" className="border-b-0">
@@ -229,6 +244,7 @@ function ExtensionListRowComponent({
                 ) : null}
               </div>
             </div>
+            {advancedFooter ? <DialogFooter>{advancedFooter}</DialogFooter> : null}
           </DialogContent>
         </Dialog>
       ) : null}

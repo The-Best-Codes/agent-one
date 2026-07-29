@@ -8,6 +8,7 @@ import {
   IconShieldOff,
 } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import {
@@ -241,9 +242,14 @@ function McpServerApprovalSettings({
 interface ExtensionAdvancedDetailsProps {
   server: McpServerConfig;
   onUpdate: (updates: Partial<McpServerConfig>) => void;
+  setDialogFooter?: (footer: ReactNode) => void;
 }
 
-export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvancedDetailsProps) {
+export function ExtensionAdvancedDetails({
+  server,
+  onUpdate,
+  setDialogFooter,
+}: ExtensionAdvancedDetailsProps) {
   const authStates = useAtomValue(mcpAuthStatesAtom);
   const authState = authStates[server.id];
   const loadStates = useAtomValue(mcpServerLoadStatesAtom);
@@ -254,6 +260,36 @@ export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvanced
   const updateDraft = (updates: Partial<McpServerConfig>) => {
     setDraft((previous) => ({ ...previous, ...updates }) as McpServerConfig);
   };
+
+  useEffect(() => {
+    if (!setDialogFooter) {
+      return;
+    }
+
+    if (!hasChanges) {
+      setDialogFooter(null);
+      return;
+    }
+
+    setDialogFooter(
+      <>
+        <DialogClose asChild>
+          <Button type="button" variant="outline">
+            Cancel
+          </Button>
+        </DialogClose>
+        <DialogClose asChild>
+          <Button type="button" onClick={() => onUpdate(draft)}>
+            Save changes
+          </Button>
+        </DialogClose>
+      </>,
+    );
+
+    return () => {
+      setDialogFooter(null);
+    };
+  }, [draft, hasChanges, onUpdate, setDialogFooter]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -314,21 +350,6 @@ export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvanced
           draft.type === "http" ? <McpAuthStatus server={draft} disabled={!draft.enabled} /> : null
         }
       />
-
-      {hasChanges ? (
-        <div className="flex justify-end gap-2">
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-          </DialogClose>
-          <DialogClose asChild>
-            <Button type="button" onClick={() => onUpdate(draft)}>
-              Save changes
-            </Button>
-          </DialogClose>
-        </div>
-      ) : null}
     </div>
   );
 }
