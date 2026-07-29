@@ -75,6 +75,8 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       followOnAppend: true,
       scrollEndThreshold: AT_BOTTOM_THRESHOLD,
       directDomUpdates: true,
+      // We would like to use "transform" mode; however, it causes problems with the positioning of codeblock headers and full-screen MCP apps.
+      directDomUpdatesMode: "position",
       rangeExtractor:
         keepMountedIndexes && keepMountedIndexes.length > 0
           ? (range) => {
@@ -215,7 +217,6 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
                     data-index={virtualItem.index}
                     style={{
                       position: "absolute",
-                      top: 0,
                       left: 0,
                       width: "100%",
                     }}
