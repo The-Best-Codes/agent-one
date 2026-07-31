@@ -15,7 +15,11 @@ const LoadingIndicator = ({
   if (isMcpLoading) text = "Starting extensions";
   if (isApiKeysLoading) text = "Booting up";
 
-  return <span className="shimmer text-sm font-bold">{text}</span>;
+  return (
+    <span className="shimmer dark:shimmer-color-accent text-foreground text-sm font-bold">
+      {text}
+    </span>
+  );
 };
 
 export const ChatMessageLoading = ({
