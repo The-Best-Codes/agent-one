@@ -172,6 +172,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         getScrollElement: () => parentRef.current,
         scrollToBottom: () => {
           setShowButton(false);
+          atBottomRef.current = true;
           scrollToBottom();
         },
         scrollToIndex: (index) => {
