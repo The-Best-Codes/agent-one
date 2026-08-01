@@ -63,9 +63,12 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
   switch (part.state) {
     case "approval-requested": {
       return (
-        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit max-w-full flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1">
-            <IconTool className="text-foreground size-4" />
+            <IconTool className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to run "{toolName}" tool
             </span>
@@ -74,7 +77,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
             <ParametersAccordion
               type="single"
               collapsible
-              className="border-border w-full rounded-md border"
+              className="border-border w-full max-w-full min-w-0 rounded-md border"
             >
               <ParametersAccordionItem value="parameters" className="border-0">
                 <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
