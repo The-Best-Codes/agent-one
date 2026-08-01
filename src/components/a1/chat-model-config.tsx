@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
@@ -208,6 +209,7 @@ export const ChatModelConfig = ({
       frequencyPenalty: DEFAULT_MODEL_CONFIG.frequencyPenalty,
       presencePenalty: DEFAULT_MODEL_CONFIG.presencePenalty,
       seed: DEFAULT_MODEL_CONFIG.seed,
+      yoloMode: DEFAULT_MODEL_CONFIG.yoloMode,
     });
   };
 
@@ -219,7 +221,8 @@ export const ChatModelConfig = ({
     currentModelConfig.topK === DEFAULT_MODEL_CONFIG.topK &&
     currentModelConfig.frequencyPenalty === DEFAULT_MODEL_CONFIG.frequencyPenalty &&
     currentModelConfig.presencePenalty === DEFAULT_MODEL_CONFIG.presencePenalty &&
-    currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed;
+    currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed &&
+    (currentModelConfig.yoloMode ?? false) === (DEFAULT_MODEL_CONFIG.yoloMode ?? false);
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -235,6 +238,28 @@ export const ChatModelConfig = ({
           <IconRestore data-icon="inline-start" />
           <span className="sr-only">Reset all</span>
         </Button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="yoloMode">YOLO Mode</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs">
+                Bypass tool approval prompts for all tools, running them automatically without
+                asking for confirmation. Use with caution.
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <Switch
+            id="yoloMode"
+            checked={currentModelConfig.yoloMode ?? false}
+            onCheckedChange={(yoloMode) => setModelConfig({ ...configRef.current, yoloMode })}
+          />
+        </div>
       </div>
 
       <SliderConfig

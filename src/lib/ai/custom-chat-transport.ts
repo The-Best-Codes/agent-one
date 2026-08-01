@@ -33,7 +33,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private smoothStreamEnabled: boolean;
   private extractReasoningEnabled: boolean;
   private mcpAppModelContexts = new Map<string, unknown>();
-  private getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
+  private getTools: (options?: {
+    subAgentContext?: SubAgentExecutionContext;
+    yoloMode?: boolean;
+  }) => Promise<ToolSet>;
   private getSystemPrompt: () => string;
   private getApiKeysLoadedPromise: () => Promise<void>;
 
@@ -43,7 +46,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     modelConfig: ModelConfig,
     smoothStreamEnabled: boolean,
     extractReasoningEnabled: boolean,
-    getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>,
+    getTools: (options?: {
+      subAgentContext?: SubAgentExecutionContext;
+      yoloMode?: boolean;
+    }) => Promise<ToolSet>,
     getSystemPrompt: () => string,
     getApiKeysLoadedPromise: () => Promise<void>,
   ) {
@@ -143,6 +149,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     await this.getApiKeysLoadedPromise();
     const systemPrompt = this.getSystemPrompt();
+    const yoloMode = modelConfig.yoloMode ?? false;
     const mcpAppContextInstructions = this.getMcpAppModelContextInstructions();
     const instructions = mcpAppContextInstructions
       ? `${systemPrompt}\n\n${mcpAppContextInstructions}`
@@ -152,9 +159,9 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       modelConfig,
       systemPrompt,
       extractReasoningEnabled,
-      getTools: () => this.getTools({ subAgentContext }),
+      getTools: () => this.getTools({ subAgentContext, yoloMode }),
     };
-    const tools = await this.getTools({ subAgentContext });
+    const tools = await this.getTools({ subAgentContext, yoloMode });
 
     const stopWhenCondition: StopCondition<ToolSet> =
       modelConfig.maxSteps === undefined ? () => false : isStepCount(modelConfig.maxSteps);

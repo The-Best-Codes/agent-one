@@ -59,6 +59,7 @@ export interface ModelConfig {
   frequencyPenalty?: number;
   presencePenalty?: number;
   seed?: number;
+  yoloMode?: boolean;
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
@@ -70,6 +71,7 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   frequencyPenalty: undefined,
   presencePenalty: undefined,
   seed: undefined,
+  yoloMode: false,
 };
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";

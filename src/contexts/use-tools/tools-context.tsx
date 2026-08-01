@@ -47,7 +47,10 @@ import { ToolsContext } from "./tools-contexts";
 const logger = getLogger(import.meta.url);
 
 export interface ToolsContextType {
-  getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
+  getTools: (options?: {
+    subAgentContext?: SubAgentExecutionContext;
+    yoloMode?: boolean;
+  }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
 }
@@ -380,7 +383,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   }, [mcpServers, parallelLoadLimit, mcpAuthStates, setMcpServerLoadStates]);
 
   const getTools = useCallback(
-    async (options?: { subAgentContext?: SubAgentExecutionContext }): Promise<ToolSet> => {
+    async (options?: {
+      subAgentContext?: SubAgentExecutionContext;
+      yoloMode?: boolean;
+    }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
       const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
       const mergedToolConfigs = {
@@ -477,13 +483,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         await loadingPromiseRef.current;
       }
 
-      return {
+      let tools: ToolSet = {
         ...filteredStaticTools,
         ...mcpToolsRef.current,
         ...(Object.keys(mcpToolsRef.current).length > 0 && {
           describeNextTool: createDescribeNextToolTool(),
         }),
       };
+
+      if (options?.yoloMode) {
+        tools = applyApprovalConfigToTools(tools, false);
+      }
+
+      return tools;
     },
     [enabledTools, toolConfigs],
   );
