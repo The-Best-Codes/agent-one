@@ -36,7 +36,7 @@ export default function SettingsTarget({ id, children, className }: SettingsTarg
     <div
       id={id}
       className={cn(
-        "scroll-mt-4 rounded-md bg-transparent transition-[colors,padding] duration-300",
+        "scroll-mt-4 rounded-[calc(var(--radius-xl)+4px)] bg-transparent transition-[colors,padding] duration-300",
         phase === "active" && "settings-target-pulse bg-primary/10 p-2",
         phase === "fading" && "settings-target-fade-out bg-primary/10 p-2",
         className,
