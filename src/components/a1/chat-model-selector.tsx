@@ -200,7 +200,7 @@ const ModelList: FC<ModelListProps> = ({
                 <IconFilter />
               </InputGroupButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-fit max-w-full">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Only show models that support</DropdownMenuLabel>
                 {MODEL_CAPABILITIES.map((capability) => {
