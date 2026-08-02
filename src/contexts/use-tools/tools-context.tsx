@@ -346,14 +346,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                     ),
                   ),
                 ]);
-                const toolEntries = Object.entries(tools);
-                const toolDisplayNames = toolEntries.map(([name, tool]) =>
-                  getToolDisplayName(name, tool.title),
-                );
-                const toolInfo: McpServerToolInfo[] = toolEntries.map(([name, tool]) => ({
+                const toolEntries = Object.entries(tools).map(([name, tool]) => ({
                   name,
-                  title: tool.title,
+                  title: typeof tool.metadata?.title === "string" ? tool.metadata.title : undefined,
                 }));
+                const toolDisplayNames = toolEntries.map(({ name, title }) =>
+                  getToolDisplayName(name, title),
+                );
+                const toolInfo: McpServerToolInfo[] = toolEntries;
                 const wrappedTools = applyApprovalConfigToTools(
                   tools,
                   server.requiresApproval ?? false,
