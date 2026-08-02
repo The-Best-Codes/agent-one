@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
@@ -32,7 +31,7 @@ import {
   isServerCached,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
-import { dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
+import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
@@ -118,6 +117,20 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const authResetPromisesRef = useRef<Map<string, Promise<unknown>>>(new Map());
   const loadIdRef = useRef(0);
 
+  const clearMcpServerRuntimeState = useCallback(
+    (serverId: string) => {
+      dismissMcpLoginToasts(serverId);
+      closeServerCache(serverId);
+      setMcpAuthStates((prev) => {
+        if (!(serverId in prev)) return prev;
+        const next = { ...prev };
+        delete next[serverId];
+        return next;
+      });
+    },
+    [setMcpAuthStates],
+  );
+
   useEffect(() => {
     mcpToolsRef.current = mcpTools;
     mcpLoadedRef.current = mcpLoaded;
@@ -143,21 +156,14 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         previousServerLoadSignatures.get(server.id) !== currentServerLoadSignatures.get(server.id);
 
       if (connectionChanged) {
-        dismissMcpLoginToasts(server.id);
-        closeServerCache(server.id);
-        setMcpAuthStates((prev) => {
-          if (!(server.id in prev)) return prev;
-          const next = { ...prev };
-          delete next[server.id];
-          return next;
-        });
+        clearMcpServerRuntimeState(server.id);
 
         if (
           previousServer?.type === "http" &&
           server.type === "http" &&
           previousServer.url !== server.url
         ) {
-          const resetPromise = invoke("mcp_logout", { serverId: server.id }).catch((error) => {
+          const resetPromise = clearMcpOAuthCredentials(server.id).catch((error) => {
             logger.error(`Failed to reset OAuth credentials for ${server.name}:`, error);
           });
           authResetPromisesRef.current.set(server.id, resetPromise);
@@ -191,14 +197,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     for (const serverId of previousEnabledIds) {
       if (!newEnabledIds.has(serverId)) {
         logger.verbose(`Cleaning up disabled server: ${serverId}`);
-        dismissMcpLoginToasts(serverId);
-        closeServerCache(serverId);
-        setMcpAuthStates((prev) => {
-          if (!(serverId in prev)) return prev;
-          const next = { ...prev };
-          delete next[serverId];
-          return next;
-        });
+        clearMcpServerRuntimeState(serverId);
       }
     }
     enabledServerIdsRef.current = newEnabledIds;
@@ -450,26 +449,19 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     parallelLoadLimit,
     mcpAuthStates,
     serverRestartVersions,
-    setMcpAuthStates,
+    clearMcpServerRuntimeState,
     setMcpServerLoadStates,
   ]);
 
   const restartMcpServer = useCallback(
     (serverId: string) => {
-      dismissMcpLoginToasts(serverId);
-      closeServerCache(serverId);
-      setMcpAuthStates((prev) => {
-        if (!(serverId in prev)) return prev;
-        const next = { ...prev };
-        delete next[serverId];
-        return next;
-      });
+      clearMcpServerRuntimeState(serverId);
       setServerRestartVersions((prev) => ({
         ...prev,
         [serverId]: (prev[serverId] ?? 0) + 1,
       }));
     },
-    [setMcpAuthStates],
+    [clearMcpServerRuntimeState],
   );
 
   const getTools = useCallback(
