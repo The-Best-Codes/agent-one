@@ -132,6 +132,18 @@ export type FluffyIoModelcontextprotocolRegistryPublisherProvided = {
 
 export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   listChanged?: boolean;
+  aml_screen?: string;
+  kyc_check?: string;
+  risk_report?: string;
+  "/assess_opportunity"?: string;
+  "/check_entry_viability"?: string;
+  "/check_pool_viability"?: string;
+  "/estimate_net_position"?: string;
+  "/gas_timing"?: string;
+  "/market_snapshot"?: string;
+  "/profitlens/ranking"?: string;
+  "/profitlens/returns"?: string;
+  "/verify_claim"?: string;
   formula?: string;
   install?: string[];
   tap?: string;
@@ -164,18 +176,6 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   api_key_env?: string;
   api_key_header?: string;
   requires_api_key?: boolean;
-  aml_screen?: string;
-  kyc_check?: string;
-  risk_report?: string;
-  "/assess_opportunity"?: string;
-  "/check_entry_viability"?: string;
-  "/check_pool_viability"?: string;
-  "/estimate_net_position"?: string;
-  "/gas_timing"?: string;
-  "/market_snapshot"?: string;
-  "/profitlens/ranking"?: string;
-  "/profitlens/returns"?: string;
-  "/verify_claim"?: string;
   dynamicClientRegistration?: boolean;
   pkce?: string;
   wellKnownIssuer?: string;
@@ -200,12 +200,14 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   github?: string;
   name?: string;
   url?: string;
+  mcpServers?: IoModelcontextprotocolRegistryPublisherProvidedMCPServers;
+  graph?: string;
+  llmsFullTxt?: string;
   codingAgentSetup?: string;
   docs?: string;
   llmsTxt?: string;
   types?: string[];
   sources?: string[];
-  mcpServers?: IoModelcontextprotocolRegistryPublisherProvidedMCPServers;
   args?: unknown[];
   node?: string;
   monthly?: number;
@@ -226,6 +228,8 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   tools?: string[] | number;
   campaign?: string;
   source?: string;
+  tags?: string[];
+  tier?: string;
   deferred_chains?: string[];
   label?: string;
   live_chains?: string[];
@@ -247,8 +251,8 @@ export type EndpointsClass = {
 };
 
 export type IoModelcontextprotocolRegistryPublisherProvidedMCPServers = {
-  "logic-pro"?: Nervapack;
   lumen?: Lumen;
+  "logic-pro"?: Nervapack;
 };
 
 export type Nervapack = {
@@ -289,9 +293,9 @@ export type Package = {
   version?: string;
   transport: Transport;
   registryBaseUrl?: string;
+  runtimeHint?: string;
   environmentVariables?: EnvironmentVariable[];
   packageArguments?: PackageArgument[];
-  runtimeHint?: string;
   runtimeArguments?: RuntimeArgument[];
   fileSha256?: string;
 };
@@ -463,6 +467,8 @@ export type RuntimeArgumentVariables = {
   vault_path?: ApifyAPIToken;
   kube_config?: ApifyAPIToken;
   source_path?: ApifyAPIToken;
+  project_dir?: ApifyAPIToken;
+  keepassxc_dir?: ApifyAPIToken;
   client_id?: ApifyAPIToken;
   client_secret?: ApifyAPIToken;
   customer_id?: CustomerID;
@@ -542,6 +548,7 @@ export type FluffyVariables = {
   agentfarm_token?: ApifyAPIToken;
   NEURA_RELAY_MCP_TOKEN?: ApifyAPIToken;
   partglyph_api_key?: ApifyAPIToken;
+  access_key?: ApifyAPIToken;
   IFR_COWORKER_TOKEN?: ApifyAPIToken;
   e2a_api_key?: ApifyAPIToken;
   NINELAYER_API_KEY?: ApifyAPIToken;
@@ -575,6 +582,8 @@ export type RemoteVariables = {
   api_key?: ApifyAPIToken;
   roster_host?: ApifyAPIToken;
   ATLAS_MCP_URL?: ApifyAPIToken;
+  workspace?: ApifyAPIToken;
+  storefront?: AimarketHost;
   sysname?: ProjectRef;
   shop_id?: AimarketHost;
   API_KEY?: ApifyAPIToken;
@@ -584,11 +593,13 @@ export type RemoteVariables = {
   instance?: ApifyAPIToken;
   site_domain?: APIHost;
   tenant?: ApifyAPIToken;
+  bucket_slug?: Account;
   baseUrl?: APIHost;
   "server-name"?: Account;
   tenantId?: ProjectRef;
   property_slug?: Account;
   subdomain?: Account;
+  portal_host?: Account;
   env?: APIHost;
   tenant_id?: Account;
   apify_token?: ApifyAPIToken;
