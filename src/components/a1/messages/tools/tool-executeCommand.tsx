@@ -303,7 +303,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           type="single"
           collapsible
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-          className="text-foreground flex w-full max-w-3xl flex-row bg-transparent p-0 text-sm"
+          className="text-foreground flex max-w-3xl flex-row bg-transparent p-0 text-sm"
         >
           <AccordionItem
             value={callId}
@@ -367,7 +367,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                 <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
               )}
             </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
+            <AccordionContent className="w-full p-0 pt-2">
               <div className="flex flex-col gap-2">
                 <TerminalDisplay command={command} output={output} />
               </div>
