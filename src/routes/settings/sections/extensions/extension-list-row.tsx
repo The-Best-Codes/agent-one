@@ -1,4 +1,10 @@
-import { IconChevronRight, IconExternalLink, IconPackage, IconTrash } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconExternalLink,
+  IconPackage,
+  IconRefresh,
+  IconTrash,
+} from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { cloneElement, isValidElement, memo, useState } from "react";
 
@@ -79,6 +85,7 @@ interface ExtensionListRowProps {
   loadState?: McpServerLoadState;
   authState?: McpAuthState;
   onEnabledChange?: (enabled: boolean) => void;
+  onRestart?: () => void;
   advancedContent?: ReactNode;
   advancedContentKey?: unknown;
   moreInfoJson?: unknown;
@@ -100,6 +107,7 @@ function ExtensionListRowComponent({
   loadState,
   authState,
   onEnabledChange,
+  onRestart,
   advancedContent,
   moreInfoJson,
 }: ExtensionListRowProps) {
@@ -169,6 +177,26 @@ function ExtensionListRowComponent({
           ) : null}
           {installed && enabled !== undefined && onEnabledChange ? (
             <div className="bg-muted dark:bg-input/30 border-border flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] border px-2.5 text-[0.8rem]">
+              {enabled &&
+              onRestart &&
+              loadState?.status !== "starting" &&
+              loadState?.status !== "connecting" ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="size-3"
+                      aria-label="Restart extension"
+                      onClick={onRestart}
+                    >
+                      <IconRefresh />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Restart</TooltipContent>
+                </Tooltip>
+              ) : null}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center">

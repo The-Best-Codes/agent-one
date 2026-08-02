@@ -511,6 +511,10 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
           });
         } else {
           void checkOAuthSupport(server.url).then((supportsOAuth) => {
+            if (serverCache.get(server.id)?.configHash !== configHash) {
+              return;
+            }
+
             if (supportsOAuth) {
               store.set(mcpAuthStatesAtom, (prev) => {
                 if (prev[server.id] === "supports-oauth") return prev;
@@ -527,7 +531,9 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
         }
       }
     } finally {
-      loadingOperations.delete(server.id);
+      if (loadingOperations.get(server.id)?.controller === controller) {
+        loadingOperations.delete(server.id);
+      }
     }
   })();
 
@@ -540,8 +546,12 @@ export async function getMcpToolsForServer(server: McpServerConfig): Promise<Too
     logger.warn(`Failed to initialize MCP client for ${server.name}:`, error);
     let normalizedError = error instanceof Error ? error : new Error("Unknown error");
 
-    if (server.type === "http" && isAuthError(error)) {
+    if (server.type === "http" && isAuthError(error) && !controller.signal.aborted) {
       const supportsOAuth = await checkOAuthSupport(server.url);
+
+      if (controller.signal.aborted) {
+        throw normalizedError;
+      }
 
       if (supportsOAuth) {
         store.set(mcpAuthStatesAtom, (prev) => {

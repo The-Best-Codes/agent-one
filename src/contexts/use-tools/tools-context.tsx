@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
@@ -31,6 +32,7 @@ import {
   isServerCached,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
+import { dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
@@ -54,6 +56,7 @@ export interface ToolsContextType {
   }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
+  restartMcpServer: (serverId: string) => void;
 }
 
 interface ToolsProviderProps {
@@ -96,19 +99,23 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
   const [toolConfigs] = useAtom(toolConfigsAtom);
-  const [mcpAuthStates] = useAtom(mcpAuthStatesAtom);
+  const [mcpAuthStates, setMcpAuthStates] = useAtom(mcpAuthStatesAtom);
   const [, setMcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
 
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
+  const [serverRestartVersions, setServerRestartVersions] = useState<Record<string, number>>({});
 
   const mcpToolsRef = useRef<ToolSet>({});
   const mcpLoadedRef = useRef(false);
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
   const enabledServerIdsRef = useRef<Set<string>>(new Set());
+  const serverConfigsRef = useRef<Map<string, McpServerConfig>>(new Map());
   const serverLoadSignaturesRef = useRef<Map<string, string>>(new Map());
+  const serverRestartVersionsRef = useRef<Record<string, number>>({});
   const authStatesRef = useRef<Record<string, (typeof mcpAuthStates)[string]>>({});
+  const authResetPromisesRef = useRef<Map<string, Promise<unknown>>>(new Map());
   const loadIdRef = useRef(0);
 
   useEffect(() => {
@@ -121,11 +128,47 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       ? mcpServers.filter((server) => server.enabled)
       : [];
     const previousEnabledIds = enabledServerIdsRef.current;
+    const previousServerConfigs = serverConfigsRef.current;
     const previousServerLoadSignatures = serverLoadSignaturesRef.current;
+    const previousServerRestartVersions = serverRestartVersionsRef.current;
     const previousAuthStates = authStatesRef.current;
     const currentServerLoadSignatures = new Map(
       mcpServers.map((server) => [server.id, getServerLoadSignature(server)]),
     );
+
+    for (const server of mcpServers) {
+      const previousServer = previousServerConfigs.get(server.id);
+      const connectionChanged =
+        previousServerLoadSignatures.has(server.id) &&
+        previousServerLoadSignatures.get(server.id) !== currentServerLoadSignatures.get(server.id);
+
+      if (connectionChanged) {
+        dismissMcpLoginToasts(server.id);
+        closeServerCache(server.id);
+        setMcpAuthStates((prev) => {
+          if (!(server.id in prev)) return prev;
+          const next = { ...prev };
+          delete next[server.id];
+          return next;
+        });
+
+        if (
+          previousServer?.type === "http" &&
+          server.type === "http" &&
+          previousServer.url !== server.url
+        ) {
+          const resetPromise = invoke("mcp_logout", { serverId: server.id }).catch((error) => {
+            logger.error(`Failed to reset OAuth credentials for ${server.name}:`, error);
+          });
+          authResetPromisesRef.current.set(server.id, resetPromise);
+          void resetPromise.finally(() => {
+            if (authResetPromisesRef.current.get(server.id) === resetPromise) {
+              authResetPromisesRef.current.delete(server.id);
+            }
+          });
+        }
+      }
+    }
 
     setMcpServerLoadStates((prev) => {
       const next: Record<string, (typeof prev)[string]> = {};
@@ -148,11 +191,20 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     for (const serverId of previousEnabledIds) {
       if (!newEnabledIds.has(serverId)) {
         logger.verbose(`Cleaning up disabled server: ${serverId}`);
+        dismissMcpLoginToasts(serverId);
         closeServerCache(serverId);
+        setMcpAuthStates((prev) => {
+          if (!(serverId in prev)) return prev;
+          const next = { ...prev };
+          delete next[serverId];
+          return next;
+        });
       }
     }
     enabledServerIdsRef.current = newEnabledIds;
+    serverConfigsRef.current = new Map(mcpServers.map((server) => [server.id, server]));
     serverLoadSignaturesRef.current = currentServerLoadSignatures;
+    serverRestartVersionsRef.current = serverRestartVersions;
     authStatesRef.current = mcpAuthStates;
 
     if (enabledServers.length === 0) {
@@ -196,6 +248,17 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
       if (
         previousServerLoadSignatures.get(server.id) !== currentServerLoadSignatures.get(server.id)
+      ) {
+        return true;
+      }
+
+      if (previousServerRestartVersions[server.id] !== serverRestartVersions[server.id]) {
+        return true;
+      }
+
+      if (
+        previousAuthStates[server.id] !== mcpAuthStates[server.id] &&
+        mcpAuthStates[server.id] === undefined
       ) {
         return true;
       }
@@ -274,6 +337,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
           await Promise.all(
             chunk.map(async (server) => {
               try {
+                await authResetPromisesRef.current.get(server.id);
                 const tools = await Promise.race([
                   getMcpToolsForServer(server),
                   new Promise<ToolSet>((_, reject) =>
@@ -381,7 +445,32 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
     const promise = loadMcpTools();
     loadingPromiseRef.current = promise;
-  }, [mcpServers, parallelLoadLimit, mcpAuthStates, setMcpServerLoadStates]);
+  }, [
+    mcpServers,
+    parallelLoadLimit,
+    mcpAuthStates,
+    serverRestartVersions,
+    setMcpAuthStates,
+    setMcpServerLoadStates,
+  ]);
+
+  const restartMcpServer = useCallback(
+    (serverId: string) => {
+      dismissMcpLoginToasts(serverId);
+      closeServerCache(serverId);
+      setMcpAuthStates((prev) => {
+        if (!(serverId in prev)) return prev;
+        const next = { ...prev };
+        delete next[serverId];
+        return next;
+      });
+      setServerRestartVersions((prev) => ({
+        ...prev,
+        [serverId]: (prev[serverId] ?? 0) + 1,
+      }));
+    },
+    [setMcpAuthStates],
+  );
 
   const getTools = useCallback(
     async (options?: {
@@ -502,7 +591,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   );
 
   return (
-    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>
+    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded, restartMcpServer }}>
       {children}
     </ToolsContext.Provider>
   );

@@ -22,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
@@ -68,6 +69,7 @@ export default function ExtensionsSection() {
   const [mcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
   const [searchParams, setSearchParams] = useSearchParams();
   const enabledToolCount = useEnabledToolCount();
+  const { restartMcpServer } = useTools();
 
   const mcpInstallPrefill = useMemo(() => {
     const name = searchParams.get("mcpName");
@@ -105,6 +107,11 @@ export default function ExtensionsSection() {
   const updateMcpServerById = useCallback(
     (serverId: string, updates: Partial<McpServerConfig>) => {
       const currentServer = mcpServers.find((server) => server.id === serverId);
+      const shouldRetryFailedServer =
+        currentServer !== undefined &&
+        mcpServerLoadStates[serverId]?.status === "error" &&
+        updates.timeoutMs !== undefined &&
+        updates.timeoutMs !== currentServer.timeoutMs;
       if (
         currentServer &&
         typeof updates.enabled === "boolean" &&
@@ -122,8 +129,12 @@ export default function ExtensionsSection() {
           server.id === serverId ? ({ ...server, ...updates } as McpServerConfig) : server,
         ),
       );
+
+      if (shouldRetryFailedServer) {
+        restartMcpServer(serverId);
+      }
     },
-    [mcpServers, setMcpServers],
+    [mcpServers, mcpServerLoadStates, restartMcpServer, setMcpServers],
   );
 
   const handleAddServer = (serverData: {
@@ -276,6 +287,7 @@ export default function ExtensionsSection() {
         loadState: mcpServerLoadStates[server.id],
         authState: mcpAuthStates[server.id],
         onEnabledChange: (enabled) => updateMcpServerById(server.id, { enabled }),
+        onRestart: () => restartMcpServer(server.id),
         onUninstall: () => handleUninstallClick(server.id, server.name || "Custom Extension"),
         advancedContent: (
           <ExtensionAdvancedDetails
@@ -323,6 +335,7 @@ export default function ExtensionsSection() {
         onEnabledChange: server
           ? (enabled) => updateMcpServerById(server.id, { enabled })
           : undefined,
+        onRestart: server ? () => restartMcpServer(server.id) : undefined,
         advancedContent:
           installed && server ? (
             <ExtensionAdvancedDetails
@@ -345,6 +358,7 @@ export default function ExtensionsSection() {
     enabledToolCount,
     updateMcpServerById,
     handleUninstallClick,
+    restartMcpServer,
   ]);
 
   useEffect(() => {
