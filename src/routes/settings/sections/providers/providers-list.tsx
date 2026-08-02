@@ -1,11 +1,9 @@
-import { IconPlugConnected, IconRefresh, IconRestore } from "@tabler/icons-react";
+import { IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo, useState } from "react";
-import { toast } from "sonner";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Empty,
@@ -26,14 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  modelDirectoryStatusAtom,
-  resetModelDirectory,
-  updateModelDirectory,
-} from "@/lib/ai/models/model-directory";
 import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS, getSelectedTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
@@ -63,10 +55,6 @@ import {
   LocalProviderListItem,
 } from "./provider-list-item";
 
-function formatModelDirectoryTimestamp(value: number): string {
-  return value ? new Date(value).toLocaleString() : "Never";
-}
-
 export function ProvidersList() {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
@@ -74,7 +62,6 @@ export function ProvidersList() {
   const [openBuiltInItem, setOpenBuiltInItem] = useState("");
   const [openLocalItem, setOpenLocalItem] = useState("");
   const [openCustomItem, setOpenCustomItem] = useState("");
-  const [isUpdatingModelDirectory, setIsUpdatingModelDirectory] = useState(false);
 
   const handleBuiltInOpenChange = useCallback((value: string | string[]) => {
     setOpenBuiltInItem(typeof value === "string" ? value : (value[0] ?? ""));
@@ -87,7 +74,6 @@ export function ProvidersList() {
   }, []);
 
   const localProviderIds = useAtomValue(localProviderIdsAtom);
-  const modelDirectoryStatus = useAtomValue(modelDirectoryStatusAtom);
   const rawTtsSettings = useAtomValue(ttsSettingsAtom);
   const localProviderSearchItems = useAtomValue(localProviderSearchItemsAtom);
   const customProviderIds = useAtomValue(customProviderIdsAtom);
@@ -170,28 +156,6 @@ export function ProvidersList() {
     trackSettingsInteraction("providers", "custom_provider_deleted");
     deleteCustomProvider(providerId);
     void deleteCustomProviderApiKey(providerId);
-  };
-
-  const handleUpdateModelDirectory = async () => {
-    setIsUpdatingModelDirectory(true);
-    trackSettingsInteraction("providers", "model_directory_update");
-    const result = await updateModelDirectory();
-    setIsUpdatingModelDirectory(false);
-
-    if (!result.ok) {
-      toast.error("Failed to update model list", { description: result.error });
-      return;
-    }
-
-    toast.success("Model list updated", {
-      description: `${result.providerCount ?? 0} providers, ${result.modelCount ?? 0} models loaded.`,
-    });
-  };
-
-  const handleResetModelDirectory = async () => {
-    trackSettingsInteraction("providers", "model_directory_reset");
-    await resetModelDirectory();
-    toast.success("Model list reset to bundled version");
   };
 
   return (
@@ -893,52 +857,6 @@ export function ProvidersList() {
                 </>
               ) : null}
             </FieldGroup>
-          </CardContent>
-        </Card>
-      </SettingsTarget>
-
-      <SettingsTarget id="setting-model-directory">
-        <Card size="sm">
-          <CardHeader>
-            <CardTitle>Model List Updates</CardTitle>
-            <CardDescription>Download the latest built-in provider model metadata.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium">
-                  {modelDirectoryStatus.usingDownloadedList
-                    ? "Using downloaded model list"
-                    : "Using bundled model list"}
-                </p>
-                <p className="text-muted-foreground text-sm tabular-nums">
-                  Last updated: {formatModelDirectoryTimestamp(modelDirectoryStatus.fetchedAt)}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleUpdateModelDirectory}
-                  disabled={isUpdatingModelDirectory}
-                  size="sm"
-                >
-                  {isUpdatingModelDirectory ? (
-                    <Spinner data-icon="inline-start" />
-                  ) : (
-                    <IconRefresh data-icon="inline-start" />
-                  )}
-                  Update now
-                </Button>
-                <Button
-                  onClick={handleResetModelDirectory}
-                  disabled={isUpdatingModelDirectory || !modelDirectoryStatus.usingDownloadedList}
-                  variant="outline"
-                  size="sm"
-                >
-                  <IconRestore data-icon="inline-start" />
-                  Reset
-                </Button>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </SettingsTarget>

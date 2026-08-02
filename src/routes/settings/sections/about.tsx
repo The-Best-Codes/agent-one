@@ -5,12 +5,14 @@ import {
   IconDownload,
   IconExternalLink,
   IconRefresh,
+  IconRestore,
   IconRocket,
   IconShieldCheck,
 } from "@tabler/icons-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
 import { getReleaseNotes, getReleaseNotesVersions } from "@/assets/release-notes";
@@ -37,11 +39,20 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import {
+  modelDirectoryStatusAtom,
+  resetModelDirectory,
+  updateModelDirectory,
+} from "@/lib/ai/models/model-directory";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import SettingsTarget from "../settings-target";
+
+function formatModelDirectoryTimestamp(value: number): string {
+  return value ? new Date(value).toLocaleString() : "Never";
+}
 
 export default function AboutSection() {
   const navigate = useNavigate();
@@ -50,6 +61,8 @@ export default function AboutSection() {
   const { user } = useWebAuth();
   const [analyticsIdentity, setAnalyticsIdentity] = useAtom(analyticsIdentityAtom);
   const [debugMode] = useAtom(debugModeEnabledAtom);
+  const modelDirectoryStatus = useAtomValue(modelDirectoryStatusAtom);
+  const [isUpdatingModelDirectory, setIsUpdatingModelDirectory] = useState(false);
 
   const currentVersion = packageJson.version;
   const releaseNoteVersions = useMemo(() => getReleaseNotesVersions(), []);
@@ -173,11 +186,33 @@ export default function AboutSection() {
 
   const stateDisplay = getStateDisplay();
 
+  const handleUpdateModelDirectory = async () => {
+    setIsUpdatingModelDirectory(true);
+    trackSettingsInteraction("about", "model_directory_update");
+    const result = await updateModelDirectory();
+    setIsUpdatingModelDirectory(false);
+
+    if (!result.ok) {
+      toast.error("Failed to update model list", { description: result.error });
+      return;
+    }
+
+    toast.success("Model list updated", {
+      description: `${result.providerCount ?? 0} providers, ${result.modelCount ?? 0} models loaded.`,
+    });
+  };
+
+  const handleResetModelDirectory = async () => {
+    trackSettingsInteraction("about", "model_directory_reset");
+    await resetModelDirectory();
+    toast.success("Model list reset to bundled version");
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Updates</CardTitle>
+          <CardTitle>App Updates</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div>
@@ -244,6 +279,57 @@ export default function AboutSection() {
           )}
         </CardContent>
       </Card>
+      <SettingsTarget id="setting-model-directory">
+        <Card>
+          <CardHeader>
+            <CardTitle>Model List Updates</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-muted-foreground text-sm">
+              Download the latest{" "}
+              <Link className="underline" to="/settings?tab=providers#setting-built-in-providers">
+                built-in providers'
+              </Link>{" "}
+              model metadata. This will update the model list available in the UI.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium">
+                  {modelDirectoryStatus.usingDownloadedList
+                    ? "Using downloaded model list"
+                    : "Using bundled model list"}
+                </p>
+                <p className="text-muted-foreground text-sm tabular-nums">
+                  Last updated: {formatModelDirectoryTimestamp(modelDirectoryStatus.fetchedAt)}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleUpdateModelDirectory}
+                  disabled={isUpdatingModelDirectory}
+                  size="sm"
+                >
+                  {isUpdatingModelDirectory ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <IconRefresh data-icon="inline-start" />
+                  )}
+                  Update now
+                </Button>
+                <Button
+                  onClick={handleResetModelDirectory}
+                  disabled={isUpdatingModelDirectory || !modelDirectoryStatus.usingDownloadedList}
+                  variant="outline"
+                  size="sm"
+                >
+                  <IconRestore data-icon="inline-start" />
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </SettingsTarget>
       <Card>
         <CardHeader>
           <CardTitle>Help</CardTitle>
