@@ -47,6 +47,9 @@ export interface ModelData {
   providerId: string;
   model: LanguageModel;
   supportsToolUse: boolean;
+  supportsImageInput: boolean;
+  supportsAttachments: boolean;
+  supportsReasoning: boolean;
   contextWindow?: number;
 }
 
@@ -117,6 +120,8 @@ function toModelRecord(model: ProviderModelMetadata): ModelRecord {
     id: model.id,
     name: model.name,
     features: {
+      attachment: model.supportsAttachments,
+      reasoning: model.supportsReasoning,
       tool_call: model.supportsTools,
     },
     limit: {
@@ -124,6 +129,11 @@ function toModelRecord(model: ProviderModelMetadata): ModelRecord {
       output: model.maxOutputTokens,
     },
     modalities: {
+      input: [
+        ...(model.supportsText ? (["text"] as const) : []),
+        ...(model.supportsImageInput ? (["image"] as const) : []),
+        ...(model.supportsAttachments ? (["file"] as const) : []),
+      ],
       output: [
         ...(model.supportsText ? (["text"] as const) : []),
         ...(model.supportsImages ? (["image"] as const) : []),
@@ -147,7 +157,17 @@ function mapDirectoryModels(
   );
 
   for (const override of overrides) {
-    modelMap.set(override.id, normalizeProviderModelMetadata(override));
+    const directoryModel = modelMap.get(override.id);
+    modelMap.set(
+      override.id,
+      normalizeProviderModelMetadata({
+        ...directoryModel,
+        ...override,
+        supportsImageInput: override.supportsImageInput ?? directoryModel?.supportsImageInput,
+        supportsAttachments: override.supportsAttachments ?? directoryModel?.supportsAttachments,
+        supportsReasoning: override.supportsReasoning ?? directoryModel?.supportsReasoning,
+      }),
+    );
   }
 
   const models = Array.from(modelMap.values());
@@ -160,6 +180,9 @@ function mapDirectoryModels(
     providerId,
     model: createModel(model.id),
     supportsToolUse: model.supportsTools,
+    supportsImageInput: model.supportsImageInput ?? false,
+    supportsAttachments: model.supportsAttachments ?? false,
+    supportsReasoning: model.supportsReasoning ?? false,
     contextWindow: model.contextWindow,
   }));
 }
@@ -181,6 +204,9 @@ function mapCustomProviderModels(
       providerId: provider.id,
       model: instance.languageModel(model.id),
       supportsToolUse: model.supportsTools,
+      supportsImageInput: model.supportsImageInput ?? false,
+      supportsAttachments: model.supportsAttachments ?? false,
+      supportsReasoning: model.supportsReasoning ?? false,
       contextWindow: model.contextWindow,
     }));
 }
@@ -201,6 +227,9 @@ function mapLocalProviderModels(
       providerId: provider.id,
       model: instance.languageModel(model.id),
       supportsToolUse: model.supportsTools,
+      supportsImageInput: model.supportsImageInput ?? false,
+      supportsAttachments: model.supportsAttachments ?? false,
+      supportsReasoning: model.supportsReasoning ?? false,
       contextWindow: model.contextWindow,
     }));
 }

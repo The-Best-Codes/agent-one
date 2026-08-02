@@ -1,4 +1,12 @@
-import { IconCheck, IconSelector } from "@tabler/icons-react";
+import {
+  IconBrain,
+  IconCheck,
+  IconFilter,
+  IconPaperclip,
+  IconPhoto,
+  IconSelector,
+  IconTool,
+} from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
@@ -20,6 +28,15 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { InputGroupButton } from "@/components/ui/input-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
@@ -41,14 +58,45 @@ type VirtualRow =
   | { type: "heading"; provider: string; providerId: string }
   | { type: "item"; model: ModelData };
 
+type ModelCapability = "images" | "tools" | "attachments" | "reasoning";
+
+const MODEL_CAPABILITIES = [
+  {
+    id: "images",
+    label: "Images",
+    icon: IconPhoto,
+    supports: (model: ModelData) => model.supportsImageInput,
+  },
+  {
+    id: "tools",
+    label: "Tools",
+    icon: IconTool,
+    supports: (model: ModelData) => model.supportsToolUse,
+  },
+  {
+    id: "attachments",
+    label: "Attachments",
+    icon: IconPaperclip,
+    supports: (model: ModelData) => model.supportsAttachments,
+  },
+  {
+    id: "reasoning",
+    label: "Reasoning",
+    icon: IconBrain,
+    supports: (model: ModelData) => model.supportsReasoning,
+  },
+] as const;
+
 interface ModelListProps {
   rows: VirtualRow[];
   currentModel: ModelData | undefined;
   parentRef: React.RefObject<HTMLDivElement | null>;
   virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
+  capabilityFilters: ModelCapability[];
   onSelect: (modelId: string) => void;
   setSearchQuery: (value: string) => void;
+  setCapabilityFilters: (value: ModelCapability[]) => void;
 }
 
 const HEADING_HEIGHT = 24;
@@ -60,8 +108,10 @@ const ModelList: FC<ModelListProps> = ({
   parentRef,
   virtualizer,
   searchQuery,
+  capabilityFilters,
   onSelect,
   setSearchQuery,
+  setCapabilityFilters,
 }) => {
   const [stickyState, setStickyState] = useState<{
     provider: string;
@@ -139,6 +189,45 @@ const ModelList: FC<ModelListProps> = ({
         className="h-9"
         value={searchQuery}
         onValueChange={setSearchQuery}
+        endAddon={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <InputGroupButton
+                variant={capabilityFilters.length > 0 ? "default" : "ghost"}
+                size="icon-xs"
+                aria-label={`Filter models${capabilityFilters.length > 0 ? ` (${capabilityFilters.length} active)` : ""}`}
+              >
+                <IconFilter />
+              </InputGroupButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Only show models that support</DropdownMenuLabel>
+                {MODEL_CAPABILITIES.map((capability) => {
+                  const CapabilityIcon = capability.icon;
+                  const isChecked = capabilityFilters.includes(capability.id);
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={capability.id}
+                      checked={isChecked}
+                      onCheckedChange={(checked) =>
+                        setCapabilityFilters(
+                          checked === true
+                            ? [...capabilityFilters, capability.id]
+                            : capabilityFilters.filter((filter) => filter !== capability.id),
+                        )
+                      }
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      <CapabilityIcon />
+                      {capability.label}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
       />
       <div className="relative overflow-hidden">
         {stickyState && (
@@ -187,11 +276,15 @@ const ModelList: FC<ModelListProps> = ({
                   }
                   const { model } = row;
                   const isSelected = currentModel?.id === model.id;
+                  const supportedCapabilities = MODEL_CAPABILITIES.filter((capability) =>
+                    capability.supports(model),
+                  );
                   return (
                     <CommandItem
                       key={virtualItem.key}
                       value={model.id}
                       onSelect={() => onSelect(model.id)}
+                      className="group/model"
                       style={{
                         position: "absolute",
                         top: 0,
@@ -212,6 +305,30 @@ const ModelList: FC<ModelListProps> = ({
                         <div className="scrollbar-size-xs w-full overflow-x-auto">
                           <span className="font-medium whitespace-nowrap">{model.name}</span>
                         </div>
+                        {supportedCapabilities.length > 0 && (
+                          <div
+                            className="text-muted-foreground flex shrink-0 items-center gap-0"
+                            title={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
+                            aria-label={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
+                          >
+                            {supportedCapabilities.map((capability) => {
+                              const CapabilityIcon = capability.icon;
+                              return (
+                                <span
+                                  key={capability.id}
+                                  className="bg-popover ring-border -ml-3 flex size-5 items-center justify-center rounded-full ring-1 transition-[margin] group-hover/model:-ml-1 group-focus/model:-ml-1 group-data-[selected=true]/model:-ml-1 first:ml-0"
+                                  aria-hidden="true"
+                                >
+                                  <CapabilityIcon />
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     </CommandItem>
                   );
@@ -236,6 +353,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
   const [staleModel, setStaleModel] = useState(currentModel);
   const [searchQuery, setSearchQuery] = useState("");
+  const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
@@ -268,12 +386,16 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const displayedModel = loading ? (staleModel ?? currentModel) : currentModel;
 
   const filteredModels = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return enabledModels;
-    }
+    const modelsWithCapabilities = enabledModels.filter((model) =>
+      capabilityFilters.every((capabilityId) =>
+        MODEL_CAPABILITIES.find((capability) => capability.id === capabilityId)?.supports(model),
+      ),
+    );
+
+    if (!searchQuery.trim()) return modelsWithCapabilities;
 
     const query = searchQuery.toLowerCase();
-    const scoredModels = enabledModels
+    const scoredModels = modelsWithCapabilities
       .map((model) => {
         const score = fuzzysort.single(query, [model.name, model?.id || ""].join(" "))?.score ?? 0;
         return { model, score };
@@ -281,7 +403,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       .filter(({ score }) => score > 0);
 
     return scoredModels.sort((a, b) => b.score - a.score).map(({ model }) => model);
-  }, [searchQuery, enabledModels]);
+  }, [searchQuery, capabilityFilters, enabledModels]);
 
   const rows = useMemo<VirtualRow[]>(() => {
     const groups = new Map<string, ModelData[]>();
@@ -346,7 +468,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   useEffect(() => {
     scrollToTop();
-  }, [effectiveOpen, searchQuery]);
+  }, [effectiveOpen, searchQuery, capabilityFilters]);
 
   const handleSelect = (modelId: string) => {
     setModel(modelId);
@@ -357,6 +479,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     setOpen(newOpen);
     if (!newOpen) {
       setSearchQuery("");
+      setCapabilityFilters([]);
     }
   };
 
@@ -420,8 +543,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           parentRef={parentRef}
           virtualizer={virtualizer}
           searchQuery={searchQuery}
+          capabilityFilters={capabilityFilters}
           onSelect={handleSelect}
           setSearchQuery={setSearchQuery}
+          setCapabilityFilters={setCapabilityFilters}
         />
       </PopoverContent>
     </Popover>
@@ -450,8 +575,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
             parentRef={parentRef}
             virtualizer={virtualizer}
             searchQuery={searchQuery}
+            capabilityFilters={capabilityFilters}
             onSelect={handleSelect}
             setSearchQuery={setSearchQuery}
+            setCapabilityFilters={setCapabilityFilters}
           />
         </div>
       </DrawerContent>
