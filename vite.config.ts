@@ -154,7 +154,7 @@ export default defineConfig(() => ({
 
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 
@@ -186,10 +186,10 @@ export default defineConfig(() => ({
           // Normalize to POSIX-style paths so checks work on Windows too
           const normalizedId = id.replace(/\\/g, "/");
           const modelListsDir = path
-            .resolve(__dirname, "src/assets/model-lists")
+            .resolve(import.meta.dirname, "src/assets/model-lists")
             .replace(/\\/g, "/");
           const mcpRegistryDir = path
-            .resolve(__dirname, "src/assets/mcp-registry")
+            .resolve(import.meta.dirname, "src/assets/mcp-registry")
             .replace(/\\/g, "/");
 
           if (normalizedId.includes(`${modelListsDir}/`)) {
