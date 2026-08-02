@@ -59,9 +59,7 @@ export default function SettingsRoute() {
     }
   };
 
-  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const isOverflowing = useOverflow(scrollViewportRef);
   const isSidebarOverflowing = useOverflow(sidebarRef);
   const previousSectionRef = useRef(displayedSection);
 
@@ -79,15 +77,9 @@ export default function SettingsRoute() {
         const target = document.getElementById(targetId);
 
         if (target) {
-          const scrollViewport = scrollViewportRef.current;
-          const viewportHeight =
-            scrollViewport && scrollViewport.scrollHeight > scrollViewport.clientHeight
-              ? scrollViewport.clientHeight
-              : window.innerHeight;
-
           target.scrollIntoView({
             behavior: "smooth",
-            block: target.getBoundingClientRect().height > viewportHeight ? "start" : "center",
+            block: target.getBoundingClientRect().height > window.innerHeight ? "start" : "center",
           });
           return;
         }
@@ -107,7 +99,6 @@ export default function SettingsRoute() {
 
     if (sectionChanged) {
       rootRef.current?.scrollIntoView({ block: "start" });
-      scrollViewportRef.current?.scrollTo({ top: 0 });
       window.requestAnimationFrame(() => {
         rootRef.current?.scrollIntoView({ block: "start" });
       });
@@ -131,9 +122,7 @@ export default function SettingsRoute() {
       role="main"
       className={cn(
         "bg-background min-h-svh",
-        fillHeight
-          ? "flex h-svh min-h-0 flex-col overflow-hidden"
-          : "md:h-svh md:min-h-0 md:overflow-hidden",
+        fillHeight && "flex h-svh min-h-0 flex-col overflow-hidden",
       )}
     >
       <h1 className="sr-only">Settings</h1>
@@ -181,21 +170,17 @@ export default function SettingsRoute() {
 
       <div
         className={cn(
-          "mx-auto w-full max-w-5xl p-4 md:flex md:h-full md:min-h-0 md:flex-col md:p-6",
-          fillHeight && "flex min-h-0 flex-1 flex-col",
+          "mx-auto w-full max-w-5xl p-4 md:flex md:flex-col md:p-6",
+          fillHeight && "flex min-h-0 flex-1 flex-col md:h-full md:min-h-0",
         )}
       >
-        <div
-          className={cn(
-            "flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row md:overflow-hidden",
-            fillHeight && "min-h-0 flex-1 overflow-hidden",
-          )}
-        >
+        <div className={cn("flex flex-col gap-6 md:flex-row", fillHeight && "min-h-0 flex-1")}>
           <div
             ref={sidebarRef}
             className={cn(
-              "hidden w-48 shrink-0 overflow-auto md:flex md:flex-col lg:w-64",
-              isSidebarOverflowing && "pr-2",
+              "hidden w-48 shrink-0 md:flex md:flex-col lg:w-64",
+              fillHeight ? "overflow-auto" : "md:sticky md:top-6 md:self-start",
+              fillHeight && isSidebarOverflowing && "pr-2",
             )}
           >
             <div className="flex flex-col gap-2 pl-0.5">
@@ -221,7 +206,7 @@ export default function SettingsRoute() {
           </div>
 
           {fillHeight ? (
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               <div
                 role="tabpanel"
                 tabIndex={0}
@@ -234,10 +219,7 @@ export default function SettingsRoute() {
               </div>
             </div>
           ) : (
-            <div
-              ref={scrollViewportRef}
-              className={cn("flex-1 overflow-auto md:min-h-0", isOverflowing && "pr-2")}
-            >
+            <div className="min-w-0 flex-1">
               <div
                 role="tabpanel"
                 tabIndex={0}
