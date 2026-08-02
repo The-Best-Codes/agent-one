@@ -14822,7 +14822,7 @@ Free PDF version: [Download (PDF 4MB)](/assets/learn/community/HTML_CSS_JavaScri
 
 [Create Tauri App with React](https://www.youtube.com/watch?v=zawhqLA7N9Y\&ab_channel=chrisbiscardi)Chris Biscardi shows how easy it is to wire up a Rust crate with a JS module and communicate between them.
 
-[Tauri & ReactJS - Creating Modern Desktop Apps](https://youtube.com/playlist?list=PLmWYh0f8jKSjt9VC5sq2T3mFETasG2p2L)Creating Modern Desktop Apps
+[Tauri & ReactJS - Creating Modern Desktop Apps](https://youtube.com/playlist?list=PLmWYh0f8jKSjt9VC5sq2T3mFETasG2p2L)Creating a modern desktop application with Tauri.
 
 # File Associations on Mobile
 
@@ -67332,88 +67332,3 @@ At the end we want to thank [NLNet](https://nlnet.nl/) for making this project p
   cargo install create-tauri-app --locked
   cargo create-tauri-app
   ```
-
-# Debug in VS Code
-
-> Suggerimenti e trucchi per il flusso di lavoro di debug
-
-## Prerequisiti
-
-Installa l’estensione [`vscode-lldb`](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb).
-
-## Configura launch.json
-
-Crea un file `.vscode/launch.json` e incolla il contenuto JSON sottostante in esso:
-
-.vscode/launch.json
-
-```json
-{
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "lldb",
-      "request": "launch",
-      "name": "Tauri Development Debug",
-      "cargo": {
-        "args": [
-          "build",
-          "--manifest-path=./src-tauri/Cargo.toml",
-          "--no-default-features"
-        ]
-      },
-      // task for the `beforeDevCommand` if used, must be configured in `.vscode/tasks.json`
-      "preLaunchTask": "ui:dev"
-    },
-    {
-      "type": "lldb",
-      "request": "launch",
-      "name": "Tauri Production Debug",
-      "cargo": {
-        "args": ["build", "--release", "--manifest-path=./src-tauri/Cargo.toml"]
-      },
-      // task for the `beforeBuildCommand` if used, must be configured in `.vscode/tasks.json`
-      "preLaunchTask": "ui:build"
-    }
-  ]
-}
-```
-
-Questo utilizza `cargo` direttamente per costruire l’applicazione Rust e caricarlo sia in modalità di sviluppo che di produzione.
-
-Nota che non utilizza il Tauri CLI, quindi le esclusive funzioni CLI non vengono eseguite. Gli script `beforeDevCommand` e `beforeBuildCommand` devono essere eseguiti in anticipo o configurati come task nel campo `preLaunchTask`. Di seguito trovate come esempio il file `.vscode/tasks.json` che ha due task, uno per un `beforeDevCommand` che genera un server di sviluppo e uno per `beforeBuildCommand`:
-
-.vscode/tasks.json
-
-```json
-{
-  // See https://go.microsoft.com/fwlink/?LinkId=733558
-  // for the documentation about the tasks.json format
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "ui:dev",
-      "type": "shell",
-      // `dev` keeps running in the background
-      // ideally you should also configure a `problemMatcher`
-      // see https://code.visualstudio.com/docs/editor/tasks#_can-a-background-task-be-used-as-a-prelaunchtask-in-launchjson
-      "isBackground": true,
-      // change this to your `beforeDevCommand`:
-      "command": "yarn",
-      "args": ["dev"]
-    },
-    {
-      "label": "ui:build",
-      "type": "shell",
-      // change this to your `beforeBuildCommand`:
-      "command": "yarn",
-      "args": ["build"]
-    }
-  ]
-}
-```
-
-Ora puoi impostare breakpoint in `src-tauri/src/main.rs` o in qualsiasi altro file Rust e iniziare il processo di debug premendo `F5`.
