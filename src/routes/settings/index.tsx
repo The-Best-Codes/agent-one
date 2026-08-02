@@ -121,7 +121,7 @@ export default function SettingsRoute() {
       ref={rootRef}
       role="main"
       className={cn(
-        "bg-background min-h-svh",
+        "bg-background min-h-svh pl-[calc(100vw-100%)]",
         fillHeight && "flex h-svh min-h-0 flex-col overflow-hidden",
       )}
     >
