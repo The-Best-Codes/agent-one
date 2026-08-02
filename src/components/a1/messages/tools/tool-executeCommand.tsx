@@ -308,8 +308,8 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           <AccordionItem
             value={callId}
             className={cn(
-              "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
-              isMainAccordionOpen && "border border-b! p-2",
+              "group/exec-accordion border-border rounded-md border-0 transition-[padding] duration-200",
+              isMainAccordionOpen && "border border-b! w-full p-2",
             )}
           >
             <AccordionTrigger
