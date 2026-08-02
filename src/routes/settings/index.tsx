@@ -79,7 +79,16 @@ export default function SettingsRoute() {
         const target = document.getElementById(targetId);
 
         if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "center" });
+          const scrollViewport = scrollViewportRef.current;
+          const viewportHeight =
+            scrollViewport && scrollViewport.scrollHeight > scrollViewport.clientHeight
+              ? scrollViewport.clientHeight
+              : window.innerHeight;
+
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: target.getBoundingClientRect().height > viewportHeight ? "start" : "center",
+          });
           return;
         }
 
