@@ -15,7 +15,7 @@ import {
   wrapLanguageModel,
 } from "ai";
 
-import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { getToolBehavior, type ModelConfig, type ToolBehavior } from "@/hooks/ai/use-model-catalog";
 import {
   addMessageTokenUsage,
   createEmptyMessageTokenUsage,
@@ -35,7 +35,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
   private mcpAppModelContexts = new Map<string, unknown>();
   private getTools: (options?: {
     subAgentContext?: SubAgentExecutionContext;
-    yoloMode?: boolean;
+    toolBehavior?: ToolBehavior;
   }) => Promise<ToolSet>;
   private getSystemPrompt: () => string;
   private getApiKeysLoadedPromise: () => Promise<void>;
@@ -48,7 +48,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
     extractReasoningEnabled: boolean,
     getTools: (options?: {
       subAgentContext?: SubAgentExecutionContext;
-      yoloMode?: boolean;
+      toolBehavior?: ToolBehavior;
     }) => Promise<ToolSet>,
     getSystemPrompt: () => string,
     getApiKeysLoadedPromise: () => Promise<void>,
@@ -149,7 +149,7 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
 
     await this.getApiKeysLoadedPromise();
     const systemPrompt = this.getSystemPrompt();
-    const yoloMode = modelConfig.yoloMode ?? false;
+    const toolBehavior = getToolBehavior(modelConfig);
     const mcpAppContextInstructions = this.getMcpAppModelContextInstructions();
     const instructions = mcpAppContextInstructions
       ? `${systemPrompt}\n\n${mcpAppContextInstructions}`
@@ -159,9 +159,10 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       modelConfig,
       systemPrompt,
       extractReasoningEnabled,
-      getTools: () => this.getTools({ subAgentContext, yoloMode }),
+      getTools: () => this.getTools({ subAgentContext, toolBehavior }),
     };
-    const tools = await this.getTools({ subAgentContext, yoloMode });
+    const tools =
+      toolBehavior === "disable" ? {} : await this.getTools({ subAgentContext, toolBehavior });
 
     const stopWhenCondition: StopCondition<ToolSet> =
       modelConfig.maxSteps === undefined ? () => false : isStepCount(modelConfig.maxSteps);
@@ -179,9 +180,8 @@ export class CustomChatTransport implements ChatTransport<UIMessage> {
       messages,
       abortSignal: options.abortSignal,
       tools,
-      toolChoice: "auto",
+      toolChoice: toolBehavior === "disable" ? "none" : "auto",
       stopWhen: stopWhenCondition,
-      // activeTools: [], // COMMENT OUT THIS LINE TO USE TOOLS
       instructions,
       ...(smoothStreamEnabled && {
         experimental_transform: smoothStream(),

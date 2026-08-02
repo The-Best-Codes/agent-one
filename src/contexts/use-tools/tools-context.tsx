@@ -2,6 +2,7 @@ import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import type { ToolBehavior } from "@/hooks/ai/use-model-catalog";
 import {
   createCreateFileTool,
   createDateTimeTool,
@@ -49,7 +50,7 @@ const logger = getLogger(import.meta.url);
 export interface ToolsContextType {
   getTools: (options?: {
     subAgentContext?: SubAgentExecutionContext;
-    yoloMode?: boolean;
+    toolBehavior?: ToolBehavior;
   }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
@@ -385,7 +386,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const getTools = useCallback(
     async (options?: {
       subAgentContext?: SubAgentExecutionContext;
-      yoloMode?: boolean;
+      toolBehavior?: ToolBehavior;
     }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
       const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
@@ -491,8 +492,8 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         }),
       };
 
-      if (options?.yoloMode) {
-        tools = applyApprovalConfigToTools(tools, false);
+      if (options?.toolBehavior === "ask" || options?.toolBehavior === "yolo") {
+        tools = applyApprovalConfigToTools(tools, options.toolBehavior === "ask");
       }
 
       return tools;

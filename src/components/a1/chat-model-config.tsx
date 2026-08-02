@@ -14,10 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
+import {
+  DEFAULT_MODEL_CONFIG,
+  getToolBehavior,
+  type ToolBehavior,
+} from "@/hooks/ai/use-model-catalog";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +35,29 @@ interface SliderConfigProps {
   step: number;
   onChange: (value: number | undefined) => void;
 }
+
+const TOOL_BEHAVIORS: { value: ToolBehavior; label: string; description: string }[] = [
+  {
+    value: "default",
+    label: "Default",
+    description: "Use enabled tools and ask for approval only when each tool requires it.",
+  },
+  {
+    value: "ask",
+    label: "Ask",
+    description: "Ask for your approval before running every tool.",
+  },
+  {
+    value: "yolo",
+    label: "YOLO",
+    description: "Run tools without asking for approval. Use with caution.",
+  },
+  {
+    value: "disable",
+    label: "Disable",
+    description: "Do not make any tools available to the model.",
+  },
+];
 
 const SliderConfig = ({
   id,
@@ -132,6 +159,7 @@ export const ChatModelConfig = ({
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const effectiveOpen = disabled ? false : open;
+  const toolBehavior = getToolBehavior(currentModelConfig);
 
   const [localInputs, setLocalInputs] = useState({
     maxTokens: currentModelConfig.maxTokens,
@@ -209,7 +237,7 @@ export const ChatModelConfig = ({
       frequencyPenalty: DEFAULT_MODEL_CONFIG.frequencyPenalty,
       presencePenalty: DEFAULT_MODEL_CONFIG.presencePenalty,
       seed: DEFAULT_MODEL_CONFIG.seed,
-      yoloMode: DEFAULT_MODEL_CONFIG.yoloMode,
+      toolBehavior: DEFAULT_MODEL_CONFIG.toolBehavior,
     });
   };
 
@@ -222,7 +250,7 @@ export const ChatModelConfig = ({
     currentModelConfig.frequencyPenalty === DEFAULT_MODEL_CONFIG.frequencyPenalty &&
     currentModelConfig.presencePenalty === DEFAULT_MODEL_CONFIG.presencePenalty &&
     currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed &&
-    (currentModelConfig.yoloMode ?? false) === (DEFAULT_MODEL_CONFIG.yoloMode ?? false);
+    toolBehavior === DEFAULT_MODEL_CONFIG.toolBehavior;
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -241,25 +269,39 @@ export const ChatModelConfig = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="yoloMode">YOLO Mode</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="max-w-xs">
-                Bypass tool approval prompts for all tools, running them automatically without
-                asking for confirmation. Use with caution.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <Switch
-            id="yoloMode"
-            checked={currentModelConfig.yoloMode ?? false}
-            onCheckedChange={(yoloMode) => setModelConfig({ ...configRef.current, yoloMode })}
-          />
+        <div className="flex items-center gap-2">
+          <Label>Tool Behavior</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-xs">
+              Choose whether tools are available and when they need your approval.
+            </TooltipContent>
+          </Tooltip>
         </div>
+        <Tabs
+          value={toolBehavior}
+          onValueChange={(value) => {
+            setModelConfig({
+              ...configRef.current,
+              toolBehavior: value as ToolBehavior,
+            });
+          }}
+        >
+          <TabsList className="w-full">
+            {TOOL_BEHAVIORS.map((behavior) => (
+              <TabsTrigger key={behavior.value} value={behavior.value}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>{behavior.label}</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">{behavior.description}</TooltipContent>
+                </Tooltip>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       <SliderConfig
@@ -350,6 +392,7 @@ export const ChatModelConfig = ({
           max={1000}
           value={localInputs.maxSteps ?? ""}
           onChange={handleMaxStepsChange}
+          disabled={toolBehavior === "disable"}
         />
       </div>
 

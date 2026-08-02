@@ -50,6 +50,8 @@ export interface ModelData {
   contextWindow?: number;
 }
 
+export type ToolBehavior = "default" | "ask" | "yolo" | "disable";
+
 export interface ModelConfig {
   temperature?: number;
   maxTokens?: number;
@@ -59,7 +61,7 @@ export interface ModelConfig {
   frequencyPenalty?: number;
   presencePenalty?: number;
   seed?: number;
-  yoloMode?: boolean;
+  toolBehavior?: ToolBehavior;
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
@@ -71,8 +73,12 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   frequencyPenalty: undefined,
   presencePenalty: undefined,
   seed: undefined,
-  yoloMode: false,
+  toolBehavior: "default",
 };
+
+export function getToolBehavior(modelConfig: ModelConfig): ToolBehavior {
+  return modelConfig.toolBehavior ?? "default";
+}
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
