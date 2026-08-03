@@ -553,7 +553,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   FIREWORKS_API_KEY: "",
   FRIENDLI_TOKEN: "",
   GITHUB_TOKEN: "",
-  GITHUB_MODELS_TOKEN: "",
   HELICONE_API_KEY: "",
   HF_TOKEN: "",
   INCEPTION_API_KEY: "",
