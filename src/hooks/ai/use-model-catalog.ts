@@ -3,10 +3,6 @@ import { useAtomValue } from "jotai";
 import { atom } from "jotai";
 import { useMemo } from "react";
 
-import {
-  getBillingUsageSummary,
-  hasAgentOneCreditsAvailable,
-} from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
   modelDirectoryDataAtom,
@@ -407,14 +403,9 @@ export function useModelCatalog() {
   const AVAILABLE_IMAGE_MODELS = useAtomValue(availableImageModelsAtom);
   const providerHasApiKey = useAtomValue(providerHasApiKeyAtom);
   const providerIsAvailable = useAtomValue(providerIsAvailableAtom);
-  const { user, isLoading, customerState, billingLoading, billingError } = useWebAuth();
+  const { user, isLoading } = useWebAuth();
 
-  const usageSummary = useMemo(() => getBillingUsageSummary(customerState), [customerState]);
-  const shouldHideUnavailableAgentOneModels =
-    isLoading ||
-    (Boolean(user) &&
-      !billingError &&
-      (billingLoading || !hasAgentOneCreditsAvailable(usageSummary)));
+  const shouldHideUnavailableAgentOneModels = isLoading || !user;
 
   const AVAILABLE_ENABLED_CHAT_MODELS = useMemo(
     () =>
