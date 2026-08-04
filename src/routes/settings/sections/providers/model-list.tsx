@@ -87,6 +87,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
   const [supportsText, setSupportsText] = useState(true);
   const [supportsTools, setSupportsTools] = useState(true);
   const [supportsImages, setSupportsImages] = useState(false);
+  const [supportsAttachments, setSupportsAttachments] = useState(false);
   const [contextWindow, setContextWindow] = useState("");
   const [maxOutputTokens, setMaxOutputTokens] = useState("");
 
@@ -110,6 +111,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
       supportsText,
       supportsTools,
       supportsImages,
+      supportsAttachments,
       contextWindow: parsedContextWindow ?? undefined,
       maxOutputTokens: parsedMaxOutputTokens ?? undefined,
     });
@@ -216,6 +218,15 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
               id="new-model-supports-images"
               checked={supportsImages}
               onCheckedChange={setSupportsImages}
+            />
+          </Field>
+
+          <Field orientation="horizontal">
+            <FieldLabel htmlFor="new-model-supports-attachments">Supports Attachments</FieldLabel>
+            <Switch
+              id="new-model-supports-attachments"
+              checked={supportsAttachments}
+              onCheckedChange={setSupportsAttachments}
             />
           </Field>
         </div>
@@ -361,6 +372,17 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
                 onCheckedChange={(checked) => setDraft({ ...draft, supportsImages: checked })}
               />
             </Field>
+
+            <Field orientation="horizontal">
+              <FieldLabel htmlFor={`model-supports-attachments-${model.id}`}>
+                Supports Attachments
+              </FieldLabel>
+              <Switch
+                id={`model-supports-attachments-${model.id}`}
+                checked={draft.supportsAttachments ?? false}
+                onCheckedChange={(checked) => setDraft({ ...draft, supportsAttachments: checked })}
+              />
+            </Field>
           </div>
         </FieldGroup>
       </DialogContent>
@@ -413,7 +435,7 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
 
       {configOpen ? (
         <ModelConfigDialog
-          key={`${model.id}-${model.name ?? ""}-${model.contextWindow ?? ""}-${model.maxOutputTokens ?? ""}-${model.supportsText}-${model.supportsTools}-${model.supportsImages}`}
+          key={`${model.id}-${model.name ?? ""}-${model.contextWindow ?? ""}-${model.maxOutputTokens ?? ""}-${model.supportsText}-${model.supportsTools}-${model.supportsImages}-${model.supportsAttachments}`}
           model={model}
           open={configOpen}
           onOpenChange={setConfigOpen}
@@ -516,6 +538,7 @@ export function ModelList({
             supportsText: true,
             supportsTools: true,
             supportsImages: false,
+            supportsAttachments: false,
           }),
         );
 
