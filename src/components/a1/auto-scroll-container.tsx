@@ -1,5 +1,5 @@
 "use client";
-import { defaultRangeExtractor, useVirtualizer } from "@tanstack/react-virtual";
+import { defaultRangeExtractor, type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import {
   forwardRef,
   type Key,
@@ -89,6 +89,24 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
             }
           : undefined,
     });
+
+    useLayoutEffect(() => {
+      if (!isVirtualized) return;
+
+      virtualizer.shouldAdjustScrollPositionOnItemSizeChange = (
+        item: VirtualItem,
+        _delta,
+        instance,
+      ) => {
+        const scrollOffset = (instance.scrollOffset ?? 0) + instance.scrollAdjustments;
+
+        return item.end <= scrollOffset && instance.scrollDirection !== "backward";
+      };
+
+      return () => {
+        virtualizer.shouldAdjustScrollPositionOnItemSizeChange = undefined;
+      };
+    }, [isVirtualized, virtualizer]);
 
     const handleScroll = useCallback(() => {
       const container = parentRef.current;
