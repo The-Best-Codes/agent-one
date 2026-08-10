@@ -32,7 +32,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
+  getActivePaidSubscription,
   getBillingUsageSummary,
+  getPlanNameForSubscription,
   isAgentOneAccountProvisioning,
 } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
@@ -75,14 +77,13 @@ export default function AccountSection() {
   }, [refreshBilling]);
 
   const activeSubscription = useMemo(
-    () =>
-      customerState?.subscriptions?.find(
-        (subscription) => subscription.status === "active" || subscription.status === "trialing",
-      ) ?? null,
+    () => getActivePaidSubscription(customerState),
     [customerState],
   );
 
-  const currentPlanName = activeSubscription?.product?.name ?? "Free";
+  const currentPlanName = activeSubscription
+    ? getPlanNameForSubscription(activeSubscription)
+    : "Free";
   const renewalDate = activeSubscription?.currentPeriodEnd
     ? new Date(activeSubscription.currentPeriodEnd).toLocaleDateString()
     : null;

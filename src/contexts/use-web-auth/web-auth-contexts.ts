@@ -1,5 +1,7 @@
 import { createContext } from "react";
 
+import { getPlanNameForProductId } from "@/lib/polar-products";
+
 export interface WebAuthUser {
   id: string;
   name: string;
@@ -18,10 +20,8 @@ export interface DeviceFlowState {
 export interface Subscription {
   id: string;
   status: string;
-  currentPeriodEnd?: string;
-  product?: {
-    name?: string;
-  };
+  currentPeriodEnd?: string | Date;
+  productId: string;
 }
 
 export interface CustomerMeter {
@@ -33,7 +33,7 @@ export interface CustomerMeter {
 }
 
 export interface CustomerState {
-  subscriptions?: Subscription[];
+  activeSubscriptions?: Subscription[];
   activeMeters?: CustomerMeter[];
 }
 
@@ -64,6 +64,28 @@ export function getBillingUsageSummary(
     consumed: effectiveConsumed,
     remaining: Math.max(balance, 0),
   };
+}
+
+const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
+
+export function getActivePaidSubscription(
+  customerState: CustomerState | null | undefined,
+): Subscription | null {
+  return (
+    customerState?.activeSubscriptions?.find(
+      (subscription) =>
+        ACTIVE_SUBSCRIPTION_STATUSES.has(subscription.status) &&
+        getPlanNameForProductId(subscription.productId) !== "Free",
+    ) ?? null
+  );
+}
+
+export function getPlanNameForSubscription(subscription: Subscription | null | undefined): string {
+  if (!subscription) {
+    return "Free";
+  }
+
+  return getPlanNameForProductId(subscription.productId) ?? "Unknown Plan";
 }
 
 export function hasAgentOneCreditsAvailable(
