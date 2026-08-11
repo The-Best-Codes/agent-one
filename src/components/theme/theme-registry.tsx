@@ -1,3 +1,4 @@
+// TODO: Support EVERY theme from https://ui.shadcn.com/create, update src/index.css, find the themes in shadcn/ui GitHub repo.
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
