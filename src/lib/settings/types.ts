@@ -16,25 +16,45 @@ export type ThemeOption = (typeof THEME_OPTIONS)[number];
 
 export const COLOR_THEME_OPTIONS = [
   "default",
-  "red",
+  "amber",
   "blue",
-  "yellow",
+  "cyan",
+  "emerald",
+  "fuchsia",
   "green",
+  "indigo",
+  "lime",
   "orange",
+  "pink",
+  "purple",
+  "red",
   "rose",
+  "sky",
+  "teal",
   "violet",
+  "yellow",
 ] as const;
 export type ColorThemeOption = (typeof COLOR_THEME_OPTIONS)[number];
 
 export const UI_TINT_OPTIONS = [
   "default",
-  "red",
+  "amber",
   "blue",
-  "yellow",
+  "cyan",
+  "emerald",
+  "fuchsia",
   "green",
+  "indigo",
+  "lime",
   "orange",
+  "pink",
+  "purple",
+  "red",
   "rose",
+  "sky",
+  "teal",
   "violet",
+  "yellow",
 ] as const;
 export type UiTintOption = (typeof UI_TINT_OPTIONS)[number];
 

@@ -1,4 +1,3 @@
-// TODO: Support EVERY theme from https://ui.shadcn.com/create, update src/index.css, find the themes in shadcn/ui GitHub repo.
 import { useAtom } from "jotai";
 import { useEffect } from "react";
 
@@ -13,6 +12,10 @@ import {
   uiTintStrengthAtom,
 } from "@/lib/jotai/settings-atoms";
 import { jsonParseCatch } from "@/lib/json-parse-catch";
+import { COLOR_THEME_OPTIONS, UI_TINT_OPTIONS } from "@/lib/settings/types";
+
+const PRIMARY_COLOR_THEMES = COLOR_THEME_OPTIONS.filter((option) => option !== "default");
+const UI_TINTS = UI_TINT_OPTIONS.filter((option) => option !== "default");
 
 const UI_TINT_STRENGTHS: Record<number, string> = {
   1: "2%",
@@ -54,21 +57,13 @@ export function ThemeRegistry() {
     root.setAttribute("data-theme", resolvedTheme);
 
     // Handle color theme
-    root.classList.remove("red", "blue", "yellow", "green", "orange", "rose", "violet");
+    root.classList.remove(...PRIMARY_COLOR_THEMES);
     if (colorTheme && colorTheme !== "default") {
       root.classList.add(colorTheme);
     }
     root.setAttribute("data-color-theme", colorTheme || "default");
 
-    root.classList.remove(
-      "ui-tint-red",
-      "ui-tint-blue",
-      "ui-tint-yellow",
-      "ui-tint-green",
-      "ui-tint-orange",
-      "ui-tint-rose",
-      "ui-tint-violet",
-    );
+    root.classList.remove(...UI_TINTS.map((name) => `ui-tint-${name}`));
     if (uiTint && uiTint !== "default") {
       root.classList.add(`ui-tint-${uiTint}`);
     }
