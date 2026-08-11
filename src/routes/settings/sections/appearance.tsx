@@ -3,8 +3,9 @@ import { appLocalDataDir, extname, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { BaseDirectory, mkdir, readFile, remove, writeFile } from "@tauri-apps/plugin-fs";
 import { useAtom } from "jotai";
-import { type ComponentProps, useCallback, useRef, useState } from "react";
+import { type ComponentProps, useRef, useState } from "react";
 
+import { ColorPicker } from "@/components/a1/color-picker";
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,6 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -326,12 +326,6 @@ export default function AppearanceSection() {
   const [removingCustomUrl, setRemovingCustomUrl] = useState<string | null>(null);
   const addingCustomBackgroundRef = useRef(false);
 
-  const activeColorRef = useCallback((node: HTMLButtonElement | null) => {
-    if (node) {
-      node.scrollIntoView({ inline: "center", block: "nearest" });
-    }
-  }, []);
-
   const isMarkdownHighlightingDefault =
     markdownHighlighting === DEFAULT_SETTINGS.MARKDOWN_HIGHLIGHTING;
   const isUiTintStrengthDefault = uiTintStrength === DEFAULT_SETTINGS.UI_TINT_STRENGTH;
@@ -492,7 +486,7 @@ export default function AppearanceSection() {
               <div className="flex flex-col items-start">
                 <Label className="text-sm font-medium">Theme</Label>
               </div>
-              <ThemeToggle className="md:max-w-64" />
+              <ThemeToggle />
             </div>
           </SettingsTarget>
 
@@ -505,30 +499,17 @@ export default function AppearanceSection() {
                   actions.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <ScrollArea className="max-w-full md:max-w-64" viewportClassName="scroll-fade-x">
-                  <ScrollBar className="w-full" orientation="horizontal" />
-                  <div className="flex flex-row flex-nowrap gap-2">
-                    {colorThemeOptions.map((option) => (
-                      <Button
-                        key={option.value}
-                        ref={colorTheme === option.value ? activeColorRef : undefined}
-                        onClick={() => {
-                          trackSettingsInteraction("appearance", "primary_color_changed", {
-                            value: option.value,
-                          });
-                          setColorTheme(option.value as typeof colorTheme);
-                        }}
-                        size="icon"
-                        className={cn("border-foreground rounded-md border-0", option.className)}
-                        title={option.label}
-                      >
-                        {colorTheme === option.value && <IconCheck data-icon="inline-start" />}
-                      </Button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              <ColorPicker
+                label="Primary color"
+                value={colorTheme}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("appearance", "primary_color_changed", {
+                    value,
+                  });
+                  setColorTheme(value as typeof colorTheme);
+                }}
+                options={colorThemeOptions}
+              />
             </div>
           </SettingsTarget>
 
@@ -541,30 +522,15 @@ export default function AppearanceSection() {
                   buttons.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <ScrollArea className="max-w-full md:max-w-64" viewportClassName="scroll-fade-x">
-                  <ScrollBar className="w-full" orientation="horizontal" />
-                  <div className="flex flex-row flex-nowrap gap-2">
-                    {colorThemeOptions.map((option) => (
-                      <Button
-                        key={option.value}
-                        ref={uiTint === option.value ? activeColorRef : undefined}
-                        onClick={() => {
-                          trackSettingsInteraction("appearance", "tint_changed", {
-                            value: option.value,
-                          });
-                          setUiTint(option.value as typeof uiTint);
-                        }}
-                        size="icon"
-                        className={cn("border-foreground rounded-md border-0", option.className)}
-                        title={option.label}
-                      >
-                        {uiTint === option.value && <IconCheck data-icon="inline-start" />}
-                      </Button>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              <ColorPicker
+                label="Tint"
+                value={uiTint}
+                onValueChange={(value) => {
+                  trackSettingsInteraction("appearance", "tint_changed", { value });
+                  setUiTint(value as typeof uiTint);
+                }}
+                options={colorThemeOptions}
+              />
             </div>
           </SettingsTarget>
 
