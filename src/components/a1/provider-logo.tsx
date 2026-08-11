@@ -22,7 +22,7 @@ export function ProviderLogo({
   size = "sm",
 }: ProviderLogoProps) {
   return (
-    <Avatar size={size} className={cn(className, "rounded-full overflow-hidden")}>
+    <Avatar size={size} className={cn(className, "overflow-hidden")}>
       <AvatarImage
         src={getProviderLogoUrl(id)}
         alt=""
