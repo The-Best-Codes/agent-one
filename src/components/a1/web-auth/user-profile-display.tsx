@@ -14,7 +14,9 @@ export function UserProfileDisplay({ user, action, className }: UserProfileDispl
   return (
     <div className={cn("flex items-center justify-between gap-4", className)}>
       <div className="flex items-center gap-3">
-        <Avatar size={40} name={user.id} variant="beam" />
+        <div className="size-10 overflow-hidden rounded-lg">
+          <Avatar size={40} name={user.id} variant="beam" square />
+        </div>
         <div>
           <p className="leading-none font-medium">{user.name}</p>
           <p className="text-muted-foreground text-sm">{user.email}</p>

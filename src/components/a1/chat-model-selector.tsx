@@ -320,7 +320,7 @@ const ModelList: FC<ModelListProps> = ({
                               return (
                                 <span
                                   key={capability.id}
-                                  className="bg-popover ring-border -ml-3 flex size-5 items-center justify-center rounded-full ring-1 transition-[margin] group-hover/model:-ml-1 group-focus/model:-ml-1 group-data-[selected=true]/model:-ml-1 first:ml-0"
+                                  className="bg-popover ring-border -ml-3 flex size-5 items-center justify-center rounded-lg ring-1 transition-[margin] group-hover/model:-ml-1 group-focus/model:-ml-1 group-data-[selected=true]/model:-ml-1 first:ml-0"
                                   aria-hidden="true"
                                 >
                                   <CapabilityIcon />
