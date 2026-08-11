@@ -225,7 +225,7 @@ export default function AboutSection() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-full">
+                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
                   {stateDisplay.icon}
                 </div>
                 <div>
@@ -444,7 +444,7 @@ export default function AboutSection() {
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-full">
+                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
                   <IconBug className="text-muted-foreground size-5" />
                 </div>
                 <div>
