@@ -486,7 +486,7 @@ export default function AppearanceSection() {
               <div className="flex flex-col items-start">
                 <Label className="text-sm font-medium">Theme</Label>
               </div>
-              <ThemeToggle className="justify-end" />
+              <ThemeToggle className="md:justify-end" />
             </div>
           </SettingsTarget>
 
