@@ -7,8 +7,7 @@ mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder =
-        tauri::Builder::default().plugin(tauri_plugin_global_shortcut::Builder::new().build());
+    let mut builder = tauri::Builder::default();
 
     // Single instance plugin should be the first plugin registered
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -36,6 +35,11 @@ pub fn run() {
                 let _ = main_window.set_focus();
             }
         }));
+    }
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
     }
 
     let mut builder = builder
