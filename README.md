@@ -73,6 +73,10 @@ You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) 
 
 On macOS, you will also need to install cmake. You can install brew and run `brew install cmake`.
 
+### Android Build
+
+Follow the steps in https://v2.tauri.app/start/prerequisites/#android. When it says `export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"`, run that as-is, then run it with `ANDROID_NDK_HOME` in place of `NDK_HOME`.
+
 ### Signing Updates
 
 See https://tauri.app/plugin/updater/.
