@@ -87,6 +87,12 @@ When it says `export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"`, r
 
 Before running `bun run tauri android dev`, run `export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"` to set the target SDK version. (While we target 21 as the minimum SDK version currently, this may change in the future. If so, this should be updated.)
 
+You also need Java 21, since 25 is too new (`sudo pacman -S jdk21-openjdk`). So run this if JBR in Android Studio shipped with 25 or later:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+```
+
 ### Signing Updates
 
 See https://tauri.app/plugin/updater/.
