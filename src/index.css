@@ -833,6 +833,11 @@
   }
 }
 
+:root [data-sonner-toaster] {
+  --border-radius: var(--radius);
+  font-family: inherit;
+}
+
 @keyframes settings-target-pulse {
   0% {
     box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 20%, transparent);
