@@ -102,7 +102,6 @@ export function ThemeRegistry() {
     }
     root.setAttribute("data-font", font || "default");
 
-    // TODO: Consider using `zoom-*` from Tailwind for UI zoom rather than `text-*`?
     root.classList.remove("text-xs", "text-sm", "text-md", "text-lg", "text-xl", "text-2xl");
     root.classList.add(`text-${textScale || "md"}`);
     root.setAttribute("data-text-scale", textScale || "md");
