@@ -75,7 +75,15 @@ On macOS, you will also need to install cmake. You can install brew and run `bre
 
 ### Android Build
 
-Follow the steps in https://v2.tauri.app/start/prerequisites/#android. When it says `export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"`, run that as-is, then run it with `ANDROID_NDK_HOME` in place of `NDK_HOME`.
+Follow the steps in https://v2.tauri.app/start/prerequisites/#android. At the time of writing, that means running this after performing all SDK installations in Android Studio (yay -S android-studio on Arch):
+
+```bash
+export JAVA_HOME=/opt/android-studio/jbr
+export ANDROID_HOME="$HOME/Android/Sdk"
+export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
+```
+
+When it says `export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"`, run that as-is, then run it with `ANDROID_NDK_HOME` in place of `NDK_HOME`.
 
 Before running `bun run tauri android dev`, run `export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"` to set the target SDK version. (While we target 21 as the minimum SDK version currently, this may change in the future. If so, this should be updated.)
 
