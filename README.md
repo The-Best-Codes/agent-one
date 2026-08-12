@@ -93,6 +93,16 @@ You also need Java 21, since 25 is too new (`sudo pacman -S jdk21-openjdk`). So 
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 ```
 
+For my current Arch Linux setup, this amounts to:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export ANDROID_HOME="$HOME/Android/Sdk"
+export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
+export ANDROID_NDK_HOME="$NDK_HOME"
+export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"
+```
+
 ### Signing Updates
 
 See https://tauri.app/plugin/updater/.
