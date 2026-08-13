@@ -12,6 +12,11 @@ import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 import { ProviderLogo } from "@/components/a1/provider-logo";
+import {
+  AdaptivePopover,
+  AdaptivePopoverContent,
+  AdaptivePopoverTrigger,
+} from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -22,13 +27,6 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -37,13 +35,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { InputGroupButton } from "@/components/ui/input-group";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -355,7 +351,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
-  const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
   const { user, isLoading: isAuthLoading, customerState } = useWebAuth();
@@ -522,9 +517,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     );
   }
 
-  return isDesktop ? (
-    <Popover open={effectiveOpen} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
+  return (
+    <AdaptivePopover open={effectiveOpen} onOpenChange={handleOpenChange}>
+      <AdaptivePopoverTrigger asChild>
         <Button
           variant="outline"
           aria-haspopup="listbox"
@@ -535,8 +530,12 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         >
           {triggerContent}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className={cn("w-full p-0", popoverClassName)}>
+      </AdaptivePopoverTrigger>
+      <AdaptivePopoverContent
+        title="Select a model"
+        className={cn("w-full p-0", popoverClassName)}
+        mobileClassName="-mt-2 px-0"
+      >
         <ModelList
           rows={rows}
           currentModel={currentModel}
@@ -548,40 +547,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
           setSearchQuery={setSearchQuery}
           setCapabilityFilters={setCapabilityFilters}
         />
-      </PopoverContent>
-    </Popover>
-  ) : (
-    <Drawer open={effectiveOpen} onOpenChange={handleOpenChange}>
-      <DrawerTrigger asChild>
-        <Button
-          variant="outline"
-          aria-haspopup="listbox"
-          aria-expanded={effectiveOpen}
-          className={cn("w-full justify-between", className)}
-          aria-label={modelLabel}
-          disabled={effectiveDisabled}
-        >
-          {triggerContent}
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="bg-popover">
-        <DrawerHeader>
-          <DrawerTitle className="sr-only">Select a model</DrawerTitle>
-        </DrawerHeader>
-        <div className="-mt-2 overflow-y-auto pb-4">
-          <ModelList
-            rows={rows}
-            currentModel={currentModel}
-            parentRef={parentRef}
-            virtualizer={virtualizer}
-            searchQuery={searchQuery}
-            capabilityFilters={capabilityFilters}
-            onSelect={handleSelect}
-            setSearchQuery={setSearchQuery}
-            setCapabilityFilters={setCapabilityFilters}
-          />
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </AdaptivePopoverContent>
+    </AdaptivePopover>
   );
 };

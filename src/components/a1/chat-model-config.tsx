@@ -3,21 +3,18 @@ import debounce from "lodash.debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  AdaptivePopover,
+  AdaptivePopoverContent,
+  AdaptivePopoverTrigger,
+} from "@/components/ui/adaptive-popover";
+import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
   AdaptiveTooltipTrigger,
 } from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModel } from "@/contexts/use-model/model-hooks";
@@ -26,7 +23,6 @@ import {
   getToolBehavior,
   type ToolBehavior,
 } from "@/hooks/ai/use-model-catalog";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 
 interface SliderConfigProps {
@@ -161,7 +157,6 @@ export const ChatModelConfig = ({
 }) => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 640px)");
   const effectiveOpen = disabled ? false : open;
   const toolBehavior = getToolBehavior(currentModelConfig);
 
@@ -467,23 +462,14 @@ export const ChatModelConfig = ({
   );
 
   return (
-    <>
-      {isDesktop ? (
-        <Popover open={effectiveOpen} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent className="max-h-80 w-64 overflow-auto p-4">{content}</PopoverContent>
-        </Popover>
-      ) : (
-        <Drawer open={effectiveOpen} onOpenChange={setOpen}>
-          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent className="bg-popover">
-            <DrawerHeader>
-              <DrawerTitle className="sr-only">Model Configuration</DrawerTitle>
-            </DrawerHeader>
-            <div className="overflow-y-auto px-4 pb-4">{content}</div>
-          </DrawerContent>
-        </Drawer>
-      )}
-    </>
+    <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
+      <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
+      <AdaptivePopoverContent
+        title="Model Configuration"
+        className="max-h-80 w-64 overflow-auto p-4"
+      >
+        {content}
+      </AdaptivePopoverContent>
+    </AdaptivePopover>
   );
 };
