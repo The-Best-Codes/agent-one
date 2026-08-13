@@ -13,6 +13,7 @@ import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { generateChatTitle, hasMessageTextContent } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
+  extractReasoningEnabledAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
   titleGenerationAtom,
@@ -20,6 +21,9 @@ import {
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
+
+export type ChatInstanceHelpers = UseChatHelpers<UIMessage> &
+  Pick<ReturnType<typeof useChat>, "updateMcpAppModelContext">;
 
 export const ChatInstance = memo(
   ({
@@ -36,7 +40,7 @@ export const ChatInstance = memo(
     modelId: string;
     modelConfig: ModelConfig;
     initialMessages: UIMessage[];
-    onInstanceUpdate: (id: string, instance: UseChatHelpers<UIMessage>) => void;
+    onInstanceUpdate: (id: string, instance: ChatInstanceHelpers) => void;
     onStatusChange: (
       id: string,
       status: UseChatHelpers<UIMessage>["status"],
@@ -46,6 +50,7 @@ export const ChatInstance = memo(
     const experimentalThrottleEnabled = useAtomValue(experimentalThrottleEnabledAtom);
     const experimentalThrottleValue = useAtomValue(experimentalThrottleValueAtom);
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
+    const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
     const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
     const chatIds = useAtomValue(chatIdsAtom);
     const suppressAutoSubmitAfterAbortRef = useRef(false);
@@ -56,7 +61,9 @@ export const ChatInstance = memo(
         return false;
       }
 
-      return lastAssistantMessageIsCompleteWithApprovalResponses({ messages });
+      return lastAssistantMessageIsCompleteWithApprovalResponses({
+        messages,
+      });
     }, []);
 
     const chat = useChat(model, modelId, modelConfig, {
@@ -95,7 +102,13 @@ export const ChatInstance = memo(
             `Triggering title generation for chat ${chatId} with ${chat.messages.length} messages`,
           );
           saveChatTitleState({ chatId, titleState: "generating" });
-          generateChatTitle(model, titleMessages, titleGenerationSettings)
+          generateChatTitle(
+            model,
+            titleMessages,
+            titleGenerationSettings,
+            undefined,
+            extractReasoningEnabled,
+          )
             .then((generatedTitle) => {
               if (chatIds.includes(chatId)) {
                 saveChatTitle({ chatId, title: generatedTitle });
@@ -115,6 +128,7 @@ export const ChatInstance = memo(
       chatId,
       model,
       chatIds,
+      extractReasoningEnabled,
       loadChatMetadata,
       saveChat,
       saveChatTitle,
@@ -128,7 +142,9 @@ export const ChatInstance = memo(
 
     useEffect(() => {
       onInstanceUpdate(chatId, chat);
-    });
+      // TODO: Address this later?
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [chatId, chat.status, chat.messages, chat.sendMessage, chat.regenerate, onInstanceUpdate]);
 
     return null;
   },

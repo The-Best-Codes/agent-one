@@ -6,15 +6,19 @@ import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
@@ -26,7 +30,6 @@ import {
   stopButtonBehaviorAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
-import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
@@ -120,8 +123,14 @@ export const MainChatInput = ({
       ? status === "streaming" || status === "submitted"
       : status === "streaming";
 
-  useHotkeys(kbdRegistry.focusMainChatInput, () => {
+  useKeyboardShortcut("focusMainChatInput", () => {
     editorViewRef.current?.focus();
+  });
+
+  useKeyboardShortcut("stopResponse", () => {
+    if (status === "streaming" || status === "submitted") {
+      void stop();
+    }
   });
 
   const handleEditorChange = (newValue: string) => {
@@ -154,7 +163,7 @@ export const MainChatInput = ({
         files: files,
       });
       trackGoogleAnalyticsEvent("message_sent", {
-        source: "main_chat_input",
+        ui_location: "main_chat_input",
         text_length: currentText.length,
         has_files: Boolean(files),
         file_count: files?.length ?? 0,
@@ -228,7 +237,7 @@ export const MainChatInput = ({
       }
 
       trackGoogleAnalyticsEvent("files_attached", {
-        source: "main_chat_input",
+        ui_location: "main_chat_input",
         file_count: updatedFileList.length,
       });
 
@@ -270,7 +279,7 @@ export const MainChatInput = ({
     setFiles(newFileList.length > 0 ? newFileList : undefined);
 
     trackGoogleAnalyticsEvent("attached_file_removed", {
-      source: "main_chat_input",
+      ui_location: "main_chat_input",
       remaining_file_count: newFileList.length,
     });
 
@@ -518,8 +527,8 @@ export const MainChatInput = ({
           )}
         >
           <div className="relative">
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <Button
                   data-testid="attach-button"
                   type="button"
@@ -533,7 +542,7 @@ export const MainChatInput = ({
                   }}
                   analytics={{
                     event: "attachment_picker_opened",
-                    params: { source: "main_chat_input" },
+                    params: { ui_location: "main_chat_input" },
                   }}
                   className="relative"
                   aria-label="Attach files"
@@ -545,15 +554,15 @@ export const MainChatInput = ({
                   )}
                   <IconPaperclip />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>Attach files to your message</TooltipContent>
-            </Tooltip>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
+            </AdaptiveTooltip>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex flex-row">
               <ModelSelector
                 loading={isChatLoading}
-                className="w-60 min-w-0 flex-1 rounded-r-none"
+                className="w-40 min-w-0 flex-1 rounded-r-none sm:w-60"
                 popoverClassName="w-60"
               />
               <ChatModelConfig
@@ -562,8 +571,8 @@ export const MainChatInput = ({
               />
             </div>
             {showStopButton ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <Button
                     variant="destructive"
                     type="button"
@@ -571,18 +580,18 @@ export const MainChatInput = ({
                     onClick={() => stop()}
                     analytics={{
                       event: "response_stop_clicked",
-                      params: { source: "main_chat_input" },
+                      params: { ui_location: "main_chat_input" },
                     }}
                     aria-label="Stop response"
                   >
                     <IconPlayerStopFilled />
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent>Stop the current response</TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
+              </AdaptiveTooltip>
             ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <Button
                     data-testid="send-button"
                     type="submit"
@@ -596,15 +605,15 @@ export const MainChatInput = ({
                     }
                     analytics={{
                       event: "send_button_clicked",
-                      params: { source: "main_chat_input" },
+                      params: { ui_location: "main_chat_input" },
                     }}
                     aria-label="Send message"
                   >
                     {status === "submitted" ? <Spinner /> : <IconArrowUp />}
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent>Send your message</TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>
+              </AdaptiveTooltip>
             )}
           </div>
         </div>

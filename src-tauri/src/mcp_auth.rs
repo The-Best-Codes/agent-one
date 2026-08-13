@@ -5,7 +5,8 @@ use axum::{
     Router,
 };
 use rmcp::transport::auth::{
-    AuthError, AuthorizationManager, CredentialStore, OAuthState, StoredCredentials,
+    AuthError, AuthorizationManager, AuthorizationRequest, CredentialStore, OAuthState,
+    StoredCredentials,
 };
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -29,11 +30,15 @@ fn get_client_metadata_url(port: u16) -> String {
 }
 
 async fn discover_scopes_with_rmcp(server_url: &str) -> Result<Vec<String>, String> {
-    let auth_manager = AuthorizationManager::new(server_url)
+    let mut auth_manager = AuthorizationManager::new(server_url)
         .await
         .map_err(|e| e.to_string())?;
 
-    let _ = auth_manager.discover_metadata().await;
+    let resolution = auth_manager
+        .resolve_metadata()
+        .await
+        .map_err(|e| e.to_string())?;
+    auth_manager.set_metadata(resolution.metadata);
 
     Ok(auth_manager.select_scopes(None, &[]))
 }
@@ -44,19 +49,17 @@ async fn initialize_and_start_auth(
     client_metadata_url: &str,
     scopes: &[String],
 ) -> Result<OAuthState, String> {
-    let scope_refs: Vec<&str> = scopes.iter().map(|s| s.as_str()).collect();
-
     let mut state = OAuthState::new(server_url, None)
         .await
         .map_err(|e| format!("Failed to initialize OAuth: {}", e))?;
 
+    let request = AuthorizationRequest::new(redirect_uri)
+        .with_scopes(scopes.iter().cloned())
+        .with_client_name("AgentOne")
+        .with_client_metadata_url(client_metadata_url);
+
     state
-        .start_authorization_with_metadata_url(
-            &scope_refs,
-            redirect_uri,
-            Some("AgentOne"),
-            Some(client_metadata_url),
-        )
+        .start_authorization(request)
         .await
         .map_err(|e| {
             let err = e.to_string();
@@ -329,20 +332,14 @@ async fn try_get_token_with_url(
 
 #[tauri::command]
 pub async fn mcp_check_oauth_support(server_url: String) -> Result<bool, String> {
-    let supported = async {
-        let auth_manager = AuthorizationManager::new(&server_url)
-            .await
-            .map_err(|e| e.to_string())?;
+    let auth_manager = AuthorizationManager::new(&server_url)
+        .await
+        .map_err(|e| e.to_string())?;
 
-        auth_manager
-            .discover_metadata()
-            .await
-            .map(|_| true)
-            .map_err(|e| e.to_string())
+    match auth_manager.resolve_metadata().await {
+        Ok(resolution) => Ok(resolution.source.is_discovered()),
+        Err(_) => Ok(false),
     }
-    .await;
-
-    Ok(supported.is_ok())
 }
 
 #[tauri::command]

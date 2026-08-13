@@ -26,7 +26,9 @@ export type ChatFunctionsContextType = Pick<
   | "resumeStream"
   | "stop"
   | "setMessages"
->;
+> & {
+  updateMcpAppModelContext: (viewId: string, context: unknown) => void;
+};
 
 export type ChatApprovalHandler = (args: {
   id: string;

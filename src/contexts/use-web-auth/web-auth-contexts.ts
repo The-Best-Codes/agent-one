@@ -1,5 +1,7 @@
 import { createContext } from "react";
 
+import { getPlanNameForProductId } from "@/lib/polar-products";
+
 export interface WebAuthUser {
   id: string;
   name: string;
@@ -18,10 +20,8 @@ export interface DeviceFlowState {
 export interface Subscription {
   id: string;
   status: string;
-  currentPeriodEnd?: string;
-  product?: {
-    name?: string;
-  };
+  currentPeriodEnd?: string | Date;
+  productId: string;
 }
 
 export interface CustomerMeter {
@@ -33,7 +33,7 @@ export interface CustomerMeter {
 }
 
 export interface CustomerState {
-  subscriptions?: Subscription[];
+  activeSubscriptions?: Subscription[];
   activeMeters?: CustomerMeter[];
 }
 
@@ -52,14 +52,40 @@ export function getBillingUsageSummary(
   }
 
   const credited = meters.reduce((sum, meter) => sum + meter.creditedUnits, 0);
-  const consumed = meters.reduce((sum, meter) => sum + meter.consumedUnits, 0);
   const balance = meters.reduce((sum, meter) => sum + meter.balance, 0);
 
+  // Grants are issued via negative event ingestion, which makes net consumedUnits lower than actual usage.
+  // Use the larger of credited or balance as the effective pool so grants don't produce negatives.
+  const effectivePool = Math.max(credited, balance);
+  const effectiveConsumed = Math.max(effectivePool - balance, 0);
+
   return {
-    credited,
-    consumed,
+    credited: effectivePool,
+    consumed: effectiveConsumed,
     remaining: Math.max(balance, 0),
   };
+}
+
+const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
+
+export function getActivePaidSubscription(
+  customerState: CustomerState | null | undefined,
+): Subscription | null {
+  return (
+    customerState?.activeSubscriptions?.find(
+      (subscription) =>
+        ACTIVE_SUBSCRIPTION_STATUSES.has(subscription.status) &&
+        getPlanNameForProductId(subscription.productId) !== "Free",
+    ) ?? null
+  );
+}
+
+export function getPlanNameForSubscription(subscription: Subscription | null | undefined): string {
+  if (!subscription) {
+    return "Free";
+  }
+
+  return getPlanNameForProductId(subscription.productId) ?? "Unknown Plan";
 }
 
 export function hasAgentOneCreditsAvailable(
@@ -83,6 +109,7 @@ export interface WebAuthContextType {
   customerState: CustomerState | null;
   billingLoading: boolean;
   billingError: string | null;
+  refreshBilling: () => void;
   startSignIn: () => Promise<void>;
   cancelSignIn: () => void;
   signOut: () => Promise<void>;

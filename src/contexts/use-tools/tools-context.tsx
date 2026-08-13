@@ -2,6 +2,7 @@ import type { Tool, ToolSet } from "ai";
 import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import type { ToolBehavior } from "@/hooks/ai/use-model-catalog";
 import {
   createCreateFileTool,
   createDateTimeTool,
@@ -10,12 +11,18 @@ import {
   createEditFileTool,
   createExecuteCommandTool,
   createGetUrlContentTool,
+  createMemoryTool,
   createSubAgentTool,
   createViewFileTool,
   createWaitTool,
   createWebSearchTool,
+  createWikipediaTool,
+  createListSettingsTool,
+  createGetSettingTool,
+  createUpdateSettingTool,
 } from "@/lib/ai/tools";
 import {
+  abortMcpServerLoad,
   buildMcpServerSlugMap,
   closeServerCache,
   getToolDisplayName,
@@ -24,6 +31,7 @@ import {
   isServerCached,
   prefixMcpToolNames,
 } from "@/lib/ai/tools/mcp";
+import { clearMcpOAuthCredentials, dismissMcpLoginToasts } from "@/lib/ai/tools/mcp/oauth";
 import type { SubAgentExecutionContext } from "@/lib/ai/tools/subAgent";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import type { McpServerToolInfo } from "@/lib/jotai/mcp-atoms";
@@ -41,9 +49,13 @@ import { ToolsContext } from "./tools-contexts";
 const logger = getLogger(import.meta.url);
 
 export interface ToolsContextType {
-  getTools: (options?: { subAgentContext?: SubAgentExecutionContext }) => Promise<ToolSet>;
+  getTools: (options?: {
+    subAgentContext?: SubAgentExecutionContext;
+    toolBehavior?: ToolBehavior;
+  }) => Promise<ToolSet>;
   isMcpLoading: boolean;
   mcpLoaded: boolean;
+  restartMcpServer: (serverId: string) => void;
 }
 
 interface ToolsProviderProps {
@@ -86,20 +98,38 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
   const [mcpServers] = useAtom(mcpServersAtom);
   const [parallelLoadLimit] = useAtom(mcpParallelLoadLimitAtom);
   const [toolConfigs] = useAtom(toolConfigsAtom);
-  const [mcpAuthStates] = useAtom(mcpAuthStatesAtom);
+  const [mcpAuthStates, setMcpAuthStates] = useAtom(mcpAuthStatesAtom);
   const [, setMcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
 
   const [mcpTools, setMcpTools] = useState<ToolSet>({});
   const [isMcpLoading, setIsMcpLoading] = useState(false);
   const [mcpLoaded, setMcpLoaded] = useState(false);
+  const [serverRestartVersions, setServerRestartVersions] = useState<Record<string, number>>({});
 
   const mcpToolsRef = useRef<ToolSet>({});
   const mcpLoadedRef = useRef(false);
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
   const enabledServerIdsRef = useRef<Set<string>>(new Set());
+  const serverConfigsRef = useRef<Map<string, McpServerConfig>>(new Map());
   const serverLoadSignaturesRef = useRef<Map<string, string>>(new Map());
+  const serverRestartVersionsRef = useRef<Record<string, number>>({});
   const authStatesRef = useRef<Record<string, (typeof mcpAuthStates)[string]>>({});
+  const authResetPromisesRef = useRef<Map<string, Promise<unknown>>>(new Map());
   const loadIdRef = useRef(0);
+
+  const clearMcpServerRuntimeState = useCallback(
+    (serverId: string) => {
+      dismissMcpLoginToasts(serverId);
+      closeServerCache(serverId);
+      setMcpAuthStates((prev) => {
+        if (!(serverId in prev)) return prev;
+        const next = { ...prev };
+        delete next[serverId];
+        return next;
+      });
+    },
+    [setMcpAuthStates],
+  );
 
   useEffect(() => {
     mcpToolsRef.current = mcpTools;
@@ -111,11 +141,40 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
       ? mcpServers.filter((server) => server.enabled)
       : [];
     const previousEnabledIds = enabledServerIdsRef.current;
+    const previousServerConfigs = serverConfigsRef.current;
     const previousServerLoadSignatures = serverLoadSignaturesRef.current;
+    const previousServerRestartVersions = serverRestartVersionsRef.current;
     const previousAuthStates = authStatesRef.current;
     const currentServerLoadSignatures = new Map(
       mcpServers.map((server) => [server.id, getServerLoadSignature(server)]),
     );
+
+    for (const server of mcpServers) {
+      const previousServer = previousServerConfigs.get(server.id);
+      const connectionChanged =
+        previousServerLoadSignatures.has(server.id) &&
+        previousServerLoadSignatures.get(server.id) !== currentServerLoadSignatures.get(server.id);
+
+      if (connectionChanged) {
+        clearMcpServerRuntimeState(server.id);
+
+        if (
+          previousServer?.type === "http" &&
+          server.type === "http" &&
+          previousServer.url !== server.url
+        ) {
+          const resetPromise = clearMcpOAuthCredentials(server.id).catch((error) => {
+            logger.error(`Failed to reset OAuth credentials for ${server.name}:`, error);
+          });
+          authResetPromisesRef.current.set(server.id, resetPromise);
+          void resetPromise.finally(() => {
+            if (authResetPromisesRef.current.get(server.id) === resetPromise) {
+              authResetPromisesRef.current.delete(server.id);
+            }
+          });
+        }
+      }
+    }
 
     setMcpServerLoadStates((prev) => {
       const next: Record<string, (typeof prev)[string]> = {};
@@ -138,11 +197,13 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
     for (const serverId of previousEnabledIds) {
       if (!newEnabledIds.has(serverId)) {
         logger.verbose(`Cleaning up disabled server: ${serverId}`);
-        closeServerCache(serverId);
+        clearMcpServerRuntimeState(serverId);
       }
     }
     enabledServerIdsRef.current = newEnabledIds;
+    serverConfigsRef.current = new Map(mcpServers.map((server) => [server.id, server]));
     serverLoadSignaturesRef.current = currentServerLoadSignatures;
+    serverRestartVersionsRef.current = serverRestartVersions;
     authStatesRef.current = mcpAuthStates;
 
     if (enabledServers.length === 0) {
@@ -190,6 +251,17 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         return true;
       }
 
+      if (previousServerRestartVersions[server.id] !== serverRestartVersions[server.id]) {
+        return true;
+      }
+
+      if (
+        previousAuthStates[server.id] !== mcpAuthStates[server.id] &&
+        mcpAuthStates[server.id] === undefined
+      ) {
+        return true;
+      }
+
       return (
         previousAuthStates[server.id] !== mcpAuthStates[server.id] &&
         mcpAuthStates[server.id] === "logged-in"
@@ -212,7 +284,7 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
             server.toolApprovalOverrides,
           );
           const serverSlug = slugMap.get(server.id) ?? server.id;
-          Object.assign(allTools, prefixMcpToolNames(wrappedTools, serverSlug));
+          Object.assign(allTools, prefixMcpToolNames(wrappedTools, serverSlug, server.id));
         } catch (error) {
           logger.error(`Failed to load cached MCP tools for ${server.name}:`, error);
           closeServerCache(server.id);
@@ -261,9 +333,10 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         for (const chunk of chunks) {
           if (loadId !== loadIdRef.current) return;
 
-          const results = await Promise.all(
+          await Promise.all(
             chunk.map(async (server) => {
               try {
+                await authResetPromisesRef.current.get(server.id);
                 const tools = await Promise.race([
                   getMcpToolsForServer(server),
                   new Promise<ToolSet>((_, reject) =>
@@ -273,20 +346,20 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                     ),
                   ),
                 ]);
-                const toolEntries = Object.entries(tools);
-                const toolDisplayNames = toolEntries.map(([name, tool]) =>
-                  getToolDisplayName(name, tool.title),
-                );
-                const toolInfo: McpServerToolInfo[] = toolEntries.map(([name, tool]) => ({
+                const toolEntries = Object.entries(tools).map(([name, tool]) => ({
                   name,
-                  title: tool.title,
+                  title: typeof tool.metadata?.title === "string" ? tool.metadata.title : undefined,
                 }));
+                const toolDisplayNames = toolEntries.map(({ name, title }) =>
+                  getToolDisplayName(name, title),
+                );
+                const toolInfo: McpServerToolInfo[] = toolEntries;
                 const wrappedTools = applyApprovalConfigToTools(
                   tools,
                   server.requiresApproval ?? false,
                   server.toolApprovalOverrides,
                 );
-                return {
+                const result = {
                   server,
                   serverSlug: slugMap.get(server.id) ?? server.id,
                   status: "loaded" as const,
@@ -294,54 +367,46 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
                   toolInfo,
                   tools: wrappedTools,
                 };
+                if (loadId !== loadIdRef.current) return;
+                Object.assign(
+                  allTools,
+                  prefixMcpToolNames(result.tools, result.serverSlug, server.id),
+                );
+                setMcpTools({ ...allTools });
+                setMcpServerLoadStates((prev) => ({
+                  ...prev,
+                  [server.id]: {
+                    status: "loaded",
+                    toolCount: result.toolNames.length,
+                    toolNames: result.toolNames,
+                    tools: result.toolInfo,
+                  },
+                }));
               } catch (error) {
                 const serverTypeLabel = server.type === "stdio" ? "STDIO" : "HTTP";
                 logger.error(
                   `Failed to load MCP tools for ${serverTypeLabel} server ${server.name}:`,
                   error,
                 );
+                if (loadId !== loadIdRef.current) return;
+                abortMcpServerLoad(server.id);
                 closeServerCache(server.id);
-                return {
-                  server,
-                  serverSlug: slugMap.get(server.id) ?? server.id,
-                  error: error instanceof Error ? error.message : "Unknown error",
-                  status: "error" as const,
-                  toolNames: [],
-                  toolInfo: [],
-                  tools: {},
-                };
-              }
-            }),
-          );
-
-          for (const result of results) {
-            Object.assign(allTools, prefixMcpToolNames(result.tools, result.serverSlug));
-          }
-
-          setMcpServerLoadStates((prev) => {
-            const next = { ...prev };
-
-            for (const result of results) {
-              const previous = prev[result.server.id];
-              next[result.server.id] =
-                result.status === "loaded"
-                  ? {
-                      status: "loaded",
-                      toolCount: result.toolNames.length,
-                      toolNames: result.toolNames,
-                      tools: result.toolInfo,
-                    }
-                  : {
+                setMcpServerLoadStates((prev) => {
+                  const previous = prev[server.id];
+                  return {
+                    ...prev,
+                    [server.id]: {
                       status: "error",
                       toolCount: previous?.toolCount ?? 0,
                       toolNames: previous?.toolNames ?? [],
                       tools: previous?.tools ?? [],
-                      error: result.error,
-                    };
-            }
-
-            return next;
-          });
+                      error: error instanceof Error ? error.message : "Unknown error",
+                    },
+                  };
+                });
+              }
+            }),
+          );
         }
 
         if (loadId !== loadIdRef.current) return;
@@ -379,47 +444,120 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
 
     const promise = loadMcpTools();
     loadingPromiseRef.current = promise;
-  }, [mcpServers, parallelLoadLimit, mcpAuthStates, setMcpServerLoadStates]);
+  }, [
+    mcpServers,
+    parallelLoadLimit,
+    mcpAuthStates,
+    serverRestartVersions,
+    clearMcpServerRuntimeState,
+    setMcpServerLoadStates,
+  ]);
+
+  const restartMcpServer = useCallback(
+    (serverId: string) => {
+      clearMcpServerRuntimeState(serverId);
+      setServerRestartVersions((prev) => ({
+        ...prev,
+        [serverId]: (prev[serverId] ?? 0) + 1,
+      }));
+    },
+    [clearMcpServerRuntimeState],
+  );
 
   const getTools = useCallback(
-    async (options?: { subAgentContext?: SubAgentExecutionContext }): Promise<ToolSet> => {
+    async (options?: {
+      subAgentContext?: SubAgentExecutionContext;
+      toolBehavior?: ToolBehavior;
+    }): Promise<ToolSet> => {
       const filteredStaticTools: ToolSet = {};
+      const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
+      const mergedToolConfigs = {
+        dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
+        waitNumberMilliseconds: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.waitNumberMilliseconds,
+          ...toolConfigs.waitNumberMilliseconds,
+        },
+        getUrlContent: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.getUrlContent,
+          ...toolConfigs.getUrlContent,
+        },
+        webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
+        wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
+        memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
+        editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
+        createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
+        deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
+        viewFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.viewFile, ...toolConfigs.viewFile },
+        executeCommand: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+          ...toolConfigs.executeCommand,
+        },
+        subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
+        listSettings: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.listSettings,
+          ...toolConfigs.listSettings,
+        },
+        getSetting: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.getSetting, ...toolConfigs.getSetting },
+        updateSetting: {
+          ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
+          ...toolConfigs.updateSetting,
+        },
+      };
 
-      if (enabledTools.dateTime) {
-        filteredStaticTools.dateTime = createDateTimeTool(toolConfigs.dateTime);
+      if (mergedEnabledTools.dateTime) {
+        filteredStaticTools.dateTime = createDateTimeTool(mergedToolConfigs.dateTime);
       }
-      if (enabledTools.waitNumberMilliseconds) {
+      if (mergedEnabledTools.waitNumberMilliseconds) {
         filteredStaticTools.waitNumberMilliseconds = createWaitTool(
-          toolConfigs.waitNumberMilliseconds,
+          mergedToolConfigs.waitNumberMilliseconds,
         );
       }
-      if (enabledTools.getUrlContent) {
-        filteredStaticTools.getUrlContent = createGetUrlContentTool(toolConfigs.getUrlContent);
+      if (mergedEnabledTools.getUrlContent) {
+        filteredStaticTools.getUrlContent = createGetUrlContentTool(
+          mergedToolConfigs.getUrlContent,
+        );
       }
-      if (enabledTools.webSearch) {
-        filteredStaticTools.webSearch = createWebSearchTool(toolConfigs.webSearch);
+      if (mergedEnabledTools.webSearch) {
+        filteredStaticTools.webSearch = createWebSearchTool(mergedToolConfigs.webSearch);
       }
-      if (enabledTools.editFile) {
-        filteredStaticTools.editFile = createEditFileTool(toolConfigs.editFile);
+      if (mergedEnabledTools.wikipedia) {
+        filteredStaticTools.wikipedia = createWikipediaTool(mergedToolConfigs.wikipedia);
       }
-      if (enabledTools.createFile) {
-        filteredStaticTools.createFile = createCreateFileTool(toolConfigs.createFile);
+      if (mergedEnabledTools.memory) {
+        filteredStaticTools.memory = createMemoryTool(mergedToolConfigs.memory);
       }
-      if (enabledTools.deleteFile) {
-        filteredStaticTools.deleteFile = createDeleteFileTool(toolConfigs.deleteFile);
+      if (mergedEnabledTools.editFile) {
+        filteredStaticTools.editFile = createEditFileTool(mergedToolConfigs.editFile);
       }
-      if (enabledTools.viewFile) {
-        filteredStaticTools.viewFile = createViewFileTool(toolConfigs.viewFile);
+      if (mergedEnabledTools.createFile) {
+        filteredStaticTools.createFile = createCreateFileTool(mergedToolConfigs.createFile);
       }
-      if (enabledTools.executeCommand) {
+      if (mergedEnabledTools.deleteFile) {
+        filteredStaticTools.deleteFile = createDeleteFileTool(mergedToolConfigs.deleteFile);
+      }
+      if (mergedEnabledTools.viewFile) {
+        filteredStaticTools.viewFile = createViewFileTool(mergedToolConfigs.viewFile);
+      }
+      if (mergedEnabledTools.executeCommand) {
         filteredStaticTools.executeCommand = createExecuteCommandTool(
-          toolConfigs.executeCommand ?? DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+          mergedToolConfigs.executeCommand,
         );
       }
-      if (enabledTools.subAgent && options?.subAgentContext) {
+      if (mergedEnabledTools.subAgent && options?.subAgentContext) {
         filteredStaticTools.subAgent = createSubAgentTool(
-          toolConfigs.subAgent ?? DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent,
+          mergedToolConfigs.subAgent,
           options.subAgentContext,
+        );
+      }
+      if (mergedEnabledTools.listSettings) {
+        filteredStaticTools.listSettings = createListSettingsTool(mergedToolConfigs.listSettings);
+      }
+      if (mergedEnabledTools.getSetting) {
+        filteredStaticTools.getSetting = createGetSettingTool(mergedToolConfigs.getSetting);
+      }
+      if (mergedEnabledTools.updateSetting) {
+        filteredStaticTools.updateSetting = createUpdateSettingTool(
+          mergedToolConfigs.updateSetting,
         );
       }
 
@@ -427,19 +565,25 @@ export const ToolsProvider: React.FC<ToolsProviderProps> = ({ children }) => {
         await loadingPromiseRef.current;
       }
 
-      return {
+      let tools: ToolSet = {
         ...filteredStaticTools,
         ...mcpToolsRef.current,
         ...(Object.keys(mcpToolsRef.current).length > 0 && {
           describeNextTool: createDescribeNextToolTool(),
         }),
       };
+
+      if (options?.toolBehavior === "ask" || options?.toolBehavior === "yolo") {
+        tools = applyApprovalConfigToTools(tools, options.toolBehavior === "ask");
+      }
+
+      return tools;
     },
     [enabledTools, toolConfigs],
   );
 
   return (
-    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded }}>
+    <ToolsContext.Provider value={{ getTools, isMcpLoading, mcpLoaded, restartMcpServer }}>
       {children}
     </ToolsContext.Provider>
   );

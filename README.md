@@ -71,6 +71,38 @@ You will need the [Tauri Prerequisites](https://tauri.app/start/prerequisites/) 
 - `winget install NASM.NASM`
 - Also, make sure `git` is installed
 
+On macOS, you will also need to install cmake. You can install brew and run `brew install cmake`.
+
+### Android Build
+
+Follow the steps in https://v2.tauri.app/start/prerequisites/#android. At the time of writing, that means running this after performing all SDK installations in Android Studio (yay -S android-studio on Arch):
+
+```bash
+export JAVA_HOME=/opt/android-studio/jbr
+export ANDROID_HOME="$HOME/Android/Sdk"
+export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
+```
+
+When it says `export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"`, run that as-is, then run it with `ANDROID_NDK_HOME` in place of `NDK_HOME`.
+
+Before running `bun run tauri android dev`, run `export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"` to set the target SDK version. (While we target 21 as the minimum SDK version currently, this may change in the future. If so, this should be updated.)
+
+You also need Java 21, since 25 is too new (`sudo pacman -S jdk21-openjdk`). So run this if JBR in Android Studio shipped with 25 or later:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+```
+
+For my current Arch Linux setup, this amounts to:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
+export ANDROID_HOME="$HOME/Android/Sdk"
+export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
+export ANDROID_NDK_HOME="$NDK_HOME"
+export BINDGEN_EXTRA_CLANG_ARGS="-target x86_64-linux-android21"
+```
+
 ### Signing Updates
 
 See https://tauri.app/plugin/updater/.

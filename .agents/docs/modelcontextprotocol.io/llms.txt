@@ -2,61 +2,89 @@
 
 ## Docs
 
-- [Example Clients](https://modelcontextprotocol.io/clients.md): A list of applications that support MCP integrations
-- [Antitrust Policy](https://modelcontextprotocol.io/community/antitrust.md): MCP Project Antitrust Policy for participants and contributors
-- [Group Charter Template](https://modelcontextprotocol.io/community/charter-template.md): Template for MCP Working Group and Interest Group charters.
-- [Contributor Communication](https://modelcontextprotocol.io/community/communication.md): Communication strategy and framework for the Model Context Protocol community
-- [Contributing to MCP](https://modelcontextprotocol.io/community/contributing.md): How to contribute to the Model Context Protocol project
-- [Contributor Ladder](https://modelcontextprotocol.io/community/contributor-ladder.md): Roles, responsibilities, and advancement criteria for MCP contributors, from first contribution to Core Maintainer
-- [Design Principles](https://modelcontextprotocol.io/community/design-principles.md): The core design principles that guide the development of the Model Context Protocol.
-- [File Uploads Charter](https://modelcontextprotocol.io/community/file-uploads/charter.md): Charter for the MCP File Uploads Working Group.
-- [Governance and Stewardship](https://modelcontextprotocol.io/community/governance.md): Learn about the Model Context Protocol's governance structure and how to participate in the community
-- [Inspector V2 Working Group Charter](https://modelcontextprotocol.io/community/inspector-v2/charter.md): Charter for the Inspector V2 Working Group, a Working Group of the Model Context Protocol community.
-- [Interceptors Charter](https://modelcontextprotocol.io/community/interceptors/charter.md): Charter for the MCP Interceptors Working Group.
-- [SDK Tiering System](https://modelcontextprotocol.io/community/sdk-tiers.md): Feature completeness, protocol support, and maintenance commitment levels for Model Context Protocol SDKs
-- [SDK Working Group Charter](https://modelcontextprotocol.io/community/sdk/charter.md): Charter for the MCP SDK Working Group.
-- [SEP Guidelines](https://modelcontextprotocol.io/community/sep-guidelines.md): Specification Enhancement Proposal (SEP) guidelines for proposing changes to the Model Context Protocol
-- [Server Card Charter](https://modelcontextprotocol.io/community/server-card/charter.md): Charter for the MCP Server Card Working Group.
-- [Skills Over MCP Charter](https://modelcontextprotocol.io/community/skills-over-mcp/charter.md): Charter for the MCP Skills Over MCP Working Group.
-- [Triggers and Events Charter](https://modelcontextprotocol.io/community/triggers-events/charter.md): Charter for the MCP Triggers and Events Working Group.
-- [Working and Interest Groups](https://modelcontextprotocol.io/community/working-interest-groups.md): Governance rules for the two forms of collaborative groups within the Model Context Protocol community — Working Groups and Interest Groups.
-- [Roadmap](https://modelcontextprotocol.io/development/roadmap.md): Our plans for evolving Model Context Protocol
-- [Build an MCP client](https://modelcontextprotocol.io/docs/develop/build-client.md): Get started building your own client that can integrate with all MCP servers.
-- [Build an MCP server](https://modelcontextprotocol.io/docs/develop/build-server.md): Get started building your own server to use in Claude for Desktop and other clients.
-- [Build with Agent Skills](https://modelcontextprotocol.io/docs/develop/build-with-agent-skills.md): Use agent skills to guide AI coding assistants through MCP server design and implementation
-- [Client Best Practices](https://modelcontextprotocol.io/docs/develop/clients/client-best-practices.md): Patterns for scaling MCP host applications across many servers and tools.
-- [Connect to local MCP servers](https://modelcontextprotocol.io/docs/develop/connect-local-servers.md): Learn how to extend Claude Desktop with local MCP servers to enable file system access and other powerful integrations
-- [Connect to remote MCP Servers](https://modelcontextprotocol.io/docs/develop/connect-remote-servers.md): Learn how to connect Claude to remote MCP servers and extend its capabilities with internet-hosted tools and data sources
-- [What is the Model Context Protocol (MCP)?](https://modelcontextprotocol.io/docs/getting-started/intro.md)
-- [Architecture overview](https://modelcontextprotocol.io/docs/learn/architecture.md)
-- [Understanding MCP clients](https://modelcontextprotocol.io/docs/learn/client-concepts.md)
-- [Understanding MCP servers](https://modelcontextprotocol.io/docs/learn/server-concepts.md)
-- [Versioning](https://modelcontextprotocol.io/docs/learn/versioning.md)
-- [SDKs](https://modelcontextprotocol.io/docs/sdk.md): Official SDKs for building with Model Context Protocol
-- [Debugging](https://modelcontextprotocol.io/docs/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
-- [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector.md): In-depth guide to using the MCP Inspector for testing and debugging Model Context Protocol servers
-- [Understanding Authorization in MCP](https://modelcontextprotocol.io/docs/tutorials/security/authorization.md): Learn how to implement secure authorization for MCP servers using OAuth 2.1 to protect sensitive resources and operations
-- [Security Best Practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
+- [What is the Model Context Protocol (MCP)?](https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro.md)
+- [Architecture overview](https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture.md)
+- [Understanding MCP servers](https://modelcontextprotocol.io/docs/2026-07-28/learn/server-concepts.md)
+- [Understanding MCP clients](https://modelcontextprotocol.io/docs/2026-07-28/learn/client-concepts.md)
+- [Versioning](https://modelcontextprotocol.io/docs/2026-07-28/learn/versioning.md)
+- [Connect to local MCP servers](https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-local-servers.md): Learn how to extend Claude Desktop with local MCP servers to enable file system access and other powerful integrations
+- [Connect to remote MCP Servers](https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-remote-servers.md): Learn how to connect Claude to remote MCP servers and extend its capabilities with internet-hosted tools and data sources
+- [Build with Agent Skills](https://modelcontextprotocol.io/docs/2026-07-28/develop/build-with-agent-skills.md): Use agent skills to guide AI coding assistants through MCP server design and implementation
+- [Build an MCP server](https://modelcontextprotocol.io/docs/2026-07-28/develop/build-server.md): Get started building your own server to use in Claude for Desktop and other clients.
+- [Build an MCP client](https://modelcontextprotocol.io/docs/2026-07-28/develop/build-client.md): Get started building your own client that can integrate with all MCP servers.
+- [Client Best Practices](https://modelcontextprotocol.io/docs/2026-07-28/develop/clients/client-best-practices.md): Patterns for scaling MCP host applications across many servers and tools.
+- [SDKs](https://modelcontextprotocol.io/docs/2026-07-28/sdk.md): Official SDKs for building with Model Context Protocol
+- [Understanding Authorization in MCP](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization.md): Learn how to implement secure authorization for MCP servers using OAuth 2.1 to protect sensitive resources and operations
+- [Security Best Practices](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices.md): Security considerations, attack vectors, and best practices for MCP implementations
+- [MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector.md): Interactive developer tooling for testing and debugging MCP servers, in the browser, on the command line, and in the terminal
+- [Web client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/web.md): A tab-by-tab walkthrough of the graphical MCP Inspector
+- [CLI client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli.md): Scripting the MCP Inspector: methods, output formats, exit codes, and CI recipes
+- [TUI client](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/tui.md): The terminal MCP Inspector: navigation, tabs, and keyboard reference
+- [Configuration and flags](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/configuration.md): Catalog vs. config files, which client owns which flag, and every environment variable
+- [Authorization](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/authorization.md): How the MCP Inspector performs OAuth, re-authorizes mid-session, and shares tokens between its clients
+- [Protocol eras](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/protocol-eras.md): How the Inspector negotiates legacy vs. modern MCP, and how every feature is handled between protocol eras
+- [Recipes](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/recipes.md): Practical guides for transports, importing configs, reviewing MCP Apps, Docker, and network hosting
+- [Debugging](https://modelcontextprotocol.io/docs/2026-07-28/tools/debugging.md): A comprehensive guide to debugging Model Context Protocol (MCP) integrations
 - [Example Servers](https://modelcontextprotocol.io/examples.md): A list of example servers and implementations
-- [Build an MCP App](https://modelcontextprotocol.io/extensions/apps/build.md): Getting started guide for building interactive UI applications with MCP Apps
-- [MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview.md): Interactive UI applications that render inside MCP hosts like Claude Desktop
-- [Enterprise-Managed Authorization](https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization.md): Centralized access control for MCP in enterprise environments via identity providers
-- [OAuth Client Credentials](https://modelcontextprotocol.io/extensions/auth/oauth-client-credentials.md): Machine-to-machine authentication for MCP using the OAuth 2.0 client credentials flow
-- [Authorization Extensions](https://modelcontextprotocol.io/extensions/auth/overview.md): Supplementary authorization mechanisms for the Model Context Protocol
-- [Extension Support Matrix](https://modelcontextprotocol.io/extensions/client-matrix.md): Which MCP clients implement which official extensions
+- [Specification](https://modelcontextprotocol.io/specification/2026-07-28/index.md)
+- [Key Changes](https://modelcontextprotocol.io/specification/2026-07-28/changelog.md)
+- [Deprecated Features](https://modelcontextprotocol.io/specification/2026-07-28/deprecated.md)
+- [Architecture](https://modelcontextprotocol.io/specification/2026-07-28/architecture/index.md)
+- [Overview](https://modelcontextprotocol.io/specification/2026-07-28/basic/index.md)
+- [Versioning and Compatibility](https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning.md)
+- [Overview](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/index.md)
+- [Multi Round-Trip Requests](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr.md)
+- [Subscriptions](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/subscriptions.md)
+- [Cancellation](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/cancellation.md)
+- [Progress](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/progress.md)
+- [Overview](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/index.md)
+- [stdio](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio.md)
+- [Streamable HTTP](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http.md)
+- [Authorization](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/index.md)
+- [Authorization Server Discovery](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/authorization-server-discovery.md)
+- [Client Registration](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/client-registration.md)
+- [Authorization Security Considerations](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/security-considerations.md)
+- [Roots](https://modelcontextprotocol.io/specification/2026-07-28/client/roots.md)
+- [Sampling](https://modelcontextprotocol.io/specification/2026-07-28/client/sampling.md)
+- [Elicitation](https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation.md)
+- [Overview](https://modelcontextprotocol.io/specification/2026-07-28/server/index.md)
+- [Discovery](https://modelcontextprotocol.io/specification/2026-07-28/server/discover.md)
+- [Prompts](https://modelcontextprotocol.io/specification/2026-07-28/server/prompts.md)
+- [Resources](https://modelcontextprotocol.io/specification/2026-07-28/server/resources.md)
+- [Tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools.md)
+- [Caching](https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/caching.md)
+- [Completion](https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/completion.md)
+- [Logging](https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/logging.md)
+- [Pagination](https://modelcontextprotocol.io/specification/2026-07-28/server/utilities/pagination.md)
+- [Schema Reference](https://modelcontextprotocol.io/specification/2026-07-28/schema.md)
 - [Extensions Overview](https://modelcontextprotocol.io/extensions/overview.md): Optional extensions to the Model Context Protocol
-- [MCP Tasks](https://modelcontextprotocol.io/extensions/tasks/overview.md): Asynchronous task execution for long-running MCP operations
+- [Extension Support Matrix](https://modelcontextprotocol.io/extensions/client-matrix.md): Which MCP clients implement which official extensions
+- [MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview.md): Interactive UI applications that render inside MCP hosts like Claude Desktop
+- [Build an MCP App](https://modelcontextprotocol.io/extensions/apps/build.md): Getting started guide for building interactive UI applications with MCP Apps
+- [Authorization Extensions](https://modelcontextprotocol.io/extensions/auth/overview.md): Supplementary authorization mechanisms for the Model Context Protocol
+- [OAuth Client Credentials](https://modelcontextprotocol.io/extensions/auth/oauth-client-credentials.md): Machine-to-machine authentication for MCP using the OAuth 2.0 client credentials flow
+- [Enterprise-Managed Authorization](https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization.md): Centralized access control for MCP in enterprise environments via identity providers
+- [Tasks](https://modelcontextprotocol.io/extensions/tasks/overview.md): Asynchronous task execution for long-running MCP operations
 - [The MCP Registry](https://modelcontextprotocol.io/registry/about.md)
-- [How to Authenticate When Publishing to the Official MCP Registry](https://modelcontextprotocol.io/registry/authentication.md)
+- [Quickstart: Publish an MCP Server to the MCP Registry](https://modelcontextprotocol.io/registry/quickstart.md)
 - [Frequently Asked Questions](https://modelcontextprotocol.io/registry/faq.md)
+- [MCP Registry Supported Package Types](https://modelcontextprotocol.io/registry/package-types.md)
+- [Publishing Remote Servers](https://modelcontextprotocol.io/registry/remote-servers.md)
+- [How to Authenticate When Publishing to the Official MCP Registry](https://modelcontextprotocol.io/registry/authentication.md)
+- [Versioning Published MCP Servers](https://modelcontextprotocol.io/registry/versioning.md)
 - [How to Automate Publishing with GitHub Actions](https://modelcontextprotocol.io/registry/github-actions.md)
 - [The MCP Registry Moderation Policy](https://modelcontextprotocol.io/registry/moderation-policy.md)
-- [MCP Registry Supported Package Types](https://modelcontextprotocol.io/registry/package-types.md)
-- [Quickstart: Publish an MCP Server to the MCP Registry](https://modelcontextprotocol.io/registry/quickstart.md)
 - [MCP Registry Aggregators](https://modelcontextprotocol.io/registry/registry-aggregators.md)
-- [Publishing Remote Servers](https://modelcontextprotocol.io/registry/remote-servers.md)
 - [Official MCP Registry Terms of Service](https://modelcontextprotocol.io/registry/terms-of-service.md)
-- [Versioning Published MCP Servers](https://modelcontextprotocol.io/registry/versioning.md)
+- [Specification Enhancement Proposals (SEPs)](https://modelcontextprotocol.io/seps/index.md): Index of all MCP Specification Enhancement Proposals
+- [SEP-414: Document OpenTelemetry Trace Context Propagation Conventions](https://modelcontextprotocol.io/seps/414-request-meta.md): Document OpenTelemetry Trace Context Propagation Conventions
+- [SEP-932: Model Context Protocol Governance](https://modelcontextprotocol.io/seps/932-model-context-protocol-governance.md): Model Context Protocol Governance
+- [SEP-973: Expose additional metadata for Implementations, Resources, Tools and Prompts](https://modelcontextprotocol.io/seps/973-expose-additional-metadata-for-implementations-res.md): Expose additional metadata for Implementations, Resources, Tools and Prompts
+- [SEP-985: Align OAuth 2.0 Protected Resource Metadata with RFC 9728](https://modelcontextprotocol.io/seps/985-align-oauth-20-protected-resource-metadata-with-rf.md): Align OAuth 2.0 Protected Resource Metadata with RFC 9728
+- [SEP-986: Specify Format for Tool Names](https://modelcontextprotocol.io/seps/986-specify-format-for-tool-names.md): Specify Format for Tool Names
+- [SEP-990: Enable enterprise IdP policy controls during MCP OAuth flows](https://modelcontextprotocol.io/seps/990-enable-enterprise-idp-policy-controls-during-mcp-o.md): Enable enterprise IdP policy controls during MCP OAuth flows
+- [SEP-991: Enable URL-based Client Registration using OAuth Client ID Metadata Documents](https://modelcontextprotocol.io/seps/991-enable-url-based-client-registration-using-oauth-c.md): Enable URL-based Client Registration using OAuth Client ID Metadata Documents
+- [SEP-994: Shared Communication Practices/Guidelines](https://modelcontextprotocol.io/seps/994-shared-communication-practicesguidelines.md): Shared Communication Practices/Guidelines
 - [SEP-1024: MCP Client Security Requirements for Local Server Installation](https://modelcontextprotocol.io/seps/1024-mcp-client-security-requirements-for-local-server-.md): MCP Client Security Requirements for Local Server Installation
 - [SEP-1034: Support default values for all primitive types in elicitation schemas](https://modelcontextprotocol.io/seps/1034--support-default-values-for-all-primitive-types-in.md): Support default values for all primitive types in elicitation schemas
 - [SEP-1036: URL Mode Elicitation for secure out-of-band interactions](https://modelcontextprotocol.io/seps/1036-url-mode-elicitation-for-secure-out-of-band-intera.md): URL Mode Elicitation for secure out-of-band interactions
@@ -90,34 +118,31 @@
 - [SEP-2577: Deprecate Roots, Sampling, and Logging](https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging.md): Deprecate Roots, Sampling, and Logging
 - [SEP-2596: Specification Feature Lifecycle and Deprecation Policy](https://modelcontextprotocol.io/seps/2596-spec-feature-lifecycle-and-deprecation.md): Specification Feature Lifecycle and Deprecation Policy
 - [SEP-2663: Tasks Extension](https://modelcontextprotocol.io/seps/2663-tasks-extension.md): Tasks Extension
-- [SEP-414: Document OpenTelemetry Trace Context Propagation Conventions](https://modelcontextprotocol.io/seps/414-request-meta.md): Document OpenTelemetry Trace Context Propagation Conventions
-- [SEP-932: Model Context Protocol Governance](https://modelcontextprotocol.io/seps/932-model-context-protocol-governance.md): Model Context Protocol Governance
-- [SEP-973: Expose additional metadata for Implementations, Resources, Tools and Prompts](https://modelcontextprotocol.io/seps/973-expose-additional-metadata-for-implementations-res.md): Expose additional metadata for Implementations, Resources, Tools and Prompts
-- [SEP-985: Align OAuth 2.0 Protected Resource Metadata with RFC 9728](https://modelcontextprotocol.io/seps/985-align-oauth-20-protected-resource-metadata-with-rf.md): Align OAuth 2.0 Protected Resource Metadata with RFC 9728
-- [SEP-986: Specify Format for Tool Names](https://modelcontextprotocol.io/seps/986-specify-format-for-tool-names.md): Specify Format for Tool Names
-- [SEP-990: Enable enterprise IdP policy controls during MCP OAuth flows](https://modelcontextprotocol.io/seps/990-enable-enterprise-idp-policy-controls-during-mcp-o.md): Enable enterprise IdP policy controls during MCP OAuth flows
-- [SEP-991: Enable URL-based Client Registration using OAuth Client ID Metadata Documents](https://modelcontextprotocol.io/seps/991-enable-url-based-client-registration-using-oauth-c.md): Enable URL-based Client Registration using OAuth Client ID Metadata Documents
-- [SEP-994: Shared Communication Practices/Guidelines](https://modelcontextprotocol.io/seps/994-shared-communication-practicesguidelines.md): Shared Communication Practices/Guidelines
-- [Specification Enhancement Proposals (SEPs)](https://modelcontextprotocol.io/seps/index.md): Index of all MCP Specification Enhancement Proposals
-- [Architecture](https://modelcontextprotocol.io/specification/2025-11-25/architecture/index.md)
-- [Authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization.md)
-- [Overview](https://modelcontextprotocol.io/specification/2025-11-25/basic/index.md)
-- [Lifecycle](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle.md)
-- [Transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports.md)
-- [Cancellation](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/cancellation.md)
-- [Ping](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/ping.md)
-- [Progress](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/progress.md)
-- [Tasks](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks.md)
-- [Key Changes](https://modelcontextprotocol.io/specification/2025-11-25/changelog.md)
-- [Elicitation](https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation.md)
-- [Roots](https://modelcontextprotocol.io/specification/2025-11-25/client/roots.md)
-- [Sampling](https://modelcontextprotocol.io/specification/2025-11-25/client/sampling.md)
-- [Specification](https://modelcontextprotocol.io/specification/2025-11-25/index.md)
-- [Schema Reference](https://modelcontextprotocol.io/specification/2025-11-25/schema.md)
-- [Overview](https://modelcontextprotocol.io/specification/2025-11-25/server/index.md)
-- [Prompts](https://modelcontextprotocol.io/specification/2025-11-25/server/prompts.md)
-- [Resources](https://modelcontextprotocol.io/specification/2025-11-25/server/resources.md)
-- [Tools](https://modelcontextprotocol.io/specification/2025-11-25/server/tools.md)
-- [Completion](https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/completion.md)
-- [Logging](https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/logging.md)
-- [Pagination](https://modelcontextprotocol.io/specification/2025-11-25/server/utilities/pagination.md)
+- [Contributing to MCP](https://modelcontextprotocol.io/community/contributing.md): How to contribute to the Model Context Protocol project
+- [Contributor Communication](https://modelcontextprotocol.io/community/communication.md): Communication strategy and framework for the Model Context Protocol community
+- [Working and Interest Groups](https://modelcontextprotocol.io/community/working-interest-groups.md): Governance rules for the two forms of collaborative groups within the Model Context Protocol community — Working Groups and Interest Groups.
+- [Group Charter Template](https://modelcontextprotocol.io/community/charter-template.md): Template for MCP Working Group and Interest Group charters.
+- [Design Principles](https://modelcontextprotocol.io/community/design-principles.md): The core design principles that guide the development of the Model Context Protocol.
+- [SEP Guidelines](https://modelcontextprotocol.io/community/sep-guidelines.md): Specification Enhancement Proposal (SEP) guidelines for proposing changes to the Model Context Protocol
+- [Governance and Stewardship](https://modelcontextprotocol.io/community/governance.md): Learn about the Model Context Protocol's governance structure and how to participate in the community
+- [Contributor Ladder](https://modelcontextprotocol.io/community/contributor-ladder.md): Roles, responsibilities, and advancement criteria for MCP contributors, from first contribution to Core Maintainer
+- [Feature Lifecycle and Deprecation Policy](https://modelcontextprotocol.io/community/feature-lifecycle.md): How individual MCP specification features move through Active, Deprecated, and Removed states, and the timeline implementers can plan against.
+- [SDK Tiering System](https://modelcontextprotocol.io/community/sdk-tiers.md): Feature completeness, protocol support, and maintenance commitment levels for Model Context Protocol SDKs
+- [Security Policy](https://modelcontextprotocol.io/community/security.md): How to report security vulnerabilities in the Model Context Protocol specification and SDKs, what is in and out of scope, and how SDK maintainers coordinate disclosure.
+- [Antitrust Policy](https://modelcontextprotocol.io/community/antitrust.md): MCP Project Antitrust Policy for participants and contributors
+- [Agents Charter](https://modelcontextprotocol.io/community/working-groups/agents.md): Charter for the MCP Agents Working Group.
+- [File Uploads Charter](https://modelcontextprotocol.io/community/working-groups/file-uploads.md): Charter for the MCP File Uploads Working Group.
+- [Inspector V2 Working Group Charter](https://modelcontextprotocol.io/community/working-groups/inspector-v2.md): Charter for the Inspector V2 Working Group, a Working Group of the Model Context Protocol community.
+- [Interceptors Charter](https://modelcontextprotocol.io/community/working-groups/interceptors.md): Charter for the MCP Interceptors Working Group.
+- [Registry Charter](https://modelcontextprotocol.io/community/working-groups/registry.md): Charter for the MCP Registry Working Group.
+- [SDK Working Group Charter](https://modelcontextprotocol.io/community/working-groups/sdk.md): Charter for the MCP SDK Working Group.
+- [Server Card Charter](https://modelcontextprotocol.io/community/working-groups/server-card.md): Charter for the MCP Server Card Working Group.
+- [Skills Over MCP Charter](https://modelcontextprotocol.io/community/working-groups/skills-over-mcp.md): Charter for the MCP Skills Over MCP Working Group.
+- [Triggers and Events Charter](https://modelcontextprotocol.io/community/working-groups/triggers-events.md): Charter for the MCP Triggers and Events Working Group.
+- [Authorization Charter](https://modelcontextprotocol.io/community/interest-groups/auth.md): Charter for the MCP Authorization Interest Group.
+- [Enterprise-Managed Authorization Charter](https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization.md): Charter for the MCP Enterprise-Managed Authorization Interest Group.
+- [Financial Services Charter](https://modelcontextprotocol.io/community/interest-groups/financial-services.md): Charter for the MCP Financial Services Interest Group.
+- [Primitive Grouping Charter](https://modelcontextprotocol.io/community/interest-groups/primitive-grouping.md): Charter for the MCP Primitive Grouping Interest Group.
+- [Security Charter](https://modelcontextprotocol.io/community/interest-groups/security.md): Charter for the MCP Security Interest Group.
+- [Tool Annotations Charter](https://modelcontextprotocol.io/community/interest-groups/tool-annotations.md): Charter for the MCP Tool Annotations Interest Group.
+- [Roadmap](https://modelcontextprotocol.io/development/roadmap.md): Our plans for evolving Model Context Protocol

@@ -37,13 +37,21 @@ export async function checkOAuthSupport(serverUrl: string): Promise<boolean> {
   }
 }
 
+export function dismissMcpLoginToasts(serverId: string): void {
+  toast.dismiss(`mcp-prompt-login-${serverId}`);
+  toast.dismiss(`mcp-soft-login-${serverId}`);
+}
+
+export function clearMcpOAuthCredentials(serverId: string): Promise<void> {
+  return invoke("mcp_logout", { serverId });
+}
+
 export async function mcpLogin(
   serverId: string,
   serverUrl: string,
   serverName: string,
 ): Promise<boolean> {
-  toast.dismiss(`mcp-prompt-login-${serverId}`);
-  toast.dismiss(`mcp-soft-login-${serverId}`);
+  dismissMcpLoginToasts(serverId);
 
   const toastId = toast.loading(`Connecting AgentOne to "${serverName}"...`, {
     action: {
@@ -99,7 +107,7 @@ export async function mcpLogin(
 
 export async function mcpLogout(serverId: string, serverName: string): Promise<boolean> {
   try {
-    await invoke("mcp_logout", { serverId });
+    await clearMcpOAuthCredentials(serverId);
     toast.success(`Disconnected from "${serverName}" successfully`);
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-out") return prev;

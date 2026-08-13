@@ -1,12 +1,15 @@
 import { getDefaultStore } from "jotai";
 import { RESET } from "jotai/utils";
 
+import { resetModelDirectory } from "@/lib/ai/models/model-directory";
 import { PROVIDER_REGISTRY, type ProviderStorageKey } from "@/lib/ai/providers/registry";
+import type { TtsProviderId } from "@/lib/settings/types";
 
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
   analyticsIdentityAtom,
+  chatBackgroundAtom,
   chatSortAtom,
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
@@ -15,26 +18,34 @@ import {
   enabledToolsAtom,
   experimentalThrottleEnabledAtom,
   experimentalThrottleValueAtom,
+  extractReasoningEnabledAtom,
   fontAtom,
   inputStyleAtom,
+  keyboardShortcutsAtom,
+  keyboardShortcutsEnabledInInputsAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
   maxMessageLengthAtom,
   maxToolResultCharsAtom,
+  memoryAtom,
   mcpParallelLoadLimitAtom,
   mcpServersAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
+  remendEnabledAtom,
   roundnessAtom,
+  showChatToBottomButtonAtom,
   showChatStatusIndicatorAtom,
   showMessageActionRowAtom,
+  showMessagePreviewRailAtom,
   smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
   systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
+  ttsSettingsAtom,
   titleGenerationAtom,
   uiTintAtom,
   uiTintStrengthAtom,
@@ -42,6 +53,14 @@ import {
   userNameAtom,
 } from "../jotai/settings-atoms";
 import { type DefaultSettings } from "./types";
+
+const TTS_PROVIDER_IDS: readonly TtsProviderId[] = [
+  "openai",
+  "elevenlabs",
+  "lmnt",
+  "hume",
+  "google",
+];
 
 export function resetAllSettings(): void {
   const store = getDefaultStore();
@@ -58,11 +77,16 @@ export function resetAllSettings(): void {
   store.set(experimentalThrottleEnabledAtom, RESET);
   store.set(experimentalThrottleValueAtom, RESET);
   store.set(smoothStreamEnabledAtom, RESET);
+  store.set(extractReasoningEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
+  store.set(remendEnabledAtom, RESET);
   store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
+  store.set(showMessagePreviewRailAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
   store.set(chatSortAtom, RESET);
+  store.set(chatBackgroundAtom, RESET);
+  store.set(ttsSettingsAtom, RESET);
   store.set(themeAtom, RESET);
   store.set(colorThemeAtom, RESET);
   store.set(uiTintAtom, RESET);
@@ -73,17 +97,26 @@ export function resetAllSettings(): void {
   store.set(analyticsIdentityAtom, RESET);
   store.set(userNameAtom, RESET);
   store.set(systemPromptAppendixAtom, RESET);
+  store.set(memoryAtom, RESET);
   store.set(enabledToolsAtom, RESET);
   store.set(toolConfigsAtom, RESET);
   store.set(mcpServersAtom, RESET);
   store.set(mcpParallelLoadLimitAtom, RESET);
   store.set(titleGenerationAtom, RESET);
   store.set(collapsedSidebarLayoutAtom, RESET);
+  store.set(keyboardShortcutsEnabledInInputsAtom, RESET);
+  store.set(keyboardShortcutsAtom, RESET);
 
   for (const provider of PROVIDER_REGISTRY) {
     void store.set(getApiKeyBaseAtom(provider.id), RESET);
     store.set(providerConfigAtoms[provider.id], RESET);
   }
+
+  for (const providerId of TTS_PROVIDER_IDS) {
+    void store.set(getApiKeyBaseAtom(`tts-${providerId}`), RESET);
+  }
+
+  void resetModelDirectory();
 }
 
 function isProviderStorageKey(key: string): key is ProviderStorageKey {
@@ -137,8 +170,17 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "SMOOTH_STREAM_ENABLED":
       store.set(smoothStreamEnabledAtom, RESET);
       break;
+    case "EXTRACT_REASONING_ENABLED":
+      store.set(extractReasoningEnabledAtom, RESET);
+      break;
     case "REGENERATE_ON_SAVE":
       store.set(regenerateOnSaveAtom, RESET);
+      break;
+    case "REMEND_ENABLED":
+      store.set(remendEnabledAtom, RESET);
+      break;
+    case "SHOW_CHAT_TO_BOTTOM_BUTTON":
+      store.set(showChatToBottomButtonAtom, RESET);
       break;
     case "STOP_BUTTON_BEHAVIOR":
       store.set(stopButtonBehaviorAtom, RESET);
@@ -146,11 +188,20 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "SHOW_CHAT_STATUS_INDICATOR":
       store.set(showChatStatusIndicatorAtom, RESET);
       break;
+    case "SHOW_MESSAGE_PREVIEW_RAIL":
+      store.set(showMessagePreviewRailAtom, RESET);
+      break;
     case "SHOW_MESSAGE_ACTION_ROW":
       store.set(showMessageActionRowAtom, RESET);
       break;
     case "CHAT_SORT":
       store.set(chatSortAtom, RESET);
+      break;
+    case "CHAT_BACKGROUND":
+      store.set(chatBackgroundAtom, RESET);
+      break;
+    case "TTS":
+      store.set(ttsSettingsAtom, RESET);
       break;
     case "THEME":
       store.set(themeAtom, RESET);
@@ -197,11 +248,20 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "SYSTEM_PROMPT_APPENDIX":
       store.set(systemPromptAppendixAtom, RESET);
       break;
+    case "MEMORY":
+      store.set(memoryAtom, RESET);
+      break;
     case "TITLE_GENERATION":
       store.set(titleGenerationAtom, RESET);
       break;
     case "COLLAPSED_SIDEBAR_LAYOUT":
       store.set(collapsedSidebarLayoutAtom, RESET);
+      break;
+    case "KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS":
+      store.set(keyboardShortcutsEnabledInInputsAtom, RESET);
+      break;
+    case "KEYBOARD_SHORTCUTS":
+      store.set(keyboardShortcutsAtom, RESET);
       break;
   }
 }

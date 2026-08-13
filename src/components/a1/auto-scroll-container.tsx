@@ -1,8 +1,8 @@
 "use client";
-import { IconChevronDown } from "@tabler/icons-react";
+import { defaultRangeExtractor, type VirtualItem, useVirtualizer } from "@tanstack/react-virtual";
 import {
   forwardRef,
-  type ReactElement,
+  type Key,
   type ReactNode,
   useCallback,
   useImperativeHandle,
@@ -10,230 +10,211 @@ import {
   useRef,
   useState,
 } from "react";
-import { Virtualizer, type VirtualizerHandle } from "virtua";
 
-import { Button } from "@/components/ui/button";
 import { useOverflow } from "@/hooks/use-overflow";
 import { cn } from "@/lib/utils";
 
+import { ChatToBottomButton } from "./chat-to-bottom-button";
+
 const AT_BOTTOM_THRESHOLD = 10;
-const BUTTON_HIDDEN_OFFSET = 36;
 
 export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-  virtualizedItems?: ReactElement[];
-  virtualizedKeepMounted?: readonly number[];
-  virtualizedBufferSize?: number;
-  contentUpdateKey?: unknown;
-  scrollableClassName?: string;
+  children?: ReactNode;
+  items?: readonly unknown[];
+  renderItem?: (item: unknown, index: number) => ReactNode;
+  getItemKey?: (index: number) => Key;
+  estimateItemSize?: (index: number) => number;
+  overscan?: number;
+  keepMountedIndexes?: readonly number[];
   scrollButtonClassName?: string;
-  scrollButtonChildren?: ReactNode;
-  scrollButtonProps?: Omit<React.ComponentProps<"button">, "className" | "children" | "onClick">;
+  buttonScrollBehavior?: "smooth" | "instant";
+  scrollableClassName?: string;
   overflowingClassName?: string;
   behavior?: "smooth" | "instant";
-  /** Scroll behavior for the scroll-to-bottom button. Defaults to "smooth". */
-  buttonScrollBehavior?: "smooth" | "instant";
-  /** Whether to watch resize events on the container. Defaults to false for performance. */
-  watchResize?: boolean;
-  /** Distance from bottom (in px) where button starts sliding out. Defaults to 50px. */
-  slideStartDistance?: number;
-  /** Distance from bottom (in px) where button is fully hidden. Defaults to 10px. */
-  slideEndDistance?: number;
 }
 
 export type AutoScrollHandle = {
+  getScrollElement: () => HTMLDivElement | null;
   scrollToBottom: () => void;
+  scrollToIndex: (index: number) => void;
 };
 
 export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContainerProps>(
   (
     {
       children,
-      virtualizedItems,
-      virtualizedKeepMounted,
-      virtualizedBufferSize,
-      contentUpdateKey,
+      items,
+      renderItem,
+      getItemKey,
+      estimateItemSize = () => 72,
+      overscan = 5,
+      keepMountedIndexes,
       className,
       scrollableClassName,
       scrollButtonClassName,
-      scrollButtonChildren,
-      scrollButtonProps,
       overflowingClassName,
-      behavior = "instant",
       buttonScrollBehavior = "smooth",
-      watchResize = false,
-      slideStartDistance = 50,
-      slideEndDistance = 10,
+      behavior = "instant",
       ...props
     },
     ref,
   ) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const contentRef = useRef<HTMLDivElement>(null);
-    const virtualizerRef = useRef<VirtualizerHandle>(null);
-    const isOverflowing = useOverflow(containerRef);
-    const [buttonOffset, setButtonOffset] = useState(BUTTON_HIDDEN_OFFSET);
-    const isAtBottomRef = useRef(true);
-    const isVirtualized = Boolean(virtualizedItems);
-    const virtualizedItemCount = virtualizedItems?.length ?? 0;
+    const parentRef = useRef<HTMLDivElement>(null);
+    const isOverflowing = useOverflow(parentRef);
+    const [showButton, setShowButton] = useState(false);
+    const atBottomRef = useRef(true);
+    const isVirtualized = items != null && items.length > 0;
+
+    const virtualizer = useVirtualizer({
+      count: isVirtualized ? items.length : 0,
+      getScrollElement: () => parentRef.current,
+      estimateSize: estimateItemSize,
+      getItemKey,
+      overscan,
+      anchorTo: "end",
+      followOnAppend: true,
+      scrollEndThreshold: AT_BOTTOM_THRESHOLD,
+      directDomUpdates: true,
+      // We would like to use "transform" mode; however, it causes problems with the positioning of codeblock headers and full-screen MCP apps.
+      directDomUpdatesMode: "position",
+      rangeExtractor:
+        keepMountedIndexes && keepMountedIndexes.length > 0
+          ? (range) => {
+              const indexes = defaultRangeExtractor(range);
+              const set = new Set(indexes);
+              for (const idx of keepMountedIndexes) {
+                set.add(idx);
+              }
+              return Array.from(set).sort((a, b) => a - b);
+            }
+          : undefined,
+    });
+
+    useLayoutEffect(() => {
+      if (!isVirtualized) return;
+
+      virtualizer.shouldAdjustScrollPositionOnItemSizeChange = (
+        item: VirtualItem,
+        _delta,
+        instance,
+      ) => {
+        const scrollOffset = (instance.scrollOffset ?? 0) + instance.scrollAdjustments;
+
+        return item.end <= scrollOffset && instance.scrollDirection !== "backward";
+      };
+
+      return () => {
+        virtualizer.shouldAdjustScrollPositionOnItemSizeChange = undefined;
+      };
+    }, [isVirtualized, virtualizer]);
+
+    const handleScroll = useCallback(() => {
+      const container = parentRef.current;
+      if (!container) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
+
+      atBottomRef.current = atBottom;
+      setShowButton(isOverflowing && !atBottom);
+    }, [isOverflowing]);
+
+    useLayoutEffect(() => {
+      const container = parentRef.current;
+      if (!container) return;
+
+      container.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+
+      return () => {
+        container.removeEventListener("scroll", handleScroll);
+      };
+    }, [handleScroll]);
+
+    useLayoutEffect(() => {
+      const container = parentRef.current;
+      if (!container || isVirtualized) return;
+
+      const observerCallback = () => {
+        if (atBottomRef.current) {
+          container.scrollTo({ top: container.scrollHeight, behavior: "instant" });
+        }
+        handleScroll();
+      };
+
+      const mutationObserver = new MutationObserver(observerCallback);
+      mutationObserver.observe(container, { childList: true, subtree: true });
+
+      return () => {
+        mutationObserver.disconnect();
+      };
+    }, [isVirtualized, handleScroll]);
+
+    useLayoutEffect(() => {
+      if (isVirtualized) {
+        virtualizer.scrollToEnd({ behavior: "instant" });
+      } else {
+        parentRef.current?.scrollTo({ top: parentRef.current.scrollHeight, behavior: "instant" });
+      }
+    }, [isVirtualized, virtualizer]);
 
     const scrollToBottom = useCallback(
       (scrollBehavior: "smooth" | "instant" = behavior) => {
-        const container = containerRef.current;
-        if (!container) return;
-
-        if (isVirtualized && virtualizerRef.current && virtualizedItemCount > 0) {
-          virtualizerRef.current.scrollToIndex(virtualizedItemCount - 1, {
-            align: "end",
-            smooth: false,
+        if (isVirtualized) {
+          virtualizer.scrollToEnd({ behavior: scrollBehavior });
+        } else {
+          parentRef.current?.scrollTo({
+            top: parentRef.current.scrollHeight,
+            behavior: scrollBehavior,
           });
-          return;
         }
-
-        container.scrollTo({
-          top: container.scrollHeight,
-          behavior: scrollBehavior,
-        });
       },
-      [behavior, isVirtualized, virtualizedItemCount],
+      [isVirtualized, virtualizer, behavior],
     );
 
     const handleScrollButtonClick = () => {
-      isAtBottomRef.current = true;
-      setButtonOffset(BUTTON_HIDDEN_OFFSET);
-      scrollToBottom(buttonScrollBehavior);
+      if (isVirtualized) {
+        virtualizer.scrollToEnd({ behavior: buttonScrollBehavior });
+      } else {
+        parentRef.current?.scrollTo({
+          top: parentRef.current.scrollHeight,
+          behavior: buttonScrollBehavior,
+        });
+      }
     };
 
     useImperativeHandle(
       ref,
       () => ({
+        getScrollElement: () => parentRef.current,
         scrollToBottom: () => {
-          isAtBottomRef.current = true;
-          setButtonOffset(BUTTON_HIDDEN_OFFSET);
+          setShowButton(false);
+          atBottomRef.current = true;
           scrollToBottom();
         },
+        scrollToIndex: (index) => {
+          if (isVirtualized) {
+            virtualizer.scrollToIndex(index, { align: "start", behavior: "smooth" });
+            return;
+          }
+
+          const container = parentRef.current;
+          const item = container?.querySelector<HTMLElement>(`[data-message-index="${index}"]`);
+          if (!container || !item) return;
+
+          const containerRect = container.getBoundingClientRect();
+          const itemRect = item.getBoundingClientRect();
+          container.scrollTo({
+            top: container.scrollTop + itemRect.top - containerRect.top,
+            behavior: "smooth",
+          });
+        },
       }),
-      [scrollToBottom],
+      [isVirtualized, scrollToBottom, virtualizer],
     );
 
-    useLayoutEffect(() => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      isAtBottomRef.current = true;
-
-      const handleScroll = () => {
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-        const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
-
-        isAtBottomRef.current = atBottom;
-
-        let offset = 0;
-        if (isOverflowing) {
-          if (distanceFromBottom <= slideStartDistance) {
-            if (distanceFromBottom <= slideEndDistance) {
-              offset = BUTTON_HIDDEN_OFFSET;
-            } else {
-              const slideRange = slideStartDistance - slideEndDistance;
-              const slideProgress = (slideStartDistance - distanceFromBottom) / slideRange;
-              offset = slideProgress * BUTTON_HIDDEN_OFFSET;
-            }
-          }
-        } else {
-          offset = BUTTON_HIDDEN_OFFSET;
-        }
-
-        setButtonOffset(offset);
-      };
-
-      const observerCallback = () => {
-        if (isAtBottomRef.current) {
-          scrollToBottom("instant");
-          setButtonOffset(BUTTON_HIDDEN_OFFSET);
-        } else {
-          handleScroll();
-        }
-      };
-
-      scrollToBottom("instant");
-
-      let mutationObserver: MutationObserver | undefined;
-      if (!isVirtualized) {
-        mutationObserver = new MutationObserver(observerCallback);
-        mutationObserver.observe(container, {
-          childList: true,
-          subtree: true,
-        });
-      }
-
-      let resizeObserver: ResizeObserver | undefined;
-      if (watchResize || isVirtualized) {
-        resizeObserver = new ResizeObserver(observerCallback);
-        resizeObserver.observe(isVirtualized ? contentRef.current || container : container);
-      }
-
-      container.addEventListener("scroll", handleScroll, { passive: true });
-
-      handleScroll();
-
-      return () => {
-        mutationObserver?.disconnect();
-        resizeObserver?.disconnect();
-        container.removeEventListener("scroll", handleScroll);
-      };
-    }, [
-      isOverflowing,
-      isVirtualized,
-      scrollToBottom,
-      slideEndDistance,
-      slideStartDistance,
-      watchResize,
-    ]);
-
-    useLayoutEffect(() => {
-      if (!isVirtualized) {
-        return;
-      }
-
-      const container = containerRef.current;
-      if (!container) {
-        return;
-      }
-
-      if (isAtBottomRef.current) {
-        scrollToBottom("instant");
-        setButtonOffset(BUTTON_HIDDEN_OFFSET);
-        return;
-      }
-
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-
-      let offset = 0;
-      if (isOverflowing) {
-        if (distanceFromBottom <= slideStartDistance) {
-          if (distanceFromBottom <= slideEndDistance) {
-            offset = BUTTON_HIDDEN_OFFSET;
-          } else {
-            const slideRange = slideStartDistance - slideEndDistance;
-            const slideProgress = (slideStartDistance - distanceFromBottom) / slideRange;
-            offset = slideProgress * BUTTON_HIDDEN_OFFSET;
-          }
-        }
-      } else {
-        offset = BUTTON_HIDDEN_OFFSET;
-      }
-
-      setButtonOffset(offset);
-    }, [
-      contentUpdateKey,
-      isOverflowing,
-      isVirtualized,
-      scrollToBottom,
-      slideEndDistance,
-      slideStartDistance,
-    ]);
+    const virtualItems = isVirtualized ? virtualizer.getVirtualItems() : [];
 
     return (
       <div
@@ -241,45 +222,35 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
         {...props}
       >
         <div
-          ref={containerRef}
+          ref={parentRef}
           className="h-full w-full overflow-y-auto"
           data-testid="auto-scroll-container-scrollable"
         >
-          <div ref={contentRef} className={scrollableClassName}>
-            {isVirtualized && virtualizedItems && virtualizedItems.length > 0 ? (
-              <Virtualizer
-                ref={virtualizerRef}
-                scrollRef={containerRef}
-                bufferSize={virtualizedBufferSize}
-                keepMounted={virtualizedKeepMounted}
-              >
-                {virtualizedItems}
-              </Virtualizer>
+          <div className={cn("min-h-full", scrollableClassName)}>
+            {isVirtualized ? (
+              <div ref={virtualizer.containerRef} style={{ position: "relative", width: "100%" }}>
+                {virtualItems.map((virtualItem) => (
+                  <div
+                    key={virtualItem.key}
+                    ref={virtualizer.measureElement}
+                    data-index={virtualItem.index}
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      width: "100%",
+                    }}
+                  >
+                    {renderItem!(items![virtualItem.index], virtualItem.index)}
+                  </div>
+                ))}
+              </div>
             ) : null}
             {children}
           </div>
         </div>
-        <div className="pointer-events-none absolute right-4 bottom-2 z-10 overflow-hidden">
-          <Button
-            data-testid="scroll-to-bottom"
-            size="icon"
-            onClick={handleScrollButtonClick}
-            className={cn(
-              "pointer-events-auto transition-transform duration-200 hover:opacity-75",
-              scrollButtonClassName,
-            )}
-            style={{
-              transform: `translateY(${buttonOffset}px)`,
-            }}
-            variant="secondary"
-            aria-label="Scroll to bottom"
-            aria-hidden={buttonOffset >= BUTTON_HIDDEN_OFFSET}
-            tabIndex={buttonOffset >= BUTTON_HIDDEN_OFFSET ? -1 : 0}
-            {...scrollButtonProps}
-          >
-            {scrollButtonChildren || <IconChevronDown data-testid="scroll-to-bottom-icon" />}
-          </Button>
-        </div>
+        {showButton && (
+          <ChatToBottomButton onClick={handleScrollButtonClick} className={scrollButtonClassName} />
+        )}
       </div>
     );
   },

@@ -1,10 +1,11 @@
 import type { LanguageModel, TextPart, UIMessage } from "ai";
-import { generateText } from "ai";
+import { extractReasoningMiddleware, generateText, wrapLanguageModel } from "ai";
 
 import { getLogger } from "@/lib/logger";
 import type { TitleGenerationSettings } from "@/lib/settings/types";
 
 const logger = getLogger(import.meta.url);
+const DEFAULT_TITLE_MAX_OUTPUT_TOKENS = 1024;
 
 function calculateMaxOutputTokens(maxTokens?: number | "none"): number | undefined {
   if (maxTokens === "none") {
@@ -13,7 +14,7 @@ function calculateMaxOutputTokens(maxTokens?: number | "none"): number | undefin
   if (typeof maxTokens === "number") {
     return maxTokens;
   }
-  return 20;
+  return DEFAULT_TITLE_MAX_OUTPUT_TOKENS;
 }
 
 function extractTextFromMessage(message: UIMessage): string {
@@ -44,6 +45,7 @@ export async function generateChatTitleAI(
   messages: UIMessage[],
   fallbackPhrase: string,
   maxTokens?: number | "none",
+  extractReasoningEnabled = false,
 ): Promise<string> {
   logger.verbose(`Generating AI title for chat with ${messages.length} messages`);
   try {
@@ -64,8 +66,16 @@ export async function generateChatTitleAI(
       .join("\n")
       .slice(0, 1000);
 
+    const titleModel =
+      extractReasoningEnabled && typeof model !== "string"
+        ? wrapLanguageModel({
+            model: model as Parameters<typeof wrapLanguageModel>[0]["model"],
+            middleware: extractReasoningMiddleware({ tagName: "think" }),
+          })
+        : model;
+
     const result = await generateText({
-      model,
+      model: titleModel,
       prompt: `Based on this transcript, generate a concise, descriptive title (max 6 words, no quotes). Respond with the chat title only and no other text.
 Even if the transcript seems very short or empty, generate a title based on the available context rather than refusing the request.
 
@@ -114,11 +124,18 @@ export async function generateChatTitle(
   messages: UIMessage[],
   settings: TitleGenerationSettings,
   maxTokens?: number | "none",
+  extractReasoningEnabled = false,
 ): Promise<string> {
   const syncTitle = generateChatTitleFromSettings(messages, settings);
   if (syncTitle !== null) {
     return syncTitle;
   }
 
-  return generateChatTitleAI(model, messages, settings.fallbackPhrase, maxTokens);
+  return generateChatTitleAI(
+    model,
+    messages,
+    settings.fallbackPhrase,
+    maxTokens ?? settings.maxOutputTokens,
+    extractReasoningEnabled,
+  );
 }

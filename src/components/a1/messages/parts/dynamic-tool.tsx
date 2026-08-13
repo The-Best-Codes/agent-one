@@ -16,6 +16,11 @@ import {
   AccordionItem as ParametersAccordionItem,
   AccordionTrigger as ParametersAccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -25,13 +30,14 @@ import {
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { maxToolResultCharsAtom } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
+
+import { MessagePartMcpApp } from "./mcp-app";
 
 type DynamicToolOutputContentItem = {
   text?: string;
@@ -46,7 +52,11 @@ interface DynamicToolPartProps {
   labels?: ToolDisplayLabels | null;
 }
 
-export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) => {
+export const MessagePartDynamicTool = (props: DynamicToolPartProps) => (
+  <MessagePartMcpApp part={props.part} fallback={<MessagePartDynamicToolFallback {...props} />} />
+);
+
+const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
@@ -57,9 +67,12 @@ export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) =
   switch (part.state) {
     case "approval-requested": {
       return (
-        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+        <div
+          key={callId}
+          className="border-border flex w-fit max-w-full flex-col gap-2 rounded-md border p-2"
+        >
           <div className="flex items-center gap-1">
-            <IconTool className="text-foreground size-4" />
+            <IconTool className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               AgentOne wants to run "{toolName}" tool
             </span>
@@ -68,7 +81,7 @@ export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) =
             <ParametersAccordion
               type="single"
               collapsible
-              className="border-border w-full rounded-md border"
+              className="border-border w-full max-w-full min-w-0 rounded-md border"
             >
               <ParametersAccordionItem value="parameters" className="border-0">
                 <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
@@ -125,6 +138,16 @@ export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) =
 
     case "approval-responded":
     case "input-streaming": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4" />
+            <span className="text-muted-foreground text-sm font-bold">
+              "{toolName}" tool denied
+            </span>
+          </div>
+        );
+      }
       const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
       return (
         <div key={callId} className="flex items-center gap-1">
@@ -192,7 +215,7 @@ export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) =
                   {labels?.errorTitle ?? `"${toolName}" tool failed`}
                 </span>
               </AccordionTrigger>
-              <AccordionContent renderWhenCollapsed={!isLongOutput} className="p-0 pt-2">
+              <AccordionContent className="p-0 pt-2">
                 {isLongOutput ? (
                   <PerformantMarkdown maxHeight="200px" content={outputText} />
                 ) : (
@@ -245,20 +268,17 @@ export const MessagePartDynamicTool = ({ part, labels }: DynamicToolPartProps) =
                 {labels?.completedTitle ?? `"${toolName}" tool finished`}
               </span>
               {isLongOutput && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
                     <div className="size-2 shrink-0 rounded-full bg-yellow-500" />
-                  </TooltipTrigger>
-                  <TooltipContent>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent>
                     Tool result is over {maxToolResultChars} characters
-                  </TooltipContent>
-                </Tooltip>
+                  </AdaptiveTooltipContent>
+                </AdaptiveTooltip>
               )}
             </AccordionTrigger>
-            <AccordionContent
-              renderWhenCollapsed={!isLongOutput}
-              className="text-muted-foreground p-0 pt-2 text-xs"
-            >
+            <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
               <ScrollArea type="always" viewportClassName="max-h-96">
                 <ScrollBar orientation="horizontal"></ScrollBar>
                 <div className="flex flex-col gap-2">

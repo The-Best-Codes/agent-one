@@ -16,7 +16,7 @@ const LoadingIndicator = ({
   if (isApiKeysLoading) text = "Booting up";
 
   return (
-    <span className="text-gradient-shimmer from-foreground via-muted-foreground to-foreground bg-linear-to-r text-sm font-bold">
+    <span className="shimmer dark:shimmer-color-accent text-foreground w-fit text-sm font-bold">
       {text}
     </span>
   );
@@ -45,8 +45,6 @@ export const ChatMessageLoading = ({
     }
 
     if (status === "streaming") {
-      // TODO: Do something better here. We used to have a cursor, but it always showed up on the next line which looks awkward.
-      // "Thinking" in the middle of a response is also awkward, but it will have to do for now.
       return <LoadingIndicator isApiKeysLoading={isApiKeysLoading} isMcpLoading={isMcpLoading} />;
     }
 

@@ -58,8 +58,9 @@ export function ReleaseNotesDialog() {
           <DialogDescription>A quick look at what changed in this release.</DialogDescription>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto">
-          <div className="prose prose-sm prose-neutral dark:prose-invert px-1">
+          <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless px-1">
             <MemoizedMarkdown
+              allowInternalLinks
               content={releaseNotesData.content}
               id="release-notes"
               messageRole="assistant"

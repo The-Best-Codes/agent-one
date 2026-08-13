@@ -19,3 +19,17 @@ export const activeSettingsSectionAtom = atomWithStorage(
   createNoSyncStorage<string>(),
   { getOnInit: true },
 );
+
+export const debugModeEnabledAtom = atomWithStorage<boolean>(
+  "agent-one-debug-mode",
+  false,
+  createJSONStorage(() => sessionStorage),
+  { getOnInit: true },
+);
+
+export const reactScanEnabledAtom = atomWithStorage<boolean>(
+  "agent-one-react-scan-enabled",
+  false,
+  createJSONStorage(() => sessionStorage),
+  { getOnInit: true },
+);

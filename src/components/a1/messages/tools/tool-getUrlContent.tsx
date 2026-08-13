@@ -9,6 +9,11 @@ import {
 import type { ToolUIPart } from "ai";
 import { memo, useState } from "react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -17,10 +22,11 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+
+import { ToolErrorAccordion } from "./tool-error-accordion";
 
 interface GetUrlContentInput {
   urls: string[];
@@ -37,6 +43,7 @@ interface UrlResult {
   length?: number;
   truncated?: boolean;
   error?: string;
+  pending?: boolean;
 }
 
 interface GetUrlContentOutput {
@@ -65,6 +72,46 @@ const formatUrl = (url: string) => {
     return url;
   }
 };
+
+const UrlPendingDisplay = memo(({ url }: { url: string }) => (
+  <div className="flex items-center gap-1">
+    <Spinner className="text-foreground size-4 shrink-0" />
+    <span className="text-foreground max-w-2xl truncate text-sm font-bold">
+      Browsing{" "}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+      >
+        {formatUrl(url)}
+      </a>
+      ...
+    </span>
+  </div>
+));
+
+UrlPendingDisplay.displayName = "UrlPendingDisplay";
+
+const UrlCancelledDisplay = memo(({ url }: { url: string }) => (
+  <div className="flex items-center gap-1">
+    <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+    <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
+      Browsing{" "}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+      >
+        {formatUrl(url)}
+      </a>{" "}
+      cancelled
+    </span>
+  </div>
+));
+
+UrlCancelledDisplay.displayName = "UrlCancelledDisplay";
 
 const UrlResultDisplay = memo(
   ({ result, input }: { result: UrlResult; input: GetUrlContentInput }) => {
@@ -106,28 +153,28 @@ const UrlResultDisplay = memo(
         <div className="flex items-center gap-1">
           <>
             {isRawContent && (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <IconFileText className="text-muted-foreground size-4 shrink-0" />
-                </TooltipTrigger>
-                <TooltipContent>Fetched raw content</TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>Fetched raw content</AdaptiveTooltipContent>
+              </AdaptiveTooltip>
             )}
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <div
                   className={cn(
                     "size-2 shrink-0 rounded-full",
                     result.truncated ? "bg-yellow-500" : "bg-green-500",
                   )}
                 />
-              </TooltipTrigger>
-              <TooltipContent>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent>
                 {result.truncated
                   ? `Truncated to ${input.maxLength || "unknown"} characters`
                   : `${result.length || "All"} characters processed`}
-              </TooltipContent>
-            </Tooltip>
+              </AdaptiveTooltipContent>
+            </AdaptiveTooltip>
           </>
         </div>
       </div>
@@ -236,9 +283,37 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         </div>
       );
 
-    // TODO: Determine if a dedicated UI for approval-responded is needed. For now, it's not.
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              {urlCount === 1 ? (
+                <>
+                  Browsing{" "}
+                  {input?.urls?.[0] ? (
+                    <a
+                      href={input.urls[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+                    >
+                      {formatUrl(input.urls[0])}
+                    </a>
+                  ) : (
+                    "a website"
+                  )}{" "}
+                  denied
+                </>
+              ) : (
+                `Browsing ${urlCount} URLs denied`
+              )}
+            </span>
+          </div>
+        );
+      }
       return (
         <div
           key={callId}
@@ -269,12 +344,41 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           </span>
         </div>
       );
+    }
 
     case "output-available": {
       const results = output?.results || [];
+      const isPreliminary = (part as { preliminary?: boolean }).preliminary === true;
+      const hasPending = results.some((r) => r.pending);
+      const isStreaming = isPreliminary && hasPending;
 
-      if (results.length === 1) {
-        return <UrlResultDisplay key={callId} result={results[0]} input={input} />;
+      if (results.length <= 1) {
+        if (isStreaming && results[0]?.pending) {
+          return (
+            <div key={callId} className="flex items-center gap-1">
+              <Spinner className="text-foreground size-4 shrink-0" />
+              <span className="text-foreground text-sm font-bold">
+                Browsing{" "}
+                {results[0] ? (
+                  <a
+                    href={results[0].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="max-w-2xl cursor-pointer truncate text-blue-500 hover:text-blue-600 hover:underline"
+                  >
+                    {formatUrl(results[0].url)}
+                  </a>
+                ) : (
+                  "a website"
+                )}
+                ...
+              </span>
+            </div>
+          );
+        }
+        if (results.length === 1) {
+          return <UrlResultDisplay key={callId} result={results[0]} input={input} />;
+        }
       }
 
       const failCount = results.filter((r) => r.error).length;
@@ -283,6 +387,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         <Accordion
           type="single"
           collapsible
+          value={isMainAccordionOpen ? callId : ""}
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
           className="text-foreground flex flex-row bg-transparent p-0 text-sm"
         >
@@ -296,12 +401,21 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <IconWorld
-                    className={cn(
-                      "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
-                      isMainAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
+                  {isStreaming ? (
+                    <Spinner
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                        isMainAccordionOpen && "scale-0 opacity-0",
+                      )}
+                    />
+                  ) : (
+                    <IconWorld
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                        isMainAccordionOpen && "scale-0 opacity-0",
+                      )}
+                    />
+                  )}
                   <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
@@ -315,15 +429,21 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate tabular-nums">
-                Browsed {results.length} URL{results.length !== 1 ? "s" : ""}
+                {isStreaming
+                  ? `Browsing ${results.length} URLs...`
+                  : `Browsed ${results.length} URL${results.length !== 1 ? "s" : ""}`}
                 {failCount > 0 && ` (${failCount} failed)`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="flex flex-col gap-1">
-                {results.map((result, index) => (
-                  <UrlResultDisplay key={index} result={result} input={input} />
-                ))}
+                {results.map((result, index) =>
+                  result.pending ? (
+                    <UrlPendingDisplay key={index} url={result.url} />
+                  ) : (
+                    <UrlResultDisplay key={index} result={result} input={input} />
+                  ),
+                )}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -335,79 +455,94 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       if (part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL) {
         const singleUrl = input?.urls?.[0];
 
-        let message: string | React.ReactNode = "Browsing cancelled";
         if (urlCount === 1 && singleUrl) {
-          message = (
-            <>
-              Browsing{" "}
-              <a
-                href={singleUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
-              >
-                {formatUrl(singleUrl)}
-              </a>{" "}
-              cancelled
-            </>
+          return (
+            <div key={callId} className="flex items-center gap-1">
+              <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+              <span className="text-muted-foreground text-sm font-bold">
+                Browsing{" "}
+                <a
+                  href={singleUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+                >
+                  {formatUrl(singleUrl)}
+                </a>{" "}
+                cancelled
+              </span>
+            </div>
           );
-        } else if (urlCount > 1) {
-          message = `Browsing ${urlCount} URLs cancelled`;
+        }
+
+        if (urlCount > 1) {
+          return (
+            <Accordion
+              type="single"
+              collapsible
+              value={isMainAccordionOpen ? callId : ""}
+              onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
+              className="text-foreground flex flex-row bg-transparent p-0 text-sm"
+            >
+              <AccordionItem
+                value={callId}
+                className={cn(
+                  "group/url-content-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
+                  isMainAccordionOpen && "border border-b! p-2",
+                )}
+              >
+                <AccordionTrigger
+                  icon={
+                    <div className="relative">
+                      <IconCircleX
+                        className={cn(
+                          "text-muted-foreground absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
+                          isMainAccordionOpen && "scale-0 opacity-0",
+                        )}
+                      />
+                      <IconChevronDown
+                        className={cn(
+                          "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
+                          isMainAccordionOpen && "scale-100 opacity-100",
+                        )}
+                      />
+                    </div>
+                  }
+                  iconPosition="left"
+                  shouldRotateIcon={true}
+                  className="justify-start gap-1 p-0 font-bold hover:no-underline"
+                >
+                  <span className="text-muted-foreground max-w-2xl truncate tabular-nums">
+                    Browsing {urlCount} URLs cancelled
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="p-0 pt-2">
+                  <div className="flex flex-col gap-1">
+                    {input?.urls?.map((url, index) => (
+                      <UrlCancelledDisplay key={index} url={url} />
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          );
         }
 
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{message}</span>
+            <span className="text-muted-foreground text-sm font-bold">Browsing cancelled</span>
           </div>
         );
       }
       return (
-        <Accordion
-          type="single"
-          collapsible
-          onValueChange={(value) => setIsErrorAccordionOpen(value === callId)}
-          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
-        >
-          <AccordionItem
-            value={callId}
-            className={cn(
-              "group/url-content-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
-              isErrorAccordionOpen && "border border-b! p-2",
-            )}
-          >
-            <AccordionTrigger
-              icon={
-                <div className="relative">
-                  <IconCircleX
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-0 group-hover/url-content-accordion:opacity-0",
-                      isErrorAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
-                  <IconChevronDown
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
-                      isErrorAccordionOpen && "scale-100 opacity-100",
-                    )}
-                  />
-                </div>
-              }
-              iconPosition="left"
-              shouldRotateIcon={true}
-              className="justify-start gap-1 p-0 font-bold hover:no-underline"
-            >
-              <span className="text-destructive max-w-2xl truncate">
-                Error fetching URL content
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
-              <div className="text-destructive/80 text-sm font-normal">
-                {part?.errorText || "Unknown error"}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <ToolErrorAccordion
+          callId={callId}
+          errorText={part.errorText}
+          isOpen={isErrorAccordionOpen}
+          onOpenChange={setIsErrorAccordionOpen}
+          title="Error fetching URL content"
+        />
       );
     }
 

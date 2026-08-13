@@ -92,13 +92,14 @@ export const MessagePartReasoning = ({
         <AccordionContent
           className={cn(
             "max-h-96 max-w-full overflow-auto p-0 pt-2 text-base",
-            shouldRenderMarkdown && "prose dark:prose-invert prose-sm prose-neutral",
+            shouldRenderMarkdown &&
+              "prose dark:prose-invert prose-sm prose-neutral prose-quoteless",
           )}
         >
           {shouldUsePerformantRenderer ? (
             <PerformantMarkdown content={text} />
           ) : shouldRenderMarkdown ? (
-            <MemoizedMarkdown id={id} content={text} messageRole="assistant" />
+            <MemoizedMarkdown id={id} content={text} messageRole="assistant" simpleCodeBlocks />
           ) : (
             <pre
               className="text-base wrap-break-word whitespace-pre-wrap"

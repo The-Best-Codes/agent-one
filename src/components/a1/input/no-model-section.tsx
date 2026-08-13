@@ -13,7 +13,7 @@ import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 export const MainInputNoModelSection = () => {
   const { hasAvailableModels } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
-  const { user, customerState, billingLoading, billingError } = useWebAuth();
+  const { user, isLoading, customerState, billingLoading, billingError } = useWebAuth();
   const { chatId } = useParams();
   const usageSummary = getBillingUsageSummary(customerState);
   const isProvisioning =
@@ -22,19 +22,24 @@ export const MainInputNoModelSection = () => {
     !billingError &&
     isAgentOneAccountProvisioning(usageSummary);
 
-  if (isApiKeysLoading || hasAvailableModels || billingLoading || isProvisioning) {
+  if (isApiKeysLoading || isLoading || hasAvailableModels || billingLoading || isProvisioning) {
     return null;
   }
 
   const settingsPath = chatId
-    ? `/settings?tab=providers&chatId=${chatId}`
-    : "/settings?tab=providers";
+    ? `/settings?tab=providers&chatId=${chatId}#setting-built-in-providers`
+    : "/settings?tab=providers#setting-built-in-providers";
 
   return (
     <div className="bg-muted/50 border-muted-foreground/20 text-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none border p-2 md:mb-2 md:rounded-md">
       <div className="flex max-h-24 w-full flex-col items-start overflow-auto">
         <span className="text-lg font-bold">No Models Available</span>
-        <span className="text-base">Configure a provider in settings to start chatting.</span>
+        <span className="text-base">
+          <Link to="/settings?tab=account#setting-hide-agentone-models" className="underline">
+            Sign in and ensure "Hide AgentOne models" is disabled,
+          </Link>{" "}
+          or configure a provider in settings to start chatting.
+        </span>
       </div>
       <div className="flex flex-row items-center gap-2">
         <Button asChild variant="default">

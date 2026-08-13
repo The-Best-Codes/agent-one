@@ -1,5 +1,3 @@
-use std::sync::atomic::{AtomicU64, Ordering};
-
 use tauri::{Emitter, Manager};
 
 mod keyring;
@@ -7,15 +5,10 @@ mod mcp_auth;
 mod tools;
 mod utils;
 mod voice_assistant;
-mod window_chat;
-
-// Global counter for unique window IDs
-static WINDOW_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder =
-        tauri::Builder::default().plugin(tauri_plugin_global_shortcut::Builder::new().build());
+    let mut builder = tauri::Builder::default();
 
     // Single instance plugin should be the first plugin registered
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -37,23 +30,17 @@ pub fn run() {
                 }
             }
 
-            // Generate a unique window ID using atomic counter
-            let window_id = WINDOW_COUNTER.fetch_add(1, Ordering::SeqCst);
-            let window_label = format!("a1-instance-{}", window_id);
-
-            match tauri::WebviewWindowBuilder::new(
-                app,
-                &window_label,
-                tauri::WebviewUrl::App("index.html".into()),
-            )
-            .title("AgentOne")
-            .inner_size(800.0, 600.0)
-            .build()
-            {
-                Ok(_) => println!("Created new window: {}", window_label),
-                Err(e) => eprintln!("Failed to create new window: {}", e),
+            if let Some(main_window) = app.get_webview_window("main") {
+                let _ = main_window.unminimize();
+                let _ = main_window.show();
+                let _ = main_window.set_focus();
             }
         }));
+    }
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
     }
 
     let mut builder = builder
@@ -150,12 +137,10 @@ pub fn run() {
             app.manage(mcp_auth::AuthCancellationState(std::sync::Arc::new(
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
             )));
-            app.manage(window_chat::WindowChatState::default());
             app.manage(voice_assistant::VoiceAssistantState::default());
 
             Ok(())
         })
-        .on_window_event(window_chat::handle_window_event)
         .invoke_handler({
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
             {
@@ -175,8 +160,6 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
-                    window_chat::sync_current_window_chat,
-                    window_chat::check_chat_open_elsewhere,
                     voice_assistant::start_voice_assistant_test,
                     voice_assistant::stop_voice_assistant_test,
                     voice_assistant::get_voice_assistant_test_state,
@@ -197,8 +180,6 @@ pub fn run() {
                     mcp_auth::mcp_get_token,
                     mcp_auth::mcp_logout,
                     mcp_auth::mcp_check_oauth_support,
-                    window_chat::sync_current_window_chat,
-                    window_chat::check_chat_open_elsewhere,
                 ]
             }
         })

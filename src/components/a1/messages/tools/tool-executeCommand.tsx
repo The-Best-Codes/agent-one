@@ -11,6 +11,11 @@ import type { ToolUIPart } from "ai";
 import { AnsiHtml } from "fancy-ansi/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -19,7 +24,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import {
   getExecuteCommandLiveState,
@@ -30,6 +35,8 @@ import {
 } from "@/lib/ai/tools/executeCommand";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+
+import { ToolErrorAccordion } from "./tool-error-accordion";
 
 interface ExecuteCommandInput {
   command: string;
@@ -112,8 +119,8 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
   return (
     <TooltipProvider>
       <div className="flex items-center gap-0.5">
-        <Tooltip>
-          <TooltipTrigger asChild>
+        <AdaptiveTooltip>
+          <AdaptiveTooltipTrigger asChild>
             <Button
               size="icon-xs"
               variant="destructive"
@@ -125,12 +132,12 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
             >
               <IconPlayerStop />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">Stop command</TooltipContent>
-        </Tooltip>
+          </AdaptiveTooltipTrigger>
+          <AdaptiveTooltipContent side="top">Stop command</AdaptiveTooltipContent>
+        </AdaptiveTooltip>
         {showSkip && (
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <Button
                 size="icon-xs"
                 variant="secondary"
@@ -142,11 +149,11 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
               >
                 <IconPlayerSkipForward />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="top">
               Skip command (leave it running in the background)
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         )}
       </div>
     </TooltipProvider>
@@ -159,7 +166,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
-  const [longRunningNow, setLongRunningNow] = useState(() => Date.now());
+  const [showLongRunningStop, setShowLongRunningStop] = useState(false);
 
   const liveState = useSyncExternalStore(
     (listener) => subscribeExecuteCommandLiveState(callId, listener),
@@ -167,31 +174,31 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
     () => getExecuteCommandLiveState(callId),
   );
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!liveState || liveState.status === "completed") {
+      setShowLongRunningStop(false);
       return;
     }
 
     const elapsed = Date.now() - liveState.startedAt;
     if (elapsed >= 1000) {
+      setShowLongRunningStop(true);
       return;
     }
 
+    setShowLongRunningStop(false);
+
     const timeout = window.setTimeout(() => {
-      setLongRunningNow(Date.now());
+      setShowLongRunningStop(true);
     }, 1000 - elapsed);
 
     return () => {
       window.clearTimeout(timeout);
     };
   }, [liveState]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  const showLongRunningStop = Boolean(
-    liveState &&
-    liveState.status !== "completed" &&
-    !liveState.timedOut &&
-    longRunningNow - liveState.startedAt >= 1000,
-  );
   const showLongRunningSkip =
     showLongRunningStop && liveState?.status === "running" && !liveState?.skipRequested;
 
@@ -252,7 +259,15 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       );
 
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">Command denied</span>
+          </div>
+        );
+      }
       return (
         <div
           key={callId}
@@ -267,6 +282,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           )}
         </div>
       );
+    }
 
     case "output-available": {
       const outputFromPart = (part.output as ExecuteCommandOutput | undefined) ?? EMPTY_OUTPUT;
@@ -292,20 +308,25 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           type="single"
           collapsible
           onValueChange={(value) => setIsMainAccordionOpen(value === callId)}
-          className="text-foreground flex w-full max-w-3xl flex-row bg-transparent p-0 text-sm"
+          className="text-foreground flex max-w-3xl flex-row bg-transparent p-0 text-sm"
         >
           <AccordionItem
             value={callId}
             className={cn(
-              "group/exec-accordion border-border w-full rounded-md border-0 transition-[padding] duration-200",
-              isMainAccordionOpen && "border border-b! p-2",
+              "group/exec-accordion border-border rounded-md border-0 transition-[padding] duration-200",
+              isMainAccordionOpen && "border border-b! w-full p-2",
             )}
           >
             <AccordionTrigger
               icon={
                 <div className="relative">
                   {showSpinnerIcon ? (
-                    <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
+                    <Spinner
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
+                        isMainAccordionOpen && "scale-0 opacity-0",
+                      )}
+                    />
                   ) : (
                     <IconTerminal2
                       className={cn(
@@ -314,14 +335,12 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                       )}
                     />
                   )}
-                  {!showSpinnerIcon && (
-                    <IconChevronDown
-                      className={cn(
-                        "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
-                        isMainAccordionOpen && "scale-100 opacity-100",
-                      )}
-                    />
-                  )}
+                  <IconChevronDown
+                    className={cn(
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
+                      isMainAccordionOpen && "scale-100 opacity-100",
+                    )}
+                  />
                 </div>
               }
               iconPosition="left"
@@ -353,7 +372,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                 <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
               )}
             </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
+            <AccordionContent className="w-full p-0 pt-2">
               <div className="flex flex-col gap-2">
                 <TerminalDisplay command={command} output={output} />
               </div>
@@ -425,49 +444,13 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         );
       }
       return (
-        <Accordion
-          type="single"
-          collapsible
-          onValueChange={(value) => setIsErrorAccordionOpen(value === callId)}
-          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
-        >
-          <AccordionItem
-            value={callId}
-            className={cn(
-              "group/exec-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
-              isErrorAccordionOpen && "border border-b! p-2",
-            )}
-          >
-            <AccordionTrigger
-              icon={
-                <div className="relative">
-                  <IconCircleX
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-0 group-hover/exec-accordion:opacity-0",
-                      isErrorAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
-                  <IconChevronDown
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
-                      isErrorAccordionOpen && "scale-100 opacity-100",
-                    )}
-                  />
-                </div>
-              }
-              iconPosition="left"
-              shouldRotateIcon={true}
-              className="justify-start gap-1 p-0 font-bold hover:no-underline"
-            >
-              <span className="text-destructive max-w-2xl truncate">Error running command</span>
-            </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
-              <div className="text-destructive/80 text-sm font-normal">
-                {part?.errorText || "Unknown error"}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <ToolErrorAccordion
+          callId={callId}
+          errorText={part.errorText}
+          isOpen={isErrorAccordionOpen}
+          onOpenChange={setIsErrorAccordionOpen}
+          title="Error running command"
+        />
       );
 
     default:

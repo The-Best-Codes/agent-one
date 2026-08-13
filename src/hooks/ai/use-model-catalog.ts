@@ -3,12 +3,12 @@ import { useAtomValue } from "jotai";
 import { atom } from "jotai";
 import { useMemo } from "react";
 
-import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
-import {
-  getBillingUsageSummary,
-  hasAgentOneCreditsAvailable,
-} from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
+import {
+  modelDirectoryDataAtom,
+  type ModelDirectoryData,
+  type ModelRecord,
+} from "@/lib/ai/models/model-directory";
 import { createCustomProvider } from "@/lib/ai/providers/custom-provider-factory";
 import { createLocalProvider } from "@/lib/ai/providers/local-provider-factory";
 import {
@@ -40,10 +40,16 @@ export interface ModelData {
   id: string;
   name: string;
   provider: string;
+  providerId: string;
   model: LanguageModel;
   supportsToolUse: boolean;
+  supportsImageInput: boolean;
+  supportsAttachments: boolean;
+  supportsReasoning: boolean;
   contextWindow?: number;
 }
+
+export type ToolBehavior = "default" | "ask" | "yolo" | "disable";
 
 export interface ModelConfig {
   temperature?: number;
@@ -54,6 +60,7 @@ export interface ModelConfig {
   frequencyPenalty?: number;
   presencePenalty?: number;
   seed?: number;
+  toolBehavior?: ToolBehavior;
 }
 
 export const DEFAULT_MODEL_CONFIG: ModelConfig = {
@@ -65,7 +72,12 @@ export const DEFAULT_MODEL_CONFIG: ModelConfig = {
   frequencyPenalty: undefined,
   presencePenalty: undefined,
   seed: undefined,
+  toolBehavior: "default",
 };
+
+export function getToolBehavior(modelConfig: ModelConfig): ToolBehavior {
+  return modelConfig.toolBehavior ?? "default";
+}
 
 export const DEFAULT_CHAT_MODEL_ID = "groq-moonshotai/kimi-k2-instruct-0905";
 
@@ -87,7 +99,10 @@ const PREFERRED_MODELS_BY_PROVIDER: Partial<Record<ProviderId, string[]>> = {
   "fireworks-ai": ["fireworks-ai-accounts/fireworks/models/kimi-k2p5"],
 };
 
-function getProviderModels(providerId: string): ModelRecord[] {
+function getProviderModels(
+  modelDirectoryData: ModelDirectoryData,
+  providerId: string,
+): ModelRecord[] {
   const provider = modelDirectoryData[providerId];
   if (!provider) {
     return [];
@@ -101,6 +116,8 @@ function toModelRecord(model: ProviderModelMetadata): ModelRecord {
     id: model.id,
     name: model.name,
     features: {
+      attachment: model.supportsAttachments,
+      reasoning: model.supportsReasoning,
       tool_call: model.supportsTools,
     },
     limit: {
@@ -108,6 +125,11 @@ function toModelRecord(model: ProviderModelMetadata): ModelRecord {
       output: model.maxOutputTokens,
     },
     modalities: {
+      input: [
+        ...(model.supportsText ? (["text"] as const) : []),
+        ...(model.supportsImageInput ? (["image"] as const) : []),
+        ...(model.supportsAttachments ? (["file"] as const) : []),
+      ],
       output: [
         ...(model.supportsText ? (["text"] as const) : []),
         ...(model.supportsImages ? (["image"] as const) : []),
@@ -117,6 +139,7 @@ function toModelRecord(model: ProviderModelMetadata): ModelRecord {
 }
 
 function mapDirectoryModels(
+  modelDirectoryData: ModelDirectoryData,
   providerId: string,
   providerName: string,
   createModel: (modelId: string) => LanguageModel,
@@ -124,13 +147,23 @@ function mapDirectoryModels(
   filter?: (model: ModelRecord) => boolean,
 ): ModelData[] {
   const modelMap = new Map(
-    getProviderModels(providerId)
+    getProviderModels(modelDirectoryData, providerId)
       .map(mapDirectoryModelToMetadata)
       .map((model) => [model.id, model] as const),
   );
 
   for (const override of overrides) {
-    modelMap.set(override.id, normalizeProviderModelMetadata(override));
+    const directoryModel = modelMap.get(override.id);
+    modelMap.set(
+      override.id,
+      normalizeProviderModelMetadata({
+        ...directoryModel,
+        ...override,
+        supportsImageInput: override.supportsImageInput ?? directoryModel?.supportsImageInput,
+        supportsAttachments: override.supportsAttachments ?? directoryModel?.supportsAttachments,
+        supportsReasoning: override.supportsReasoning ?? directoryModel?.supportsReasoning,
+      }),
+    );
   }
 
   const models = Array.from(modelMap.values());
@@ -140,8 +173,12 @@ function mapDirectoryModels(
     id: `${providerId}-${model.id}`,
     name: model.name ?? model.id,
     provider: providerName,
+    providerId,
     model: createModel(model.id),
     supportsToolUse: model.supportsTools,
+    supportsImageInput: model.supportsImageInput ?? false,
+    supportsAttachments: model.supportsAttachments ?? false,
+    supportsReasoning: model.supportsReasoning ?? false,
     contextWindow: model.contextWindow,
   }));
 }
@@ -160,8 +197,12 @@ function mapCustomProviderModels(
       id: `custom-${provider.id}-${model.id}`,
       name: model.name || model.id,
       provider: provider.name,
+      providerId: provider.id,
       model: instance.languageModel(model.id),
       supportsToolUse: model.supportsTools,
+      supportsImageInput: model.supportsImageInput ?? false,
+      supportsAttachments: model.supportsAttachments ?? false,
+      supportsReasoning: model.supportsReasoning ?? false,
       contextWindow: model.contextWindow,
     }));
 }
@@ -179,8 +220,12 @@ function mapLocalProviderModels(
       id: `local-${provider.id}-${model.id}`,
       name: model.name || model.id,
       provider: provider.name,
+      providerId: provider.id,
       model: instance.languageModel(model.id),
       supportsToolUse: model.supportsTools,
+      supportsImageInput: model.supportsImageInput ?? false,
+      supportsAttachments: model.supportsAttachments ?? false,
+      supportsReasoning: model.supportsReasoning ?? false,
       contextWindow: model.contextWindow,
     }));
 }
@@ -224,10 +269,12 @@ const availableModelsAtom = atom((get) => {
   const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
+  const modelDirectoryData = get(modelDirectoryDataAtom);
   const providers = get(providerInstancesAtom);
 
   const builtInModels = PROVIDER_REGISTRY.flatMap((provider) =>
     mapDirectoryModels(
+      modelDirectoryData,
       provider.id,
       provider.label,
       providers[provider.id].languageModel,
@@ -252,10 +299,12 @@ const availableChatModelsAtom = atom((get) => {
   const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
+  const modelDirectoryData = get(modelDirectoryDataAtom);
   const providers = get(providerInstancesAtom);
 
   const builtInModels = PROVIDER_REGISTRY.flatMap((provider) =>
     mapDirectoryModels(
+      modelDirectoryData,
       provider.id,
       provider.label,
       providers[provider.id].languageModel,
@@ -285,12 +334,14 @@ const availableImageModelsAtom = atom((get) => {
   const localProviders = get(normalizedLocalProvidersAtom);
   const customProviders = get(normalizedCustomProvidersAtom);
   const customProviderApiKeys = get(customProviderApiKeysAtom);
+  const modelDirectoryData = get(modelDirectoryDataAtom);
   const providers = get(providerInstancesAtom);
 
   const builtInModels = PROVIDER_REGISTRY.filter(
     (provider) => provider.id === "google" || provider.id === "openrouter",
   ).flatMap((provider) =>
     mapDirectoryModels(
+      modelDirectoryData,
       provider.id,
       provider.label,
       providers[provider.id].languageModel,
@@ -352,13 +403,9 @@ export function useModelCatalog() {
   const AVAILABLE_IMAGE_MODELS = useAtomValue(availableImageModelsAtom);
   const providerHasApiKey = useAtomValue(providerHasApiKeyAtom);
   const providerIsAvailable = useAtomValue(providerIsAvailableAtom);
-  const { user, customerState, billingLoading, billingError } = useWebAuth();
+  const { user, isLoading } = useWebAuth();
 
-  const usageSummary = useMemo(() => getBillingUsageSummary(customerState), [customerState]);
-  const shouldHideUnavailableAgentOneModels =
-    Boolean(user) &&
-    !billingError &&
-    (billingLoading || !hasAgentOneCreditsAvailable(usageSummary));
+  const shouldHideUnavailableAgentOneModels = isLoading || !user;
 
   const AVAILABLE_ENABLED_CHAT_MODELS = useMemo(
     () =>

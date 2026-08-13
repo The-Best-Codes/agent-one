@@ -118,7 +118,7 @@ The root ``meson.build`` parts should be something like this:
   }, section: 'Development')
 
 
-The root ``meson-options.txt`` should have something like::
+The root ``meson.options`` should have something like::
 
   option('profile', type: 'combo', choices: ['default', 'development'], value: 'default')
 
@@ -365,7 +365,7 @@ desktop file to fix the window class.
 Additional tools
 ----------------
 
-- `Electron Builder <https://www.electron.build/flatpak.html>`_
+- `Electron Builder <https://www.electron.build/flatpak/>`_
   supports exporting single file Flatpak bundles. Please also see the
   Electron application packaging guide :doc:`electron`.
 

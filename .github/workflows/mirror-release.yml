@@ -21,7 +21,7 @@ jobs:
       TARGET_REPO: AgentOne-Dev/agent-one-public
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Resolve release tag
         id: tag
@@ -52,11 +52,41 @@ jobs:
           echo "Downloaded assets:"
           ls -lh /tmp/release-assets/
 
-      - name: Rewrite latest.json repo references
+      - name: Rewrite latest.json asset URLs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -f /tmp/release-assets/latest.json ]; then
-            echo "Rewriting repo references in latest.json..."
-            sed -i "s|$SOURCE_REPO|$TARGET_REPO|g" /tmp/release-assets/latest.json
+            TAG="${{ steps.tag.outputs.tag }}"
+            echo "Rewriting asset URLs in latest.json..."
+
+            gh api "repos/$SOURCE_REPO/releases/tags/$TAG" > /tmp/source-release.json
+
+            jq \
+              --arg source_repo "$SOURCE_REPO" \
+              --arg target_repo "$TARGET_REPO" \
+              --slurpfile release /tmp/source-release.json \
+              '($release[0].assets | map({
+                key: .url,
+                value: (.browser_download_url | sub($source_repo; $target_repo))
+              }) | from_entries) as $asset_urls
+              | .platforms |= with_entries(
+                  .value.url = ($asset_urls[.value.url] // (.value.url | sub($source_repo; $target_repo)))
+                )' \
+              /tmp/release-assets/latest.json > /tmp/latest.json
+
+            mv /tmp/latest.json /tmp/release-assets/latest.json
+
+            if jq -e --arg target_repo "$TARGET_REPO" '
+              [.platforms[].url]
+              | all(startswith("https://github.com/" + $target_repo + "/releases/download/"))
+            ' /tmp/release-assets/latest.json > /dev/null; then
+              echo "All updater URLs point to mirrored release downloads."
+            else
+              echo "ERROR: latest.json contains an unresolved asset URL"
+              exit 1
+            fi
+
             echo "Updated latest.json:"
             cat /tmp/release-assets/latest.json
           else
@@ -119,3 +149,18 @@ jobs:
             --clobber
 
           echo "Successfully mirrored $TAG to $TARGET_REPO"
+
+      - name: Revalidate download page and release cache
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            "https://www.agent-one.dev/api/revalidate" \
+            -H "Authorization: Bearer ${{ secrets.REVALIDATION_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d '{"paths":["/download"],"tags":["latest-release"]}')
+
+          if [ "$RESPONSE" = "200" ]; then
+            echo "Successfully revalidated website download page."
+          else
+            echo "Revalidation failed with HTTP $RESPONSE"
+            exit 1
+          fi

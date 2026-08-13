@@ -1,9 +1,11 @@
 import { atom, getDefaultStore } from "jotai";
 import { atomWithStorage, RESET } from "jotai/utils";
 
+import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
 import type { DefaultSettings } from "@/lib/settings/types";
 import {
   type AnalyticsIdentityOption,
+  type ChatBackgroundSettings,
   type ChatSortOption,
   type ColorThemeOption,
   DEFAULT_SETTINGS,
@@ -16,6 +18,7 @@ import {
   type RoundnessOption,
   type StopButtonBehaviorOption,
   type SubmitKeyOption,
+  type TtsSettings,
   type TextScaleOption,
   type ThemeOption,
   type TitleGenerationSettings,
@@ -118,6 +121,11 @@ export const smoothStreamEnabledAtom = createSettingAtom(
   DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED,
 );
 
+export const extractReasoningEnabledAtom = createSettingAtom(
+  "EXTRACT_REASONING_ENABLED",
+  DEFAULT_SETTINGS.EXTRACT_REASONING_ENABLED,
+);
+
 export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
@@ -131,6 +139,11 @@ export const stopButtonBehaviorAtom = createSettingAtom<StopButtonBehaviorOption
 export const showChatStatusIndicatorAtom = createSettingAtom(
   "SHOW_CHAT_STATUS_INDICATOR",
   DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR,
+);
+
+export const showMessagePreviewRailAtom = createSettingAtom(
+  "SHOW_MESSAGE_PREVIEW_RAIL",
+  DEFAULT_SETTINGS.SHOW_MESSAGE_PREVIEW_RAIL,
 );
 
 export const themeAtom = createSettingAtom<ThemeOption>("THEME", DEFAULT_SETTINGS.THEME);
@@ -196,6 +209,8 @@ export const systemPromptAppendixAtom = createSettingAtom(
   DEFAULT_SETTINGS.SYSTEM_PROMPT_APPENDIX,
 );
 
+export const memoryAtom = createSettingAtom<string[]>("MEMORY", DEFAULT_SETTINGS.MEMORY);
+
 export const showMessageActionRowAtom = createSettingAtom<MessageActionRowOption>(
   "SHOW_MESSAGE_ACTION_ROW",
   DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW,
@@ -206,6 +221,13 @@ export const chatSortAtom = createSettingAtom<ChatSortOption>(
   DEFAULT_SETTINGS.CHAT_SORT,
 );
 
+export const chatBackgroundAtom = createSettingAtom<ChatBackgroundSettings>(
+  "CHAT_BACKGROUND",
+  DEFAULT_SETTINGS.CHAT_BACKGROUND,
+);
+
+export const ttsSettingsAtom = createSettingAtom<TtsSettings>("TTS", DEFAULT_SETTINGS.TTS);
+
 export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(
   "TITLE_GENERATION",
   DEFAULT_SETTINGS.TITLE_GENERATION,
@@ -214,4 +236,24 @@ export const titleGenerationAtom = createSettingAtom<TitleGenerationSettings>(
 export const collapsedSidebarLayoutAtom = createSettingAtom<CollapsedSidebarLayoutOption>(
   "COLLAPSED_SIDEBAR_LAYOUT",
   DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT,
+);
+
+export const keyboardShortcutsEnabledInInputsAtom = createSettingAtom(
+  "KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS",
+  DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS,
+);
+
+export const keyboardShortcutsAtom = createSettingAtom<KeyboardShortcutSettings>(
+  "KEYBOARD_SHORTCUTS",
+  DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS,
+);
+
+export const remendEnabledAtom = createSettingAtom(
+  "REMEND_ENABLED",
+  DEFAULT_SETTINGS.REMEND_ENABLED,
+);
+
+export const showChatToBottomButtonAtom = createSettingAtom(
+  "SHOW_CHAT_TO_BOTTOM_BUTTON",
+  DEFAULT_SETTINGS.SHOW_CHAT_TO_BOTTOM_BUTTON,
 );

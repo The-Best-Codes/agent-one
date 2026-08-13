@@ -12,6 +12,7 @@ export const MainInputProvisioningSection = () => {
   const usageSummary = getBillingUsageSummary(customerState);
   const showProvisioningAlert =
     Boolean(user) &&
+    customerState !== null &&
     !billingLoading &&
     !billingError &&
     isAgentOneAccountProvisioning(usageSummary);

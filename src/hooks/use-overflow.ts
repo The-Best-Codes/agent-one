@@ -34,12 +34,14 @@ export function useOverflow<T extends HTMLElement>(
       setIsOverflowing((current) => (current === nextIsOverflowing ? current : nextIsOverflowing));
     };
 
-    let frameId: number | null = null;
+    let pendingCheck = false;
     const scheduleCheck = () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-      frameId = window.requestAnimationFrame(checkOverflow);
+      if (pendingCheck) return;
+      pendingCheck = true;
+      queueMicrotask(() => {
+        pendingCheck = false;
+        checkOverflow();
+      });
     };
 
     checkOverflow();
@@ -57,10 +59,6 @@ export function useOverflow<T extends HTMLElement>(
     });
 
     return () => {
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };

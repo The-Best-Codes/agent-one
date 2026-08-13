@@ -1,7 +1,7 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,9 +12,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useOverflow } from "@/hooks/use-overflow";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { cn } from "@/lib/utils";
 
 import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
@@ -22,9 +23,11 @@ import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const rootRef = useRef<HTMLElement>(null);
 
   const tabParam = searchParams.get("tab");
   const displayedSection = useMemo(() => {
@@ -42,6 +45,11 @@ export default function SettingsRoute() {
     }
   }, [tabParam, activeSection]);
 
+  const fillHeight = useMemo(
+    () => sections.find((section) => section.id === displayedSection)?.fillHeight === true,
+    [displayedSection],
+  );
+
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
     if (chatId) {
@@ -51,12 +59,51 @@ export default function SettingsRoute() {
     }
   };
 
-  const contentRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const isSidebarOverflowing = useOverflow(sidebarRef);
+  const previousSectionRef = useRef(displayedSection);
 
   useEffect(() => {
-    const viewport = contentRef.current?.closest("[data-slot='scroll-area-viewport']");
-    viewport?.scrollTo({ top: 0 });
-  }, [displayedSection]);
+    const sectionChanged = previousSectionRef.current !== displayedSection;
+
+    previousSectionRef.current = displayedSection;
+
+    if (location.hash) {
+      const targetId = location.hash.slice(1);
+      let frameId = 0;
+      let attempts = 0;
+
+      const scrollToHashTarget = () => {
+        const target = document.getElementById(targetId);
+
+        if (target) {
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: target.getBoundingClientRect().height > window.innerHeight ? "start" : "center",
+          });
+          return;
+        }
+
+        if (attempts < 10) {
+          attempts += 1;
+          frameId = window.requestAnimationFrame(scrollToHashTarget);
+        }
+      };
+
+      frameId = window.requestAnimationFrame(scrollToHashTarget);
+
+      return () => {
+        window.cancelAnimationFrame(frameId);
+      };
+    }
+
+    if (sectionChanged) {
+      rootRef.current?.scrollIntoView({ block: "start" });
+      window.requestAnimationFrame(() => {
+        rootRef.current?.scrollIntoView({ block: "start" });
+      });
+    }
+  }, [displayedSection, location.hash]);
 
   const handleSectionChange = (section: string) => {
     trackSettingsInteraction("navigation", "section_changed", { value: section });
@@ -70,7 +117,14 @@ export default function SettingsRoute() {
   };
 
   return (
-    <main role="main" className="bg-background min-h-screen">
+    <main
+      ref={rootRef}
+      role="main"
+      className={cn(
+        "bg-background min-h-svh pl-[calc(100vw-100%)]",
+        fillHeight && "flex h-svh min-h-0 flex-col overflow-hidden",
+      )}
+    >
       <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
@@ -78,7 +132,7 @@ export default function SettingsRoute() {
             variant="outline"
             size="sm"
             onClick={handleNavigateBack}
-            analytics={{ event: "settings_back_clicked", params: { source: "mobile_header" } }}
+            analytics={{ event: "settings_back_clicked", params: { ui_location: "mobile_header" } }}
           >
             <IconArrowLeft data-icon="inline-start" />
             Back
@@ -89,14 +143,17 @@ export default function SettingsRoute() {
                 variant="outline"
                 size="icon"
                 aria-label="Open settings menu"
-                analytics={{ event: "settings_menu_opened", params: { source: "mobile_header" } }}
+                analytics={{
+                  event: "settings_menu_opened",
+                  params: { ui_location: "mobile_header" },
+                }}
               >
                 <IconList />
               </Button>
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle className="mb-2">Settings</DrawerTitle>
+                <DrawerTitle className="mb-2">Setting Categories</DrawerTitle>
                 <DrawerDescription className="sr-only">List of setting sections</DrawerDescription>
                 <SettingsSidebar
                   activeSection={displayedSection}
@@ -111,10 +168,22 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl p-4 md:flex md:h-screen md:flex-col md:p-6">
-        <div className="flex flex-col gap-6 md:min-h-0 md:flex-1 md:flex-row">
-          <ScrollArea type="always" className="hidden w-48 shrink-0 md:flex md:flex-col lg:w-64">
-            <div className="flex flex-col gap-2">
+      <div
+        className={cn(
+          "mx-auto w-full max-w-5xl p-4 md:flex md:flex-col md:p-6",
+          fillHeight && "flex min-h-0 flex-1 flex-col md:h-full md:min-h-0",
+        )}
+      >
+        <div className={cn("flex flex-col gap-6 md:flex-row", fillHeight && "min-h-0 flex-1")}>
+          <div
+            ref={sidebarRef}
+            className={cn(
+              "hidden w-48 shrink-0 md:flex md:flex-col lg:w-64",
+              fillHeight ? "overflow-auto" : "md:sticky md:top-6 md:self-start",
+              fillHeight && isSidebarOverflowing && "pr-2",
+            )}
+          >
+            <div className="flex flex-col gap-2 pl-0.5">
               <div className="mb-2">
                 <Button
                   variant="outline"
@@ -122,7 +191,7 @@ export default function SettingsRoute() {
                   className="w-full"
                   analytics={{
                     event: "settings_back_clicked",
-                    params: { source: "desktop_sidebar" },
+                    params: { ui_location: "desktop_sidebar" },
                   }}
                 >
                   <IconArrowLeft data-icon="inline-start" />
@@ -134,18 +203,32 @@ export default function SettingsRoute() {
                 onSectionChange={handleSectionChange}
               />
             </div>
-          </ScrollArea>
+          </div>
 
-          <ScrollArea type="always" className="-m-0.5 flex-1 md:min-h-0" viewportClassName="p-0.5">
-            <div
-              ref={contentRef}
-              role="tabpanel"
-              tabIndex={0}
-              className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
-            >
-              <SettingsContent activeSection={displayedSection} />
+          {fillHeight ? (
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+              <div
+                role="tabpanel"
+                tabIndex={0}
+                className={cn(
+                  "focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1",
+                  "flex min-h-0 min-w-0 flex-1 flex-col",
+                )}
+              >
+                <SettingsContent activeSection={displayedSection} fillHeight />
+              </div>
             </div>
-          </ScrollArea>
+          ) : (
+            <div className="min-w-0 flex-1">
+              <div
+                role="tabpanel"
+                tabIndex={0}
+                className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
+              >
+                <SettingsContent activeSection={displayedSection} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

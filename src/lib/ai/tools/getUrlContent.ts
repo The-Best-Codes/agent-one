@@ -18,24 +18,20 @@ interface UrlContentResponse {
   truncated: boolean;
 }
 
-type SuccessResult = {
+export interface UrlResult {
   url: string;
   title?: string;
-  content: string;
-  format: string;
-  length: number;
-  truncated: boolean;
-};
+  content?: string;
+  format?: string;
+  length?: number;
+  truncated?: boolean;
+  error?: string;
+  pending?: boolean;
+}
 
-type ErrorResult = {
-  error: string;
-  url: string;
-};
-
-type FetchResult = SuccessResult | ErrorResult;
-
-// TODO: Later, consider streaming the tools results to the UI as they come in:
-// https://ai-sdk.dev/docs/ai-sdk-core/tools-and-tool-calling#preliminary-tool-results
+export interface GetUrlContentOutput {
+  results: UrlResult[];
+}
 
 export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
   tool({
@@ -74,97 +70,107 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
           "Whether to use webview to avoid bot detection, not recommended unless bot detection issues repeatedly occur",
         ),
     }),
-    execute: async (input, { abortSignal }) => {
+    execute: async function* (input, { abortSignal }): AsyncGenerator<GetUrlContentOutput> {
       abortSignal?.throwIfAborted();
 
       const timeoutMs = (input.timeoutSeconds || 5) * 1000;
 
       logger.verbose("Executing getUrlContent tool with input:", input);
 
-      let timeoutId: NodeJS.Timeout | undefined = undefined;
+      const results: UrlResult[] = input.urls.map((url) => ({
+        url: fixUrl(url),
+        pending: true,
+      }));
 
-      const partialResults: FetchResult[] = Array.from({
-        length: input.urls.length,
-      });
+      yield { results: results.map((r) => ({ ...r })) };
 
-      const singleFetch = async (url: string, index: number): Promise<FetchResult> => {
-        const fixedUrl = fixUrl(url);
-        return raceWithAbort(
-          invoke<UrlContentResponse>("get_url_content", {
-            url: fixedUrl,
-            format: input.format,
-            maxLength: input.maxLength,
-            timeoutSeconds: input.timeoutSeconds,
-            useWebview: input.useWebview,
-          }),
-          abortSignal,
-        ).then((result) => {
-          logger.verbose("Fetched URL:", result);
-
-          const successResult: SuccessResult = {
-            url: result.url,
-            title: result.title,
-            content: result.content,
-            format: result.format,
-            length: result.length,
-            truncated: result.truncated,
-          };
-          partialResults[index] = successResult;
-          return successResult;
-        });
-      };
+      let timeoutId: NodeJS.Timeout | undefined;
 
       try {
         const fetchPromises = input.urls.map((url, index) =>
-          singleFetch(url, index).catch((error) => {
-            if (error instanceof Error && error.name === "AbortError") {
-              throw error;
-            }
-
-            return {
-              error: error instanceof Error ? error.message : String(error),
-              url,
-            };
-          }),
+          raceWithAbort(
+            invoke<UrlContentResponse>("get_url_content", {
+              url: fixUrl(url),
+              format: input.format,
+              maxLength: input.maxLength,
+              timeoutSeconds: input.timeoutSeconds,
+              useWebview: input.useWebview,
+            }),
+            abortSignal,
+          )
+            .then((result): { index: number; result: UrlResult } => {
+              logger.verbose("Fetched URL:", {
+                url: result.url,
+                title: result.title,
+                contentLength: result.content?.length,
+              });
+              return {
+                index,
+                result: {
+                  url: result.url,
+                  title: result.title,
+                  content: result.content,
+                  format: result.format,
+                  length: result.length,
+                  truncated: result.truncated,
+                },
+              };
+            })
+            .catch((error): { index: number; result: UrlResult } => {
+              return {
+                index,
+                result: {
+                  error: error instanceof Error ? error.message : String(error),
+                  url: fixUrl(url),
+                },
+              };
+            }),
         );
 
-        const timeoutPromise = new Promise<"timeout">((resolve) => {
+        const timeoutPromise = new Promise<{ timeout: true }>((resolve) => {
           timeoutId = setTimeout(() => {
             logger.error("Timeout reached:", timeoutMs);
-            resolve("timeout");
+            resolve({ timeout: true });
           }, timeoutMs);
         });
 
-        const raced = await Promise.race([Promise.all(fetchPromises), timeoutPromise]);
+        const pending = new Set(fetchPromises);
 
-        if (raced === "timeout") {
-          throw new Error("Operation timed out before the URLs could be fetched.");
+        while (pending.size > 0) {
+          const winner = await Promise.race([...pending, timeoutPromise]);
+
+          if ("timeout" in winner) {
+            for (let i = 0; i < results.length; i++) {
+              if (results[i].pending) {
+                results[i] = {
+                  url: results[i].url,
+                  error: "Operation timed out before this URL could be fetched.",
+                };
+              }
+            }
+            break;
+          }
+
+          pending.delete(fetchPromises[winner.index]);
+          results[winner.index] = winner.result;
+          yield { results: results.map((r) => ({ ...r })) };
         }
 
-        const finalResults: FetchResult[] = input.urls.map(
-          (url, index) =>
-            partialResults[index] ?? {
-              error: "Operation timed out before this URL could be fetched.",
-              url,
-            },
-        );
+        yield { results: results.map((r) => ({ ...r })) };
 
-        logger.verbose("Processed URL results:", finalResults);
+        abortSignal?.throwIfAborted();
 
-        if (finalResults.length > 0 && finalResults.every((r) => "error" in r)) {
-          const errorDetails = finalResults
-            .filter((r): r is ErrorResult => "error" in r && !!r.error)
+        const hasAnySuccess = results.some((r) => !r.error && !r.pending);
+        if (!hasAnySuccess) {
+          const errorDetails = results
+            .filter((r) => r.error)
             .map((r) => `${r.url}: ${r.error}`)
             .join(", ");
 
           throw new Error(
-            `${finalResults.length > 1 ? `All ${finalResults.length} URLs` : `URL`} failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
+            `${results.length > 1 ? `All ${results.length} URLs` : `URL`} failed to fetch. ${errorDetails ? `Details: ${errorDetails}` : "No specific error details available."}`,
           );
         }
-
-        return {
-          results: finalResults,
-        };
       } finally {
         if (timeoutId) clearTimeout(timeoutId);
       }

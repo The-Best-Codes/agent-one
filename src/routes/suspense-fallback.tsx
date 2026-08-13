@@ -5,8 +5,8 @@ export default function SuspenseFallback() {
       role="main"
       data-testid="main"
     >
-      <img src="/icon-dark-wide-padding.svg" alt="AgentOne" className="size-48" />
-      <div className="mt-2 h-1">
+      <img src="/icon-dark-raw.svg" alt="AgentOne" className="size-48 dark:invert" />
+      <div className="mt-6 h-1">
         {/* Placeholder to prevent layout shift after progress bar is hidden */}
       </div>
     </main>

@@ -4,7 +4,7 @@ import debounce from "lodash.debounce";
 import { authClient, SERVER_URL } from "@/lib/auth/auth-client";
 import { syncEnabledAtom } from "@/lib/jotai/atoms";
 import { getLogger } from "@/lib/logger";
-import type { DefaultSettings } from "@/lib/settings/types";
+import { DEFAULT_SETTINGS, type DefaultSettings } from "@/lib/settings/types";
 
 import { SETTING_PREFIX } from "../jotai/settings-atoms";
 
@@ -12,6 +12,8 @@ const logger = getLogger(import.meta.url);
 
 const TIMESTAMPS_LS_KEY = "agent-one-setting-timestamps";
 const DEBOUNCE_MS = 2000;
+const INITIAL_RETRY_MS = 2000;
+const MAX_RETRY_MS = 600_000;
 
 type SettingKey = keyof DefaultSettings;
 type TimestampMap = Partial<Record<SettingKey, number>>;
@@ -46,11 +48,17 @@ function readLocalSetting(key: SettingKey): unknown {
   return undefined;
 }
 
+function isDefaultSetting(key: SettingKey, value: unknown): boolean {
+  return JSON.stringify(value) === JSON.stringify(DEFAULT_SETTINGS[key]);
+}
+
 class SettingsSyncManager {
   private timestamps: TimestampMap;
   private dirtyKeys: Set<SettingKey> = new Set();
   private pullPromise: Promise<void> | null = null;
   private atomSetters = new Map<SettingKey, (value: unknown) => void>();
+  private pushRetryMs = INITIAL_RETRY_MS;
+  private retryTimeout: ReturnType<typeof setTimeout> | null = null;
 
   private debouncedPush = debounce(() => {
     void this.push();
@@ -64,8 +72,12 @@ class SettingsSyncManager {
     const store = getDefaultStore();
     store.sub(syncEnabledAtom, () => {
       if (store.get(syncEnabledAtom)) {
-        logger.verbose("Sync enabled, triggering pull");
+        logger.verbose("Sync enabled, pushing modified local settings and pulling remote settings");
+        this.queueModifiedSettings();
+        void this.push();
         void this.pull();
+      } else {
+        this.clearRetry();
       }
     });
   }
@@ -76,17 +88,61 @@ class SettingsSyncManager {
   }
 
   markDirty(key: SettingKey): void {
-    if (!getDefaultStore().get(syncEnabledAtom)) return;
-
     const now = Date.now();
     this.timestamps[key] = now;
     saveTimestamps(this.timestamps);
+
+    if (!getDefaultStore().get(syncEnabledAtom)) return;
 
     this.dirtyKeys.add(key);
     logger.verbose(
       `Marked key dirty: ${key} (timestamp: ${now}, total dirty: ${this.dirtyKeys.size})`,
     );
     this.debouncedPush();
+  }
+
+  private queueModifiedSettings(): void {
+    for (const key of Object.keys(DEFAULT_SETTINGS) as SettingKey[]) {
+      const value = readLocalSetting(key);
+      if (
+        value === undefined ||
+        (this.timestamps[key] === undefined && isDefaultSetting(key, value))
+      ) {
+        continue;
+      }
+
+      this.timestamps[key] ??= Date.now();
+      this.dirtyKeys.add(key);
+    }
+    saveTimestamps(this.timestamps);
+  }
+
+  private clearRetry(): void {
+    if (this.retryTimeout) {
+      clearTimeout(this.retryTimeout);
+      this.retryTimeout = null;
+    }
+    this.pushRetryMs = INITIAL_RETRY_MS;
+  }
+
+  private scheduleRetry(): void {
+    if (!getDefaultStore().get(syncEnabledAtom) || this.retryTimeout) return;
+
+    const delay = this.pushRetryMs;
+    this.pushRetryMs = Math.min(this.pushRetryMs * 2, MAX_RETRY_MS);
+    logger.verbose(`Scheduling settings sync retry in ${delay}ms`);
+    this.retryTimeout = setTimeout(() => {
+      this.retryTimeout = null;
+      void this.push();
+    }, delay);
+  }
+
+  syncNow(): void {
+    if (!getDefaultStore().get(syncEnabledAtom)) return;
+
+    this.queueModifiedSettings();
+    void this.push();
+    void this.pull();
   }
 
   private async push(): Promise<void> {
@@ -129,11 +185,12 @@ class SettingsSyncManager {
       }
 
       logger.verbose(`Push succeeded for ${payloadKeyCount} keys`);
+      this.clearRetry();
     } catch (error) {
       logger.warn("Failed to push settings to server:", error);
       for (const key of keys) this.dirtyKeys.add(key);
-      logger.verbose(`Re-queued ${keys.length} keys for retry, scheduling another push`);
-      this.debouncedPush();
+      logger.verbose(`Re-queued ${keys.length} keys for retry`);
+      this.scheduleRetry();
     }
   }
 

@@ -1,8 +1,22 @@
-import { IconCheck, IconSelector } from "@tabler/icons-react";
+import {
+  IconBrain,
+  IconCheck,
+  IconFilter,
+  IconPaperclip,
+  IconPhoto,
+  IconSelector,
+  IconTool,
+} from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
+import { ProviderLogo } from "@/components/a1/provider-logo";
+import {
+  AdaptivePopover,
+  AdaptivePopoverContent,
+  AdaptivePopoverTrigger,
+} from "@/components/ui/adaptive-popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -13,18 +27,19 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { InputGroupButton } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
+import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +50,38 @@ interface ModelSelectorProps {
   loading?: boolean;
 }
 
-type VirtualRow = { type: "heading"; provider: string } | { type: "item"; model: ModelData };
+type VirtualRow =
+  | { type: "heading"; provider: string; providerId: string }
+  | { type: "item"; model: ModelData };
+
+type ModelCapability = "images" | "tools" | "attachments" | "reasoning";
+
+const MODEL_CAPABILITIES = [
+  {
+    id: "images",
+    label: "Images",
+    icon: IconPhoto,
+    supports: (model: ModelData) => model.supportsImageInput,
+  },
+  {
+    id: "tools",
+    label: "Tools",
+    icon: IconTool,
+    supports: (model: ModelData) => model.supportsToolUse,
+  },
+  {
+    id: "attachments",
+    label: "Attachments",
+    icon: IconPaperclip,
+    supports: (model: ModelData) => model.supportsAttachments,
+  },
+  {
+    id: "reasoning",
+    label: "Reasoning",
+    icon: IconBrain,
+    supports: (model: ModelData) => model.supportsReasoning,
+  },
+] as const;
 
 interface ModelListProps {
   rows: VirtualRow[];
@@ -43,8 +89,10 @@ interface ModelListProps {
   parentRef: React.RefObject<HTMLDivElement | null>;
   virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
+  capabilityFilters: ModelCapability[];
   onSelect: (modelId: string) => void;
   setSearchQuery: (value: string) => void;
+  setCapabilityFilters: (value: ModelCapability[]) => void;
 }
 
 const HEADING_HEIGHT = 24;
@@ -56,21 +104,24 @@ const ModelList: FC<ModelListProps> = ({
   parentRef,
   virtualizer,
   searchQuery,
+  capabilityFilters,
   onSelect,
   setSearchQuery,
+  setCapabilityFilters,
 }) => {
   const [stickyState, setStickyState] = useState<{
     provider: string;
+    providerId: string;
     translateY: number;
     scrollbarWidth: number;
   } | null>(null);
 
   const headingOffsets = useMemo(() => {
-    const offsets: { provider: string; offset: number }[] = [];
+    const offsets: { provider: string; providerId: string; offset: number }[] = [];
     let offset = 2;
     for (const row of rows) {
       if (row.type === "heading") {
-        offsets.push({ provider: row.provider, offset });
+        offsets.push({ provider: row.provider, providerId: row.providerId, offset });
       }
       offset += row.type === "heading" ? HEADING_HEIGHT : ITEM_HEIGHT;
     }
@@ -87,13 +138,13 @@ const ModelList: FC<ModelListProps> = ({
       return;
     }
 
-    let currentHeading: string | null = null;
+    let currentHeading: { provider: string; providerId: string } | null = null;
     let nextHeadingOffset: number | null = null;
 
     for (let i = 0; i < headingOffsets.length; i++) {
       const h = headingOffsets[i];
       if (h.offset < scrollTop) {
-        currentHeading = h.provider;
+        currentHeading = h;
         nextHeadingOffset = headingOffsets[i + 1]?.offset ?? null;
       }
     }
@@ -112,7 +163,12 @@ const ModelList: FC<ModelListProps> = ({
     }
 
     const scrollbarWidth = el.offsetWidth - el.clientWidth;
-    setStickyState({ provider: currentHeading, translateY, scrollbarWidth });
+    setStickyState({
+      provider: currentHeading.provider,
+      providerId: currentHeading.providerId,
+      translateY,
+      scrollbarWidth,
+    });
   }, [parentRef, headingOffsets]);
 
   useEffect(() => {
@@ -129,6 +185,45 @@ const ModelList: FC<ModelListProps> = ({
         className="h-9"
         value={searchQuery}
         onValueChange={setSearchQuery}
+        endAddon={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <InputGroupButton
+                variant={capabilityFilters.length > 0 ? "default" : "ghost"}
+                size="icon-xs"
+                aria-label={`Filter models${capabilityFilters.length > 0 ? ` (${capabilityFilters.length} active)` : ""}`}
+              >
+                <IconFilter />
+              </InputGroupButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-fit max-w-full">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Only show models that support</DropdownMenuLabel>
+                {MODEL_CAPABILITIES.map((capability) => {
+                  const CapabilityIcon = capability.icon;
+                  const isChecked = capabilityFilters.includes(capability.id);
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={capability.id}
+                      checked={isChecked}
+                      onCheckedChange={(checked) =>
+                        setCapabilityFilters(
+                          checked === true
+                            ? [...capabilityFilters, capability.id]
+                            : capabilityFilters.filter((filter) => filter !== capability.id),
+                        )
+                      }
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      <CapabilityIcon />
+                      {capability.label}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
       />
       <div className="relative overflow-hidden">
         {stickyState && (
@@ -177,11 +272,15 @@ const ModelList: FC<ModelListProps> = ({
                   }
                   const { model } = row;
                   const isSelected = currentModel?.id === model.id;
+                  const supportedCapabilities = MODEL_CAPABILITIES.filter((capability) =>
+                    capability.supports(model),
+                  );
                   return (
                     <CommandItem
                       key={virtualItem.key}
                       value={model.id}
                       onSelect={() => onSelect(model.id)}
+                      className="group/model"
                       style={{
                         position: "absolute",
                         top: 0,
@@ -193,9 +292,39 @@ const ModelList: FC<ModelListProps> = ({
                     >
                       <div className="flex w-full min-w-0 flex-1 items-center justify-center gap-1">
                         {isSelected && <IconCheck />}
+                        <ProviderLogo
+                          id={model.providerId}
+                          title={model.provider}
+                          className="size-4!"
+                          imageClassName="p-0"
+                        />
                         <div className="scrollbar-size-xs w-full overflow-x-auto">
                           <span className="font-medium whitespace-nowrap">{model.name}</span>
                         </div>
+                        {supportedCapabilities.length > 0 && (
+                          <div
+                            className="text-muted-foreground flex shrink-0 items-center gap-0"
+                            title={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
+                            aria-label={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
+                          >
+                            {supportedCapabilities.map((capability) => {
+                              const CapabilityIcon = capability.icon;
+                              return (
+                                <span
+                                  key={capability.id}
+                                  className="bg-popover ring-border -ml-3 flex size-5 items-center justify-center rounded-lg ring-1 transition-[margin] group-hover/model:-ml-1 group-focus/model:-ml-1 group-data-[selected=true]/model:-ml-1 first:ml-0"
+                                  aria-hidden="true"
+                                >
+                                  <CapabilityIcon />
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     </CommandItem>
                   );
@@ -220,10 +349,11 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
   const [staleModel, setStaleModel] = useState(currentModel);
   const [searchQuery, setSearchQuery] = useState("");
+  const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
-  const isDesktop = useMediaQuery("(min-width: 640px)");
   const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
   const { isApiKeysLoading } = useApiKeys();
+  const { user, isLoading: isAuthLoading, customerState } = useWebAuth();
 
   if (!loading && staleModel !== currentModel) {
     setStaleModel(currentModel);
@@ -251,12 +381,16 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const displayedModel = loading ? (staleModel ?? currentModel) : currentModel;
 
   const filteredModels = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return enabledModels;
-    }
+    const modelsWithCapabilities = enabledModels.filter((model) =>
+      capabilityFilters.every((capabilityId) =>
+        MODEL_CAPABILITIES.find((capability) => capability.id === capabilityId)?.supports(model),
+      ),
+    );
+
+    if (!searchQuery.trim()) return modelsWithCapabilities;
 
     const query = searchQuery.toLowerCase();
-    const scoredModels = enabledModels
+    const scoredModels = modelsWithCapabilities
       .map((model) => {
         const score = fuzzysort.single(query, [model.name, model?.id || ""].join(" "))?.score ?? 0;
         return { model, score };
@@ -264,7 +398,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       .filter(({ score }) => score > 0);
 
     return scoredModels.sort((a, b) => b.score - a.score).map(({ model }) => model);
-  }, [searchQuery, enabledModels]);
+  }, [searchQuery, capabilityFilters, enabledModels]);
 
   const rows = useMemo<VirtualRow[]>(() => {
     const groups = new Map<string, ModelData[]>();
@@ -280,7 +414,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     const result: VirtualRow[] = [];
     const entries = Array.from(groups.entries());
     entries.forEach(([provider, models]) => {
-      result.push({ type: "heading", provider });
+      result.push({ type: "heading", provider, providerId: models[0]?.providerId ?? provider });
       for (const model of models) {
         result.push({ type: "item", model });
       }
@@ -329,7 +463,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   useEffect(() => {
     scrollToTop();
-  }, [effectiveOpen, searchQuery]);
+  }, [effectiveOpen, searchQuery, capabilityFilters]);
 
   const handleSelect = (modelId: string) => {
     setModel(modelId);
@@ -340,13 +474,14 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     setOpen(newOpen);
     if (!newOpen) {
       setSearchQuery("");
+      setCapabilityFilters([]);
     }
   };
 
   const triggerContent = displayedModel ? (
     <>
       <div className="min-w-0 flex-1">
-        <div className="scrollbar-size-xs w-full overflow-x-auto" tabIndex={0}>
+        <div className="scrollbar-size-xs scroll-fade-x w-full overflow-x-auto" tabIndex={0}>
           <div className="w-full text-left whitespace-nowrap">
             <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
             <span className="font-medium">{displayedModel.name}</span>
@@ -357,7 +492,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     </>
   ) : (
     <>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 text-left">
         <span className="text-muted-foreground">No model selected</span>
       </div>
       <IconSelector className="size-4 shrink-0 opacity-50" />
@@ -366,7 +501,12 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
-  if (isApiKeysLoading || shouldShowLoadingSkeleton) {
+  if (
+    isApiKeysLoading ||
+    isAuthLoading ||
+    (Boolean(user) && !customerState) ||
+    shouldShowLoadingSkeleton
+  ) {
     return (
       <Skeleton
         className={cn(
@@ -377,9 +517,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     );
   }
 
-  return isDesktop ? (
-    <Popover open={effectiveOpen} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>
+  return (
+    <AdaptivePopover open={effectiveOpen} onOpenChange={handleOpenChange}>
+      <AdaptivePopoverTrigger asChild>
         <Button
           variant="outline"
           aria-haspopup="listbox"
@@ -390,49 +530,24 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         >
           {triggerContent}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className={cn("w-full p-0", popoverClassName)}>
+      </AdaptivePopoverTrigger>
+      <AdaptivePopoverContent
+        title="Select a model"
+        className={cn("w-full p-0", popoverClassName)}
+        mobileClassName="-mt-2 px-0"
+      >
         <ModelList
           rows={rows}
           currentModel={currentModel}
           parentRef={parentRef}
           virtualizer={virtualizer}
           searchQuery={searchQuery}
+          capabilityFilters={capabilityFilters}
           onSelect={handleSelect}
           setSearchQuery={setSearchQuery}
+          setCapabilityFilters={setCapabilityFilters}
         />
-      </PopoverContent>
-    </Popover>
-  ) : (
-    <Drawer open={effectiveOpen} onOpenChange={handleOpenChange}>
-      <DrawerTrigger asChild>
-        <Button
-          variant="outline"
-          aria-haspopup="listbox"
-          aria-expanded={effectiveOpen}
-          className={cn("w-full justify-between", className)}
-          aria-label={modelLabel}
-          disabled={effectiveDisabled}
-        >
-          {triggerContent}
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="bg-popover">
-        <DrawerHeader>
-          <DrawerTitle className="sr-only">Select a model</DrawerTitle>
-        </DrawerHeader>
-        <div className="-mt-2 overflow-y-auto pb-4">
-          <ModelList
-            rows={rows}
-            currentModel={currentModel}
-            parentRef={parentRef}
-            virtualizer={virtualizer}
-            searchQuery={searchQuery}
-            onSelect={handleSelect}
-            setSearchQuery={setSearchQuery}
-          />
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </AdaptivePopoverContent>
+    </AdaptivePopover>
   );
 };

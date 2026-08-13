@@ -17,16 +17,52 @@ import { enabledToolsAtom, toolConfigsAtom } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
 import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
 
+import SettingsTarget from "../../settings-target";
 import { BUILT_IN_TOOLS, TOOL_IDS } from "./built-in-extensions-utils";
+
+function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
+  return {
+    dateTime: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.dateTime, ...toolConfigs.dateTime },
+    waitNumberMilliseconds: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.waitNumberMilliseconds,
+      ...toolConfigs.waitNumberMilliseconds,
+    },
+    getUrlContent: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.getUrlContent,
+      ...toolConfigs.getUrlContent,
+    },
+    webSearch: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.webSearch, ...toolConfigs.webSearch },
+    wikipedia: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.wikipedia, ...toolConfigs.wikipedia },
+    memory: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.memory, ...toolConfigs.memory },
+    editFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.editFile, ...toolConfigs.editFile },
+    createFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.createFile, ...toolConfigs.createFile },
+    deleteFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteFile, ...toolConfigs.deleteFile },
+    viewFile: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.viewFile, ...toolConfigs.viewFile },
+    executeCommand: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.executeCommand,
+      ...toolConfigs.executeCommand,
+    },
+    subAgent: { ...DEFAULT_SETTINGS.TOOL_CONFIGS.subAgent, ...toolConfigs.subAgent },
+    listSettings: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.listSettings,
+      ...toolConfigs.listSettings,
+    },
+    getSetting: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.getSetting,
+      ...toolConfigs.getSetting,
+    },
+    updateSetting: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
+      ...toolConfigs.updateSetting,
+    },
+  };
+}
 
 export function BuiltInExtensionsConfig() {
   const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
   const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
   const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
-  const mergedToolConfigs = {
-    ...DEFAULT_SETTINGS.TOOL_CONFIGS,
-    ...toolConfigs,
-  } satisfies ToolConfigs;
+  const mergedToolConfigs = getMergedToolConfigs(toolConfigs);
 
   const isToolConfigsDefault =
     JSON.stringify({ enabledTools: mergedEnabledTools, toolConfigs: mergedToolConfigs }) ===
@@ -55,29 +91,31 @@ export function BuiltInExtensionsConfig() {
     });
     setToolConfigs((prev) => ({
       ...prev,
-      [toolId]: { ...prev[toolId], ...updates },
+      [toolId]: { ...DEFAULT_SETTINGS.TOOL_CONFIGS[toolId], ...prev[toolId], ...updates },
     }));
   };
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-1 flex-col items-start">
-          <Label className="text-sm font-medium">Built-in tools</Label>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Choose which built-in tools are available and how they behave.
-          </p>
+      <SettingsTarget id="setting-built-in-tools">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-1 flex-col items-start">
+            <Label className="text-sm font-medium">Built-in tools</Label>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Choose which built-in tools are available and how they behave.
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleResetToolConfigs}
+            disabled={isToolConfigsDefault}
+            aria-label="Reset to default"
+          >
+            <IconRestore data-icon="inline-start" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleResetToolConfigs}
-          disabled={isToolConfigsDefault}
-          aria-label="Reset to default"
-        >
-          <IconRestore data-icon="inline-start" />
-        </Button>
-      </div>
+      </SettingsTarget>
 
       <Accordion type="single" collapsible className="border-border w-full rounded-md border">
         {TOOL_IDS.map((toolId) => (
@@ -282,32 +320,77 @@ export function BuiltInExtensionsConfig() {
                 )}
 
                 {toolId === "executeCommand" && (
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="executeCommand-timeout" className="text-xs">
-                      Default Timeout (ms)
-                    </Label>
-                    <Input
-                      id="executeCommand-timeout"
-                      type="number"
-                      min={1000}
-                      max={600000}
-                      value={mergedToolConfigs.executeCommand.defaultTimeoutMs}
-                      onChange={(e) =>
-                        updateToolConfig("executeCommand", {
-                          defaultTimeoutMs: Math.max(
-                            1000,
-                            Math.min(parseInt(e.target.value) || 120000, 600000),
-                          ),
-                        })
-                      }
-                    />
-                  </div>
+                  <>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="executeCommand-timeout" className="text-xs">
+                        Default Timeout (ms)
+                      </Label>
+                      <Input
+                        id="executeCommand-timeout"
+                        type="number"
+                        min={1000}
+                        max={600000}
+                        value={mergedToolConfigs.executeCommand.defaultTimeoutMs}
+                        onChange={(e) =>
+                          updateToolConfig("executeCommand", {
+                            defaultTimeoutMs: Math.max(
+                              1000,
+                              Math.min(parseInt(e.target.value) || 120000, 600000),
+                            ),
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="executeCommand-scrollback" className="text-xs">
+                        Max Scrollback (chars)
+                      </Label>
+                      <Input
+                        id="executeCommand-scrollback"
+                        type="number"
+                        min={1000}
+                        max={500000}
+                        value={mergedToolConfigs.executeCommand.maxScrollbackChars}
+                        onChange={(e) =>
+                          updateToolConfig("executeCommand", {
+                            maxScrollbackChars: Math.max(
+                              1000,
+                              Math.min(parseInt(e.target.value) || 25000, 500000),
+                            ),
+                          })
+                        }
+                      />
+                    </div>
+                  </>
                 )}
 
                 {toolId === "subAgent" && (
                   <div className="text-muted-foreground text-xs">
                     Subagents inherit the current model and enabled tools, but cannot spawn other
                     subagents.
+                  </div>
+                )}
+
+                {toolId === "wikipedia" && (
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="wikipedia-maxresults" className="text-xs">
+                      Default Max Results
+                    </Label>
+                    <Input
+                      id="wikipedia-maxresults"
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={mergedToolConfigs.wikipedia.defaultMaxResults}
+                      onChange={(e) =>
+                        updateToolConfig("wikipedia", {
+                          defaultMaxResults: Math.max(
+                            1,
+                            Math.min(parseInt(e.target.value) || 10, 50),
+                          ),
+                        })
+                      }
+                    />
                   </div>
                 )}
 

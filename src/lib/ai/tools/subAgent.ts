@@ -1,13 +1,16 @@
-import type { Tool, ToolExecutionOptions } from "@ai-sdk/provider-utils";
+import type { Context, Tool, ToolExecutionOptions } from "@ai-sdk/provider-utils";
 import {
   convertToModelMessages,
-  readUIMessageStream,
-  stepCountIs,
-  streamText,
+  extractReasoningMiddleware,
   type LanguageModel,
+  readUIMessageStream,
+  isStepCount,
+  streamText,
+  toUIMessageStream,
   type ModelMessage,
   type ToolSet,
   type UIMessage,
+  wrapLanguageModel,
 } from "ai";
 import { z } from "zod";
 
@@ -30,6 +33,7 @@ export interface SubAgentExecutionContext {
   model: LanguageModel;
   modelConfig: ModelConfig;
   systemPrompt: string;
+  extractReasoningEnabled: boolean;
   getTools: () => Promise<ToolSet>;
 }
 
@@ -251,6 +255,14 @@ async function* streamSubAgentRun({
   const subAgentMessages: UIMessage[] = [];
   let finalMessage: UIMessage | undefined;
 
+  const wrappedModel =
+    context.extractReasoningEnabled && typeof context.model !== "string"
+      ? wrapLanguageModel({
+          model: context.model as Parameters<typeof wrapLanguageModel>[0]["model"],
+          middleware: extractReasoningMiddleware({ tagName: "think" }),
+        })
+      : context.model;
+
   while (true) {
     abortSignal?.throwIfAborted();
 
@@ -266,7 +278,7 @@ async function* streamSubAgentRun({
           });
 
     const result = streamText({
-      model: context.model,
+      model: wrappedModel,
       temperature: context.modelConfig.temperature,
       maxOutputTokens: context.modelConfig.maxTokens,
       topP: context.modelConfig.topP,
@@ -278,14 +290,14 @@ async function* streamSubAgentRun({
       abortSignal,
       tools,
       toolChoice: "auto",
-      stopWhen: stepCountIs(context.modelConfig.maxSteps ?? 20),
-      system: buildSubAgentInstructions(context.systemPrompt),
+      stopWhen: isStepCount(context.modelConfig.maxSteps ?? 20),
+      instructions: buildSubAgentInstructions(context.systemPrompt),
     });
 
     let latestMessage: UIMessage | undefined;
 
     for await (const message of readUIMessageStream({
-      stream: result.toUIMessageStream(),
+      stream: toUIMessageStream({ stream: result.stream, tools }),
       message: subAgentMessages.at(-1),
     })) {
       latestMessage = cloneMessage(message);
@@ -393,7 +405,7 @@ export const createSubAgentTool = (
     inputSchema: z.object({
       task: z.string().min(1).describe("The task for the subagent to complete"),
     }),
-    execute: async function* (input: SubAgentInput, options: ToolExecutionOptions) {
+    execute: async function* (input: SubAgentInput, options: ToolExecutionOptions<Context>) {
       logger.verbose("Executing subAgent tool with input:", input);
 
       setLiveState(options.toolCallId, {

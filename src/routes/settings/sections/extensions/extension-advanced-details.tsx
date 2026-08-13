@@ -8,6 +8,7 @@ import {
   IconShieldOff,
 } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import {
@@ -17,6 +18,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { DialogClose } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
@@ -240,73 +242,112 @@ function McpServerApprovalSettings({
 interface ExtensionAdvancedDetailsProps {
   server: McpServerConfig;
   onUpdate: (updates: Partial<McpServerConfig>) => void;
+  setDialogFooter?: (footer: ReactNode) => void;
 }
 
-export function ExtensionAdvancedDetails({ server, onUpdate }: ExtensionAdvancedDetailsProps) {
+export function ExtensionAdvancedDetails({
+  server,
+  onUpdate,
+  setDialogFooter,
+}: ExtensionAdvancedDetailsProps) {
   const authStates = useAtomValue(mcpAuthStatesAtom);
   const authState = authStates[server.id];
   const loadStates = useAtomValue(mcpServerLoadStatesAtom);
   const loadState = loadStates[server.id];
+  const [draft, setDraft] = useState(server);
+
+  const hasChanges = JSON.stringify(draft) !== JSON.stringify(server);
+  const updateDraft = (updates: Partial<McpServerConfig>) => {
+    setDraft((previous) => ({ ...previous, ...updates }) as McpServerConfig);
+  };
+
+  useEffect(() => {
+    if (!setDialogFooter) {
+      return;
+    }
+
+    if (!hasChanges) {
+      setDialogFooter(null);
+      return;
+    }
+
+    setDialogFooter(
+      <>
+        <DialogClose asChild>
+          <Button type="button" variant="outline">
+            Cancel
+          </Button>
+        </DialogClose>
+        <DialogClose asChild>
+          <Button type="button" onClick={() => onUpdate(draft)}>
+            Save changes
+          </Button>
+        </DialogClose>
+      </>,
+    );
+
+    return () => {
+      setDialogFooter(null);
+    };
+  }, [draft, hasChanges, onUpdate, setDialogFooter]);
 
   return (
     <div className="flex flex-col gap-3">
       <McpServerStatus
         state={loadState}
         authState={authState}
-        disabled={!server.enabled}
+        disabled={!draft.enabled}
         switchId={`enabled-${server.id}`}
-        onEnabledChange={(checked) => onUpdate({ enabled: checked })}
+        onEnabledChange={(enabled) => updateDraft({ enabled })}
       />
 
       <McpServerApprovalSettings
         idPrefix={server.id}
-        enabled={server.enabled}
-        requiresApproval={server.requiresApproval}
-        toolApprovalOverrides={server.toolApprovalOverrides}
+        enabled={draft.enabled}
+        requiresApproval={draft.requiresApproval}
+        toolApprovalOverrides={draft.toolApprovalOverrides}
         loadState={loadState}
-        onRequiresApprovalChange={(requiresApproval) => onUpdate({ requiresApproval })}
+        onRequiresApprovalChange={(requiresApproval) => updateDraft({ requiresApproval })}
         onToolApprovalOverridesChange={(toolApprovalOverrides) =>
-          onUpdate({ toolApprovalOverrides })
+          updateDraft({ toolApprovalOverrides })
         }
       />
 
       <McpServerConfigForm
         idPrefix={server.id}
         values={{
-          type: server.type,
-          name: server.name,
-          command: server.type === "stdio" ? server.command : "",
-          env: server.type === "stdio" ? server.env : {},
-          url: server.type === "http" ? server.url : "",
-          headers: server.type === "http" ? server.headers : {},
-          timeoutSec: server.timeoutMs / 1000,
-          requiresApproval: server.requiresApproval,
+          type: draft.type,
+          name: draft.name,
+          command: draft.type === "stdio" ? draft.command : "",
+          env: draft.type === "stdio" ? draft.env : {},
+          url: draft.type === "http" ? draft.url : "",
+          headers: draft.type === "http" ? draft.headers : {},
+          timeoutSec: draft.timeoutMs / 1000,
+          requiresApproval: draft.requiresApproval,
         }}
         onChange={(updates) => {
           if (updates.name !== undefined) {
-            onUpdate({ name: updates.name });
+            updateDraft({ name: updates.name });
           }
-          if (updates.command !== undefined && server.type === "stdio") {
-            onUpdate({ command: updates.command });
+          if (updates.command !== undefined && draft.type === "stdio") {
+            updateDraft({ command: updates.command });
           }
-          if (updates.env !== undefined && server.type === "stdio") {
-            onUpdate({ env: updates.env });
+          if (updates.env !== undefined && draft.type === "stdio") {
+            updateDraft({ env: updates.env });
           }
-          if (updates.url !== undefined && server.type === "http") {
-            onUpdate({ url: updates.url });
+          if (updates.url !== undefined && draft.type === "http") {
+            updateDraft({ url: updates.url });
           }
-          if (updates.headers !== undefined && server.type === "http") {
-            onUpdate({ headers: updates.headers });
+          if (updates.headers !== undefined && draft.type === "http") {
+            updateDraft({ headers: updates.headers });
           }
           if (updates.timeoutSec !== undefined) {
-            onUpdate({ timeoutMs: updates.timeoutSec * 1000 });
+            updateDraft({ timeoutMs: updates.timeoutSec * 1000 });
           }
         }}
         showApprovalControls={false}
         httpSupplement={
-          server.type === "http" ? (
-            <McpAuthStatus server={server} disabled={!server.enabled} />
-          ) : null
+          draft.type === "http" ? <McpAuthStatus server={draft} disabled={!draft.enabled} /> : null
         }
       />
     </div>

@@ -1,15 +1,14 @@
-import {
-  IconAppWindow,
-  IconLayoutSidebar,
-  IconPlus,
-  IconSearch,
-  IconSettings,
-} from "@tabler/icons-react";
+import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
+import { useCallback, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -18,13 +17,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
-import { sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
-import { kbdRegistry } from "@/lib/kbd-registry";
+import { debugModeEnabledAtom, sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
-import { openNewWindow } from "@/lib/tauri/open-new-window";
 import { cn } from "@/lib/utils";
 
 import { ChatList } from "./chat-list";
@@ -45,10 +42,44 @@ const SidebarContent = ({
   handleNewChat: () => void;
   onChatClick?: (id: string) => void;
 }) => {
+  const navigate = useNavigate();
+  const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
+  const clickTimestamps = useRef<number[]>([]);
+
+  const handleTitleClick = useCallback(() => {
+    if (debugMode) return;
+    const now = Date.now();
+    clickTimestamps.current.push(now);
+    clickTimestamps.current = clickTimestamps.current.filter((t) => now - t < 1500);
+    if (clickTimestamps.current.length >= 5) {
+      clickTimestamps.current = [];
+      toast("Enable debug mode?", {
+        id: "enable-debug-mode",
+        description: "This will add a Debug section to Help & Updates in Settings.",
+        action: {
+          label: "Enable",
+          onClick: () => {
+            setDebugMode(true);
+            toast.success("Debug mode enabled", {
+              description: "Check Settings > Help & Updates to access internal tests.",
+              action: {
+                label: "Open Settings",
+                onClick: () => navigate("/settings?tab=about"),
+              },
+            });
+          },
+        },
+        duration: Infinity,
+      });
+    }
+  }, [navigate, debugMode, setDebugMode]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex flex-row items-center justify-center gap-2">
-        <span className="text-xl">AgentOne</span>
+        <span className="cursor-default text-xl select-none" onClick={handleTitleClick}>
+          AgentOne
+        </span>
       </div>
       <div className="flex min-h-0 flex-1 flex-col">
         <ChatList
@@ -84,18 +115,24 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   const isSidebarSmall = isCollapsed || !isDesktop;
   const isColumnLayout = collapsedLayout === "column";
-  const toggleTooltip = isCollapsed ? "Open sidebar" : "Close sidebar";
+  const toggleTooltip = (isDesktop ? isCollapsed : !isDrawerOpen)
+    ? "Open sidebar"
+    : "Close sidebar";
   const tooltipSide = isColumnLayout && isSidebarSmall ? "right" : undefined;
 
-  useHotkeys(kbdRegistry.focusChatSearchCollapsed, () => {
+  useKeyboardShortcut("focusChatSearchCollapsed", () => {
     if (isSidebarSmall) {
       setIsSearchModalOpen(true);
     }
   });
 
-  useHotkeys(kbdRegistry.toggleSidebar, () => {
+  useKeyboardShortcut("toggleSidebar", () => {
     setIsSearchModalOpen(false);
-    setIsCollapsed(!isCollapsed);
+    if (isDesktop) {
+      setIsCollapsed(!isCollapsed);
+    } else {
+      setIsDrawerOpen(!isDrawerOpen);
+    }
   });
 
   const handleNewChat = () => {
@@ -112,39 +149,39 @@ export const Sidebar = ({ className }: SidebarProps) => {
   };
 
   const sidebarButton = isDesktop ? (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <AdaptiveTooltip>
+      <AdaptiveTooltipTrigger asChild>
         <Button
           variant="outline"
           size="icon-sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
           analytics={{
             event: "sidebar_toggled",
-            params: { collapsed: !isCollapsed, source: "desktop" },
+            params: { collapsed: !isCollapsed, ui_location: "desktop" },
           }}
           aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           className="size-6"
         >
           <IconLayoutSidebar data-icon="inline-start" />
         </Button>
-      </TooltipTrigger>
-      <TooltipContent side={tooltipSide}>{toggleTooltip}</TooltipContent>
-    </Tooltip>
+      </AdaptiveTooltipTrigger>
+      <AdaptiveTooltipContent side={tooltipSide}>{toggleTooltip}</AdaptiveTooltipContent>
+    </AdaptiveTooltip>
   ) : (
     <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
+      <AdaptiveTooltip>
+        <AdaptiveTooltipTrigger asChild>
           <DrawerTrigger asChild>
-            <Button variant="outline" size="icon-sm" aria-label="Expand sidebar" className="size-6">
+            <Button variant="outline" size="icon-sm" aria-label={toggleTooltip} className="size-6">
               <IconLayoutSidebar />
             </Button>
           </DrawerTrigger>
-        </TooltipTrigger>
-        <TooltipContent>{toggleTooltip}</TooltipContent>
-      </Tooltip>
+        </AdaptiveTooltipTrigger>
+        <AdaptiveTooltipContent>{toggleTooltip}</AdaptiveTooltipContent>
+      </AdaptiveTooltip>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
-        className="bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
+        className="bg-background dark:bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
       >
         <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
         <DrawerDescription className="sr-only">Mobile chat sidebar content</DrawerDescription>
@@ -179,53 +216,38 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 "pointer-events-none -translate-y-2 scale-95 opacity-0",
               isColumnLayout && "flex-col",
             )}
-            inert={!isCollapsed}
+            inert={!isSidebarSmall}
           >
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon-sm"
                   onClick={handleSearchClick}
-                  analytics={{ event: "search_modal_opened", params: { source: "sidebar" } }}
+                  analytics={{ event: "search_modal_opened", params: { ui_location: "sidebar" } }}
                   aria-label="Search chats"
                   className="size-6"
                 >
                   <IconSearch data-icon="inline-start" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent side={tooltipSide}>Search chats</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent side={tooltipSide}>Search chats</AdaptiveTooltipContent>
+            </AdaptiveTooltip>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon-sm"
                   onClick={handleNewChat}
-                  analytics={{ event: "new_chat_clicked", params: { source: "sidebar" } }}
+                  analytics={{ event: "new_chat_clicked", params: { ui_location: "sidebar" } }}
                   aria-label="New chat"
                   className="size-6"
                 >
                   <IconPlus data-icon="inline-start" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent side={tooltipSide}>New chat</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={() => openNewWindow("/chat")}
-                  analytics={{ event: "new_window_clicked", params: { source: "sidebar" } }}
-                  aria-label="New window"
-                  className="size-6"
-                >
-                  <IconAppWindow data-icon="inline-start" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side={tooltipSide}>New window</TooltipContent>
-            </Tooltip>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent side={tooltipSide}>New chat</AdaptiveTooltipContent>
+            </AdaptiveTooltip>
           </div>
         </div>
       </div>
@@ -233,7 +255,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       {isDesktop && (
         <aside
           className={cn(
-            "bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width,padding] duration-200",
+            "bg-background dark:bg-sidebar border-sidebar-border flex h-full flex-col overflow-hidden border-r p-2 transition-[translate,opacity,width,padding] duration-200",
             isSidebarSmall
               ? "pointer-events-none w-0 p-0 border-0 -translate-x-full opacity-0"
               : "w-64 translate-x-0 opacity-100",

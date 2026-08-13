@@ -22,11 +22,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
 
+import SettingsTarget from "../../settings-target";
 import { AddServerDialog } from "./add-server-dialog";
 import { BuiltInExtensionsConfig } from "./built-in-extensions-config";
 import { BUILT_IN_SEARCH_TEXT, TOOL_IDS, useEnabledToolCount } from "./built-in-extensions-utils";
@@ -67,6 +69,7 @@ export default function ExtensionsSection() {
   const [mcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
   const [searchParams, setSearchParams] = useSearchParams();
   const enabledToolCount = useEnabledToolCount();
+  const { restartMcpServer } = useTools();
 
   const mcpInstallPrefill = useMemo(() => {
     const name = searchParams.get("mcpName");
@@ -104,13 +107,18 @@ export default function ExtensionsSection() {
   const updateMcpServerById = useCallback(
     (serverId: string, updates: Partial<McpServerConfig>) => {
       const currentServer = mcpServers.find((server) => server.id === serverId);
+      const shouldRetryFailedServer =
+        currentServer !== undefined &&
+        mcpServerLoadStates[serverId]?.status === "error" &&
+        updates.timeoutMs !== undefined &&
+        updates.timeoutMs !== currentServer.timeoutMs;
       if (
         currentServer &&
         typeof updates.enabled === "boolean" &&
         updates.enabled !== currentServer.enabled
       ) {
         trackGoogleAnalyticsEvent("extension_enabled_changed", {
-          source: isServerFromRegistry(currentServer) ? "registry" : "custom",
+          extension_source: isServerFromRegistry(currentServer) ? "registry" : "custom",
           transport_type: currentServer.type,
           enabled: updates.enabled,
         });
@@ -121,8 +129,12 @@ export default function ExtensionsSection() {
           server.id === serverId ? ({ ...server, ...updates } as McpServerConfig) : server,
         ),
       );
+
+      if (shouldRetryFailedServer) {
+        restartMcpServer(serverId);
+      }
     },
-    [mcpServers, setMcpServers],
+    [mcpServers, mcpServerLoadStates, restartMcpServer, setMcpServers],
   );
 
   const handleAddServer = (serverData: {
@@ -162,7 +174,7 @@ export default function ExtensionsSection() {
 
     setMcpServers((prev) => [newServer, ...prev]);
     trackGoogleAnalyticsEvent("extension_added", {
-      source: "custom",
+      extension_source: "custom",
       transport_type: newServer.type,
       requires_approval: newServer.requiresApproval,
     });
@@ -196,7 +208,7 @@ export default function ExtensionsSection() {
 
     setMcpServers((prev) => [newServer, ...prev]);
     trackGoogleAnalyticsEvent("extension_added", {
-      source: "registry",
+      extension_source: "registry",
       transport_type: newServer.type,
       requires_approval: newServer.requiresApproval,
     });
@@ -214,7 +226,7 @@ export default function ExtensionsSection() {
     const server = mcpServers.find((item) => item.id === serverToUninstall.id);
     if (server) {
       trackGoogleAnalyticsEvent("extension_removed", {
-        source: isServerFromRegistry(server) ? "registry" : "custom",
+        extension_source: isServerFromRegistry(server) ? "registry" : "custom",
         transport_type: server.type,
       });
     }
@@ -248,6 +260,7 @@ export default function ExtensionsSection() {
       canUninstall: false,
       installSupported: false,
       advancedContent: <BuiltInExtensionsConfig />,
+      advancedContentKey: "built-in",
     });
 
     // Custom servers (non-registry)
@@ -274,13 +287,16 @@ export default function ExtensionsSection() {
         loadState: mcpServerLoadStates[server.id],
         authState: mcpAuthStates[server.id],
         onEnabledChange: (enabled) => updateMcpServerById(server.id, { enabled }),
+        onRestart: () => restartMcpServer(server.id),
         onUninstall: () => handleUninstallClick(server.id, server.name || "Custom Extension"),
         advancedContent: (
           <ExtensionAdvancedDetails
+            key={JSON.stringify(server)}
             server={server}
             onUpdate={(updates) => updateMcpServerById(server.id, updates)}
           />
         ),
+        advancedContentKey: server,
       });
     }
 
@@ -319,13 +335,16 @@ export default function ExtensionsSection() {
         onEnabledChange: server
           ? (enabled) => updateMcpServerById(server.id, { enabled })
           : undefined,
+        onRestart: server ? () => restartMcpServer(server.id) : undefined,
         advancedContent:
           installed && server ? (
             <ExtensionAdvancedDetails
+              key={JSON.stringify(server)}
               server={server}
               onUpdate={(updates) => updateMcpServerById(server.id, updates)}
             />
           ) : undefined,
+        advancedContentKey: server,
         moreInfoJson: installed ? extension.registryEntry : undefined,
       });
     }
@@ -339,6 +358,7 @@ export default function ExtensionsSection() {
     enabledToolCount,
     updateMcpServerById,
     handleUninstallClick,
+    restartMcpServer,
   ]);
 
   useEffect(() => {
@@ -362,79 +382,83 @@ export default function ExtensionsSection() {
   }, [onlyInstalled, query, showDeviceExtensions, showOnlineExtensions]);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="flex min-h-0 flex-1 flex-col">
+      <CardHeader className="shrink-0">
         <h2 className="text-base leading-none font-semibold">Extensions</h2>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <Alert>
-          <IconFlask />
-          <AlertTitle>Extensions are in beta</AlertTitle>
-          <AlertDescription>
-            Some features may be incomplete or change without notice.
-          </AlertDescription>
-        </Alert>
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
+        <SettingsTarget id="setting-extensions-beta-notice">
+          <Alert>
+            <IconFlask />
+            <AlertTitle>Extensions are in beta</AlertTitle>
+            <AlertDescription>
+              Some features may be incomplete or change without notice.
+            </AlertDescription>
+          </Alert>
+        </SettingsTarget>
 
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="flex w-full flex-row gap-0">
-            <SearchInput
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search extensions..."
-              aria-label="Search extensions"
-              className="rounded-r-none"
-              containerClassName="flex-1"
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="rounded-l-none border-l-0"
-                  size="icon"
-                  variant="outline"
-                  aria-label="Filter extensions"
-                  analytics={{ event: "extension_filters_opened" }}
-                >
-                  <IconFilter data-icon="inline-start" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-auto min-w-max">
-                <DropdownMenuLabel>Show</DropdownMenuLabel>
-                <DropdownMenuCheckboxItem
-                  checked={onlyInstalled}
-                  onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
-                >
-                  Only show installed
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Connection type</DropdownMenuLabel>
-                <DropdownMenuCheckboxItem
-                  checked={showDeviceExtensions}
-                  onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
-                >
-                  Runs on this device
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={showOnlineExtensions}
-                  onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
-                >
-                  Connects online
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
-                  <IconTool data-icon="inline-start" />
-                  Find dangling extensions
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <SettingsTarget id="setting-extension-search-and-filters">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="flex w-full flex-row gap-0">
+              <SearchInput
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search extensions..."
+                aria-label="Search extensions"
+                className="rounded-r-none"
+                containerClassName="flex-1"
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    className="rounded-l-none border-l-0"
+                    size="icon"
+                    variant="outline"
+                    aria-label="Filter extensions"
+                    analytics={{ event: "extension_filters_opened" }}
+                  >
+                    <IconFilter data-icon="inline-start" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-auto min-w-max">
+                  <DropdownMenuLabel>Show</DropdownMenuLabel>
+                  <DropdownMenuCheckboxItem
+                    checked={onlyInstalled}
+                    onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
+                  >
+                    Only show installed
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Connection type</DropdownMenuLabel>
+                  <DropdownMenuCheckboxItem
+                    checked={showDeviceExtensions}
+                    onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
+                  >
+                    Runs on this device
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={showOnlineExtensions}
+                    onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
+                  >
+                    Connects online
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
+                    <IconTool data-icon="inline-start" />
+                    Find dangling extensions
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <Button
+              onClick={() => setShowAddDialog(true)}
+              analytics={{ event: "custom_extension_dialog_opened" }}
+            >
+              <IconPlus data-icon="inline-start" />
+              Add Custom
+            </Button>
           </div>
-          <Button
-            onClick={() => setShowAddDialog(true)}
-            analytics={{ event: "custom_extension_dialog_opened" }}
-          >
-            <IconPlus data-icon="inline-start" />
-            Add Custom
-          </Button>
-        </div>
+        </SettingsTarget>
 
         <ExtensionsBrowser
           items={items}
@@ -487,7 +511,7 @@ export default function ExtensionsSection() {
             const server = mcpServers.find((s) => s.id === serverId);
             if (server) {
               trackGoogleAnalyticsEvent("extension_removed", {
-                source: "dangling",
+                extension_source: "dangling",
                 transport_type: server.type,
               });
             }
@@ -496,7 +520,7 @@ export default function ExtensionsSection() {
           }}
           onRemoveAll={(serverIds) => {
             trackGoogleAnalyticsEvent("extension_removed", {
-              source: "dangling_bulk",
+              extension_source: "dangling_bulk",
               removed_count: serverIds.length,
             });
             const ids = new Set(serverIds);

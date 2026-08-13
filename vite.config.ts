@@ -17,10 +17,13 @@ const vendorManualChunks = {
     "@ai-sdk/cohere",
     "@ai-sdk/deepinfra",
     "@ai-sdk/deepseek",
+    "@ai-sdk/elevenlabs",
     "@ai-sdk/fireworks",
     "@ai-sdk/gateway",
     "@ai-sdk/google",
     "@ai-sdk/groq",
+    "@ai-sdk/hume",
+    "@ai-sdk/lmnt",
     "@ai-sdk/mistral",
     "@ai-sdk/openai",
     "@ai-sdk/openai-compatible",
@@ -92,6 +95,8 @@ const vendorManualChunks = {
     "fuzzysort",
     "@number-flow/react",
     "number-flow",
+    "react-scan",
+    "react-grab",
   ],
   tauri: [
     "@tauri-apps/api",
@@ -114,10 +119,10 @@ const vendorManualChunks = {
   auth: ["better-auth", "@better-auth/core", "@better-fetch/fetch", "nanostores", "defu"],
   stateAndVirtualization: [
     "jotai",
+    "jotai-family",
     "consola",
     "@tanstack/virtual-core",
     "@tanstack/react-virtual",
-    "virtua",
   ],
 };
 
@@ -129,11 +134,12 @@ export default defineConfig(() => ({
       exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]workers[/\\]/],
     }),
     tailwindcss(),
-    visualizer({
-      open: false,
-      emitFile: false,
-      filename: "dist/stats.html",
-    }),
+    process.env.VISUALIZE &&
+      visualizer({
+        open: false,
+        emitFile: false,
+        filename: "dist/stats.html",
+      }),
   ],
 
   test: {
@@ -148,7 +154,7 @@ export default defineConfig(() => ({
 
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 
@@ -180,10 +186,10 @@ export default defineConfig(() => ({
           // Normalize to POSIX-style paths so checks work on Windows too
           const normalizedId = id.replace(/\\/g, "/");
           const modelListsDir = path
-            .resolve(__dirname, "src/assets/model-lists")
+            .resolve(import.meta.dirname, "src/assets/model-lists")
             .replace(/\\/g, "/");
           const mcpRegistryDir = path
-            .resolve(__dirname, "src/assets/mcp-registry")
+            .resolve(import.meta.dirname, "src/assets/mcp-registry")
             .replace(/\\/g, "/");
 
           if (normalizedId.includes(`${modelListsDir}/`)) {

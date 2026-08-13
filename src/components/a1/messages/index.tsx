@@ -118,6 +118,19 @@ const MessagePartsInternal = ({
       .join("\n");
   }, [message.parts]);
 
+  const getTextToSpeechContent = useCallback(() => {
+    return message.parts
+      .map((part) => {
+        if (part.type === "text") {
+          return (part as TextUIPart).text;
+        }
+
+        return null;
+      })
+      .filter(Boolean)
+      .join("\n");
+  }, [message.parts]);
+
   const renderedParts = useMemo(() => {
     let textIndex = 0;
 
@@ -273,6 +286,7 @@ const MessagePartsInternal = ({
   return (
     <MessageGroup
       contentToCopy={getCopyContent()}
+      contentToSpeak={getTextToSpeechContent()}
       messageRole={message.role}
       messageId={message.id}
       onEdit={canEdit ? handleEdit : undefined}

@@ -1,7 +1,9 @@
 import type { UIMessage } from "ai";
+import { useAtomValue } from "jotai";
 import { marked } from "marked";
 import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
+import { Link } from "react-router";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 import remend from "remend";
@@ -14,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { remendEnabledAtom } from "@/lib/jotai/settings-atoms";
 
 import { CodeBlock } from "./codeblock";
 
@@ -23,8 +26,8 @@ type MarkdownBlock = {
   lang?: string;
 };
 
-function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
-  const completedMarkdown = remend(markdown);
+function parseMarkdownIntoBlocks(markdown: string, remendEnabled: boolean): MarkdownBlock[] {
+  const completedMarkdown = remendEnabled ? remend(markdown) : markdown;
   const tokens = marked.lexer(completedMarkdown);
   const blocks: MarkdownBlock[] = [];
 
@@ -46,20 +49,43 @@ function parseMarkdownIntoBlocks(markdown: string): MarkdownBlock[] {
 }
 
 const MemoizedMarkdownBlock = memo(
-  ({ block, messageRole }: { block: MarkdownBlock; messageRole: UIMessage["role"] }) => {
+  ({
+    allowInternalLinks,
+    block,
+    messageRole,
+    remendEnabled,
+    simpleCodeBlocks,
+  }: {
+    allowInternalLinks?: boolean;
+    block: MarkdownBlock;
+    messageRole: UIMessage["role"];
+    remendEnabled: boolean;
+    simpleCodeBlocks?: boolean;
+  }) => {
     const { type, content, lang } = block;
 
     if (type === "code") {
+      if (simpleCodeBlocks) {
+        return (
+          <pre>
+            <code>{content}</code>
+          </pre>
+        );
+      }
+
       return <CodeBlock content={content} lang={lang} messageRole={messageRole} />;
     } else {
-      // TODO: Allow enabling and disabling remend in settings
-      const completedContent = remend(content);
+      const completedContent = remendEnabled ? remend(content) : content;
       return (
         <ReactMarkdown
           remarkPlugins={[remarkBreaks, remarkGfm]}
           components={{
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             a({ node, ...props }) {
+              if (allowInternalLinks && props.href?.startsWith("/")) {
+                return <Link to={props.href} {...props} />;
+              }
+
               return <a {...props} target="_blank" rel="noopener noreferrer" />;
             },
             table({ ...props }) {
@@ -97,7 +123,10 @@ const MemoizedMarkdownBlock = memo(
     return (
       prevProps.block.type === nextProps.block.type &&
       prevProps.block.content === nextProps.block.content &&
-      prevProps.block.lang === nextProps.block.lang
+      prevProps.block.lang === nextProps.block.lang &&
+      prevProps.allowInternalLinks === nextProps.allowInternalLinks &&
+      prevProps.remendEnabled === nextProps.remendEnabled &&
+      prevProps.simpleCodeBlocks === nextProps.simpleCodeBlocks
     );
   },
 );
@@ -106,18 +135,33 @@ MemoizedMarkdownBlock.displayName = "MemoizedMarkdownBlock";
 
 export const MemoizedMarkdown = memo(
   ({
+    allowInternalLinks,
     content,
     id,
     messageRole,
+    simpleCodeBlocks,
   }: {
+    allowInternalLinks?: boolean;
     content: string;
     id: string;
     messageRole: UIMessage["role"];
+    simpleCodeBlocks?: boolean;
   }) => {
-    const blocks = useMemo(() => parseMarkdownIntoBlocks(content), [content]);
+    const remendEnabled = useAtomValue(remendEnabledAtom);
+    const blocks = useMemo(
+      () => parseMarkdownIntoBlocks(content, remendEnabled),
+      [content, remendEnabled],
+    );
 
     return blocks.map((block, index) => (
-      <MemoizedMarkdownBlock block={block} messageRole={messageRole} key={`${id}-block_${index}`} />
+      <MemoizedMarkdownBlock
+        allowInternalLinks={allowInternalLinks}
+        block={block}
+        messageRole={messageRole}
+        remendEnabled={remendEnabled}
+        simpleCodeBlocks={simpleCodeBlocks}
+        key={`${id}-block_${index}`}
+      />
     ));
   },
 );

@@ -1,5 +1,6 @@
 import { atom } from "jotai";
-import { atomFamily, atomWithStorage } from "jotai/utils";
+import { atomFamily } from "jotai-family";
+import { atomWithStorage } from "jotai/utils";
 
 import {
   normalizeProviderModelMetadata,
@@ -60,6 +61,13 @@ export const providerHeadersAtomFamily = atomFamily((providerId: ProviderId) =>
 
 export const providerModelsAtomFamily = atomFamily((providerId: ProviderId) =>
   atom((get) => normalizeProviderConfig(get(providerConfigAtoms[providerId])).models),
+);
+
+export const providerSetupDismissedAtom = atomWithStorage<Record<string, boolean>>(
+  `${SETTING_PREFIX}PROVIDER_SETUP_DISMISSED`,
+  {},
+  undefined,
+  { getOnInit: true },
 );
 
 export const hasEnabledProviderAtom = atom((get) => {

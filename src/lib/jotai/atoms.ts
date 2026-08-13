@@ -2,7 +2,9 @@ import dedent from "dedent";
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 
-import { systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
+import { sanitizeMemoryEntries } from "@/lib/memory";
+
+import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
 
 export type ChatStatusIndicator = "loading" | "error" | "unread" | null;
 
@@ -19,7 +21,7 @@ export const onboardingCompletedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
-export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", false, undefined, {
+export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", true, undefined, {
   getOnInit: true,
 });
 
@@ -51,9 +53,18 @@ export const lastVacuumTimestampAtom = atomWithStorage<number>(
   { getOnInit: true },
 );
 
+export const lastModelDirectorySyncTimestampAtom = atomWithStorage<number>(
+  "agent-one-last-model-directory-sync-timestamp",
+  0,
+  undefined,
+  { getOnInit: true },
+);
+
 export const systemPromptAtom = atom((get) => {
   const userName = get(userNameAtom);
   const appendix = get(systemPromptAppendixAtom);
+  const memory = get(memoryAtom);
+  const memoryEntries = sanitizeMemoryEntries(memory);
 
   const settings = [
     userName && `- Name: ${userName}`,
@@ -62,10 +73,18 @@ export const systemPromptAtom = atom((get) => {
     .filter(Boolean)
     .join("\n");
 
+  const memorySection =
+    memoryEntries.length > 0 ? memoryEntries.map((entry) => `- ${entry}`).join("\n") : "";
+
   return dedent`
     ## Guidelines
-    You are AgentOne, a helpful AI agent.
-    When the \`describeNextTool\` function is available, _always_ use it before you use an \`mcp__\` tool.
+    You are AgentOne, a helpful AI agent. You are currently being accessed via the [AgentOne desktop app](https://www.agent-one.dev/). Documentation for AgentOne can be found at https://docs.agent-one.dev/docs/. To extend your capabilities beyond the tools you already have, the user can install extensions for you to use. They can do so by clicking "Settings" in the bottom left of the app sidebar (when expanded), then choosing the "Extensions" tab. There are over 21,000 extensions available.
+    When the \`describeNextTool\` function is available, you _always_ use it before you use a tool beginning with \`mcp__\`. If you use multiple tools beginning with \`mcp__\` at once, you always use \`describeNextTool\` before each one.
+    When the \`memory\` tool is available, you use it to store facts about the user across chats. You always do this when applicable to personalize responses, or when the user asks you to remember something. You don't have to be explicit in your use of the tool - if you update your memory, you don't need to mention it. Prefer small targeted additions, deletions, or edits. Avoid adding duplicates or contradictory entries. Save stable, reusable information that is likely to help in future chats.
+    ## Application Usage
+    When the \`listSettings\`, \`getSetting\`, and \`updateSetting\` tools are available, you can use them to change the desktop app behavior. Note that not all settings are accessible to you - there may be settings that you do not know about. If you are unsure what a setting does, do not make assumptions - you could search for it in the documentation or explain that you aren't certain.
+    If the user asks you something like "Stop requesting my permission every time you need to do something", "You keep handing the task back to me", "You're supposed to be agentic", etc., inform them that you are unable to adjust this setting. However, they can do it themselves by opening the model config popup (the 3 bars icon next to the model selector, in the area where users type their messages), then changing "Tool Behavior" to "YOLO". That change will only effect this conversation. To change the default for all conversations, the user can click "New Chat" in the sidebar to get to the new chat screen, then open the model config popup and do the same change.
     ${settings ? `\n## User settings:\n${settings}` : ""}
+    ${memorySection ? `\n## User memory:\n${memorySection}` : ""}
   `.trim();
 });

@@ -8,6 +8,7 @@ export const MessageGroup = ({
   children,
   messageRole,
   contentToCopy,
+  contentToSpeak,
   messageId,
   onEdit,
   onBranch,
@@ -15,6 +16,7 @@ export const MessageGroup = ({
   children: React.ReactNode;
   messageRole: UIMessage["role"];
   contentToCopy: string;
+  contentToSpeak: string;
   messageId: UIMessage["id"];
   onEdit?: () => void;
   onBranch?: () => void;
@@ -23,19 +25,22 @@ export const MessageGroup = ({
     <div
       className={cn(
         "group/message flex flex-col wrap-anywhere",
-        messageRole === "user" ? "max-w-3/4 items-end" : "max-w-full items-start",
+        messageRole === "user" ? "max-w-3/4 items-end" : "max-w-full w-full items-start",
       )}
     >
       <div
         className={cn(
           "flex max-w-full flex-col gap-2 rounded-md",
-          messageRole === "user" ? "bg-secondary text-secondary-foreground p-2" : "p-2 pr-0 pb-0",
+          messageRole === "user"
+            ? "bg-secondary text-secondary-foreground p-2"
+            : "p-2 pr-0 pb-0 w-full",
         )}
       >
         {children}
       </div>
       <MessageActionRow
         contentToCopy={contentToCopy}
+        contentToSpeak={contentToSpeak}
         messageRole={messageRole}
         messageId={messageId}
         onEdit={onEdit}

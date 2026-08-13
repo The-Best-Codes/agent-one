@@ -3,8 +3,12 @@ import { IconChevronLeft } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatLoading, useChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -130,8 +134,8 @@ export const ChatUsageStatus = () => {
                 </>
               ) : (
                 <>
-                  <Tooltip>
-                    <TooltipTrigger
+                  <AdaptiveTooltip>
+                    <AdaptiveTooltipTrigger
                       className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
                       tabIndex={isCollapsed ? -1 : 0}
                       asChild
@@ -149,17 +153,17 @@ export const ChatUsageStatus = () => {
                           }
                         />
                       </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
+                    </AdaptiveTooltipTrigger>
+                    <AdaptiveTooltipContent className="max-w-xs">
                       This chat is currently {totalTokens} tokens long.{" "}
                       {maxTokens !== undefined
                         ? `The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
                         : "The model you're using supports an unknown number of tokens."}
-                    </TooltipContent>
-                  </Tooltip>
+                    </AdaptiveTooltipContent>
+                  </AdaptiveTooltip>
 
-                  <Tooltip>
-                    <TooltipTrigger
+                  <AdaptiveTooltip>
+                    <AdaptiveTooltipTrigger
                       className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
                       tabIndex={isCollapsed ? -1 : 0}
                       asChild
@@ -179,15 +183,15 @@ export const ChatUsageStatus = () => {
                           />
                         )}
                       </span>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
+                    </AdaptiveTooltipTrigger>
+                    <AdaptiveTooltipContent className="max-w-xs">
                       {hasUnknownCost
                         ? totalCostUsd > 0
                           ? "Estimated cost is a lower bound, as pricing data is missing for one or more messages in this chat. Edits and deleted messages are not included in these stats."
                           : "Pricing data is unavailable for the model(s) used in this chat, so the cost cannot be estimated."
                         : "Estimated cost of this chat in USD. Edits and deleted messages are not included in these stats."}
-                    </TooltipContent>
-                  </Tooltip>
+                    </AdaptiveTooltipContent>
+                  </AdaptiveTooltip>
                 </>
               )}
             </div>

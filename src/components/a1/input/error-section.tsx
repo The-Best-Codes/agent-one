@@ -1,7 +1,11 @@
 import { IconRefresh, IconX } from "@tabler/icons-react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
@@ -26,8 +30,8 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
         {displayDescription && <span className="text-base">{displayDescription}</span>}
       </div>
       <div className="flex flex-row items-center gap-2">
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
+        <AdaptiveTooltip delayDuration={0}>
+          <AdaptiveTooltipTrigger asChild>
             <Button
               onClick={() => {
                 void regenerate();
@@ -39,11 +43,11 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
               <IconRefresh data-icon="inline-start" />
               Retry
             </Button>
-          </TooltipTrigger>
-          <TooltipContent className="max-h-48 max-w-48">
+          </AdaptiveTooltipTrigger>
+          <AdaptiveTooltipContent className="max-h-48 max-w-48">
             Discards the last AI message (if any) and retries
-          </TooltipContent>
-        </Tooltip>
+          </AdaptiveTooltipContent>
+        </AdaptiveTooltip>
         <Button title="Ignore error" size="icon" onClick={() => clearError()} variant="outline">
           <IconX />
         </Button>

@@ -31,6 +31,7 @@ import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 import { SubagentTranscript } from "../parts/subagent-transcript";
+import { ToolErrorAccordion } from "./tool-error-accordion";
 
 interface SubAgentToolPartProps {
   part: ToolUIPart;
@@ -86,6 +87,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
     if (liveState?.status === "waiting-approval") {
       return `Subagent waiting for ${pendingApprovals.length === 1 ? "approval" : "approvals"}`;
     }
+    if (part.state === "approval-responded" && part.approval?.approved === false) {
+      return "Subagent denied";
+    }
     if (isStreaming || part.state === "approval-responded" || part.state === "input-available") {
       return "Subagent running";
     }
@@ -105,7 +109,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               AgentOne wants to spawn a subagent
             </span>
           </div>
-          <div className="bg-secondary rounded px-2 py-1 text-xs break-words">{task}</div>
+          <div className="bg-secondary rounded px-2 py-1 text-xs wrap-break-word">{task}</div>
           <div className="flex items-center justify-end gap-2">
             <Button
               size="sm"
@@ -146,6 +150,14 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
     case "approval-responded":
     case "input-available":
     case "output-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">Subagent denied</span>
+          </div>
+        );
+      }
       return (
         <Accordion
           type="single"
@@ -164,7 +176,12 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               icon={
                 <div className="relative">
                   {showSpinnerIcon ? (
-                    <Spinner className="text-foreground absolute inset-0 size-4 shrink-0" />
+                    <Spinner
+                      className={cn(
+                        "text-foreground absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-0 group-hover/subagent-accordion:opacity-0",
+                        isExpanded && "scale-0 opacity-0",
+                      )}
+                    />
                   ) : (
                     <IconHierarchy3
                       className={cn(
@@ -173,14 +190,12 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
                       )}
                     />
                   )}
-                  {!showSpinnerIcon && (
-                    <IconChevronDown
-                      className={cn(
-                        "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-100 group-hover/subagent-accordion:opacity-100",
-                        isExpanded && "scale-100 opacity-100",
-                      )}
-                    />
-                  )}
+                  <IconChevronDown
+                    className={cn(
+                      "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-accordion:scale-100 group-hover/subagent-accordion:opacity-100",
+                      isExpanded && "scale-100 opacity-100",
+                    )}
+                  />
                 </div>
               }
               iconPosition="left"
@@ -223,49 +238,13 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       }
 
       return (
-        <Accordion
-          type="single"
-          collapsible
-          onValueChange={(value) => setIsErrorAccordionOpen(value === callId)}
-          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
-        >
-          <AccordionItem
-            value={callId}
-            className={cn(
-              "group/subagent-error-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
-              isErrorAccordionOpen && "border border-b! p-2",
-            )}
-          >
-            <AccordionTrigger
-              icon={
-                <div className="relative">
-                  <IconCircleX
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/subagent-error-accordion:scale-0 group-hover/subagent-error-accordion:opacity-0",
-                      isErrorAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
-                  <IconChevronDown
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/subagent-error-accordion:scale-100 group-hover/subagent-error-accordion:opacity-100",
-                      isErrorAccordionOpen && "scale-100 opacity-100",
-                    )}
-                  />
-                </div>
-              }
-              iconPosition="left"
-              shouldRotateIcon={true}
-              className="justify-start gap-1 p-0 font-bold hover:no-underline"
-            >
-              <span className="text-destructive max-w-2xl truncate">Subagent error</span>
-            </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
-              <div className="text-destructive/80 text-sm font-normal">
-                {part.errorText || "Unknown error"}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <ToolErrorAccordion
+          callId={callId}
+          errorText={part.errorText}
+          isOpen={isErrorAccordionOpen}
+          onOpenChange={setIsErrorAccordionOpen}
+          title="Subagent error"
+        />
       );
 
     default:

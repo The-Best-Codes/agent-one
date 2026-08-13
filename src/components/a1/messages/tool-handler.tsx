@@ -11,11 +11,16 @@ import { MessagePartToolDateTime } from "./tools/tool-dateTime";
 import { MessagePartToolDeleteFile } from "./tools/tool-deleteFile";
 import { MessagePartToolEditFile } from "./tools/tool-editFile";
 import { MessagePartToolExecuteCommand } from "./tools/tool-executeCommand";
+import { MessagePartToolGetSetting } from "./tools/tool-getSetting";
 import { MessagePartToolGetUrlContent } from "./tools/tool-getUrlContent";
+import { MessagePartToolListSettings } from "./tools/tool-listSettings";
+import { MessagePartToolMemory } from "./tools/tool-memory";
 import { MessagePartToolSubAgent } from "./tools/tool-subAgent";
+import { MessagePartToolUpdateSetting } from "./tools/tool-updateSetting";
 import { MessagePartToolViewFile } from "./tools/tool-viewFile";
 import { MessagePartToolWaitNumberMilliseconds } from "./tools/tool-waitNumberMilliseconds";
 import { MessagePartToolWebSearch } from "./tools/tool-webSearch";
+import { MessagePartToolWikipedia } from "./tools/tool-wikipedia";
 
 const logger = getLogger(import.meta.url);
 
@@ -41,6 +46,10 @@ export const MessageToolHandler = memo(
         return <MessagePartToolGetUrlContent part={part} />;
       case "tool-webSearch":
         return <MessagePartToolWebSearch part={part} />;
+      case "tool-wikipedia":
+        return <MessagePartToolWikipedia part={part} />;
+      case "tool-memory":
+        return <MessagePartToolMemory part={part} />;
       case "tool-editFile":
         return <MessagePartToolEditFile part={part} />;
       case "tool-createFile":
@@ -53,6 +62,12 @@ export const MessageToolHandler = memo(
         return <MessagePartToolExecuteCommand part={part} />;
       case "tool-subAgent":
         return <MessagePartToolSubAgent part={part} />;
+      case "tool-listSettings":
+        return <MessagePartToolListSettings part={part} />;
+      case "tool-getSetting":
+        return <MessagePartToolGetSetting part={part} />;
+      case "tool-updateSetting":
+        return <MessagePartToolUpdateSetting part={part} />;
       default:
         return <MessagePartToolCall part={part as ToolUIPart} />;
     }

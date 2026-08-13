@@ -8,7 +8,6 @@ import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/l
 import { chatSortAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import { type ChatSearchResult, chatStorage } from "@/lib/storage/chat-storage";
-import { emitWindowSyncEvent, onWindowSyncEvent } from "@/lib/sync/window-sync";
 
 import { PersistenceContext } from "./persistence-contexts";
 
@@ -147,49 +146,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    let unlisten: (() => void) | null = null;
-    let cancelled = false;
-
-    void onWindowSyncEvent((event) => {
-      switch (event.type) {
-        case "chat-created":
-        case "chat-branched": {
-          metadataCacheRef.current.set(event.chatId, event.metadata);
-          setChatIds((curr) => (curr.includes(event.chatId) ? curr : [event.chatId, ...curr]));
-          setChatUpdateTrigger((p) => p + 1);
-          break;
-        }
-        case "chat-deleted": {
-          metadataCacheRef.current.delete(event.chatId);
-          setChatIds((curr) => curr.filter((id) => id !== event.chatId));
-          setChatUpdateTrigger((p) => p + 1);
-          break;
-        }
-        case "chats-bulk-deleted": {
-          const deleted = new Set(event.chatIds);
-          for (const id of event.chatIds) metadataCacheRef.current.delete(id);
-          setChatIds((curr) => curr.filter((id) => !deleted.has(id)));
-          setChatUpdateTrigger((p) => p + 1);
-          break;
-        }
-        case "chat-metadata-updated": {
-          metadataCacheRef.current.set(event.chatId, event.metadata);
-          setChatUpdateTrigger((p) => p + 1);
-          break;
-        }
-      }
-    }).then((fn) => {
-      if (cancelled) fn();
-      else unlisten = fn;
-    });
-
-    return () => {
-      cancelled = true;
-      unlisten?.();
-    };
-  }, [setChatIds, setChatUpdateTrigger]);
-
   const getMetadata = useCallback((id: string): ChatMetadata => {
     return metadataCacheRef.current.get(id) ?? { ...DEFAULT_METADATA };
   }, []);
@@ -272,7 +228,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         return currentChatIds.includes(id) ? currentChatIds : [id, ...currentChatIds];
       });
       setChatUpdateTrigger((prev) => prev + 1);
-      emitWindowSyncEvent({ type: "chat-created", chatId: id, metadata });
       return id;
     },
     [setChatIds, setChatUpdateTrigger, setMetadata, persistMetadata, persistMessages],
@@ -328,11 +283,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           logger.error(`Failed to update FTS index ${chatId}`, error);
         });
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({
-          type: "chat-metadata-updated",
-          chatId,
-          metadata: updatedMetadata,
-        });
       } catch (error) {
         logger.error(`Failed to save chat ${chatId}`, error);
       }
@@ -347,11 +297,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({
-          type: "chat-metadata-updated",
-          chatId,
-          metadata: updated,
-        });
       } catch (error) {
         logger.error(`Failed to save chat model ${chatId}`, error);
       }
@@ -366,11 +311,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({
-          type: "chat-metadata-updated",
-          chatId,
-          metadata: updated,
-        });
       } catch (error) {
         logger.error(`Failed to save chat model config ${chatId}`, error);
       }
@@ -391,11 +331,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         setMetadata(chatId, updated);
         persistMetadata(chatId, updated);
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({
-          type: "chat-metadata-updated",
-          chatId,
-          metadata: updated,
-        });
       } catch (error) {
         logger.error(`Failed to save chat title state ${chatId}`, error);
       }
@@ -417,11 +352,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           logger.error(`Failed to update FTS title ${chatId}`, error);
         });
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({
-          type: "chat-metadata-updated",
-          chatId,
-          metadata: updated,
-        });
       } catch (error) {
         logger.error(`Failed to save chat title ${chatId}`, error);
       }
@@ -440,7 +370,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           return currentChatIds.filter((id: string) => id !== chatId);
         });
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({ type: "chat-deleted", chatId });
       } catch (error) {
         logger.error(`Failed to delete chat ${chatId}`, error);
       }
@@ -461,7 +390,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           return currentChatIds.filter((id: string) => !chatIds.includes(id));
         });
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({ type: "chats-bulk-deleted", chatIds });
       } catch (error) {
         logger.error("Failed to bulk delete chats", error);
       }
@@ -528,11 +456,6 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
           return currentChatIds.includes(newId) ? currentChatIds : [newId, ...currentChatIds];
         });
         setChatUpdateTrigger((prev) => prev + 1);
-        emitWindowSyncEvent({
-          type: "chat-branched",
-          chatId: newId,
-          metadata: newMetadata,
-        });
 
         logger.verbose(`Chat ${originalChatId} branched to new chat ${newId}`);
         return newId;

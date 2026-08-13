@@ -1,6 +1,6 @@
 import type { LanguageModelUsage, UIMessage } from "ai";
 
-import { modelDirectoryData, type ModelRecord } from "@/assets/model-lists/model-directory";
+import { modelDirectoryData, type ModelRecord } from "@/lib/ai/models/model-directory";
 import { PROVIDER_IDS } from "@/lib/ai/providers/registry";
 
 const TOKENS_PER_MILLION = 1_000_000;

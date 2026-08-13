@@ -1,5 +1,4 @@
 import {
-  IconAppWindow,
   IconChevronDown,
   IconDeselect,
   IconDownload,
@@ -14,7 +13,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,16 +26,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
+import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useOverflow } from "@/hooks/use-overflow";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom } from "@/lib/jotai/settings-atoms";
-import { kbdRegistry } from "@/lib/kbd-registry";
 import { getLogger } from "@/lib/logger";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
-import { openNewWindow } from "@/lib/tauri/open-new-window";
 import { cn } from "@/lib/utils";
 
 import { ChatItem } from "./chat-item";
@@ -88,7 +84,7 @@ export const VirtualizedChatList = ({
   const [chatIds] = useAtom(chatIdsAtom);
   const [chatSort] = useAtom(chatSortAtom);
 
-  useHotkeys(kbdRegistry.focusChatSearch, () => {
+  useKeyboardShortcut("focusChatSearch", () => {
     searchInputRef.current?.focus();
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
@@ -155,7 +151,7 @@ export const VirtualizedChatList = ({
         }
         setIsSearching(true);
         trackGoogleAnalyticsEvent("chat_search_used", {
-          source: "sidebar",
+          ui_location: "sidebar",
           query_length: query.trim().length,
           search_content: searchContent,
           raw_operators: useRawOperators,
@@ -314,31 +310,15 @@ export const VirtualizedChatList = ({
     <div className={cn("flex h-full flex-col", className)}>
       <div className={cn("pb-2", showNewChatButton && "flex flex-col gap-2")}>
         {showNewChatButton && !selectionMode && (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => handleNewChat && handleNewChat()}
-              className="flex-1 justify-start"
-              variant="outline"
-              analytics={{ event: "new_chat_clicked", params: { source: "chat_list" } }}
-            >
-              <IconPlus data-icon="inline-start" />
-              New Chat
-            </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => openNewWindow("/chat")}
-                  analytics={{ event: "new_window_clicked", params: { source: "chat_list" } }}
-                  aria-label="New window"
-                >
-                  <IconAppWindow />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>New window</TooltipContent>
-            </Tooltip>
-          </div>
+          <Button
+            onClick={() => handleNewChat && handleNewChat()}
+            className="w-full justify-start"
+            variant="outline"
+            analytics={{ event: "new_chat_clicked", params: { ui_location: "chat_list" } }}
+          >
+            <IconPlus data-icon="inline-start" />
+            New Chat
+          </Button>
         )}
         {selectionMode ? (
           <div className="flex flex-col gap-1.5">
@@ -354,7 +334,10 @@ export const VirtualizedChatList = ({
                 size="sm"
                 className="h-7 flex-1 justify-start"
                 onClick={toggleSelectAll}
-                analytics={{ event: "chat_selection_toggled", params: { source: "chat_list" } }}
+                analytics={{
+                  event: "chat_selection_toggled",
+                  params: { ui_location: "chat_list" },
+                }}
               >
                 {!allSelected ? (
                   <IconSelectAll data-icon="inline-start" />
@@ -369,7 +352,10 @@ export const VirtualizedChatList = ({
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkExportModal(true)}
-                analytics={{ event: "bulk_chat_export_opened", params: { source: "chat_list" } }}
+                analytics={{
+                  event: "bulk_chat_export_opened",
+                  params: { ui_location: "chat_list" },
+                }}
               >
                 <IconDownload data-icon="inline-start" />
               </Button>
@@ -379,7 +365,10 @@ export const VirtualizedChatList = ({
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkDeleteModal(true)}
-                analytics={{ event: "bulk_chat_delete_opened", params: { source: "chat_list" } }}
+                analytics={{
+                  event: "bulk_chat_delete_opened",
+                  params: { ui_location: "chat_list" },
+                }}
               >
                 <IconTrash data-icon="inline-start" />
               </Button>
@@ -404,7 +393,10 @@ export const VirtualizedChatList = ({
                   size="icon"
                   className="shrink-0 rounded-l-none border-l-0"
                   aria-label="Search options"
-                  analytics={{ event: "chat_search_options_opened", params: { source: "sidebar" } }}
+                  analytics={{
+                    event: "chat_search_options_opened",
+                    params: { ui_location: "sidebar" },
+                  }}
                 >
                   <IconChevronDown />
                 </Button>
@@ -438,7 +430,7 @@ export const VirtualizedChatList = ({
         ref={parentRef}
         className={cn(
           "flex-1",
-          showList ? "overflow-y-auto" : "overflow-hidden",
+          showList ? "overflow-y-auto scroll-fade" : "overflow-hidden",
           isOverflowing && showList && "pr-2",
         )}
       >

@@ -27,6 +27,16 @@ export const BUILT_IN_TOOLS: Record<
     description: "Find information online",
     searchTerms: "search web internet results",
   },
+  wikipedia: {
+    name: "Wikipedia",
+    description: "Search Wikipedia and read article summaries, content, links, and categories",
+    searchTerms: "wikipedia encyclopedia knowledge article reference",
+  },
+  memory: {
+    name: "Memory",
+    description: "Maintain concise long-term user memory",
+    searchTerms: "memory remember preferences profile facts notes",
+  },
   editFile: {
     name: "Edit file",
     description: "Edit files by replacing text content",
@@ -56,6 +66,21 @@ export const BUILT_IN_TOOLS: Record<
     name: "Spawn subagent",
     description: "Delegate focused work to a streamed subagent",
     searchTerms: "subagent delegate nested agent parallel work",
+  },
+  listSettings: {
+    name: "List Settings",
+    description: "List all available configuration setting keys",
+    searchTerms: "settings list keys config configuration options",
+  },
+  getSetting: {
+    name: "Get Setting",
+    description: "Get the current value and possible options of a specific setting",
+    searchTerms: "settings get value options inspect configuration",
+  },
+  updateSetting: {
+    name: "Update Setting",
+    description: "Update a setting key's value",
+    searchTerms: "settings update change set write value configuration",
   },
 };
 

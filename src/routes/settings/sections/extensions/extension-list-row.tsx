@@ -1,6 +1,12 @@
-import { IconChevronRight, IconExternalLink, IconPackage, IconTrash } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconExternalLink,
+  IconPackage,
+  IconRefresh,
+  IconTrash,
+} from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { cloneElement, isValidElement, memo, useState } from "react";
 
 import {
   Accordion,
@@ -8,6 +14,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,12 +26,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 
 import { McpServerStatus } from "./mcp-server-status";
@@ -78,11 +89,13 @@ interface ExtensionListRowProps {
   loadState?: McpServerLoadState;
   authState?: McpAuthState;
   onEnabledChange?: (enabled: boolean) => void;
+  onRestart?: () => void;
   advancedContent?: ReactNode;
+  advancedContentKey?: unknown;
   moreInfoJson?: unknown;
 }
 
-export function ExtensionListRow({
+function ExtensionListRowComponent({
   title,
   description,
   version,
@@ -98,12 +111,19 @@ export function ExtensionListRow({
   loadState,
   authState,
   onEnabledChange,
+  onRestart,
   advancedContent,
   moreInfoJson,
 }: ExtensionListRowProps) {
   const hasAdvanced = Boolean(advancedContent) || moreInfoJson !== undefined;
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advancedFooter, setAdvancedFooter] = useState<ReactNode>(null);
   const toolCount = loadState?.status === "loaded" ? loadState.toolCount : null;
+  const advancedBody = isValidElement<{
+    setDialogFooter?: (footer: ReactNode) => void;
+  }>(advancedContent)
+    ? cloneElement(advancedContent, { setDialogFooter: setAdvancedFooter })
+    : advancedContent;
 
   return (
     <div className="bg-muted/40 flex w-full flex-col gap-3 rounded-md p-4 not-dark:border">
@@ -150,9 +170,14 @@ export function ExtensionListRow({
 
         <div className="flex shrink-0 items-center gap-2">
           {installed && canUninstall ? (
-            <Button size="sm" variant="destructive" onClick={onUninstall}>
-              <IconTrash data-icon="inline-start" />
-              Uninstall
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={onUninstall}
+              className="not-sm:size-7 sm:pl-1.5"
+            >
+              <IconTrash />
+              <span className="sr-only sm:not-sr-only">Uninstall</span>
             </Button>
           ) : !installed ? (
             <Button size="sm" variant="default" onClick={onInstall} disabled={!installSupported}>
@@ -161,8 +186,28 @@ export function ExtensionListRow({
           ) : null}
           {installed && enabled !== undefined && onEnabledChange ? (
             <div className="bg-muted dark:bg-input/30 border-border flex h-7 items-center gap-1 rounded-[min(var(--radius-md),12px)] border px-2.5 text-[0.8rem]">
-              <Tooltip>
-                <TooltipTrigger asChild>
+              {enabled &&
+              onRestart &&
+              loadState?.status !== "starting" &&
+              loadState?.status !== "connecting" ? (
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="size-3"
+                      aria-label="Restart extension"
+                      onClick={onRestart}
+                    >
+                      <IconRefresh />
+                    </Button>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent>Restart</AdaptiveTooltipContent>
+                </AdaptiveTooltip>
+              ) : null}
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <div className="flex items-center">
                     <McpServerStatus
                       state={loadState}
@@ -171,11 +216,11 @@ export function ExtensionListRow({
                       compact
                     />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>
                   {getMcpServerStatusTooltip(loadState, authState, !enabled)}
-                </TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipContent>
+              </AdaptiveTooltip>
               {toolCount !== null ? (
                 <span className="text-muted-foreground text-xs">
                   {toolCount === 1 ? "1 tool" : `${toolCount} tools`}
@@ -195,7 +240,15 @@ export function ExtensionListRow({
       </div>
 
       {installed && hasAdvanced ? (
-        <Dialog open={advancedOpen} onOpenChange={setAdvancedOpen}>
+        <Dialog
+          open={advancedOpen}
+          onOpenChange={(open) => {
+            setAdvancedOpen(open);
+            if (!open) {
+              setAdvancedFooter(null);
+            }
+          }}
+        >
           <DialogTrigger asChild>
             <Button
               type="button"
@@ -213,7 +266,7 @@ export function ExtensionListRow({
             </DialogHeader>
             <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
               <div className="flex flex-col gap-4 py-1">
-                {advancedContent}
+                {advancedBody}
                 {moreInfoJson !== undefined ? (
                   <Accordion type="single" collapsible className="rounded-md border px-3">
                     <AccordionItem value="more-info" className="border-b-0">
@@ -228,9 +281,29 @@ export function ExtensionListRow({
                 ) : null}
               </div>
             </div>
+            {advancedFooter ? <DialogFooter>{advancedFooter}</DialogFooter> : null}
           </DialogContent>
         </Dialog>
       ) : null}
     </div>
   );
 }
+
+export const ExtensionListRow = memo(ExtensionListRowComponent, (previous, next) => {
+  return (
+    previous.title === next.title &&
+    previous.description === next.description &&
+    previous.version === next.version &&
+    previous.iconUrl === next.iconUrl &&
+    previous.websiteUrl === next.websiteUrl &&
+    previous.badges === next.badges &&
+    previous.installed === next.installed &&
+    previous.installSupported === next.installSupported &&
+    previous.canUninstall === next.canUninstall &&
+    previous.enabled === next.enabled &&
+    previous.loadState === next.loadState &&
+    previous.authState === next.authState &&
+    previous.advancedContentKey === next.advancedContentKey &&
+    previous.moreInfoJson === next.moreInfoJson
+  );
+});

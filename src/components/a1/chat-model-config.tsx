@@ -2,22 +2,27 @@ import { IconAdjustments, IconInfoCircle, IconRestore } from "@tabler/icons-reac
 import debounce from "lodash.debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  AdaptivePopover,
+  AdaptivePopoverContent,
+  AdaptivePopoverTrigger,
+} from "@/components/ui/adaptive-popover";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { DEFAULT_MODEL_CONFIG } from "@/hooks/ai/use-model-catalog";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  DEFAULT_MODEL_CONFIG,
+  getToolBehavior,
+  type ToolBehavior,
+} from "@/hooks/ai/use-model-catalog";
 import { cn } from "@/lib/utils";
 
 interface SliderConfigProps {
@@ -30,6 +35,29 @@ interface SliderConfigProps {
   step: number;
   onChange: (value: number | undefined) => void;
 }
+
+const TOOL_BEHAVIORS: { value: ToolBehavior; label: string; description: string }[] = [
+  {
+    value: "default",
+    label: "Default",
+    description: "Use enabled tools and ask for approval only when each tool requires it.",
+  },
+  {
+    value: "ask",
+    label: "Ask",
+    description: "Ask for your approval before running every tool.",
+  },
+  {
+    value: "yolo",
+    label: "YOLO",
+    description: "Run tools without asking for approval. Use with caution.",
+  },
+  {
+    value: "disable",
+    label: "Disable",
+    description: "Do not make any tools available to the model.",
+  },
+];
 
 const SliderConfig = ({
   id,
@@ -69,14 +97,14 @@ const SliderConfig = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Label htmlFor={id}>{label}</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               {tooltip}
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <div className="flex items-center gap-1">
           <span className={cn("text-sm", isUnset ? "text-muted-foreground" : "text-foreground")}>
@@ -129,8 +157,8 @@ export const ChatModelConfig = ({
 }) => {
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 640px)");
   const effectiveOpen = disabled ? false : open;
+  const toolBehavior = getToolBehavior(currentModelConfig);
 
   const [localInputs, setLocalInputs] = useState({
     maxTokens: currentModelConfig.maxTokens,
@@ -208,6 +236,7 @@ export const ChatModelConfig = ({
       frequencyPenalty: DEFAULT_MODEL_CONFIG.frequencyPenalty,
       presencePenalty: DEFAULT_MODEL_CONFIG.presencePenalty,
       seed: DEFAULT_MODEL_CONFIG.seed,
+      toolBehavior: DEFAULT_MODEL_CONFIG.toolBehavior,
     });
   };
 
@@ -219,7 +248,8 @@ export const ChatModelConfig = ({
     currentModelConfig.topK === DEFAULT_MODEL_CONFIG.topK &&
     currentModelConfig.frequencyPenalty === DEFAULT_MODEL_CONFIG.frequencyPenalty &&
     currentModelConfig.presencePenalty === DEFAULT_MODEL_CONFIG.presencePenalty &&
-    currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed;
+    currentModelConfig.seed === DEFAULT_MODEL_CONFIG.seed &&
+    toolBehavior === DEFAULT_MODEL_CONFIG.toolBehavior;
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -235,6 +265,44 @@ export const ChatModelConfig = ({
           <IconRestore data-icon="inline-start" />
           <span className="sr-only">Reset all</span>
         </Button>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Label>Tool Behavior</Label>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
+              <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
+              Choose whether tools are available and when they need your approval.
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
+        </div>
+        <Tabs
+          value={toolBehavior}
+          onValueChange={(value) => {
+            setModelConfig({
+              ...configRef.current,
+              toolBehavior: value as ToolBehavior,
+            });
+          }}
+        >
+          <TabsList className="w-full">
+            {TOOL_BEHAVIORS.map((behavior) => (
+              <TabsTrigger key={behavior.value} value={behavior.value}>
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
+                    <span>{behavior.label}</span>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent className="max-w-xs">
+                    {behavior.description}
+                  </AdaptiveTooltipContent>
+                </AdaptiveTooltip>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       <SliderConfig
@@ -262,16 +330,16 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="topK">Top K</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Only sample from the top K options for each subsequent token. Used to remove "long
               tail" low probability responses. Recommended for advanced use cases only. Leave empty
               to use model default.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="topK"
@@ -308,14 +376,14 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="maxSteps">Max Steps</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Maximum number of reasoning/tool steps in one response. Leave empty for no step limit.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="maxSteps"
@@ -325,21 +393,22 @@ export const ChatModelConfig = ({
           max={1000}
           value={localInputs.maxSteps ?? ""}
           onChange={handleMaxStepsChange}
+          disabled={toolBehavior === "disable"}
         />
       </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="maxTokens">Max Tokens</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Maximum number of tokens (words/sub-words) in the model response. Leave empty to use
               the model's default limit.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="maxTokens"
@@ -353,15 +422,15 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="seed">Seed</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Integer seed for random sampling. If set and supported by the model, calls will
               generate deterministic results. Leave empty for random behavior.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="seed"
@@ -393,23 +462,14 @@ export const ChatModelConfig = ({
   );
 
   return (
-    <>
-      {isDesktop ? (
-        <Popover open={effectiveOpen} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent className="max-h-80 w-64 overflow-auto p-4">{content}</PopoverContent>
-        </Popover>
-      ) : (
-        <Drawer open={effectiveOpen} onOpenChange={setOpen}>
-          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle className="sr-only">Model Configuration</DrawerTitle>
-            </DrawerHeader>
-            <div className="overflow-y-auto px-4 pb-4">{content}</div>
-          </DrawerContent>
-        </Drawer>
-      )}
-    </>
+    <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
+      <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
+      <AdaptivePopoverContent
+        title="Model Configuration"
+        className="max-h-80 w-64 overflow-auto p-4"
+      >
+        {content}
+      </AdaptivePopoverContent>
+    </AdaptivePopover>
   );
 };

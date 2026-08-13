@@ -1,25 +1,14 @@
-import {
-  IconChevronDown,
-  IconCircleCheck,
-  IconCircleX,
-  IconClock,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCircleCheck, IconCircleX, IconClock, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { getLogger } from "@/lib/logger";
-import { cn } from "@/lib/utils";
+
+import { ToolErrorAccordion } from "./tool-error-accordion";
 
 const logger = getLogger(import.meta.url);
 
@@ -116,7 +105,17 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       );
 
     case "approval-responded":
-    case "input-available":
+    case "input-available": {
+      if (part.approval?.approved === false) {
+        return (
+          <div key={callId} className="flex items-center gap-1">
+            <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+            <span className="text-muted-foreground text-sm font-bold">
+              Wait for {safeFormatMilliseconds(input?.milliseconds)} denied
+            </span>
+          </div>
+        );
+      }
       return (
         <div
           key={callId}
@@ -128,6 +127,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           </span>
         </div>
       );
+    }
 
     case "output-available":
       return (
@@ -152,51 +152,13 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         );
       }
       return (
-        <Accordion
-          type="single"
-          collapsible
-          onValueChange={(value) => setIsErrorAccordionOpen(value === callId)}
-          className="text-foreground flex flex-row bg-transparent p-0 text-sm"
-        >
-          <AccordionItem
-            value={callId}
-            className={cn(
-              "group/wait-accordion border-border w-fit max-w-full rounded-md border-0 transition-[padding] duration-200",
-              isErrorAccordionOpen && "border border-b! p-2",
-            )}
-          >
-            <AccordionTrigger
-              icon={
-                <div className="relative">
-                  <IconCircleX
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-100 opacity-100 transition-[opacity,scale] duration-200 group-hover/wait-accordion:scale-0 group-hover/wait-accordion:opacity-0",
-                      isErrorAccordionOpen && "scale-0 opacity-0",
-                    )}
-                  />
-                  <IconChevronDown
-                    className={cn(
-                      "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/wait-accordion:scale-100 group-hover/wait-accordion:opacity-100",
-                      isErrorAccordionOpen && "scale-100 opacity-100",
-                    )}
-                  />
-                </div>
-              }
-              iconPosition="left"
-              shouldRotateIcon={true}
-              className="justify-start gap-1 p-0 font-bold hover:no-underline"
-            >
-              <span className="text-destructive max-w-2xl truncate">
-                An error occurred while waiting
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="p-0 pt-2">
-              <div className="text-destructive/80 text-sm font-normal">
-                {part?.errorText || "Unknown error"}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <ToolErrorAccordion
+          callId={callId}
+          errorText={part.errorText}
+          isOpen={isErrorAccordionOpen}
+          onOpenChange={setIsErrorAccordionOpen}
+          title="An error occurred while waiting"
+        />
       );
 
     default:

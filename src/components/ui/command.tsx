@@ -56,8 +56,9 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  endAddon,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & { endAddon?: React.ReactNode }) {
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
       <InputGroup className="border-input/30 bg-input/30 h-8! rounded-lg! shadow-none! *:data-[slot=input-group-addon]:pl-2!">
@@ -72,6 +73,7 @@ function CommandInput({
         <InputGroupAddon>
           <IconSearch className="size-4 shrink-0 opacity-50" />
         </InputGroupAddon>
+        {endAddon && <InputGroupAddon align="inline-end">{endAddon}</InputGroupAddon>}
       </InputGroup>
     </div>
   );
