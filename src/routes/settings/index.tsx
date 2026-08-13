@@ -153,7 +153,7 @@ export default function SettingsRoute() {
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle className="mb-2">Settings</DrawerTitle>
+                <DrawerTitle className="mb-2">Setting Categories</DrawerTitle>
                 <DrawerDescription className="sr-only">List of setting sections</DrawerDescription>
                 <SettingsSidebar
                   activeSection={displayedSection}
