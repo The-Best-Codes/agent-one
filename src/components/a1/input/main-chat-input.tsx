@@ -558,7 +558,7 @@ export const MainChatInput = ({
             <div className="flex flex-row">
               <ModelSelector
                 loading={isChatLoading}
-                className="sm:w-60 w-40 min-w-0 flex-1 rounded-r-none"
+                className="w-40 min-w-0 flex-1 rounded-r-none sm:w-60"
                 popoverClassName="w-60"
               />
               <ChatModelConfig
