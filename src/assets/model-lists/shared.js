@@ -17,15 +17,15 @@ export function createAgentOneProvider() {
     id: "agent-one",
     name: "AgentOne",
     models: {
-      lite: {
-        id: "agent-one-lite",
-        name: "Lite",
-        features: { tool_call: true },
-        modalities: { output: ["text"] },
-      },
       auto: {
         id: "agent-one-auto",
         name: "Auto",
+        features: { tool_call: true },
+        modalities: { output: ["text"] },
+      },
+      lite: {
+        id: "agent-one-lite",
+        name: "Lite",
         features: { tool_call: true },
         modalities: { output: ["text"] },
       },
