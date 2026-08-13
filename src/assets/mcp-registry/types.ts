@@ -33,7 +33,7 @@ export type Server = {
 export type ServerMeta = {
   "io.modelcontextprotocol.registry/publisher-provided"?: {
     [key: string]:
-      | Array<PurpleIoModelcontextprotocolRegistryPublisherProvided | string>
+      | Array<PurpleIoModelcontextprotocolRegistryPublisherProvided | number | string>
       | boolean
       | number
       | {
@@ -52,7 +52,7 @@ export type PurpleIoModelcontextprotocolRegistryPublisherProvided = {
   count?: number;
   description?: string;
   name?: string;
-  config?: ConfigClass | string;
+  config?: ConfigConfig | string;
   note?: string;
   command?: string;
   example?: Example;
@@ -97,15 +97,15 @@ export type Annotations = {
   readOnlyHint: boolean;
 };
 
-export type ConfigClass = {
+export type ConfigConfig = {
   mcpServers: ConfigMCPServers;
 };
 
 export type ConfigMCPServers = {
-  codeix: Codeix;
+  codeix: CodeixClass;
 };
 
-export type Codeix = {
+export type CodeixClass = {
   args: string[];
   command: string;
 };
@@ -124,10 +124,12 @@ export type FluffyIoModelcontextprotocolRegistryPublisherProvided = {
   description?: string;
   name?: string;
   usd_per_month?: number | string;
-  asset?: string;
-  label?: string;
-  network?: string;
-  proof?: string;
+  level?: string;
+  organization?: string;
+  url?: string;
+  install?: string;
+  required?: boolean;
+  config?: CodeixClass;
 };
 
 export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
@@ -165,8 +167,17 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   status?: string;
   authorizationUrl?: string;
   clientId?: string;
-  scopes?: string[];
-  tokenUrl?: TokenURL;
+  scopes?: Array<ScopeClass | string>;
+  tokenUrl?: TokenURLClass | string;
+  billingBasis?: string;
+  deepUsdPerHandle?: string;
+  internalActorFailoverHasNoExtraCharge?: boolean;
+  livePreflightAnd402AreAuthoritative?: boolean;
+  minimumTaskUsd?: string;
+  normalProgressiveTiers?: string[];
+  pricingVersion?: string;
+  deep?: string;
+  normal?: string;
   alsoSupported?: string[];
   primary?: string;
   billing?: string;
@@ -176,11 +187,22 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   api_key_env?: string;
   api_key_header?: string;
   requires_api_key?: boolean;
+  changelog?: string;
+  health?: string;
+  metadata?: string;
   dynamicClientRegistration?: boolean;
   pkce?: string;
   wellKnownIssuer?: string;
   docsUrl?: string;
   oauthDiscoveryUrl?: string;
+  "invoke-human-tasks"?: InvokeHumanTasks;
+  nervapack?: Nervapack;
+  "nervapack-memory"?: Nervapack;
+  mcpServers?: IoModelcontextprotocolRegistryPublisherProvidedMCPServers;
+  codingAgentSetup?: string;
+  llmsTxt?: string;
+  protocol?: string;
+  resources?: string[] | boolean;
   auth?: string;
   homepage?: string;
   quickstart?: string;
@@ -200,31 +222,40 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   github?: string;
   name?: string;
   url?: string;
-  mcpServers?: IoModelcontextprotocolRegistryPublisherProvidedMCPServers;
   graph?: string;
   llmsFullTxt?: string;
-  codingAgentSetup?: string;
-  docs?: string;
-  llmsTxt?: string;
   types?: string[];
   sources?: string[];
+  analyst?: number;
+  enterprise?: string;
+  free?: number;
+  team?: number;
   args?: unknown[];
   node?: string;
   monthly?: number;
   yearly?: number;
+  default?: string;
+  environmentVariable?: string;
+  values?: Values;
   faq?: string;
   pypi?: string[] | string;
+  consentUrl?: string;
+  grantTypes?: string[];
+  notes?: string;
+  revocationUrl?: string;
+  sessionManagementUrl?: string;
+  credentials?: string[];
+  transport?: string;
+  levels?: string[];
+  presets?: Preset[];
+  version?: number;
   npm?: string[];
-  nervapack?: Nervapack;
-  "nervapack-memory"?: Nervapack;
   company_baseline?: string;
   evidence_packet?: string;
   program_search?: string;
   quota_before_batch?: string;
   method?: string;
-  protocol?: string;
   prompts?: boolean;
-  resources?: boolean;
   tools?: string[] | number;
   campaign?: string;
   source?: string;
@@ -250,6 +281,11 @@ export type EndpointsClass = {
   verify: string;
 };
 
+export type InvokeHumanTasks = {
+  type: string;
+  url: string;
+};
+
 export type IoModelcontextprotocolRegistryPublisherProvidedMCPServers = {
   lumen?: Lumen;
   "logic-pro"?: Nervapack;
@@ -270,14 +306,33 @@ export type Env = {
   LUMEN_MCP_AUTH_TOKEN: string;
 };
 
+export type Preset = {
+  id: string;
+  scopes: string[];
+  title: string;
+};
+
 export type ProtocolCoverage = {
   live: string[];
   planned_2026_q2_q3: string[];
 };
 
-export type TokenURL = {
+export type ScopeClass = {
+  description: string;
+  id: string;
+  maxLevel: string;
+  title: string;
+};
+
+export type TokenURLClass = {
   eu: string;
   us: string;
+};
+
+export type Values = {
+  dual: Date[];
+  legacy: Date[];
+  modern: Date[];
 };
 
 export type Icon = {
@@ -342,6 +397,12 @@ export type EnvironmentVariableVariables = {
   ls_appkey?: ApifyAPIToken;
   ls_appsecretkey?: ApifyAPIToken;
   ls_market?: AllowSecrets;
+  garnet_host?: ProjectRef;
+  garnet_port?: ProjectRef;
+  embeddings_provider?: ProjectRef;
+  embeddings_endpoint?: ProjectRef;
+  embeddings_deployment?: ProjectRef;
+  embeddings_dimensions?: ProjectRef;
   sipnav_username?: ProjectRef;
   sipnav_password?: SgpDirectoryAPIKey;
   sipnav_api_url?: ProjectRef;
@@ -387,9 +448,9 @@ export type PackageArgument = {
   description?: string;
   isRequired?: boolean;
   format?: string;
+  valueHint?: string;
   default?: string;
   name?: string;
-  valueHint?: string;
   isRepeated?: boolean;
   variables?: PackageArgumentVariables;
   choices?: string[];
@@ -400,6 +461,8 @@ export type PackageArgument = {
 export type PackageArgumentVariables = {
   region?: ApifyAPIToken;
   store_path?: ApifyAPIToken;
+  host?: ApifyAPIToken;
+  port?: ApifyAPIToken;
   user_id?: ApifyAPIToken;
   workingDirectory?: ApifyAPIToken;
   toolFilter?: ToolFilter;
@@ -444,6 +507,7 @@ export type RuntimeArgumentVariables = {
   encoder_file?: ApifyAPIToken;
   decoder_file?: ApifyAPIToken;
   tokens_file?: ApifyAPIToken;
+  data_dir?: ApifyAPIToken;
   token?: ApifyAPIToken;
   VAULT_PATH?: ApifyAPIToken;
   config_path?: ApifyAPIToken;
@@ -461,11 +525,17 @@ export type RuntimeArgumentVariables = {
   kubeconfig_dir?: Account;
   inventory_path?: ApifyAPIToken;
   key_path?: ApifyAPIToken;
+  host_user?: ApifyAPIToken;
+  repository?: ApifyAPIToken;
   audio_directory?: ApifyAPIToken;
+  data_volume?: ApifyAPIToken;
+  uid_gid?: ApifyAPIToken;
   password?: ApifyAPIToken;
   rpc_url?: ApifyAPIToken;
   vault_path?: ApifyAPIToken;
   kube_config?: ApifyAPIToken;
+  sas_token_dir?: ApifyAPIToken;
+  kubeconfig_path?: ApifyAPIToken;
   source_path?: ApifyAPIToken;
   project_dir?: ApifyAPIToken;
   keepassxc_dir?: ApifyAPIToken;
@@ -550,17 +620,22 @@ export type FluffyVariables = {
   partglyph_api_key?: ApifyAPIToken;
   access_key?: ApifyAPIToken;
   IFR_COWORKER_TOKEN?: ApifyAPIToken;
+  cernion_token?: ApifyAPIToken;
   e2a_api_key?: ApifyAPIToken;
+  calmloop_mcp_token?: ApifyAPIToken;
   NINELAYER_API_KEY?: ApifyAPIToken;
   adtao_api_key?: ApifyAPIToken;
   project_token?: ApifyAPIToken;
   CATHEDRAL_API_KEY?: ApifyAPIToken;
   UPTOCODE_API_KEY?: ApifyAPIToken;
+  LTD_API_TOKEN?: ApifyAPIToken;
+  imagcon_api_key?: ApifyAPIToken;
   AUTH_TOKEN?: ApifyAPIToken;
   YUOR_MCP_TOKEN?: ApifyAPIToken;
   BRIGHTSEC_API_KEY?: ApifyAPIToken;
   EVERALICE_API_KEY?: ApifyAPIToken;
   FIRSTDATA_API_KEY?: ApifyAPIToken;
+  YO_API_KEY?: ApifyAPIToken;
   agent_name?: ApifyAPIToken;
   apiKey?: ApifyAPIToken;
   indicate_api_key?: ApifyAPIToken;
@@ -569,6 +644,8 @@ export type FluffyVariables = {
   pixelvault_api_key?: ApifyAPIToken;
   rendley_api_key?: ApifyAPIToken;
   signaliz_api_key?: ApifyAPIToken;
+  credentials?: ApifyAPIToken;
+  patsol_api_key?: ApifyAPIToken;
   RUNLOG_API_KEY?: ApifyAPIToken;
 };
 
@@ -591,6 +668,8 @@ export type RemoteVariables = {
   token?: APIHost;
   channel_key?: ApifyAPIToken;
   instance?: ApifyAPIToken;
+  cxone_base_url?: Account;
+  tenant_id?: Account;
   site_domain?: APIHost;
   tenant?: ApifyAPIToken;
   bucket_slug?: Account;
@@ -601,7 +680,6 @@ export type RemoteVariables = {
   subdomain?: Account;
   portal_host?: Account;
   env?: APIHost;
-  tenant_id?: Account;
   apify_token?: ApifyAPIToken;
   agent_id?: Account;
   apiKey?: ApifyAPIToken;
@@ -611,7 +689,10 @@ export type RemoteVariables = {
   host?: APIHost;
   key?: ApifyAPIToken;
   SGP_DIRECTORY_API_KEY?: SgpDirectoryAPIKey;
+  cle?: ApifyAPIToken;
   server_name?: Account;
+  perfex_host?: Account;
+  group?: APIHost;
   tenant_name?: Account;
   team_id?: Account;
   AUTH_TOKEN?: ApifyAPIToken;
@@ -632,6 +713,7 @@ export type RemoteVariables = {
   private_cloud_url?: Account;
   language?: APIHost;
   arquestra_token?: ApifyAPIToken;
+  network?: APIHost;
   supabase_project_ref?: Account;
   project_id?: Account;
   easy8_host?: Account;
@@ -643,6 +725,7 @@ export type RemoteVariables = {
   apifyToken?: ApifyAPIToken;
   slug?: Account;
   SKYVERN_API_KEY?: ApifyAPIToken;
+  session_id?: ApifyAPIToken;
   PROJECT_REF?: ProjectRef;
   ibkr_mcp_host?: Account;
   company_code?: ProjectRef;
@@ -665,14 +748,14 @@ export type RemoteVariables = {
   companyId?: Account;
   account?: Account;
   helpdesk_host?: Account;
-  port?: MCPPath;
+  organization?: Account;
+  worker_host?: Account;
   marmot_host?: Account;
   metabase_host?: Account;
   worker_domain?: ApifyAPIToken;
   openmetadata_host?: Account;
   plexus_host?: ProjectRef;
   your_mcp_server_host?: Account;
-  realm?: Account;
   sourcegraph_hostname?: Account;
   lobster_id?: Account;
   mcpPath?: MCPPath;
@@ -681,8 +764,11 @@ export type RemoteVariables = {
   key_id?: ApifyAPIToken;
   key_secret?: ApifyAPIToken;
   appId?: Account;
+  mcpHost?: APIHost;
   api_token?: ApifyAPIToken;
   endpoint_code?: Account;
+  locale?: APIHost;
+  cashtag?: ApifyAPIToken;
 };
 
 export type APIHost = {
