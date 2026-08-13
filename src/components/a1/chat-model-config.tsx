@@ -470,7 +470,7 @@ export const ChatModelConfig = ({
       ) : (
         <Drawer open={effectiveOpen} onOpenChange={setOpen}>
           <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent>
+          <DrawerContent className="bg-popover">
             <DrawerHeader>
               <DrawerTitle className="sr-only">Model Configuration</DrawerTitle>
             </DrawerHeader>
