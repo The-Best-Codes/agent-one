@@ -119,9 +119,9 @@ function ExtensionListRowComponent({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [advancedFooter, setAdvancedFooter] = useState<ReactNode>(null);
   const toolCount = loadState?.status === "loaded" ? loadState.toolCount : null;
-  const advancedBody = isValidElement<{ setDialogFooter?: (footer: ReactNode) => void }>(
-    advancedContent,
-  )
+  const advancedBody = isValidElement<{
+    setDialogFooter?: (footer: ReactNode) => void;
+  }>(advancedContent)
     ? cloneElement(advancedContent, { setDialogFooter: setAdvancedFooter })
     : advancedContent;
 
@@ -170,9 +170,14 @@ function ExtensionListRowComponent({
 
         <div className="flex shrink-0 items-center gap-2">
           {installed && canUninstall ? (
-            <Button size="sm" variant="destructive" onClick={onUninstall}>
-              <IconTrash data-icon="inline-start" />
-              Uninstall
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={onUninstall}
+              className="not-sm:size-7 sm:pl-1.5"
+            >
+              <IconTrash />
+              <span className="sr-only sm:not-sr-only">Uninstall</span>
             </Button>
           ) : !installed ? (
             <Button size="sm" variant="default" onClick={onInstall} disabled={!installSupported}>
