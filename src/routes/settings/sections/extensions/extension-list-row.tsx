@@ -14,6 +14,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +32,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 
 import { McpServerStatus } from "./mcp-server-status";
@@ -181,8 +185,8 @@ function ExtensionListRowComponent({
               onRestart &&
               loadState?.status !== "starting" &&
               loadState?.status !== "connecting" ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
                     <Button
                       type="button"
                       variant="ghost"
@@ -193,12 +197,12 @@ function ExtensionListRowComponent({
                     >
                       <IconRefresh />
                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Restart</TooltipContent>
-                </Tooltip>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent>Restart</AdaptiveTooltipContent>
+                </AdaptiveTooltip>
               ) : null}
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <div className="flex items-center">
                     <McpServerStatus
                       state={loadState}
@@ -207,11 +211,11 @@ function ExtensionListRowComponent({
                       compact
                     />
                   </div>
-                </TooltipTrigger>
-                <TooltipContent>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>
                   {getMcpServerStatusTooltip(loadState, authState, !enabled)}
-                </TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipContent>
+              </AdaptiveTooltip>
               {toolCount !== null ? (
                 <span className="text-muted-foreground text-xs">
                   {toolCount === 1 ? "1 tool" : `${toolCount} tools`}

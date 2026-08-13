@@ -2,6 +2,11 @@ import { IconAdjustments, IconInfoCircle, IconRestore } from "@tabler/icons-reac
 import debounce from "lodash.debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -15,7 +20,6 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import {
   DEFAULT_MODEL_CONFIG,
@@ -97,14 +101,14 @@ const SliderConfig = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Label htmlFor={id}>{label}</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               {tooltip}
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <div className="flex items-center gap-1">
           <span className={cn("text-sm", isUnset ? "text-muted-foreground" : "text-foreground")}>
@@ -271,14 +275,14 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label>Tool Behavior</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Choose whether tools are available and when they need your approval.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Tabs
           value={toolBehavior}
@@ -292,12 +296,14 @@ export const ChatModelConfig = ({
           <TabsList className="w-full">
             {TOOL_BEHAVIORS.map((behavior) => (
               <TabsTrigger key={behavior.value} value={behavior.value}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
                     <span>{behavior.label}</span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">{behavior.description}</TooltipContent>
-                </Tooltip>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent className="max-w-xs">
+                    {behavior.description}
+                  </AdaptiveTooltipContent>
+                </AdaptiveTooltip>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -329,16 +335,16 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="topK">Top K</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Only sample from the top K options for each subsequent token. Used to remove "long
               tail" low probability responses. Recommended for advanced use cases only. Leave empty
               to use model default.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="topK"
@@ -375,14 +381,14 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="maxSteps">Max Steps</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Maximum number of reasoning/tool steps in one response. Leave empty for no step limit.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="maxSteps"
@@ -399,15 +405,15 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="maxTokens">Max Tokens</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Maximum number of tokens (words/sub-words) in the model response. Leave empty to use
               the model's default limit.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="maxTokens"
@@ -421,15 +427,15 @@ export const ChatModelConfig = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="seed">Seed</Label>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-xs">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="right" className="max-w-xs">
               Integer seed for random sampling. If set and supported by the model, calls will
               generate deterministic results. Leave empty for random behavior.
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         </div>
         <Input
           id="seed"

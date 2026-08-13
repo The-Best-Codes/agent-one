@@ -4,6 +4,11 @@ import { useCallback, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -12,7 +17,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
@@ -145,8 +149,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
   };
 
   const sidebarButton = isDesktop ? (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <AdaptiveTooltip>
+      <AdaptiveTooltipTrigger asChild>
         <Button
           variant="outline"
           size="icon-sm"
@@ -160,21 +164,21 @@ export const Sidebar = ({ className }: SidebarProps) => {
         >
           <IconLayoutSidebar data-icon="inline-start" />
         </Button>
-      </TooltipTrigger>
-      <TooltipContent side={tooltipSide}>{toggleTooltip}</TooltipContent>
-    </Tooltip>
+      </AdaptiveTooltipTrigger>
+      <AdaptiveTooltipContent side={tooltipSide}>{toggleTooltip}</AdaptiveTooltipContent>
+    </AdaptiveTooltip>
   ) : (
     <Drawer direction="left" open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
+      <AdaptiveTooltip>
+        <AdaptiveTooltipTrigger asChild>
           <DrawerTrigger asChild>
             <Button variant="outline" size="icon-sm" aria-label={toggleTooltip} className="size-6">
               <IconLayoutSidebar />
             </Button>
           </DrawerTrigger>
-        </TooltipTrigger>
-        <TooltipContent>{toggleTooltip}</TooltipContent>
-      </Tooltip>
+        </AdaptiveTooltipTrigger>
+        <AdaptiveTooltipContent>{toggleTooltip}</AdaptiveTooltipContent>
+      </AdaptiveTooltip>
       <DrawerContent
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="bg-background dark:bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
@@ -214,8 +218,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
             )}
             inert={!isSidebarSmall}
           >
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon-sm"
@@ -226,11 +230,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 >
                   <IconSearch data-icon="inline-start" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent side={tooltipSide}>Search chats</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent side={tooltipSide}>Search chats</AdaptiveTooltipContent>
+            </AdaptiveTooltip>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon-sm"
@@ -241,9 +245,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 >
                   <IconPlus data-icon="inline-start" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent side={tooltipSide}>New chat</TooltipContent>
-            </Tooltip>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent side={tooltipSide}>New chat</AdaptiveTooltipContent>
+            </AdaptiveTooltip>
           </div>
         </div>
       </div>

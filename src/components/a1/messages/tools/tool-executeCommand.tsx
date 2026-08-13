@@ -11,6 +11,11 @@ import type { ToolUIPart } from "ai";
 import { AnsiHtml } from "fancy-ansi/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -19,7 +24,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import {
   getExecuteCommandLiveState,
@@ -114,8 +119,8 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
   return (
     <TooltipProvider>
       <div className="flex items-center gap-0.5">
-        <Tooltip>
-          <TooltipTrigger asChild>
+        <AdaptiveTooltip>
+          <AdaptiveTooltipTrigger asChild>
             <Button
               size="icon-xs"
               variant="destructive"
@@ -127,12 +132,12 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
             >
               <IconPlayerStop />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">Stop command</TooltipContent>
-        </Tooltip>
+          </AdaptiveTooltipTrigger>
+          <AdaptiveTooltipContent side="top">Stop command</AdaptiveTooltipContent>
+        </AdaptiveTooltip>
         {showSkip && (
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
               <Button
                 size="icon-xs"
                 variant="secondary"
@@ -144,11 +149,11 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
               >
                 <IconPlayerSkipForward />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent side="top">
               Skip command (leave it running in the background)
-            </TooltipContent>
-          </Tooltip>
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
         )}
       </div>
     </TooltipProvider>

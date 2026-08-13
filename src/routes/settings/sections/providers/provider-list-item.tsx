@@ -5,6 +5,11 @@ import { memo, useMemo, useRef, useState, type ReactNode } from "react";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { ProviderLogo } from "@/components/a1/provider-logo";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -15,7 +20,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { modelDirectoryDataAtom } from "@/lib/ai/models/model-directory";
 import {
   getBuiltInProviderModels,
@@ -128,14 +132,14 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
             <ProviderLogo id={id} title={title} />
             <span>{title}</span>
             {showMissingKeyWarning && (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <span className="inline-flex">
                     <IconAlertTriangle className="size-4" />
                   </span>
-                </TooltipTrigger>
-                <TooltipContent>No API key set</TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>No API key set</AdaptiveTooltipContent>
+              </AdaptiveTooltip>
             )}
           </span>
           <span className="flex items-center gap-2">

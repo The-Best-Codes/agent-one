@@ -23,6 +23,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -36,7 +41,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
@@ -409,8 +413,8 @@ export default function AboutSection() {
                 </a>
               </div>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <span>
                     <Switch
                       checked={analyticsIdentity === "user-id"}
@@ -425,13 +429,13 @@ export default function AboutSection() {
                       aria-label="Associate analytics with my signed-in account"
                     />
                   </span>
-                </TooltipTrigger>
+                </AdaptiveTooltipTrigger>
                 {!user && (
-                  <TooltipContent>
+                  <AdaptiveTooltipContent>
                     You're not signed in, so analytics aren't associated with your account.
-                  </TooltipContent>
+                  </AdaptiveTooltipContent>
                 )}
-              </Tooltip>
+              </AdaptiveTooltip>
             </div>
           </SettingsTarget>
         </CardContent>

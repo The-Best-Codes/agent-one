@@ -12,6 +12,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +35,6 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   getActivePaidSubscription,
   getBillingUsageSummary,
@@ -292,8 +296,8 @@ export default function AccountSection() {
                   Keep your settings in sync across devices using your AgentOne account.
                 </p>
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <span>
                     <Switch
                       id="sync-enabled"
@@ -307,9 +311,9 @@ export default function AccountSection() {
                       disabled={!user}
                     />
                   </span>
-                </TooltipTrigger>
-                {!user && <TooltipContent>Sign in to enable sync</TooltipContent>}
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                {!user && <AdaptiveTooltipContent>Sign in to enable sync</AdaptiveTooltipContent>}
+              </AdaptiveTooltip>
             </div>
           </SettingsTarget>
           <SettingsTarget id="setting-hide-agentone-models">
@@ -322,8 +326,8 @@ export default function AccountSection() {
                   Remove AgentOne models from the model selector.
                 </p>
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <span>
                     <Switch
                       id="hide-agentone-models"
@@ -337,11 +341,13 @@ export default function AccountSection() {
                       disabled={!user}
                     />
                   </span>
-                </TooltipTrigger>
+                </AdaptiveTooltipTrigger>
                 {!user && (
-                  <TooltipContent>You won't see AgentOne models unless signed-in</TooltipContent>
+                  <AdaptiveTooltipContent>
+                    You won't see AgentOne models unless signed-in
+                  </AdaptiveTooltipContent>
                 )}
-              </Tooltip>
+              </AdaptiveTooltip>
             </div>
           </SettingsTarget>
           <p className="text-muted-foreground text-sm">

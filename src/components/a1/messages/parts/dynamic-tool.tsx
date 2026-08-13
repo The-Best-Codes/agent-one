@@ -16,6 +16,11 @@ import {
   AccordionItem as ParametersAccordionItem,
   AccordionTrigger as ParametersAccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -25,7 +30,6 @@ import {
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
@@ -264,14 +268,14 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                 {labels?.completedTitle ?? `"${toolName}" tool finished`}
               </span>
               {isLongOutput && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
                     <div className="size-2 shrink-0 rounded-full bg-yellow-500" />
-                  </TooltipTrigger>
-                  <TooltipContent>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent>
                     Tool result is over {maxToolResultChars} characters
-                  </TooltipContent>
-                </Tooltip>
+                  </AdaptiveTooltipContent>
+                </AdaptiveTooltip>
               )}
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">

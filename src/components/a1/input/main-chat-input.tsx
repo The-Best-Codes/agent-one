@@ -7,10 +7,14 @@ import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
@@ -523,8 +527,8 @@ export const MainChatInput = ({
           )}
         >
           <div className="relative">
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <Button
                   data-testid="attach-button"
                   type="button"
@@ -550,9 +554,9 @@ export const MainChatInput = ({
                   )}
                   <IconPaperclip />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>Attach files to your message</TooltipContent>
-            </Tooltip>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
+            </AdaptiveTooltip>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex flex-row">
@@ -567,8 +571,8 @@ export const MainChatInput = ({
               />
             </div>
             {showStopButton ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <Button
                     variant="destructive"
                     type="button"
@@ -582,12 +586,12 @@ export const MainChatInput = ({
                   >
                     <IconPlayerStopFilled />
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent>Stop the current response</TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
+              </AdaptiveTooltip>
             ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <Button
                     data-testid="send-button"
                     type="submit"
@@ -607,9 +611,9 @@ export const MainChatInput = ({
                   >
                     {status === "submitted" ? <Spinner /> : <IconArrowUp />}
                   </Button>
-                </TooltipTrigger>
-                <TooltipContent>Send your message</TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>
+              </AdaptiveTooltip>
             )}
           </div>
         </div>

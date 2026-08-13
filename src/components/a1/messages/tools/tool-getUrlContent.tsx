@@ -9,6 +9,11 @@ import {
 import type { ToolUIPart } from "ai";
 import { memo, useState } from "react";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -17,7 +22,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -149,28 +153,28 @@ const UrlResultDisplay = memo(
         <div className="flex items-center gap-1">
           <>
             {isRawContent && (
-              <Tooltip>
-                <TooltipTrigger asChild>
+              <AdaptiveTooltip>
+                <AdaptiveTooltipTrigger asChild>
                   <IconFileText className="text-muted-foreground size-4 shrink-0" />
-                </TooltipTrigger>
-                <TooltipContent>Fetched raw content</TooltipContent>
-              </Tooltip>
+                </AdaptiveTooltipTrigger>
+                <AdaptiveTooltipContent>Fetched raw content</AdaptiveTooltipContent>
+              </AdaptiveTooltip>
             )}
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <AdaptiveTooltip>
+              <AdaptiveTooltipTrigger asChild>
                 <div
                   className={cn(
                     "size-2 shrink-0 rounded-full",
                     result.truncated ? "bg-yellow-500" : "bg-green-500",
                   )}
                 />
-              </TooltipTrigger>
-              <TooltipContent>
+              </AdaptiveTooltipTrigger>
+              <AdaptiveTooltipContent>
                 {result.truncated
                   ? `Truncated to ${input.maxLength || "unknown"} characters`
                   : `${result.length || "All"} characters processed`}
-              </TooltipContent>
-            </Tooltip>
+              </AdaptiveTooltipContent>
+            </AdaptiveTooltip>
           </>
         </div>
       </div>
