@@ -1,3 +1,5 @@
+> This file has been renamed to `AGENTS-UNUSED.md` as we decided that passing this context to AI agents by default is no longer necessary.
+
 # AGENTS.md
 
 If you are an AI agent, please follow the instructions in this file to ensure you align with AgentOne's (this project) expectations for AI agents.
