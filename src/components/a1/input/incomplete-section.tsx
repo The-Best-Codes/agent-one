@@ -1,4 +1,4 @@
-import { IconRefresh } from "@tabler/icons-react";
+import { IconPlayerPlay } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { useChatFunctions, useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -6,7 +6,7 @@ import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 
 export const MainInputIncompleteSection = ({ onRetry }: { onRetry?: () => void }) => {
   const { error, status } = useChatStatus();
-  const { regenerate } = useChatFunctions();
+  const { resumeStream } = useChatFunctions();
   const messages = useChatMessages();
   const { hasAvailableModels } = useModelCatalog();
 
@@ -32,14 +32,14 @@ export const MainInputIncompleteSection = ({ onRetry }: { onRetry?: () => void }
       <div className="flex flex-row items-center gap-2">
         <Button
           onClick={() => {
-            void regenerate();
+            void resumeStream();
             onRetry?.();
           }}
           variant="default"
           disabled={!hasAvailableModels}
         >
-          <IconRefresh data-icon="inline-start" />
-          Retry
+          <IconPlayerPlay data-icon="inline-start" />
+          Resume
         </Button>
       </div>
     </div>

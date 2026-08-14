@@ -1,10 +1,5 @@
-import { IconRefresh, IconX } from "@tabler/icons-react";
+import { IconPlayerPlay, IconX } from "@tabler/icons-react";
 
-import {
-  AdaptiveTooltip,
-  AdaptiveTooltipContent,
-  AdaptiveTooltipTrigger,
-} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
@@ -12,7 +7,7 @@ import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
 
 export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => {
   const { error } = useChatStatus();
-  const { regenerate, clearError } = useChatFunctions();
+  const { resumeStream, clearError } = useChatFunctions();
   const { hasAvailableModels } = useModelCatalog();
 
   if (!error) {
@@ -30,24 +25,16 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
         {displayDescription && <span className="text-base">{displayDescription}</span>}
       </div>
       <div className="flex flex-row items-center gap-2">
-        <AdaptiveTooltip delayDuration={0}>
-          <AdaptiveTooltipTrigger asChild>
-            <Button
-              onClick={() => {
-                void regenerate();
-                onRetry?.();
-              }}
-              variant="destructive"
-              disabled={!hasAvailableModels}
-            >
-              <IconRefresh data-icon="inline-start" />
-              Retry
-            </Button>
-          </AdaptiveTooltipTrigger>
-          <AdaptiveTooltipContent className="max-h-48 max-w-48">
-            Discards the last AI message (if any) and retries
-          </AdaptiveTooltipContent>
-        </AdaptiveTooltip>
+        <Button
+          onClick={() => {
+            void resumeStream();
+            onRetry?.();
+          }}
+          disabled={!hasAvailableModels}
+        >
+          <IconPlayerPlay data-icon="inline-start" />
+          Resume
+        </Button>
         <Button title="Ignore error" size="icon" onClick={() => clearError()} variant="outline">
           <IconX />
         </Button>

@@ -16,6 +16,16 @@ const logger = getLogger(import.meta.url);
 type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
   Pick<UseChatOptions<UIMessage>, "experimental_throttle" | "resume">;
 
+function canResumeFromMessages(messages: UIMessage[]) {
+  const lastMessage = messages.at(-1);
+
+  if (!lastMessage) {
+    return false;
+  }
+
+  return lastMessage.role === "assistant" || lastMessage.role === "user";
+}
+
 export function useChat(
   model: LanguageModel | null,
   modelId: string | null,
@@ -112,6 +122,19 @@ export function useChat(
     [chatResult, syncTransport],
   );
 
+  const resumeStream = useCallback<typeof chatResult.resumeStream>(
+    async (resumeOptions) => {
+      syncTransport();
+
+      if (canResumeFromMessages(chatResult.messages)) {
+        return chatResult.sendMessage(undefined, resumeOptions);
+      }
+
+      return chatResult.resumeStream(resumeOptions);
+    },
+    [chatResult, syncTransport],
+  );
+
   const updateMcpAppModelContext = useCallback(
     (viewId: string, context: unknown) => {
       transport.updateMcpAppModelContext(viewId, context);
@@ -123,6 +146,7 @@ export function useChat(
     ...chatResult,
     sendMessage,
     regenerate,
+    resumeStream,
     updateMcpAppModelContext,
   };
 }
