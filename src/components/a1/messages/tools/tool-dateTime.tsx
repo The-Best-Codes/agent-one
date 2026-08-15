@@ -62,7 +62,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Time and date check denied
+            {t("tools.dateTimeDenied")}
           </span>
         </div>
       );
@@ -84,7 +84,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Time and date check denied
+              {t("tools.dateTimeDenied")}
             </span>
           </div>
         );
@@ -119,7 +119,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Time and date check cancelled
+              {t("tools.dateTimeCancelled")}
             </span>
           </div>
         );

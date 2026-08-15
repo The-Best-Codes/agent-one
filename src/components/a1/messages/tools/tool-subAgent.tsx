@@ -214,7 +214,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               {hasPendingApprovals && !isExpanded && (
                 <span className="border-border text-muted-foreground ml-2 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium">
                   <IconHourglassHigh className="size-3 shrink-0" />
-                  Approval needed
+                  {t("tools.approvalNeeded")}
                 </span>
               )}
             </AccordionTrigger>

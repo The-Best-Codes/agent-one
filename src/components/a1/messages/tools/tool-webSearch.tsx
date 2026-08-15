@@ -95,7 +95,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Web search for "{query}" denied
+            {t("tools.webSearchDenied", { query })}
           </span>
         </div>
       );
@@ -115,7 +115,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Web search for "{query}" denied
+              {t("tools.webSearchDenied", { query })}
             </span>
           </div>
         );
@@ -124,7 +124,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <div key={callId} className="flex flex-row items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate text-sm font-bold">
-            Searching online for "{query}"...
+            {t("tools.searchingOnline", { query })}
           </span>
         </div>
       );
@@ -169,7 +169,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                Found {result.total_results} results for "{result.query}"
+                {t("tools.foundResults", { total: result.total_results, query: result.query })}
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
@@ -183,7 +183,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground text-xs"
                       >
-                        View <span className="italic">"{result.query}"</span> on DuckDuckGo
+                        {t("tools.viewOnDuckDuckGo", { query: result.query })}
                         <IconExternalLink className="ml-1 inline size-3" />
                       </a>
                     )}
@@ -224,7 +224,9 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />{" "}
             <span className="text-muted-foreground text-sm font-bold">
-              {`Web search ${query ? `for "${query}" ` : ""}cancelled`}
+              {query
+                ? t("tools.webSearchCancelled", { query })
+                : t("tools.webSearchCancelledShort")}
             </span>
           </div>
         );

@@ -4,6 +4,7 @@ import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import i18n from "@/lib/i18n";
 import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -60,15 +61,17 @@ export interface PersistenceContextType {
 const NEW_CHAT_MODEL_ID_KEY = "new-chat-model-id";
 const NEW_CHAT_MODEL_CONFIG_KEY = "new-chat-model-config";
 
-const DEFAULT_METADATA: ChatMetadata = {
-  title: "New chat",
-  titleState: undefined,
-  modelId: undefined,
-  modelConfig: undefined,
-  branchOf: undefined,
-  createdAt: undefined,
-  updatedAt: undefined,
-};
+function getDefaultMetadata(): ChatMetadata {
+  return {
+    title: i18n.t("chatsSettings.newChatPlaceholder"),
+    titleState: undefined,
+    modelId: undefined,
+    modelConfig: undefined,
+    branchOf: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+  };
+}
 
 function createTimestampedMetadata(metadata: ChatMetadata): ChatMetadata {
   const now = Date.now();
@@ -147,7 +150,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, []);
 
   const getMetadata = useCallback((id: string): ChatMetadata => {
-    return metadataCacheRef.current.get(id) ?? { ...DEFAULT_METADATA };
+    return metadataCacheRef.current.get(id) ?? { ...getDefaultMetadata() };
   }, []);
 
   const setMetadata = useCallback((id: string, metadata: ChatMetadata) => {
@@ -212,7 +215,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     (modelId: string, modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG) => {
       const id = generateId();
       const metadata = createTimestampedMetadata({
-        title: "New chat",
+        title: i18n.t("chatsSettings.newChatPlaceholder"),
         titleState: undefined,
         modelId,
         modelConfig,
@@ -262,10 +265,10 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         return { ...metadata, messages: messages ?? [] };
       }
       logger.warn(`No chat found for id: ${id}`);
-      return { messages: [], ...DEFAULT_METADATA };
+      return { messages: [], ...getDefaultMetadata() };
     } catch (error) {
       logger.error(`Failed to load full chat data ${id}`, error);
-      return { messages: [], ...DEFAULT_METADATA };
+      return { messages: [], ...getDefaultMetadata() };
     }
   }, []);
 

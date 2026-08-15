@@ -54,12 +54,12 @@ export async function mcpLogin(
 ): Promise<boolean> {
   dismissMcpLoginToasts(serverId);
 
-  const toastId = toast.loading(`Connecting AgentOne to "${serverName}"...`, {
+  const toastId = toast.loading(i18n.t("extensions.connectingTo", { name: serverName }), {
     action: {
-      label: "Cancel",
+      label: i18n.t("common.cancel"),
       onClick: async (event) => {
         event.preventDefault();
-        toast.loading(`Cancelling connection to "${serverName}"...`, {
+        toast.loading(i18n.t("extensions.cancellingConnection", { name: serverName }), {
           id: toastId,
           action: null,
           duration: Infinity,
@@ -151,11 +151,11 @@ export async function mcpCheckAuth(
 }
 
 export function promptLoginToast(server: McpHttpServerConfig): void {
-  toast(`Connect to the "${server.name}" Extension`, {
+  toast(i18n.t("extensions.connectToExtension", { name: server.name }), {
     id: `mcp-prompt-login-${server.id}`,
-    description: "Authentication required to access tools.",
+    description: i18n.t("extensions.authRequiredAccessTools"),
     action: {
-      label: "Connect",
+      label: i18n.t("extensions.connect"),
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     duration: Infinity,
@@ -168,14 +168,14 @@ export function promptSoftLoginToast(server: McpHttpServerConfig): void {
     return;
   }
 
-  toast(`Connect to the "${server.name}" Extension for full access`, {
+  toast(i18n.t("extensions.connectToExtensionFullAccess", { name: server.name }), {
     id: `mcp-soft-login-${server.id}`,
     action: {
-      label: "Connect",
+      label: i18n.t("extensions.connect"),
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     cancel: {
-      label: "Never",
+      label: i18n.t("common.never"),
       onClick: () => {
         store.set(dismissedOAuthPromptsAtom, (prev) => {
           if (prev.includes(server.id)) return prev;

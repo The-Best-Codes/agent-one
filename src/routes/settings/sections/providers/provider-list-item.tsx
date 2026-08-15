@@ -141,7 +141,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                     <IconAlertTriangle className="size-4" />
                   </span>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>No API key set</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{t("providers.noApiKeySet")}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
           </span>
@@ -157,7 +157,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                 }}
               >
                 <IconAlertTriangle data-icon="inline-start" />
-                Set Up Provider
+                {t("providers.setUpProvider")}
               </Button>
             )}
             <Switch
@@ -183,7 +183,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
           {showApiKey ? (
             <div className="flex flex-col gap-2">
               <Label htmlFor={`api-key-${id}`} className="text-xs">
-                API Key
+                {t("providers.apiKey")}
               </Label>
               {apiKeyHint ? <p className="text-muted-foreground text-sm">{apiKeyHint}</p> : null}
               <SecretInput
@@ -337,7 +337,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
         details={
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={`name-${provider.id}`}>Name</FieldLabel>
+              <FieldLabel htmlFor={`name-${provider.id}`}>{t("common.name")}</FieldLabel>
               <Input
                 id={`name-${provider.id}`}
                 value={provider.name}
@@ -347,12 +347,12 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
             </Field>
 
             <Field>
-              <FieldLabel htmlFor={`base-url-${provider.id}`}>Base URL</FieldLabel>
+              <FieldLabel htmlFor={`base-url-${provider.id}`}>{t("providers.baseUrl")}</FieldLabel>
               <Input
                 id={`base-url-${provider.id}`}
                 value={provider.baseUrl}
                 onChange={(event) => update({ baseUrl: event.target.value })}
-                placeholder="e.g., http://localhost:1234/v1"
+                placeholder={t("providers.baseUrlPlaceholder")}
               />
             </Field>
           </FieldGroup>
@@ -370,7 +370,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
             className="w-fit"
           >
             <IconTrash data-icon="inline-start" />
-            Delete Provider
+            {t("providers.deleteProvider")}
           </Button>
         }
         onEnabledChange={(enabled) => update({ enabled })}
@@ -435,12 +435,12 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
       details={
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={`base-url-${provider.id}`}>Base URL</FieldLabel>
+            <FieldLabel htmlFor={`base-url-${provider.id}`}>{t("providers.baseUrl")}</FieldLabel>
             <Input
               id={`base-url-${provider.id}`}
               value={provider.baseUrl}
               onChange={(event) => updateProvider(provider.id, { baseUrl: event.target.value })}
-              placeholder="e.g. http://127.0.0.1:11434/v1"
+              placeholder={t("providers.baseUrlOllamaPlaceholder")}
             />
           </Field>
         </FieldGroup>

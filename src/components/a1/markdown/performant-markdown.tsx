@@ -3,12 +3,14 @@ import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
 import { memo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@/hooks/use-theme";
 import { markdownHighlightingAtom } from "@/lib/jotai/settings-atoms";
 
 export const PerformantMarkdown = memo(
   ({ content, maxHeight }: { content: string; maxHeight?: string }) => {
+    const { t } = useTranslation();
     const { resolvedTheme } = useTheme();
     const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
     const editorTheme = EditorView.theme({
@@ -33,7 +35,7 @@ export const PerformantMarkdown = memo(
       <div className="overflow-hidden">
         <CodeMirror
           theme={resolvedTheme === "dark" ? "dark" : "light"}
-          value={content || "No content detected to display"}
+          value={content || t("markdown.noContent")}
           maxHeight={maxHeight || "384px"}
           className="w-full bg-transparent text-sm"
           extensions={[

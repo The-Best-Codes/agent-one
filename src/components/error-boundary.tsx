@@ -91,7 +91,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                   <CopyButton
                     text={dedent`
                 Error: ${this.state.error?.toString() ?? i18n.t("errorBoundary.unknownError")}
-                Stack: ${this.state.errorInfo?.componentStack ?? "No stack trace"}
+                Stack: ${this.state.errorInfo?.componentStack ?? i18n.t("errorBoundary.noStackTrace")}
                     `}
                   />
                 </div>

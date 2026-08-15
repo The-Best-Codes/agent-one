@@ -264,6 +264,7 @@ export function ExtensionAdvancedDetails({
   const authState = authStates[server.id];
   const loadStates = useAtomValue(mcpServerLoadStatesAtom);
   const loadState = loadStates[server.id];
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(server);
 
   const hasChanges = JSON.stringify(draft) !== JSON.stringify(server);
@@ -285,12 +286,12 @@ export function ExtensionAdvancedDetails({
       <>
         <DialogClose asChild>
           <Button type="button" variant="outline">
-            Cancel
+            {t("common.cancel")}
           </Button>
         </DialogClose>
         <DialogClose asChild>
           <Button type="button" onClick={() => onUpdate(draft)}>
-            Save changes
+            {t("common.saveChanges")}
           </Button>
         </DialogClose>
       </>,
@@ -299,7 +300,7 @@ export function ExtensionAdvancedDetails({
     return () => {
       setDialogFooter(null);
     };
-  }, [draft, hasChanges, onUpdate, setDialogFooter]);
+  }, [draft, hasChanges, onUpdate, setDialogFooter, t]);
 
   return (
     <div className="flex flex-col gap-3">

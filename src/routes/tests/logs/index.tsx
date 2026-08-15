@@ -90,15 +90,15 @@ export default function LogsTestRoute() {
             <div className="max-h-[70vh] overflow-auto" ref={parentRef}>
               {isEmpty ? (
                 <p className="text-muted-foreground py-12 text-center">
-                  {searchQuery.trim() ? "No logs match your search." : "No log entries yet."}
+                  {searchQuery.trim() ? t("tests.noLogsMatch") : t("tests.noLogEntries")}
                 </p>
               ) : (
                 <>
                   <div className="text-muted-foreground grid grid-cols-[7rem_4rem_9rem_1fr] gap-0 border-b px-3 py-2 text-left text-xs font-medium uppercase">
-                    <div>Time</div>
-                    <div>Type</div>
-                    <div>Tag</div>
-                    <div>Message</div>
+                    <div>{t("tests.time")}</div>
+                    <div>{t("tests.type")}</div>
+                    <div>{t("tests.tag")}</div>
+                    <div>{t("tests.message")}</div>
                   </div>
                   <div
                     style={{

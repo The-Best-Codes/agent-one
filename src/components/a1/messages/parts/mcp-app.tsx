@@ -315,7 +315,7 @@ function ConnectedMcpAppInternal({
         >
           {displayMode === "pip" && (
             <Button variant="ghost" size="sm" onClick={() => setDisplayMode("inline")}>
-              Extension open in picture-in-picture
+              {t("messages.extensionPip")}
             </Button>
           )}
         </div>

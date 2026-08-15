@@ -41,10 +41,10 @@ export function UninstallExtensionDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            Uninstall
+            {t("extensions.uninstall")}
           </Button>
         </DialogFooter>
       </DialogContent>

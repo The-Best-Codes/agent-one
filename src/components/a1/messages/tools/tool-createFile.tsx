@@ -78,7 +78,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || "unknown file";
+  const filePath = input?.filePath || t("tools.unknownFile");
 
   switch (part.state) {
     case "approval-requested":
@@ -125,7 +125,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            File creation denied ({filePath})
+            {t("tools.fileCreationDenied", { path: filePath })}
           </span>
         </div>
       );
@@ -147,7 +147,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              File creation denied ({filePath})
+              {t("tools.fileCreationDenied", { path: filePath })}
             </span>
           </div>
         );
@@ -158,9 +158,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Creating <span className="font-mono text-xs">{filePath}</span>...
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.creatingFile", { path: filePath })}</span>
         </div>
       );
     }

@@ -3,6 +3,7 @@ import { useSetAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { authClient, CLIENT_ID, setAuthToken } from "@/lib/auth/auth-client";
+import i18n from "@/lib/i18n";
 import { getApiKeyBaseAtom } from "@/lib/jotai/api-key-atoms";
 import { getProviderConfigAtom } from "@/lib/jotai/provider-atoms";
 import { getLogger } from "@/lib/logger";
@@ -114,14 +115,14 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (cancelled) return;
 
         if (error) {
-          setBillingError("Unable to load billing information.");
+          setBillingError(i18n.t("auth.billingLoadError"));
           return;
         }
 
         setCustomerState((data as CustomerState | null) ?? null);
       } catch {
         if (!cancelled) {
-          setBillingError("Unable to load billing information.");
+          setBillingError(i18n.t("auth.billingLoadError"));
         }
       } finally {
         if (!cancelled && (!silent || !customerState)) {

@@ -203,7 +203,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const showLongRunningSkip =
     showLongRunningStop && liveState?.status === "running" && !liveState?.skipRequested;
 
-  const command = input?.command || "unknown command";
+  const command = input?.command || t("tools.unknownCommand");
   const truncatedCommand = command.length > 80 ? command.slice(0, 80) + "…" : command;
 
   switch (part.state) {
@@ -370,7 +370,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                         : output.skipped
                           ? " " + t("tools.commandSkippedParen")
                           : output.exitCode && output.exitCode !== 0
-                            ? ` (exit code ${output.exitCode})`
+                            ? ` ${t("tools.exitCode", { code: output.exitCode })}`
                             : ""}
               </span>
               {showLongRunningStop && (

@@ -34,7 +34,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
   const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const key = input?.key || "unknown setting";
+  const key = input?.key || t("tools.unknownSetting");
   const value = input?.value !== undefined ? JSON.stringify(input.value) : "undefined";
 
   switch (part.state) {
@@ -73,7 +73,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Update "{key}" setting denied
+            {t("tools.updateSettingDenied", { key })}
           </span>
         </div>
       );
@@ -86,7 +86,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Update "{key}" setting denied
+              {t("tools.updateSettingDenied", { key })}
             </span>
           </div>
         );
@@ -97,9 +97,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Updating "{key}" setting to {value}...
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.updatingSettingTo", { key, value })}</span>
         </div>
       );
     }
@@ -114,7 +112,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
         >
           <IconSettingsCheck className="size-4 shrink-0" />
           <span className="max-w-2xl truncate">
-            Updated "{key}" setting to {JSON.stringify(output?.value)}
+            {t("tools.updatedSettingTo", { key, value: JSON.stringify(output?.value) })}
           </span>
         </div>
       );
@@ -126,7 +124,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Updating setting was cancelled
+              {t("tools.updatingSettingCancelled")}
             </span>
           </div>
         );

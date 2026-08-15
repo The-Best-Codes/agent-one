@@ -25,7 +25,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
   const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || "unknown file";
+  const filePath = input?.filePath || t("tools.unknownFile");
 
   switch (part.state) {
     case "approval-requested":
@@ -63,7 +63,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            File deletion denied ({filePath})
+            {t("tools.fileDeletionDenied", { path: filePath })}
           </span>
         </div>
       );
@@ -85,7 +85,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              File deletion denied ({filePath})
+              {t("tools.fileDeletionDenied", { path: filePath })}
             </span>
           </div>
         );
@@ -96,9 +96,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Deleting <span className="font-mono text-xs">{filePath}</span>...
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.deletingFile", { path: filePath })}</span>
         </div>
       );
     }
@@ -110,9 +108,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <IconTrash className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Deleted <span className="font-mono text-xs">{filePath}</span>
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.deletedFile", { path: filePath })}</span>
         </div>
       );
 

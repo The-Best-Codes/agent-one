@@ -79,7 +79,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || "unknown file";
+  const filePath = input?.filePath || t("tools.unknownFile");
 
   switch (part.state) {
     case "approval-requested":
@@ -120,7 +120,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            File view denied ({filePath})
+            {t("tools.fileViewDenied", { path: filePath })}
           </span>
         </div>
       );
@@ -140,7 +140,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              File view denied ({filePath})
+              {t("tools.fileViewDenied", { path: filePath })}
             </span>
           </div>
         );
@@ -151,9 +151,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Reading <span className="font-mono text-xs">{filePath}</span>...
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.readingFile", { path: filePath })}</span>
         </div>
       );
     }
@@ -161,9 +159,9 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
     case "output-available": {
       const lineInfo =
         output.truncated && output.startLine != null && output.endLine != null
-          ? ` (${output.startLine}-${output.endLine} of ${output.totalLines} lines)`
+          ? ` ${t("tools.lineRangeOf", { start: output.startLine, end: output.endLine, total: output.totalLines })}`
           : output.totalLines != null
-            ? ` (${output.totalLines} lines)`
+            ? ` ${t("tools.totalLines", { total: output.totalLines })}`
             : "";
 
       return (
@@ -202,7 +200,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                Viewed <span className="font-mono text-xs">{filePath}</span>
+                {t("tools.viewedFile", { path: filePath })}
                 {lineInfo}
               </span>
             </AccordionTrigger>
@@ -214,7 +212,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
                   </div>
                   {output.truncated && (
                     <div className="text-muted-foreground text-xs">
-                      Content truncated ({output.totalChars} total chars)
+                      {t("tools.contentTruncated", { total: output.totalChars })}
                     </div>
                   )}
                 </div>

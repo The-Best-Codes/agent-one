@@ -112,12 +112,17 @@ export default function LocalDatabaseTestRoute() {
     const nextMetrics: BenchmarkMetric[] = [];
 
     const measure = async (label: string, details: string, task: () => Promise<void>) => {
-      addLog(`Starting ${label.toLowerCase()}...`);
+      addLog(t("tests.startingLabel", { label: label.toLowerCase() }));
       const start = performance.now();
       await task();
       const durationMs = performance.now() - start;
       nextMetrics.push({ label, durationMs, details });
-      addLog(`Finished ${label.toLowerCase()} in ${formatDuration(durationMs)}`);
+      addLog(
+        t("tests.finishedLabel", {
+          label: label.toLowerCase(),
+          duration: formatDuration(durationMs),
+        }),
+      );
     };
 
     let initialChatIds = new Set<string>();
@@ -125,12 +130,15 @@ export default function LocalDatabaseTestRoute() {
     try {
       initialChatIds = new Set((await chatStorage.listChats("created-at")).map(({ id }) => id));
       addLog(
-        `Preparing ${BENCHMARK_CHAT_COUNT} temporary chats with ${MESSAGES_PER_CHAT} messages each.`,
+        t("tests.preparingChats", { chats: BENCHMARK_CHAT_COUNT, messages: MESSAGES_PER_CHAT }),
       );
 
       await measure(
-        "Write workload",
-        `${BENCHMARK_CHAT_COUNT.toLocaleString()} chats, ${(BENCHMARK_CHAT_COUNT * MESSAGES_PER_CHAT).toLocaleString()} long messages`,
+        t("tests.writeWorkload"),
+        t("tests.writeWorkloadDetails", {
+          chats: BENCHMARK_CHAT_COUNT.toLocaleString(),
+          messages: (BENCHMARK_CHAT_COUNT * MESSAGES_PER_CHAT).toLocaleString(),
+        }),
         async () => {
           const batchCount = Math.ceil(BENCHMARK_CHAT_COUNT / WRITE_BATCH_SIZE);
 
@@ -155,7 +163,10 @@ export default function LocalDatabaseTestRoute() {
 
             if (shouldLogProgress(end, BENCHMARK_CHAT_COUNT, WRITE_BATCH_SIZE)) {
               addLog(
-                `Write progress: ${end.toLocaleString()} / ${BENCHMARK_CHAT_COUNT.toLocaleString()} chats`,
+                t("tests.writeProgress", {
+                  current: end.toLocaleString(),
+                  total: BENCHMARK_CHAT_COUNT.toLocaleString(),
+                }),
               );
             }
 
@@ -165,8 +176,8 @@ export default function LocalDatabaseTestRoute() {
       );
 
       await measure(
-        "Read workload",
-        `${BENCHMARK_CHAT_COUNT.toLocaleString()} metadata reads and message reads`,
+        t("tests.readWorkload"),
+        t("tests.readWorkloadDetails", { chats: BENCHMARK_CHAT_COUNT.toLocaleString() }),
         async () => {
           const batchCount = Math.ceil(BENCHMARK_CHAT_COUNT / READ_BATCH_SIZE);
 
@@ -188,7 +199,10 @@ export default function LocalDatabaseTestRoute() {
 
             if (shouldLogProgress(end, BENCHMARK_CHAT_COUNT, READ_BATCH_SIZE)) {
               addLog(
-                `Read progress: ${end.toLocaleString()} / ${BENCHMARK_CHAT_COUNT.toLocaleString()} chats`,
+                t("tests.readProgress", {
+                  current: end.toLocaleString(),
+                  total: BENCHMARK_CHAT_COUNT.toLocaleString(),
+                }),
               );
             }
 
@@ -198,8 +212,8 @@ export default function LocalDatabaseTestRoute() {
       );
 
       await measure(
-        "Search workload",
-        `${SEARCH_ITERATIONS.toLocaleString()} full-text searches across unique chat tokens`,
+        t("tests.searchWorkload"),
+        t("tests.searchWorkloadDetails", { count: SEARCH_ITERATIONS.toLocaleString() }),
         async () => {
           for (let iteration = 0; iteration < SEARCH_ITERATIONS; iteration += 1) {
             const chatIndex = iteration % BENCHMARK_CHAT_COUNT;
@@ -213,7 +227,10 @@ export default function LocalDatabaseTestRoute() {
 
             if ((iteration + 1) % 100 === 0 || iteration + 1 === SEARCH_ITERATIONS) {
               addLog(
-                `Search progress: ${(iteration + 1).toLocaleString()} / ${SEARCH_ITERATIONS.toLocaleString()} queries`,
+                t("tests.searchProgress", {
+                  current: (iteration + 1).toLocaleString(),
+                  total: SEARCH_ITERATIONS.toLocaleString(),
+                }),
               );
             }
 
@@ -232,20 +249,24 @@ export default function LocalDatabaseTestRoute() {
 
       setSummary(
         [
-          `Writes: ${formatOpsPerSecond(writeOps, writeMetric?.durationMs ?? 0)}`,
-          `Reads: ${formatOpsPerSecond(readOps, readMetric?.durationMs ?? 0)}`,
-          `Search average: ${formatDuration((searchMetric?.durationMs ?? 0) / SEARCH_ITERATIONS)}`,
+          t("tests.writesRate", {
+            rate: formatOpsPerSecond(writeOps, writeMetric?.durationMs ?? 0),
+          }),
+          t("tests.readsRate", { rate: formatOpsPerSecond(readOps, readMetric?.durationMs ?? 0) }),
+          t("tests.searchAverage", {
+            duration: formatDuration((searchMetric?.durationMs ?? 0) / SEARCH_ITERATIONS),
+          }),
         ].join(" | "),
       );
       setMetrics(nextMetrics);
-      addLog("Benchmark completed successfully.");
+      addLog(t("tests.benchmarkSuccess"));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       setMetrics(nextMetrics);
-      setSummary(`Benchmark failed: ${errorMessage}`);
-      addLog(`Benchmark failed: ${errorMessage}`);
+      setSummary(t("tests.benchmarkFailed", { error: errorMessage }));
+      addLog(t("tests.benchmarkFailed", { error: errorMessage }));
     } finally {
-      addLog("Cleaning up temporary benchmark chats...");
+      addLog(t("tests.cleaningUp"));
       try {
         const batchCount = Math.ceil(BENCHMARK_CHAT_COUNT / DELETE_BATCH_SIZE);
 
@@ -255,7 +276,10 @@ export default function LocalDatabaseTestRoute() {
 
           if (shouldLogProgress(end, BENCHMARK_CHAT_COUNT, DELETE_BATCH_SIZE)) {
             addLog(
-              `Cleanup progress: ${end.toLocaleString()} / ${BENCHMARK_CHAT_COUNT.toLocaleString()} chats`,
+              t("tests.cleanupProgress", {
+                current: end.toLocaleString(),
+                total: BENCHMARK_CHAT_COUNT.toLocaleString(),
+              }),
             );
           }
 
@@ -269,25 +293,25 @@ export default function LocalDatabaseTestRoute() {
           finalChatIds.size !== initialChatIds.size ||
           Array.from(initialChatIds).some((chatId) => !finalChatIds.has(chatId));
         if (chatListChanged) {
-          const cleanupMessage = "The stored chat list changed during cleanup.";
+          const cleanupMessage = t("tests.chatListChanged");
           setSummary((current) =>
             current
-              ? `${current} Cleanup issue: ${cleanupMessage}`
-              : `Cleanup issue: ${cleanupMessage}`,
+              ? `${current} ${t("tests.cleanupIssue", { message: cleanupMessage })}`
+              : t("tests.cleanupIssue", { message: cleanupMessage }),
           );
-          addLog(`Cleanup failed: ${cleanupMessage}`);
+          addLog(t("tests.cleanupFailed", { message: cleanupMessage }));
         } else {
-          addLog("Cleanup finished. Existing chats were left unchanged.");
+          addLog(t("tests.cleanupFinished"));
         }
       } catch (cleanupError) {
         const cleanupMessage =
           cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
         setSummary((current) =>
           current
-            ? `${current} Cleanup issue: ${cleanupMessage}`
-            : `Cleanup issue: ${cleanupMessage}`,
+            ? `${current} ${t("tests.cleanupIssue", { message: cleanupMessage })}`
+            : t("tests.cleanupIssue", { message: cleanupMessage }),
         );
-        addLog(`Cleanup failed: ${cleanupMessage}`);
+        addLog(t("tests.cleanupFailed", { message: cleanupMessage }));
       } finally {
         setIsRunning(false);
       }
@@ -309,20 +333,19 @@ export default function LocalDatabaseTestRoute() {
           <Card>
             <CardHeader>
               <CardTitle>{t("tests.stressBenchmark")}</CardTitle>
-              <CardDescription>
-                Writes temporary chats into the local SQLite database, reads them back, benchmarks
-                search performance, then deletes everything it created without modifying your saved
-                chat list.
-              </CardDescription>
+              <CardDescription>{t("tests.localDatabaseCardDescription")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="text-muted-foreground text-sm">
-                Workload: {BENCHMARK_CHAT_COUNT.toLocaleString()} chats, {MESSAGES_PER_CHAT} long
-                messages per chat, {SEARCH_ITERATIONS.toLocaleString()} search passes.
+                {t("tests.workloadSummary", {
+                  chats: BENCHMARK_CHAT_COUNT.toLocaleString(),
+                  messages: MESSAGES_PER_CHAT,
+                  searches: SEARCH_ITERATIONS.toLocaleString(),
+                })}
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => void runBenchmark()} disabled={isRunning}>
-                  {isRunning ? "Running Stress Test..." : "Run Stress Test"}
+                  {isRunning ? t("tests.runningStressTest") : t("tests.runStressTest")}
                 </Button>
               </div>
               {summary ? <div className="rounded-md border p-3 text-sm">{summary}</div> : null}

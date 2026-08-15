@@ -74,7 +74,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
         <div key={callId} className="flex items-center gap-2">
           <Spinner className="text-destructive" />
           <span className="text-destructive text-sm font-bold">
-            Running unknown tool "{toolName}"
+            {t("tools.runningUnknownTool", { name: toolName })}
           </span>
         </div>
       );
@@ -86,7 +86,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4" />
             <span className="text-muted-foreground text-sm font-bold">
-              Tool "{toolName}" denied
+              {t("tools.toolDenied", { name: toolName })}
             </span>
           </div>
         );
@@ -132,7 +132,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <AccordionContent className="p-2 pt-0">
               <div className="text-foreground/80 text-sm">
                 <div className="whitespace-pre-wrap">
-                  Tool output:{" "}
+                  {t("tools.toolOutput")}{" "}
                   {typeof part.output === "string"
                     ? part.output
                     : JSON.stringify(part.output, null, 2)}
@@ -149,7 +149,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <div key={callId} className="flex items-center gap-2">
             <IconCircleX className="text-muted-foreground size-4" />
             <span className="text-muted-foreground text-sm font-bold">
-              Tool "{toolName}" cancelled
+              {t("tools.toolCancelled", { name: toolName })}
             </span>
           </div>
         );

@@ -101,20 +101,18 @@ export function AddOpenAICompatibleDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add OpenAI Compatible Provider</DialogTitle>
-          <DialogDescription>
-            Add a custom provider that uses the OpenAI API format.
-          </DialogDescription>
+          <DialogTitle>{t("providers.addOpenaiCompatible")}</DialogTitle>
+          <DialogDescription>{t("providers.addOpenaiCompatibleDescription")}</DialogDescription>
         </DialogHeader>
 
         <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
           <div className="py-4">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="provider-name">Name</FieldLabel>
+                <FieldLabel htmlFor="provider-name">{t("common.name")}</FieldLabel>
                 <Input
                   id="provider-name"
-                  placeholder="e.g., My Local LLM"
+                  placeholder={t("providers.nameExampleLocalLlm")}
                   value={draft.name}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -126,10 +124,10 @@ export function AddOpenAICompatibleDialog({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="provider-base-url">Base URL</FieldLabel>
+                <FieldLabel htmlFor="provider-base-url">{t("providers.baseUrl")}</FieldLabel>
                 <Input
                   id="provider-base-url"
-                  placeholder="e.g., http://localhost:1234/v1"
+                  placeholder={t("providers.baseUrlPlaceholder")}
                   value={draft.baseUrl}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -141,7 +139,7 @@ export function AddOpenAICompatibleDialog({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="provider-api-key">API Key</FieldLabel>
+                <FieldLabel htmlFor="provider-api-key">{t("providers.apiKey")}</FieldLabel>
                 <SecretInput
                   id="provider-api-key"
                   value={draft.apiKey}
@@ -186,10 +184,10 @@ export function AddOpenAICompatibleDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleAdd} disabled={!isValid}>
-            Add Provider
+            {t("providers.addProvider")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -204,23 +202,24 @@ export function DeleteProviderDialog({
   onConfirm,
   onCancel,
 }: DeleteProviderDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Provider</DialogTitle>
+          <DialogTitle>{t("providers.deleteProvider")}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete &quot;{providerName}&quot;? This action cannot be
-            undone.
+            {t("providers.deleteProviderConfirm", { name: providerName })}
           </DialogDescription>
         </DialogHeader>
 
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            Delete
+            {t("common.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

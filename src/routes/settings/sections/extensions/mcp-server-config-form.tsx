@@ -51,8 +51,8 @@ export function McpServerConfigForm({
   showTypeSelector = false,
   showTransportEditors = true,
   namePlaceholder,
-  commandPlaceholder = "e.g., npx -y @modelcontextprotocol/server-everything",
-  urlPlaceholder = "https://mcp.example.com/api",
+  commandPlaceholder,
+  urlPlaceholder,
   approvalDescription,
   stdioSupplement,
   httpSupplement,
@@ -61,6 +61,8 @@ export function McpServerConfigForm({
   const { t } = useTranslation();
   const isStdio = values.type === "stdio";
   const resolvedNamePlaceholder = namePlaceholder ?? t("extensions.serverName");
+  const resolvedCommandPlaceholder = commandPlaceholder ?? t("extensions.commandPlaceholder");
+  const resolvedUrlPlaceholder = urlPlaceholder ?? t("extensions.urlPlaceholder");
   const resolvedApprovalDescription =
     approvalDescription ?? t("extensions.approvalDescriptionServer");
 
@@ -105,7 +107,7 @@ export function McpServerConfigForm({
             <Label htmlFor={`${idPrefix}-command`}>{t("extensions.command")}</Label>
             <Input
               id={`${idPrefix}-command`}
-              placeholder={commandPlaceholder}
+              placeholder={resolvedCommandPlaceholder}
               value={values.command}
               onChange={(event) => onChange({ command: event.target.value })}
             />
@@ -126,7 +128,7 @@ export function McpServerConfigForm({
             <Label htmlFor={`${idPrefix}-url`}>{t("extensions.url")}</Label>
             <Input
               id={`${idPrefix}-url`}
-              placeholder={urlPlaceholder}
+              placeholder={resolvedUrlPlaceholder}
               value={values.url}
               onChange={(event) => onChange({ url: event.target.value })}
             />

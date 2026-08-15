@@ -96,7 +96,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || "unknown file";
+  const filePath = input?.filePath || t("tools.unknownFile");
 
   switch (part.state) {
     case "approval-requested":
@@ -166,7 +166,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Edit denied ({filePath})
+              {t("tools.editDenied", { path: filePath })}
             </span>
           </div>
         );
@@ -177,9 +177,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Editing <span className="font-mono text-xs">{filePath}</span>...
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.editingFile", { path: filePath })}</span>
         </div>
       );
     }
@@ -224,8 +222,10 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                Edited <span className="font-mono text-xs">{filePath}</span>
-                {output.linesChanged ? ` (${output.linesChanged} lines)` : ""}
+                {t("tools.editedFile", { path: filePath })}
+                {output.linesChanged
+                  ? ` ${t("tools.linesChanged", { count: output.linesChanged })}`
+                  : ""}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">

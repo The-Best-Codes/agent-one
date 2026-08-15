@@ -1,6 +1,7 @@
 import { IconCheck, IconSearch } from "@tabler/icons-react";
 import { Command as CommandPrimitive } from "cmdk";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Dialog,
@@ -26,8 +27,8 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
 }
 
 function CommandDialog({
-  title = "Command Palette",
-  description = "Search for a command to run...",
+  title,
+  description,
   children,
   className,
   showCloseButton = false,
@@ -38,11 +39,14 @@ function CommandDialog({
   className?: string;
   showCloseButton?: boolean;
 }) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t("ui.commandPalette");
+  const resolvedDescription = description ?? t("ui.commandSearchPlaceholder");
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
+        <DialogTitle>{resolvedTitle}</DialogTitle>
+        <DialogDescription>{resolvedDescription}</DialogDescription>
       </DialogHeader>
       <DialogContent
         className={cn("top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0", className)}

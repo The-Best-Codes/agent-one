@@ -250,8 +250,8 @@ export default function ExtensionsSection() {
     // Built-in extensions card
     const toolCountLabel =
       enabledToolCount === 1
-        ? "1 tool enabled"
-        : `${enabledToolCount} of ${TOOL_IDS.length} tools enabled`;
+        ? t("extensions.oneToolEnabled")
+        : t("extensions.toolsEnabledCount", { count: enabledToolCount, total: TOOL_IDS.length });
     result.push({
       id: "built-in",
       title: t("extensions.builtInExtensions"),
@@ -362,6 +362,7 @@ export default function ExtensionsSection() {
     updateMcpServerById,
     handleUninstallClick,
     restartMcpServer,
+    t,
   ]);
 
   useEffect(() => {
@@ -394,9 +395,7 @@ export default function ExtensionsSection() {
           <Alert>
             <IconFlask />
             <AlertTitle>{t("extensions.betaTitle")}</AlertTitle>
-            <AlertDescription>
-              Some features may be incomplete or change without notice.
-            </AlertDescription>
+            <AlertDescription>{t("extensions.betaDescription")}</AlertDescription>
           </Alert>
         </SettingsTarget>
 
@@ -429,7 +428,7 @@ export default function ExtensionsSection() {
                     checked={onlyInstalled}
                     onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
                   >
-                    Only show installed
+                    {t("extensions.onlyShowInstalled")}
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel>{t("extensions.connectionType")}</DropdownMenuLabel>
@@ -437,18 +436,18 @@ export default function ExtensionsSection() {
                     checked={showDeviceExtensions}
                     onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
                   >
-                    Runs on this device
+                    {t("extensions.runsOnThisDevice")}
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={showOnlineExtensions}
                     onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
                   >
-                    Connects online
+                    {t("extensions.connectsOnline")}
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
                     <IconTool data-icon="inline-start" />
-                    Find dangling extensions
+                    {t("extensions.findDangling")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -458,7 +457,7 @@ export default function ExtensionsSection() {
               analytics={{ event: "custom_extension_dialog_opened" }}
             >
               <IconPlus data-icon="inline-start" />
-              Add Custom
+              {t("extensions.addCustomAction")}
             </Button>
           </div>
         </SettingsTarget>

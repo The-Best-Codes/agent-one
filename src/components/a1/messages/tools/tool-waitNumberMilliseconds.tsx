@@ -33,7 +33,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
   const safeFormatMilliseconds = (milliseconds: number) => {
     try {
       if (isNaN(milliseconds) || milliseconds < 0) {
-        return "unknown";
+        return t("common.unknown");
       }
 
       const totalSeconds = Math.floor(milliseconds / 1000);
@@ -51,7 +51,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return formatted.join(" ");
     } catch (error) {
       logger.error(error);
-      return "unknown";
+      return t("common.unknown");
     }
   };
 
@@ -91,7 +91,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Wait for {safeFormatMilliseconds(input?.milliseconds)} denied
+            {t("tools.waitDenied", { duration: safeFormatMilliseconds(input?.milliseconds) })}
           </span>
         </div>
       );
@@ -113,7 +113,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Wait for {safeFormatMilliseconds(input?.milliseconds)} denied
+              {t("tools.waitDenied", { duration: safeFormatMilliseconds(input?.milliseconds) })}
             </span>
           </div>
         );
@@ -125,7 +125,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         >
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
-            Waiting {safeFormatMilliseconds(input?.milliseconds)}...
+            {t("tools.waitingDuration", { duration: safeFormatMilliseconds(input?.milliseconds) })}
           </span>
         </div>
       );
@@ -139,7 +139,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         >
           <IconClock className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate">
-            Waited {safeFormatMilliseconds(input?.milliseconds)}
+            {t("tools.waitedDuration", { duration: safeFormatMilliseconds(input?.milliseconds) })}
           </span>
         </div>
       );

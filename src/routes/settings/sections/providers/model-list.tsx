@@ -128,29 +128,27 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
     <div className="bg-muted/30 rounded-lg border p-4">
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="new-model-id">Model ID</FieldLabel>
+          <FieldLabel htmlFor="new-model-id">{t("providers.modelId")}</FieldLabel>
           <Input
             id="new-model-id"
             value={id}
             onChange={(event) => setId(event.target.value)}
-            placeholder="e.g. gpt-5"
+            placeholder={t("providers.modelIdPlaceholder")}
             aria-invalid={isDuplicate}
           />
           {isDuplicate ? (
             <FieldDescription className="text-destructive">
-              Model ID already exists.
+              {t("providers.modelIdExists")}
             </FieldDescription>
           ) : overridesBuiltIn ? (
-            <FieldDescription>
-              This matches a built-in model and will override its metadata.
-            </FieldDescription>
+            <FieldDescription>{t("providers.modelIdOverridesBuiltIn")}</FieldDescription>
           ) : (
-            <FieldDescription>Use the provider's raw model identifier.</FieldDescription>
+            <FieldDescription>{t("providers.modelIdHint")}</FieldDescription>
           )}
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="new-model-name">Display Name</FieldLabel>
+          <FieldLabel htmlFor="new-model-name">{t("providers.displayName")}</FieldLabel>
           <Input
             id="new-model-name"
             value={name}
@@ -161,12 +159,14 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 
         <div className="grid gap-4 md:grid-cols-2">
           <Field data-invalid={parsedContextWindow === null || undefined}>
-            <FieldLabel htmlFor="new-model-context-window">Context Window</FieldLabel>
+            <FieldLabel htmlFor="new-model-context-window">
+              {t("providers.contextWindow")}
+            </FieldLabel>
             <Input
               id="new-model-context-window"
               value={contextWindow}
               onChange={(event) => setContextWindow(event.target.value)}
-              placeholder="e.g. 200000"
+              placeholder={t("providers.contextWindowPlaceholder")}
               inputMode="numeric"
               aria-invalid={parsedContextWindow === null}
             />
@@ -178,12 +178,12 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           </Field>
 
           <Field data-invalid={parsedMaxOutputTokens === null || undefined}>
-            <FieldLabel htmlFor="new-model-max-output">Max Output Tokens</FieldLabel>
+            <FieldLabel htmlFor="new-model-max-output">{t("providers.maxOutputTokens")}</FieldLabel>
             <Input
               id="new-model-max-output"
               value={maxOutputTokens}
               onChange={(event) => setMaxOutputTokens(event.target.value)}
-              placeholder="e.g. 8192"
+              placeholder={t("providers.maxOutputTokensPlaceholder")}
               inputMode="numeric"
               aria-invalid={parsedMaxOutputTokens === null}
             />
@@ -197,7 +197,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 
         <div className="flex flex-col gap-4">
           <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-text">Supports Text</FieldLabel>
+            <FieldLabel htmlFor="new-model-supports-text">{t("providers.supportsText")}</FieldLabel>
             <Switch
               id="new-model-supports-text"
               checked={supportsText}
@@ -206,7 +206,9 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           </Field>
 
           <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-tools">Supports Tools</FieldLabel>
+            <FieldLabel htmlFor="new-model-supports-tools">
+              {t("providers.supportsTools")}
+            </FieldLabel>
             <Switch
               id="new-model-supports-tools"
               checked={supportsTools}
@@ -215,7 +217,9 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           </Field>
 
           <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-images">Supports Images</FieldLabel>
+            <FieldLabel htmlFor="new-model-supports-images">
+              {t("providers.supportsImages")}
+            </FieldLabel>
             <Switch
               id="new-model-supports-images"
               checked={supportsImages}
@@ -224,7 +228,9 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           </Field>
 
           <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-attachments">Supports Attachments</FieldLabel>
+            <FieldLabel htmlFor="new-model-supports-attachments">
+              {t("providers.supportsAttachments")}
+            </FieldLabel>
             <Switch
               id="new-model-supports-attachments"
               checked={supportsAttachments}
@@ -236,10 +242,10 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 
       <div className="mt-4 flex justify-end gap-2">
         <Button variant="outline" size="sm" onClick={onCancel}>
-          Cancel
+          {t("common.cancel")}
         </Button>
         <Button size="sm" onClick={handleAdd} disabled={!isValid}>
-          Add Model
+          {t("providers.addModel")}
         </Button>
       </div>
     </div>
@@ -278,7 +284,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={`model-name-${model.id}`}>Display Name</FieldLabel>
+            <FieldLabel htmlFor={`model-name-${model.id}`}>{t("providers.displayName")}</FieldLabel>
             <Input
               id={`model-name-${model.id}`}
               value={draft.name ?? ""}
@@ -294,7 +300,9 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
           <div className="grid gap-4 md:grid-cols-2">
             <Field data-invalid={isContextWindowInvalid || undefined}>
-              <FieldLabel htmlFor={`model-context-window-${model.id}`}>Context Window</FieldLabel>
+              <FieldLabel htmlFor={`model-context-window-${model.id}`}>
+                {t("providers.contextWindow")}
+              </FieldLabel>
               <Input
                 id={`model-context-window-${model.id}`}
                 value={contextWindowValue}
@@ -322,7 +330,9 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
             </Field>
 
             <Field data-invalid={isMaxOutputTokensInvalid || undefined}>
-              <FieldLabel htmlFor={`model-max-output-${model.id}`}>Max Output Tokens</FieldLabel>
+              <FieldLabel htmlFor={`model-max-output-${model.id}`}>
+                {t("providers.maxOutputTokens")}
+              </FieldLabel>
               <Input
                 id={`model-max-output-${model.id}`}
                 value={maxOutputTokensValue}
@@ -352,7 +362,9 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
           <div className="flex flex-col gap-4">
             <Field orientation="horizontal">
-              <FieldLabel htmlFor={`model-supports-text-${model.id}`}>Supports Text</FieldLabel>
+              <FieldLabel htmlFor={`model-supports-text-${model.id}`}>
+                {t("providers.supportsText")}
+              </FieldLabel>
               <Switch
                 id={`model-supports-text-${model.id}`}
                 checked={draft.supportsText}
@@ -361,7 +373,9 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
             </Field>
 
             <Field orientation="horizontal">
-              <FieldLabel htmlFor={`model-supports-tools-${model.id}`}>Supports Tools</FieldLabel>
+              <FieldLabel htmlFor={`model-supports-tools-${model.id}`}>
+                {t("providers.supportsTools")}
+              </FieldLabel>
               <Switch
                 id={`model-supports-tools-${model.id}`}
                 checked={draft.supportsTools}
@@ -370,7 +384,9 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
             </Field>
 
             <Field orientation="horizontal">
-              <FieldLabel htmlFor={`model-supports-images-${model.id}`}>Supports Images</FieldLabel>
+              <FieldLabel htmlFor={`model-supports-images-${model.id}`}>
+                {t("providers.supportsImages")}
+              </FieldLabel>
               <Switch
                 id={`model-supports-images-${model.id}`}
                 checked={draft.supportsImages}
@@ -380,7 +396,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
             <Field orientation="horizontal">
               <FieldLabel htmlFor={`model-supports-attachments-${model.id}`}>
-                Supports Attachments
+                {t("providers.supportsAttachments")}
               </FieldLabel>
               <Switch
                 id={`model-supports-attachments-${model.id}`}
@@ -590,7 +606,7 @@ export function ModelList({
   return (
     <div className="rounded-md border p-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="text-sm font-medium">Models</div>
+        <div className="text-sm font-medium">{t("providers.models")}</div>
 
         <div className="flex gap-2">
           {baseUrl ? (
@@ -606,7 +622,7 @@ export function ModelList({
               }}
             >
               {fetchIcon}
-              Auto
+              {t("providers.auto")}
             </Button>
           ) : null}
           <Button

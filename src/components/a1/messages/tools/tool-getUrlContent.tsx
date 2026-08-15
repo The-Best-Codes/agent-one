@@ -226,11 +226,11 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       {formatUrl(input.urls[0])}
                     </a>
                   ) : (
-                    "a website"
+                    t("tools.aWebsite")
                   )}
                 </>
               ) : (
-                ` ${urlCount} URLs`
+                ` ${t("tools.urlCount", { count: urlCount })}`
               )}
             </span>
           </div>
@@ -262,7 +262,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <span className="text-muted-foreground text-sm font-bold">
             {urlCount === 1 ? (
               <>
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 {input?.urls?.[0] ? (
                   <a
                     href={input.urls[0]}
@@ -273,12 +273,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(input.urls[0])}
                   </a>
                 ) : (
-                  "a website"
+                  t("tools.aWebsite")
                 )}{" "}
-                denied
+                {t("tools.deniedWord")}
               </>
             ) : (
-              `Browsing ${urlCount} URLs denied`
+              t("tools.browsingUrlsDenied", { count: urlCount })
             )}
           </span>
         </div>
@@ -303,7 +303,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <span className="text-muted-foreground text-sm font-bold">
               {urlCount === 1 ? (
                 <>
-                  Browsing{" "}
+                  {t("tools.browsing")}{" "}
                   {input?.urls?.[0] ? (
                     <a
                       href={input.urls[0]}
@@ -314,12 +314,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       {formatUrl(input.urls[0])}
                     </a>
                   ) : (
-                    "a website"
+                    t("tools.aWebsite")
                   )}{" "}
-                  denied
+                  {t("tools.deniedWord")}
                 </>
               ) : (
-                `Browsing ${urlCount} URLs denied`
+                t("tools.browsingUrlsDenied", { count: urlCount })
               )}
             </span>
           </div>
@@ -334,7 +334,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <span className="max-w-2xl truncate">
             {urlCount === 1 ? (
               <>
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 {input?.urls?.[0] ? (
                   <a
                     href={input.urls[0]}
@@ -345,12 +345,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(input.urls[0])}
                   </a>
                 ) : (
-                  "a website"
+                  t("tools.aWebsite")
                 )}
                 ...
               </>
             ) : (
-              `Browsing ${urlCount === 0 ? " " : `${urlCount} `}URLs...`
+              t("tools.browsingUrlsCount", { count: urlCount })
             )}
           </span>
         </div>
@@ -369,7 +369,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <div key={callId} className="flex items-center gap-1">
               <Spinner className="text-foreground size-4 shrink-0" />
               <span className="text-foreground text-sm font-bold">
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 {results[0] ? (
                   <a
                     href={results[0].url}
@@ -380,7 +380,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(results[0].url)}
                   </a>
                 ) : (
-                  "a website"
+                  t("tools.aWebsite")
                 )}
                 ...
               </span>
@@ -441,9 +441,9 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             >
               <span className="max-w-2xl truncate tabular-nums">
                 {isStreaming
-                  ? `Browsing ${results.length} URLs...`
-                  : `Browsed ${results.length} URL${results.length !== 1 ? "s" : ""}`}
-                {failCount > 0 && ` (${failCount} failed)`}
+                  ? t("tools.browsingUrlsCount", { count: results.length })
+                  : t("tools.browsedUrlsCount", { count: results.length })}
+                {failCount > 0 && ` ${t("tools.countFailed", { count: failCount })}`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
@@ -471,7 +471,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <div key={callId} className="flex items-center gap-1">
               <IconCircleX className="text-muted-foreground size-4 shrink-0" />
               <span className="text-muted-foreground text-sm font-bold">
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 <a
                   href={singleUrl}
                   target="_blank"
@@ -480,7 +480,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 >
                   {formatUrl(singleUrl)}
                 </a>{" "}
-                cancelled
+                {t("tools.cancelled")}
               </span>
             </div>
           );
@@ -524,7 +524,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                   className="justify-start gap-1 p-0 font-bold hover:no-underline"
                 >
                   <span className="text-muted-foreground max-w-2xl truncate tabular-nums">
-                    Browsing {urlCount} URLs cancelled
+                    {t("tools.browsingUrlsCancelled", { count: urlCount })}
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="p-0 pt-2">

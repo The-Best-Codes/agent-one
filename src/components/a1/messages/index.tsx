@@ -95,13 +95,19 @@ const MessagePartsInternal = ({
         if (part.type === "text") {
           return (part as TextUIPart).text;
         } else if (part.type === "file") {
-          return `[File: ${part.filename || "Unnamed file"}]`;
+          return t("messages.copyFile", { filename: part.filename || t("messages.unnamedFile") });
         } else if (part.type === "reasoning") {
           return `[Reasoning: ${part.text}]`;
         } else if (part.type === "source-url") {
-          return `[Source URL: ${part?.title || "Untitled URL"}, ${part?.url || "Unknown URL"}]`;
+          return t("messages.copySourceUrl", {
+            title: part?.title || t("messages.untitledUrl"),
+            url: part?.url || t("messages.unknownUrl"),
+          });
         } else if (part.type === "source-document") {
-          return `[Source Document: ${part?.title || "Unnamed document"}, ${part?.filename || "Unnamed file"}]`;
+          return t("messages.copySourceDocument", {
+            title: part?.title || t("messages.unnamedDocument"),
+            filename: part?.filename || t("messages.unnamedFile"),
+          });
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
         } else if (part.type === "tool-describeNextTool") {
@@ -118,7 +124,7 @@ const MessagePartsInternal = ({
       })
       .filter(Boolean)
       .join("\n");
-  }, [message.parts]);
+  }, [message.parts, t]);
 
   const getTextToSpeechContent = useCallback(() => {
     return message.parts

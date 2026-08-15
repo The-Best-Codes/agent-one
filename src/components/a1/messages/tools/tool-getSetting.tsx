@@ -21,7 +21,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
   const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const key = input?.key || "unknown setting";
+  const key = input?.key || t("tools.unknownSetting");
 
   switch (part.state) {
     case "approval-requested":
@@ -59,7 +59,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Read "{key}" setting denied
+            {t("tools.readSettingDenied", { key })}
           </span>
         </div>
       );
@@ -72,7 +72,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Read "{key}" setting denied
+              {t("tools.readSettingDenied", { key })}
             </span>
           </div>
         );
@@ -103,7 +103,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Reading setting was cancelled
+              {t("tools.readingSettingCancelled")}
             </span>
           </div>
         );
