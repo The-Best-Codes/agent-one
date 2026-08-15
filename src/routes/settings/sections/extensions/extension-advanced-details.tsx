@@ -10,6 +10,7 @@ import {
 import { useAtomValue } from "jotai";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Accordion,
@@ -35,6 +36,7 @@ import { McpServerConfigForm } from "./mcp-server-config-form";
 import { McpServerStatus } from "./mcp-server-status";
 
 function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disabled?: boolean }) {
+  const { t } = useTranslation();
   const authStates = useAtomValue(mcpAuthStatesAtom);
   const authState = authStates[server.id];
   const [loading, setLoading] = useState(false);
@@ -56,7 +58,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <IconInfoCircle className="text-foreground size-5" />
-          <span className="text-foreground text-sm">Enable server to see auth status</span>
+          <span className="text-foreground text-sm">{t("extensions.enableToSeeAuth")}</span>
         </div>
       </div>
     );
@@ -67,7 +69,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <IconShieldOff className="text-foreground size-5" />
-          <span className="text-foreground text-sm">No authorization required</span>
+          <span className="text-foreground text-sm">{t("extensions.noAuthRequired")}</span>
         </div>
       </div>
     );
@@ -78,14 +80,16 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <Spinner className="text-foreground" data-icon="inline-start" />
-          <span className="text-foreground text-sm">Checking auth status...</span>
+          <span className="text-foreground text-sm">{t("extensions.checkingAuth")}</span>
         </div>
       </div>
     );
   }
 
   const loginLabel =
-    authState === "supports-oauth" ? "Connect your account for full access" : "Not connected";
+    authState === "supports-oauth"
+      ? t("extensions.connectAccountFullAccess")
+      : t("extensions.notConnected");
 
   return (
     <div className="flex items-center justify-between rounded-md border p-3">
@@ -93,7 +97,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
         {authState === "logged-in" ? (
           <>
             <IconCircleCheck className="text-foreground size-5" />
-            <span className="text-sm">Connected</span>
+            <span className="text-sm">{t("extensions.connected")}</span>
           </>
         ) : authState === "supports-oauth" ? (
           <>
@@ -115,7 +119,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
           disabled={loading}
         >
           {loading ? <Spinner data-icon="inline-start" /> : <IconLogout />}
-          Disconnect
+          {t("extensions.disconnect")}
         </Button>
       ) : (
         <Button
@@ -124,7 +128,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
           disabled={loading}
         >
           {loading ? <Spinner data-icon="inline-start" /> : <IconLogin />}
-          Connect
+          {t("extensions.connect")}
         </Button>
       )}
     </div>
@@ -148,6 +152,7 @@ function McpServerApprovalSettings({
   onRequiresApprovalChange: (requiresApproval: boolean) => void;
   onToolApprovalOverridesChange: (overrides: Record<string, boolean>) => void;
 }) {
+  const { t } = useTranslation();
   const availableTools = loadState?.tools ?? [];
 
   return (
@@ -155,10 +160,10 @@ function McpServerApprovalSettings({
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
-            Require Approval By Default
+            {t("extensions.requireApprovalByDefault")}
           </Label>
           <span className="text-muted-foreground text-xs">
-            Ask for confirmation before running tools
+            {t("extensions.askBeforeRunningTools")}
           </span>
         </div>
         <Switch
@@ -170,28 +175,29 @@ function McpServerApprovalSettings({
 
       <Accordion type="single" collapsible className="rounded-md border px-3">
         <AccordionItem value="tool-approval" className="border-b-0">
-          <AccordionTrigger className="py-3 text-sm">Per-tool approvals</AccordionTrigger>
+          <AccordionTrigger className="py-3 text-sm">
+            {t("extensions.perToolApprovals")}
+          </AccordionTrigger>
           <AccordionContent className="pb-3">
             <div className="flex flex-col gap-3">
               {!enabled ? (
                 <span className="text-muted-foreground text-sm">
-                  Enable this server to configure per-tool approvals.
+                  {t("extensions.enableForPerTool")}
                 </span>
               ) : loadState?.status === "starting" ||
                 loadState?.status === "connecting" ||
                 loadState?.status === "unknown" ? (
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Spinner className="size-4" />
-                  Tool list will appear after the server finishes loading.
+                  {t("extensions.toolListAfterLoad")}
                 </div>
               ) : loadState?.status === "error" ? (
                 <span className="text-muted-foreground text-sm">
-                  Tools could not be loaded yet. Resolve the server error to configure per-tool
-                  approvals.
+                  {t("extensions.toolsCouldNotLoad")}
                 </span>
               ) : availableTools.length === 0 ? (
                 <span className="text-muted-foreground text-sm">
-                  This server does not currently expose any tools.
+                  {t("extensions.noToolsExposed")}
                 </span>
               ) : (
                 availableTools.map((tool) => {
@@ -206,10 +212,14 @@ function McpServerApprovalSettings({
                         <span className="truncate text-sm font-medium">{toolDisplayName}</span>
                         <span className="text-muted-foreground text-xs">
                           {override === undefined
-                            ? `Using default: ${requiresApproval ? "approval required" : "no approval required"}`
+                            ? t("extensions.usingDefaultApproval", {
+                                value: requiresApproval
+                                  ? t("extensions.approvalRequired")
+                                  : t("extensions.noApprovalRequired"),
+                              })
                             : toolRequiresApproval
-                              ? "Approval required"
-                              : "No approval required"}
+                              ? t("extensions.approvalRequiredCap")
+                              : t("extensions.noApprovalRequiredCap")}
                         </span>
                       </div>
                       <Switch
@@ -225,7 +235,7 @@ function McpServerApprovalSettings({
 
                           onToolApprovalOverridesChange(nextOverrides);
                         }}
-                        aria-label={`Toggle approval for ${toolDisplayName}`}
+                        aria-label={t("extensions.toggleApproval", { name: toolDisplayName })}
                       />
                     </div>
                   );

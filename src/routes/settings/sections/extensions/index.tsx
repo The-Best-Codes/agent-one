@@ -214,7 +214,7 @@ export default function ExtensionsSection() {
       transport_type: newServer.type,
       requires_approval: newServer.requiresApproval,
     });
-    toast.success(`${installed.name} installed`);
+    toast.success(t("extensions.installedToast", { name: installed.name }));
   };
 
   const handleUninstallClick = useCallback((serverId: string, name: string) => {
@@ -234,7 +234,7 @@ export default function ExtensionsSection() {
     }
 
     setMcpServers((prev) => prev.filter((server) => server.id !== serverToUninstall.id));
-    toast.success(`${serverToUninstall.name} removed`);
+    toast.success(t("extensions.removed", { name: serverToUninstall.name }));
     setServerToUninstall(null);
     setShowUninstallDialog(false);
   };
@@ -519,7 +519,9 @@ export default function ExtensionsSection() {
               });
             }
             setMcpServers((prev) => prev.filter((s) => s.id !== serverId));
-            toast.success(t("extensions.removed", { name: server?.name || t("extensions.extensionFallback") }));
+            toast.success(
+              t("extensions.removed", { name: server?.name || t("extensions.extensionFallback") }),
+            );
           }}
           onRemoveAll={(serverIds) => {
             trackGoogleAnalyticsEvent("extension_removed", {

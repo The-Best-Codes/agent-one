@@ -149,7 +149,9 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.waitCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.waitCancelled")}
+            </span>
           </div>
         );
       }

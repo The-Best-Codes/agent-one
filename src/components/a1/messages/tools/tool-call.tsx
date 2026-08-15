@@ -63,7 +63,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4" />
-          <span className="text-muted-foreground text-sm font-bold">{t("tools.toolDenied", { name: toolName })}</span>
+          <span className="text-muted-foreground text-sm font-bold">
+            {t("tools.toolDenied", { name: toolName })}
+          </span>
         </div>
       );
 
@@ -95,7 +97,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <Spinner className="text-destructive" />
-                <span className="max-w-2xl truncate">{t("tools.runningUnknownTool", { name: toolName })}</span>
+                <span className="max-w-2xl truncate">
+                  {t("tools.runningUnknownTool", { name: toolName })}
+                </span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="p-2 pt-0">
@@ -120,7 +124,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <IconCircleX className="text-destructive" />
-                <span className="max-w-2xl truncate">{t("tools.unknownToolFinished", { name: toolName })}</span>
+                <span className="max-w-2xl truncate">
+                  {t("tools.unknownToolFinished", { name: toolName })}
+                </span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="p-2 pt-0">
@@ -162,7 +168,9 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-2">
           <IconCircleX className="text-destructive size-4" />
-          <span className="text-destructive text-sm font-bold">{t("tools.unknownTool", { name: toolName })}</span>
+          <span className="text-destructive text-sm font-bold">
+            {t("tools.unknownTool", { name: toolName })}
+          </span>
         </div>
       );
   }

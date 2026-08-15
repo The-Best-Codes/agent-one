@@ -152,9 +152,7 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
                 <IconPlayerSkipForward />
               </Button>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="top">
-              {t("tools.skipCommand")}
-            </AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="top">{t("tools.skipCommand")}</AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
       </div>
@@ -249,7 +247,9 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{t("tools.commandDenied")}</span>
+          <span className="text-muted-foreground text-sm font-bold">
+            {t("tools.commandDenied")}
+          </span>
         </div>
       );
 
@@ -267,7 +267,9 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.commandDenied")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.commandDenied")}
+            </span>
           </div>
         );
       }
@@ -428,7 +430,8 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                   className="justify-start gap-1 p-0 font-bold hover:no-underline"
                 >
                   <span className="max-w-2xl truncate">
-                    {t("tools.cancelledCommand")} <code className="text-xs">{truncatedCommand}</code>
+                    {t("tools.cancelledCommand")}{" "}
+                    <code className="text-xs">{truncatedCommand}</code>
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="p-0 pt-2">
@@ -442,7 +445,9 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.commandCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.commandCancelled")}
+            </span>
           </div>
         );
       }

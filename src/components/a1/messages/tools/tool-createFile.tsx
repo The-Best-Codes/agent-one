@@ -134,7 +134,9 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.preparingCreateFile")}</span>
+          <span className="text-foreground text-sm font-bold">
+            {t("tools.preparingCreateFile")}
+          </span>
         </div>
       );
 
@@ -225,7 +227,9 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.fileCreationCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.fileCreationCancelled")}
+            </span>
           </div>
         );
       }

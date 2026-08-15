@@ -109,7 +109,9 @@ export default function ChatsSection() {
   const titleMaxOutputTokens = titleGeneration.maxOutputTokens ?? 1024;
   const titleMaxOutputTokenValue = titleMaxOutputTokens === "none" ? 0 : titleMaxOutputTokens;
   const titleMaxOutputTokenLabel =
-    titleMaxOutputTokens === "none" ? t("chatsSettings.noLimit") : titleMaxOutputTokens.toLocaleString();
+    titleMaxOutputTokens === "none"
+      ? t("chatsSettings.noLimit")
+      : titleMaxOutputTokens.toLocaleString();
 
   return (
     <div className="flex flex-col gap-6">
@@ -168,7 +170,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-markdown-rendering">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{t("chatsSettings.markdownRendering")}</Label>
+                <Label className="text-sm font-medium">
+                  {t("chatsSettings.markdownRendering")}
+                </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
                   {t("chatsSettings.markdownRenderingDescription")}
                 </p>
@@ -278,7 +282,9 @@ export default function ChatsSection() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="always">{t("common.always")}</SelectItem>
-                      <SelectItem value="when-unfocused">{t("chatsSettings.whenUnfocused")}</SelectItem>
+                      <SelectItem value="when-unfocused">
+                        {t("chatsSettings.whenUnfocused")}
+                      </SelectItem>
                       <SelectItem value="never">{t("common.never")}</SelectItem>
                     </SelectGroup>
                   </SelectContent>

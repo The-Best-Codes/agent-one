@@ -1,5 +1,6 @@
 import { IconEye, IconEyeClosed } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   createMcpServerFromRegistryInstall,
@@ -38,6 +39,7 @@ function InstallFieldInput({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { t } = useTranslation();
   const [showSecret, setShowSecret] = useState(false);
 
   return (
@@ -64,7 +66,7 @@ function InstallFieldInput({
               event: "settings_interaction",
               params: { section: "extensions", control: "toggle_install_secret_visibility" },
             }}
-            title={showSecret ? "Hide value" : "Show value"}
+            title={showSecret ? t("common.hideValue") : t("common.showValue")}
           >
             {showSecret ? (
               <IconEyeClosed data-icon="inline-start" />
@@ -90,6 +92,7 @@ function InstallExtensionDialogBody({
   onOpenChange: (open: boolean) => void;
   onInstall: (server: McpRegistryInstallResult) => void;
 }) {
+  const { t } = useTranslation();
   const install = extension.install;
   const defaultFieldValues = useMemo(() => {
     if (!install) {
@@ -122,7 +125,7 @@ function InstallExtensionDialogBody({
   const detectedConfigurationContent =
     install.fields.length > 0 ? (
       <div className="rounded-md border p-3">
-        <p className="mb-3 text-xs font-medium">Detected configuration</p>
+        <p className="mb-3 text-xs font-medium">{t("extensions.detectedConfig")}</p>
         <div className="flex flex-col gap-3">
           {install.fields.map((field) => (
             <InstallFieldInput
@@ -174,10 +177,8 @@ function InstallExtensionDialogBody({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Install {extension.displayName}</DialogTitle>
-        <DialogDescription>
-          Review detected settings and install this MCP extension.
-        </DialogDescription>
+        <DialogTitle>{t("extensions.install", { name: extension.displayName })}</DialogTitle>
+        <DialogDescription>{t("extensions.installDescription")}</DialogDescription>
       </DialogHeader>
 
       <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
@@ -189,7 +190,7 @@ function InstallExtensionDialogBody({
           showTransportEditors={false}
           commandPlaceholder="npx -y ..."
           urlPlaceholder="https://..."
-          approvalDescription="Ask before running tools from this extension"
+          approvalDescription={t("extensions.approvalDescription")}
           stdioSupplement={detectedConfigurationContent}
           httpSupplement={detectedConfigurationContent}
         />
@@ -197,10 +198,10 @@ function InstallExtensionDialogBody({
 
       <DialogFooter>
         <Button variant="outline" onClick={() => onOpenChange(false)}>
-          Cancel
+          {t("common.cancel")}
         </Button>
         <Button onClick={handleInstall} disabled={!isFormValid}>
-          Install
+          {t("extensions.installAction")}
         </Button>
       </DialogFooter>
     </>

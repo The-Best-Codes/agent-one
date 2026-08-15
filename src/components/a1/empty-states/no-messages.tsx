@@ -41,8 +41,7 @@ export const NoMessagesGreeting = () => {
     () => GREETING_KEYS[Math.floor(Math.random() * GREETING_KEYS.length)],
   );
   const namedKey = NAMED_GREETING_KEYS[greetingKey];
-  const currentPhrase =
-    userName && namedKey ? t(namedKey, { name: userName }) : t(greetingKey);
+  const currentPhrase = userName && namedKey ? t(namedKey, { name: userName }) : t(greetingKey);
 
   return (
     <div className="flex h-full items-center justify-center">

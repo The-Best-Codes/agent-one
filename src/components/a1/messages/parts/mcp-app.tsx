@@ -354,7 +354,9 @@ function ConnectedMcpAppInternal({
         {displayMode === "fullscreen" && (
           <div className="bg-background border-border flex h-16 items-center justify-between gap-3 border-b px-4">
             <div className="min-w-0">
-              <div className="truncate text-base font-medium">{t("messages.expandedExtension")}</div>
+              <div className="truncate text-base font-medium">
+                {t("messages.expandedExtension")}
+              </div>
               <div className="text-muted-foreground truncate text-sm">
                 {t("messages.expandedExtensionHint")}
               </div>

@@ -51,7 +51,9 @@ export const MessagePartToolListSettings = ({ part }: { part: ToolUIPart }) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{t("tools.listSettingsDenied")}</span>
+          <span className="text-muted-foreground text-sm font-bold">
+            {t("tools.listSettingsDenied")}
+          </span>
         </div>
       );
 
@@ -62,7 +64,9 @@ export const MessagePartToolListSettings = ({ part }: { part: ToolUIPart }) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.listSettingsDenied")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.listSettingsDenied")}
+            </span>
           </div>
         );
       }
@@ -94,7 +98,9 @@ export const MessagePartToolListSettings = ({ part }: { part: ToolUIPart }) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.listSettingsCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.listSettingsCancelled")}
+            </span>
           </div>
         );
       }
@@ -114,7 +120,9 @@ export const MessagePartToolListSettings = ({ part }: { part: ToolUIPart }) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSettings className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.listSettingsAccessed")}</span>
+          <span className="text-foreground text-sm font-bold">
+            {t("tools.listSettingsAccessed")}
+          </span>
         </div>
       );
   }

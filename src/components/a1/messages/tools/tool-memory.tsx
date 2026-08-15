@@ -55,19 +55,28 @@ function getActionLabel(t: (key: string) => string, input: MemoryToolInput) {
   }
 }
 
-function formatOutput(t: (key: string, opts?: Record<string, unknown>) => string, output: MemoryToolOutput) {
+function formatOutput(
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  output: MemoryToolOutput,
+) {
   const details: string[] = [];
 
   if (output.added?.length) {
-    details.push(t("tools.memoryAdded", { entries: output.added.map((entry) => `- ${entry}`).join("\n") }));
+    details.push(
+      t("tools.memoryAdded", { entries: output.added.map((entry) => `- ${entry}`).join("\n") }),
+    );
   }
 
   if (output.removed?.length) {
-    details.push(t("tools.memoryRemoved", { entries: output.removed.map((entry) => `- ${entry}`).join("\n") }));
+    details.push(
+      t("tools.memoryRemoved", { entries: output.removed.map((entry) => `- ${entry}`).join("\n") }),
+    );
   }
 
   if (output.action === "replace") {
-    details.push(t("tools.memoryReplaced", { value: output.replaced ? t("tools.yes") : t("tools.no") }));
+    details.push(
+      t("tools.memoryReplaced", { value: output.replaced ? t("tools.yes") : t("tools.no") }),
+    );
     if (output.oldEntry) details.push(t("tools.memoryOld", { value: output.oldEntry }));
     if (output.newEntry) details.push(t("tools.memoryNew", { value: output.newEntry }));
   }
@@ -79,7 +88,10 @@ function formatOutput(t: (key: string, opts?: Record<string, unknown>) => string
   return details.join("\n\n") || t("tools.memoryUpdatedPeriod");
 }
 
-function getCompletedLabel(t: (key: string, opts?: Record<string, unknown>) => string, output: MemoryToolOutput) {
+function getCompletedLabel(
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  output: MemoryToolOutput,
+) {
   switch (output.action) {
     case "add":
       return output.added?.length
@@ -162,7 +174,9 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.memoryDenied")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.memoryDenied")}
+            </span>
           </div>
         );
       }
@@ -229,7 +243,9 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.memoryUpdateCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.memoryUpdateCancelled")}
+            </span>
           </div>
         );
       }

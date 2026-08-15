@@ -79,7 +79,9 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
                   <>
                     <span>&middot;</span>
                     <span className="truncate">
-                      {file.name.includes("_agent-one_chat") ? t("chat.attachmentTypeChat") : file.type}
+                      {file.name.includes("_agent-one_chat")
+                        ? t("chat.attachmentTypeChat")
+                        : file.type}
                     </span>
                   </>
                 )}

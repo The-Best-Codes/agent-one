@@ -47,7 +47,9 @@ export default function TestsRoute() {
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
                   <h3 className="font-medium">{t("tests.notifications")}</h3>
-                  <p className="text-muted-foreground text-sm">{t("tests.notificationsDescription")}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("tests.notificationsDescription")}
+                  </p>
                 </div>
                 <Button onClick={() => navigate("/tests/notifications")} variant="outline">
                   {t("tests.runTest")}
@@ -67,7 +69,9 @@ export default function TestsRoute() {
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
                   <h3 className="font-medium">{t("tests.chatStress")}</h3>
-                  <p className="text-muted-foreground text-sm">{t("tests.chatStressDescription")}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("tests.chatStressDescription")}
+                  </p>
                 </div>
                 <Button onClick={() => navigate("/tests/chat-stress")} variant="outline">
                   {t("tests.runTest")}
@@ -93,7 +97,9 @@ export default function TestsRoute() {
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
                   <h3 className="font-medium">{t("tests.logHistory")}</h3>
-                  <p className="text-muted-foreground text-sm">{t("tests.logHistoryDescription")}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("tests.logHistoryDescription")}
+                  </p>
                 </div>
                 <Button onClick={() => navigate("/tests/logs")} variant="outline">
                   {t("tests.viewLogs")}

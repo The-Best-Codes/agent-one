@@ -856,7 +856,9 @@ export default function AppearanceSection() {
                     onClick={() =>
                       updateChatBackground({ preset: value as ChatBackgroundPresetOption })
                     }
-                    title={t(`appearance.backgroundPresets.${value}`, { defaultValue: preset.label })}
+                    title={t(`appearance.backgroundPresets.${value}`, {
+                      defaultValue: preset.label,
+                    })}
                   >
                     {chatBackground.preset === value && (
                       <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
@@ -993,7 +995,9 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-markdown-highlighting">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{t("appearance.markdownHighlighting")}</Label>
+                <Label className="text-sm font-medium">
+                  {t("appearance.markdownHighlighting")}
+                </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
                   {t("appearance.markdownHighlightingDescription")}
                 </p>

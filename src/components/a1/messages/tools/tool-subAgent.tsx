@@ -8,8 +8,8 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -137,7 +137,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       return (
         <div className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{t("tools.subagentDenied")}</span>
+          <span className="text-muted-foreground text-sm font-bold">
+            {t("tools.subagentDenied")}
+          </span>
         </div>
       );
 
@@ -156,7 +158,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
         return (
           <div className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.subagentDenied")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.subagentDenied")}
+            </span>
           </div>
         );
       }
@@ -234,7 +238,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
         return (
           <div className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.subagentCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.subagentCancelled")}
+            </span>
           </div>
         );
       }

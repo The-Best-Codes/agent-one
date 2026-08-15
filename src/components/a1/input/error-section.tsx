@@ -37,7 +37,12 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
           <IconPlayerPlay data-icon="inline-start" />
           {t("chat.resume")}
         </Button>
-        <Button title={t("input.ignoreError")} size="icon" onClick={() => clearError()} variant="outline">
+        <Button
+          title={t("input.ignoreError")}
+          size="icon"
+          onClick={() => clearError()}
+          variant="outline"
+        >
           <IconX />
         </Button>
       </div>

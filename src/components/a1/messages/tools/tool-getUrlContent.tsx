@@ -77,21 +77,21 @@ const formatUrl = (url: string) => {
 const UrlPendingDisplay = memo(({ url }: { url: string }) => {
   const { t } = useTranslation();
   return (
-  <div className="flex items-center gap-1">
-    <Spinner className="text-foreground size-4 shrink-0" />
-    <span className="text-foreground max-w-2xl truncate text-sm font-bold">
-      {t("tools.browsing")}{" "}
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
-      >
-        {formatUrl(url)}
-      </a>
-      ...
-    </span>
-  </div>
+    <div className="flex items-center gap-1">
+      <Spinner className="text-foreground size-4 shrink-0" />
+      <span className="text-foreground max-w-2xl truncate text-sm font-bold">
+        {t("tools.browsing")}{" "}
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+        >
+          {formatUrl(url)}
+        </a>
+        ...
+      </span>
+    </div>
   );
 });
 
@@ -100,21 +100,21 @@ UrlPendingDisplay.displayName = "UrlPendingDisplay";
 const UrlCancelledDisplay = memo(({ url }: { url: string }) => {
   const { t } = useTranslation();
   return (
-  <div className="flex items-center gap-1">
-    <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-    <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
-      {t("tools.browsing")}{" "}
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
-      >
-        {formatUrl(url)}
-      </a>{" "}
-      {t("tools.cancelled")}
-    </span>
-  </div>
+    <div className="flex items-center gap-1">
+      <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+      <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
+        {t("tools.browsing")}{" "}
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+        >
+          {formatUrl(url)}
+        </a>{" "}
+        {t("tools.cancelled")}
+      </span>
+    </div>
   );
 });
 
@@ -542,7 +542,9 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.browsingCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.browsingCancelled")}
+            </span>
           </div>
         );
       }
@@ -561,7 +563,9 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconWorld className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.webBrowsingAccessed")}</span>
+          <span className="text-foreground text-sm font-bold">
+            {t("tools.webBrowsingAccessed")}
+          </span>
         </div>
       );
   }

@@ -173,7 +173,9 @@ export default function AccountSection() {
                       <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
                         <IconExternalLink data-icon="inline-start" />
                         <span>{t("account.dashboard")}</span>
-                        <span className="sr-only lg:not-sr-only">{t("account.dashboardSuffix")}</span>
+                        <span className="sr-only lg:not-sr-only">
+                          {t("account.dashboardSuffix")}
+                        </span>
                       </a>
                     </Button>
                     <Button
@@ -350,9 +352,7 @@ export default function AccountSection() {
                   </span>
                 </AdaptiveTooltipTrigger>
                 {!user && (
-                  <AdaptiveTooltipContent>
-                    {t("account.hideModelsTooltip")}
-                  </AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>{t("account.hideModelsTooltip")}</AdaptiveTooltipContent>
                 )}
               </AdaptiveTooltip>
             </div>
@@ -426,9 +426,7 @@ export default function AccountSection() {
               <p className="text-muted-foreground text-sm">{t("account.memoryDescription")}</p>
               <div className="rounded-md border p-3">
                 <div className="mb-3 flex items-start justify-between gap-2">
-                  <p className="text-muted-foreground text-xs">
-                    {t("account.memoryHint")}
-                  </p>
+                  <p className="text-muted-foreground text-xs">{t("account.memoryHint")}</p>
                   <Button
                     type="button"
                     variant="outline"

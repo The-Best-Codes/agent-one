@@ -2,9 +2,8 @@ import type { UIMessage } from "ai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import i18n from "@/lib/i18n";
-
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import i18n from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const getMessagePreview = (message: UIMessage) => {

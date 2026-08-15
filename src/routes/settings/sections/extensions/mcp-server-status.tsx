@@ -1,6 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
-import i18n from "@/lib/i18n";
 import { Switch } from "@/components/ui/switch";
+import i18n from "@/lib/i18n";
 import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 import { cn } from "@/lib/utils";
 

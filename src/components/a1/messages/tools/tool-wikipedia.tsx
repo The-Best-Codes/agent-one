@@ -99,7 +99,9 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <IconBrandWikipedia className="text-foreground size-4 shrink-0" />
-            <span className="text-foreground text-sm font-bold">{t("tools.wantsTo", { label })}</span>
+            <span className="text-foreground text-sm font-bold">
+              {t("tools.wantsTo", { label })}
+            </span>
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button
@@ -517,7 +519,9 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconBrandWikipedia className="text-muted-foreground size-4 shrink-0" />{" "}
-          <span className="text-muted-foreground text-sm font-bold">{t("tools.wikipediaAccessed")}</span>
+          <span className="text-muted-foreground text-sm font-bold">
+            {t("tools.wikipediaAccessed")}
+          </span>
         </div>
       );
   }

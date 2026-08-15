@@ -165,7 +165,9 @@ export function HttpHeadersEditor({
                   </Button>
                 </div>
                 {isDupe && (
-                  <p className="text-destructive mt-1 ml-0.5 text-xs">{t("input.duplicateHeader")}</p>
+                  <p className="text-destructive mt-1 ml-0.5 text-xs">
+                    {t("input.duplicateHeader")}
+                  </p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">

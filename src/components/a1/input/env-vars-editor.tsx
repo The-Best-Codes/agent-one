@@ -211,7 +211,9 @@ export function EnvVarsEditor({
                   </Button>
                 </div>
                 {isDupe && (
-                  <p className="text-destructive mt-1 ml-0.5 text-xs">{t("input.duplicateVariable")}</p>
+                  <p className="text-destructive mt-1 ml-0.5 text-xs">
+                    {t("input.duplicateVariable")}
+                  </p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">

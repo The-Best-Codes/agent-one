@@ -157,11 +157,11 @@ export default function ChatStressTestRoute() {
         throw new Error("Failed to load chat messages after 5 tries.");
       }
 
-      toast.success(`Created stress chat with ${messages.length.toLocaleString()} messages.`);
+      toast.success(t("tests.createdStressChat", { count: messages.length.toLocaleString() }));
       await navigate(`/chat/${chatId}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      toast.error(`Failed to create stress chat: ${message}`);
+      toast.error(t("tests.failedStressChat", { message }));
     } finally {
       setIsCreating(false);
     }

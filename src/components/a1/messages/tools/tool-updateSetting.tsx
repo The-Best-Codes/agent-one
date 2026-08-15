@@ -147,7 +147,9 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSettings className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.updateSettingAccessed")}</span>
+          <span className="text-foreground text-sm font-bold">
+            {t("tools.updateSettingAccessed")}
+          </span>
         </div>
       );
   }

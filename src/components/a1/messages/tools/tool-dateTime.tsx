@@ -107,7 +107,9 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <IconCalendar className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">{t("tools.checkedTimeDate", { formatted: output?.formatted })}</span>
+          <span className="max-w-2xl truncate">
+            {t("tools.checkedTimeDate", { formatted: output?.formatted })}
+          </span>
         </div>
       );
 

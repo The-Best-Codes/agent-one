@@ -172,7 +172,9 @@ export default function KeyboardShortcutsSection() {
           <SettingsTarget id="setting-activate-shortcuts-in-input-fields">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">{t("shortcuts.activateInInputsLabel")}</Label>
+                <Label className="text-sm font-medium">
+                  {t("shortcuts.activateInInputsLabel")}
+                </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
                   {t("shortcuts.activateInInputsDescription")}
                 </p>
@@ -225,7 +227,9 @@ export default function KeyboardShortcutsSection() {
                 >
                   <div>
                     <Label className="text-sm font-medium">{t(definition.labelKey)}</Label>
-                    <p className="text-muted-foreground mt-1 text-xs">{t(definition.descriptionKey)}</p>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      {t(definition.descriptionKey)}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Kbd>{config.shortcut}</Kbd>

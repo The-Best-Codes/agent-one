@@ -438,9 +438,7 @@ export default function AboutSection() {
                   </span>
                 </AdaptiveTooltipTrigger>
                 {!user && (
-                  <AdaptiveTooltipContent>
-                    {t("about.notSignedInAnalytics")}
-                  </AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>{t("about.notSignedInAnalytics")}</AdaptiveTooltipContent>
                 )}
               </AdaptiveTooltip>
             </div>

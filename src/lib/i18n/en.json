@@ -100,6 +100,7 @@
     "categories": "Setting Categories",
     "categoriesDescription": "List of setting sections",
     "selectSection": "Select a section from the sidebar.",
+    "selectLanguage": "Select language",
     "sections": {
       "account": "Account",
       "appearance": "Appearance",
@@ -513,7 +514,9 @@
     "deleteModel": "Delete model",
     "addModel": "Add Model",
     "noCustomModels": "No custom models yet",
-    "noCustomModelsDescription": "Add a model or fetch the provider’s model list, then edit the metadata you want AgentOne to use."
+    "noCustomModelsDescription": "Add a model or fetch the provider’s model list, then edit the metadata you want AgentOne to use.",
+    "addProvider": "Add Provider",
+    "openaiCompatible": "OpenAI Compatible"
   },
   "extensions": {
     "title": "Extensions",
@@ -589,7 +592,115 @@
     "noApprovalRequired": "no approval required",
     "approvalRequiredCap": "Approval required",
     "noApprovalRequiredCap": "No approval required",
-    "toggleApproval": "Toggle approval for {{name}}"
+    "toggleApproval": "Toggle approval for {{name}}",
+    "noMatch": "No extensions match your search.",
+    "iconAlt": "{{title}} icon",
+    "advanced": "Advanced",
+    "advancedConfig": "{{title}} advanced config",
+    "toolCount_one": "{{count}} tool",
+    "toolCount_other": "{{count}} tools",
+    "addCustomTitle": "Add Custom Extension",
+    "addCustomDescription": "Configure a custom extension by defining an MCP server.",
+    "autoFilledDescription": "Review the details below before installing. Only install extensions you trust.",
+    "namePlaceholderExample": "e.g., Everything Server",
+    "addCustomAction": "Add Custom",
+    "installDescription": "Review detected settings and install this MCP extension.",
+    "danglingDescription": "These extensions were installed previously but no longer match anything in the registry, usually because the extension was updated to a newer version. They may still be running in the background.",
+    "noDangling": "No dangling extensions found.",
+    "removeAll": "Remove all",
+    "installedToast": "{{name}} installed",
+    "requireApproval": "Require Approval",
+    "requireApprovalHint": "Ask for confirmation before running this tool",
+    "requireApprovalByDefault": "Require Approval By Default",
+    "useUtc": "Use UTC",
+    "useUtcHint": "Return time in UTC instead of local timezone",
+    "minDurationMs": "Min Duration (ms)",
+    "maxDurationMs": "Max Duration (ms)",
+    "minUrls": "Min URLs",
+    "maxUrls": "Max URLs",
+    "defaultMaxContentLength": "Default Max Content Length",
+    "defaultMaxCharacters": "Default Max Characters",
+    "defaultTimeoutMs": "Default Timeout (ms)",
+    "maxScrollbackChars": "Max Scrollback (chars)",
+    "subAgentHint": "Subagents inherit the current model and enabled tools, but cannot spawn other subagents.",
+    "defaultMaxResults": "Default Max Results",
+    "maxConcurrentSearches": "Max Concurrent Searches",
+    "defaultMaxPages": "Default Max Pages",
+    "builtInToolsDescription": "Choose which built-in tools are available and how they behave.",
+    "tools": {
+      "dateTime": {
+        "name": "Current date and time",
+        "description": "Check the current date and time"
+      },
+      "waitNumberMilliseconds": {
+        "name": "Pause",
+        "description": "Wait for a short amount of time"
+      },
+      "getUrlContent": {
+        "name": "Browse",
+        "description": "Read content from web pages"
+      },
+      "webSearch": {
+        "name": "Search the web",
+        "description": "Find information online"
+      },
+      "wikipedia": {
+        "name": "Wikipedia",
+        "description": "Search Wikipedia and read article summaries, content, links, and categories"
+      },
+      "memory": {
+        "name": "Memory",
+        "description": "Maintain concise long-term user memory"
+      },
+      "editFile": {
+        "name": "Edit file",
+        "description": "Edit files by replacing text content"
+      },
+      "createFile": {
+        "name": "Create file",
+        "description": "Create new files with content"
+      },
+      "deleteFile": {
+        "name": "Delete file",
+        "description": "Delete files from the filesystem"
+      },
+      "viewFile": {
+        "name": "View file",
+        "description": "Read and view file contents with smart truncation"
+      },
+      "executeCommand": {
+        "name": "Run command",
+        "description": "Execute terminal commands on your system"
+      },
+      "subAgent": {
+        "name": "Spawn subagent",
+        "description": "Delegate focused work to a streamed subagent"
+      },
+      "listSettings": {
+        "name": "List Settings",
+        "description": "List all available configuration setting keys"
+      },
+      "getSetting": {
+        "name": "Get Setting",
+        "description": "Get the current value and possible options of a specific setting"
+      },
+      "updateSetting": {
+        "name": "Update Setting",
+        "description": "Update a setting key's value"
+      }
+    },
+    "connectedTo": "Connected to \"{{name}}\" successfully",
+    "connectionCancelled": "Connection to \"{{name}}\" cancelled",
+    "connectionFailed": "Connection failed: {{error}}",
+    "disconnectedFrom": "Disconnected from \"{{name}}\" successfully",
+    "disconnectFailed": "Failed to disconnect from \"{{name}}\": {{error}}",
+    "askBeforeRunningTools": "Ask for confirmation before running tools",
+    "enableForPerTool": "Enable this server to configure per-tool approvals.",
+    "toolListAfterLoad": "Tool list will appear after the server finishes loading.",
+    "toolsCouldNotLoad": "Tools could not be loaded yet. Resolve the server error to configure per-tool approvals.",
+    "noToolsExposed": "This server does not currently expose any tools.",
+    "disconnect": "Disconnect",
+    "connect": "Connect"
   },
   "onboarding": {
     "configureProviders": "Configure providers",
@@ -685,7 +796,9 @@
     "stressBenchmark": "Stress Test and Benchmark",
     "results": "Results",
     "chatStressTest": "Chat Stress Test",
-    "generateStressChat": "Generate a Stress Chat"
+    "generateStressChat": "Generate a Stress Chat",
+    "createdStressChat": "Created stress chat with {{count}} messages.",
+    "failedStressChat": "Failed to create stress chat: {{message}}"
   },
   "auth": {
     "checkingStatus": "Checking status...",

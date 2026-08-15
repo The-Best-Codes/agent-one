@@ -34,9 +34,7 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
     >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-foreground text-4xl font-bold">{t("onboarding.allSet")}</h1>
-        <p className="text-muted-foreground text-lg">
-          {t("onboarding.welcomeAboard", { name })}
-        </p>
+        <p className="text-muted-foreground text-lg">{t("onboarding.welcomeAboard", { name })}</p>
       </div>
 
       <div className="flex w-full flex-col gap-3">

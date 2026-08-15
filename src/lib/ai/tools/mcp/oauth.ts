@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getDefaultStore } from "jotai";
 import { toast } from "sonner";
 
+import i18n from "@/lib/i18n";
 import { dismissedOAuthPromptsAtom, mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
@@ -77,7 +78,10 @@ export async function mcpLogin(
       serverId,
       serverUrl,
     });
-    toast.success(`Connected to "${serverName}" successfully`, { id: toastId, action: null });
+    toast.success(i18n.t("extensions.connectedTo", { name: serverName }), {
+      id: toastId,
+      action: null,
+    });
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-in") return prev;
       return {
@@ -89,13 +93,13 @@ export async function mcpLogin(
     return true;
   } catch (e) {
     if (typeof e === "string" && e.includes("Authorization cancelled")) {
-      toast.error(`Connection to "${serverName}" cancelled`, {
+      toast.error(i18n.t("extensions.connectionCancelled", { name: serverName }), {
         id: toastId,
         action: null,
         duration: 10_000,
       });
     } else {
-      toast.error(`Connection failed: ${String(e)}`, {
+      toast.error(i18n.t("extensions.connectionFailed", { error: String(e) }), {
         id: toastId,
         action: null,
         duration: 10_000,
@@ -108,7 +112,7 @@ export async function mcpLogin(
 export async function mcpLogout(serverId: string, serverName: string): Promise<boolean> {
   try {
     await clearMcpOAuthCredentials(serverId);
-    toast.success(`Disconnected from "${serverName}" successfully`);
+    toast.success(i18n.t("extensions.disconnectedFrom", { name: serverName }));
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-out") return prev;
       return {
@@ -119,7 +123,7 @@ export async function mcpLogout(serverId: string, serverName: string): Promise<b
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    toast.error(`Failed to disconnect from "${serverName}": ${String(e)}`);
+    toast.error(i18n.t("extensions.disconnectFailed", { name: serverName, error: String(e) }));
     return false;
   }
 }

@@ -1,4 +1,5 @@
 import { useAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 
 import {
   Select,
@@ -17,6 +18,7 @@ interface LanguagePickerProps {
 }
 
 export function LanguagePicker({ className, id }: LanguagePickerProps) {
+  const { t } = useTranslation();
   const [language, setLanguage] = useAtom(languageAtom);
 
   const handleChange = (value: string) => {
@@ -25,7 +27,7 @@ export function LanguagePicker({ className, id }: LanguagePickerProps) {
 
   return (
     <Select value={language} onValueChange={handleChange}>
-      <SelectTrigger className={className} id={id} aria-label="Select language">
+      <SelectTrigger className={className} id={id} aria-label={t("settings.selectLanguage")}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

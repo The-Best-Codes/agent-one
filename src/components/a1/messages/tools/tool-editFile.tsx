@@ -145,7 +145,9 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{t("tools.editDenied", { path: filePath })}</span>
+          <span className="text-muted-foreground text-sm font-bold">
+            {t("tools.editDenied", { path: filePath })}
+          </span>
         </div>
       );
 
@@ -245,7 +247,9 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{t("tools.fileEditCancelled")}</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.fileEditCancelled")}
+            </span>
           </div>
         );
       }

@@ -93,7 +93,9 @@ export const MessageActionRow = ({
                 <RetryButton messageId={messageId} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">{t("messages.regenerate")}</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">
+              {t("messages.regenerate")}
+            </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
         {onEdit && (
@@ -103,7 +105,9 @@ export const MessageActionRow = ({
                 <EditButton onEdit={onEdit} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">{t("messages.editMessage")}</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">
+              {t("messages.editMessage")}
+            </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
       </>

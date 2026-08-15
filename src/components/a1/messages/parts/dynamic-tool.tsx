@@ -87,7 +87,9 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
             >
               <ParametersAccordionItem value="parameters" className="border-0">
                 <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
-                  <span className="text-muted-foreground font-medium">{t("common.parameters")}</span>
+                  <span className="text-muted-foreground font-medium">
+                    {t("common.parameters")}
+                  </span>
                 </ParametersAccordionTrigger>
                 <ParametersAccordionContent className="px-2 pb-2">
                   <pre className="text-muted-foreground overflow-x-auto text-xs">

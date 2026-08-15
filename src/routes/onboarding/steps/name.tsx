@@ -83,7 +83,9 @@ export function NameStep({ onSubmit }: NameStepProps) {
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-2xl font-bold">{t("onboarding.whatShouldICallYou")}</h2>
+          <h2 className="text-foreground text-2xl font-bold">
+            {t("onboarding.whatShouldICallYou")}
+          </h2>
           <p className="text-muted-foreground">{t("onboarding.enterNamePersonalize")}</p>
         </div>
 
