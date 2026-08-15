@@ -2,6 +2,10 @@
   "app": {
     "name": "AgentOne"
   },
+  "ui": {
+    "closeSidebar": "Close sidebar",
+    "openSidebar": "Open sidebar"
+  },
   "settings": {
     "language": "Language"
   }
