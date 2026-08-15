@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -61,27 +62,36 @@ interface WikipediaArticleOutput {
 
 type WikipediaOutput = WikipediaSearchOutput | WikipediaArticleOutput;
 
-const ACTION_LABELS: Record<WikipediaAction, (input: WikipediaInput) => string> = {
-  search: (i) => `Search Wikipedia for "${i.query}"`,
-  getSummary: (i) => `Read "${i.title}" on Wikipedia`,
-  getContent: (i) => `Read full content of "${i.title}" on Wikipedia`,
-  getLinks: (i) => `View links from "${i.title}" on Wikipedia`,
-  getCategories: (i) => `View categories of "${i.title}" on Wikipedia`,
-};
-
-function getToolLabel(input: WikipediaInput | undefined): string {
-  if (!input) return "Wikipedia";
-  return ACTION_LABELS[input.action]?.(input) ?? "Wikipedia";
+function getToolLabel(
+  t: (key: string, opts?: Record<string, unknown>) => string,
+  input: WikipediaInput | undefined,
+): string {
+  if (!input) return t("tools.wikipedia");
+  switch (input.action) {
+    case "search":
+      return t("tools.wikiSearch", { query: input.query });
+    case "getSummary":
+      return t("tools.wikiSummary", { title: input.title });
+    case "getContent":
+      return t("tools.wikiContent", { title: input.title });
+    case "getLinks":
+      return t("tools.wikiLinks", { title: input.title });
+    case "getCategories":
+      return t("tools.wikiCategories", { title: input.title });
+    default:
+      return t("tools.wikipedia");
+  }
 }
 
 export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as WikipediaInput;
   const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const label = getToolLabel(input);
+  const label = getToolLabel(t, input);
 
   switch (part.state) {
     case "approval-requested":
@@ -89,7 +99,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1">
             <IconBrandWikipedia className="text-foreground size-4 shrink-0" />
-            <span className="text-foreground text-sm font-bold">AgentOne wants to {label}</span>
+            <span className="text-foreground text-sm font-bold">{t("tools.wantsTo", { label })}</span>
           </div>
           <div className="flex items-center justify-end gap-2">
             <Button
@@ -98,7 +108,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -106,7 +116,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -124,7 +134,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />{" "}
-          <span className="text-foreground text-sm font-bold">Preparing Wikipedia request...</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.preparingWikipedia")}</span>
         </div>
       );
 
@@ -498,7 +508,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Wikipedia error"
+          title={t("tools.wikipediaError")}
         />
       );
     }
@@ -507,7 +517,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconBrandWikipedia className="text-muted-foreground size-4 shrink-0" />{" "}
-          <span className="text-muted-foreground text-sm font-bold">Wikipedia accessed</span>
+          <span className="text-muted-foreground text-sm font-bold">{t("tools.wikipediaAccessed")}</span>
         </div>
       );
   }

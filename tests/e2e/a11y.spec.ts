@@ -16,7 +16,7 @@ const routes: RouteConfig[] = [
   { path: "/chat", label: "Chat" },
   ...sectionsMetadata.map((section) => ({
     path: `/settings?tab=${section.id}`,
-    label: `Settings - ${section.label}`,
+    label: `Settings - ${section.labelKey}`,
   })),
 ];
 

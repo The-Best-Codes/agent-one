@@ -1,6 +1,7 @@
 import { IconDownload } from "@tabler/icons-react";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ interface ExportChatModalProps {
 }
 
 export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportChatModalProps) => {
+  const { t } = useTranslation();
   const { loadFullChatData } = usePersistence();
   const handleExportJSON = async () => {
     const chatData = await loadFullChatData(chatId);
@@ -41,9 +43,9 @@ export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportCh
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Export Chat</DialogTitle>
+          <DialogTitle>{t("sidebar.exportChat")}</DialogTitle>
           <DialogDescription>
-            Choose how you'd like to export the "{chatTitle}" chat.
+            {t("sidebar.exportChatDescription", { title: chatTitle })}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
@@ -53,12 +55,12 @@ export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportCh
             className="justify-start"
           >
             <IconDownload data-icon="inline-start" />
-            Download as JSON
+            {t("sidebar.downloadJson")}
           </Button>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Close
+            {t("common.close")}
           </Button>
         </DialogFooter>
       </DialogContent>

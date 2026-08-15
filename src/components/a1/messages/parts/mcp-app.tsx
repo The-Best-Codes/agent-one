@@ -8,6 +8,7 @@ import { IconX } from "@tabler/icons-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { DynamicToolUIPart } from "ai";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,7 @@ function ConnectedMcpAppInternal({
   serverId: string;
   fallback: ReactNode;
 }) {
+  const { t } = useTranslation();
   const { mcpLoaded } = useTools();
   const { resolvedTheme } = useTheme();
   const { sendMessage, updateMcpAppModelContext } = useChatFunctions();
@@ -352,15 +354,15 @@ function ConnectedMcpAppInternal({
         {displayMode === "fullscreen" && (
           <div className="bg-background border-border flex h-16 items-center justify-between gap-3 border-b px-4">
             <div className="min-w-0">
-              <div className="truncate text-base font-medium">Expanded extension view</div>
+              <div className="truncate text-base font-medium">{t("messages.expandedExtension")}</div>
               <div className="text-muted-foreground truncate text-sm">
-                Opened in expanded view. Press Escape or close it to return to the conversation.
+                {t("messages.expandedExtensionHint")}
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon-sm" onClick={() => setDisplayMode("inline")}>
                 <IconX />
-                <span className="sr-only">Close expanded MCP app</span>
+                <span className="sr-only">{t("messages.closeExpandedMcp")}</span>
               </Button>
             </div>
           </div>

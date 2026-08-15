@@ -2,6 +2,7 @@ import { IconCheck, IconChevronDown, IconX } from "@tabler/icons-react";
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
 import { useAtom } from "jotai";
 import { memo, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const MessagePartsInternal = ({
   message: UIMessage;
   isLastMessage?: boolean;
 }) => {
+  const { t } = useTranslation();
   const {
     isEditing,
     canEdit,
@@ -247,17 +249,17 @@ const MessagePartsInternal = ({
         <div className="mt-2 flex items-center justify-end gap-1.5">
           <Button size="xs" variant="outline" onClick={handleCancel}>
             <IconX data-icon="inline-start" />
-            Cancel
+            {t("common.cancel")}
           </Button>
           {message.role === "user" ? (
             <ButtonGroup>
               <Button size="xs" variant="default" onClick={() => handleSave(regenerateOnSave)}>
                 <IconCheck data-icon="inline-start" />
-                Save
+                {t("common.save")}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="icon-xs" variant="default" aria-label="More options">
+                  <Button size="icon-xs" variant="default" aria-label={t("messages.moreOptions")}>
                     <IconChevronDown />
                   </Button>
                 </DropdownMenuTrigger>
@@ -267,7 +269,7 @@ const MessagePartsInternal = ({
                     checked={regenerateOnSave}
                     onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
                   >
-                    Regenerate when Saved
+                    {t("messages.regenerateWhenSaved")}
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -275,7 +277,7 @@ const MessagePartsInternal = ({
           ) : (
             <Button size="xs" variant="default" onClick={() => handleSave(false)}>
               <IconCheck data-icon="inline-start" />
-              Save
+              {t("common.save")}
             </Button>
           )}
         </div>

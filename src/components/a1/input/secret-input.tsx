@@ -1,5 +1,6 @@
 import { IconDeviceFloppy, IconEye, IconEyeClosed, IconRestore } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +19,12 @@ export function SecretInput({
   id,
   value,
   onChange,
-  placeholder = "Enter secret value",
+  placeholder,
   className,
   showSaveCancel = false,
 }: SecretInputProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t("input.enterSecret");
   const [showValue, setShowValue] = useState(false);
   const [inputValue, setInputValue] = useState(value);
 
@@ -56,7 +59,7 @@ export function SecretInput({
         autoComplete="off"
         value={inputValue}
         onChange={(e) => handleChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         className="flex-1"
       />
       <Button
@@ -64,7 +67,7 @@ export function SecretInput({
         onClick={() => setShowValue(!showValue)}
         variant="outline"
         size="icon"
-        title={showValue ? "Hide value" : "Show value"}
+        title={showValue ? t("common.hideValue") : t("common.showValue")}
       >
         {showValue ? (
           <IconEyeClosed data-icon="inline-start" />
@@ -80,7 +83,7 @@ export function SecretInput({
             disabled={!hasChanges}
             variant="outline"
             size="icon"
-            title="Save"
+            title={t("common.save")}
           >
             <IconDeviceFloppy data-icon="inline-start" />
           </Button>
@@ -90,7 +93,7 @@ export function SecretInput({
             disabled={!hasChanges}
             variant="outline"
             size="icon"
-            title="Cancel changes"
+            title={t("common.cancelChanges")}
           >
             <IconRestore data-icon="inline-start" />
           </Button>

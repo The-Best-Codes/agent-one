@@ -1,5 +1,6 @@
 import { IconDeviceFloppy, IconPlus, IconRestore, IconTrash } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ export function HttpHeadersEditor({
   onChange: (headers: Record<string, string>) => void;
   labelClassName?: string;
 }) {
+  const { t } = useTranslation();
   const [syncedHeaders, setSyncedHeaders] = useState(headers);
   const [draft, setDraft] = useState<DraftEntry[]>(() => toDraft(headers));
 
@@ -98,7 +100,7 @@ export function HttpHeadersEditor({
   return (
     <div className="rounded-md border p-3">
       <div className="mb-3 flex items-start justify-between gap-2">
-        <Label className={labelClassName || "text-xs"}>HTTP Headers</Label>
+        <Label className={labelClassName || "text-xs"}>{t("input.httpHeaders")}</Label>
         <div className="flex gap-1.5">
           {hasChanges && (
             <>
@@ -108,26 +110,26 @@ export function HttpHeadersEditor({
                 size="sm"
                 onClick={handleSave}
                 disabled={!canSave}
-                title="Save changes"
+                title={t("common.saveChanges")}
               >
                 <IconDeviceFloppy data-icon="inline-start" />
-                Save
+                {t("common.save")}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleRevert}
-                title="Revert changes"
+                title={t("common.revertChanges")}
               >
                 <IconRestore data-icon="inline-start" />
-                Revert
+                {t("common.revert")}
               </Button>
             </>
           )}
           <Button type="button" variant="outline" size="sm" onClick={addEntry}>
             <IconPlus data-icon="inline-start" />
-            Add
+            {t("common.add")}
           </Button>
         </div>
       </div>
@@ -141,14 +143,14 @@ export function HttpHeadersEditor({
               <div key={`${id}-header-${idx}`}>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Header name"
+                    placeholder={t("input.headerName")}
                     value={key}
                     onChange={(e) => updateKey(idx, e.target.value)}
                     aria-invalid={hasError}
                     className="flex-1"
                   />
                   <Input
-                    placeholder="Value"
+                    placeholder={t("common.value")}
                     value={value}
                     onChange={(e) => updateValue(idx, e.target.value)}
                     className="flex-1"
@@ -163,11 +165,11 @@ export function HttpHeadersEditor({
                   </Button>
                 </div>
                 {isDupe && (
-                  <p className="text-destructive mt-1 ml-0.5 text-xs">Duplicate header name</p>
+                  <p className="text-destructive mt-1 ml-0.5 text-xs">{t("input.duplicateHeader")}</p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    Header name cannot be empty
+                    {t("input.headerNameEmpty")}
                   </p>
                 )}
               </div>
@@ -176,7 +178,7 @@ export function HttpHeadersEditor({
         </div>
       ) : (
         <p className="text-muted-foreground flex h-9 flex-col items-center justify-center rounded-md border border-dashed p-2 text-sm">
-          No headers configured.
+          {t("input.noHeaders")}
         </p>
       )}
     </div>

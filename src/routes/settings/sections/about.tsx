@@ -11,6 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { useAtom, useAtomValue } from "jotai";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -54,11 +55,12 @@ import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import SettingsTarget from "../settings-target";
 
-function formatModelDirectoryTimestamp(value: number): string {
-  return value ? new Date(value).toLocaleString() : "Never";
+function formatModelDirectoryTimestamp(value: number, neverLabel: string): string {
+  return value ? new Date(value).toLocaleString() : neverLabel;
 }
 
 export default function AboutSection() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
     useUpdate();
@@ -82,50 +84,50 @@ export default function AboutSection() {
       case "idle":
         return {
           icon: <IconShieldCheck className="text-muted-foreground size-5" />,
-          title: "Check for updates",
-          description: "Stay up to date with the latest features and bug fixes",
+          title: t("about.checkForUpdates"),
+          description: t("about.checkForUpdatesDescription"),
         };
       case "checking":
         return {
           icon: <Spinner className="text-primary" data-icon="inline-start" />,
-          title: "Checking for updates...",
-          description: "Please wait while we check for the latest version",
+          title: t("about.checking"),
+          description: t("about.checkingDescription"),
         };
       case "managed-externally":
         return {
           icon: <IconShieldCheck className="text-muted-foreground size-5" />,
-          title: "Automatic updates disabled",
-          description: "Update AgentOne through your software manager instead",
+          title: t("about.managedExternally"),
+          description: t("about.managedExternallyDescription"),
         };
       case "up-to-date":
         return {
           icon: <IconCircleCheck className="size-5" />,
-          title: "You're up to date",
-          description: "AgentOne is running the latest version",
+          title: t("about.upToDate"),
+          description: t("about.upToDateDescription"),
         };
       case "available":
         return {
           icon: <IconRocket className="text-primary size-5" />,
-          title: `Update available: v${updateVersion}`,
-          description: "A new version is ready to install",
+          title: t("about.updateAvailable", { version: updateVersion }),
+          description: t("about.updateAvailableDescription"),
         };
       case "downloading":
         return {
           icon: <IconDownload className="text-primary size-5" />,
-          title: "Downloading update...",
-          description: `${Math.round(updateProgress)}% complete`,
+          title: t("about.downloading"),
+          description: t("about.downloadPercent", { percent: Math.round(updateProgress) }),
         };
       case "installing":
         return {
           icon: <Spinner className="text-primary" data-icon="inline-start" />,
-          title: "Installing update...",
-          description: "Please wait while we install the update",
+          title: t("about.installing"),
+          description: t("about.installingDescription"),
         };
       case "error":
         return {
           icon: <IconAlertCircle className="text-destructive size-5" />,
-          title: "Update failed",
-          description: "Something went wrong while checking for updates",
+          title: t("about.updateFailed"),
+          description: t("about.updateFailedDescription"),
         };
     }
   };
@@ -144,14 +146,14 @@ export default function AboutSection() {
             size="sm"
           >
             <IconRefresh data-icon="inline-start" />
-            Check Now
+            {t("about.checkNow")}
           </Button>
         );
       case "checking":
         return (
           <Button variant="outline" size="sm" disabled>
             <Spinner data-icon="inline-start" />
-            Checking...
+            {t("about.checkingButton")}
           </Button>
         );
       case "managed-externally":
@@ -166,7 +168,7 @@ export default function AboutSection() {
             size="sm"
           >
             <IconDownload data-icon="inline-start" />
-            Download &amp; Install
+            {t("about.downloadAndInstall")}
           </Button>
         );
       case "error":
@@ -180,7 +182,7 @@ export default function AboutSection() {
             size="sm"
           >
             <IconRefresh data-icon="inline-start" />
-            Try Again
+            {t("about.tryAgain")}
           </Button>
         );
       default:
@@ -197,30 +199,33 @@ export default function AboutSection() {
     setIsUpdatingModelDirectory(false);
 
     if (!result.ok) {
-      toast.error("Failed to update model list", { description: result.error });
+      toast.error(t("about.failedToUpdateModelList"), { description: result.error });
       return;
     }
 
-    toast.success("Model list updated", {
-      description: `${result.providerCount ?? 0} providers, ${result.modelCount ?? 0} models loaded.`,
+    toast.success(t("about.modelListUpdated"), {
+      description: t("about.modelListUpdatedDescription", {
+        providerCount: result.providerCount ?? 0,
+        modelCount: result.modelCount ?? 0,
+      }),
     });
   };
 
   const handleResetModelDirectory = async () => {
     trackSettingsInteraction("about", "model_directory_reset");
     await resetModelDirectory();
-    toast.success("Model list reset to bundled version");
+    toast.success(t("about.modelListReset"));
   };
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>App Updates</CardTitle>
+          <CardTitle>{t("about.appUpdates")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div>
-            <p className="text-muted-foreground text-sm">Current Version</p>
+            <p className="text-muted-foreground text-sm">{t("about.currentVersion")}</p>
             <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
           </div>
 
@@ -248,7 +253,7 @@ export default function AboutSection() {
           {selectedReleaseNotes && (
             <Accordion type="single" collapsible className="border-t pt-3">
               <AccordionItem value="release-notes" className="border-b-0">
-                <AccordionTrigger className="py-1.5">Release notes</AccordionTrigger>
+                <AccordionTrigger className="py-1.5">{t("about.releaseNotes")}</AccordionTrigger>
                 <AccordionContent className="h-auto overflow-visible pb-0">
                   <Select
                     value={selectedReleaseNotesVersion}
@@ -257,7 +262,7 @@ export default function AboutSection() {
                     <SelectTrigger
                       className="mb-3"
                       size="sm"
-                      aria-label="Select release notes version"
+                      aria-label={t("about.selectReleaseNotesVersion")}
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -286,25 +291,30 @@ export default function AboutSection() {
       <SettingsTarget id="setting-model-directory">
         <Card>
           <CardHeader>
-            <CardTitle>Model List Updates</CardTitle>
+            <CardTitle>{t("about.modelListUpdates")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <p className="text-muted-foreground text-sm">
-              Download the latest{" "}
+              {t("about.modelListUpdatesDescriptionBefore")}{" "}
               <Link className="underline" to="/settings?tab=providers#setting-built-in-providers">
-                built-in providers'
+                {t("about.builtInProvidersLink")}
               </Link>{" "}
-              model metadata. This will update the model list available in the UI.
+              {t("about.modelListUpdatesDescriptionAfter")}
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium">
                   {modelDirectoryStatus.usingDownloadedList
-                    ? "Using downloaded model list"
-                    : "Using bundled model list"}
+                    ? t("about.usingDownloaded")
+                    : t("about.usingBundled")}
                 </p>
                 <p className="text-muted-foreground text-sm tabular-nums">
-                  Last updated: {formatModelDirectoryTimestamp(modelDirectoryStatus.fetchedAt)}
+                  {t("about.lastUpdated", {
+                    date: formatModelDirectoryTimestamp(
+                      modelDirectoryStatus.fetchedAt,
+                      t("about.never"),
+                    ),
+                  })}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -318,7 +328,7 @@ export default function AboutSection() {
                   ) : (
                     <IconRefresh data-icon="inline-start" />
                   )}
-                  Update now
+                  {t("about.updateNow")}
                 </Button>
                 <Button
                   onClick={handleResetModelDirectory}
@@ -327,7 +337,7 @@ export default function AboutSection() {
                   size="sm"
                 >
                   <IconRestore data-icon="inline-start" />
-                  Reset
+                  {t("common.reset")}
                 </Button>
               </div>
             </div>
@@ -336,7 +346,7 @@ export default function AboutSection() {
       </SettingsTarget>
       <Card>
         <CardHeader>
-          <CardTitle>Help</CardTitle>
+          <CardTitle>{t("about.help")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
@@ -345,7 +355,7 @@ export default function AboutSection() {
               href="https://github.com/AgentOne-Dev/agent-one-public/issues/new"
               className="flex w-fit items-center gap-1 underline"
             >
-              Report a bug
+              {t("about.reportBug")}
               <IconExternalLink className="size-4" />
             </a>
             <a
@@ -353,7 +363,7 @@ export default function AboutSection() {
               href="https://www.agent-one.dev/discord"
               className="flex w-fit items-center gap-1 underline"
             >
-              Get help on Discord
+              {t("about.getHelpDiscord")}
               <IconExternalLink className="size-4" />
             </a>
             <a
@@ -361,7 +371,7 @@ export default function AboutSection() {
               href="https://docs.agent-one.dev/docs"
               className="flex w-fit items-center gap-1 underline"
             >
-              Read the docs
+              {t("about.readDocs")}
               <IconExternalLink className="size-4" />
             </a>
           </div>
@@ -369,16 +379,15 @@ export default function AboutSection() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Usage Analytics</CardTitle>
+          <CardTitle>{t("about.usageAnalytics")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <SettingsTarget id="setting-allow-usage-analytics">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-1 flex-col gap-1">
-                <p className="text-sm font-medium">Allow usage analytics</p>
+                <p className="text-sm font-medium">{t("about.allowAnalytics")}</p>
                 <p className="text-muted-foreground text-sm">
-                  When disabled, AgentOne stops sending Google Analytics events from the desktop
-                  app.
+                  {t("about.allowAnalyticsDescription")}
                 </p>
               </div>
               <Switch
@@ -390,18 +399,16 @@ export default function AboutSection() {
                   });
                   setAnalyticsIdentity(nextValue);
                 }}
-                aria-label="Allow usage analytics"
+                aria-label={t("about.allowAnalytics")}
               />
             </div>
           </SettingsTarget>
           <SettingsTarget id="setting-associate-analytics-with-my-signed-in-account">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-1 flex-col gap-1">
-                <p className="text-sm font-medium">Associate analytics with my signed-in account</p>
+                <p className="text-sm font-medium">{t("about.associateAnalytics")}</p>
                 <p className="text-muted-foreground text-sm">
-                  When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you
-                  can measure signed-in usage across sessions. We do not send your name or email
-                  address to Google Analytics.
+                  {t("about.associateAnalyticsDescription")}
                 </p>
                 <a
                   href="https://www.agent-one.dev/privacy?utm_source=desktop-app"
@@ -409,7 +416,7 @@ export default function AboutSection() {
                   rel="noopener noreferrer"
                   className="flex w-fit underline"
                 >
-                  Learn more
+                  {t("about.learnMore")}
                 </a>
               </div>
 
@@ -426,13 +433,13 @@ export default function AboutSection() {
                         });
                         setAnalyticsIdentity(checked ? "user-id" : "anonymous");
                       }}
-                      aria-label="Associate analytics with my signed-in account"
+                      aria-label={t("about.associateAnalytics")}
                     />
                   </span>
                 </AdaptiveTooltipTrigger>
                 {!user && (
                   <AdaptiveTooltipContent>
-                    You're not signed in, so analytics aren't associated with your account.
+                    {t("about.notSignedInAnalytics")}
                   </AdaptiveTooltipContent>
                 )}
               </AdaptiveTooltip>
@@ -443,7 +450,7 @@ export default function AboutSection() {
       {debugMode && (
         <Card>
           <CardHeader>
-            <CardTitle>Debug</CardTitle>
+            <CardTitle>{t("about.debug")}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
@@ -452,14 +459,14 @@ export default function AboutSection() {
                   <IconBug className="text-muted-foreground size-5" />
                 </div>
                 <div>
-                  <p className="leading-none font-medium">Internal Tests</p>
+                  <p className="leading-none font-medium">{t("about.internalTests")}</p>
                   <p className="text-muted-foreground text-sm">
-                    Access internal testing tools and utilities.
+                    {t("about.internalTestsDescription")}
                   </p>
                 </div>
               </div>
               <Button onClick={() => navigate("/tests")} size="sm">
-                Open Tests
+                {t("about.openTests")}
               </Button>
             </div>
           </CardContent>

@@ -1,6 +1,7 @@
 import { IconAlertTriangle, IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { memo, useMemo, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
@@ -124,6 +125,8 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
   onOpenChange,
   onEnabledChange,
 }: SharedProviderEditorProps) {
+  const { t } = useTranslation();
+
   return (
     <AccordionItem value={id}>
       <AccordionTrigger className="px-1 py-2 hover:no-underline">
@@ -168,7 +171,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                 onEnabledChange(checked);
               }}
               onClick={(event) => event.stopPropagation()}
-              aria-label={`Enable ${title}`}
+              aria-label={t("providers.enableProvider", { title })}
             />
           </span>
         </div>
@@ -226,6 +229,7 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
   hasEnvKey,
   onOpenChange,
 }: BuiltInProviderListItemProps) {
+  const { t } = useTranslation();
   const storedConfig = useAtomValue(getProviderConfigAtom(providerId));
   const storedApiKey = useAtomValue(getApiKeyAtom(providerId));
   const modelDirectoryData = useAtomValue(modelDirectoryDataAtom);
@@ -265,11 +269,11 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
       models={storedConfig.models ?? []}
       onModelsChange={(models) => updateConfig({ models })}
       builtInModels={builtInModels}
-      apiKeyPlaceholder={`Enter your ${label} API key`}
-      apiKeyHint={hasEnvKey ? "Using environment variable. Override below if needed." : undefined}
-      addButtonLabel="Add Model Override"
-      emptyTitle="No model overrides"
-      emptyDescription="Add a model to override built-in metadata or to register an extra model for this provider."
+      apiKeyPlaceholder={t("providers.enterApiKeyFor", { label })}
+      apiKeyHint={hasEnvKey ? t("providers.usingEnvKey") : undefined}
+      addButtonLabel={t("providers.addModelOverride")}
+      emptyTitle={t("providers.noModelOverrides")}
+      emptyDescription={t("providers.noModelOverridesDescription")}
       onEnabledChange={(enabled) => updateConfig({ enabled })}
       showSetupButton={showSetupButton}
       showMissingKeyWarning={showMissingKeyWarning}
@@ -284,6 +288,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
   onDelete,
   onOpenChange,
 }: CustomProviderListItemProps) {
+  const { t } = useTranslation();
   const provider = useAtomValue(getCustomProviderAtom(providerId));
   const apiKey = useAtomValue(getCustomProviderApiKeyAtom(providerId));
   const updateProvider = useSetAtom(updateCustomProviderAtom);
@@ -323,12 +328,12 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
         onHeadersChange={(headers) => update({ headers })}
         models={provider.models}
         onModelsChange={(models) => update({ models })}
-        apiKeyPlaceholder="Enter API key if required"
+        apiKeyPlaceholder={t("providers.enterApiKeyIfRequired")}
         modelListBaseUrl={provider.baseUrl}
         modelListHeaders={provider.headers}
         modelListApiKey={apiKey}
-        emptyTitle="No models configured"
-        emptyDescription="Add a model to make it available in the model picker."
+        emptyTitle={t("providers.noModelsConfigured")}
+        emptyDescription={t("providers.addModelPicker")}
         details={
           <FieldGroup>
             <Field>
@@ -337,7 +342,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
                 id={`name-${provider.id}`}
                 value={provider.name}
                 onChange={(event) => update({ name: event.target.value })}
-                placeholder="Provider name"
+                placeholder={t("providers.providerName")}
               />
             </Field>
 
@@ -390,6 +395,7 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
   providerId,
   onOpenChange,
 }: LocalProviderListItemProps) {
+  const { t } = useTranslation();
   const provider = useAtomValue(getLocalProviderAtom(providerId));
   const updateProvider = useSetAtom(updateLocalProviderAtom);
   const setupDismissed = useAtomValue(providerSetupDismissedAtom);
@@ -420,12 +426,12 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
       models={provider.models}
       onModelsChange={(models) => updateProvider(provider.id, { models })}
       showApiKey={false}
-      apiKeyPlaceholder="No API key required"
+      apiKeyPlaceholder={t("providers.noApiKeyRequired")}
       modelListBaseUrl={provider.baseUrl}
       modelListHeaders={provider.headers}
       autoFetchOnMount
-      emptyTitle="No models configured"
-      emptyDescription="Fetch models from Ollama or add one manually."
+      emptyTitle={t("providers.noModelsConfigured")}
+      emptyDescription={t("providers.fetchOrAddOllama")}
       details={
         <FieldGroup>
           <Field>

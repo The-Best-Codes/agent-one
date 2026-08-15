@@ -1,6 +1,7 @@
 import { IconCircleCheck, IconCircleX, IconTool, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +22,7 @@ interface ToolCallPartProps {
 }
 
 export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const toolName = getToolDisplayName(part.type.replace("tool-", ""), part.title);
   const approvalHandler = useChatApprovalHandler();
@@ -33,7 +35,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           <div className="flex items-center gap-1">
             <IconTool className="text-foreground size-4" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to run tool "{toolName}"
+              {t("tools.wantsToRunNamedTool", { name: toolName })}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -43,7 +45,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -51,7 +53,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -61,7 +63,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4" />
-          <span className="text-muted-foreground text-sm font-bold">Tool "{toolName}" denied</span>
+          <span className="text-muted-foreground text-sm font-bold">{t("tools.toolDenied", { name: toolName })}</span>
         </div>
       );
 
@@ -93,13 +95,13 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <Spinner className="text-destructive" />
-                <span className="max-w-2xl truncate">Running unknown tool "{toolName}"</span>
+                <span className="max-w-2xl truncate">{t("tools.runningUnknownTool", { name: toolName })}</span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="p-2 pt-0">
               {part.input && typeof part.input === "object" ? (
                 <div className="text-foreground/80 text-xs">
-                  <span className="font-medium">Parameters:</span>
+                  <span className="font-medium">{t("common.parametersColon")}</span>
                   <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
                     {JSON.stringify(part.input, null, 2)}
                   </pre>
@@ -118,7 +120,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <AccordionTrigger className="p-2 hover:no-underline">
               <p className="text-destructive flex flex-row items-center gap-1 text-sm font-bold">
                 <IconCircleX className="text-destructive" />
-                <span className="max-w-2xl truncate">Unknown tool "{toolName}" finished</span>
+                <span className="max-w-2xl truncate">{t("tools.unknownToolFinished", { name: toolName })}</span>
               </p>
             </AccordionTrigger>
             <AccordionContent className="p-2 pt-0">
@@ -152,7 +154,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={<>Unknown tool "{toolName}" error</>}
+          title={t("tools.unknownToolError", { name: toolName })}
         />
       );
 
@@ -160,7 +162,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-2">
           <IconCircleX className="text-destructive size-4" />
-          <span className="text-destructive text-sm font-bold">Unknown tool "{toolName}"</span>
+          <span className="text-destructive text-sm font-bold">{t("tools.unknownTool", { name: toolName })}</span>
         </div>
       );
   }

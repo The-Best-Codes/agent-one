@@ -8,6 +8,7 @@ import {
 import type { DynamicToolUIPart } from "ai";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
 import {
@@ -57,6 +58,7 @@ export const MessagePartDynamicTool = (props: DynamicToolPartProps) => (
 );
 
 const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) => {
+  const { t } = useTranslation();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
@@ -74,7 +76,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
           <div className="flex items-center gap-1">
             <IconTool className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to run "{toolName}" tool
+              {t("tools.wantsToRunTool", { name: toolName })}
             </span>
           </div>
           {part?.input !== null && (
@@ -85,7 +87,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
             >
               <ParametersAccordionItem value="parameters" className="border-0">
                 <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
-                  <span className="text-muted-foreground font-medium">Parameters</span>
+                  <span className="text-muted-foreground font-medium">{t("common.parameters")}</span>
                 </ParametersAccordionTrigger>
                 <ParametersAccordionContent className="px-2 pb-2">
                   <pre className="text-muted-foreground overflow-x-auto text-xs">
@@ -107,7 +109,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               }
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -120,7 +122,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               }
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -148,7 +150,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
           </div>
         );
       }
-      const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
+      const loadingText = labels?.loadingTitle ?? t("tools.runningTool", { name: toolName });
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground" />
@@ -157,7 +159,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
       );
     }
     case "input-available": {
-      const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
+      const loadingText = labels?.loadingTitle ?? t("tools.runningTool", { name: toolName });
       return (
         <div
           key={callId}
@@ -284,14 +286,14 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                 <div className="flex flex-col gap-2">
                   {part?.input !== null && (
                     <div>
-                      <span className="font-medium">Parameters:</span>
+                      <span className="font-medium">{t("common.parametersColon")}</span>
                       <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
                         {JSON.stringify(part.input, null, 2)}
                       </pre>
                     </div>
                   )}
                   <div>
-                    <span className="font-medium">Result:</span>
+                    <span className="font-medium">{t("common.result")}</span>
                     <div className="mt-1 rounded bg-transparent p-2">
                       {isLongOutput ? (
                         <PerformantMarkdown maxHeight="200px" content={outputText} />

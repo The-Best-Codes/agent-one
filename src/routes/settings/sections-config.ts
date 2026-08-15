@@ -12,7 +12,7 @@ import ProvidersSection from "./sections/providers";
 
 interface SettingsSection {
   id: string;
-  label: string;
+  labelKey: string;
   icon?: string;
   component: ComponentType;
   fillHeight?: boolean;

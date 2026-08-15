@@ -1,6 +1,7 @@
 import { IconCalendar, IconCircleCheck, IconCircleX, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -19,6 +20,7 @@ interface DateTimeToolPartProps {
 }
 
 export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const output = part.output as DateTimeOutput;
   const approvalHandler = useChatApprovalHandler();
@@ -31,7 +33,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconCalendar className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to check the date and time
+              {t("tools.wantsToCheckDateTime")}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -41,7 +43,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -49,7 +51,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -71,7 +73,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           <div>
             <Spinner className="text-foreground size-4 shrink-0" />
           </div>
-          <span className="text-foreground text-sm font-bold">Checking time and date...</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.checkingTimeDate")}</span>
         </div>
       );
 
@@ -93,7 +95,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">Checking time and date...</span>
+          <span className="max-w-2xl truncate">{t("tools.checkingTimeDate")}</span>
         </div>
       );
     }
@@ -105,7 +107,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <IconCalendar className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">Checked time and date ({output?.formatted})</span>
+          <span className="max-w-2xl truncate">{t("tools.checkedTimeDate", { formatted: output?.formatted })}</span>
         </div>
       );
 
@@ -126,7 +128,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Error checking time and date"
+          title={t("tools.dateTimeError")}
         />
       );
 
@@ -134,7 +136,7 @@ export const MessagePartToolDateTime = ({ part }: DateTimeToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCalendar className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Time &amp; date accessed</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.timeDateAccessed")}</span>
         </div>
       );
   }

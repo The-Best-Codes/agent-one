@@ -1,6 +1,7 @@
 import { IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
@@ -56,6 +57,7 @@ import {
 } from "./provider-list-item";
 
 export function ProvidersList() {
+  const { t } = useTranslation();
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
@@ -171,7 +173,7 @@ export function ProvidersList() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <SearchInput
-              placeholder="Search built-in providers..."
+              placeholder={t("providers.searchBuiltIn")}
               value={builtInSearchQuery}
               onChange={(event) => {
                 trackSettingsInteraction("providers", "built_in_search_changed", {
@@ -218,7 +220,7 @@ export function ProvidersList() {
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <SearchInput
-              placeholder="Search local providers..."
+              placeholder={t("providers.searchLocal")}
               value={localSearchQuery}
               onChange={(event) => {
                 trackSettingsInteraction("providers", "local_search_changed", {
@@ -264,7 +266,7 @@ export function ProvidersList() {
           <CardContent className="flex flex-col gap-4">
             <div className="flex gap-2">
               <SearchInput
-                placeholder="Search custom providers..."
+                placeholder={t("providers.searchCustom")}
                 value={customSearchQuery}
                 onChange={(event) => {
                   trackSettingsInteraction("providers", "custom_search_changed", {
@@ -341,7 +343,7 @@ export function ProvidersList() {
                   }}
                 >
                   <SelectTrigger id="tts-provider" className="w-full md:max-w-96">
-                    <SelectValue placeholder="Choose a voice provider" />
+                    <SelectValue placeholder={t("providers.chooseVoiceProvider")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -390,7 +392,7 @@ export function ProvidersList() {
                   disabled={!selectedTtsProvider}
                 >
                   <SelectTrigger id="tts-model" className="w-full md:max-w-96">
-                    <SelectValue placeholder="Choose a voice model" />
+                    <SelectValue placeholder={t("providers.chooseVoiceModel")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -411,7 +413,7 @@ export function ProvidersList() {
                     id="tts-openai-api-key"
                     value={openAiTtsApiKey}
                     onChange={setOpenAiTtsApiKey}
-                    placeholder="Enter your OpenAI API key"
+                    placeholder={t("providers.enterOpenaiKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -424,7 +426,7 @@ export function ProvidersList() {
                     id="tts-elevenlabs-api-key"
                     value={elevenLabsTtsApiKey}
                     onChange={setElevenLabsTtsApiKey}
-                    placeholder="Enter your ElevenLabs API key"
+                    placeholder={t("providers.enterElevenLabsKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -437,7 +439,7 @@ export function ProvidersList() {
                     id="tts-lmnt-api-key"
                     value={lmntTtsApiKey}
                     onChange={setLmntTtsApiKey}
-                    placeholder="Enter your LMNT API key"
+                    placeholder={t("providers.enterLmntKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -450,7 +452,7 @@ export function ProvidersList() {
                     id="tts-hume-api-key"
                     value={humeTtsApiKey}
                     onChange={setHumeTtsApiKey}
-                    placeholder="Enter your Hume API key"
+                    placeholder={t("providers.enterHumeKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -463,7 +465,7 @@ export function ProvidersList() {
                     id="tts-google-api-key"
                     value={googleTtsApiKey}
                     onChange={setGoogleTtsApiKey}
-                    placeholder="Enter your Google Generative AI API key"
+                    placeholder={t("providers.enterGoogleKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -482,7 +484,7 @@ export function ProvidersList() {
                       }
                     >
                       <SelectTrigger id="tts-openai-voice" className="w-full md:max-w-96">
-                        <SelectValue placeholder="Choose a voice" />
+                        <SelectValue placeholder={t("providers.chooseVoice")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -526,7 +528,7 @@ export function ProvidersList() {
                           openai: { ...ttsSettings.openai, instructions: event.target.value },
                         })
                       }
-                      placeholder="Optional, for example: warm, calm, and conversational"
+                      placeholder={t("providers.voiceInstructionsPlaceholder")}
                     />
                   </Field>
                 </>
@@ -544,7 +546,7 @@ export function ProvidersList() {
                           elevenlabs: { ...ttsSettings.elevenlabs, voice: event.target.value },
                         })
                       }
-                      placeholder="Paste a voice ID from ElevenLabs"
+                      placeholder={t("providers.pasteElevenLabsVoiceId")}
                     />
                   </Field>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -580,7 +582,7 @@ export function ProvidersList() {
                             },
                           })
                         }
-                        placeholder="Optional, for example: en"
+                        placeholder={t("providers.languagePlaceholder")}
                       />
                     </Field>
                     <Field>
@@ -788,7 +790,7 @@ export function ProvidersList() {
                           hume: { ...ttsSettings.hume, instructions: event.target.value },
                         })
                       }
-                      placeholder="Optional, for example: upbeat and friendly"
+                      placeholder={t("providers.voiceInstructionsUpbeat")}
                     />
                   </Field>
                 </>
@@ -807,7 +809,7 @@ export function ProvidersList() {
                       }
                     >
                       <SelectTrigger id="tts-google-voice" className="w-full md:max-w-96">
-                        <SelectValue placeholder="Choose a voice" />
+                        <SelectValue placeholder={t("providers.chooseVoice")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -851,7 +853,7 @@ export function ProvidersList() {
                           google: { ...ttsSettings.google, instructions: event.target.value },
                         })
                       }
-                      placeholder="Optional, for example: warm, calm, and conversational"
+                      placeholder={t("providers.voiceInstructionsPlaceholder")}
                     />
                   </Field>
                 </>

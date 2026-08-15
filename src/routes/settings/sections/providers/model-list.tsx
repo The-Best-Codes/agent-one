@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -82,6 +83,7 @@ function normalizeOptionalNumber(value: string) {
 }
 
 function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddModelFormProps) {
+  const { t } = useTranslation();
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [supportsText, setSupportsText] = useState(true);
@@ -153,7 +155,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
             id="new-model-name"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Optional label shown in the model picker"
+            placeholder={t("providers.optionalLabelPicker")}
           />
         </Field>
 
@@ -170,8 +172,8 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
             />
             <FieldDescription>
               {parsedContextWindow === null
-                ? "Enter a non-negative number."
-                : "Optional token limit used in the app UI."}
+                ? t("providers.enterNonNegative")
+                : t("providers.optionalTokenLimit")}
             </FieldDescription>
           </Field>
 
@@ -187,8 +189,8 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
             />
             <FieldDescription>
               {parsedMaxOutputTokens === null
-                ? "Enter a non-negative number."
-                : "Optional max output token metadata override."}
+                ? t("providers.enterNonNegative")
+                : t("providers.optionalMaxOutput")}
             </FieldDescription>
           </Field>
         </div>
@@ -245,6 +247,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 }
 
 function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigDialogProps) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(model);
   const [contextWindowValue, setContextWindowValue] = useState(
     model.contextWindow?.toString() ?? "",
@@ -285,7 +288,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
                   name: event.target.value.trim() || undefined,
                 })
               }
-              placeholder="Optional label shown in the model picker"
+              placeholder={t("providers.optionalLabelPicker")}
             />
           </Field>
 
@@ -308,11 +311,13 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
                   }
                 }}
                 inputMode="numeric"
-                placeholder="Optional"
+                placeholder={t("common.optional")}
                 aria-invalid={isContextWindowInvalid}
               />
               <FieldDescription>
-                {isContextWindowInvalid ? "Enter a non-negative number." : "Shown in usage status."}
+                {isContextWindowInvalid
+                  ? t("providers.enterNonNegative")
+                  : t("providers.shownInUsage")}
               </FieldDescription>
             </Field>
 
@@ -334,13 +339,13 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
                   }
                 }}
                 inputMode="numeric"
-                placeholder="Optional"
+                placeholder={t("common.optional")}
                 aria-invalid={isMaxOutputTokensInvalid}
               />
               <FieldDescription>
                 {isMaxOutputTokensInvalid
-                  ? "Enter a non-negative number."
-                  : "Used when you want to override the built-in output limit."}
+                  ? t("providers.enterNonNegative")
+                  : t("providers.overrideOutputLimit")}
               </FieldDescription>
             </Field>
           </div>
@@ -391,6 +396,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 }
 
 const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowProps) {
+  const { t } = useTranslation();
   const [configOpen, setConfigOpen] = useState(false);
 
   return (
@@ -413,7 +419,7 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
               trackSettingsInteraction("providers", "model_config_opened");
               setConfigOpen(true);
             }}
-            aria-label="Configure model"
+            aria-label={t("providers.configureModel")}
           >
             <IconSettings />
           </Button>
@@ -426,7 +432,7 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
               trackSettingsInteraction("providers", "model_deleted");
               onDelete(model.id);
             }}
-            aria-label="Delete model"
+            aria-label={t("providers.deleteModel")}
           >
             <IconTrash />
           </Button>
@@ -453,11 +459,15 @@ export function ModelList({
   apiKey = "",
   headers = {},
   autoFetchOnMount = false,
-  addButtonLabel = "Add Model",
-  emptyTitle = "No models configured",
-  emptyDescription = "Add a model to make it available in the model picker.",
+  addButtonLabel,
+  emptyTitle,
+  emptyDescription,
   onChange,
 }: ModelListProps) {
+  const { t } = useTranslation();
+  const resolvedAddButtonLabel = addButtonLabel ?? t("providers.addModel");
+  const resolvedEmptyTitle = emptyTitle ?? t("providers.noModelsConfigured");
+  const resolvedEmptyDescription = emptyDescription ?? t("providers.addModelPicker");
   const [isAdding, setIsAdding] = useState(false);
   const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
   const fetchResetTimeoutRef = useRef<number | null>(null);
@@ -609,7 +619,7 @@ export function ModelList({
             }}
           >
             <IconPlus data-icon="inline-start" />
-            {addButtonLabel}
+            {resolvedAddButtonLabel}
           </Button>
         </div>
       </div>
@@ -662,8 +672,8 @@ export function ModelList({
               <EmptyMedia variant="icon">
                 <IconRobot />
               </EmptyMedia>
-              <EmptyTitle>{emptyTitle}</EmptyTitle>
-              <EmptyDescription>{emptyDescription}</EmptyDescription>
+              <EmptyTitle>{resolvedEmptyTitle}</EmptyTitle>
+              <EmptyDescription>{resolvedEmptyDescription}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button
@@ -675,7 +685,7 @@ export function ModelList({
                 }}
               >
                 <IconPlus data-icon="inline-start" />
-                {addButtonLabel}
+                {resolvedAddButtonLabel}
               </Button>
             </EmptyContent>
           </Empty>

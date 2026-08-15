@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -19,10 +20,10 @@ interface BulkDeleteModalProps {
 }
 
 export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount }: BulkDeleteModalProps) => {
+  const { t } = useTranslation();
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { bulkDeleteChats } = usePersistence();
-  const chatLabel = chatCount === 1 ? "chat" : "chats";
 
   const handleDelete = () => {
     bulkDeleteChats(chatIds);
@@ -36,19 +37,17 @@ export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount }: BulkDel
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Delete {chatCount} {chatLabel}
-          </DialogTitle>
+          <DialogTitle>{t("sidebar.deleteChatsTitle", { count: chatCount })}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete {chatCount} {chatLabel}? This action cannot be undone.
+            {t("sidebar.deleteChatsConfirm", { count: chatCount })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            Delete
+            {t("common.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

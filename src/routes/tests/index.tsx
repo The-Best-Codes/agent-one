@@ -1,5 +1,6 @@
 import { IconAlertTriangle, IconArrowLeft } from "@tabler/icons-react";
 import { useAtom, useSetAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -10,6 +11,7 @@ import { onboardingCompletedAtom } from "@/lib/jotai/atoms";
 import { reactScanEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 export default function TestsRoute() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const setOnboardingCompleted = useSetAtom(onboardingCompletedAtom);
   const [reactScanEnabled, setReactScanEnabled] = useAtom(reactScanEnabledAtom);
@@ -25,64 +27,57 @@ export default function TestsRoute() {
             className="gap-2"
           >
             <IconArrowLeft data-icon="inline-start" />
-            Back to Settings
+            {t("tests.backToSettings")}
           </Button>
-          <h1 className="text-2xl font-bold">Tests</h1>
+          <h1 className="text-2xl font-bold">{t("tests.title")}</h1>
         </div>
 
         <Alert variant="destructive" className="mb-6">
           <IconAlertTriangle />
-          <AlertTitle>Developer Tools</AlertTitle>
-          <AlertDescription>
-            These tests are intended for developers and debugging only. They may affect your app
-            data, performance, or stability. Proceed with caution.
-          </AlertDescription>
+          <AlertTitle>{t("tests.developerTools")}</AlertTitle>
+          <AlertDescription>{t("tests.developerToolsDescription")}</AlertDescription>
         </Alert>
 
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Available Tests</CardTitle>
+              <CardTitle>{t("tests.availableTests")}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
-                  <h3 className="font-medium">Notifications</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Test notification permissions and sending notifications
-                  </p>
+                  <h3 className="font-medium">{t("tests.notifications")}</h3>
+                  <p className="text-muted-foreground text-sm">{t("tests.notificationsDescription")}</p>
                 </div>
                 <Button onClick={() => navigate("/tests/notifications")} variant="outline">
-                  Run Test
+                  {t("tests.runTest")}
                 </Button>
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
-                  <h3 className="font-medium">Local Database</h3>
+                  <h3 className="font-medium">{t("tests.localDatabase")}</h3>
                   <p className="text-muted-foreground text-sm">
-                    Stress test and benchmark the local chat database with automatic cleanup
+                    {t("tests.localDatabaseDescription")}
                   </p>
                 </div>
                 <Button onClick={() => navigate("/tests/local-database")} variant="outline">
-                  Run Test
+                  {t("tests.runTest")}
                 </Button>
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
-                  <h3 className="font-medium">Chat Stress Generator</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Create large test chats with configurable size and content for UI stress testing
-                  </p>
+                  <h3 className="font-medium">{t("tests.chatStress")}</h3>
+                  <p className="text-muted-foreground text-sm">{t("tests.chatStressDescription")}</p>
                 </div>
                 <Button onClick={() => navigate("/tests/chat-stress")} variant="outline">
-                  Run Test
+                  {t("tests.runTest")}
                 </Button>
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
-                  <h3 className="font-medium">Trigger Onboarding</h3>
+                  <h3 className="font-medium">{t("tests.triggerOnboarding")}</h3>
                   <p className="text-muted-foreground text-sm">
-                    Reset onboarding state and restart the onboarding flow
+                    {t("tests.triggerOnboardingDescription")}
                   </p>
                 </div>
                 <Button
@@ -92,26 +87,22 @@ export default function TestsRoute() {
                   }}
                   variant="outline"
                 >
-                  Run Test
+                  {t("tests.runTest")}
                 </Button>
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
-                  <h3 className="font-medium">Log History</h3>
-                  <p className="text-muted-foreground text-sm">
-                    View persisted application logs from the current session
-                  </p>
+                  <h3 className="font-medium">{t("tests.logHistory")}</h3>
+                  <p className="text-muted-foreground text-sm">{t("tests.logHistoryDescription")}</p>
                 </div>
                 <Button onClick={() => navigate("/tests/logs")} variant="outline">
-                  View Logs
+                  {t("tests.viewLogs")}
                 </Button>
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
-                  <h3 className="font-medium">React Scan</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Enable react-scan to visualize component renders for the rest of this session
-                  </p>
+                  <h3 className="font-medium">{t("tests.reactScan")}</h3>
+                  <p className="text-muted-foreground text-sm">{t("tests.reactScanDescription")}</p>
                 </div>
                 <Switch checked={reactScanEnabled} onCheckedChange={setReactScanEnabled} />
               </div>

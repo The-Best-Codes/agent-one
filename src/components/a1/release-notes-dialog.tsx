@@ -1,6 +1,7 @@
 import { IconRocket } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import packageJson from "@/../package.json";
 import { getReleaseNotes } from "@/assets/release-notes";
@@ -17,6 +18,7 @@ import {
 import { releaseNotesLastSeenVersionAtom } from "@/lib/jotai/atoms";
 
 export function ReleaseNotesDialog() {
+  const { t } = useTranslation();
   const [lastSeenVersion, setLastSeenVersion] = useAtom(releaseNotesLastSeenVersionAtom);
   const currentVersion = packageJson.version;
 
@@ -53,9 +55,11 @@ export function ReleaseNotesDialog() {
         <DialogHeader>
           <div className="flex items-center gap-2">
             <IconRocket className="text-primary size-5" />
-            <DialogTitle>What's New in v{releaseNotesData.version}</DialogTitle>
+            <DialogTitle>
+              {t("dialogs.releaseNotesTitle", { version: releaseNotesData.version })}
+            </DialogTitle>
           </div>
-          <DialogDescription>A quick look at what changed in this release.</DialogDescription>
+          <DialogDescription>{t("dialogs.releaseNotesDescription")}</DialogDescription>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto">
           <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless px-1">
@@ -68,7 +72,7 @@ export function ReleaseNotesDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={handleClose}>{t("common.close")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

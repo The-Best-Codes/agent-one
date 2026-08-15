@@ -1,6 +1,7 @@
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ interface AccountStepProps {
 }
 
 export function AccountStep({ onSubmit }: AccountStepProps) {
+  const { t } = useTranslation();
   const { user } = useWebAuth();
   const [view, setView] = useState<"account" | "byok">("account");
   const [isExiting, setIsExiting] = useState(false);
@@ -50,10 +52,11 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
       >
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-foreground text-2xl font-bold">Configure providers</h2>
+            <h2 className="text-foreground text-2xl font-bold">
+              {t("onboarding.configureProviders")}
+            </h2>
             <p className="text-muted-foreground text-sm">
-              Your API keys are stored securely on your device. Enable providers and configure their
-              API keys to get started.
+              {t("onboarding.configureProvidersDescription")}
             </p>
           </div>
 
@@ -67,11 +70,11 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
               disabled={!hasEnabledProvider || isSubmitting}
               className="w-full"
             >
-              Finish Setup
+              {t("onboarding.finishSetup")}
             </Button>
             <Button variant="outline" onClick={() => handleViewChange("account")}>
               <IconArrowLeft data-icon="inline-start" />
-              Back to account options
+              {t("onboarding.backToAccount")}
             </Button>
           </div>
         </div>
@@ -91,10 +94,11 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     >
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-center text-4xl font-bold">Set up your account</h2>
+          <h2 className="text-foreground text-center text-4xl font-bold">
+            {t("onboarding.setUpAccount")}
+          </h2>
           <p className="text-muted-foreground text-center text-base">
-            An AgentOne account synchronizes your data across devices and allows you to access
-            AgentOne models.
+            {t("onboarding.setUpAccountDescription")}
           </p>
         </div>
 
@@ -105,7 +109,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
 
           {user && (
             <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
-              Continue
+              {t("common.continue")}
               <IconArrowRight data-icon="inline-end" />
             </Button>
           )}
@@ -115,7 +119,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
             className="text-muted-foreground hover:text-foreground mt-2 cursor-pointer text-sm underline"
             onClick={() => handleViewChange("byok")}
           >
-            Or continue without an account
+            {t("onboarding.orContinueWithout")}
           </button>
         </div>
       </div>

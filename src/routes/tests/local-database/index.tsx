@@ -1,6 +1,7 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { generateId, type UIMessage } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -86,6 +87,7 @@ async function yieldToUi(): Promise<void> {
 }
 
 export default function LocalDatabaseTestRoute() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
@@ -298,15 +300,15 @@ export default function LocalDatabaseTestRoute() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            Back to Tests
+            {t("tests.backToTests")}
           </Button>
-          <h1 className="text-2xl font-bold">Local Database Test</h1>
+          <h1 className="text-2xl font-bold">{t("tests.localDatabaseTest")}</h1>
         </div>
 
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Stress Test and Benchmark</CardTitle>
+              <CardTitle>{t("tests.stressBenchmark")}</CardTitle>
               <CardDescription>
                 Writes temporary chats into the local SQLite database, reads them back, benchmarks
                 search performance, then deletes everything it created without modifying your saved
@@ -330,7 +332,7 @@ export default function LocalDatabaseTestRoute() {
           {metrics.length > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle>Results</CardTitle>
+                <CardTitle>{t("tests.results")}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 {metrics.map((metric) => (
@@ -351,7 +353,7 @@ export default function LocalDatabaseTestRoute() {
           {logs.length > 0 ? (
             <Card>
               <CardHeader>
-                <CardTitle>Logs</CardTitle>
+                <CardTitle>{t("tests.logs")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/20 max-h-96 overflow-y-auto rounded-md border p-4">

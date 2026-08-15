@@ -1,6 +1,7 @@
 import { IconCircleCheck, IconCircleX, IconClock, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -23,6 +24,7 @@ interface WaitNumberMillisecondsToolPartProps {
 export const MessagePartToolWaitNumberMilliseconds = ({
   part,
 }: WaitNumberMillisecondsToolPartProps) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as WaitNumberMillisecondsInput;
   const approvalHandler = useChatApprovalHandler();
@@ -60,7 +62,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           <div className="flex items-center gap-1">
             <IconClock className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to wait {safeFormatMilliseconds(input?.milliseconds)}
+              {t("tools.wantsToWait", { duration: safeFormatMilliseconds(input?.milliseconds) })}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -70,7 +72,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -78,7 +80,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -100,7 +102,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           <div>
             <Spinner className="text-foreground size-4 shrink-0" />
           </div>
-          <span className="text-foreground text-sm font-bold">Waiting a bit...</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.waiting")}</span>
         </div>
       );
 
@@ -147,7 +149,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">Wait cancelled</span>
+            <span className="text-muted-foreground text-sm font-bold">{t("tools.waitCancelled")}</span>
           </div>
         );
       }
@@ -157,7 +159,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="An error occurred while waiting"
+          title={t("tools.waitError")}
         />
       );
 
@@ -165,7 +167,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconClock className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Wait tool accessed</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.waitAccessed")}</span>
         </div>
       );
   }

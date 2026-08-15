@@ -1,6 +1,7 @@
 import { IconArrowLeft, IconMessage2Plus } from "@tabler/icons-react";
 import { generateId, type UIMessage } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -98,6 +99,7 @@ function createStressMessages({
 }
 
 export default function ChatStressTestRoute() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     createChat,
@@ -171,15 +173,15 @@ export default function ChatStressTestRoute() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            Back to Tests
+            {t("tests.backToTests")}
           </Button>
-          <h1 className="text-2xl font-bold">Chat Stress Test</h1>
+          <h1 className="text-2xl font-bold">{t("tests.chatStressTest")}</h1>
         </div>
 
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Generate a Stress Chat</CardTitle>
+              <CardTitle>{t("tests.generateStressChat")}</CardTitle>
               <CardDescription>
                 Create a realistic large chat and jump straight into it to test chat rendering,
                 scrolling, and virtualization thresholds.

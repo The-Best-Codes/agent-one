@@ -1,4 +1,5 @@
 import { IconChevronDown, IconClock, IconDownload, IconRocket } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 import { useUpdate } from "@/contexts/use-update/update-hooks";
 
 export function UpdateAvailableDialog() {
+  const { t } = useTranslation();
   const { dialogOpen, updateVersion, handleRemind, dismissDialog } = useUpdate();
   const navigate = useNavigate();
 
@@ -33,18 +35,17 @@ export function UpdateAvailableDialog() {
         <DialogHeader>
           <div className="flex items-center gap-2">
             <IconRocket className="text-primary size-5" />
-            <DialogTitle>Update Available</DialogTitle>
+            <DialogTitle>{t("dialogs.updateAvailable")}</DialogTitle>
           </div>
           <DialogDescription>
-            AgentOne v{updateVersion} is available. Update now to get the latest features and bug
-            fixes.
+            {t("dialogs.updateAvailableDescription", { version: updateVersion })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <ButtonGroup>
             <Button variant="outline" size="sm" onClick={() => handleRemind(1)}>
               <IconClock data-icon="inline-start" />
-              Remind me in 1 day
+              {t("dialogs.remind1Day")}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -54,13 +55,13 @@ export function UpdateAvailableDialog() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuItem onClick={() => handleRemind(3)}>
-                  Remind me in 3 days
+                  {t("dialogs.remind3Days")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleRemind(7)}>
-                  Remind me in 1 week
+                  {t("dialogs.remind1Week")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleRemind(14)}>
-                  Remind me in 2 weeks
+                  {t("dialogs.remind2Weeks")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -73,7 +74,7 @@ export function UpdateAvailableDialog() {
             }}
           >
             <IconDownload data-icon="inline-start" />
-            Update
+            {t("dialogs.update")}
           </Button>
         </DialogFooter>
       </DialogContent>

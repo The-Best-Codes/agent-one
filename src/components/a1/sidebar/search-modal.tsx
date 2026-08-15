@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import {
   Dialog,
   DialogContent,
@@ -15,13 +17,16 @@ interface SearchModalProps {
 }
 
 export const SearchModal = ({ isOpen, onClose, activeChatId }: SearchModalProps) => {
+  const { t } = useTranslation();
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent showCloseButton={false} className="flex h-fit max-w-2xl flex-col p-2">
         <DialogHeader>
-          <DialogTitle className="sr-only flex items-center gap-2">Chat search dialog</DialogTitle>
+          <DialogTitle className="sr-only flex items-center gap-2">
+            {t("sidebar.chatSearchDialog")}
+          </DialogTitle>
           <DialogDescription className="sr-only">
-            Select a conversation to continue
+            {t("sidebar.searchSelectConversation")}
           </DialogDescription>
           <div className="max-h-[80svh] min-h-0 flex-1">
             <VirtualizedChatList

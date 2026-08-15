@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
@@ -54,6 +55,7 @@ export function AddOpenAICompatibleDialog({
   onOpenChange,
   onAdd,
 }: AddOpenAICompatibleDialogProps) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<ProviderDraftState>(EMPTY_PROVIDER_DRAFT);
 
   const isValid =
@@ -149,7 +151,7 @@ export function AddOpenAICompatibleDialog({
                       apiKey,
                     }))
                   }
-                  placeholder="Enter API key if required"
+                  placeholder={t("providers.enterApiKeyIfRequired")}
                 />
               </Field>
 
@@ -169,8 +171,8 @@ export function AddOpenAICompatibleDialog({
                 baseUrl={draft.baseUrl.trim()}
                 apiKey={draft.apiKey.trim()}
                 headers={draft.headers}
-                emptyTitle="No custom models yet"
-                emptyDescription="Add a model or fetch the provider’s model list, then edit the metadata you want AgentOne to use."
+                emptyTitle={t("providers.noCustomModels")}
+                emptyDescription={t("providers.noCustomModelsDescription")}
                 onChange={(models) =>
                   setDraft((current) => ({
                     ...current,

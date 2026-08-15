@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -27,6 +28,7 @@ interface UpdateSettingOutput {
 }
 
 export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as UpdateSettingInput;
   const approvalHandler = useChatApprovalHandler();
@@ -42,7 +44,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div className="flex items-center gap-1">
             <IconSettings className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to update "{key}" setting to {value}
+              {t("tools.wantsToUpdateSetting", { key, value })}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -52,7 +54,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -60,7 +62,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -136,7 +138,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Error updating setting"
+          title={t("tools.updateSettingError")}
         />
       );
     }
@@ -145,7 +147,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSettings className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Update setting accessed</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.updateSettingAccessed")}</span>
         </div>
       );
   }
