@@ -23,6 +23,7 @@ import {
   inputStyleAtom,
   keyboardShortcutsAtom,
   keyboardShortcutsEnabledInInputsAtom,
+  languageAtom,
   markdownHighlightingAtom,
   markdownRenderingAtom,
   maxCodeblockCharsAtom,
@@ -106,6 +107,7 @@ export function resetAllSettings(): void {
   store.set(collapsedSidebarLayoutAtom, RESET);
   store.set(keyboardShortcutsEnabledInInputsAtom, RESET);
   store.set(keyboardShortcutsAtom, RESET);
+  store.set(languageAtom, RESET);
 
   for (const provider of PROVIDER_REGISTRY) {
     void store.set(getApiKeyBaseAtom(provider.id), RESET);
@@ -262,6 +264,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "KEYBOARD_SHORTCUTS":
       store.set(keyboardShortcutsAtom, RESET);
+      break;
+    case "LANGUAGE":
+      store.set(languageAtom, RESET);
       break;
   }
 }

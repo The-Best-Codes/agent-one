@@ -4,8 +4,10 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { BaseDirectory, mkdir, readFile, remove, writeFile } from "@tauri-apps/plugin-fs";
 import { useAtom } from "jotai";
 import { type ComponentProps, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { ColorPicker } from "@/components/a1/color-picker";
+import { LanguagePicker } from "@/components/a1/language-picker";
 import ThemeToggle from "@/components/theme/toggle-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -310,6 +312,7 @@ async function createThumbnailFile(sourceUrl: string, destinationPath: string) {
 }
 
 export default function AppearanceSection() {
+  const { t } = useTranslation();
   const [chatBackground, setChatBackground] = useAtom(chatBackgroundAtom);
   const [colorTheme, setColorTheme] = useAtom(colorThemeAtom);
   const [font, setFont] = useAtom(fontAtom);
@@ -487,6 +490,15 @@ export default function AppearanceSection() {
                 <Label className="text-sm font-medium">Theme</Label>
               </div>
               <ThemeToggle className="md:justify-end" />
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-language">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium">{t("settings.language")}</Label>
+              </div>
+              <LanguagePicker className="w-full md:w-fit md:max-w-96" />
             </div>
           </SettingsTarget>
 
