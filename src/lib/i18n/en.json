@@ -2,7 +2,7 @@
   "app": {
     "name": "AgentOne"
   },
-  "ui": {
+  "sidebar": {
     "closeSidebar": "Close sidebar",
     "openSidebar": "Open sidebar"
   },
