@@ -29,7 +29,7 @@ If you are an AI agent, please follow the instructions in this file to ensure yo
 - Before you use a shadcn/ui component, use the shadcn skill if you haven't already. For each component you plan to use, use the shadcn CLI or browse the web to read its documentation.
 - The UI components are consistent and align with the project's design system. Unless you have a good reason, avoid applying custom classnames or other styling to the UI components when you use them in a file, customize them via props where possible and leave the styling at its default.
 - To add a new UI component, run `bunx shadcn@latest add *`. Only add new UI components when necessary. If the install step fails, ask the user to add the component manually for you.
-- The UI should be localized! Read the i18n files we have. Add new keys where it makes sense when writing new UI. Aria labels, titles, tooltips, etc. should all be localized too.
+- The UI should be localized! Read the i18n files we have. Add new keys where it makes sense when writing new UI. Aria labels, titles, tooltips, etc. should all be localized too. You shouldn't just add new keys to en.json, you should translate them and add them to the other locales as well.
 
 ## Code Style
 
