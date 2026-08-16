@@ -4,12 +4,14 @@ import { initReactI18next } from "react-i18next";
 
 import en from "./i18n/en.json";
 import es from "./i18n/es.json";
+import ru from "./i18n/ru.json";
 import { languageAtom } from "./jotai/settings-atoms";
 import { LANGUAGE_OPTIONS, type LanguageOption } from "./settings/types";
 
 export const supportedLanguages = [
   { value: "en", label: "English" },
   { value: "es", label: "Español" },
+  { value: "ru", label: "Русский" },
 ] as const satisfies readonly { value: LanguageOption; label: string }[];
 
 export type SupportedLanguage = LanguageOption;
@@ -32,6 +34,7 @@ void i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
     es: { translation: es },
+    ru: { translation: ru },
   },
   lng: resolveInitialLanguage(),
   fallbackLng: FALLBACK_LNG,
