@@ -196,3 +196,7 @@ Kenari
 kenari
 KENARI
 Español
+Deutsch
+Français
+Italiano
+Русский
