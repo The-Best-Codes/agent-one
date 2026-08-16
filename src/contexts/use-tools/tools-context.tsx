@@ -78,6 +78,8 @@ function getServerLoadSignature(server: McpServerConfig): string {
   });
 }
 
+const ALWAYS_APPROVAL_FREE_TOOLS = new Set(["describeNextTool"]);
+
 function applyApprovalConfigToTools(
   tools: ToolSet,
   defaultNeedsApproval: boolean,
@@ -87,7 +89,9 @@ function applyApprovalConfigToTools(
   for (const [name, tool] of Object.entries(tools)) {
     wrappedTools[name] = {
       ...tool,
-      needsApproval: toolApprovalOverrides[name] ?? defaultNeedsApproval,
+      needsApproval: ALWAYS_APPROVAL_FREE_TOOLS.has(name)
+        ? false
+        : (toolApprovalOverrides[name] ?? defaultNeedsApproval),
     } as Tool<unknown, unknown>;
   }
   return wrappedTools;
