@@ -7,5 +7,15 @@
     }
   ],
   "dictionaries": ["project-words"],
-  "ignorePaths": ["project-words.txt", "src/assets/*", "src-tauri/*"]
+  "ignorePaths": ["project-words.txt", "src/assets/*", "src-tauri/*"],
+  "overrides": [
+    {
+      "filename": "src/lib/i18n/**",
+      "enabled": false
+    },
+    {
+      "filename": "src/lib/i18n/en.json",
+      "enabled": true
+    }
+  ]
 }

@@ -195,3 +195,4 @@ TOKENROUTER
 Kenari
 kenari
 KENARI
+Español
