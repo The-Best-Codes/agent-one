@@ -101,6 +101,9 @@
     "categoriesDescription": "Elenco delle sezioni di impostazione",
     "selectSection": "Seleziona una sezione dalla barra laterale.",
     "selectLanguage": "Seleziona lingua",
+    "languageWarningTitle": "Cambiare lingua?",
+    "languageWarningDescription": "AgentOne è supportato completamente solo in inglese. L'interfaccia potrebbe rompersi in altre lingue e le traduzioni sono generate da IA e potrebbero essere inaccurate. Passare a {{language}}?",
+    "switchLanguage": "Cambia lingua",
     "sections": {
       "account": "Account",
       "appearance": "Aspetto",

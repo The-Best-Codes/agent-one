@@ -101,6 +101,9 @@
     "categoriesDescription": "Список разделов настроек",
     "selectSection": "Выберите раздел на боковой панели.",
     "selectLanguage": "Выберите язык",
+    "languageWarningTitle": "Сменить язык?",
+    "languageWarningDescription": "AgentOne полностью поддерживается только на английском языке. Интерфейс может работать некорректно на других языках, а переводы созданы ИИ и могут быть неточными. Переключиться на {{language}}?",
+    "switchLanguage": "Сменить язык",
     "sections": {
       "account": "Аккаунт",
       "appearance": "Внешний вид",

@@ -101,6 +101,9 @@
     "categoriesDescription": "List of setting sections",
     "selectSection": "Select a section from the sidebar.",
     "selectLanguage": "Select language",
+    "languageWarningTitle": "Switch language?",
+    "languageWarningDescription": "AgentOne is only fully supported in English. The UI may break in other languages, and the translations are AI-generated and may be inaccurate. Switch to {{language}}?",
+    "switchLanguage": "Switch language",
     "sections": {
       "account": "Account",
       "appearance": "Appearance",
