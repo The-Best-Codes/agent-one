@@ -9,7 +9,11 @@ import {
   type McpRegistryInstallResult,
   type RegistryInstallField,
 } from "@/assets/mcp-registry/mcp-registry";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -230,22 +234,32 @@ function InstallExtensionDialogBody({
         />
       </div>
 
-      <DialogFooter className="flex sm:flex-col">
+      <DialogFooter className="flex">
         {missingRuntimeCommand ? (
-          <Alert variant="destructive" className="mb-2">
-            <IconAlertTriangle />
-            <AlertTitle>{t("extensions.missingRuntimeTitle")}</AlertTitle>
-            <AlertDescription>
+          <AdaptiveTooltip>
+            <AdaptiveTooltipTrigger asChild>
+              <Label className="w-full text-destructive">
+                <IconAlertTriangle className="size-4" />
+                <span className="truncate">{t("extensions.missingRuntimeTitle")}</span>
+              </Label>
+            </AdaptiveTooltipTrigger>
+            <AdaptiveTooltipContent className="max-w-xs">
               {t("extensions.missingRuntimeDescription", { command: missingRuntimeCommand })}
-            </AlertDescription>
-          </Alert>
-        ) : null}
+            </AdaptiveTooltipContent>
+          </AdaptiveTooltip>
+        ) : (
+          <div className="w-full" />
+        )}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleInstall} disabled={!isFormValid}>
-            {missingRuntimeCommand ? t("extensions.installAnyway") : t("extensions.installAction")}
+          <Button
+            onClick={handleInstall}
+            disabled={!isFormValid}
+            variant={missingRuntimeCommand ? "destructive" : "default"}
+          >
+            {t("extensions.installAction")}
           </Button>
         </div>
       </DialogFooter>
