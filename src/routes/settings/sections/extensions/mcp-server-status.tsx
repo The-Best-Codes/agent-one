@@ -1,5 +1,6 @@
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import i18n from "@/lib/i18n";
 import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 import { cn } from "@/lib/utils";
 
@@ -24,24 +25,24 @@ function getStatusLabel(
   authState?: McpAuthState,
 ): string {
   if (hasAuthIssue(status, authState)) {
-    return "Auth";
+    return i18n.t("extensions.statusAuth");
   }
 
   switch (status) {
     case "disabled":
-      return "Off";
+      return i18n.t("common.off");
     case "loaded":
-      return "Enabled";
+      return i18n.t("common.enabled");
     case "starting":
-      return "Loading...";
+      return i18n.t("common.loadingEllipsis");
     case "connecting":
-      return "Loading...";
+      return i18n.t("common.loadingEllipsis");
     case "unknown":
-      return "Loading...";
+      return i18n.t("common.loadingEllipsis");
     case "error":
-      return "Error";
+      return i18n.t("common.error");
     default:
-      return "Unknown";
+      return i18n.t("common.unknown");
   }
 }
 
@@ -51,30 +52,32 @@ function getStatusDescription(
   authState?: McpAuthState,
 ): string {
   if (disabled) {
-    return "Toggle the switch to enable this server";
+    return i18n.t("extensions.toggleToEnable");
   }
 
   if (hasAuthIssue(state?.status, authState)) {
     return authState === "supports-oauth"
-      ? "Connect your account for full access to this server"
-      : "Authentication required to load tools";
+      ? i18n.t("extensions.connectForAccess")
+      : i18n.t("extensions.authRequired");
   }
 
   switch (state?.status) {
     case "loaded":
       if (state.toolCount === 0) {
-        return "Connected, but no tools are available";
+        return i18n.t("extensions.connectedNoTools");
       }
-      return state.toolCount === 1 ? "1 tool available" : `${state.toolCount} tools available`;
+      return state.toolCount === 1
+        ? i18n.t("extensions.loadedOneTool")
+        : i18n.t("extensions.loadedTools", { count: state.toolCount });
     case "starting":
-      return "Starting server";
+      return i18n.t("extensions.startingServer");
     case "connecting":
-      return "Connecting to server";
+      return i18n.t("extensions.connectingToServer");
     case "error":
-      return state.error ?? "Unable to load tools";
+      return state.error ?? i18n.t("extensions.unableToLoadTools");
     case "unknown":
     default:
-      return "Waiting for server to load";
+      return i18n.t("extensions.waitingToLoad");
   }
 }
 
@@ -91,13 +94,13 @@ export function McpServerStatus({
   const authIssue = hasAuthIssue(status, authState);
 
   if (compact) {
-    const isLoading = label === "Loading...";
+    const isLoading = label === i18n.t("common.loadingEllipsis");
 
     if (isLoading) {
       return (
         <div className="flex items-center gap-1.5">
           <Spinner className="text-muted-foreground size-3" />
-          <span className="text-muted-foreground text-xs">Loading...</span>
+          <span className="text-muted-foreground text-xs">{i18n.t("common.loadingEllipsis")}</span>
         </div>
       );
     }
@@ -136,7 +139,7 @@ export function McpServerStatus({
           id={switchId}
           checked={!disabled}
           onCheckedChange={onEnabledChange}
-          aria-label="Toggle extension"
+          aria-label={i18n.t("extensions.toggleExtension")}
         />
       ) : null}
     </div>

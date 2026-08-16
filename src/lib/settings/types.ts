@@ -88,6 +88,9 @@ export type InputStyleOption = (typeof INPUT_STYLE_OPTIONS)[number];
 export const COLLAPSED_SIDEBAR_LAYOUT_OPTIONS = ["row", "column"] as const;
 export type CollapsedSidebarLayoutOption = (typeof COLLAPSED_SIDEBAR_LAYOUT_OPTIONS)[number];
 
+export const LANGUAGE_OPTIONS = ["en", "es"] as const;
+export type LanguageOption = (typeof LANGUAGE_OPTIONS)[number];
+
 export const CHAT_VIRTUALIZATION_MODE_OPTIONS = ["off", "threshold"] as const;
 export type ChatVirtualizationModeOption = (typeof CHAT_VIRTUALIZATION_MODE_OPTIONS)[number];
 
@@ -327,6 +330,7 @@ export interface DefaultSettings extends ApiKeySettings {
   MARKDOWN_RENDERING: MarkdownRenderingOption;
   SUBMIT_KEY: SubmitKeyOption;
   INPUT_STYLE: InputStyleOption;
+  LANGUAGE: LanguageOption;
   MAX_CODEBLOCK_CHARS: number;
   MAX_MESSAGE_LENGTH: number;
   MAX_TOOL_RESULT_CHARS: number;
@@ -373,6 +377,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MARKDOWN_RENDERING: "both",
   SUBMIT_KEY: "enter",
   INPUT_STYLE: "docked",
+  LANGUAGE: "en",
   MAX_CODEBLOCK_CHARS: 10000,
   MAX_MESSAGE_LENGTH: 50000,
   MAX_TOOL_RESULT_CHARS: 15000,

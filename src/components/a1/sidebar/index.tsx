@@ -1,6 +1,7 @@
 import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
@@ -42,6 +43,7 @@ const SidebarContent = ({
   handleNewChat: () => void;
   onChatClick?: (id: string) => void;
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
   const clickTimestamps = useRef<number[]>([]);
@@ -50,20 +52,20 @@ const SidebarContent = ({
     if (debugMode) return;
     const now = Date.now();
     clickTimestamps.current.push(now);
-    clickTimestamps.current = clickTimestamps.current.filter((t) => now - t < 1500);
+    clickTimestamps.current = clickTimestamps.current.filter((ts) => now - ts < 1500);
     if (clickTimestamps.current.length >= 5) {
       clickTimestamps.current = [];
-      toast("Enable debug mode?", {
+      toast(t("sidebar.debugEnableQuestion"), {
         id: "enable-debug-mode",
-        description: "This will add a Debug section to Help & Updates in Settings.",
+        description: t("sidebar.debugEnableQuestionDescription"),
         action: {
-          label: "Enable",
+          label: t("common.enable"),
           onClick: () => {
             setDebugMode(true);
-            toast.success("Debug mode enabled", {
-              description: "Check Settings > Help & Updates to access internal tests.",
+            toast.success(t("sidebar.debugEnabled"), {
+              description: t("sidebar.debugEnabledDescription"),
               action: {
-                label: "Open Settings",
+                label: t("sidebar.openSettings"),
                 onClick: () => navigate("/settings?tab=about"),
               },
             });
@@ -72,7 +74,7 @@ const SidebarContent = ({
         duration: Infinity,
       });
     }
-  }, [navigate, debugMode, setDebugMode]);
+  }, [navigate, debugMode, setDebugMode, t]);
 
   return (
     <div className="flex h-full flex-col">
@@ -96,7 +98,7 @@ const SidebarContent = ({
             data-icon="inline-start"
           >
             <IconSettings data-icon="inline-start" />
-            Settings
+            {t("common.settings")}
           </Link>
         </Button>
       </div>
@@ -105,6 +107,7 @@ const SidebarContent = ({
 };
 
 export const Sidebar = ({ className }: SidebarProps) => {
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useAtom(sidebarCollapsedAtom);
   const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -116,8 +119,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const isSidebarSmall = isCollapsed || !isDesktop;
   const isColumnLayout = collapsedLayout === "column";
   const toggleTooltip = (isDesktop ? isCollapsed : !isDrawerOpen)
-    ? "Open sidebar"
-    : "Close sidebar";
+    ? t("sidebar.openSidebar")
+    : t("sidebar.closeSidebar");
   const tooltipSide = isColumnLayout && isSidebarSmall ? "right" : undefined;
 
   useKeyboardShortcut("focusChatSearchCollapsed", () => {
@@ -159,7 +162,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             event: "sidebar_toggled",
             params: { collapsed: !isCollapsed, ui_location: "desktop" },
           }}
-          aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
+          aria-label={isCollapsed ? t("sidebar.openSidebar") : t("sidebar.closeSidebar")}
           className="size-6"
         >
           <IconLayoutSidebar data-icon="inline-start" />
@@ -183,8 +186,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="bg-background dark:bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
       >
-        <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
-        <DrawerDescription className="sr-only">Mobile chat sidebar content</DrawerDescription>
+        <DrawerTitle className="sr-only">{t("sidebar.chatSidebar")}</DrawerTitle>
+        <DrawerDescription className="sr-only">
+          {t("sidebar.mobileSidebarDescription")}
+        </DrawerDescription>
         <SidebarContent
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}
@@ -225,13 +230,15 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   size="icon-sm"
                   onClick={handleSearchClick}
                   analytics={{ event: "search_modal_opened", params: { ui_location: "sidebar" } }}
-                  aria-label="Search chats"
+                  aria-label={t("sidebar.searchChats")}
                   className="size-6"
                 >
                   <IconSearch data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>Search chats</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>
+                {t("sidebar.searchChats")}
+              </AdaptiveTooltipContent>
             </AdaptiveTooltip>
             <AdaptiveTooltip>
               <AdaptiveTooltipTrigger asChild>
@@ -240,13 +247,15 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   size="icon-sm"
                   onClick={handleNewChat}
                   analytics={{ event: "new_chat_clicked", params: { ui_location: "sidebar" } }}
-                  aria-label="New chat"
+                  aria-label={t("sidebar.newChat")}
                   className="size-6"
                 >
                   <IconPlus data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>New chat</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>
+                {t("sidebar.newChat")}
+              </AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </div>
         </div>

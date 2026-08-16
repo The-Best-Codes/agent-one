@@ -1,6 +1,7 @@
 import { IconCircleCheck, IconCircleX, IconSettings, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -14,12 +15,13 @@ interface GetSettingInput {
 }
 
 export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as GetSettingInput;
   const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const key = input?.key || "unknown setting";
+  const key = input?.key || t("tools.unknownSetting");
 
   switch (part.state) {
     case "approval-requested":
@@ -28,7 +30,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           <div className="flex items-center gap-1">
             <IconSettings className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to read the "{key}" setting
+              {t("tools.wantsToReadSetting", { key })}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -38,7 +40,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -46,7 +48,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -57,7 +59,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Read "{key}" setting denied
+            {t("tools.readSettingDenied", { key })}
           </span>
         </div>
       );
@@ -70,7 +72,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Read "{key}" setting denied
+              {t("tools.readSettingDenied", { key })}
             </span>
           </div>
         );
@@ -81,7 +83,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">Reading "{key}" setting...</span>
+          <span className="max-w-2xl truncate">{t("tools.readingSetting", { key })}</span>
         </div>
       );
     }
@@ -90,7 +92,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
       return (
         <div key={callId} className="text-foreground flex items-center gap-1 text-sm font-bold">
           <IconSettings className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">Read "{key}" setting</span>
+          <span className="max-w-2xl truncate">{t("tools.readSetting", { key })}</span>
         </div>
       );
     }
@@ -101,7 +103,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Reading setting was cancelled
+              {t("tools.readingSettingCancelled")}
             </span>
           </div>
         );
@@ -113,7 +115,7 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Error reading setting"
+          title={t("tools.getSettingError")}
         />
       );
     }
@@ -122,7 +124,9 @@ export const MessagePartToolGetSetting = ({ part }: { part: ToolUIPart }) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSettings className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Read setting accessed</span>
+          <span className="text-foreground text-sm font-bold">
+            {t("tools.readSettingAccessed")}
+          </span>
         </div>
       );
   }

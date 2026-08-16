@@ -6,6 +6,7 @@ import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -80,6 +81,7 @@ export const MainChatInput = ({
   initialValue?: string;
   disabled?: boolean;
 }) => {
+  const { t } = useTranslation();
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
   const { resolvedTheme } = useTheme();
@@ -426,7 +428,7 @@ export const MainChatInput = ({
               isFloating ? "rounded-md" : "rounded-md rounded-b-none",
             )}
           >
-            <p className="text-primary text-lg font-semibold">Drop files or chats to attach</p>
+            <p className="text-primary text-lg font-semibold">{t("chat.dropToAttach")}</p>
           </div>
         )}
         <input
@@ -447,7 +449,7 @@ export const MainChatInput = ({
             value={initialValue || ""}
             minHeight="40px"
             maxHeight="160px"
-            placeholder="Ask anything..."
+            placeholder={t("chat.askAnything")}
             className="bg-transparent text-sm"
             extensions={[
               ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
@@ -455,7 +457,7 @@ export const MainChatInput = ({
               EditorView.lineWrapping,
               EditorView.contentAttributes.of({
                 spellcheck: "true",
-                "aria-label": "Chat message input",
+                "aria-label": t("chat.inputAria"),
                 "data-testid": "chat-editor",
               }),
               // eslint-disable-next-line react-hooks/refs
@@ -545,7 +547,7 @@ export const MainChatInput = ({
                     params: { ui_location: "main_chat_input" },
                   }}
                   className="relative"
-                  aria-label="Attach files"
+                  aria-label={t("chat.attachFiles")}
                 >
                   {files && files?.length > 0 && (
                     <Badge variant="default" className="absolute -top-2 -right-2 z-10 shadow-md">
@@ -555,7 +557,7 @@ export const MainChatInput = ({
                   <IconPaperclip />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent>{t("chat.attachFilesTooltip")}</AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </div>
           <div className="flex items-center gap-2">
@@ -582,12 +584,12 @@ export const MainChatInput = ({
                       event: "response_stop_clicked",
                       params: { ui_location: "main_chat_input" },
                     }}
-                    aria-label="Stop response"
+                    aria-label={t("chat.stopResponse")}
                   >
                     <IconPlayerStopFilled />
                   </Button>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{t("chat.stopTooltip")}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             ) : (
               <AdaptiveTooltip>
@@ -607,12 +609,12 @@ export const MainChatInput = ({
                       event: "send_button_clicked",
                       params: { ui_location: "main_chat_input" },
                     }}
-                    aria-label="Send message"
+                    aria-label={t("chat.sendMessage")}
                   >
                     {status === "submitted" ? <Spinner /> : <IconArrowUp />}
                   </Button>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{t("chat.sendTooltip")}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
           </div>

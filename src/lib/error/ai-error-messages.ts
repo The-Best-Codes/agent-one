@@ -1,39 +1,36 @@
+import i18n from "@/lib/i18n";
+
 interface UxErrorConfig {
   key: string;
-  uxError: string;
-  description: string;
+  uxErrorKey: string;
+  descriptionKey: string;
 }
 
 export const aiErrorMessages = new Set<UxErrorConfig>([
   {
     key: "Failed to fetch",
-    uxError: "Failed to connect to AI model",
-    description:
-      "AgentOne couldn't connect to the provider of the AI model you've chosen. Try a different model and check your internet connection.",
+    uxErrorKey: "aiErrors.failedToConnect",
+    descriptionKey: "aiErrors.failedToConnectDescription",
   },
   {
     key: "'Non-image file content parts' functionality not supported.",
-    uxError: "Only image files are supported by this model",
-    description:
-      "The AI model you've chosen does not support non-image files. Please choose a different model or file type.",
+    uxErrorKey: "aiErrors.onlyImageFiles",
+    descriptionKey: "aiErrors.onlyImageFilesDescription",
   },
   {
     key: "Unauthorized",
-    uxError: "Unauthorized access to AI model",
-    description:
-      "AgentOne couldn't authenticate with the provider of the AI model you've chosen. Have you configured the correct API key for it in settings?",
+    uxErrorKey: "aiErrors.unauthorized",
+    descriptionKey: "aiErrors.unauthorizedDescription",
   },
   {
     key: "API key not valid. Please pass a valid API key.",
-    uxError: "Invalid API key",
-    description:
-      "AgentOne couldn't authenticate with the provider of the AI model you've chosen. Have you configured the correct API key for it in settings?",
+    uxErrorKey: "aiErrors.invalidApiKey",
+    descriptionKey: "aiErrors.invalidApiKeyDescription",
   },
   {
     key: "Invalid API Key",
-    uxError: "Invalid API key",
-    description:
-      "AgentOne couldn't authenticate with the provider of the AI model you've chosen. Have you configured the correct API key for it in settings?",
+    uxErrorKey: "aiErrors.invalidApiKey",
+    descriptionKey: "aiErrors.invalidApiKeyDescription",
   },
 ]);
 
@@ -46,7 +43,7 @@ export const aiErrorMessages = new Set<UxErrorConfig>([
 export const getAiErrorMessageUx = (
   rawErrorMessage: string | undefined | null,
 ): { message: string | null; description: string | null } => {
-  const defaultMessage = "An unknown error occurred.";
+  const defaultMessage = i18n.t("aiErrors.unknown");
   const actualErrorMessage = rawErrorMessage?.trim() || "";
 
   if (!actualErrorMessage) {
@@ -59,8 +56,8 @@ export const getAiErrorMessageUx = (
   for (const config of aiErrorMessages) {
     if (actualErrorMessage.toLowerCase().includes(config.key.toLowerCase())) {
       return {
-        message: config.uxError,
-        description: config.description,
+        message: i18n.t(config.uxErrorKey),
+        description: i18n.t(config.descriptionKey),
       };
     }
   }

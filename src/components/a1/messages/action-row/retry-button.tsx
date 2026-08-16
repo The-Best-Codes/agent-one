@@ -1,5 +1,6 @@
 import { IconRefresh } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -13,6 +14,7 @@ type RetryButtonProps = {
 
 // TODO: Disable this button when no models are available (see ../../input/no-model-section.tsx for example)
 export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps) => {
+  const { t } = useTranslation();
   const { regenerate } = useChatFunctions();
   const { status } = useChatStatus();
 
@@ -31,7 +33,7 @@ export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps
       className={className}
       size="icon-sm"
       variant="secondary"
-      aria-label="Regenerate response"
+      aria-label={t("messages.regenerate")}
       {...props}
     >
       <IconRefresh data-icon="inline-start" />

@@ -2,6 +2,7 @@ import { IconCheck, IconChevronDown, IconX } from "@tabler/icons-react";
 import type { TextUIPart, ToolUIPart, UIMessage } from "ai";
 import { useAtom } from "jotai";
 import { memo, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const MessagePartsInternal = ({
   message: UIMessage;
   isLastMessage?: boolean;
 }) => {
+  const { t } = useTranslation();
   const {
     isEditing,
     canEdit,
@@ -93,13 +95,19 @@ const MessagePartsInternal = ({
         if (part.type === "text") {
           return (part as TextUIPart).text;
         } else if (part.type === "file") {
-          return `[File: ${part.filename || "Unnamed file"}]`;
+          return t("messages.copyFile", { filename: part.filename || t("messages.unnamedFile") });
         } else if (part.type === "reasoning") {
           return `[Reasoning: ${part.text}]`;
         } else if (part.type === "source-url") {
-          return `[Source URL: ${part?.title || "Untitled URL"}, ${part?.url || "Unknown URL"}]`;
+          return t("messages.copySourceUrl", {
+            title: part?.title || t("messages.untitledUrl"),
+            url: part?.url || t("messages.unknownUrl"),
+          });
         } else if (part.type === "source-document") {
-          return `[Source Document: ${part?.title || "Unnamed document"}, ${part?.filename || "Unnamed file"}]`;
+          return t("messages.copySourceDocument", {
+            title: part?.title || t("messages.unnamedDocument"),
+            filename: part?.filename || t("messages.unnamedFile"),
+          });
         } else if (part.type.startsWith("data-")) {
           return `[Data: ${JSON.stringify(part)}]`;
         } else if (part.type === "tool-describeNextTool") {
@@ -116,7 +124,7 @@ const MessagePartsInternal = ({
       })
       .filter(Boolean)
       .join("\n");
-  }, [message.parts]);
+  }, [message.parts, t]);
 
   const getTextToSpeechContent = useCallback(() => {
     return message.parts
@@ -247,17 +255,17 @@ const MessagePartsInternal = ({
         <div className="mt-2 flex items-center justify-end gap-1.5">
           <Button size="xs" variant="outline" onClick={handleCancel}>
             <IconX data-icon="inline-start" />
-            Cancel
+            {t("common.cancel")}
           </Button>
           {message.role === "user" ? (
             <ButtonGroup>
               <Button size="xs" variant="default" onClick={() => handleSave(regenerateOnSave)}>
                 <IconCheck data-icon="inline-start" />
-                Save
+                {t("common.save")}
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="icon-xs" variant="default" aria-label="More options">
+                  <Button size="icon-xs" variant="default" aria-label={t("messages.moreOptions")}>
                     <IconChevronDown />
                   </Button>
                 </DropdownMenuTrigger>
@@ -267,7 +275,7 @@ const MessagePartsInternal = ({
                     checked={regenerateOnSave}
                     onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
                   >
-                    Regenerate when Saved
+                    {t("messages.regenerateWhenSaved")}
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -275,7 +283,7 @@ const MessagePartsInternal = ({
           ) : (
             <Button size="xs" variant="default" onClick={() => handleSave(false)}>
               <IconCheck data-icon="inline-start" />
-              Save
+              {t("common.save")}
             </Button>
           )}
         </div>

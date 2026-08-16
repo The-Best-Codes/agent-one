@@ -8,6 +8,7 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { memo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -73,54 +74,61 @@ const formatUrl = (url: string) => {
   }
 };
 
-const UrlPendingDisplay = memo(({ url }: { url: string }) => (
-  <div className="flex items-center gap-1">
-    <Spinner className="text-foreground size-4 shrink-0" />
-    <span className="text-foreground max-w-2xl truncate text-sm font-bold">
-      Browsing{" "}
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
-      >
-        {formatUrl(url)}
-      </a>
-      ...
-    </span>
-  </div>
-));
+const UrlPendingDisplay = memo(({ url }: { url: string }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-1">
+      <Spinner className="text-foreground size-4 shrink-0" />
+      <span className="text-foreground max-w-2xl truncate text-sm font-bold">
+        {t("tools.browsing")}{" "}
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+        >
+          {formatUrl(url)}
+        </a>
+        ...
+      </span>
+    </div>
+  );
+});
 
 UrlPendingDisplay.displayName = "UrlPendingDisplay";
 
-const UrlCancelledDisplay = memo(({ url }: { url: string }) => (
-  <div className="flex items-center gap-1">
-    <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-    <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
-      Browsing{" "}
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
-      >
-        {formatUrl(url)}
-      </a>{" "}
-      cancelled
-    </span>
-  </div>
-));
+const UrlCancelledDisplay = memo(({ url }: { url: string }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-1">
+      <IconCircleX className="text-muted-foreground size-4 shrink-0" />
+      <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
+        {t("tools.browsing")}{" "}
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="cursor-pointer text-blue-500 hover:text-blue-600 hover:underline"
+        >
+          {formatUrl(url)}
+        </a>{" "}
+        {t("tools.cancelled")}
+      </span>
+    </div>
+  );
+});
 
 UrlCancelledDisplay.displayName = "UrlCancelledDisplay";
 
 const UrlResultDisplay = memo(
   ({ result, input }: { result: UrlResult; input: GetUrlContentInput }) => {
+    const { t } = useTranslation();
     if (result.error) {
       return (
         <div className="flex items-center gap-1">
           <IconCircleX className="text-destructive size-4 shrink-0" />
           <span className="text-destructive max-w-2xl truncate text-sm font-bold">
-            Failed to browse{" "}
+            {t("tools.failedToBrowse")}{" "}
             <a
               href={result.url}
               target="_blank"
@@ -140,7 +148,7 @@ const UrlResultDisplay = memo(
       <div className="flex items-center gap-1">
         <IconWorld className="text-foreground size-4 shrink-0" />
         <span className="text-foreground max-w-2xl truncate text-sm font-bold">
-          Browsed{" "}
+          {t("tools.browsed")}{" "}
           <a
             href={result.url}
             target="_blank"
@@ -157,7 +165,7 @@ const UrlResultDisplay = memo(
                 <AdaptiveTooltipTrigger asChild>
                   <IconFileText className="text-muted-foreground size-4 shrink-0" />
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>Fetched raw content</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{t("tools.fetchedRaw")}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
             <AdaptiveTooltip>
@@ -171,8 +179,10 @@ const UrlResultDisplay = memo(
               </AdaptiveTooltipTrigger>
               <AdaptiveTooltipContent>
                 {result.truncated
-                  ? `Truncated to ${input.maxLength || "unknown"} characters`
-                  : `${result.length || "All"} characters processed`}
+                  ? t("tools.truncatedTo", { max: input.maxLength || t("common.unknown") })
+                  : result.length
+                    ? t("tools.charsProcessed", { count: result.length })
+                    : t("tools.allCharsProcessed")}
               </AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </>
@@ -185,6 +195,7 @@ const UrlResultDisplay = memo(
 UrlResultDisplay.displayName = "UrlResultDisplay";
 
 export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProps) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as GetUrlContentInput;
   const output = part.output as GetUrlContentOutput;
@@ -201,7 +212,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <div className="flex items-center gap-1">
             <IconWorld className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to browse
+              {t("tools.wantsToBrowse")}
               {urlCount === 1 ? (
                 <>
                   {" "}
@@ -215,11 +226,11 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       {formatUrl(input.urls[0])}
                     </a>
                   ) : (
-                    "a website"
+                    t("tools.aWebsite")
                   )}
                 </>
               ) : (
-                ` ${urlCount} URLs`
+                ` ${t("tools.urlCount", { count: urlCount })}`
               )}
             </span>
           </div>
@@ -230,7 +241,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -238,7 +249,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -251,7 +262,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <span className="text-muted-foreground text-sm font-bold">
             {urlCount === 1 ? (
               <>
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 {input?.urls?.[0] ? (
                   <a
                     href={input.urls[0]}
@@ -262,12 +273,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(input.urls[0])}
                   </a>
                 ) : (
-                  "a website"
+                  t("tools.aWebsite")
                 )}{" "}
-                denied
+                {t("tools.deniedWord")}
               </>
             ) : (
-              `Browsing ${urlCount} URLs denied`
+              t("tools.browsingUrlsDenied", { count: urlCount })
             )}
           </span>
         </div>
@@ -279,7 +290,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <div>
             <Spinner className="text-foreground size-4 shrink-0" />
           </div>
-          <span className="text-foreground text-sm font-bold">Browsing URLs...</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.browsingUrls")}</span>
         </div>
       );
 
@@ -292,7 +303,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <span className="text-muted-foreground text-sm font-bold">
               {urlCount === 1 ? (
                 <>
-                  Browsing{" "}
+                  {t("tools.browsing")}{" "}
                   {input?.urls?.[0] ? (
                     <a
                       href={input.urls[0]}
@@ -303,12 +314,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       {formatUrl(input.urls[0])}
                     </a>
                   ) : (
-                    "a website"
+                    t("tools.aWebsite")
                   )}{" "}
-                  denied
+                  {t("tools.deniedWord")}
                 </>
               ) : (
-                `Browsing ${urlCount} URLs denied`
+                t("tools.browsingUrlsDenied", { count: urlCount })
               )}
             </span>
           </div>
@@ -323,7 +334,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <span className="max-w-2xl truncate">
             {urlCount === 1 ? (
               <>
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 {input?.urls?.[0] ? (
                   <a
                     href={input.urls[0]}
@@ -334,12 +345,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(input.urls[0])}
                   </a>
                 ) : (
-                  "a website"
+                  t("tools.aWebsite")
                 )}
                 ...
               </>
             ) : (
-              `Browsing ${urlCount === 0 ? " " : `${urlCount} `}URLs...`
+              t("tools.browsingUrlsCount", { count: urlCount })
             )}
           </span>
         </div>
@@ -358,7 +369,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <div key={callId} className="flex items-center gap-1">
               <Spinner className="text-foreground size-4 shrink-0" />
               <span className="text-foreground text-sm font-bold">
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 {results[0] ? (
                   <a
                     href={results[0].url}
@@ -369,7 +380,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(results[0].url)}
                   </a>
                 ) : (
-                  "a website"
+                  t("tools.aWebsite")
                 )}
                 ...
               </span>
@@ -430,9 +441,9 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             >
               <span className="max-w-2xl truncate tabular-nums">
                 {isStreaming
-                  ? `Browsing ${results.length} URLs...`
-                  : `Browsed ${results.length} URL${results.length !== 1 ? "s" : ""}`}
-                {failCount > 0 && ` (${failCount} failed)`}
+                  ? t("tools.browsingUrlsCount", { count: results.length })
+                  : t("tools.browsedUrlsCount", { count: results.length })}
+                {failCount > 0 && ` ${t("tools.countFailed", { count: failCount })}`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
@@ -460,7 +471,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <div key={callId} className="flex items-center gap-1">
               <IconCircleX className="text-muted-foreground size-4 shrink-0" />
               <span className="text-muted-foreground text-sm font-bold">
-                Browsing{" "}
+                {t("tools.browsing")}{" "}
                 <a
                   href={singleUrl}
                   target="_blank"
@@ -469,7 +480,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 >
                   {formatUrl(singleUrl)}
                 </a>{" "}
-                cancelled
+                {t("tools.cancelled")}
               </span>
             </div>
           );
@@ -513,7 +524,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                   className="justify-start gap-1 p-0 font-bold hover:no-underline"
                 >
                   <span className="text-muted-foreground max-w-2xl truncate tabular-nums">
-                    Browsing {urlCount} URLs cancelled
+                    {t("tools.browsingUrlsCancelled", { count: urlCount })}
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="p-0 pt-2">
@@ -531,7 +542,9 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">Browsing cancelled</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.browsingCancelled")}
+            </span>
           </div>
         );
       }
@@ -541,7 +554,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Error fetching URL content"
+          title={t("tools.getUrlError")}
         />
       );
     }
@@ -550,7 +563,9 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconWorld className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Web browsing accessed</span>
+          <span className="text-foreground text-sm font-bold">
+            {t("tools.webBrowsingAccessed")}
+          </span>
         </div>
       );
   }

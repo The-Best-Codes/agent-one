@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -27,12 +28,13 @@ interface UpdateSettingOutput {
 }
 
 export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as UpdateSettingInput;
   const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const key = input?.key || "unknown setting";
+  const key = input?.key || t("tools.unknownSetting");
   const value = input?.value !== undefined ? JSON.stringify(input.value) : "undefined";
 
   switch (part.state) {
@@ -42,7 +44,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div className="flex items-center gap-1">
             <IconSettings className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to update "{key}" setting to {value}
+              {t("tools.wantsToUpdateSetting", { key, value })}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -52,7 +54,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -60,7 +62,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -71,7 +73,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            Update "{key}" setting denied
+            {t("tools.updateSettingDenied", { key })}
           </span>
         </div>
       );
@@ -84,7 +86,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Update "{key}" setting denied
+              {t("tools.updateSettingDenied", { key })}
             </span>
           </div>
         );
@@ -95,9 +97,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Updating "{key}" setting to {value}...
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.updatingSettingTo", { key, value })}</span>
         </div>
       );
     }
@@ -112,7 +112,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
         >
           <IconSettingsCheck className="size-4 shrink-0" />
           <span className="max-w-2xl truncate">
-            Updated "{key}" setting to {JSON.stringify(output?.value)}
+            {t("tools.updatedSettingTo", { key, value: JSON.stringify(output?.value) })}
           </span>
         </div>
       );
@@ -124,7 +124,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              Updating setting was cancelled
+              {t("tools.updatingSettingCancelled")}
             </span>
           </div>
         );
@@ -136,7 +136,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Error updating setting"
+          title={t("tools.updateSettingError")}
         />
       );
     }
@@ -145,7 +145,9 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSettings className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Update setting accessed</span>
+          <span className="text-foreground text-sm font-bold">
+            {t("tools.updateSettingAccessed")}
+          </span>
         </div>
       );
   }

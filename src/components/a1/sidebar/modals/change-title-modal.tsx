@@ -1,6 +1,7 @@
 import { IconSparkles } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -42,6 +43,7 @@ const ChangeTitleForm = ({
   chatId: string;
   onClose: () => void;
 }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(currentTitle);
   const [isGenerating, setIsGenerating] = useState(false);
   const { saveChatTitle, loadChatMetadata, loadChatMessages } = usePersistence();
@@ -92,7 +94,7 @@ const ChangeTitleForm = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Enter chat title..."
+          placeholder={t("sidebar.enterTitle")}
           autoFocus
           className="flex-1"
         />
@@ -103,16 +105,16 @@ const ChangeTitleForm = ({
             </Button>
           </AdaptiveTooltipTrigger>
           <AdaptiveTooltipContent>
-            <p>Generate title using AI</p>
+            <p>{t("sidebar.generateTitle")}</p>
           </AdaptiveTooltipContent>
         </AdaptiveTooltip>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
-          Cancel
+          {t("common.cancel")}
         </Button>
         <Button onClick={handleSave} disabled={!title.trim()}>
-          Save
+          {t("common.save")}
         </Button>
       </DialogFooter>
     </>
@@ -125,12 +127,13 @@ export const ChangeTitleModal = ({
   chatId,
   currentTitle,
 }: ChangeTitleModalProps) => {
+  const { t } = useTranslation();
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change Chat Title</DialogTitle>
-          <DialogDescription>Enter a new title for this chat conversation.</DialogDescription>
+          <DialogTitle>{t("sidebar.changeTitleHeading")}</DialogTitle>
+          <DialogDescription>{t("sidebar.changeTitleDescription")}</DialogDescription>
         </DialogHeader>
         <ChangeTitleForm currentTitle={currentTitle} chatId={chatId} onClose={onClose} />
       </DialogContent>

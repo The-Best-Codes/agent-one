@@ -2,6 +2,7 @@ import { IconBrain, IconChevronDown } from "@tabler/icons-react";
 import type { ReasoningUIPart } from "ai";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
@@ -25,6 +26,7 @@ export const MessagePartReasoning = ({
   text: ReasoningUIPart["text"];
   isBusy?: boolean;
 }) => {
+  const { t } = useTranslation();
   const { status } = useChatStatus();
   const isLoading = isBusy && status === "streaming";
 
@@ -87,7 +89,7 @@ export const MessagePartReasoning = ({
           shouldRotateIcon={true}
           className="justify-start gap-1 p-0 font-bold hover:no-underline"
         >
-          <span className="max-w-2xl truncate">Reasoning</span>
+          <span className="max-w-2xl truncate">{t("messages.reasoning")}</span>
         </AccordionTrigger>
         <AccordionContent
           className={cn(

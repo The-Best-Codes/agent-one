@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 
+import "@/lib/i18n";
 import ErrorBoundary from "@/components/error-boundary";
 import { ThemeRegistry } from "@/components/theme/theme-registry";
 import { TooltipProvider } from "@/components/ui/tooltip";

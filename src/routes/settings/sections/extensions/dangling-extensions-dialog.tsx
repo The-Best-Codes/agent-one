@@ -1,5 +1,6 @@
 import { IconTrash } from "@tabler/icons-react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ export function DanglingExtensionsDialog({
   onRemove,
   onRemoveAll,
 }: DanglingExtensionsDialogProps) {
+  const { t } = useTranslation();
   const danglingServers = useMemo(() => {
     return mcpServers.filter((server) => {
       const registryName = getRegistryNameFromServerId(server.id);
@@ -48,17 +50,13 @@ export function DanglingExtensionsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Dangling extensions</DialogTitle>
-          <DialogDescription>
-            These extensions were installed previously but no longer match anything in the registry,
-            usually because the extension was updated to a newer version. They may still be running
-            in the background.
-          </DialogDescription>
+          <DialogTitle>{t("extensions.danglingTitle")}</DialogTitle>
+          <DialogDescription>{t("extensions.danglingDescription")}</DialogDescription>
         </DialogHeader>
 
         {danglingServers.length === 0 ? (
           <div className="text-muted-foreground rounded-md border p-6 text-center text-sm">
-            No dangling extensions found.
+            {t("extensions.noDangling")}
           </div>
         ) : (
           <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto">
@@ -69,7 +67,7 @@ export function DanglingExtensionsDialog({
               >
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-sm font-medium">
-                    {server.name || "Unnamed extension"}
+                    {server.name || t("extensions.unnamed")}
                   </span>
                   <span className="text-muted-foreground truncate font-mono text-xs">
                     {server.id}
@@ -78,7 +76,7 @@ export function DanglingExtensionsDialog({
                 <Button
                   size="icon"
                   variant="outline"
-                  aria-label={`Remove ${server.name || server.id}`}
+                  aria-label={t("extensions.removeAria", { name: server.name || server.id })}
                   onClick={() => {
                     trackSettingsInteraction("extensions", "remove_dangling_extension");
                     onRemove(server.id);
@@ -93,7 +91,7 @@ export function DanglingExtensionsDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            {t("common.close")}
           </Button>
           {danglingServers.length > 0 && (
             <Button
@@ -105,7 +103,7 @@ export function DanglingExtensionsDialog({
                 onRemoveAll(danglingServers.map((s) => s.id));
               }}
             >
-              Remove all
+              {t("extensions.removeAll")}
             </Button>
           )}
         </DialogFooter>

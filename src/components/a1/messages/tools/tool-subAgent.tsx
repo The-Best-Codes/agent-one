@@ -9,6 +9,7 @@ import {
 import type { ToolUIPart } from "ai";
 import { useCallback } from "react";
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -47,6 +48,7 @@ function getDisplayedMessage(part: ToolUIPart) {
 }
 
 export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as SubAgentInput | undefined;
   const approvalHandler = useChatApprovalHandler();
@@ -59,7 +61,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
     () => getSubAgentLiveState(callId),
   );
 
-  const task = input?.task || "unknown task";
+  const task = input?.task || t("tools.unknownTask");
   const truncatedTask = task.length > 96 ? `${task.slice(0, 96)}...` : task;
   const displayedMessage = liveState?.message ?? getDisplayedMessage(part);
   const isStreaming =
@@ -77,27 +79,27 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
 
   const headerText = useMemo(() => {
     if (part.state === "output-denied") {
-      return "Subagent denied";
+      return t("tools.subagentDenied");
     }
     if (part.state === "output-error") {
       return part.errorText === TOOL_CANCELLED_BY_USER_SYMBOL
-        ? "Subagent cancelled"
-        : "Subagent error";
+        ? t("tools.subagentCancelled")
+        : t("tools.subagentError");
     }
     if (liveState?.status === "waiting-approval") {
-      return `Subagent waiting for ${pendingApprovals.length === 1 ? "approval" : "approvals"}`;
+      return t("tools.subagentWaiting", { count: pendingApprovals.length });
     }
     if (part.state === "approval-responded" && part.approval?.approved === false) {
-      return "Subagent denied";
+      return t("tools.subagentDenied");
     }
     if (isStreaming || part.state === "approval-responded" || part.state === "input-available") {
-      return "Subagent running";
+      return t("tools.subagentRunning");
     }
     if (part.state === "output-available") {
-      return "Subagent finished";
+      return t("tools.subagentFinished");
     }
-    return "Preparing subagent";
-  }, [isStreaming, liveState?.status, part, pendingApprovals.length]);
+    return t("tools.preparingSubagentShort");
+  }, [isStreaming, liveState?.status, part, pendingApprovals.length, t]);
 
   switch (part.state) {
     case "approval-requested":
@@ -106,7 +108,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconHierarchy3 className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to spawn a subagent
+              {t("tools.wantsToSpawnSubagent")}
             </span>
           </div>
           <div className="bg-secondary rounded px-2 py-1 text-xs wrap-break-word">{task}</div>
@@ -117,7 +119,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -125,7 +127,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -135,7 +137,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       return (
         <div className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">Subagent denied</span>
+          <span className="text-muted-foreground text-sm font-bold">
+            {t("tools.subagentDenied")}
+          </span>
         </div>
       );
 
@@ -143,7 +147,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       return (
         <div className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Preparing subagent...</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.preparingSubagent")}</span>
         </div>
       );
 
@@ -154,7 +158,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
         return (
           <div className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">Subagent denied</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.subagentDenied")}
+            </span>
           </div>
         );
       }
@@ -208,13 +214,13 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               {hasPendingApprovals && !isExpanded && (
                 <span className="border-border text-muted-foreground ml-2 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium">
                   <IconHourglassHigh className="size-3 shrink-0" />
-                  Approval needed
+                  {t("tools.approvalNeeded")}
                 </span>
               )}
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="flex flex-col gap-3">
-                <div className="text-muted-foreground text-xs">Task: {task}</div>
+                <div className="text-muted-foreground text-xs">{t("tools.task", { task })}</div>
                 {displayedMessage ? (
                   <ChatApprovalHandlerContext.Provider value={nestedApprovalHandler}>
                     <SubagentTranscript message={displayedMessage} />
@@ -232,7 +238,9 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
         return (
           <div className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">Subagent cancelled</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.subagentCancelled")}
+            </span>
           </div>
         );
       }
@@ -243,7 +251,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Subagent error"
+          title={t("tools.subagentError")}
         />
       );
 
@@ -251,7 +259,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       return (
         <div className="flex items-center gap-1">
           <IconHierarchy3 className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Subagent executed</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.subagentExecuted")}</span>
         </div>
       );
   }

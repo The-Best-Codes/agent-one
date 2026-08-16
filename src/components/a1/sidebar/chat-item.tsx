@@ -7,6 +7,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { memo, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -95,6 +96,7 @@ export const ChatItem = memo(
     onSelectionToggle,
     onEnterSelectionMode,
   }: ChatItemProps) => {
+    const { t } = useTranslation();
     const [showChangeTitleModal, setShowChangeTitleModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
@@ -209,7 +211,7 @@ export const ChatItem = memo(
                         }}
                       >
                         <IconEdit />
-                        Change Title
+                        {t("sidebar.changeTitle")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={(e) => {
@@ -223,7 +225,7 @@ export const ChatItem = memo(
                         }}
                       >
                         <IconDownload />
-                        Export Chat
+                        {t("sidebar.exportChat")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={(e) => {
@@ -238,7 +240,7 @@ export const ChatItem = memo(
                         variant="destructive"
                       >
                         <IconTrash />
-                        Delete Chat
+                        {t("sidebar.deleteChat")}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -249,7 +251,7 @@ export const ChatItem = memo(
                         }}
                       >
                         <IconCheckbox />
-                        Select Chat
+                        {t("sidebar.selectChat")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -268,7 +270,7 @@ export const ChatItem = memo(
               }}
             >
               <IconEdit />
-              Change Title
+              {t("sidebar.changeTitle")}
             </ContextMenuItem>
             <ContextMenuItem
               onClick={() => {
@@ -280,7 +282,7 @@ export const ChatItem = memo(
               }}
             >
               <IconDownload />
-              Export Chat
+              {t("sidebar.exportChat")}
             </ContextMenuItem>
             <ContextMenuItem
               variant="destructive"
@@ -293,7 +295,7 @@ export const ChatItem = memo(
               }}
             >
               <IconTrash />
-              Delete Chat
+              {t("sidebar.deleteChat")}
             </ContextMenuItem>
             <ContextMenuSeparator />
             <ContextMenuItem
@@ -302,7 +304,7 @@ export const ChatItem = memo(
               }}
             >
               <IconCheckbox />
-              Select Chat
+              {t("sidebar.selectChat")}
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>

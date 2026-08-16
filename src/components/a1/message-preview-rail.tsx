@@ -1,21 +1,26 @@
 import type { UIMessage } from "ai";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import i18n from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const getMessagePreview = (message: UIMessage) => {
   const text = message.parts
     .flatMap((part) => {
       if (part.type === "text" || part.type === "reasoning") return part.text;
-      if (part.type === "file") return part.filename ? `File: ${part.filename}` : "File attachment";
+      if (part.type === "file")
+        return part.filename
+          ? i18n.t("chat.previewFile", { filename: part.filename })
+          : i18n.t("chat.previewFileAttachment");
       return [];
     })
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
 
-  return text || "Message with tools or attachments";
+  return text || i18n.t("chat.messageWithTools");
 };
 
 export function MessagePreviewRail({
@@ -27,6 +32,7 @@ export function MessagePreviewRail({
   onMessageSelect: (index: number) => void;
   getScrollElement: () => HTMLElement | null;
 }) {
+  const { t } = useTranslation();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [visibleIndexes, setVisibleIndexes] = useState<Set<number>>(new Set());
@@ -90,7 +96,7 @@ export function MessagePreviewRail({
   return (
     <div className="pointer-events-none fixed top-1/2 right-0 z-20 hidden w-12 -translate-y-1/2 items-center md:flex">
       <nav
-        aria-label="Chat message navigation"
+        aria-label={t("chat.messageNav")}
         onPointerLeave={() => setHoveredIndex(null)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) setFocusedIndex(null);
@@ -110,7 +116,11 @@ export function MessagePreviewRail({
             <button
               key={message.id}
               type="button"
-              aria-label={`Scroll to ${message.role === "user" ? "your" : "assistant"} message ${index + 1}`}
+              aria-label={
+                message.role === "user"
+                  ? t("chat.scrollToYourMessage", { index: index + 1 })
+                  : t("chat.scrollToAssistantMessage", { index: index + 1 })
+              }
               onPointerEnter={(event) => {
                 if (event.pointerType !== "touch") setHoveredIndex(index);
               }}
@@ -141,7 +151,9 @@ export function MessagePreviewRail({
           >
             <Card key={displayedMessage.id}>
               <CardHeader>
-                <CardTitle>{displayedMessage.role === "user" ? "You" : "AgentOne"}</CardTitle>
+                <CardTitle>
+                  {displayedMessage.role === "user" ? t("chat.roleYou") : t("chat.roleAssistant")}
+                </CardTitle>
                 <CardDescription className="line-clamp-4 leading-6">
                   {getMessagePreview(displayedMessage)}
                 </CardDescription>

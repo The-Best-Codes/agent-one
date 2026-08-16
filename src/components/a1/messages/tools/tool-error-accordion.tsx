@@ -1,4 +1,5 @@
 import { IconChevronDown, IconCircleX } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
 import {
   Accordion,
@@ -23,6 +24,7 @@ export function ToolErrorAccordion({
   onOpenChange,
   title,
 }: ToolErrorAccordionProps) {
+  const { t } = useTranslation();
   return (
     <Accordion
       type="single"
@@ -62,7 +64,7 @@ export function ToolErrorAccordion({
         </AccordionTrigger>
         <AccordionContent className="p-0 pt-2">
           <div className="text-destructive/80 text-sm font-normal">
-            {errorText || "Unknown error"}
+            {errorText || t("messages.unknownError")}
           </div>
         </AccordionContent>
       </AccordionItem>

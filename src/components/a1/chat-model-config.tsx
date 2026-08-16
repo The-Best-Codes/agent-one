@@ -1,6 +1,7 @@
 import { IconAdjustments, IconInfoCircle, IconRestore } from "@tabler/icons-react";
 import debounce from "lodash.debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   AdaptivePopover,
@@ -36,26 +37,26 @@ interface SliderConfigProps {
   onChange: (value: number | undefined) => void;
 }
 
-const TOOL_BEHAVIORS: { value: ToolBehavior; label: string; description: string }[] = [
+const TOOL_BEHAVIORS: { value: ToolBehavior; labelKey: string; descriptionKey: string }[] = [
   {
     value: "default",
-    label: "Default",
-    description: "Use enabled tools and ask for approval only when each tool requires it.",
+    labelKey: "chat.toolBehaviorDefault",
+    descriptionKey: "chat.toolBehaviorDefaultDescription",
   },
   {
     value: "ask",
-    label: "Ask",
-    description: "Ask for your approval before running every tool.",
+    labelKey: "chat.toolBehaviorAsk",
+    descriptionKey: "chat.toolBehaviorAskDescription",
   },
   {
     value: "yolo",
-    label: "YOLO",
-    description: "Run tools without asking for approval. Use with caution.",
+    labelKey: "chat.toolBehaviorYolo",
+    descriptionKey: "chat.toolBehaviorYoloDescription",
   },
   {
     value: "disable",
-    label: "Disable",
-    description: "Do not make any tools available to the model.",
+    labelKey: "chat.toolBehaviorDisable",
+    descriptionKey: "chat.toolBehaviorDisableDescription",
   },
 ];
 
@@ -69,6 +70,7 @@ const SliderConfig = ({
   step,
   onChange,
 }: SliderConfigProps) => {
+  const { t } = useTranslation();
   const isUnset = value === undefined;
   const midpoint = (min + max) / 2;
   const [draggingValue, setDraggingValue] = useState<number | null>(null);
@@ -108,7 +110,7 @@ const SliderConfig = ({
         </div>
         <div className="flex items-center gap-1">
           <span className={cn("text-sm", isUnset ? "text-muted-foreground" : "text-foreground")}>
-            {isUnset ? "Default" : displayValue}
+            {isUnset ? t("common.default") : displayValue}
           </span>
           {!isUnset && (
             <Button
@@ -116,8 +118,8 @@ const SliderConfig = ({
               size="icon-xs"
               className="size-5"
               onClick={handleClear}
-              title={`Reset ${label} config`}
-              aria-label={`Reset ${label} config`}
+              title={t("chat.resetLabelConfig", { label })}
+              aria-label={t("chat.resetLabelConfig", { label })}
             >
               <IconRestore data-icon="inline-start" />
             </Button>
@@ -131,7 +133,7 @@ const SliderConfig = ({
           className="h-6 w-fit px-2 text-xs"
           onClick={handleSetCustomValue}
         >
-          Set custom value
+          {t("chat.setCustomValue")}
         </Button>
       ) : (
         <Slider
@@ -155,6 +157,7 @@ export const ChatModelConfig = ({
   disabled?: boolean;
   triggerClassName?: string;
 }) => {
+  const { t } = useTranslation();
   const { currentModelConfig, setModelConfig } = useModel();
   const [open, setOpen] = useState(false);
   const effectiveOpen = disabled ? false : open;
@@ -254,7 +257,7 @@ export const ChatModelConfig = ({
   const content = (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Model Config</h3>
+        <h3 className="text-lg font-semibold">{t("chat.modelConfig")}</h3>
         <Button
           variant="ghost"
           size="icon"
@@ -263,19 +266,19 @@ export const ChatModelConfig = ({
           disabled={isAtDefaults}
         >
           <IconRestore data-icon="inline-start" />
-          <span className="sr-only">Reset all</span>
+          <span className="sr-only">{t("chat.resetAll")}</span>
         </Button>
       </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label>Tool Behavior</Label>
+          <Label>{t("chat.toolBehavior")}</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              Choose whether tools are available and when they need your approval.
+              {t("chat.toolBehaviorTooltip")}
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
@@ -293,10 +296,10 @@ export const ChatModelConfig = ({
               <TabsTrigger key={behavior.value} value={behavior.value}>
                 <AdaptiveTooltip>
                   <AdaptiveTooltipTrigger asChild>
-                    <span>{behavior.label}</span>
+                    <span>{t(behavior.labelKey)}</span>
                   </AdaptiveTooltipTrigger>
                   <AdaptiveTooltipContent className="max-w-xs">
-                    {behavior.description}
+                    {t(behavior.descriptionKey)}
                   </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               </TabsTrigger>
@@ -307,8 +310,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="temperature"
-        label="Temperature"
-        tooltip="Controls randomness in responses. Higher values (1.0-2.0) make output more creative and random, while lower values (0.0-1.0) make it more focused and deterministic."
+        label={t("chat.temperature")}
+        tooltip={t("chat.temperatureTooltip")}
         value={currentModelConfig.temperature}
         min={0}
         max={2}
@@ -318,8 +321,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="topP"
-        label="Top P"
-        tooltip="Nucleus sampling. Controls diversity by limiting token selection to a cumulative probability. Lower values (e.g., 0.1) make output more focused, higher values (e.g., 0.9) allow more variety. It's recommended to set either temperature or topP, but not both."
+        label={t("chat.topP")}
+        tooltip={t("chat.topPTooltip")}
         value={currentModelConfig.topP}
         min={0}
         max={1}
@@ -329,22 +332,20 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="topK">Top K</Label>
+          <Label htmlFor="topK">{t("chat.topK")}</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              Only sample from the top K options for each subsequent token. Used to remove "long
-              tail" low probability responses. Recommended for advanced use cases only. Leave empty
-              to use model default.
+              {t("chat.topKTooltip")}
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="topK"
           type="number"
-          placeholder="Default"
+          placeholder={t("common.default")}
           min={1}
           value={localInputs.topK ?? ""}
           onChange={handleTopKChange}
@@ -353,8 +354,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="frequencyPenalty"
-        label="Frequency Penalty"
-        tooltip="Reduces the likelihood of the model repeatedly using the same words or phrases. Higher values (up to 2.0) discourage repetition more strongly."
+        label={t("chat.frequencyPenalty")}
+        tooltip={t("chat.frequencyPenaltyTooltip")}
         value={currentModelConfig.frequencyPenalty}
         min={0}
         max={2}
@@ -364,8 +365,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="presencePenalty"
-        label="Presence Penalty"
-        tooltip="Reduces the likelihood of the model repeating information already in the prompt. Higher values (up to 2.0) encourage the model to introduce new topics."
+        label={t("chat.presencePenalty")}
+        tooltip={t("chat.presencePenaltyTooltip")}
         value={currentModelConfig.presencePenalty}
         min={0}
         max={2}
@@ -375,20 +376,20 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="maxSteps">Max Steps</Label>
+          <Label htmlFor="maxSteps">{t("chat.maxSteps")}</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              Maximum number of reasoning/tool steps in one response. Leave empty for no step limit.
+              {t("chat.maxStepsTooltip")}
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="maxSteps"
           type="number"
-          placeholder="Default"
+          placeholder={t("common.default")}
           min={0}
           max={1000}
           value={localInputs.maxSteps ?? ""}
@@ -399,21 +400,20 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="maxTokens">Max Tokens</Label>
+          <Label htmlFor="maxTokens">{t("chat.maxTokens")}</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              Maximum number of tokens (words/sub-words) in the model response. Leave empty to use
-              the model's default limit.
+              {t("chat.maxTokensTooltip")}
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="maxTokens"
           type="number"
-          placeholder="Default"
+          placeholder={t("common.default")}
           value={localInputs.maxTokens ?? ""}
           onChange={handleMaxTokensChange}
         />
@@ -421,21 +421,20 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="seed">Seed</Label>
+          <Label htmlFor="seed">{t("chat.seed")}</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              Integer seed for random sampling. If set and supported by the model, calls will
-              generate deterministic results. Leave empty for random behavior.
+              {t("chat.seedTooltip")}
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="seed"
           type="number"
-          placeholder="Default"
+          placeholder={t("common.default")}
           value={localInputs.seed ?? ""}
           onChange={handleSeedChange}
         />
@@ -447,14 +446,14 @@ export const ChatModelConfig = ({
     <Button
       variant="outline"
       size="icon"
-      aria-label="Model configuration"
+      aria-label={t("chat.modelConfiguration")}
       className={cn("relative", triggerClassName)}
       disabled={disabled}
     >
       <IconAdjustments data-icon="inline-start" />
       {!isAtDefaults && (
         <span
-          title="Model config has been modified"
+          title={t("chat.modelConfigModified")}
           className="bg-primary absolute -top-0.5 -right-0.5 flex size-2 rounded-full"
         ></span>
       )}
@@ -465,7 +464,7 @@ export const ChatModelConfig = ({
     <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
       <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
       <AdaptivePopoverContent
-        title="Model Configuration"
+        title={t("chat.modelConfigTitle")}
         className="max-h-80 w-64 overflow-auto p-4"
       >
         {content}

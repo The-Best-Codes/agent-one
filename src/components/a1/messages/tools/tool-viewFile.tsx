@@ -4,6 +4,7 @@ import { IconChevronDown, IconCircleCheck, IconCircleX, IconEye, IconX } from "@
 import CodeMirror from "@uiw/react-codemirror";
 import type { ToolUIPart } from "ai";
 import { memo, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -70,6 +71,7 @@ const ContentPreview = memo(({ content, filePath }: { content: string; filePath:
 ContentPreview.displayName = "ContentPreview";
 
 export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
+  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as ViewFileInput;
   const output = part.output as ViewFileOutput;
@@ -77,7 +79,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || "unknown file";
+  const filePath = input?.filePath || t("tools.unknownFile");
 
   switch (part.state) {
     case "approval-requested":
@@ -89,7 +91,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconEye className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              AgentOne wants to view <span className="font-mono text-xs">{filePath}</span>
+              {t("tools.wantsToView")} <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -99,7 +101,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              Deny
+              {t("common.deny")}
             </Button>
             <Button
               size="sm"
@@ -107,7 +109,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              Approve
+              {t("common.approve")}
             </Button>
           </div>
         </div>
@@ -118,7 +120,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            File view denied ({filePath})
+            {t("tools.fileViewDenied", { path: filePath })}
           </span>
         </div>
       );
@@ -127,7 +129,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">Preparing to view file...</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.preparingViewFile")}</span>
         </div>
       );
 
@@ -138,7 +140,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              File view denied ({filePath})
+              {t("tools.fileViewDenied", { path: filePath })}
             </span>
           </div>
         );
@@ -149,9 +151,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">
-            Reading <span className="font-mono text-xs">{filePath}</span>...
-          </span>
+          <span className="max-w-2xl truncate">{t("tools.readingFile", { path: filePath })}</span>
         </div>
       );
     }
@@ -159,9 +159,9 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
     case "output-available": {
       const lineInfo =
         output.truncated && output.startLine != null && output.endLine != null
-          ? ` (${output.startLine}-${output.endLine} of ${output.totalLines} lines)`
+          ? ` ${t("tools.lineRangeOf", { start: output.startLine, end: output.endLine, total: output.totalLines })}`
           : output.totalLines != null
-            ? ` (${output.totalLines} lines)`
+            ? ` ${t("tools.totalLines", { total: output.totalLines })}`
             : "";
 
       return (
@@ -200,7 +200,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                Viewed <span className="font-mono text-xs">{filePath}</span>
+                {t("tools.viewedFile", { path: filePath })}
                 {lineInfo}
               </span>
             </AccordionTrigger>
@@ -212,12 +212,12 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
                   </div>
                   {output.truncated && (
                     <div className="text-muted-foreground text-xs">
-                      Content truncated ({output.totalChars} total chars)
+                      {t("tools.contentTruncated", { total: output.totalChars })}
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-muted-foreground text-xs">File viewed successfully.</div>
+                <div className="text-muted-foreground text-xs">{t("tools.fileViewedSuccess")}</div>
               )}
             </AccordionContent>
           </AccordionItem>
@@ -230,7 +230,9 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">File view cancelled</span>
+            <span className="text-muted-foreground text-sm font-bold">
+              {t("tools.fileViewCancelled")}
+            </span>
           </div>
         );
       }
@@ -240,7 +242,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title="Error viewing file"
+          title={t("tools.viewFileError")}
         />
       );
 
@@ -248,7 +250,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconEye className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">File viewed</span>
+          <span className="text-foreground text-sm font-bold">{t("tools.fileViewed")}</span>
         </div>
       );
   }

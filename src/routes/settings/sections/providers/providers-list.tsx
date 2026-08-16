@@ -1,6 +1,7 @@
 import { IconPlugConnected } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { SecretInput } from "@/components/a1/input/secret-input";
 import { SearchInput } from "@/components/a1/search-input";
@@ -56,6 +57,7 @@ import {
 } from "./provider-list-item";
 
 export function ProvidersList() {
+  const { t } = useTranslation();
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
@@ -163,15 +165,12 @@ export function ProvidersList() {
       <SettingsTarget id="setting-built-in-providers">
         <Card size="sm">
           <CardHeader>
-            <CardTitle>Built-in Providers</CardTitle>
-            <CardDescription>
-              Enable built-in providers, set keys and headers, and override model metadata when
-              needed.
-            </CardDescription>
+            <CardTitle>{t("providers.builtInProviders")}</CardTitle>
+            <CardDescription>{t("providers.builtInProvidersDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <SearchInput
-              placeholder="Search built-in providers..."
+              placeholder={t("providers.searchBuiltIn")}
               value={builtInSearchQuery}
               onChange={(event) => {
                 trackSettingsInteraction("providers", "built_in_search_changed", {
@@ -201,7 +200,7 @@ export function ProvidersList() {
               </Accordion>
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
-                No built-in providers found.
+                {t("providers.noBuiltInFound")}
               </p>
             )}
           </CardContent>
@@ -211,14 +210,12 @@ export function ProvidersList() {
       <SettingsTarget id="setting-local-providers">
         <Card size="sm">
           <CardHeader>
-            <CardTitle>Local Providers</CardTitle>
-            <CardDescription>
-              Configure built-in local providers that can automatically discover models on startup.
-            </CardDescription>
+            <CardTitle>{t("providers.localProviders")}</CardTitle>
+            <CardDescription>{t("providers.localProvidersDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <SearchInput
-              placeholder="Search local providers..."
+              placeholder={t("providers.searchLocal")}
               value={localSearchQuery}
               onChange={(event) => {
                 trackSettingsInteraction("providers", "local_search_changed", {
@@ -246,7 +243,7 @@ export function ProvidersList() {
               </Accordion>
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
-                No local providers found.
+                {t("providers.noLocalFound")}
               </p>
             )}
           </CardContent>
@@ -256,15 +253,13 @@ export function ProvidersList() {
       <SettingsTarget id="setting-custom-providers">
         <Card size="sm">
           <CardHeader>
-            <CardTitle>Custom Providers</CardTitle>
-            <CardDescription>
-              Add OpenAI-compatible providers and configure exactly which models they expose.
-            </CardDescription>
+            <CardTitle>{t("providers.customProviders")}</CardTitle>
+            <CardDescription>{t("providers.customProvidersDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex gap-2">
               <SearchInput
-                placeholder="Search custom providers..."
+                placeholder={t("providers.searchCustom")}
                 value={customSearchQuery}
                 onChange={(event) => {
                   trackSettingsInteraction("providers", "custom_search_changed", {
@@ -283,10 +278,8 @@ export function ProvidersList() {
                   <EmptyMedia variant="icon">
                     <IconPlugConnected />
                   </EmptyMedia>
-                  <EmptyTitle>No custom providers yet</EmptyTitle>
-                  <EmptyDescription>
-                    Add an OpenAI-compatible provider, then configure its models and metadata here.
-                  </EmptyDescription>
+                  <EmptyTitle>{t("providers.noCustomProviders")}</EmptyTitle>
+                  <EmptyDescription>{t("providers.noCustomProvidersDescription")}</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <AddProviderDropdown onAddProvider={handleAddProvider} />
@@ -311,7 +304,7 @@ export function ProvidersList() {
               </Accordion>
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
-                No custom providers found.
+                {t("providers.noCustomFound")}
               </p>
             )}
           </CardContent>
@@ -321,15 +314,13 @@ export function ProvidersList() {
       <SettingsTarget id="setting-tts-providers">
         <Card size="sm">
           <CardHeader>
-            <CardTitle>Text-to-Speech Providers</CardTitle>
-            <CardDescription>
-              Choose which voice service reads assistant replies out loud and adjust how it sounds.
-            </CardDescription>
+            <CardTitle>{t("tts.providersTitle")}</CardTitle>
+            <CardDescription>{t("tts.providersDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="tts-provider">Provider</FieldLabel>
+                <FieldLabel htmlFor="tts-provider">{t("tts.provider")}</FieldLabel>
                 <Select
                   value={ttsSettings.provider}
                   onValueChange={(value) => {
@@ -341,7 +332,7 @@ export function ProvidersList() {
                   }}
                 >
                   <SelectTrigger id="tts-provider" className="w-full md:max-w-96">
-                    <SelectValue placeholder="Choose a voice provider" />
+                    <SelectValue placeholder={t("providers.chooseVoiceProvider")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -353,13 +344,11 @@ export function ProvidersList() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-                <FieldDescription>
-                  Pick the service you want to use when you tap the speaker button.
-                </FieldDescription>
+                <FieldDescription>{t("tts.pickService")}</FieldDescription>
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="tts-model">Voice Model</FieldLabel>
+                <FieldLabel htmlFor="tts-model">{t("tts.voiceModel")}</FieldLabel>
                 <Select
                   value={selectedTtsModel}
                   onValueChange={(model) => {
@@ -390,7 +379,7 @@ export function ProvidersList() {
                   disabled={!selectedTtsProvider}
                 >
                   <SelectTrigger id="tts-model" className="w-full md:max-w-96">
-                    <SelectValue placeholder="Choose a voice model" />
+                    <SelectValue placeholder={t("providers.chooseVoiceModel")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
@@ -406,12 +395,12 @@ export function ProvidersList() {
 
               {ttsSettings.provider === "openai" ? (
                 <Field>
-                  <FieldLabel htmlFor="tts-openai-api-key">API Key</FieldLabel>
+                  <FieldLabel htmlFor="tts-openai-api-key">{t("providers.apiKey")}</FieldLabel>
                   <SecretInput
                     id="tts-openai-api-key"
                     value={openAiTtsApiKey}
                     onChange={setOpenAiTtsApiKey}
-                    placeholder="Enter your OpenAI API key"
+                    placeholder={t("providers.enterOpenaiKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -419,12 +408,12 @@ export function ProvidersList() {
 
               {ttsSettings.provider === "elevenlabs" ? (
                 <Field>
-                  <FieldLabel htmlFor="tts-elevenlabs-api-key">API Key</FieldLabel>
+                  <FieldLabel htmlFor="tts-elevenlabs-api-key">{t("providers.apiKey")}</FieldLabel>
                   <SecretInput
                     id="tts-elevenlabs-api-key"
                     value={elevenLabsTtsApiKey}
                     onChange={setElevenLabsTtsApiKey}
-                    placeholder="Enter your ElevenLabs API key"
+                    placeholder={t("providers.enterElevenLabsKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -432,12 +421,12 @@ export function ProvidersList() {
 
               {ttsSettings.provider === "lmnt" ? (
                 <Field>
-                  <FieldLabel htmlFor="tts-lmnt-api-key">API Key</FieldLabel>
+                  <FieldLabel htmlFor="tts-lmnt-api-key">{t("providers.apiKey")}</FieldLabel>
                   <SecretInput
                     id="tts-lmnt-api-key"
                     value={lmntTtsApiKey}
                     onChange={setLmntTtsApiKey}
-                    placeholder="Enter your LMNT API key"
+                    placeholder={t("providers.enterLmntKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -445,12 +434,12 @@ export function ProvidersList() {
 
               {ttsSettings.provider === "hume" ? (
                 <Field>
-                  <FieldLabel htmlFor="tts-hume-api-key">API Key</FieldLabel>
+                  <FieldLabel htmlFor="tts-hume-api-key">{t("providers.apiKey")}</FieldLabel>
                   <SecretInput
                     id="tts-hume-api-key"
                     value={humeTtsApiKey}
                     onChange={setHumeTtsApiKey}
-                    placeholder="Enter your Hume API key"
+                    placeholder={t("providers.enterHumeKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -458,12 +447,12 @@ export function ProvidersList() {
 
               {ttsSettings.provider === "google" ? (
                 <Field>
-                  <FieldLabel htmlFor="tts-google-api-key">API Key</FieldLabel>
+                  <FieldLabel htmlFor="tts-google-api-key">{t("providers.apiKey")}</FieldLabel>
                   <SecretInput
                     id="tts-google-api-key"
                     value={googleTtsApiKey}
                     onChange={setGoogleTtsApiKey}
-                    placeholder="Enter your Google Generative AI API key"
+                    placeholder={t("providers.enterGoogleKey")}
                     showSaveCancel
                   />
                 </Field>
@@ -472,7 +461,7 @@ export function ProvidersList() {
               {ttsSettings.provider === "openai" ? (
                 <>
                   <Field>
-                    <FieldLabel htmlFor="tts-openai-voice">Voice</FieldLabel>
+                    <FieldLabel htmlFor="tts-openai-voice">{t("tts.voice")}</FieldLabel>
                     <Select
                       value={ttsSettings.openai.voice}
                       onValueChange={(voice) =>
@@ -482,7 +471,7 @@ export function ProvidersList() {
                       }
                     >
                       <SelectTrigger id="tts-openai-voice" className="w-full md:max-w-96">
-                        <SelectValue placeholder="Choose a voice" />
+                        <SelectValue placeholder={t("providers.chooseVoice")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -498,7 +487,7 @@ export function ProvidersList() {
                     </Select>
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="tts-openai-speed">Speech Rate</FieldLabel>
+                    <FieldLabel htmlFor="tts-openai-speed">{t("tts.speechRate")}</FieldLabel>
                     <Input
                       id="tts-openai-speed"
                       type="number"
@@ -517,7 +506,9 @@ export function ProvidersList() {
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="tts-openai-instructions">How It Should Sound</FieldLabel>
+                    <FieldLabel htmlFor="tts-openai-instructions">
+                      {t("tts.howItShouldSound")}
+                    </FieldLabel>
                     <Textarea
                       id="tts-openai-instructions"
                       value={ttsSettings.openai.instructions}
@@ -526,7 +517,7 @@ export function ProvidersList() {
                           openai: { ...ttsSettings.openai, instructions: event.target.value },
                         })
                       }
-                      placeholder="Optional, for example: warm, calm, and conversational"
+                      placeholder={t("providers.voiceInstructionsPlaceholder")}
                     />
                   </Field>
                 </>
@@ -535,7 +526,7 @@ export function ProvidersList() {
               {ttsSettings.provider === "elevenlabs" ? (
                 <>
                   <Field>
-                    <FieldLabel htmlFor="tts-elevenlabs-voice">Voice ID</FieldLabel>
+                    <FieldLabel htmlFor="tts-elevenlabs-voice">{t("tts.voiceId")}</FieldLabel>
                     <Input
                       id="tts-elevenlabs-voice"
                       value={ttsSettings.elevenlabs.voice}
@@ -544,12 +535,12 @@ export function ProvidersList() {
                           elevenlabs: { ...ttsSettings.elevenlabs, voice: event.target.value },
                         })
                       }
-                      placeholder="Paste a voice ID from ElevenLabs"
+                      placeholder={t("providers.pasteElevenLabsVoiceId")}
                     />
                   </Field>
                   <div className="grid gap-4 md:grid-cols-2">
                     <Field>
-                      <FieldLabel htmlFor="tts-elevenlabs-speed">Speech Rate</FieldLabel>
+                      <FieldLabel htmlFor="tts-elevenlabs-speed">{t("tts.speechRate")}</FieldLabel>
                       <Input
                         id="tts-elevenlabs-speed"
                         type="number"
@@ -568,7 +559,9 @@ export function ProvidersList() {
                       />
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor="tts-elevenlabs-language">Language Code</FieldLabel>
+                      <FieldLabel htmlFor="tts-elevenlabs-language">
+                        {t("tts.languageCode")}
+                      </FieldLabel>
                       <Input
                         id="tts-elevenlabs-language"
                         value={ttsSettings.elevenlabs.languageCode}
@@ -580,11 +573,13 @@ export function ProvidersList() {
                             },
                           })
                         }
-                        placeholder="Optional, for example: en"
+                        placeholder={t("providers.languagePlaceholder")}
                       />
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor="tts-elevenlabs-stability">Stability</FieldLabel>
+                      <FieldLabel htmlFor="tts-elevenlabs-stability">
+                        {t("tts.stability")}
+                      </FieldLabel>
                       <Input
                         id="tts-elevenlabs-stability"
                         type="number"
@@ -603,7 +598,9 @@ export function ProvidersList() {
                       />
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor="tts-elevenlabs-similarity">Voice Match</FieldLabel>
+                      <FieldLabel htmlFor="tts-elevenlabs-similarity">
+                        {t("tts.voiceMatch")}
+                      </FieldLabel>
                       <Input
                         id="tts-elevenlabs-similarity"
                         type="number"
@@ -622,7 +619,9 @@ export function ProvidersList() {
                       />
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor="tts-elevenlabs-style">Style Strength</FieldLabel>
+                      <FieldLabel htmlFor="tts-elevenlabs-style">
+                        {t("tts.styleStrength")}
+                      </FieldLabel>
                       <Input
                         id="tts-elevenlabs-style"
                         type="number"
@@ -641,7 +640,9 @@ export function ProvidersList() {
                       />
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor="tts-elevenlabs-normalization">Text Cleanup</FieldLabel>
+                      <FieldLabel htmlFor="tts-elevenlabs-normalization">
+                        {t("tts.textCleanup")}
+                      </FieldLabel>
                       <Select
                         value={ttsSettings.elevenlabs.applyTextNormalization}
                         onValueChange={(value) =>
@@ -658,9 +659,9 @@ export function ProvidersList() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectGroup>
-                            <SelectItem value="auto">Auto</SelectItem>
-                            <SelectItem value="on">On</SelectItem>
-                            <SelectItem value="off">Off</SelectItem>
+                            <SelectItem value="auto">{t("tts.auto")}</SelectItem>
+                            <SelectItem value="on">{t("tts.on")}</SelectItem>
+                            <SelectItem value="off">{t("common.off")}</SelectItem>
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -668,7 +669,7 @@ export function ProvidersList() {
                   </div>
                   <Field orientation="horizontal">
                     <FieldLabel htmlFor="tts-elevenlabs-speaker-boost">
-                      Boost Voice Match
+                      {t("tts.boostVoiceMatch")}
                     </FieldLabel>
                     <Switch
                       id="tts-elevenlabs-speaker-boost"
@@ -686,7 +687,7 @@ export function ProvidersList() {
               {ttsSettings.provider === "lmnt" ? (
                 <>
                   <Field>
-                    <FieldLabel htmlFor="tts-lmnt-voice">Voice</FieldLabel>
+                    <FieldLabel htmlFor="tts-lmnt-voice">{t("tts.voice")}</FieldLabel>
                     <Input
                       id="tts-lmnt-voice"
                       value={ttsSettings.lmnt.voice}
@@ -695,12 +696,12 @@ export function ProvidersList() {
                           lmnt: { ...ttsSettings.lmnt, voice: event.target.value },
                         })
                       }
-                      placeholder="e.g. ava"
+                      placeholder={t("tts.voiceExampleAva")}
                     />
                   </Field>
                   <div className="grid gap-4 md:grid-cols-2">
                     <Field>
-                      <FieldLabel htmlFor="tts-lmnt-language">Language Code</FieldLabel>
+                      <FieldLabel htmlFor="tts-lmnt-language">{t("tts.languageCode")}</FieldLabel>
                       <Input
                         id="tts-lmnt-language"
                         value={ttsSettings.lmnt.language}
@@ -709,11 +710,11 @@ export function ProvidersList() {
                             lmnt: { ...ttsSettings.lmnt, language: event.target.value },
                           })
                         }
-                        placeholder="e.g. en"
+                        placeholder={t("tts.languageExampleEn")}
                       />
                     </Field>
                     <Field>
-                      <FieldLabel htmlFor="tts-lmnt-speed">Speech Rate</FieldLabel>
+                      <FieldLabel htmlFor="tts-lmnt-speed">{t("tts.speechRate")}</FieldLabel>
                       <Input
                         id="tts-lmnt-speed"
                         type="number"
@@ -733,7 +734,9 @@ export function ProvidersList() {
                     </Field>
                   </div>
                   <Field orientation="horizontal">
-                    <FieldLabel htmlFor="tts-lmnt-conversational">Conversational Voice</FieldLabel>
+                    <FieldLabel htmlFor="tts-lmnt-conversational">
+                      {t("tts.conversationalVoice")}
+                    </FieldLabel>
                     <Switch
                       id="tts-lmnt-conversational"
                       checked={ttsSettings.lmnt.conversational}
@@ -750,7 +753,7 @@ export function ProvidersList() {
               {ttsSettings.provider === "hume" ? (
                 <>
                   <Field>
-                    <FieldLabel htmlFor="tts-hume-voice">Voice ID</FieldLabel>
+                    <FieldLabel htmlFor="tts-hume-voice">{t("tts.voiceId")}</FieldLabel>
                     <Input
                       id="tts-hume-voice"
                       value={ttsSettings.hume.voice}
@@ -762,7 +765,7 @@ export function ProvidersList() {
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="tts-hume-speed">Speech Rate</FieldLabel>
+                    <FieldLabel htmlFor="tts-hume-speed">{t("tts.speechRate")}</FieldLabel>
                     <Input
                       id="tts-hume-speed"
                       type="number"
@@ -779,7 +782,9 @@ export function ProvidersList() {
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="tts-hume-instructions">How It Should Sound</FieldLabel>
+                    <FieldLabel htmlFor="tts-hume-instructions">
+                      {t("tts.howItShouldSound")}
+                    </FieldLabel>
                     <Textarea
                       id="tts-hume-instructions"
                       value={ttsSettings.hume.instructions}
@@ -788,7 +793,7 @@ export function ProvidersList() {
                           hume: { ...ttsSettings.hume, instructions: event.target.value },
                         })
                       }
-                      placeholder="Optional, for example: upbeat and friendly"
+                      placeholder={t("providers.voiceInstructionsUpbeat")}
                     />
                   </Field>
                 </>
@@ -797,7 +802,7 @@ export function ProvidersList() {
               {ttsSettings.provider === "google" ? (
                 <>
                   <Field>
-                    <FieldLabel htmlFor="tts-google-voice">Voice</FieldLabel>
+                    <FieldLabel htmlFor="tts-google-voice">{t("tts.voice")}</FieldLabel>
                     <Select
                       value={ttsSettings.google.voice}
                       onValueChange={(voice) =>
@@ -807,7 +812,7 @@ export function ProvidersList() {
                       }
                     >
                       <SelectTrigger id="tts-google-voice" className="w-full md:max-w-96">
-                        <SelectValue placeholder="Choose a voice" />
+                        <SelectValue placeholder={t("providers.chooseVoice")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
@@ -823,7 +828,7 @@ export function ProvidersList() {
                     </Select>
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="tts-google-speed">Speech Rate</FieldLabel>
+                    <FieldLabel htmlFor="tts-google-speed">{t("tts.speechRate")}</FieldLabel>
                     <Input
                       id="tts-google-speed"
                       type="number"
@@ -842,7 +847,9 @@ export function ProvidersList() {
                     />
                   </Field>
                   <Field>
-                    <FieldLabel htmlFor="tts-google-instructions">How It Should Sound</FieldLabel>
+                    <FieldLabel htmlFor="tts-google-instructions">
+                      {t("tts.howItShouldSound")}
+                    </FieldLabel>
                     <Textarea
                       id="tts-google-instructions"
                       value={ttsSettings.google.instructions}
@@ -851,7 +858,7 @@ export function ProvidersList() {
                           google: { ...ttsSettings.google, instructions: event.target.value },
                         })
                       }
-                      placeholder="Optional, for example: warm, calm, and conversational"
+                      placeholder={t("providers.voiceInstructionsPlaceholder")}
                     />
                   </Field>
                 </>

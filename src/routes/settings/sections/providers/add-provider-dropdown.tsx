@@ -1,5 +1,6 @@
 import { IconChevronDown, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ interface AddProviderDropdownProps {
 }
 
 export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps) {
+  const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -32,7 +34,7 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
               params: { section: "providers", control: "add_provider_menu_opened" },
             }}
           >
-            Add Provider
+            {t("providers.addProvider")}
             <IconChevronDown data-icon="inline-end" />
           </Button>
         </DropdownMenuTrigger>
@@ -45,7 +47,7 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
               }}
             >
               <IconPlus data-icon="inline-start" />
-              OpenAI Compatible
+              {t("providers.openaiCompatible")}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

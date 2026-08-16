@@ -1,5 +1,6 @@
 import { IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 
 import {
   Accordion,
@@ -59,6 +60,7 @@ function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
 }
 
 export function BuiltInExtensionsConfig() {
+  const { t } = useTranslation();
   const [enabledTools, setEnabledTools] = useAtom(enabledToolsAtom);
   const [toolConfigs, setToolConfigs] = useAtom(toolConfigsAtom);
   const mergedEnabledTools = { ...DEFAULT_SETTINGS.ENABLED_TOOLS, ...enabledTools };
@@ -100,9 +102,9 @@ export function BuiltInExtensionsConfig() {
       <SettingsTarget id="setting-built-in-tools">
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-1 flex-col items-start">
-            <Label className="text-sm font-medium">Built-in tools</Label>
+            <Label className="text-sm font-medium">{t("extensions.builtInTools")}</Label>
             <p className="text-muted-foreground mt-1 text-sm">
-              Choose which built-in tools are available and how they behave.
+              {t("extensions.builtInToolsDescription")}
             </p>
           </div>
           <Button
@@ -110,7 +112,7 @@ export function BuiltInExtensionsConfig() {
             size="icon"
             onClick={handleResetToolConfigs}
             disabled={isToolConfigsDefault}
-            aria-label="Reset to default"
+            aria-label={t("common.resetToDefault")}
           >
             <IconRestore data-icon="inline-start" />
           </Button>
@@ -125,13 +127,13 @@ export function BuiltInExtensionsConfig() {
                 id={`enabled-${toolId}`}
                 checked={mergedEnabledTools[toolId]}
                 onCheckedChange={(checked) => updateToolEnabled(toolId, checked as boolean)}
-                aria-label={`Enable ${BUILT_IN_TOOLS[toolId].name}`}
+                aria-label={t("extensions.enableTool", { name: t(BUILT_IN_TOOLS[toolId].nameKey) })}
               />
               <AccordionTrigger className="py-4 hover:no-underline">
                 <div className="flex flex-col items-start text-left">
-                  <span className="text-sm font-medium">{BUILT_IN_TOOLS[toolId].name}</span>
+                  <span className="text-sm font-medium">{t(BUILT_IN_TOOLS[toolId].nameKey)}</span>
                   <span className="text-muted-foreground text-xs">
-                    {BUILT_IN_TOOLS[toolId].description}
+                    {t(BUILT_IN_TOOLS[toolId].descriptionKey)}
                   </span>
                 </div>
               </AccordionTrigger>
@@ -141,10 +143,10 @@ export function BuiltInExtensionsConfig() {
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <Label htmlFor={`approval-${toolId}`} className="text-sm">
-                      Require Approval
+                      {t("extensions.requireApproval")}
                     </Label>
                     <span className="text-muted-foreground text-xs">
-                      Ask for confirmation before running this tool
+                      {t("extensions.requireApprovalHint")}
                     </span>
                   </div>
                   <Switch
@@ -162,10 +164,10 @@ export function BuiltInExtensionsConfig() {
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col">
                       <Label htmlFor="dateTime-utc" className="text-sm">
-                        Use UTC
+                        {t("extensions.useUtc")}
                       </Label>
                       <span className="text-muted-foreground text-xs">
-                        Return time in UTC instead of local timezone
+                        {t("extensions.useUtcHint")}
                       </span>
                     </div>
                     <Switch
@@ -182,7 +184,7 @@ export function BuiltInExtensionsConfig() {
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <div className="grid flex-1 gap-1.5">
                       <Label htmlFor="wait-min" className="text-xs">
-                        Min Duration (ms)
+                        {t("extensions.minDurationMs")}
                       </Label>
                       <Input
                         id="wait-min"
@@ -205,7 +207,7 @@ export function BuiltInExtensionsConfig() {
                     </div>
                     <div className="grid flex-1 gap-1.5">
                       <Label htmlFor="wait-max" className="text-xs">
-                        Max Duration (ms)
+                        {t("extensions.maxDurationMs")}
                       </Label>
                       <Input
                         id="wait-max"
@@ -231,7 +233,7 @@ export function BuiltInExtensionsConfig() {
                     <div className="flex flex-col gap-3 sm:flex-row">
                       <div className="grid flex-1 gap-1.5">
                         <Label htmlFor="url-min" className="text-xs">
-                          Min URLs
+                          {t("extensions.minUrls")}
                         </Label>
                         <Input
                           id="url-min"
@@ -254,7 +256,7 @@ export function BuiltInExtensionsConfig() {
                       </div>
                       <div className="grid flex-1 gap-1.5">
                         <Label htmlFor="url-max" className="text-xs">
-                          Max URLs
+                          {t("extensions.maxUrls")}
                         </Label>
                         <Input
                           id="url-max"
@@ -275,7 +277,7 @@ export function BuiltInExtensionsConfig() {
                     </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="url-maxlength" className="text-xs">
-                        Default Max Content Length
+                        {t("extensions.defaultMaxContentLength")}
                       </Label>
                       <Input
                         id="url-maxlength"
@@ -299,7 +301,7 @@ export function BuiltInExtensionsConfig() {
                 {toolId === "viewFile" && (
                   <div className="grid gap-1.5">
                     <Label htmlFor="viewFile-maxchars" className="text-xs">
-                      Default Max Characters
+                      {t("extensions.defaultMaxCharacters")}
                     </Label>
                     <Input
                       id="viewFile-maxchars"
@@ -323,7 +325,7 @@ export function BuiltInExtensionsConfig() {
                   <>
                     <div className="grid gap-1.5">
                       <Label htmlFor="executeCommand-timeout" className="text-xs">
-                        Default Timeout (ms)
+                        {t("extensions.defaultTimeoutMs")}
                       </Label>
                       <Input
                         id="executeCommand-timeout"
@@ -343,7 +345,7 @@ export function BuiltInExtensionsConfig() {
                     </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="executeCommand-scrollback" className="text-xs">
-                        Max Scrollback (chars)
+                        {t("extensions.maxScrollbackChars")}
                       </Label>
                       <Input
                         id="executeCommand-scrollback"
@@ -366,15 +368,14 @@ export function BuiltInExtensionsConfig() {
 
                 {toolId === "subAgent" && (
                   <div className="text-muted-foreground text-xs">
-                    Subagents inherit the current model and enabled tools, but cannot spawn other
-                    subagents.
+                    {t("extensions.subAgentHint")}
                   </div>
                 )}
 
                 {toolId === "wikipedia" && (
                   <div className="grid gap-1.5">
                     <Label htmlFor="wikipedia-maxresults" className="text-xs">
-                      Default Max Results
+                      {t("extensions.defaultMaxResults")}
                     </Label>
                     <Input
                       id="wikipedia-maxresults"
@@ -398,7 +399,7 @@ export function BuiltInExtensionsConfig() {
                   <>
                     <div className="grid gap-1.5">
                       <Label htmlFor="search-concurrent" className="text-xs">
-                        Max Concurrent Searches
+                        {t("extensions.maxConcurrentSearches")}
                       </Label>
                       <Input
                         id="search-concurrent"
@@ -416,7 +417,7 @@ export function BuiltInExtensionsConfig() {
                     <div className="flex flex-col gap-3 sm:flex-row">
                       <div className="grid flex-1 gap-1.5">
                         <Label htmlFor="search-results" className="text-xs">
-                          Default Max Results
+                          {t("extensions.defaultMaxResults")}
                         </Label>
                         <Input
                           id="search-results"
@@ -436,7 +437,7 @@ export function BuiltInExtensionsConfig() {
                       </div>
                       <div className="grid flex-1 gap-1.5">
                         <Label htmlFor="search-pages" className="text-xs">
-                          Default Max Pages
+                          {t("extensions.defaultMaxPages")}
                         </Label>
                         <Input
                           id="search-pages"

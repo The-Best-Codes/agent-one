@@ -1,33 +1,47 @@
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { userNameAtom } from "@/lib/jotai/settings-atoms";
 
-const getPhrases = (userName: string) => [
-  userName ? `What's on your mind, ${userName}?` : "What's on your mind?",
-  userName ? `Where should we begin, ${userName}?` : "Where should we begin?",
-  userName ? `How can I help you today, ${userName}?` : "How can I help you today?",
-  userName ? `I'm all ears, ${userName}!` : "I'm all ears!",
-  userName ? `What can I help with, ${userName}?` : "What can I help with?",
-  userName ? `Where should we start, ${userName}?` : "Where should we start?",
-  "Ask me anything.",
-  "Ready when you are.",
-  userName ? `What's on your mind today, ${userName}?` : "What's on your mind today?",
-  userName ? `What are you working on, ${userName}?` : "What are you working on?",
-  userName ? `What's on the agenda today, ${userName}?` : "What's on the agenda today?",
-  userName ? `How can I help, ${userName}?` : "How can I help?",
-  userName ? `What can I do for you, ${userName}?` : "What can I do for you?",
-];
+const GREETING_KEYS = [
+  "empty.greetingMind",
+  "empty.greetingBegin",
+  "empty.greetingHelpToday",
+  "empty.greetingEars",
+  "empty.greetingHelpWith",
+  "empty.greetingStart",
+  "empty.greetingAnything",
+  "empty.greetingReady",
+  "empty.greetingMindToday",
+  "empty.greetingWorking",
+  "empty.greetingAgenda",
+  "empty.greetingHelp",
+  "empty.greetingDoForYou",
+] as const;
 
-const getRandomPhrase = (phrases: string[]) => {
-  const randomIndex = Math.floor(Math.random() * phrases.length);
-  return phrases[randomIndex];
+const NAMED_GREETING_KEYS: Partial<Record<(typeof GREETING_KEYS)[number], string>> = {
+  "empty.greetingMind": "empty.greetingMindNamed",
+  "empty.greetingBegin": "empty.greetingBeginNamed",
+  "empty.greetingHelpToday": "empty.greetingHelpTodayNamed",
+  "empty.greetingEars": "empty.greetingEarsNamed",
+  "empty.greetingHelpWith": "empty.greetingHelpWithNamed",
+  "empty.greetingStart": "empty.greetingStartNamed",
+  "empty.greetingMindToday": "empty.greetingMindTodayNamed",
+  "empty.greetingWorking": "empty.greetingWorkingNamed",
+  "empty.greetingAgenda": "empty.greetingAgendaNamed",
+  "empty.greetingHelp": "empty.greetingHelpNamed",
+  "empty.greetingDoForYou": "empty.greetingDoForYouNamed",
 };
 
 export const NoMessagesGreeting = () => {
+  const { t } = useTranslation();
   const userName = useAtomValue(userNameAtom);
-  const phrases = getPhrases(userName);
-  const [currentPhrase] = useState(() => getRandomPhrase(phrases));
+  const [greetingKey] = useState(
+    () => GREETING_KEYS[Math.floor(Math.random() * GREETING_KEYS.length)],
+  );
+  const namedKey = NAMED_GREETING_KEYS[greetingKey];
+  const currentPhrase = userName && namedKey ? t(namedKey, { name: userName }) : t(greetingKey);
 
   return (
     <div className="flex h-full items-center justify-center">

@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 import { useAtom, useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import {
@@ -33,6 +34,7 @@ export const MessageActionRow = ({
   onEdit?: () => void;
   onBranch?: () => void;
 }) => {
+  const { t } = useTranslation();
   const [showMessageActionRow] = useAtom(showMessageActionRowAtom);
 
   return (
@@ -65,7 +67,7 @@ export const MessageActionRow = ({
               />
             </div>
           </AdaptiveTooltipTrigger>
-          <AdaptiveTooltipContent side="bottom">Copy message</AdaptiveTooltipContent>
+          <AdaptiveTooltipContent side="bottom">{t("messages.copyMessage")}</AdaptiveTooltipContent>
         </AdaptiveTooltip>
 
         {messageRole === "assistant" && contentToSpeak.trim() ? (
@@ -79,7 +81,9 @@ export const MessageActionRow = ({
                 <BranchButton onBranch={onBranch} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">Branch conversation</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">
+              {t("messages.branchConversation")}
+            </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
         {messageRole === "assistant" && (
@@ -89,7 +93,9 @@ export const MessageActionRow = ({
                 <RetryButton messageId={messageId} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">Regenerate response</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">
+              {t("messages.regenerate")}
+            </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
         {onEdit && (
@@ -99,7 +105,9 @@ export const MessageActionRow = ({
                 <EditButton onEdit={onEdit} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">Edit message</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">
+              {t("messages.editMessage")}
+            </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
       </>
@@ -108,6 +116,7 @@ export const MessageActionRow = ({
 };
 
 function TtsAction({ messageId, text }: { messageId: string; text: string }) {
+  const { t } = useTranslation();
   const rawTtsSettings = useAtomValue(ttsSettingsAtom);
   const ttsSettings = normalizeTtsSettings(rawTtsSettings);
   const apiKeys = {
@@ -129,7 +138,7 @@ function TtsAction({ messageId, text }: { messageId: string; text: string }) {
           <TtsButton messageId={messageId} text={text} className="size-6" />
         </div>
       </AdaptiveTooltipTrigger>
-      <AdaptiveTooltipContent side="bottom">Read aloud</AdaptiveTooltipContent>
+      <AdaptiveTooltipContent side="bottom">{t("messages.readAloud")}</AdaptiveTooltipContent>
     </AdaptiveTooltip>
   );
 }

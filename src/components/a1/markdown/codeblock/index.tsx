@@ -1,6 +1,7 @@
 import { IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
 import type { UIMessage } from "ai";
 import { useAtomValue } from "jotai";
+import { useTranslation } from "react-i18next";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const BestHighlighter = ({
 };
 
 export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
+  const { t } = useTranslation();
   const maxCodeblockChars = useAtomValue(maxCodeblockCharsAtom);
   const {
     isPreviewMode,
@@ -64,7 +66,7 @@ export const CodeBlock = ({ content, lang, messageRole }: CodeBlockProps) => {
                 size="icon"
                 onClick={togglePreview}
                 className="size-8 bg-[rgb(30,30,30)] text-white hover:bg-[rgb(30,30,30)]"
-                aria-label={isPreviewMode ? "Stop preview" : "Preview code"}
+                aria-label={isPreviewMode ? t("messages.stopPreview") : t("messages.previewCode")}
               >
                 {isPreviewMode ? (
                   <IconPlayerStop data-icon="inline-start" />

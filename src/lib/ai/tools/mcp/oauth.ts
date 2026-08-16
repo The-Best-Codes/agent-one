@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getDefaultStore } from "jotai";
 import { toast } from "sonner";
 
+import i18n from "@/lib/i18n";
 import { dismissedOAuthPromptsAtom, mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
@@ -53,12 +54,12 @@ export async function mcpLogin(
 ): Promise<boolean> {
   dismissMcpLoginToasts(serverId);
 
-  const toastId = toast.loading(`Connecting AgentOne to "${serverName}"...`, {
+  const toastId = toast.loading(i18n.t("extensions.connectingTo", { name: serverName }), {
     action: {
-      label: "Cancel",
+      label: i18n.t("common.cancel"),
       onClick: async (event) => {
         event.preventDefault();
-        toast.loading(`Cancelling connection to "${serverName}"...`, {
+        toast.loading(i18n.t("extensions.cancellingConnection", { name: serverName }), {
           id: toastId,
           action: null,
           duration: Infinity,
@@ -77,7 +78,10 @@ export async function mcpLogin(
       serverId,
       serverUrl,
     });
-    toast.success(`Connected to "${serverName}" successfully`, { id: toastId, action: null });
+    toast.success(i18n.t("extensions.connectedTo", { name: serverName }), {
+      id: toastId,
+      action: null,
+    });
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-in") return prev;
       return {
@@ -89,13 +93,13 @@ export async function mcpLogin(
     return true;
   } catch (e) {
     if (typeof e === "string" && e.includes("Authorization cancelled")) {
-      toast.error(`Connection to "${serverName}" cancelled`, {
+      toast.error(i18n.t("extensions.connectionCancelled", { name: serverName }), {
         id: toastId,
         action: null,
         duration: 10_000,
       });
     } else {
-      toast.error(`Connection failed: ${String(e)}`, {
+      toast.error(i18n.t("extensions.connectionFailed", { error: String(e) }), {
         id: toastId,
         action: null,
         duration: 10_000,
@@ -108,7 +112,7 @@ export async function mcpLogin(
 export async function mcpLogout(serverId: string, serverName: string): Promise<boolean> {
   try {
     await clearMcpOAuthCredentials(serverId);
-    toast.success(`Disconnected from "${serverName}" successfully`);
+    toast.success(i18n.t("extensions.disconnectedFrom", { name: serverName }));
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-out") return prev;
       return {
@@ -119,7 +123,7 @@ export async function mcpLogout(serverId: string, serverName: string): Promise<b
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    toast.error(`Failed to disconnect from "${serverName}": ${String(e)}`);
+    toast.error(i18n.t("extensions.disconnectFailed", { name: serverName, error: String(e) }));
     return false;
   }
 }
@@ -147,11 +151,11 @@ export async function mcpCheckAuth(
 }
 
 export function promptLoginToast(server: McpHttpServerConfig): void {
-  toast(`Connect to the "${server.name}" Extension`, {
+  toast(i18n.t("extensions.connectToExtension", { name: server.name }), {
     id: `mcp-prompt-login-${server.id}`,
-    description: "Authentication required to access tools.",
+    description: i18n.t("extensions.authRequiredAccessTools"),
     action: {
-      label: "Connect",
+      label: i18n.t("extensions.connect"),
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     duration: Infinity,
@@ -164,14 +168,14 @@ export function promptSoftLoginToast(server: McpHttpServerConfig): void {
     return;
   }
 
-  toast(`Connect to the "${server.name}" Extension for full access`, {
+  toast(i18n.t("extensions.connectToExtensionFullAccess", { name: server.name }), {
     id: `mcp-soft-login-${server.id}`,
     action: {
-      label: "Connect",
+      label: i18n.t("extensions.connect"),
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     cancel: {
-      label: "Never",
+      label: i18n.t("common.never"),
       onClick: () => {
         store.set(dismissedOAuthPromptsAtom, (prev) => {
           if (prev.includes(server.id)) return prev;

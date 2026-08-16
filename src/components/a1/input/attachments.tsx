@@ -1,5 +1,6 @@
 import { IconFile, IconMessageCircle, IconX } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import formatBytes from "@/lib/format-bytes";
@@ -10,6 +11,7 @@ interface AttachmentsProps {
 }
 
 export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => {
+  const { t } = useTranslation();
   const [previews, setPreviews] = useState<{ url: string; type: string }[]>([]);
   const previewUrls = useRef<string[]>([]);
 
@@ -77,7 +79,9 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
                   <>
                     <span>&middot;</span>
                     <span className="truncate">
-                      {file.name.includes("_agent-one_chat") ? "AgentOne Chat" : file.type}
+                      {file.name.includes("_agent-one_chat")
+                        ? t("chat.attachmentTypeChat")
+                        : file.type}
                     </span>
                   </>
                 )}
@@ -89,7 +93,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
               variant="ghost"
               onClick={() => handleRemove(index)}
               className="size-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
-              title="Remove file"
+              title={t("common.removeFile")}
             >
               <IconX data-icon="inline-start" />
             </Button>

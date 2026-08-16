@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ interface DeleteChatModalProps {
 }
 
 export const DeleteChatModal = ({ isOpen, onClose, chatId, chatTitle }: DeleteChatModalProps) => {
+  const { t } = useTranslation();
   const { id: activeChatId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { deleteChat } = usePersistence();
@@ -35,17 +37,17 @@ export const DeleteChatModal = ({ isOpen, onClose, chatId, chatTitle }: DeleteCh
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Chat</DialogTitle>
+          <DialogTitle>{t("sidebar.deleteChat")}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete "{chatTitle}"? This action cannot be undone.
+            {t("sidebar.deleteChatConfirm", { title: chatTitle })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            Delete
+            {t("common.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

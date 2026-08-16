@@ -1,6 +1,7 @@
 import { IconBulb, IconPencil, IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -64,6 +65,7 @@ function ShortcutEditor({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const [shortcuts, setShortcuts] = useAtom(keyboardShortcutsAtom);
   const current = shortcuts[id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[id];
   const [shortcut, setShortcut] = useState(current.shortcut);
@@ -104,7 +106,7 @@ function ShortcutEditor({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Edit shortcut</DialogTitle>
+          <DialogTitle>{t("shortcuts.editShortcut")}</DialogTitle>
           <DialogDescription>{label}</DialogDescription>
         </DialogHeader>
 
@@ -113,36 +115,38 @@ function ShortcutEditor({
           className="bg-muted/40 flex min-h-24 items-center justify-center rounded-lg border border-dashed p-4"
           autoFocus
         >
-          <Kbd className="h-auto px-3 py-1 text-sm">{shortcut || "Press keys"}</Kbd>
+          <Kbd className="h-auto px-3 py-1 text-sm">{shortcut || t("shortcuts.pressKeys")}</Kbd>
         </button>
 
         {conflict && (
           <Alert variant="destructive">
-            <AlertTitle>Shortcut conflict</AlertTitle>
-            <AlertDescription>This shortcut is also used by {conflict.label}.</AlertDescription>
+            <AlertTitle>{t("shortcuts.conflictTitle")}</AlertTitle>
+            <AlertDescription>
+              {t("shortcuts.conflictDescription", { label: t(conflict.labelKey) })}
+            </AlertDescription>
           </Alert>
         )}
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-4">
-            <Label>Activate in input fields</Label>
+            <Label>{t("shortcuts.activateInInputs")}</Label>
             <Switch
               checked={enabledInInputs ?? enabledInInputsDefault}
               onCheckedChange={setEnabledInInputs}
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <Label>Prevent default browser behavior</Label>
+            <Label>{t("shortcuts.preventDefault")}</Label>
             <Switch checked={preventDefault} onCheckedChange={setPreventDefault} />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant={conflict ? "destructive" : "default"} onClick={handleSave}>
-            Save
+            {t("common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -151,6 +155,7 @@ function ShortcutEditor({
 }
 
 export default function KeyboardShortcutsSection() {
+  const { t } = useTranslation();
   const [shortcuts, setShortcuts] = useAtom(keyboardShortcutsAtom);
   const [enabledInInputsDefault, setEnabledInInputsDefault] = useAtom(
     keyboardShortcutsEnabledInInputsAtom,
@@ -161,23 +166,24 @@ export default function KeyboardShortcutsSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Keyboard Shortcuts</CardTitle>
+          <CardTitle>{t("shortcuts.title")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-activate-shortcuts-in-input-fields">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">Activate shortcuts in input fields</Label>
+                <Label className="text-sm font-medium">
+                  {t("shortcuts.activateInInputsLabel")}
+                </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  This is the default behavior. You can change it for individual shortcuts in the
-                  shortcut editor.
+                  {t("shortcuts.activateInInputsDescription")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
                   checked={enabledInInputsDefault}
                   onCheckedChange={setEnabledInInputsDefault}
-                  aria-label="Activate shortcuts in input fields"
+                  aria-label={t("shortcuts.activateInInputsLabel")}
                 />
                 <Button
                   variant="ghost"
@@ -186,7 +192,7 @@ export default function KeyboardShortcutsSection() {
                     enabledInInputsDefault === DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS
                   }
                   onClick={() => resetSetting("KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS")}
-                  aria-label="Reset input field shortcut behavior"
+                  aria-label={t("shortcuts.resetInputBehavior")}
                 >
                   <IconRestore />
                 </Button>
@@ -197,9 +203,9 @@ export default function KeyboardShortcutsSection() {
           <div className="flex gap-1">
             <IconBulb className="size-5 shrink-0" />
             <span>
-              You can change the send key (<Kbd>Enter</Kbd> or <Kbd>Ctrl+Enter</Kbd>) in{" "}
+              {t("shortcuts.sendKeyHint")} (<Kbd>Enter</Kbd> / <Kbd>Ctrl+Enter</Kbd>){" "}
               <Link to="/settings?tab=chats#setting-submit-key" className="underline">
-                chat settings.
+                {t("shortcuts.chatSettings")}
               </Link>
             </span>
           </div>
@@ -220,8 +226,10 @@ export default function KeyboardShortcutsSection() {
                   className="flex flex-col gap-3 p-3 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
-                    <Label className="text-sm font-medium">{definition.label}</Label>
-                    <p className="text-muted-foreground mt-1 text-xs">{definition.description}</p>
+                    <Label className="text-sm font-medium">{t(definition.labelKey)}</Label>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      {t(definition.descriptionKey)}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Kbd>{config.shortcut}</Kbd>
@@ -230,7 +238,7 @@ export default function KeyboardShortcutsSection() {
                         variant="outline"
                         size="icon-sm"
                         onClick={() => setEditingId(definition.id)}
-                        aria-label={`Edit ${definition.label}`}
+                        aria-label={t("shortcuts.editAria", { label: t(definition.labelKey) })}
                       >
                         <IconPencil />
                       </Button>
@@ -244,7 +252,7 @@ export default function KeyboardShortcutsSection() {
                             [definition.id]: defaultConfig,
                           }));
                         }}
-                        aria-label={`Reset ${definition.label}`}
+                        aria-label={t("shortcuts.resetAria", { label: t(definition.labelKey) })}
                       >
                         <IconRestore />
                       </Button>
@@ -260,7 +268,9 @@ export default function KeyboardShortcutsSection() {
       {editingId && (
         <ShortcutEditor
           id={editingId}
-          label={keyboardShortcutDefinitions.find((shortcut) => shortcut.id === editingId)!.label}
+          label={t(
+            keyboardShortcutDefinitions.find((shortcut) => shortcut.id === editingId)!.labelKey,
+          )}
           enabledInInputsDefault={enabledInInputsDefault}
           open={Boolean(editingId)}
           onOpenChange={(open) => !open && setEditingId(null)}

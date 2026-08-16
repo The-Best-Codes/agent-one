@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ interface SplashStepProps {
 }
 
 export function SplashStep({ onGetStarted }: SplashStepProps) {
+  const { t } = useTranslation();
   const textRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -138,10 +140,10 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
       >
         <div className="overflow-hidden">
           <div className="flex flex-col items-center gap-2 pb-4 text-center">
-            <h1 className="text-foreground text-4xl font-bold">Welcome to {CONFIG.appName}</h1>
-            <p className="text-muted-foreground text-xl">
-              Let's get you set up with a few questions
-            </p>
+            <h1 className="text-foreground text-4xl font-bold">
+              {t("onboarding.welcomeTo", { name: CONFIG.appName })}
+            </h1>
+            <p className="text-muted-foreground text-xl">{t("onboarding.letsGetSetUp")}</p>
           </div>
         </div>
       </div>
@@ -159,7 +161,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
 
         {showButton ? (
           <Button variant="default" size="lg" onClick={handleGetStarted}>
-            Get Started
+            {t("onboarding.getStarted")}
           </Button>
         ) : (
           <div

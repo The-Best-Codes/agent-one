@@ -13,6 +13,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -67,6 +68,7 @@ export const VirtualizedChatList = ({
   additionalOnChatClickCallback,
   scrollToActiveChat = true,
 }: VirtualizedChatListProps) => {
+  const { t } = useTranslation();
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ChatSearchResult[] | null>(null);
@@ -317,7 +319,7 @@ export const VirtualizedChatList = ({
             analytics={{ event: "new_chat_clicked", params: { ui_location: "chat_list" } }}
           >
             <IconPlus data-icon="inline-start" />
-            New Chat
+            {t("sidebar.newChat")}
           </Button>
         )}
         {selectionMode ? (
@@ -326,7 +328,9 @@ export const VirtualizedChatList = ({
               <Button variant="ghost" size="icon" className="size-7" onClick={exitSelectionMode}>
                 <IconX />
               </Button>
-              <span className="text-muted-foreground text-sm">{selectedChatIds.size} selected</span>
+              <span className="text-muted-foreground text-sm">
+                {t("sidebar.selectedCount", { count: selectedChatIds.size })}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Button
@@ -344,7 +348,7 @@ export const VirtualizedChatList = ({
                 ) : (
                   <IconDeselect data-icon="inline-start" />
                 )}
-                {allSelected ? "Deselect All" : "Select All"}
+                {allSelected ? t("sidebar.deselectAll") : t("sidebar.selectAll")}
               </Button>
               <Button
                 variant="outline"
@@ -380,7 +384,11 @@ export const VirtualizedChatList = ({
               <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
               <Input
                 ref={searchInputRef}
-                placeholder={searchContent ? "Search chats..." : "Search titles..."}
+                placeholder={
+                  searchContent
+                    ? t("sidebar.searchChatsPlaceholder")
+                    : t("sidebar.searchTitlesPlaceholder")
+                }
                 className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
@@ -392,7 +400,7 @@ export const VirtualizedChatList = ({
                   variant="outline"
                   size="icon"
                   className="shrink-0 rounded-l-none border-l-0"
-                  aria-label="Search options"
+                  aria-label={t("sidebar.searchOptions")}
                   analytics={{
                     event: "chat_search_options_opened",
                     params: { ui_location: "sidebar" },
@@ -402,12 +410,12 @@ export const VirtualizedChatList = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
-                <DropdownMenuLabel>Search mode</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("sidebar.searchMode")}</DropdownMenuLabel>
                 <DropdownMenuCheckboxItem
                   checked={searchContent}
                   onCheckedChange={(checked) => setSearchContent(checked as boolean)}
                 >
-                  Search content
+                  {t("sidebar.searchContent")}
                 </DropdownMenuCheckboxItem>
                 {searchContent && (
                   <>
@@ -416,7 +424,7 @@ export const VirtualizedChatList = ({
                       checked={rawOperators}
                       onCheckedChange={(checked) => setRawOperators(checked as boolean)}
                     >
-                      Raw FTS5 syntax
+                      {t("sidebar.rawFts")}
                     </DropdownMenuCheckboxItem>
                   </>
                 )}
@@ -444,17 +452,19 @@ export const VirtualizedChatList = ({
         ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">No chats yet</p>
+            <p className="max-w-full min-w-0 truncate">{t("sidebar.noChatsYet")}</p>
           </div>
         ) : showSearchLoading ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <Spinner className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">Searching...</p>
+            <p className="max-w-full min-w-0 truncate">{t("sidebar.searching")}</p>
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
-            <span className="max-w-full min-w-0 truncate">No results for "{searchQuery}"</span>
+            <span className="max-w-full min-w-0 truncate">
+              {t("sidebar.noResults", { query: searchQuery })}
+            </span>
           </div>
         ) : (
           <div

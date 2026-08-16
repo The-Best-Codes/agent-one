@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +25,8 @@ export function UninstallExtensionDialog({
   onConfirm,
   onCancel,
 }: UninstallExtensionDialogProps) {
+  const { t } = useTranslation();
+
   if (!serverName) {
     return null;
   }
@@ -31,16 +35,16 @@ export function UninstallExtensionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Uninstall {serverName}</DialogTitle>
-          <DialogDescription>Are you sure you want to uninstall this extension?</DialogDescription>
+          <DialogTitle>{t("extensions.uninstallTitle", { name: serverName })}</DialogTitle>
+          <DialogDescription>{t("extensions.uninstallConfirm")}</DialogDescription>
         </DialogHeader>
 
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            Uninstall
+            {t("extensions.uninstall")}
           </Button>
         </DialogFooter>
       </DialogContent>

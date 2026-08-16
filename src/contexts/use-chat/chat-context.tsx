@@ -12,6 +12,7 @@ import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
+import i18n from "@/lib/i18n";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -31,13 +32,15 @@ const logger = getLogger(import.meta.url);
 
 type ChatInstanceCollection = Map<string, ChatInstanceHelpers>;
 
-const DEFAULT_CHAT_METADATA: ChatMetadata = {
-  title: "New chat",
-  titleState: undefined,
-  modelId: undefined,
-  modelConfig: undefined,
-  branchOf: undefined,
-};
+function getDefaultChatMetadata(): ChatMetadata {
+  return {
+    title: i18n.t("chatsSettings.newChatPlaceholder"),
+    titleState: undefined,
+    modelId: undefined,
+    modelConfig: undefined,
+    branchOf: undefined,
+  };
+}
 
 export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const {
@@ -394,7 +397,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ],
   );
 
-  const metadataValue = currentChatId ? loadChatMetadata(currentChatId) : DEFAULT_CHAT_METADATA;
+  const metadataValue = currentChatId ? loadChatMetadata(currentChatId) : getDefaultChatMetadata();
 
   const instanceForFunctions = currentChatId ? stableFocusedChatInstance : defaultChat;
   const noopAsync = useCallback(async () => {}, []);
@@ -461,8 +464,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           (notificationSetting === "when-unfocused" && !document.hasFocus())
         ) {
           void sendNotificationIfAllowed(
-            "AgentOne Finished Responding",
-            "You can disable this notification in settings.",
+            i18n.t("notifications.finishedResponding"),
+            i18n.t("notifications.disableInSettings"),
           );
         }
       }

@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { cloneElement, isValidElement, memo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Accordion,
@@ -32,6 +33,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import i18n from "@/lib/i18n";
 import { type McpAuthState, type McpServerLoadState } from "@/lib/jotai/mcp-atoms";
 
 import { McpServerStatus } from "./mcp-server-status";
@@ -42,34 +44,36 @@ function getMcpServerStatusTooltip(
   disabled?: boolean,
 ): string {
   if (disabled) {
-    return "Disabled";
+    return i18n.t("common.disabled");
   }
 
   if (state?.status === "error" && (authState === "logged-out" || authState === "supports-oauth")) {
     return authState === "supports-oauth"
-      ? "Login available for full access"
-      : "Authentication required to load tools";
+      ? i18n.t("extensions.loginAvailable")
+      : i18n.t("extensions.authRequired");
   }
 
   switch (state?.status) {
     case "loaded":
       if (state.toolCount === 0) {
-        return "Connected, but no tools are available";
+        return i18n.t("extensions.connectedNoTools");
       }
       return state.toolCount === 1
-        ? "Loaded successfully with 1 tool"
-        : `Loaded successfully with ${state.toolCount} tools`;
+        ? i18n.t("extensions.loadedOneTool")
+        : i18n.t("extensions.loadedTools", { count: state.toolCount });
     case "error":
-      return state.error ? `Error: ${state.error}` : "Error";
+      return state.error
+        ? i18n.t("extensions.errorWithMessage", { error: state.error })
+        : i18n.t("common.error");
     case "starting":
-      return "Starting";
+      return i18n.t("extensions.starting");
     case "connecting":
-      return "Connecting";
+      return i18n.t("extensions.connecting");
     case "disabled":
-      return "Disabled";
+      return i18n.t("common.disabled");
     case "unknown":
     default:
-      return "Unknown";
+      return i18n.t("common.unknown");
   }
 }
 
@@ -115,6 +119,7 @@ function ExtensionListRowComponent({
   advancedContent,
   moreInfoJson,
 }: ExtensionListRowProps) {
+  const { t } = useTranslation();
   const hasAdvanced = Boolean(advancedContent) || moreInfoJson !== undefined;
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [advancedFooter, setAdvancedFooter] = useState<ReactNode>(null);
@@ -132,7 +137,7 @@ function ExtensionListRowComponent({
           <div className="flex min-w-0 items-center gap-2">
             <p className="flex min-w-0 items-center gap-2 truncate text-lg font-medium">
               <Avatar className="size-6">
-                <AvatarImage src={iconUrl} alt={`${title} icon`} />
+                <AvatarImage src={iconUrl} alt={t("extensions.iconAlt", { title })} />
                 <AvatarFallback>
                   <IconPackage />
                 </AvatarFallback>
@@ -177,11 +182,11 @@ function ExtensionListRowComponent({
               className="not-sm:size-7 sm:pl-1.5"
             >
               <IconTrash />
-              <span className="sr-only sm:not-sr-only">Uninstall</span>
+              <span className="sr-only sm:not-sr-only">{t("extensions.uninstall")}</span>
             </Button>
           ) : !installed ? (
             <Button size="sm" variant="default" onClick={onInstall} disabled={!installSupported}>
-              {installSupported ? "Install" : "Unsupported"}
+              {installSupported ? t("extensions.installAction") : t("extensions.unsupported")}
             </Button>
           ) : null}
           {installed && enabled !== undefined && onEnabledChange ? (
@@ -197,13 +202,13 @@ function ExtensionListRowComponent({
                       variant="ghost"
                       size="icon-xs"
                       className="size-3"
-                      aria-label="Restart extension"
+                      aria-label={t("extensions.restartAria")}
                       onClick={onRestart}
                     >
                       <IconRefresh />
                     </Button>
                   </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent>Restart</AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>{t("extensions.restart")}</AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               ) : null}
               <AdaptiveTooltip>
@@ -223,7 +228,7 @@ function ExtensionListRowComponent({
               </AdaptiveTooltip>
               {toolCount !== null ? (
                 <span className="text-muted-foreground text-xs">
-                  {toolCount === 1 ? "1 tool" : `${toolCount} tools`}
+                  {t("extensions.toolCount", { count: toolCount })}
                 </span>
               ) : null}
 
@@ -232,7 +237,7 @@ function ExtensionListRowComponent({
                 className="ml-1"
                 checked={enabled}
                 onCheckedChange={onEnabledChange}
-                aria-label="Toggle extension"
+                aria-label={t("extensions.toggleExtension")}
               />
             </div>
           ) : null}
@@ -255,14 +260,14 @@ function ExtensionListRowComponent({
               variant="outline"
               className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
             >
-              Advanced
+              {t("extensions.advanced")}
               <IconChevronRight className="text-muted-foreground" data-icon="inline-end" />
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{title} advanced config</DialogTitle>
-              <DialogDescription>Edit advanced settings for this extension.</DialogDescription>
+              <DialogTitle>{t("extensions.advancedConfig", { title })}</DialogTitle>
+              <DialogDescription>{t("extensions.editAdvanced")}</DialogDescription>
             </DialogHeader>
             <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
               <div className="flex flex-col gap-4 py-1">
@@ -270,7 +275,9 @@ function ExtensionListRowComponent({
                 {moreInfoJson !== undefined ? (
                   <Accordion type="single" collapsible className="rounded-md border px-3">
                     <AccordionItem value="more-info" className="border-b-0">
-                      <AccordionTrigger className="py-3">Debug info</AccordionTrigger>
+                      <AccordionTrigger className="py-3">
+                        {t("extensions.debugInfo")}
+                      </AccordionTrigger>
                       <AccordionContent>
                         <pre className="bg-muted overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap">
                           {JSON.stringify(moreInfoJson, null, 2)}

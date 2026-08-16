@@ -1,5 +1,6 @@
 import { IconAlertTriangle } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ export function AddServerDialog({
   onAddServer,
   initialValues,
 }: AddServerDialogProps) {
+  const { t } = useTranslation();
   const [formValues, setFormValues] = useState<McpServerConfigFormValues>({
     type: initialValues?.type ?? "stdio",
     name: initialValues?.name ?? "",
@@ -115,19 +117,15 @@ export function AddServerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Custom Extension</DialogTitle>
-          <DialogDescription>
-            Configure a custom extension by defining an MCP server.
-          </DialogDescription>
+          <DialogTitle>{t("extensions.addCustomTitle")}</DialogTitle>
+          <DialogDescription>{t("extensions.addCustomDescription")}</DialogDescription>
         </DialogHeader>
 
         {isFromDeepLink ? (
           <Alert variant="destructive">
             <IconAlertTriangle />
-            <AlertTitle>Extension details were auto-filled</AlertTitle>
-            <AlertDescription>
-              Review the details below before installing. Only install extensions you trust.
-            </AlertDescription>
+            <AlertTitle>{t("extensions.autoFilled")}</AlertTitle>
+            <AlertDescription>{t("extensions.autoFilledDescription")}</AlertDescription>
           </Alert>
         ) : null}
 
@@ -138,16 +136,16 @@ export function AddServerDialog({
             showTypeSelector
             values={formValues}
             onChange={(updates) => setFormValues((current) => ({ ...current, ...updates }))}
-            namePlaceholder="e.g., Everything Server"
+            namePlaceholder={t("extensions.namePlaceholderExample")}
           />
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancelAdd}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button onClick={handleAddServer} disabled={!isAddFormValid}>
-            Add Custom
+            {t("extensions.addCustomAction")}
           </Button>
         </DialogFooter>
       </DialogContent>

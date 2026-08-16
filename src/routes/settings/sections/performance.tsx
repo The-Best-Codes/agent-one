@@ -1,5 +1,6 @@
 import { IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 import SettingsTarget from "../settings-target";
 
 export default function PerformanceSection() {
+  const { t } = useTranslation();
   const [maxMessageLength, setMaxMessageLength] = useAtom(maxMessageLengthAtom);
   const [maxCodeblockChars, setMaxCodeblockChars] = useAtom(maxCodeblockCharsAtom);
   const [maxToolResultChars, setMaxToolResultChars] = useAtom(maxToolResultCharsAtom);
@@ -44,17 +46,17 @@ export default function PerformanceSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Rendering Limits</CardTitle>
+          <CardTitle>{t("performance.renderingLimits")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-max-message-length">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
                 <Label htmlFor="max-message-length" className="text-sm font-medium">
-                  Max Message Length
+                  {t("performance.maxMessageLength")}
                 </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Maximum characters before activating performance mode for that message.
+                  {t("performance.maxMessageLengthDescription")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -80,7 +82,7 @@ export default function PerformanceSection() {
                     resetSetting("MAX_MESSAGE_LENGTH");
                   }}
                   disabled={isMaxMessageLengthDefault}
-                  aria-label="Reset to default"
+                  aria-label={t("common.resetToDefault")}
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -92,10 +94,10 @@ export default function PerformanceSection() {
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
                 <Label htmlFor="max-codeblock-chars" className="text-sm font-medium">
-                  Max Codeblock Characters
+                  {t("performance.maxCodeblockChars")}
                 </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Maximum characters in code blocks before switching to plain text rendering.
+                  {t("performance.maxCodeblockCharsDescription")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -121,7 +123,7 @@ export default function PerformanceSection() {
                     resetSetting("MAX_CODEBLOCK_CHARS");
                   }}
                   disabled={isMaxCodeblockCharsDefault}
-                  aria-label="Reset to default"
+                  aria-label={t("common.resetToDefault")}
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -133,10 +135,10 @@ export default function PerformanceSection() {
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
                 <Label htmlFor="max-tool-result-chars" className="text-sm font-medium">
-                  Max Tool Result Characters
+                  {t("performance.maxToolResultChars")}
                 </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Maximum characters in tool results before switching to performant rendering.
+                  {t("performance.maxToolResultCharsDescription")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -162,7 +164,7 @@ export default function PerformanceSection() {
                     resetSetting("MAX_TOOL_RESULT_CHARS");
                   }}
                   disabled={isMaxToolResultCharsDefault}
-                  aria-label="Reset to default"
+                  aria-label={t("common.resetToDefault")}
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -174,17 +176,17 @@ export default function PerformanceSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Chat Virtualization</CardTitle>
+          <CardTitle>{t("performance.chatVirtualization")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-virtualize-chat-messages">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-1 flex-col gap-1">
                 <Label htmlFor="chat-virtualization-enabled" className="text-sm font-medium">
-                  Virtualize Chat Messages
+                  {t("performance.virtualizeChatMessages")}
                 </Label>
                 <p className="text-muted-foreground text-sm">
-                  Reduce rendering work for large chats while preserving the same chat UI behavior.
+                  {t("performance.virtualizeChatMessagesDescription")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -206,7 +208,7 @@ export default function PerformanceSection() {
                     resetSetting("CHAT_VIRTUALIZATION_MODE");
                   }}
                   disabled={isChatVirtualizationModeDefault}
-                  aria-label="Reset chat virtualization mode"
+                  aria-label={t("performance.resetVirtualizationMode")}
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -219,11 +221,10 @@ export default function PerformanceSection() {
               <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex flex-1 flex-col items-start">
                   <Label htmlFor="chat-virtualization-threshold" className="text-sm font-medium">
-                    Message Count Threshold
+                    {t("performance.messageCountThreshold")}
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    Only enable chat virtualization when a conversation reaches at least this many
-                    messages.
+                    {t("performance.messageCountThresholdDescription")}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -255,7 +256,7 @@ export default function PerformanceSection() {
                       resetSetting("CHAT_VIRTUALIZATION_THRESHOLD");
                     }}
                     disabled={isChatVirtualizationThresholdDefault}
-                    aria-label="Reset chat virtualization threshold"
+                    aria-label={t("performance.resetVirtualizationThreshold")}
                   >
                     <IconRestore data-icon="inline-start" />
                   </Button>
@@ -268,17 +269,17 @@ export default function PerformanceSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Extension Runtime</CardTitle>
+          <CardTitle>{t("performance.extensionRuntime")}</CardTitle>
         </CardHeader>
         <CardContent>
           <SettingsTarget id="setting-mcp-parallel-load-limit">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
                 <Label htmlFor="mcp-parallel-load-limit" className="text-sm font-medium">
-                  MCP Parallel Load Limit
+                  {t("performance.mcpParallelLoadLimit")}
                 </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Maximum number of MCP servers loaded concurrently.
+                  {t("performance.mcpParallelLoadLimitDescription")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -305,7 +306,7 @@ export default function PerformanceSection() {
                     resetSetting("MCP_PARALLEL_LOAD_LIMIT");
                   }}
                   disabled={isMcpParallelLoadLimitDefault}
-                  aria-label="Reset to default"
+                  aria-label={t("common.resetToDefault")}
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
