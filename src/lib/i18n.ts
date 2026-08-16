@@ -2,17 +2,21 @@ import i18n from "i18next";
 import { getDefaultStore } from "jotai";
 import { initReactI18next } from "react-i18next";
 
+import de from "./i18n/de.json";
 import en from "./i18n/en.json";
 import es from "./i18n/es.json";
 import fr from "./i18n/fr.json";
+import it from "./i18n/it.json";
 import ru from "./i18n/ru.json";
 import { languageAtom } from "./jotai/settings-atoms";
 import { LANGUAGE_OPTIONS, type LanguageOption } from "./settings/types";
 
 export const supportedLanguages = [
   { value: "en", label: "English" },
+  { value: "de", label: "Deutsch" },
   { value: "es", label: "Español" },
   { value: "fr", label: "Français" },
+  { value: "it", label: "Italiano" },
   { value: "ru", label: "Русский" },
 ] as const satisfies readonly { value: LanguageOption; label: string }[];
 
@@ -34,9 +38,11 @@ function resolveInitialLanguage(): SupportedLanguage {
 
 void i18n.use(initReactI18next).init({
   resources: {
+    de: { translation: de },
     en: { translation: en },
     es: { translation: es },
     fr: { translation: fr },
+    it: { translation: it },
     ru: { translation: ru },
   },
   lng: resolveInitialLanguage(),

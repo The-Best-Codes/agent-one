@@ -88,7 +88,7 @@ export type InputStyleOption = (typeof INPUT_STYLE_OPTIONS)[number];
 export const COLLAPSED_SIDEBAR_LAYOUT_OPTIONS = ["row", "column"] as const;
 export type CollapsedSidebarLayoutOption = (typeof COLLAPSED_SIDEBAR_LAYOUT_OPTIONS)[number];
 
-export const LANGUAGE_OPTIONS = ["en", "es", "fr", "ru"] as const;
+export const LANGUAGE_OPTIONS = ["de", "en", "es", "fr", "it", "ru"] as const;
 export type LanguageOption = (typeof LANGUAGE_OPTIONS)[number];
 
 export const CHAT_VIRTUALIZATION_MODE_OPTIONS = ["off", "threshold"] as const;

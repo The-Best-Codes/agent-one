@@ -1,3 +1,4 @@
+import { IconLanguage } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
 
@@ -28,6 +29,7 @@ export function LanguagePicker({ className, id }: LanguagePickerProps) {
   return (
     <Select value={language} onValueChange={handleChange}>
       <SelectTrigger className={className} id={id} aria-label={t("settings.selectLanguage")}>
+        <IconLanguage className="text-muted-foreground" aria-hidden />
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
