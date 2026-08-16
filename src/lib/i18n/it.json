@@ -641,7 +641,6 @@
     "connecting": "Connessione in corso",
     "uninstall": "Disinstalla",
     "installAction": "Installa",
-    "installAnyway": "Installa comunque",
     "missingRuntimeTitle": "Strumento richiesto mancante",
     "missingRuntimeDescription": "Lo strumento \"{{command}}\" non è installato sul dispositivo. È necessario per eseguire questa estensione. Puoi comunque installarla, ma potrebbe non funzionare finché lo strumento non sarà disponibile.",
     "unsupported": "Non supportato",

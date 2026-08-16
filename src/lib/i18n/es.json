@@ -641,7 +641,6 @@
     "connecting": "Conectando",
     "uninstall": "Desinstalar",
     "installAction": "Instalar",
-    "installAnyway": "Instalar de todos modos",
     "missingRuntimeTitle": "Falta una herramienta necesaria",
     "missingRuntimeDescription": "La herramienta \"{{command}}\" no está instalada en tu dispositivo. Es necesaria para ejecutar esta extensión. Puedes instalarla de todos modos, pero puede que no funcione hasta que la herramienta esté disponible.",
     "unsupported": "No compatible",

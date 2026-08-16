@@ -641,7 +641,6 @@
     "connecting": "Connexion",
     "uninstall": "Désinstaller",
     "installAction": "Installer",
-    "installAnyway": "Installer quand même",
     "missingRuntimeTitle": "Outil requis manquant",
     "missingRuntimeDescription": "L'outil \"{{command}}\" n'est pas installé sur votre appareil. Il est nécessaire pour exécuter cette extension. Vous pouvez tout de même l'installer, mais elle risque de ne pas fonctionner tant que l'outil n'est pas disponible.",
     "unsupported": "Non pris en charge",

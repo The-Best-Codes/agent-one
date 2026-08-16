@@ -234,11 +234,11 @@ function InstallExtensionDialogBody({
         />
       </div>
 
-      <DialogFooter className="flex">
+      <DialogFooter>
         {missingRuntimeCommand ? (
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
-              <Label className="w-full text-destructive">
+              <Label className="text-destructive w-fit sm:w-full">
                 <IconAlertTriangle className="size-4" />
                 <span className="truncate">{t("extensions.missingRuntimeTitle")}</span>
               </Label>
