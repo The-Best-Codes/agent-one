@@ -135,3 +135,18 @@ export async function runCommand(
   const { result } = spawnCommand(command, options);
   return result;
 }
+
+export async function isCommandAvailable(command: string): Promise<boolean> {
+  if (!command.trim()) {
+    return false;
+  }
+
+  const checkCommand = platform() === "windows" ? `where ${command}` : `command -v ${command}`;
+
+  try {
+    const result = await runCommand(checkCommand);
+    return result.exitCode === 0;
+  } catch {
+    return false;
+  }
+}

@@ -1,13 +1,15 @@
-import { IconEye, IconEyeClosed } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { IconAlertTriangle, IconEye, IconEyeClosed } from "@tabler/icons-react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
   createMcpServerFromRegistryInstall,
+  getStdioRuntimeCommand,
   type McpRegistryExtension,
   type McpRegistryInstallResult,
   type RegistryInstallField,
 } from "@/assets/mcp-registry/mcp-registry";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
+import { isCommandAvailable } from "@/lib/run-command";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";
 
@@ -116,6 +119,36 @@ function InstallExtensionDialogBody({
     requiresApproval: false,
   });
   const [fieldValues, setFieldValues] = useState<Record<string, string>>(defaultFieldValues);
+  const [runtimeCheck, setRuntimeCheck] = useState<{
+    command: string;
+    available: boolean;
+  } | null>(null);
+
+  const runtimeCommand =
+    install?.type === "stdio" ? getStdioRuntimeCommand(formValues.command) : undefined;
+
+  const missingRuntimeCommand =
+    runtimeCheck && runtimeCheck.command === runtimeCommand && !runtimeCheck.available
+      ? runtimeCheck.command
+      : null;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!runtimeCommand) {
+      return;
+    }
+
+    void isCommandAvailable(runtimeCommand).then((available) => {
+      if (!cancelled) {
+        setRuntimeCheck({ command: runtimeCommand, available });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [runtimeCommand]);
 
   if (!install) {
     return null;
@@ -197,13 +230,24 @@ function InstallExtensionDialogBody({
         />
       </div>
 
-      <DialogFooter>
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
-          {t("common.cancel")}
-        </Button>
-        <Button onClick={handleInstall} disabled={!isFormValid}>
-          {t("extensions.installAction")}
-        </Button>
+      <DialogFooter className="flex sm:flex-col">
+        {missingRuntimeCommand ? (
+          <Alert variant="destructive" className="mb-2">
+            <IconAlertTriangle />
+            <AlertTitle>{t("extensions.missingRuntimeTitle")}</AlertTitle>
+            <AlertDescription>
+              {t("extensions.missingRuntimeDescription", { command: missingRuntimeCommand })}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t("common.cancel")}
+          </Button>
+          <Button onClick={handleInstall} disabled={!isFormValid}>
+            {missingRuntimeCommand ? t("extensions.installAnyway") : t("extensions.installAction")}
+          </Button>
+        </div>
       </DialogFooter>
     </>
   );

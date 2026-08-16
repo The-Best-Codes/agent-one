@@ -3,6 +3,28 @@ import type { MCPRegistryEntry } from "./types";
 
 type InstallFieldKind = "env" | "header" | "variable";
 
+const STDIO_RUNTIME_WHITELIST = new Set([
+  "npx",
+  "bunx",
+  "uvx",
+  "pipx",
+  "pip",
+  "uv",
+  "docker",
+  "podman",
+  "node",
+  "bun",
+  "python",
+  "python3",
+  "dnx",
+  "dotnet",
+]);
+
+export function getStdioRuntimeCommand(command: string): string | undefined {
+  const [first] = command.trim().split(/\s+/);
+  return first && STDIO_RUNTIME_WHITELIST.has(first) ? first : undefined;
+}
+
 export interface RegistryInstallField {
   id: string;
   kind: InstallFieldKind;
