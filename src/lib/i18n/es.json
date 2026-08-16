@@ -613,6 +613,8 @@
     "httpRemote": "HTTP (Remoto)",
     "stdioHelp": "Los servidores STDIO se ejecutan localmente mediante línea de comandos.",
     "httpHelp": "Los servidores HTTP son endpoints remotos compatibles con el protocolo MCP.",
+    "stdioSecurityTitle": "Esta extensión ejecuta código en tu dispositivo",
+    "stdioSecurityDescription": "Instálala solo si confías en el desarrollador. Puede que no funcione correctamente en todos los dispositivos.",
     "command": "Comando",
     "url": "URL",
     "timeoutSeconds": "Tiempo límite (segundos)",

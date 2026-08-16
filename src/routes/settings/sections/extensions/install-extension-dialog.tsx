@@ -193,6 +193,7 @@ function InstallExtensionDialogBody({
           approvalDescription={t("extensions.approvalDescription")}
           stdioSupplement={detectedConfigurationContent}
           httpSupplement={detectedConfigurationContent}
+          showStdioWarning
         />
       </div>
 

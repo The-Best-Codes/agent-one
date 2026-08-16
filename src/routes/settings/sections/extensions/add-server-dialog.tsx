@@ -137,6 +137,7 @@ export function AddServerDialog({
             values={formValues}
             onChange={(updates) => setFormValues((current) => ({ ...current, ...updates }))}
             namePlaceholder={t("extensions.namePlaceholderExample")}
+            showStdioWarning
           />
         </div>
 

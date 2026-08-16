@@ -613,6 +613,8 @@
     "httpRemote": "HTTP (Remote)",
     "stdioHelp": "STDIO-Server laufen lokal über die Befehlszeile.",
     "httpHelp": "HTTP-Server sind entfernte Endpunkte mit MCP-Protokoll.",
+    "stdioSecurityTitle": "Diese Erweiterung führt Code auf deinem Gerät aus",
+    "stdioSecurityDescription": "Installiere sie nur, wenn du dem Entwickler vertraust. Sie funktioniert möglicherweise nicht auf allen Geräten korrekt.",
     "command": "Befehl",
     "url": "URL",
     "timeoutSeconds": "Timeout (Sekunden)",

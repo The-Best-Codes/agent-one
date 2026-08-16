@@ -1,8 +1,10 @@
+import { IconAlertTriangle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,6 +43,7 @@ interface McpServerConfigFormProps {
   stdioSupplement?: ReactNode;
   httpSupplement?: ReactNode;
   showApprovalControls?: boolean;
+  showStdioWarning?: boolean;
 }
 
 export function McpServerConfigForm({
@@ -57,6 +60,7 @@ export function McpServerConfigForm({
   stdioSupplement,
   httpSupplement,
   showApprovalControls = false,
+  showStdioWarning = false,
 }: McpServerConfigFormProps) {
   const { t } = useTranslation();
   const isStdio = values.type === "stdio";
@@ -103,6 +107,13 @@ export function McpServerConfigForm({
 
       {isStdio ? (
         <>
+          {showStdioWarning ? (
+            <Alert>
+              <IconAlertTriangle />
+              <AlertTitle>{t("extensions.stdioSecurityTitle")}</AlertTitle>
+              <AlertDescription>{t("extensions.stdioSecurityDescription")}</AlertDescription>
+            </Alert>
+          ) : null}
           <div className="grid gap-2">
             <Label htmlFor={`${idPrefix}-command`}>{t("extensions.command")}</Label>
             <Input

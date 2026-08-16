@@ -613,6 +613,8 @@
     "httpRemote": "HTTP (Remote)",
     "stdioHelp": "STDIO servers run locally via command line.",
     "httpHelp": "HTTP servers are remote endpoints that support the MCP protocol.",
+    "stdioSecurityTitle": "This extension runs code on your device",
+    "stdioSecurityDescription": "Only install it if you trust the developer. It may not work correctly on all devices.",
     "command": "Command",
     "url": "URL",
     "timeoutSeconds": "Timeout (seconds)",

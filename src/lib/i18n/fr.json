@@ -613,6 +613,8 @@
     "httpRemote": "HTTP (Distant)",
     "stdioHelp": "Les serveurs STDIO s'exécutent localement en ligne de commande.",
     "httpHelp": "Les serveurs HTTP sont des points de terminaison distants compatibles MCP.",
+    "stdioSecurityTitle": "Cette extension exécute du code sur votre appareil",
+    "stdioSecurityDescription": "Ne l'installez que si vous faites confiance au développeur. Elle peut ne pas fonctionner correctement sur tous les appareils.",
     "command": "Commande",
     "url": "URL",
     "timeoutSeconds": "Délai d'attente (secondes)",
