@@ -42,7 +42,7 @@ Importantly, AgentOne is a desktop app. There are currently no plans for a CLI. 
 ## Key Features
 
 - **Subagents:** Obviously. Everyone supports these. Async subagents are coming soon, though!
-- **Extensions & MCP:** AgentOne ships with **29,000+ built-in extensions** and supports the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) for custom servers, both local (STDIO) and remote (HTTP). Extensions can also render interactive apps directly inside your chats (MCP Apps, beta).
+- **Extensions & MCP:** AgentOne ships with **20,000+ built-in extensions** and supports the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) for custom servers, both local (STDIO) and remote (HTTP). Extensions can also render interactive apps directly inside your chats (MCP Apps, beta).
 - **Bring your own key:** Use your own API keys from OpenRouter, Groq, Google, Cerebras, and dozens more directly from your device, with no price markup. Or let AgentOne handle the models for you. Local models via Ollama and LM Studio are supported too.
 - **Private by default:** Everything runs locally on your device.
 - **Cross-device sync:** Sign in to sync your settings across devices.
