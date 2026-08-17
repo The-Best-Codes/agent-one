@@ -136,11 +136,3 @@ snapcraft export-login --snaps=agent-one --channels=stable -
 
 - To run E2E tests on a commit in your PR, add `[e2e]` to the commit message. E2E tests will only run if the _current_ commit message contains `[e2e]`, even previous commit messages also contain `[e2e]`.
 - Rust checks will only run if `src-tauri/` has changed.
-
----
-
-Copyright © 2026 bestcodes.dev
-
-All rights reserved.
-
-This code is proprietary and confidential. No license is granted to use, copy, modify, distribute, or create derivative works of this software except with explicit written permission from the copyright holder.
