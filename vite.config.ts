@@ -130,7 +130,7 @@ export default defineConfig(() => ({
   plugins: [
     react(),
     babel({
-      presets: [reactCompilerPreset({ target: "19" })],
+      presets: !process.env.DISABLE_REACT_COMPILER ? [reactCompilerPreset({ target: "19" })] : [],
       exclude: [/[/\\]node_modules[/\\]/, /[/\\]src[/\\]workers[/\\]/],
     }),
     tailwindcss(),
