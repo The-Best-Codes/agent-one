@@ -45,17 +45,17 @@ keyring-core = "1.0.0"
 tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
 axum = "0.8.9"
 url = "2.5.8"
-rmcp = { version = "3.1.0", features = [
+rmcp = { version = "3.1.2", features = [
   "auth",
   "client",
   "transport-streamable-http-client",
   "transport-streamable-http-client-reqwest",
 ] }
-async-trait = "0.1.91"
+async-trait = "0.1.92"
 tauri-plugin-websocket = "2"
 sqlx = { version = "0.9.0", features = ["sqlite", "runtime-tokio", "tls-rustls"] }
 chacha20poly1305 = "0.11.0"
-base64 = "0.23.0"
+base64 = "0.23.1"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
@@ -64,7 +64,7 @@ tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-apple-native-keyring-store = { version = "1.0.1", features = ["keychain", "protected"] }
+apple-native-keyring-store = { version = "1.0.2", features = ["keychain", "protected"] }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-native-keyring-store = "1.1.0"
@@ -74,4 +74,4 @@ windows-sys = { version = "0.61.2", features = [
 ] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-zbus-secret-service-keyring-store = { version = "1.0.0", features = ["rt-async-io-crypto-rust"] }
+zbus-secret-service-keyring-store = { version = "1.0.1", features = ["rt-async-io-crypto-rust"] }
