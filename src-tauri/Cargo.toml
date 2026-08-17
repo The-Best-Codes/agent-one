@@ -2,7 +2,8 @@
 name = "agent-one"
 version = "1.0.4"
 description = "AgentOne is a powerful AI agent that gives you freedom to choose your models and control your data."
-authors = ["you"]
+authors = ["The-Best-Codes"]
+license = "AGPL-3.0-or-later"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
