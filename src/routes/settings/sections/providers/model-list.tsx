@@ -558,15 +558,13 @@ export function ModelList({
       const existingIds = new Set(models.map((model) => model.id));
       const fetchedModels = response.data
         .filter((model) => !existingIds.has(model.id))
-        .map(
-          (model): ProviderModelMetadata => ({
-            id: model.id,
-            supportsText: true,
-            supportsTools: true,
-            supportsImages: false,
-            supportsAttachments: false,
-          }),
-        );
+        .map((model): ProviderModelMetadata => ({
+          id: model.id,
+          supportsText: true,
+          supportsTools: true,
+          supportsImages: false,
+          supportsAttachments: false,
+        }));
 
       if (fetchedModels.length > 0) {
         onChange([...fetchedModels, ...models]);
