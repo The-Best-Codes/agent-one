@@ -673,6 +673,7 @@
     "namePlaceholderExample": "ex. : Serveur Tout-en-un",
     "addCustomAction": "Ajouter personnalisée",
     "installDescription": "Vérifiez les paramètres détectés et installez cette extension MCP.",
+    "installMethod": "Méthode d'installation",
     "danglingDescription": "Extensions installées qui ne figurent plus dans le registre (souvent suite à une mise à jour). Elles peuvent encore tourner en arrière-plan.",
     "noDangling": "Aucune extension orpheline trouvée.",
     "removeAll": "Tout supprimer",

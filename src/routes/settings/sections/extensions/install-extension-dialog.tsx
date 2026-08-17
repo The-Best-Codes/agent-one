@@ -25,6 +25,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { isCommandAvailable } from "@/lib/run-command";
 
@@ -49,12 +57,41 @@ function InstallFieldInput({
   const { t } = useTranslation();
   const [showSecret, setShowSecret] = useState(false);
 
+  const label = (
+    <Label htmlFor={field.id} className="text-xs">
+      {field.label}
+      {field.required ? " *" : ""}
+    </Label>
+  );
+
+  if (field.choices && field.choices.length > 0) {
+    return (
+      <div className="grid gap-1.5">
+        {label}
+        <Select value={value || field.choices[0]} onValueChange={onChange}>
+          <SelectTrigger id={field.id} className="w-full">
+            <SelectValue placeholder={field.placeholder || field.label} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {field.choices.map((choice) => (
+                <SelectItem key={choice} value={choice}>
+                  {choice}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        {field.description ? (
+          <p className="text-muted-foreground text-xs">{field.description}</p>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-1.5">
-      <Label htmlFor={field.id} className="text-xs">
-        {field.label}
-        {field.required ? " *" : ""}
-      </Label>
+      {label}
       <div className="flex items-center gap-2">
         <Input
           id={field.id}
@@ -100,17 +137,15 @@ function InstallExtensionDialogBody({
   onInstall: (server: McpRegistryInstallResult) => void;
 }) {
   const { t } = useTranslation();
-  const install = extension.install;
-  const defaultFieldValues = useMemo(() => {
-    if (!install) {
-      return {};
-    }
+  const installTemplates = extension.installTemplates;
+  const [selectedTemplateId, setSelectedTemplateId] = useState(installTemplates[0]?.id ?? "");
 
-    return install.fields.reduce<Record<string, string>>((accumulator, field) => {
-      accumulator[field.id] = field.defaultValue;
-      return accumulator;
-    }, {});
-  }, [install]);
+  const install = useMemo(
+    () =>
+      installTemplates.find((template) => template.id === selectedTemplateId) ??
+      installTemplates[0],
+    [installTemplates, selectedTemplateId],
+  );
 
   const [formValues, setFormValues] = useState<McpServerConfigFormValues>({
     type: install?.type ?? "stdio",
@@ -122,11 +157,41 @@ function InstallExtensionDialogBody({
     timeoutSec: 30,
     requiresApproval: false,
   });
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>(defaultFieldValues);
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>(
+    install?.fields.reduce<Record<string, string>>((accumulator, field) => {
+      accumulator[field.id] = field.defaultValue;
+      return accumulator;
+    }, {}) ?? {},
+  );
   const [runtimeCheck, setRuntimeCheck] = useState<{
     command: string;
     available: boolean;
   } | null>(null);
+
+  const selectMethod = (templateId: string) => {
+    const next = installTemplates.find((template) => template.id === templateId);
+    if (!next) {
+      return;
+    }
+
+    setSelectedTemplateId(next.id);
+    setFormValues({
+      type: next.type,
+      name: extension.displayName,
+      command: next.commandTemplate || "",
+      env: {},
+      url: next.urlTemplate || "",
+      headers: {},
+      timeoutSec: 30,
+      requiresApproval: false,
+    });
+    setFieldValues(
+      next.fields.reduce<Record<string, string>>((accumulator, field) => {
+        accumulator[field.id] = field.defaultValue;
+        return accumulator;
+      }, {}),
+    );
+  };
 
   const runtimeCommand =
     install?.type === "stdio" ? getStdioRuntimeCommand(formValues.command) : undefined;
@@ -188,7 +253,7 @@ function InstallExtensionDialogBody({
       return;
     }
 
-    const result = createMcpServerFromRegistryInstall(extension, {
+    const result = createMcpServerFromRegistryInstall(install, {
       name: formValues.name.trim(),
       timeoutSec: formValues.timeoutSec,
       requiresApproval: formValues.requiresApproval,
@@ -203,6 +268,7 @@ function InstallExtensionDialogBody({
 
     trackSettingsInteraction("extensions", "submit_install_extension", {
       type: install.type,
+      method: install.label,
       requires_approval: formValues.requiresApproval,
       field_count: install.fields.length,
     });
@@ -219,6 +285,27 @@ function InstallExtensionDialogBody({
       </DialogHeader>
 
       <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
+        {installTemplates.length > 1 ? (
+          <div className="grid gap-2 py-2">
+            <Label htmlFor="install-method" className="text-sm">
+              {t("extensions.installMethod")}
+            </Label>
+            <Select value={install.id} onValueChange={selectMethod}>
+              <SelectTrigger id="install-method" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {installTemplates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
         <McpServerConfigForm
           idPrefix="install-extension"
           className="grid gap-4 py-2"

@@ -1,5 +1,5 @@
 import mcpRegistryData from "./mcp-registry.json";
-import type { MCPRegistryEntry } from "./types";
+import type { MCPRegistryEntry, Package, Remote, Transport } from "./types";
 
 type InstallFieldKind = "env" | "header" | "variable";
 
@@ -39,7 +39,10 @@ export interface RegistryInstallField {
 }
 
 export interface McpRegistryInstallTemplate {
+  id: string;
   type: "stdio" | "http";
+  label: string;
+  runtimeHint?: string;
   commandTemplate?: string;
   urlTemplate?: string;
   envDefaults: Record<string, string>;
@@ -65,7 +68,7 @@ export interface McpRegistryExtension {
   requiredFieldCount: number;
   transportTypes: string[];
   updatedAt?: string;
-  install?: McpRegistryInstallTemplate;
+  installTemplates: McpRegistryInstallTemplate[];
   searchText: string;
   registryEntry: MCPRegistryEntry;
 }
@@ -144,6 +147,37 @@ function inferRuntimeHint(registryType?: string): string | undefined {
   if (registryType === "pypi") return "uvx";
   if (registryType === "oci") return "docker";
   return undefined;
+}
+
+function getRegistryTypeLabel(registryType?: string): string {
+  switch (registryType) {
+    case "npm":
+      return "npm";
+    case "pypi":
+      return "PyPI";
+    case "oci":
+      return "Docker";
+    case "mcpb":
+      return "Packaged binary";
+    case "cargo":
+      return "Cargo";
+    case "github":
+      return "GitHub";
+    case "local":
+      return "Local";
+    default:
+      return registryType ?? "Package";
+  }
+}
+
+function getStdioInstallLabel(registryType?: string, runtimeHint?: string): string {
+  const base = getRegistryTypeLabel(registryType);
+  const runtime = runtimeHint ?? inferRuntimeHint(registryType);
+  return runtime ? `${base} (${runtime})` : base;
+}
+
+function buildInstallTemplateId(type: string, ...parts: Array<string | undefined>): string {
+  return [type, ...parts.filter((part): part is string => Boolean(part))].join(":");
 }
 
 function normalizeInputField(
@@ -233,17 +267,9 @@ function toCommandArgumentToken(
   return null;
 }
 
-function buildStdioInstallTemplate(
-  server: MCPRegistryEntry["server"],
-): McpRegistryInstallTemplate | undefined {
-  const packages = Array.isArray(server.packages) ? server.packages : [];
-  const pkg = packages.find((candidate) => candidate.transport?.type === "stdio");
-
-  if (!pkg) {
-    return undefined;
-  }
-
-  const runtimeHint = asString(pkg.runtimeHint) ?? inferRuntimeHint(asString(pkg.registryType));
+function buildStdioInstallTemplate(pkg: Package): McpRegistryInstallTemplate | undefined {
+  const registryType = asString(pkg.registryType);
+  const runtimeHint = asString(pkg.runtimeHint) ?? inferRuntimeHint(registryType);
   const identifier = asString(pkg.identifier);
 
   if (!runtimeHint || !identifier) {
@@ -316,7 +342,10 @@ function buildStdioInstallTemplate(
   }
 
   return {
+    id: buildInstallTemplateId("stdio", registryType, identifier),
     type: "stdio",
+    label: getStdioInstallLabel(registryType, runtimeHint),
+    runtimeHint,
     commandTemplate,
     envDefaults,
     headerDefaults: {},
@@ -325,22 +354,18 @@ function buildStdioInstallTemplate(
 }
 
 function buildHttpInstallTemplate(
-  server: MCPRegistryEntry["server"],
+  source: Remote | Transport,
 ): McpRegistryInstallTemplate | undefined {
-  const remotes = Array.isArray(server.remotes) ? server.remotes : [];
-  const remote = remotes.find(
-    (candidate) => candidate?.type === "streamable-http" || candidate?.type === "sse",
-  );
+  const urlTemplate = asString(source.url);
 
-  if (!remote || !asString(remote.url)) {
+  if (!urlTemplate) {
     return undefined;
   }
 
   const variableFields = new Map<string, RegistryInstallField>();
-  const urlTemplate = asString(remote.url)!;
 
-  if (remote.variables && typeof remote.variables === "object") {
-    const variablesRecord = remote.variables as Record<string, unknown>;
+  if (source.variables && typeof source.variables === "object") {
+    const variablesRecord = source.variables as Record<string, unknown>;
     for (const [key, value] of Object.entries(variablesRecord)) {
       addVariableField(
         variableFields,
@@ -359,7 +384,7 @@ function buildHttpInstallTemplate(
   const headerDefaults: Record<string, string> = {};
   const headerFields: RegistryInstallField[] = [];
 
-  const headers = Array.isArray(remote.headers) ? remote.headers : [];
+  const headers = Array.isArray(source.headers) ? source.headers : [];
   for (const header of headers) {
     if (!header || typeof header !== "object" || typeof header.name !== "string") {
       continue;
@@ -390,7 +415,9 @@ function buildHttpInstallTemplate(
   }
 
   return {
+    id: buildInstallTemplateId("http", asString(source.type), urlTemplate),
     type: "http",
+    label: "HTTP",
     urlTemplate,
     envDefaults: {},
     headerDefaults,
@@ -398,10 +425,53 @@ function buildHttpInstallTemplate(
   };
 }
 
-function buildInstallTemplate(
-  server: MCPRegistryEntry["server"],
-): McpRegistryInstallTemplate | undefined {
-  return buildStdioInstallTemplate(server) ?? buildHttpInstallTemplate(server);
+function buildInstallTemplates(server: MCPRegistryEntry["server"]): McpRegistryInstallTemplate[] {
+  const templates: McpRegistryInstallTemplate[] = [];
+  const packages = Array.isArray(server.packages) ? server.packages : [];
+  const remotes = Array.isArray(server.remotes) ? server.remotes : [];
+
+  for (const pkg of packages) {
+    if (asString(pkg.transport?.type) === "stdio") {
+      const template = buildStdioInstallTemplate(pkg);
+      if (template) {
+        templates.push(template);
+      }
+    }
+  }
+
+  const seenUrls = new Set<string>();
+  for (const pkg of packages) {
+    const transportType = asString(pkg.transport?.type);
+    if (transportType !== "streamable-http") {
+      continue;
+    }
+    const url = asString(pkg.transport?.url);
+    if (!url || seenUrls.has(url)) {
+      continue;
+    }
+    seenUrls.add(url);
+    const template = buildHttpInstallTemplate(pkg.transport);
+    if (template) {
+      templates.push(template);
+    }
+  }
+
+  for (const remote of remotes) {
+    if (remote?.type !== "streamable-http") {
+      continue;
+    }
+    const url = asString(remote.url);
+    if (!url || seenUrls.has(url)) {
+      continue;
+    }
+    seenUrls.add(url);
+    const template = buildHttpInstallTemplate(remote);
+    if (template) {
+      templates.push(template);
+    }
+  }
+
+  return templates;
 }
 
 function createSearchText(entry: McpRegistryExtension): string {
@@ -464,7 +534,7 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
       Array.isArray(server.icons) && server.icons.length > 0
         ? asString(server.icons[0]?.src)
         : undefined;
-    const installTemplate = buildInstallTemplate(server);
+    const installTemplates = buildInstallTemplates(server);
 
     const extension: McpRegistryExtension = {
       id: `${server.name}@${server.version}`,
@@ -480,11 +550,11 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
       license: asString(publisherProvided?.license),
       keywords,
       packageCount: packages.length,
-      installType: installTemplate?.type,
-      requiredFieldCount: installTemplate?.fields.filter((field) => field.required).length ?? 0,
+      installType: installTemplates[0]?.type,
+      requiredFieldCount: installTemplates[0]?.fields.filter((field) => field.required).length ?? 0,
       transportTypes,
       updatedAt: asString(entry._meta?.["io.modelcontextprotocol.registry/official"]?.updatedAt),
-      install: installTemplate,
+      installTemplates,
       searchText: "",
       registryEntry: entry,
     };
@@ -499,10 +569,10 @@ export function getMcpRegistryExtensions(): McpRegistryExtension[] {
 }
 
 export function createMcpServerFromRegistryInstall(
-  extension: McpRegistryExtension,
+  template: McpRegistryInstallTemplate,
   submission: RegistryInstallSubmission,
 ): McpRegistryInstallResult | null {
-  const install = extension.install;
+  const install = template;
   if (!install) {
     return null;
   }

@@ -673,6 +673,7 @@
     "namePlaceholderExample": "e.g., Everything Server",
     "addCustomAction": "Add Custom",
     "installDescription": "Review detected settings and install this MCP extension.",
+    "installMethod": "Install method",
     "danglingDescription": "These extensions were installed previously but no longer match anything in the registry, usually because the extension was updated to a newer version. They may still be running in the background.",
     "noDangling": "No dangling extensions found.",
     "removeAll": "Remove all",

@@ -673,6 +673,7 @@
     "namePlaceholderExample": "z. B. Everything Server",
     "addCustomAction": "Hinzufügen",
     "installDescription": "Erkannte Einstellungen prüfen und MCP-Erweiterung installieren.",
+    "installMethod": "Installationsmethode",
     "danglingDescription": "Diese Erweiterungen waren zuvor installiert, stimmen aber nicht mehr mit der Registrierung überein. Sie laufen möglicherweise noch im Hintergrund.",
     "noDangling": "Keine verwaisten Erweiterungen gefunden.",
     "removeAll": "Alle entfernen",

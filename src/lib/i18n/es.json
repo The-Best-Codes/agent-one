@@ -673,6 +673,7 @@
     "namePlaceholderExample": "Ej.: Everything Server",
     "addCustomAction": "Añadir personalizada",
     "installDescription": "Revisa los ajustes detectados e instala esta extensión MCP.",
+    "installMethod": "Método de instalación",
     "danglingDescription": "Estas extensiones se instalaron antes pero ya no coinciden con el registro, habitualmente por una actualización de versión. Podrían seguir ejecutándose en segundo plano.",
     "noDangling": "No se encontraron extensiones huérfanas.",
     "removeAll": "Eliminar todas",

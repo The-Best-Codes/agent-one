@@ -673,6 +673,7 @@
     "namePlaceholderExample": "es. Server Everything",
     "addCustomAction": "Aggiungi personalizzato",
     "installDescription": "Rivedi le impostazioni rilevate e installa questa estensione MCP.",
+    "installMethod": "Metodo di installazione",
     "danglingDescription": "Queste estensioni sono state installate in precedenza ma non corrispondono più al registro, spesso a causa di un aggiornamento. Potrebbero essere ancora in esecuzione in background.",
     "noDangling": "Nessuna estensione isolata trovata.",
     "removeAll": "Rimuovi tutto",

@@ -18,6 +18,7 @@ export interface ExtensionListItem {
   description: string;
   searchText: string;
   transportType: "stdio" | "http" | "built-in";
+  transportTypes?: ("stdio" | "http")[];
   installed: boolean;
   canUninstall: boolean;
   installSupported: boolean;
@@ -64,9 +65,8 @@ export function ExtensionsBrowser({
 
     result = result.filter((item) => {
       if (item.transportType === "built-in") return true;
-      if (item.transportType === "stdio") return showDeviceExtensions;
-      if (item.transportType === "http") return showOnlineExtensions;
-      return showDeviceExtensions || showOnlineExtensions;
+      const types = item.transportTypes ?? [item.transportType];
+      return types.some((type) => (type === "stdio" ? showDeviceExtensions : showOnlineExtensions));
     });
 
     const normalizedQuery = query.trim();

@@ -316,9 +316,13 @@ export default function ExtensionsSection() {
           .filter(Boolean)
           .join(" "),
         transportType: extension.installType ?? "stdio",
+        transportTypes:
+          extension.installTemplates.length > 0
+            ? Array.from(new Set(extension.installTemplates.map((template) => template.type)))
+            : undefined,
         installed,
         canUninstall: true,
-        installSupported: Boolean(extension.install),
+        installSupported: extension.installTemplates.length > 0,
         version: extension.version,
         iconUrl: extension.iconUrl,
         websiteUrl: extension.websiteUrl,
@@ -327,7 +331,7 @@ export default function ExtensionsSection() {
         loadState: server ? mcpServerLoadStates[server.id] : undefined,
         authState: server ? mcpAuthStates[server.id] : undefined,
         onInstall: () => {
-          if (extension.install) {
+          if (extension.installTemplates.length > 0) {
             setSelectedExtension(extension);
             setShowInstallDialog(true);
           }
