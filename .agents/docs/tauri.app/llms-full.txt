@@ -18738,7 +18738,7 @@ Hover “\*” to see notes. For more details visit the plugin page
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/autostart)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-autostart)[crates.io](https://crates.io/crates/tauri-plugin-autostart)
 
-API Reference[](/reference/javascript/autostart/)[](https://docs.rs/tauri-plugin-autostart)
+API Reference:[](/reference/javascript/autostart/)[](https://docs.rs/tauri-plugin-autostart)
 
 Automatically launch your application at system startup.
 
@@ -19027,7 +19027,7 @@ It allows all to check, enable and disable the automatic start on boot.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/barcode-scanner)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-barcode-scanner)[crates.io](https://crates.io/crates/tauri-plugin-barcode-scanner)
 
-API Reference[](/reference/javascript/barcode-scanner/)[](https://docs.rs/tauri-plugin-barcode-scanner)
+API Reference:[](/reference/javascript/barcode-scanner/)[](https://docs.rs/tauri-plugin-barcode-scanner)
 
 Allows your mobile application to use the camera to scan QR codes, EAN-13 and other kinds of barcodes.
 
@@ -19304,7 +19304,7 @@ It allows all barcode related features.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/biometric)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-biometric)[crates.io](https://crates.io/crates/tauri-plugin-biometric)
 
-API Reference[](/reference/javascript/biometric/)[](https://docs.rs/tauri-plugin-biometric)
+API Reference:[](/reference/javascript/biometric/)[](https://docs.rs/tauri-plugin-biometric)
 
 Prompt the user for biometric authentication on Android and iOS.
 
@@ -19669,7 +19669,7 @@ It allows acccess to all biometric commands.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/cli)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-cli)[crates.io](https://crates.io/crates/tauri-plugin-cli)
 
-API Reference[](/reference/javascript/cli/)[](https://docs.rs/tauri-plugin-cli)
+API Reference:[](/reference/javascript/cli/)[](https://docs.rs/tauri-plugin-cli)
 
 Tauri enables your app to have a CLI through [clap](https://github.com/clap-rs/clap), a robust command line argument parser. With a simple CLI definition in your `tauri.conf.json` file, you can define your interface and read its argument matches map on JavaScript and/or Rust.
 
@@ -20085,7 +20085,7 @@ Allows reading the CLI matches
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/clipboard-manager)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-clipboard-manager)[crates.io](https://crates.io/crates/tauri-plugin-clipboard-manager)
 
-API Reference[](/reference/javascript/clipboard-manager/)[](https://docs.rs/tauri-plugin-clipboard-manager)
+API Reference:[](/reference/javascript/clipboard-manager/)[](https://docs.rs/tauri-plugin-clipboard-manager)
 
 Read and write to the system clipboard using the clipboard plugin.
 
@@ -20331,7 +20331,7 @@ Clipboard interaction needs to be explicitly enabled.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/deep-link)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-deep-link)[crates.io](https://crates.io/crates/tauri-plugin-deep-link)
 
-API Reference[](/reference/javascript/deep-link/)[](https://docs.rs/tauri-plugin-deep-link)
+API Reference:[](/reference/javascript/deep-link/)[](https://docs.rs/tauri-plugin-deep-link)
 
 Set your Tauri application as the default handler for an URL.
 
@@ -20921,7 +20921,7 @@ Allows reading the opened deep link via the get\_current command
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/dialog)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-dialog)[crates.io](https://crates.io/crates/tauri-plugin-dialog)
 
-API Reference[](/reference/javascript/dialog/)[](https://docs.rs/tauri-plugin-dialog)
+API Reference:[](/reference/javascript/dialog/)[](https://docs.rs/tauri-plugin-dialog)
 
 Native system dialogs for opening and saving files along with message dialogs.
 
@@ -21389,7 +21389,7 @@ All dialog types are enabled.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/fs)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-fs)[crates.io](https://crates.io/crates/tauri-plugin-fs)
 
-API Reference[](/reference/javascript/fs/)[](https://docs.rs/tauri-plugin-fs)
+API Reference:[](/reference/javascript/fs/)[](https://docs.rs/tauri-plugin-fs)
 
 Access the file system.
 
@@ -22562,7 +22562,7 @@ The same option exists for **`app.security.assetProtocol.scope`** when you use t
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/geolocation)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-geolocation)[crates.io](https://crates.io/crates/tauri-plugin-geolocation)
 
-API Reference[](/reference/javascript/geolocation/)[](https://docs.rs/tauri-plugin-geolocation)
+API Reference:[](/reference/javascript/geolocation/)[](https://docs.rs/tauri-plugin-geolocation)
 
 Get and track the device’s current position, including information about altitude, heading, and speed (if available).
 
@@ -22862,7 +22862,7 @@ src-tauri/capabilities/mobile.json
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/global-shortcut)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-global-shortcut)[crates.io](https://crates.io/crates/tauri-plugin-global-shortcut)
 
-API Reference[](/reference/javascript/global-shortcut/)[](https://docs.rs/tauri-plugin-global-shortcut)
+API Reference:[](/reference/javascript/global-shortcut/)[](https://docs.rs/tauri-plugin-global-shortcut)
 
 Register global shortcuts.
 
@@ -23150,7 +23150,7 @@ No features are enabled by default, as we believe the shortcuts can be inherentl
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/haptics)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-haptics)[crates.io](https://crates.io/crates/tauri-plugin-haptics)
 
-API Reference[](/reference/javascript/haptics/)[](https://docs.rs/tauri-plugin-haptics)
+API Reference:[](/reference/javascript/haptics/)[](https://docs.rs/tauri-plugin-haptics)
 
 Haptic feedback and vibrations on Android and iOS.
 
@@ -23397,7 +23397,7 @@ src-tauri/capabilities/mobile.json
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/http)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-http)[crates.io](https://crates.io/crates/tauri-plugin-http)
 
-API Reference[](/reference/javascript/http/)[](https://docs.rs/tauri-plugin-http)
+API Reference:[](/reference/javascript/http/)[](https://docs.rs/tauri-plugin-http)
 
 Make HTTP requests with the http plugin.
 
@@ -23680,7 +23680,7 @@ All fetch operations are enabled.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/localhost)[crates.io](https://crates.io/crates/tauri-plugin-localhost)
 
-API Reference[](https://docs.rs/tauri-plugin-localhost)
+API Reference:[](https://docs.rs/tauri-plugin-localhost)
 
 Expose your app’s assets through a localhost server instead of the default custom protocol.
 
@@ -23836,7 +23836,7 @@ pub fn run() {
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/log)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-log)[crates.io](https://crates.io/crates/tauri-plugin-log)
 
-API Reference[](/reference/javascript/log/)[](https://docs.rs/tauri-plugin-log)
+API Reference:[](/reference/javascript/log/)[](https://docs.rs/tauri-plugin-log)
 
 Configurable logging for your Tauri app.
 
@@ -24346,7 +24346,7 @@ Allows the log command
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/nfc)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-nfc)[crates.io](https://crates.io/crates/tauri-plugin-nfc)
 
-API Reference[](/reference/javascript/nfc/)[](https://docs.rs/tauri-plugin-nfc)
+API Reference:[](/reference/javascript/nfc/)[](https://docs.rs/tauri-plugin-nfc)
 
 Read and write NFC tags on Android and iOS.
 
@@ -24873,7 +24873,7 @@ Checking if the NFC functionality is available and scanning nearby tags is allow
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/notification)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-notification)[crates.io](https://crates.io/crates/tauri-plugin-notification)
 
-API Reference[](/reference/javascript/notification/)[](https://docs.rs/tauri-plugin-notification)
+API Reference:[](/reference/javascript/notification/)[](https://docs.rs/tauri-plugin-notification)
 
 Send native notifications to your user using the notification plugin.
 
@@ -25368,7 +25368,7 @@ It allows all notification related features.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/opener)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-opener)[crates.io](https://crates.io/crates/tauri-plugin-opener)
 
-API Reference[](/reference/javascript/opener/)[](https://docs.rs/tauri-plugin-opener)
+API Reference:[](/reference/javascript/opener/)[](https://docs.rs/tauri-plugin-opener)
 
 This plugin allows you to open files and URLs in a specified, or the default, application. It also supports “revealing” files in the system’s file explorer.
 
@@ -25672,7 +25672,7 @@ This permission set allows opening `mailto:`, `tel:`, `https://` and `http://` u
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/os)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-os)[crates.io](https://crates.io/crates/tauri-plugin-os)
 
-API Reference[](/reference/javascript/os/)[](https://docs.rs/tauri-plugin-os)
+API Reference:[](/reference/javascript/os/)[](https://docs.rs/tauri-plugin-os)
 
 Read information about the operating system using the OS Information plugin.
 
@@ -25943,7 +25943,7 @@ All information except the host name are available.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/persisted-scope)[crates.io](https://crates.io/crates/tauri-plugin-persisted-scope)
 
-API Reference[](https://docs.rs/tauri-plugin-persisted-scope)
+API Reference:[](https://docs.rs/tauri-plugin-persisted-scope)
 
 Save filesystem and asset scopes and restore them when the app is reopened.
 
@@ -26092,7 +26092,7 @@ After setup the plugin will automatically save and restore filesystem and asset 
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/positioner)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-positioner)[crates.io](https://crates.io/crates/tauri-plugin-positioner)
 
-API Reference[](/reference/javascript/positioner/)[](https://docs.rs/tauri-plugin-positioner)
+API Reference:[](/reference/javascript/positioner/)[](https://docs.rs/tauri-plugin-positioner)
 
 Position your windows at well-known locations.
 
@@ -26385,7 +26385,7 @@ Allows the moveWindow and handleIconState APIs
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/process)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-process)[crates.io](https://crates.io/crates/tauri-plugin-process)
 
-API Reference[](/reference/javascript/process/)[](https://docs.rs/tauri-plugin-process)
+API Reference:[](/reference/javascript/process/)[](https://docs.rs/tauri-plugin-process)
 
 This plugin provides APIs to access the current process. To spawn child processes, see the [shell](/plugin/shell/) plugin.
 
@@ -26643,7 +26643,7 @@ This enables to quit via `allow-exit` and restart via `allow-restart` the applic
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/shell)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-shell)[crates.io](https://crates.io/crates/tauri-plugin-shell)
 
-API Reference[](/reference/javascript/shell/)[](https://docs.rs/tauri-plugin-shell)
+API Reference:[](/reference/javascript/shell/)[](https://docs.rs/tauri-plugin-shell)
 
 Access the system shell. Allows you to spawn child processes.
 
@@ -26936,7 +26936,7 @@ It allows to use the `open` functionality with a reasonable scope pre-configured
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/single-instance)[crates.io](https://crates.io/crates/tauri-plugin-single-instance)
 
-API Reference[](https://docs.rs/tauri-plugin-single-instance)
+API Reference:[](https://docs.rs/tauri-plugin-single-instance)
 
 Ensure that a single instance of your tauri app is running at a time using the Single Instance Plugin.
 
@@ -27199,7 +27199,7 @@ Because this Plugin currently does not have JavaScript APIs you do not have to c
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/sql)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-sql)[crates.io](https://crates.io/crates/tauri-plugin-sql)
 
-API Reference[](/reference/javascript/sql/)[](https://docs.rs/tauri-plugin-sql)
+API Reference:[](/reference/javascript/sql/)[](https://docs.rs/tauri-plugin-sql)
 
 Plugin providing an interface for the frontend to communicate with SQL databases through [sqlx](https://github.com/launchbadge/sqlx). It supports the SQLite, MySQL and PostgreSQL drivers, enabled by a Cargo feature.
 
@@ -27654,7 +27654,7 @@ All reading related operations are enabled. Also allows to load or close a conne
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/store)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-store)[crates.io](https://crates.io/crates/tauri-plugin-store)
 
-API Reference[](/reference/javascript/store/)[](https://docs.rs/tauri-plugin-store)
+API Reference:[](/reference/javascript/store/)[](https://docs.rs/tauri-plugin-store)
 
 This plugin provides a persistent key-value store. This is one of many options to handle state in your application. See the [state management overview](/develop/state-management/) for more information on additional options.
 
@@ -28024,7 +28024,7 @@ All operations are enabled by default.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/stronghold)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-stronghold)[crates.io](https://crates.io/crates/tauri-plugin-stronghold)
 
-API Reference[](/reference/javascript/stronghold/)[](https://docs.rs/tauri-plugin-stronghold)
+API Reference:[](/reference/javascript/stronghold/)[](https://docs.rs/tauri-plugin-stronghold)
 
 Store secrets and keys using the [IOTA Stronghold](https://github.com/iotaledger/stronghold.rs) secret management engine.
 
@@ -28424,7 +28424,7 @@ All non-destructive operations are enabled by default.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/updater)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-updater)[crates.io](https://crates.io/crates/tauri-plugin-updater)
 
-API Reference[](/reference/javascript/updater/)[](https://docs.rs/tauri-plugin-updater)
+API Reference:[](/reference/javascript/updater/)[](https://docs.rs/tauri-plugin-updater)
 
 Automatically update your Tauri app with an update server or a static JSON.
 
@@ -29346,7 +29346,7 @@ The full workflow from checking for updates to installing them is enabled.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/upload)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-upload)[crates.io](https://crates.io/crates/tauri-plugin-upload)
 
-API Reference[](/reference/javascript/upload/)[](https://docs.rs/tauri-plugin-upload)
+API Reference:[](/reference/javascript/upload/)[](https://docs.rs/tauri-plugin-upload)
 
 Upload files from disk to a remote server over HTTP. Download files from a remote HTTP server to disk.
 
@@ -29605,7 +29605,7 @@ All operations are enabled by default.
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/websocket)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-websocket)[crates.io](https://crates.io/crates/tauri-plugin-websocket)
 
-API Reference[](/reference/javascript/websocket/)[](https://docs.rs/tauri-plugin-websocket)
+API Reference:[](/reference/javascript/websocket/)[](https://docs.rs/tauri-plugin-websocket)
 
 Open a WebSocket connection using a Rust client in JavaScript.
 
@@ -29855,7 +29855,7 @@ Allows connecting and sending data to a WebSocket server
 
 [GitHub](https://github.com/tauri-apps/plugins-workspace/tree/v2/plugins/window-state)[npm](https://www.npmx.dev/package/@tauri-apps/plugin-window-state)[crates.io](https://crates.io/crates/tauri-plugin-window-state)
 
-API Reference[](/reference/javascript/window-state/)[](https://docs.rs/tauri-plugin-window-state)
+API Reference:[](/reference/javascript/window-state/)[](https://docs.rs/tauri-plugin-window-state)
 
 Save window positions and sizes and restore them when the app is reopened.
 
