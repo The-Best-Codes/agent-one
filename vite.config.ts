@@ -193,7 +193,7 @@ export default defineConfig(() => ({
             .replace(/\\/g, "/");
 
           if (normalizedId.includes(`${modelListsDir}/`)) {
-            return path.parse(id).name;
+            return "modelLists";
           }
 
           if (normalizedId.includes(`${mcpRegistryDir}/`)) {
