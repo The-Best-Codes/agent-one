@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   typecheck:
     name: Typecheck
@@ -96,6 +99,9 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
