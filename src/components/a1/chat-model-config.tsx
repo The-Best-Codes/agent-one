@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -302,21 +303,23 @@ export const ChatModelConfig = ({
             <SelectValue>{selectedBehavior ? t(selectedBehavior.labelKey) : ""}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {TOOL_BEHAVIORS.map((behavior) => (
-              <SelectItem key={behavior.value} value={behavior.value}>
-                {t(behavior.labelKey)}
-                <AdaptiveTooltip>
-                  <AdaptiveTooltipTrigger asChild>
-                    <span className="-ml-1 inline-flex cursor-help">
-                      <IconInfoCircle className="text-muted-foreground size-3" />
-                    </span>
-                  </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent side="right" className="max-w-xs">
-                    {t(behavior.descriptionKey)}
-                  </AdaptiveTooltipContent>
-                </AdaptiveTooltip>
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {TOOL_BEHAVIORS.map((behavior) => (
+                <SelectItem key={behavior.value} value={behavior.value}>
+                  {t(behavior.labelKey)}
+                  <AdaptiveTooltip>
+                    <AdaptiveTooltipTrigger asChild>
+                      <span className="-ml-1 inline-flex cursor-help">
+                        <IconInfoCircle className="text-muted-foreground size-3" />
+                      </span>
+                    </AdaptiveTooltipTrigger>
+                    <AdaptiveTooltipContent side="right" className="max-w-xs">
+                      {t(behavior.descriptionKey)}
+                    </AdaptiveTooltipContent>
+                  </AdaptiveTooltip>
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

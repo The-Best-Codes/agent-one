@@ -779,14 +779,16 @@ export default function ChatsSection() {
                   <SelectValue placeholder={t("chatsSettings.selectMethod")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ai">{t("chatsSettings.aiGenerated")}</SelectItem>
-                  <SelectItem value="first-user-message">
-                    {t("chatsSettings.firstUserMessage")}
-                  </SelectItem>
-                  <SelectItem value="first-assistant-message">
-                    {t("chatsSettings.firstAssistantMessage")}
-                  </SelectItem>
-                  <SelectItem value="custom">{t("chatsSettings.customPhrase")}</SelectItem>
+                  <SelectGroup>
+                    <SelectItem value="ai">{t("chatsSettings.aiGenerated")}</SelectItem>
+                    <SelectItem value="first-user-message">
+                      {t("chatsSettings.firstUserMessage")}
+                    </SelectItem>
+                    <SelectItem value="first-assistant-message">
+                      {t("chatsSettings.firstAssistantMessage")}
+                    </SelectItem>
+                    <SelectItem value="custom">{t("chatsSettings.customPhrase")}</SelectItem>
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </div>

@@ -35,6 +35,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -267,11 +268,13 @@ export default function AboutSection() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {releaseNoteVersions.map((version) => (
-                        <SelectItem key={version} value={version}>
-                          v{version}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {releaseNoteVersions.map((version) => (
+                          <SelectItem key={version} value={version}>
+                            v{version}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                   <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless max-w-none">
