@@ -60,6 +60,10 @@ Here's some screenshots of various AgentOne setups and themes.
 
 ![AgentOne chat area screenshot with blue and rose theme in dark mode](.github/assets/screenshots/agentone-mono-blue-rose.png)
 
+**An example of a small section of the chat settings:**
+
+![AgentOne chat settings screenshot](.github/assets/screenshots/agentone-chat-settings.png)
+
 </details>
 
 ## Key Features
