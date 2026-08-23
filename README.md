@@ -56,6 +56,10 @@ Here's some screenshots of various AgentOne setups and themes.
 
 ![AgentOne chat area screenshot with default theme in dark mode](.github/assets/screenshots/agentone-research-default-theme.png)
 
+**Custom fonts? Responsive at small window sizes? You bet! Here it is with blue and rose theme colors:**
+
+![AgentOne chat area screenshot with blue and rose theme in dark mode](.github/assets/screenshots/agentone-mono-blue-rose.png)
+
 </details>
 
 ## Key Features
