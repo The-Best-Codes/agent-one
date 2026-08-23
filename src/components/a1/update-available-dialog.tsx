@@ -15,6 +15,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -54,15 +55,17 @@ export function UpdateAvailableDialog() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
-                <DropdownMenuItem onClick={() => handleRemind(3)}>
-                  {t("dialogs.remind3Days")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleRemind(7)}>
-                  {t("dialogs.remind1Week")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleRemind(14)}>
-                  {t("dialogs.remind2Weeks")}
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => handleRemind(3)}>
+                    {t("dialogs.remind3Days")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleRemind(7)}>
+                    {t("dialogs.remind1Week")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleRemind(14)}>
+                    {t("dialogs.remind2Weeks")}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>

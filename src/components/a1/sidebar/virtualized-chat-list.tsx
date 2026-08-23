@@ -20,6 +20,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -410,22 +411,26 @@ export const VirtualizedChatList = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
-                <DropdownMenuLabel>{t("sidebar.searchMode")}</DropdownMenuLabel>
-                <DropdownMenuCheckboxItem
-                  checked={searchContent}
-                  onCheckedChange={(checked) => setSearchContent(checked as boolean)}
-                >
-                  {t("sidebar.searchContent")}
-                </DropdownMenuCheckboxItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>{t("sidebar.searchMode")}</DropdownMenuLabel>
+                  <DropdownMenuCheckboxItem
+                    checked={searchContent}
+                    onCheckedChange={(checked) => setSearchContent(checked as boolean)}
+                  >
+                    {t("sidebar.searchContent")}
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuGroup>
                 {searchContent && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem
-                      checked={rawOperators}
-                      onCheckedChange={(checked) => setRawOperators(checked as boolean)}
-                    >
-                      {t("sidebar.rawFts")}
-                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuCheckboxItem
+                        checked={rawOperators}
+                        onCheckedChange={(checked) => setRawOperators(checked as boolean)}
+                      >
+                        {t("sidebar.rawFts")}
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuGroup>
                   </>
                 )}
               </DropdownMenuContent>

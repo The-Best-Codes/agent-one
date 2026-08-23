@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
+  ContextMenuGroup,
   ContextMenuItem,
   ContextMenuLabel,
   ContextMenuTrigger,
@@ -41,10 +42,12 @@ export function ChatToBottomButton({ onClick, className }: ChatToBottomButtonPro
           </Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuLabel>{t("common.options")}</ContextMenuLabel>
-          <ContextMenuItem variant="destructive" onSelect={() => setShowSetting(false)}>
-            {t("chat.neverShowScrollButton")}
-          </ContextMenuItem>
+          <ContextMenuGroup>
+            <ContextMenuLabel>{t("common.options")}</ContextMenuLabel>
+            <ContextMenuItem variant="destructive" onSelect={() => setShowSetting(false)}>
+              {t("chat.neverShowScrollButton")}
+            </ContextMenuItem>
+          </ContextMenuGroup>
         </ContextMenuContent>
       </ContextMenu>
     </div>

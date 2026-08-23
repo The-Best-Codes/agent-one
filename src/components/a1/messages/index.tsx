@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
@@ -270,13 +271,15 @@ const MessagePartsInternal = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
-                  <DropdownMenuCheckboxItem
-                    id="regenerate-on-save"
-                    checked={regenerateOnSave}
-                    onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
-                  >
-                    {t("messages.regenerateWhenSaved")}
-                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuCheckboxItem
+                      id="regenerate-on-save"
+                      checked={regenerateOnSave}
+                      onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
+                    >
+                      {t("messages.regenerateWhenSaved")}
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
             </ButtonGroup>

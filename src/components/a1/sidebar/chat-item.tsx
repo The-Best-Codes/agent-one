@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   ContextMenu,
   ContextMenuContent,
+  ContextMenuGroup,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
@@ -22,6 +23,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -199,60 +201,64 @@ export const ChatItem = memo(
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-auto min-w-max">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          logger.verbose("Opening change title modal", {
-                            chatId: id,
-                            title,
-                          });
-                          setShowChangeTitleModal(true);
-                        }}
-                      >
-                        <IconEdit />
-                        {t("sidebar.changeTitle")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          logger.verbose("Opening export chat modal", {
-                            chatId: id,
-                            title,
-                          });
-                          setShowExportModal(true);
-                        }}
-                      >
-                        <IconDownload />
-                        {t("sidebar.exportChat")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          logger.verbose("Opening delete chat modal", {
-                            chatId: id,
-                            title,
-                          });
-                          setShowDeleteModal(true);
-                        }}
-                        variant="destructive"
-                      >
-                        <IconTrash />
-                        {t("sidebar.deleteChat")}
-                      </DropdownMenuItem>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            logger.verbose("Opening change title modal", {
+                              chatId: id,
+                              title,
+                            });
+                            setShowChangeTitleModal(true);
+                          }}
+                        >
+                          <IconEdit />
+                          {t("sidebar.changeTitle")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            logger.verbose("Opening export chat modal", {
+                              chatId: id,
+                              title,
+                            });
+                            setShowExportModal(true);
+                          }}
+                        >
+                          <IconDownload />
+                          {t("sidebar.exportChat")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            logger.verbose("Opening delete chat modal", {
+                              chatId: id,
+                              title,
+                            });
+                            setShowDeleteModal(true);
+                          }}
+                          variant="destructive"
+                        >
+                          <IconTrash />
+                          {t("sidebar.deleteChat")}
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onEnterSelectionMode?.([id]);
-                        }}
-                      >
-                        <IconCheckbox />
-                        {t("sidebar.selectChat")}
-                      </DropdownMenuItem>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onEnterSelectionMode?.([id]);
+                          }}
+                        >
+                          <IconCheckbox />
+                          {t("sidebar.selectChat")}
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -260,52 +266,56 @@ export const ChatItem = memo(
             </Button>
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem
-              onClick={() => {
-                logger.verbose("Opening change title modal", {
-                  chatId: id,
-                  title,
-                });
-                setShowChangeTitleModal(true);
-              }}
-            >
-              <IconEdit />
-              {t("sidebar.changeTitle")}
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={() => {
-                logger.verbose("Opening export chat modal", {
-                  chatId: id,
-                  title,
-                });
-                setShowExportModal(true);
-              }}
-            >
-              <IconDownload />
-              {t("sidebar.exportChat")}
-            </ContextMenuItem>
-            <ContextMenuItem
-              variant="destructive"
-              onClick={() => {
-                logger.verbose("Opening delete chat modal", {
-                  chatId: id,
-                  title,
-                });
-                setShowDeleteModal(true);
-              }}
-            >
-              <IconTrash />
-              {t("sidebar.deleteChat")}
-            </ContextMenuItem>
+            <ContextMenuGroup>
+              <ContextMenuItem
+                onClick={() => {
+                  logger.verbose("Opening change title modal", {
+                    chatId: id,
+                    title,
+                  });
+                  setShowChangeTitleModal(true);
+                }}
+              >
+                <IconEdit />
+                {t("sidebar.changeTitle")}
+              </ContextMenuItem>
+              <ContextMenuItem
+                onClick={() => {
+                  logger.verbose("Opening export chat modal", {
+                    chatId: id,
+                    title,
+                  });
+                  setShowExportModal(true);
+                }}
+              >
+                <IconDownload />
+                {t("sidebar.exportChat")}
+              </ContextMenuItem>
+              <ContextMenuItem
+                variant="destructive"
+                onClick={() => {
+                  logger.verbose("Opening delete chat modal", {
+                    chatId: id,
+                    title,
+                  });
+                  setShowDeleteModal(true);
+                }}
+              >
+                <IconTrash />
+                {t("sidebar.deleteChat")}
+              </ContextMenuItem>
+            </ContextMenuGroup>
             <ContextMenuSeparator />
-            <ContextMenuItem
-              onClick={() => {
-                onEnterSelectionMode?.([id]);
-              }}
-            >
-              <IconCheckbox />
-              {t("sidebar.selectChat")}
-            </ContextMenuItem>
+            <ContextMenuGroup>
+              <ContextMenuItem
+                onClick={() => {
+                  onEnterSelectionMode?.([id]);
+                }}
+              >
+                <IconCheckbox />
+                {t("sidebar.selectChat")}
+              </ContextMenuItem>
+            </ContextMenuGroup>
           </ContextMenuContent>
         </ContextMenu>
 

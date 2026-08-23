@@ -18,6 +18,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -427,32 +428,38 @@ export default function ExtensionsSection() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
-                  <DropdownMenuLabel>{t("extensions.show")}</DropdownMenuLabel>
-                  <DropdownMenuCheckboxItem
-                    checked={onlyInstalled}
-                    onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
-                  >
-                    {t("extensions.onlyShowInstalled")}
-                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>{t("extensions.show")}</DropdownMenuLabel>
+                    <DropdownMenuCheckboxItem
+                      checked={onlyInstalled}
+                      onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
+                    >
+                      {t("extensions.onlyShowInstalled")}
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuLabel>{t("extensions.connectionType")}</DropdownMenuLabel>
-                  <DropdownMenuCheckboxItem
-                    checked={showDeviceExtensions}
-                    onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
-                  >
-                    {t("extensions.runsOnThisDevice")}
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={showOnlineExtensions}
-                    onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
-                  >
-                    {t("extensions.connectsOnline")}
-                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>{t("extensions.connectionType")}</DropdownMenuLabel>
+                    <DropdownMenuCheckboxItem
+                      checked={showDeviceExtensions}
+                      onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
+                    >
+                      {t("extensions.runsOnThisDevice")}
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={showOnlineExtensions}
+                      onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
+                    >
+                      {t("extensions.connectsOnline")}
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
-                    <IconTool data-icon="inline-start" />
-                    {t("extensions.findDangling")}
-                  </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
+                      <IconTool data-icon="inline-start" />
+                      {t("extensions.findDangling")}
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
