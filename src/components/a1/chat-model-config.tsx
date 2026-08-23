@@ -16,8 +16,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import {
   DEFAULT_MODEL_CONFIG,
@@ -162,6 +168,7 @@ export const ChatModelConfig = ({
   const [open, setOpen] = useState(false);
   const effectiveOpen = disabled ? false : open;
   const toolBehavior = getToolBehavior(currentModelConfig);
+  const selectedBehavior = TOOL_BEHAVIORS.find((behavior) => behavior.value === toolBehavior);
 
   const [localInputs, setLocalInputs] = useState({
     maxTokens: currentModelConfig.maxTokens,
@@ -282,7 +289,7 @@ export const ChatModelConfig = ({
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
-        <Tabs
+        <Select
           value={toolBehavior}
           onValueChange={(value) => {
             setModelConfig({
@@ -291,21 +298,27 @@ export const ChatModelConfig = ({
             });
           }}
         >
-          <TabsList className="w-full">
+          <SelectTrigger id="toolBehavior" className="w-full">
+            <SelectValue>{selectedBehavior ? t(selectedBehavior.labelKey) : ""}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
             {TOOL_BEHAVIORS.map((behavior) => (
-              <TabsTrigger key={behavior.value} value={behavior.value}>
+              <SelectItem key={behavior.value} value={behavior.value}>
+                {t(behavior.labelKey)}
                 <AdaptiveTooltip>
                   <AdaptiveTooltipTrigger asChild>
-                    <span>{t(behavior.labelKey)}</span>
+                    <span className="-ml-1 inline-flex cursor-help">
+                      <IconInfoCircle className="text-muted-foreground size-3" />
+                    </span>
                   </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent className="max-w-xs">
+                  <AdaptiveTooltipContent side="right" className="max-w-xs">
                     {t(behavior.descriptionKey)}
                   </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
-              </TabsTrigger>
+              </SelectItem>
             ))}
-          </TabsList>
-        </Tabs>
+          </SelectContent>
+        </Select>
       </div>
 
       <SliderConfig
