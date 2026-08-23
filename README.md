@@ -39,6 +39,25 @@ Unlike many other open-source agents, we offer a [free plan](https://www.agent-o
 
 Importantly, AgentOne is a desktop app. There are currently no plans for a CLI. I may add a mobile app in the future. The app is built on [Tauri](https://tauri.app), so it's lightweight and runs on Windows, macOS, and Linux.
 
+<details>
+<summary>Screenshots</summary>
+
+Here's some screenshots of various AgentOne setups and themes.
+
+**No border radius, yellow theme, forest background image, light mode. Using the Excalidraw MCP app to draw a square:**
+
+![AgentOne chat area screenshot with yellow theme in light mode](.github/assets/screenshots/agentone-excalidraw-yellow-theme.png)
+
+**Default roundness setting, lime green colors, custom ocean background in dark mode. Sending an email with Gmail:**
+
+![AgentOne chat area screenshot with lime green theme in dark mode](.github/assets/screenshots/agentone-gmail-lime-theme.png)
+
+**Default preset dark theme, AgentOne researching LLC laws and editing a codebase based on the findings:**
+
+![AgentOne chat area screenshot with default theme in dark mode](.github/assets/screenshots/agentone-research-default-theme.png)
+
+</details>
+
 ## Key Features
 
 - **Subagents:** Obviously. Everyone supports these. Async subagents are coming soon, though!
