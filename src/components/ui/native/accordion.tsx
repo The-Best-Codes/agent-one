@@ -129,8 +129,9 @@ function AccordionItem({ className, value, ...props }: AccordionItemProps) {
     <AccordionItemContext.Provider value={itemContextValue}>
       <details
         data-slot="accordion-item"
+        data-state={isOpen ? "open" : "closed"}
         className={cn("accordion-details-animated border-b last:border-b-0", className)}
-        open={isOpen}
+        open
         {...props}
       />
     </AccordionItemContext.Provider>
@@ -233,10 +234,12 @@ function AccordionContent({
     <div
       data-slot="accordion-content"
       data-state={isOpen ? "open" : "closed"}
-      className={cn("text-sm", wrapperClassName)}
+      className={cn("accordion-content-grid text-sm", wrapperClassName)}
       {...props}
     >
-      <div className={cn("overflow-hidden pt-0 pb-4", className)}>{children}</div>
+      <div className={cn("accordion-content-grid-inner overflow-hidden pt-0 pb-4", className)}>
+        {children}
+      </div>
     </div>
   );
 }

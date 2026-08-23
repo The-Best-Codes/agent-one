@@ -881,19 +881,37 @@
 }
 
 @utility accordion-details-animated {
-  & {
-    interpolate-size: allow-keywords;
+  @supports selector(details::details-content) {
+    &::details-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 200ms ease;
+    }
+
+    & > [data-slot="accordion-content"] {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    &[data-state="open"]::details-content {
+      grid-template-rows: 1fr;
+    }
   }
 
-  &::details-content {
-    height: 0;
-    overflow-y: clip;
-    transition:
-      content-visibility 200ms allow-discrete,
-      height 200ms;
-  }
+  @supports not selector(details::details-content) {
+    & > [data-slot="accordion-content"] {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 200ms ease;
+    }
 
-  &[open]::details-content {
-    height: auto;
+    & > [data-slot="accordion-content"] > .accordion-content-grid-inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    &[data-state="open"] > [data-slot="accordion-content"] {
+      grid-template-rows: 1fr;
+    }
   }
 }
