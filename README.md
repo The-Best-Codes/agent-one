@@ -40,7 +40,7 @@ Unlike many other open-source agents, we offer a [free plan](https://www.agent-o
 Importantly, AgentOne is a desktop app. There are currently no plans for a CLI. I may add a mobile app in the future. The app is built on [Tauri](https://tauri.app), so it's lightweight and runs on Windows, macOS, and Linux.
 
 <details>
-<summary>Screenshots</summary>
+<summary><h2>Screenshots</h2></summary>
 
 Here's some screenshots of various AgentOne setups and themes.
 
