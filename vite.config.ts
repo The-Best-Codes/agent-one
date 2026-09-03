@@ -80,10 +80,9 @@ const vendorManualChunks = {
   ],
   miscUi: [
     "vaul",
-    "tailwind-merge",
+    "cn",
     "sonner",
     "class-variance-authority",
-    "clsx",
     "fast-equals",
     "@tabler/icons",
     "@tabler/icons-react",
