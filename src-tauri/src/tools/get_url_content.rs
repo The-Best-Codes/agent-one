@@ -1,9 +1,9 @@
 use super::constants::{DEFAULT_TIMEOUT_SECONDS, MAX_CONTENT_LENGTH, MAX_TIMEOUT_SECONDS};
+use super::html_to_markdown::{convert_html_to_markdown, truncate_content};
 
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::utils::headless_webview::fetch_url_with_webview;
 
-use htmd::HtmlToMarkdown;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -12,9 +12,6 @@ use tokio::time::{timeout, Duration};
 use wreq::Client;
 use wreq_util::Emulation;
 
-// TODO: Truncate long image data URLs
-
-static BLANK_LINE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"\n\s*\n\s*\n+").unwrap());
 static TITLE_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"<title[^>]*>([^<]*)</title>").unwrap());
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -65,51 +62,12 @@ pub async fn get_url_content(
             })?;
 
             let processed_content = match format.as_str() {
-                "markdown" => {
-                    let mut converter_builder = HtmlToMarkdown::builder();
-                    converter_builder =
-                        converter_builder.skip_tags(vec!["script", "style", "link", "meta"]);
-                    let converter = converter_builder.build();
-
-                    let mut markdown_output = converter
-                        .convert(&html_content)
-                        .map_err(|e| format!("Failed to convert HTML to markdown: {e}"))?;
-
-                    markdown_output = BLANK_LINE_REGEX
-                        .replace_all(&markdown_output, "\n\n")
-                        .to_string();
-
-                    markdown_output
-                }
+                "markdown" => convert_html_to_markdown(&html_content)?,
                 "raw" => html_content,
                 _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
             };
 
-            let (mut final_content, truncated) = if processed_content.len() > max_length {
-                let mut byte_idx = 0;
-                for (idx, _) in processed_content.char_indices() {
-                    if idx >= max_length {
-                        break;
-                    }
-                    byte_idx = idx;
-                }
-
-                if byte_idx == 0 && max_length > 0 && !processed_content.is_empty() {
-                    byte_idx = processed_content.chars().next().unwrap().len_utf8();
-                    if byte_idx > max_length {
-                        byte_idx = max_length;
-                    }
-                }
-
-                (processed_content[..byte_idx].to_string(), true)
-            } else {
-                (processed_content, false)
-            };
-
-            if truncated {
-                final_content =
-                    format!("{final_content}...\n\n[Content truncated at {max_length} bytes]");
-            }
+            let (final_content, truncated) = truncate_content(processed_content, max_length);
 
             return Ok(UrlContentResponse {
                 content: final_content.clone(),
@@ -168,20 +126,7 @@ pub async fn get_url_content(
     let processed_content = match format.as_str() {
         "markdown" => {
             if content_type.contains("text/html") {
-                let mut converter_builder = HtmlToMarkdown::builder();
-                converter_builder =
-                    converter_builder.skip_tags(vec!["script", "style", "link", "meta"]);
-                let converter = converter_builder.build();
-
-                let mut markdown_output = converter
-                    .convert(&text)
-                    .map_err(|e| format!("Failed to convert HTML to markdown: {e}"))?;
-
-                markdown_output = BLANK_LINE_REGEX
-                    .replace_all(&markdown_output, "\n\n")
-                    .to_string();
-
-                markdown_output
+                convert_html_to_markdown(&text)?
             } else {
                 text
             }
@@ -190,30 +135,7 @@ pub async fn get_url_content(
         _ => return Err("Invalid format. Use 'markdown' or 'raw'".to_string()),
     };
 
-    let (mut final_content, truncated) = if processed_content.len() > max_length {
-        let mut byte_idx = 0;
-        for (idx, _) in processed_content.char_indices() {
-            if idx >= max_length {
-                break;
-            }
-            byte_idx = idx;
-        }
-
-        if byte_idx == 0 && max_length > 0 && !processed_content.is_empty() {
-            byte_idx = processed_content.chars().next().unwrap().len_utf8();
-            if byte_idx > max_length {
-                byte_idx = max_length;
-            }
-        }
-
-        (processed_content[..byte_idx].to_string(), true)
-    } else {
-        (processed_content, false)
-    };
-
-    if truncated {
-        final_content = format!("{final_content}...\n\n[Content truncated at {max_length} bytes]");
-    }
+    let (final_content, truncated) = truncate_content(processed_content, max_length);
 
     Ok(UrlContentResponse {
         content: final_content.clone(),
