@@ -1,4 +1,4 @@
-use tauri::{Emitter, Manager};
+use tauri::{Emitter, Listener, Manager};
 
 mod keyring;
 mod mcp_auth;
@@ -135,6 +135,26 @@ pub fn run() {
                 tokio::sync::Mutex::new(std::collections::HashMap::new()),
             )));
 
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            app.listen_any("headless-webview-html", |event| {
+                #[derive(serde::Deserialize)]
+                #[serde(rename_all = "camelCase")]
+                struct Payload {
+                    webview_id: String,
+                    html: String,
+                }
+
+                match serde_json::from_str::<Payload>(event.payload()) {
+                    Ok(payload) => {
+                        tauri::async_runtime::spawn(utils::webview_html_callback(
+                            payload.webview_id,
+                            payload.html,
+                        ));
+                    }
+                    Err(error) => eprintln!("Invalid headless webview HTML event: {error}"),
+                }
+            });
+
             Ok(())
         })
         .invoke_handler({
@@ -144,7 +164,6 @@ pub fn run() {
                     tools::get_url_content,
                     tools::web_search,
                     utils::is_update_managed_externally,
-                    utils::webview_html_callback,
                     utils::list_webviews,
                     utils::force_close_webview,
                     keyring::storage_get_item,

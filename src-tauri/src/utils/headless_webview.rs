@@ -29,7 +29,6 @@ fn generate_webview_id() -> String {
     format!("headless-webview-{}", id)
 }
 
-#[tauri::command]
 pub async fn webview_html_callback(webview_id: String, html: String) -> Result<(), String> {
     let mut channels = WEBVIEW_CHANNELS.lock().await;
     if let Some(sender) = channels.remove(&webview_id) {
@@ -103,9 +102,12 @@ pub async fn fetch_html_from_webview(
             try {{
                 const handleDOMLoaded = () => {{
                     const html = document.documentElement.outerHTML;
-                    window.__TAURI_INTERNALS__.invoke('webview_html_callback', {{
-                        webviewId: '{}',
-                        html: html
+                    window.__TAURI_INTERNALS__.invoke('plugin:event|emit', {{
+                        event: 'headless-webview-html',
+                        payload: {{
+                            webviewId: '{}',
+                            html: html
+                        }}
                     }}).catch(console.error);
                 }};
 
@@ -115,9 +117,12 @@ pub async fn fetch_html_from_webview(
                     handleDOMLoaded();
                 }}
             }} catch (error) {{
-                window.__TAURI_INTERNALS__.invoke('webview_html_callback', {{
-                    webviewId: '{}',
-                    html: 'Error: ' + error.message
+                window.__TAURI_INTERNALS__.invoke('plugin:event|emit', {{
+                    event: 'headless-webview-html',
+                    payload: {{
+                        webviewId: '{}',
+                        html: 'Error: ' + error.message
+                    }}
                 }}).catch(console.error);
             }}
         }})();

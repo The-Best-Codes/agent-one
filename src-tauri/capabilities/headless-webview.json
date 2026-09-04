@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "headless-webview",
+  "description": "Allow URL fetch webviews to return page HTML",
+  "windows": ["headless-webview-*"],
+  "remote": {
+    "urls": ["http://*", "https://*"]
+  },
+  "local": false,
+  "permissions": ["core:event:allow-emit"]
+}
