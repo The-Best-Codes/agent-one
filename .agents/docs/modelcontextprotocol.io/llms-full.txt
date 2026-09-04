@@ -6371,8 +6371,8 @@ Think of MCP like a USB-C port for AI applications. Just as USB-C provides a sta
 Depending on where you sit in the ecosystem, MCP can have a range of benefits.
 
 * **Developers**: MCP reduces development time and complexity when building, or integrating with, an AI application or agent.
-* **AI applications or agents**: MCP provides access to an ecosystem of data sources, tools and apps which will enhance capabilities and improve the end-user experience.
-* **End-users**: MCP results in more capable AI applications or agents which can access your data and take actions on your behalf when necessary.
+* **AI applications or agents**: MCP gives them access to an ecosystem of data sources, tools and apps, which enhances their capabilities and improves the end-user experience.
+* **End-users**: MCP results in more capable AI applications or agents that can access user data and take actions on the user's behalf when necessary.
 
 ## Broad ecosystem support
 
@@ -7611,8 +7611,8 @@ Build MCP servers and clients using our official SDKs. SDKs are classified into 
 | <Icon icon="python" />   [Python](https://py.sdk.modelcontextprotocol.io)        | [modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk)         | <Badge>Tier 1</Badge> |
 | <Icon icon="square-c" />   [C#](https://csharp.sdk.modelcontextprotocol.io)      | [modelcontextprotocol/csharp-sdk](https://github.com/modelcontextprotocol/csharp-sdk)         | <Badge>Tier 1</Badge> |
 | <Icon icon="golang" />   [Go](https://go.sdk.modelcontextprotocol.io)            | [modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk)                 | <Badge>Tier 1</Badge> |
+| <Icon icon="rust" />   [Rust](https://rust.sdk.modelcontextprotocol.io)          | [modelcontextprotocol/rust-sdk](https://github.com/modelcontextprotocol/rust-sdk)             | <Badge>Tier 1</Badge> |
 | <Icon icon="java" />   [Java](https://java.sdk.modelcontextprotocol.io)          | [modelcontextprotocol/java-sdk](https://github.com/modelcontextprotocol/java-sdk)             | <Badge>Tier 2</Badge> |
-| <Icon icon="rust" />   [Rust](https://rust.sdk.modelcontextprotocol.io)          | [modelcontextprotocol/rust-sdk](https://github.com/modelcontextprotocol/rust-sdk)             | <Badge>Tier 2</Badge> |
 | <Icon icon="gem" />   [Ruby](https://ruby.sdk.modelcontextprotocol.io)           | [modelcontextprotocol/ruby-sdk](https://github.com/modelcontextprotocol/ruby-sdk)             | <Badge>Tier 2</Badge> |
 | <Icon icon="swift" />   Swift                                                    | [modelcontextprotocol/swift-sdk](https://github.com/modelcontextprotocol/swift-sdk)           | <Badge>Tier 3</Badge> |
 | <Icon icon="php" />   [PHP](https://php.sdk.modelcontextprotocol.io)             | [modelcontextprotocol/php-sdk](https://github.com/modelcontextprotocol/php-sdk)               | <Badge>Tier 3</Badge> |
@@ -14049,8 +14049,8 @@ A subscription ends when:
 
 * The **client** cancels it — close the SSE stream (HTTP) or send
   `notifications/cancelled` referencing the `subscriptions/listen` request ID (stdio).
-* The **server** tears it down (e.g., during shutdown) — it **SHOULD** send the
-  empty `subscriptions/listen` response to signal a graceful end (see
+* The **server** tears it down (e.g., during shutdown) — it **SHOULD** send a
+  successful `subscriptions/listen` response to signal a graceful end (see
   [Graceful Closure](#graceful-closure)), then close the stream.
 * The underlying transport closes (HTTP timeout, TCP disconnect, stdio process
   exit).
@@ -14059,10 +14059,11 @@ A subscription ends when:
 
 When the server ends a subscription on its own initiative (for example, during
 shutdown), it **SHOULD** respond to the original `subscriptions/listen` request
-with an empty result before closing the stream. This is the JSON-RPC response to
-the long-lived request, correlated by its `id`, and signals that the subscription
-ended gracefully — as opposed to an abrupt transport drop, which carries no
-response.
+with a completion result before closing the stream. The result carries no
+method-specific data beyond the standard result fields and subscription
+metadata. This is the JSON-RPC response to the long-lived request, correlated by
+its `id`, and signals that the subscription ended gracefully — as opposed to an
+abrupt transport drop, which carries no response.
 
 ```json theme={null}
 {
@@ -21229,6 +21230,10 @@ Text responses can only go so far. Sometimes users need to interact with data, n
 just read about it. MCP Apps let servers return interactive HTML interfaces (data
 visualizations, forms, dashboards) that render directly in the chat.
 
+<Frame>
+  <img alt="An Excalidraw MCP App drawing a sequence diagram inside a Claude conversation" />
+</Frame>
+
 ## Why not just build a web app?
 
 You could build a standalone web app and send users a link. However, MCP Apps
@@ -23413,6 +23418,57 @@ This MCP server manages Azure DevOps work items and pipelines.
 
 <!-- mcp-name: io.github.username/azure-devops-mcp -->
 ```
+
+## Cargo (Rust) Packages
+
+For Cargo packages, the MCP Registry currently supports the official crates.io registry (`https://crates.io`) only.
+
+Cargo packages use `"registryType": "cargo"` in `server.json`. For example:
+
+```json server.json highlight={9} theme={null}
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.username/widget-mcp",
+  "title": "Widget",
+  "description": "Rust-native MCP server",
+  "version": "0.3.0",
+  "packages": [
+    {
+      "registryType": "cargo",
+      "identifier": "widget-mcp",
+      "version": "0.3.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
+```
+
+### Runtime Model
+
+Cargo's runtime model differs from npm/PyPI/NuGet. `cargo install <crate>` places the compiled binary on PATH at `~/.cargo/bin`, after which MCP clients invoke it directly by name. There is no per-invocation runner equivalent to `npx` (npm), `uvx` (PyPI), or `dnx` (NuGet, .NET 10 SDK Preview 6+) — install is one-time, execution is by binary name. The Cargo example above intentionally omits `runtimeHint` for this reason.
+
+Rust MCP authors have two first-class distribution paths:
+
+* **Cargo (`registryType: cargo`)** — source-distributed via crates.io. End users need the Rust toolchain (`rustup`) to run `cargo install`. Idiomatic for the Rust ecosystem and consistent with how Rust CLIs are typically published.
+* **MCPB (`registryType: mcpb`)** — prebuilt binary distributed via GitHub or GitLab Releases. End users need no toolchain. Right choice if the priority is "no Rust toolchain required."
+
+Both paths are supported; the choice is the author's. Cargo native support exists so Rust authors who prefer source distribution are not forced into the MCPB binary-packaging workaround.
+
+### Ownership Verification
+
+The MCP Registry verifies ownership of Cargo packages by checking for the existence of an `mcp-name: $SERVER_NAME` string in the package README (which is rendered to HTML and served by crates.io's static CDN). The `$SERVER_NAME` portion **MUST** match the server name from `server.json`. For example:
+
+```markdown README.md highlight={5} theme={null}
+# Widget MCP Server
+
+A Rust-native MCP server for widget operations.
+
+- MCP Registry name: `mcp-name: io.github.username/widget-mcp`
+```
+
+**Cargo-specific gotcha:** Unlike PyPI and NuGet (which preserve HTML comments in their README rendering), **crates.io strips HTML comments during markdown→HTML conversion**. The `<!-- mcp-name: ... -->` hidden-comment form that works for PyPI/NuGet **does not work for cargo** — the token will not appear in the rendered HTML the validator inspects. Cargo authors must include the `mcp-name:` token as visible markdown text. A simple bullet in the Links section is the recommended pattern.
 
 ## Docker/OCI Images
 
@@ -31167,37 +31223,39 @@ Charter for the MCP Authorization Interest Group.
 
 ## Mission Statement
 
-The Authorization Interest Group provides a venue for MCP implementers, identity-provider vendors, and security practitioners to surface real-world authorization challenges encountered when deploying MCP clients and servers. The group gathers use cases, documents gaps in the current OAuth 2.1–based authorization specification, and incubates validated problems until they are scoped well enough to propose a focused Working Group via the standard [group-creation process](/community/working-interest-groups#creating-a-working-group) to drive the corresponding [SEPs](/community/sep-guidelines).
+The Authorization Interest Group is the single chartered venue for MCP authorization work. It brings MCP implementers, identity-provider vendors, and security practitioners together to surface real-world authorization problems, decide whether they are worth solving and whether they belong in MCP, and give authors a reliable place to present [SEPs](/community/sep-guidelines), [ext-auth](https://github.com/modelcontextprotocol/ext-auth) drafts, prototypes, and deployment results for cross-topic feedback. The charter defines the scope; discussion and rough consensus happen in one channel and one recurring call, and the work products are drafts and demos rather than new standing groups.
 
 ## Scope
 
 ### In Scope
 
 * **Deployment experience reports**: how implementers have integrated the current authorization spec (OAuth 2.1, [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) Protected Resource Metadata, [RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) Dynamic Client Registration, Client ID Metadata Documents) with real authorization servers, and where it falls short
+* **Extension interoperability reports**: results of pairing independent implementations of the [ext-auth](https://github.com/modelcontextprotocol/ext-auth) extensions end to end (for example IdP, client, and authorization server through the [Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization) ID-JAG exchange), including IdP capability gaps, workarounds, and conformance scenario input
 * **Enterprise identity integration**: requirements and friction points when connecting MCP servers to enterprise IdPs (Okta, Entra ID, Ping, Keycloak, etc.), including SSO, tenant isolation, and admin consent flows
 * **Delegated and agentic access**: use cases for on-behalf-of token exchange, downstream resource access, audience restriction, and consent when an MCP client acts through chains of agents or tools
-* **Scope and permission granularity**: whether and how MCP servers should advertise fine-grained scopes (per-tool, per-resource) and how clients should request and present them
+* **Scope and permission granularity**: whether and how MCP servers should advertise fine-grained scopes (per-tool, per-resource) and how clients should request and present them, and authorization granularity beyond scope strings (Rich Authorization Requests, structured denials, remediation hints)
 * **Credentials for non-HTTP transports**: patterns for stdio, WebSocket, and future transports where the HTTP authorization spec does not directly apply
 * **Client identity and registration**: operator experience with Dynamic Client Registration, Client ID Metadata Documents, software statements, and pre-registered clients
 * **Threat modelling input**: cataloguing authorization-related attack surfaces (token confusion, confused-deputy, audience mismatch, redirect handling) to inform Security Best Practices documentation
-* **Proposing Working Groups**: once a problem is validated and scoped, the IG submits a Working Group creation proposal via the standard `#wg-ig-group-creation` process; approval remains with community moderators and core maintainers
-* **Problem statements and requirements**: use-case catalogues and recommendations published to GitHub Discussions for consumption by SEP authors and Working Groups
+* **SEP and draft feedback**: authorization-related SEPs, ext-auth drafts, reference implementations, and demos are presented on the call and in `#auth-ig` threads for feedback before and during the [SEP process](/community/sep-guidelines); the IG's rough consensus is recorded in meeting notes for sponsors and Core Maintainers to draw on
+* **Problem statements and requirements**: use-case catalogues and recommendations shared in `#auth-ig` threads and on SEP pull requests for consumption by SEP authors
 
 ### Out of Scope
 
+* **Accepting SEPs or extensions**: the IG gives feedback and signals support; sponsorship and acceptance follow the [SEP guidelines](/community/sep-guidelines) and remain with Maintainers and Core Maintainers
 * **Authentication of end users to MCP clients**: how a host application authenticates its own users is a host concern, not a protocol concern
 * **Transport security (TLS, mTLS, certificate handling)**: belongs to the Transports WG
 * **Server identity, provenance, and trust signalling**: belongs to the Server Card / Registry efforts
-* **End-user product configuration walk-throughs**: the IG discusses patterns, not step-by-step setup for individual IdP products. Vendor-reported constraints on what an authorization server can or cannot implement *are* in scope as deployment experience
+* **End-user product configuration walk-throughs**: the IG discusses patterns, not step-by-step setup for individual IdP products. Vendor-reported constraints on what an authorization server or IdP can or cannot implement *are* in scope as deployment experience
 * **Competitively sensitive or non-public business information**, per the [MCP Antitrust Policy](/community/antitrust)
 
 ### Related Groups
 
-* **[Enterprise-Managed Authorization IG](/community/interest-groups/enterprise-managed-authorization)**: coordinates IdP, client, and server interoperability testing for the EMA extension produced by the Profiles WG; spec-change requests surfaced there are routed back to this group
-* **Transports WG**: authorization is currently specified at the HTTP transport level; changes to transports affect where credentials are carried
+* **[Security IG](/community/interest-groups/security)**: token-audience confusion, issuer validation, and account-linking risks sit at the boundary between the two groups
+* **[Transports WG](/community/working-groups/transports)**: authorization is currently specified at the HTTP transport level; changes to transports affect where credentials are carried
 * **Agents WG**: delegated/on-behalf-of access and consent for multi-agent chains overlap heavily with agentic use cases
 * **[Server Card WG](/community/working-groups/server-card) / [Registry](/community/working-groups/registry)**: client and server identity, discovery metadata, and trust establishment intersect with how authorization servers and resource servers are located and verified
-* **SDK Maintainers**: SDKs ship the auth client implementations; IG findings should inform cross-SDK auth ergonomics
+* **SDK Maintainers**: SDKs ship the auth client implementations; IG findings should inform cross-SDK auth ergonomics and defaults
 
 ## Leadership
 
@@ -31209,46 +31267,190 @@ The Authorization Interest Group provides a venue for MCP implementers, identity
 
 ## Membership
 
-Open to anyone; no formal membership or approval step is required to join the channel, attend calls, or contribute.
+Open to anyone; no formal membership or approval step is required to join the channel, attend calls, or contribute. The group particularly seeks identity-provider vendors, MCP client and server implementers shipping authorization support, and operators integrating MCP with enterprise IdPs.
 
-Join the `#auth-ig` channel on the [MCP Contributors Discord](/community/communication#discord) or open a thread in the Authorization category of [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions). If your topic clearly matches one of the Working Groups in the table below, you can post directly in that WG's channel. Calls are open and attendance is optional — async participation via Discord and GitHub is equally valued.
+Join the `#auth-ig` channel on the [MCP Contributors Discord](/community/communication#discord) and start or join a thread for your topic. Calls are open and attendance is optional — async participation in Discord threads is equally valued.
 
 ## Operations
 
-| Meeting         | Frequency     | Duration | Purpose                                                                      |
-| --------------- | ------------- | -------- | ---------------------------------------------------------------------------- |
-| Discussion Call | Every 2 weeks | 45 min   | Use-case sharing, problem triage, WG proposal decisions, implementer reports |
+| Meeting      | Frequency     | Duration | Purpose                                                                           |
+| ------------ | ------------- | -------- | --------------------------------------------------------------------------------- |
+| Auth IG Call | Every 2 weeks | 45 min   | Agenda-driven: problem pitches, SEP and draft progress, demos, deployment reports |
 
 Discord: [#auth-ig](https://discord.com/channels/1358869848138059966/1360835991749001368)
 
-### Working Group Incubation
+### One channel, threads per topic
 
-A topic graduates to a Working Group proposal when it has a written problem statement in GitHub Discussions and rough consensus on a bi-weekly call (recorded in published notes). A facilitator then files the standard WG creation template in `#wg-ig-group-creation`, citing that discussion. The IG's role ends at the proposal; approval remains with community moderators and core maintainers.
+All authorization discussion happens in `#auth-ig`, with one Discord thread per topic (for example a SEP number, a draft name, or a deployment pairing). There are no per-topic channels. Meeting agendas and notes live in the channel's per-call agenda thread, with a link cross-posted to [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) as the [group governance rules](/community/working-interest-groups) require.
+
+### Agenda-driven calls
+
+The call keeps a fixed biweekly slot, but each meeting is built from its agenda:
+
+1. A facilitator opens an agenda thread in `#auth-ig` ahead of each call. Anyone may request a slot by replying with the topic, the ask (feedback, decision, awareness), and the time needed.
+2. Facilitators agree the agenda and hand out time slots before the call.
+3. If the agenda is thin, the call is cancelled in the thread and the slot is kept for next time.
+
+Typical slots are a problem pitch, a progress update on a SEP or ext-auth draft, a demo of a prototype or reference implementation, or a deployment or interoperability report from implementers of a shipped extension.
+
+### From problem to SEP
+
+Two standing questions are asked of every problem pitch before anyone invests in a SEP:
+
+* **Is this a problem worth solving?** Is there real deployment demand, and is the gap in the protocol rather than in one product?
+* **Does it belong here?** Is the right home the core specification, an official extension in ext-auth, an unofficial extension, or an upstream standards body?
+
+When the answer to both is yes, the proposer drafts a SEP or ext-auth pull request through the normal [SEP process](/community/sep-guidelines), finds a sponsor, and returns to the call to present progress and demos as the draft matures. The IG does not charter a sub-group, channel, or meeting series per topic. Contributors who already meet separately on a topic are welcome to keep doing so, and bring outcomes back to the call as agenda slots. A separate [Working Group](/community/working-interest-groups) can still be proposed through the standard process when a deliverable genuinely needs its own decision rights, but that is the exception rather than the default path.
 
 ## Deliverables & Success Metrics
 
-The IG incubates problems until they are well-scoped, then proposes focused Working Groups to drive specific SEPs. Each spawned WG maintains its own charter; this list is a directory, not a substitute. The IG stewards [modelcontextprotocol/ext-auth](https://github.com/modelcontextprotocol/ext-auth), where individual WGs land authorization extension specifications via PR.
+The IG's outputs are the drafts and demos that pass through it: authorization SEPs and ext-auth specifications with recorded IG feedback, reference implementations and conformance scenarios, interoperability and deployment reports, and published meeting notes. The IG stewards [modelcontextprotocol/ext-auth](https://github.com/modelcontextprotocol/ext-auth), where authorization extension specifications land via PR. Success looks like authorization proposals reaching Core Maintainer review with cross-topic feedback already incorporated, and shipped extensions accumulating independent interoperable implementations.
 
-| Working Group              | Discord                        | Focus                                                                                                                                                                               | Status    | Charter |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
-| Client Registration        | `#auth-wg-client-registration` | Dynamic Client Registration, Client ID Metadata Documents, software statements, and pre-registered client workflows                                                                 | Completed | —       |
-| Mix-up Protection          | `#auth-wg-mixup-protection`    | Mitigating OAuth authorization-server mix-up and token-audience confusion attacks                                                                                                   | Completed | —       |
-| Profiles                   | `#auth-wg-profiles`            | Extension specifications for additional grant types and token-binding mechanisms (Client Credentials, Enterprise-Managed Authorization, DPoP, Workload Identity Federation)         | Completed | —       |
-| Tool Scopes                | `#auth-wg-tool-scopes`         | Per-tool OAuth scope advertisement, step-up authorization / scope challenge, and client-side scope accumulation — mechanics within the OAuth scope-string model                     | Active    | Pending |
-| Fine-Grained Authorization | `#auth-wg-fine-grained-authz`  | Authorization granularity beyond scope strings — Rich Authorization Requests ([RFC 9396](https://www.rfc-editor.org/rfc/rfc9396)), remediation hints, and multi-credential handling | Active    | Pending |
-| Improve DevX               | `#auth-wg-improve-devx`        | Best-practices guidance and tutorials for building secure MCP clients and servers, beyond the normative spec                                                                        | Completed | —       |
+### Consolidated channels
+
+The following Discord channels previously hosted authorization sub-groups. They are archived (read-only) as of this re-charter and their topics continue as `#auth-ig` threads and agenda slots. The [Enterprise-Managed Authorization IG](/community/interest-groups/enterprise-managed-authorization) is folded into this group on the same basis: EMA implementers bring interoperability and deployment progress to the call as presentation slots rather than to a standing separate group.
+
+| Former channel                 | Topic                                                                                                                   | State at consolidation | Continues as                                              |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------- |
+| `#auth-wg-client-registration` | Dynamic Client Registration, Client ID Metadata Documents, software statements, pre-registration                        | Completed              | `#auth-ig` threads as needed                              |
+| `#auth-wg-mixup-protection`    | Authorization-server mix-up and token-audience confusion mitigations                                                    | Completed              | `#auth-ig` threads as needed                              |
+| `#auth-wg-profiles`            | Client Credentials, Enterprise-Managed Authorization, DPoP, Workload Identity Federation extensions                     | Completed              | `#auth-ig` DPoP and Workload Identity Federation threads  |
+| `#auth-wg-tool-scopes`         | Per-tool scope advertisement, step-up authorization, client-side scope accumulation                                     | Active                 | `#auth-ig` thread                                         |
+| `#auth-wg-fine-grained-authz`  | Rich Authorization Requests ([RFC 9396](https://www.rfc-editor.org/rfc/rfc9396)), structured denials, remediation hints | Active                 | `#auth-ig` SEP-2643 / fine-grained authorization thread   |
+| `#auth-wg-improve-devx`        | Best-practices guidance and tutorials beyond the normative spec                                                         | Dormant                | `#auth-ig` threads as needed                              |
+| `#enterprise-managed-auth-ig`  | EMA extension interoperability (IdP, client, authorization server)                                                      | Active                 | `#auth-ig` EMA interop thread and deployment-report slots |
 
 ## Changelog
 
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-06-02 | Initial charter |
+| Date       | Change                                                                                                                                                                               |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-08-17 | Re-charter: single venue and channel for authorization work; agenda-driven calls; SEP feedback in scope; `#auth-wg-*` channels and the Enterprise-Managed Authorization IG folded in |
+| 2026-06-02 | Initial charter                                                                                                                                                                      |
+
+
+# Enterprise Interest Group Charter
+Source: https://modelcontextprotocol.io/community/interest-groups/enterprise
+
+Charter for the MCP Enterprise Interest Group.
+
+## Group Type
+
+**Interest Group**
+
+## Mission Statement
+
+The Enterprise IG identifies and documents the requirements gaps that enterprises encounter when deploying MCP in production. As MCP adoption scales across regulated industries and large organizations, enterprise teams face recurring gaps in areas such as authentication integration, identity propagation, audit and compliance, gateway behavior, scalability and resilience, and configuration management that are not yet addressed at the protocol level. The group brings together enterprise practitioners to capture these gaps as problem statements and structured recommendations, and to channel them to the relevant Working Groups for specification work. Governance and best-practice patterns may emerge from these discussions, but the group’s core mandate is surfacing protocol-level requirements, not maintaining a general best-practices catalog.
+
+All discussions and sessions are protocol-focused and vendor-neutral. The Enterprise IG is not a venue for product pitches or vendor-specific marketing. Participants contribute as practitioners sharing deployment experience and requirements, not as representatives promoting commercial solutions.
+
+## Scope
+
+### In Scope
+
+* **Enterprise Requirements Gaps (overarching focus)**: The group’s primary mandate is identifying enterprise deployment requirements that are not addressed at the MCP protocol level today and turning them into problem statements and recommendations for the relevant Working Groups. Each requirement is captured with the enterprise opportunity it represents, not only the pain point, since closing these gaps is what unlocks broader enterprise adoption and value. The specific domains below are explored through that lens; governance and best-practice patterns are documented only where they surface a protocol-level gap:
+* **Enterprise Authentication and Identity**: Discussion of enterprise-managed auth patterns including IdP integration (SSO, SAML, OIDC), token lifecycle management, On-Behalf-Of (OBO) token exchange flows, and fine-grained authorization (Rich Authorization Requests). Gathering requirements to inform the Auth WG and related SEPs.
+* **Identity Propagation and Session Context**: Defines how verified identity is surfaced and conveyed across MCP clients, servers, and downstream services for policy enforcement and audit. This includes spawned-agent and delegated-agent use cases: identity lineage, least-privilege for child agents, descendant revocation, and auditability across multi-agent chains, which is adjacent to authentication but distinct in focus.
+* **Audit, Observability, and Compliance**: Exploration of standardized audit trail formats for MCP tool invocations, integration with enterprise SIEM and observability platforms, and evidence generation for compliance frameworks (SOC 2, HIPAA, GDPR, EU AI Act). Includes sector-specific compliance patterns such as PHI handling and BAA-scoped data flows in healthcare environments.
+* **Gateway and Proxy Behavior**: Documentation of enterprise deployment patterns where MCP traffic routes through API gateways, load balancers, reverse proxies, and security proxies. With the move to a stateless protocol core in the 2026-07-28 release, the focus shifts from session affinity to gaps that persist in a stateless model: header and context propagation, authorization handoff across proxies, and policy enforcement at the gateway.
+* **Scalability and Resilience**: Running MCP at enterprise scale across regions and availability zones. With the stateless core enabling horizontal scaling without sticky sessions, the focus is on failover, load distribution, and reliability for mission-critical deployments.
+* **MCP in Enterprise Architecture**: Definition of how MCP fits into broader enterprise architecture, including integration with existing middleware, data platforms, and agent orchestration layers.
+* **Configuration Portability and Deployment**: Discussion of challenges in deploying MCP servers across heterogeneous client environments, multi-tenant configuration patterns, and enterprise-scale rollout practices.
+* **Interceptors and Middleware**: Exploration of use cases for request/response interception in MCP pipelines, including PII redaction, compliance validation, content filtering, and hallucination detection. Gathering requirements that may inform future specification work on middleware patterns.
+* **Problem Statements and Use Cases**: Documentation of enterprise pain points and production failure scenarios (anonymized) to build an evidence base for prioritizing specification work.
+* **Recommendations to Working Groups**: Providing structured input from enterprise practitioners to the Auth WG, Security IG, Gateways IG, and other groups on enterprise-specific requirements.
+
+### Out of Scope
+
+* Writing or owning SEPs. The Enterprise IG produces problem statements, use cases, and recommendations. Concrete specification changes are driven through the appropriate Working Groups.
+* Discussion of product-specific or vendor-specific solutions. Discussions must remain vendor-neutral and focused on protocol-level patterns.
+* General MCP support or onboarding. The group focuses on enterprise deployment challenges, not introductory MCP topics.
+* Overlapping directly with the Auth WG's specification work. The Enterprise IG gathers enterprise auth requirements and feeds them to the Auth WG rather than proposing auth protocol changes.
+
+### Related Groups
+
+#### Working Groups
+
+* **Auth WG** — Enterprise auth requirements (IdP integration, OBO flows, RAR) are gathered and provided as input to the Auth WG's specification work.
+* **Transport WG** — Transport-level needs for enterprise support (non-functional requirements such as latency and horizontal scaling) are bundled and provided as input to the Transport WG.
+* **Extensions WG** — Requirements for extensions other than authorization are bundled and provided as input to the Extensions WG.
+
+#### Interest Groups
+
+* **Security IG** — Overlapping interest in runtime security, tool poisoning, and credential management. The Enterprise IG focuses on the organizational and governance dimensions; the Security IG focuses on threat models and protocol-level mitigations.
+* **Gateways IG** — Direct overlap on gateway/proxy behavior patterns. The Enterprise IG provides enterprise deployment context; the Gateways IG focuses on technical gateway specifications.
+* **Financial Services IG** — Several enterprise concerns (compliance, audit, regulated environments) overlap with the FS-IG. Cross-posting and joint sessions will be coordinated where appropriate.
+
+## Leadership
+
+| Role        | Name          | Organization     | GitHub                                                     | Term     |
+| ----------- | ------------- | ---------------- | ---------------------------------------------------------- | -------- |
+| Facilitator | Raghu Chandra | Independent      | [@raghu-chandra-mcp](https://github.com/raghu-chandra-mcp) | 6 months |
+| Facilitator | Yannj\_Fr     | MCPApps Builders | [@yannj-fr](https://github.com/yannj-fr)                   | 6 months |
+
+## Membership
+
+| Name           | Organization                                      | GitHub                                                     | Discord       | Level       |
+| -------------- | ------------------------------------------------- | ---------------------------------------------------------- | ------------- | ----------- |
+| Raghu Chandra  | Independent                                       | [@raghu-chandra-mcp](https://github.com/raghu-chandra-mcp) | raghu.chandra | Facilitator |
+| Yannj\_Fr      | MCPApps Builders                                  | [@yannj-fr](https://github.com/yannj-fr)                   | yannj\_fr     | Facilitator |
+| Peder H P      | Saxo Bank                                         | [@pederhp](https://github.com/pederhp)                     |               | Participant |
+| Derek Lewis    | Silex Data Solutions                              | [@derekelewis](https://github.com/derekelewis)             | dlewis.io     | Participant |
+| Aman s         | Independent Researcher; Blue Shield of California | [@aman210122](https://github.com/aman210122)               |               | Participant |
+| Ola            | Nordstrom / MCP Maintainer                        | [@olaservo](https://github.com/olaservo)                   |               | Participant |
+| Varun          | TraceForce                                        | [@vawadhwa88](https://github.com/vawadhwa88)               |               | Participant |
+| Markus Mueller | Boomi                                             | [@mquadrat](https://github.com/mquadrat)                   |               | Participant |
+| Aaron Parecki  | Okta                                              | [@aaronpk](https://github.com/aaronpk)                     |               | Participant |
+| cayerbe        | GNS-Foundation                                    | [@GNS-Foundation](https://github.com/GNS-Foundation)       | cayerbe       | Participant |
+| Anishma        | EmpowerID                                         | [@anishma](https://github.com/anishma)                     |               | Participant |
+| Lin Sun        | Solo.io                                           | [@linsun](https://github.com/linsun)                       |               | Participant |
+| Joey Orlando   | Archestra                                         | [@joeyorlando](https://github.com/joeyorlando)             |               | Participant |
+
+## Operations
+
+| Meeting         | Frequency | Duration | Purpose                                                              |
+| --------------- | --------- | -------- | -------------------------------------------------------------------- |
+| Working Session | Monthly   | 60 min   | Use case discussion, pain point cataloging, cross-group coordination |
+
+Discord: #enterprise-ig
+
+### Decision Process for Recommendations
+
+The Enterprise IG produces non-binding use cases, problem statements, and functional and non-functional requirements. To ensure clarity and avoid downstream process debates, the following applies:
+
+* **Problem statements and use cases** are contributed asynchronously via GitHub Discussions or Discord threads and reviewed during monthly meetings.
+* **Recommendations to Working Groups** are finalized through lazy consensus among participants, with a 7-day review period posted on GitHub. If no objections are raised, the recommendation is considered approved.
+* **Facilitators** are responsible for packaging approved recommendations and delivering them to the relevant Working Group or Interest Group.
+
+## Deliverables (Optional)
+
+As an Interest Group, the Enterprise IG does not produce binding deliverables. The following are planned discussion outputs:
+
+| Item                                            | Status  | Target Date | Champion      |
+| ----------------------------------------------- | ------- | ----------- | ------------- |
+| Enterprise Pain Points Catalog                  | Planned | Q2 2026     | Raghu Chandra |
+| Healthcare & Compliance Use Cases (PHI, BAA)    | Planned | Q3 2026     | Aman s        |
+| Enterprise Auth Requirements (input to Auth WG) | Planned | Q3 2026     | TBD           |
+| Gateway Deployment Patterns Document            | Planned | Q3 2026     | TBD           |
+
+## Changelog
+
+| Date       | Change                |
+| ---------- | --------------------- |
+| 2026-04-13 | Initial charter filed |
 
 
 # Enterprise-Managed Authorization Charter
 Source: https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization
 
 Charter for the MCP Enterprise-Managed Authorization Interest Group.
+
+<Note>
+  As of 2026-08-17 this Interest Group is folded into the [Authorization
+  IG](/community/interest-groups/auth). EMA interoperability and deployment
+  progress is presented as agenda slots on the Auth IG call, discussion
+  continues in `#auth-ig` threads, and `#enterprise-managed-auth-ig` is
+  archived. This page is kept for reference.
+</Note>
 
 ## Group Type
 
@@ -31308,9 +31510,10 @@ Discord: [#enterprise-managed-auth-ig](https://discord.com/channels/135886984813
 
 ## Changelog
 
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-06-16 | Initial charter |
+| Date       | Change                                             |
+| ---------- | -------------------------------------------------- |
+| 2026-08-17 | Folded into the Authorization IG; channel archived |
+| 2026-06-16 | Initial charter                                    |
 
 
 # Financial Services Charter
@@ -31636,7 +31839,7 @@ scopes validated problems into focused Working Groups or [SEPs](/community/sep-g
 * **[Server Card WG](/community/working-groups/server-card) / [Registry WG](/community/working-groups/registry)**:
   server identity, provenance, and discovery metadata intersect with admission and supply-chain
   concerns
-* **Transports WG**: stdio process isolation and unauthenticated method surface
+* **[Transports WG](/community/working-groups/transports)**: stdio process isolation and unauthenticated method surface
 * **SDK Maintainers**: coordinated handling of SDK security advisories and cross-SDK security
   defaults
 
@@ -32107,7 +32310,7 @@ flowchart TD
 
 8. **Resolution**: The SEP may be `accepted`, `rejected`, or returned for revision. The sponsor updates the status.
 
-9. **Finalization**: Once accepted, the reference implementation must be completed. For Standards Track SEPs with observable protocol behavior, a [conformance test](#conformance-test-requirement) must also be merged. When complete and incorporated into the specification, the sponsor updates the status to `final`.
+9. **Finalization**: Once accepted, the reference implementation must be completed. For Standards Track SEPs with observable protocol behavior, a [conformance test](#conformance-test-requirement) must also be merged. The author adds the specification changes (schema changes, specification text, and a changelog entry) to the SEP's pull request. SDK implementations are not required for a SEP to become `final`. When this work is complete, the sponsor updates the status to `final` and the SEP's PR can be merged.
 
 ### SEP Statuses
 
@@ -32222,7 +32425,7 @@ For a SEP to be accepted it must meet these criteria:
 * Clear benefit to the MCP ecosystem
 * Community support and consensus
 
-Once a SEP has been accepted, the reference implementation must be completed. When complete and incorporated into the main repository, the status changes to "Final".
+Once a SEP has been accepted, the author adds the specification changes (schema changes, specification text, and a changelog entry) to the SEP's pull request. The reference implementation must be completed, along with any required [conformance test](#conformance-test-requirement). SDK implementations are not required. When this work is complete, the status changes to "Final" and the PR can be merged.
 
 ## Conformance Test Requirement
 
@@ -32343,7 +32546,7 @@ primitives. The WG evaluates those questions through its design work.
 
 ### Related Groups
 
-* **[Transports WG](https://github.com/modelcontextprotocol/transports-wg)** -
+* **[Transports WG](/community/working-groups/transports)** -
   Task polling, multi-round-trip requests, stateless operation, and request
   association depend on transport and message-flow semantics.
 * **[Triggers and Events WG](/community/working-groups/triggers-events)** -
@@ -32684,7 +32887,7 @@ The Interceptors Working Group exists to standardize how context operations are 
 
 ### Related Groups
 
-* **Transports WG** — interceptors operate on MCP message flows whose delivery behavior depends on the transport; coordination needed on transport-level interception points.
+* **[Transports WG](/community/working-groups/transports)** — interceptors operate on MCP message flows whose delivery behavior depends on the transport; coordination needed on transport-level interception points.
 * **Gateways IG** — gateways are a key deployment model for interceptors; coordination needed on gateway-based interceptor patterns and shared concerns around routing, policy, and observability.
 
 ## Leadership
@@ -32897,7 +33100,7 @@ The SDK Working Group exists to keep the official MCP SDKs consistent, conforman
 
 ### Related Groups
 
-* **Transports WG**: Transport implementations are a substantial part of every SDK. The SDK WG coordinates with the Transports WG on rollout sequencing when transport SEPs land.
+* **[Transports WG](/community/working-groups/transports)**: Transport implementations are a substantial part of every SDK. The SDK WG coordinates with the Transports WG on rollout sequencing when transport SEPs land.
 * **Conformance Testing**: Tier assignments depend on conformance scores. The SDK WG consumes conformance results and feeds back gaps in test coverage.
 * **All specification-producing WGs**: The SDK WG is a downstream consumer of accepted SEPs and coordinates reference-implementation timing with the originating group.
 
@@ -33203,6 +33406,159 @@ Full live tracking is on the [Skills Over MCP WG project board](https://github.c
 | 2026-02-01 | IG formed; experimental repo created                                                                                                                                                                                                                                                                             |
 
 
+# Transports Charter
+Source: https://modelcontextprotocol.io/community/working-groups/transports
+
+Charter for the MCP Transports Working Group.
+
+## Group Type
+
+**Working Group**
+
+## Mission Statement
+
+The Transports Working Group evolves MCP transport bindings and transport-adjacent
+protocol architecture so implementations remain interoperable, scalable, reliable,
+and easy to operate across local and remote deployments. The WG produces transport
+proposals, SEPs, implementation evidence, and guidance. The
+[working group repository](https://github.com/modelcontextprotocol/transports-wg) and
+its [upstream charter](https://github.com/modelcontextprotocol/transports-wg/blob/main/CHARTER.md)
+maintain the WG's current technical focus, proposal strategy, and supporting detail
+within these boundaries.
+
+## Scope
+
+### In Scope
+
+* **Transport Bindings**: Framing, delivery, request and envelope metadata,
+  cancellation and termination, connection lifecycle, backward compatibility, and
+  the behavior of existing and future MCP transports. The current specification's
+  [transport overview](/specification/draft/basic/transports) defines the boundary
+  between a transport binding and core protocol semantics.
+* **Scalability and Reliability**: Transport-level connection management, resource
+  efficiency, multiplexing, load distribution, error handling, reconnection,
+  resumption, and the delivery and ordering guarantees offered by a binding.
+* **Transport-Adjacent Protocol Architecture**: Protocol-wide message-flow concerns
+  required for scalable, interoperable bindings, including request association,
+  per-request metadata, stateless operation, and migration from legacy initialization
+  and transport-session models.
+* **Transport Security**: Binding and envelope security requirements such as Origin
+  validation, TLS, mTLS, and certificate handling, coordinated with the Security IG.
+  Credential carriage is coordinated with the Auth IG.
+* **Validation and Guidance**: Reference implementations, experiments, implementation
+  evidence, and documentation needed to evaluate proposals and help implementers
+  adopt agreed transport behavior. Supporting material is maintained in the upstream
+  [documentation](https://github.com/modelcontextprotocol/transports-wg/tree/main/docs).
+  The WG contributes transport scenarios and requirements to the Conformance Testing
+  project, whose maintainers own the conformance suite.
+* **Cross-Cutting Coordination**: Transport implications of work owned by other MCP
+  groups, without taking ownership of their application-layer features.
+
+The upstream [scope statement](https://github.com/modelcontextprotocol/transports-wg/blob/main/CHARTER.md#scope)
+provides supporting context but cannot expand the boundaries in this charter.
+
+### Out of Scope
+
+* Application-layer behavior for MCP primitives such as tools, resources, prompts,
+  tasks, agents, or events, including application state, application-session meaning,
+  task lifecycle, and event or subscription semantics. The WG coordinates where those
+  features depend on binding or message-flow behavior.
+* Domain-specific extensions and implementation-specific product or business concerns.
+* SDK APIs and implementation details unrelated to transports.
+* Authorization protocol mechanics, credential and token semantics, application
+  identity, and authorization policy. The WG coordinates with the relevant groups on
+  how bindings carry agreed authorization data.
+* Ownership of the MCP conformance suite. The WG contributes transport requirements
+  and scenarios in coordination with its maintainers.
+
+### Related Groups
+
+* **[SDK WG](/community/working-groups/sdk)**: Official SDKs implement transport
+  changes; the groups coordinate on feasibility, reference implementations, and
+  rollout sequencing.
+* **[Agents WG](/community/working-groups/agents)**: The Agents WG owns Tasks and
+  durable execution; the groups coordinate where these depend on multi-round-trip
+  requests, request association, stateless operation, or binding behavior.
+* **[Triggers and Events WG](/community/working-groups/triggers-events)**: Event
+  callbacks, subscriptions, and application-level delivery semantics are owned by that
+  group; Transports owns binding-specific carriage and guarantees.
+* **[Auth IG](/community/interest-groups/auth)** and
+  **[Security IG](/community/interest-groups/security)**: The groups coordinate on
+  credential carriage and transport wire security while authorization mechanics and
+  broader security requirements remain with the respective IGs.
+
+## Leadership
+
+The current WG Lead is
+[Kurtis Van Gent](https://github.com/kurtisvg).
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
+| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
+| Technical design within scope       | WG consensus                                           |
+| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
+| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
+| Scope expansion                     | Core Maintainer approval required                      |
+| WG Member approval                  | WG Member sponsors                                     |
+
+## Membership
+
+Current WG Members are listed in the upstream
+[group membership roster](https://github.com/modelcontextprotocol/transports-wg/blob/main/GOVERNANCE.md#members).
+
+## Operations
+
+The WG holds a regular weekly meeting, with the current time and joining details listed
+at [meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io). Topics are
+discussed asynchronously in `#transports-wg` on the
+[MCP Discord](https://discord.gg/6CSzBmMkjX).
+
+Work follows a problem-first workflow:
+
+1. Create a core problem statement in the
+   [working group repository](https://github.com/modelcontextprotocol/transports-wg) to
+   align the WG on the problem and its requirements.
+2. Work with other interested participants to define a solution.
+3. Review and iterate on the solution to address WG feedback.
+4. After the WG reaches consensus under its decision-making process, present the
+   solution to Core Maintainers as an SEP through the
+   [SEP process](/community/sep-guidelines).
+
+## Resources
+
+* [modelcontextprotocol/transports-wg](https://github.com/modelcontextprotocol/transports-wg)
+  * [Proposals](https://github.com/modelcontextprotocol/transports-wg/tree/main/proposals)
+  * [Supporting documentation and decision records](https://github.com/modelcontextprotocol/transports-wg/tree/main/docs)
+  * [Meeting notes](https://github.com/modelcontextprotocol/transports-wg/tree/main/meetings)
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+See [open pull requests](https://github.com/modelcontextprotocol/transports-wg/pulls)
+and the [`roadmaps/` directory](https://github.com/modelcontextprotocol/transports-wg/tree/main/roadmaps).
+
+### Success Criteria
+
+* Adopted transport-agnostic protocol behavior remains consistent across transports,
+  while binding-specific differences are explicit and validated by implementation
+  evidence and applicable conformance scenarios.
+* Transport changes that affect official SDKs are coordinated with the SDK WG and have
+  clear implementation guidance.
+* Decisions, proposal status, and supporting rationale remain publicly discoverable in
+  or linked from the working group repository.
+
+## Changelog
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-08-23 | Initial charter |
+
+
 # Triggers and Events Charter
 Source: https://modelcontextprotocol.io/community/working-groups/triggers-events
 
@@ -33233,7 +33589,7 @@ The Triggers and Events Working Group exists to define how MCP servers proactive
 
 ### Related Groups
 
-* **Transports WG** — delivery and ordering guarantees depend on transport capabilities; callback semantics must be coherent across stdio, Streamable HTTP, and future transports.
+* **[Transports WG](/community/working-groups/transports)** — delivery and ordering guarantees depend on transport capabilities; callback semantics must be coherent across stdio, Streamable HTTP, and future transports.
 * **Agents WG** — [SEP-1686 (Tasks)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686) identifies webhook-style task completion notifications as a future consideration; this WG owns that mechanism.
 
 ## Leadership
@@ -33519,15 +33875,14 @@ The quarterly updates are provided as a document posted in the [GitHub Discussio
 **Working Group Formation:**
 
 * There must be a widely acknowledged concern requiring coordination
-* PR for creation of WG into `docs/community/working-groups/<name>/overview.mdx`, gated by CODEOWNERS requiring approval by Maintainers
-* PR for charter into `docs/community/working-groups/<name>.mdx`, gated by CODEOWNERS requiring approval from Core Maintainers
+* PR adding the WG charter as `docs/community/working-groups/<name>.mdx`, written from the [Group Charter Template](/community/charter-template) and including the corresponding navigation entry in `docs/docs.json`, gated by CODEOWNERS requiring approval from Core Maintainers
 * Initial member list approved by WG Lead
 
 **Interest Group Formation:**
 
 * Fill out the creation template in the `#wg-ig-group-creation` channel on [Discord](https://discord.gg/6CSzBmMkjX)
 * A Core Maintainer reviews the proposal; the IG and its Facilitator(s) must be sponsored by at least two Core Maintainers or one Lead Maintainer
-* Once sponsored, the Facilitator(s) organize the IG and create a charter
+* Once sponsored, the Facilitator(s) organize the IG and create a charter via a PR adding `docs/community/interest-groups/<name>.mdx`, written from the same template and including the corresponding navigation entry in `docs/docs.json`, gated by CODEOWNERS requiring approval from Core Maintainers
 
 **Retirement:**
 
@@ -33587,98 +33942,100 @@ Yes. Participate in as many groups as your time allows.
 # Roadmap
 Source: https://modelcontextprotocol.io/development/roadmap
 
-Our plans for evolving Model Context Protocol
+The Model Context Protocol roadmap, covering the priority areas Core Maintainers and Working Groups are driving for the next specification release and how they shape SEP review.
 
-<Info>Last updated: **2026-03-05**</Info>
+<Info>Last updated: **2026-08-22**</Info>
 
-This page describes our strategic priorities and what we expect **Working Groups** and **Interest Groups** to deliver against them.
+This page outlines the Core Maintainers' vision for the protocol over the coming six to twelve months, highlighting objectives targeted for the next specification update and beyond. It describes our primary strategic goals and the expected deliverables from [Working and Interest Groups](/community/working-interest-groups).
 
 <Note>
-  The ideas presented here are not commitments. We may solve these challenges differently than described. Some items may not materialize at all. This is also not an *exhaustive* list. We may incorporate work that isn't mentioned here.
+  This roadmap reflects current thinking rather than firm commitments. Priorities may shift, some items may be delivered differently than described or deferred, and work not listed here may still be included in the release.
 </Note>
 
 ## SEP Prioritization
 
-**SEPs that fall within the priority areas below will receive expedited review and have the highest chance of acceptance.** SEPs outside these areas are not automatically rejected, but contributors should expect longer review timelines and a higher bar for justification. Maintainer capacity is finite. We direct it toward these priorities first.
+**[Specification Enhancement Proposals](/community/sep-guidelines) (SEPs) that fall within the priority areas below get expedited review and have the best chance of acceptance.** SEPs outside them aren't rejected automatically, but expect a longer queue and a higher bar for justification. Maintainer review time is scarce. We spend it here first.
 
-If you are considering a SEP, check whether it aligns with one of the areas below, discuss it in the relevant [Working Group or Interest Group](/community/working-interest-groups), and bring that group's backing with you. SEPs with WG support and a clear connection to the roadmap move fastest. See the [SEP guidelines](/community/sep-guidelines) for the full process.
+If you're considering writing a SEP, start by identifying which priority area it belongs to and raising it with the relevant Working Group, then bring that group's support with the proposal. SEPs with a Working Group behind them and a clear line to this roadmap move fastest. See the [SEP guidelines](/community/sep-guidelines) for the full process.
+
+Each priority area names the Core Maintainers responsible for it, who can be reached on [Discord](/community/communication#discord) by anyone interested in contributing. The items listed under each area are the deliverables prioritized for this roadmap period. The remainder of each area is open scope, and Working Groups are expected to define and contribute further work within it.
 
 ## Priority Areas
 
-### 1. Transport Evolution and Scalability
+### 1. Agentic Messaging Primitives
 
-Streamable HTTP gave MCP a production-ready transport, but running it at scale has revealed gaps around horizontal scaling, stateless operation, and middleware patterns.
+Core Maintainers: [**Caitie McCaffrey**](https://github.com/CaitieM20), [**Clare Liguori**](https://github.com/clareliguori), [**Peter Alexander**](https://github.com/pja-ant)
 
-**What we want to achieve:**
+Agentic workloads need [messaging patterns](/specification/2026-07-28/basic/patterns) beyond request and response: work that runs for minutes, servers that push, results that stream, and a way to steer work mid-flight. MCP has grown a set of concepts for this, including [Tasks](/extensions/tasks/overview), [`subscriptions/listen`](/specification/2026-07-28/basic/patterns/subscriptions), and [progress notifications](/specification/2026-07-28/basic/patterns/progress), spread across multiple Working Groups. The risk is three answers to "the server isn't done yet" that don't share a lifecycle, a cancellation model, or an error surface. We want them to compose.
 
-* **Next-generation transport**: evolve Streamable HTTP to run statelessly across multiple server instances and behave correctly behind load balancers and proxies.
-* **Scalable session handling**: define how sessions are created, resumed, and migrated so that server restarts and scale-out events are transparent to connected clients.
-* **MCP Server Cards**: a standard for exposing structured server metadata via a `.well-known` URL, so browsers, crawlers, and registries can discover a server's capabilities without connecting to it.
+**This roadmap period:**
 
-**Working Group ownership:**
+* **Server-initiated events**: [Triggers & Events WG](/community/working-groups/triggers-events). Channels and subscriptions for push delivery, including webhooks. As we take on asynchronous workloads through Tasks and other events, we need extensions that let servers tell clients when work has finished, without relying purely on expensive client-side polling.
+* **A composition review**: [Agents](/community/working-groups/agents), Transports, and [Triggers & Events](/community/working-groups/triggers-events) WGs. Primitives in the making, such as Tasks and Triggers, need to compose cleanly with each other and fit concrete use cases.
 
-* **Transports WG** owns the transport and session work: a series of SEPs covering the wire format, session model, and resumption protocol, plus conformance guidance for SDK authors.
-* **Server Card WG** owns the Server Card format and its distribution, coordinating with the broader industry AI-catalog effort.
+Beyond these, we expect continued work on Tasks ([SEP-2663](/seps/2663-tasks-extension)) toward eventual inclusion of the extension in the core protocol.
 
-We will **not** be introducing additional official transports this cycle. Keeping the set small protects ecosystem compatibility; the community should experiment via custom transports.
+### 2. HTTP-Native Transport Unification and Hardening
 
-### 2. Agent Communication
+Core Maintainers: [**Kurtis Van Gent**](https://github.com/kurtisvg), [**Nick Cooper**](https://github.com/nickcoai)
 
-The Tasks extension ([SEP-2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663)) gave agents a reliable call-now / fetch-later pattern. Running it in production has surfaced gaps in the lifecycle semantics that the **Agents WG** should close:
+The [2026-07-28 release](/specification/2026-07-28/changelog) made a remote MCP server a normal HTTP workload, and we increasingly rely on HTTP specifics such as headers and status codes to carry transport-level information. Every HTTP-native feature needs a second stdio-specific design or doesn't work locally. SDKs maintain two transport pipelines, and protocol metadata is now duplicated across HTTP headers and message fields that servers have to cross-validate. We want one transport model, with standard HTTP practice on top of it.
 
-* **Retry semantics**: what happens when a task fails transiently, and who decides whether to retry.
-* **Expiry policies**: how long results are retained after completion, and how clients learn a result has expired.
+**This roadmap period:**
 
-These are the gaps we can point to today. The Agents WG should also collect and triage operational issues from production deployments—this list will grow as more of the ecosystem runs Tasks at scale.
+* **HTTP over stdio**: Transports WG. Streamable HTTP as the single binding, spoken over stdin/stdout for local servers. We believe we can use HTTP/2 over stdio to get multiplexed HTTP transport while retaining the security and lifecycle guarantees of a subprocess.
+* **Caching**: Transports WG. The most recent protocol revision made strides toward caching, adding `ttlMs` and `cacheScope` to list results and resource reads ([SEP-2549](/seps/2549-TTL-for-list-results)). As part of this work, we want to extend our caching approach to support ETags, which should allow versioning the results of primitives, in particular tool calls.
 
-### 3. Governance Maturation
+Beyond these, we want to look at standardized error handling across all surfaces, capability scoping for tool lists after [SEP-2575](/seps/2575-stateless-mcp), and providing servers with configuration options in a secure way.
 
-MCP has grown into a multi-company open standard under the Linux Foundation. [SEP-1302](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1302) formalized Working Groups and Interest Groups, and [SEP-2085](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2085) established succession and amendment procedures. The next step is giving the community a clear path to leadership so the project does not depend on a small set of individuals.
+### 3. Agent Identity and Enterprise-Ready Security
 
-The **Governance WG** should deliver:
+Core Maintainers: [**Paul Carleton**](https://github.com/pcarleton), [**Den Delimarsky**](https://github.com/localden)
 
-* **A Contributor Ladder SEP** defining the progression from community participant → WG contributor → WG facilitator → lead maintainer → core maintainer, with explicit nomination and review criteria at each step.
-* **A delegation model** allowing WGs with a proven track record to accept SEPs and publish extension updates within their domain without a full core-maintainer review cycle.
-* **A charter template** that every WG and IG maintains publicly: scope, active deliverables, success criteria, and retirement conditions, reviewed quarterly.
+MCP authorization assumes a person with a browser at consent time. Increasingly the caller is an agent: a cloud workload with its own identity, acting for a user who isn't present, or spawning sub-agents that should get narrower authority than their parent. Existing MCP servers lean on pasted API keys and long-lived refresh tokens. We need a standardized way for MCP servers to handle agent identities, and we will continue improving security by adopting existing standards.
 
-### 4. Enterprise Readiness
+**This roadmap period:**
 
-Enterprises are deploying MCP at scale and hitting gaps the protocol does not yet address.
+* **DPoP**: Agent Identity WG (forming during this roadmap period). Finalize the specification for Demonstrating Proof of Possession (DPoP) and focus on getting widespread adoption.
+* **Agent identity and delegation**: Agent Identity WG. We want an opinionated way for MCP servers to be reached by agents through their own identity or a user-delegated identity. The work will focus on Workload Identity Federation ([SEP-1933](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1933)), the Identity Assertion JWT Authorization Grant (ID-JAG) used by [Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization), and [RFC 8693](https://www.rfc-editor.org/rfc/rfc8693) token exchange, coordinated with the IETF OAuth and [WIMSE](https://datatracker.ietf.org/wg/wimse/about/) working groups.
 
-Areas where we need clear problem statements and directional proposals:
+Beyond these, several other topics are under discussion and may come into scope as the Working Group forms, including human-presence attestation for distinguishing interactive clients from headless agents and other agent identity concerns.
 
-* **Audit trails and observability**: end-to-end visibility into what a client requested and what a server did, in a form enterprises can feed into their existing logging and compliance pipelines.
-* **Enterprise-managed auth**: paved paths away from static client secrets and toward SSO-integrated flows ([Cross-App Access](https://xaa.dev)), so IT can manage MCP access the same way they manage everything else.
-* **Gateway and proxy patterns**: well-defined behavior when a client does not connect directly to a server but routes through an intermediary. This may include authorization propagation, session semantics, and what the gateway is allowed to see.
-* **Configuration portability**: a way to configure a server once and have that configuration work across different MCP clients.
+### 4. Improved Primitives
 
-We expect an **Enterprise WG** to form to own this. Much of the output will likely land as extensions rather than core specification changes.
+Core Maintainers: [**Kurtis Van Gent**](https://github.com/kurtisvg), [**Peter Alexander**](https://github.com/pja-ant), [**Den Delimarsky**](https://github.com/localden)
 
-## On the Horizon
+MCP's tool calling interface has served well. However, `tools/call` allows returning both `content` and `structuredContent` at the same time, which has confused server and client authors alike and produced diverging implementations. We want to spend this roadmap period improving the shape of the `tools/call` interface for more consistent semantics. We also hear repeatedly from the community that servers need more options to guide clients through large sets of tools, resources, and other primitives, so we're starting a dedicated effort around **progressive discovery** to define what an experimental server-side discovery mechanism would look like.
 
-These areas have community interest and interest from core maintainers but are not top priorities. We will support a community-formed Working Group in any of them and review SEPs on these topics if time permits.
+**This roadmap period:**
 
-* **Triggers and Event-Driven Updates** — clients currently learn about server-side state changes by polling or holding an SSE connection open. A standardized callback mechanism (webhooks or similar) would let servers proactively notify clients when new data is available, with defined ordering guarantees across all transports.
-* **Result Type Improvements** — tool calls, resource reads, and task results all arrive complete and inline. Streamed results would let clients receive output incrementally for interactive scenarios (generated text, audio, video frames); reference-based results would let clients decide when to pull large payloads into context rather than polluting it by default. This is cross-cutting: streaming touches transport, references touch the schema.
-* **Security & Authorization** — finer-grained least-privilege scopes, clearer guidance on avoiding OAuth mix-up attacks, secure credential management on both client and server, and a community-driven vulnerability disclosure program routed through the Linux Foundation. Sponsored work is already underway: [SEP-1932 (DPoP)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1932) and [SEP-1933 (Workload Identity Federation)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1933).
-* **Extensions Ecosystem** — the `ext-auth` and `ext-apps` tracks are early proof that the extension mechanism works. Maturing them, investigating a Skills primitive for composed capabilities, and adding first-class extension support to the registry would all strengthen the path from experiment to standard.
+* **Tool result shape**: Core Primitives WG (forming during this roadmap period). Redesign the `tools/call` interface to resolve fidelity disparities among return types and streamline the handling of structured and unstructured output.
+* **Progressive discovery**: Core Primitives WG. Clients learn a server's tools and resources as they need them instead of ingesting the full catalog up front, with a defined interaction with the caching work under [HTTP-Native Transport Unification and Hardening](#2-http-native-transport-unification-and-hardening).
+* **Primitive annotations**: Core Primitives WG. [Content annotations](/specification/2026-07-28/server/resources#annotations) in the specification declare a piece of content's intended audience and priority. Applying them to tool results and resources could resolve the visibility confusion described in [SEP-2200](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2200), but most implementers haven't adopted these annotations and may not be aware of their purpose. If they aren't useful, we should consider deprecating them.
 
-## Validation
+In addition, the [File Uploads WG](/community/working-groups/file-uploads) continues on scoped file operations and filesystem-like resource semantics (range reads, hierarchical listing).
 
-A protocol specification is only as good as the implementations that follow it. Alongside the areas above, we continue to invest in:
+### 5. Improved SDK Developer Experience
 
-* **Conformance Test Suites**: automated verification that clients, servers, and SDKs correctly implement the specification, with coverage expanding alongside each new feature area.
-* **SDK Tiers**: the tiering system introduced in [SEP-1730](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1730) gives developers a clear signal of which SDKs track the specification most closely.
-* **Reference Implementations**: canonical implementations of new features to anchor community development and unblock early adopters.
+Core Maintainers: [**Den Delimarsky**](https://github.com/localden), [**David Soria Parra**](https://github.com/dsp-ant)
+
+Our SDKs, reference servers, and quickstarts are maintained by hand. While this works, we believe the specification and a human-reviewed conformance test suite can serve as the source of truth from which more of these artifacts are derived, so that both SDKs and examples are regenerated and revalidated as part of each release rather than repaired after it.
+
+**This roadmap period:**
+
+* **The extension contract**: [SDK WG](/community/working-groups/sdk) with the Core Maintainers. Which role an extension binds (host, client, server, agent) and what each does when the capability is declared; what SDKs must support natively; how extensions are packaged; capability additions as versioned changes to the extension; auth treated as its own area.
+* **The generated-artifacts experiment**: [SDK WG](/community/working-groups/sdk). Generate a candidate [Tier 1 SDK](/community/sdk-tiers) and its companion quickstart examples from the specification, validate both against the [conformance test suite](/community/sdk-tiers#conformance-testing), and publish findings with a recommendation for the next cycle, including which layers should be deterministic codegen versus model-assisted.
+
+Beyond these, we want to revisit ownership and freshness expectations for the reference servers and quickstart repositories, and treat spec clarity issues surfaced by generation failures as documentation bugs.
 
 ## Get Involved
 
-MCP's roadmap is built by its community:
+Every priority area above has a Working Group behind it or forming around it, and all of them have room for more contributors. There are several ways to participate:
 
-* **Join a Working Group or Interest Group**: see the [Working Groups & Interest Groups](/community/working-interest-groups) page and the [community communication channels](/community/communication) to connect with the groups active in each area above.
-* **Propose or comment on SEPs**: review the [SEP guidelines](/community/sep-guidelines) and open or weigh in on proposals.
-* **Start an experimental extension**: [SEP-2133](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2133) lets any WG or IG experiment in an `experimental-ext-` repository before a formal SEP is required.
-* **Contribute to the project**: read the [contributing guide](/community/contributing) for how to get involved with the specification, SDKs, and tooling.
+* **Join a Working Group or Interest Group**: see the [Working and Interest Groups](/community/working-interest-groups) page and the [community channels](/community/communication).
+* **Propose or comment on a SEP**: read the [SEP guidelines](/community/sep-guidelines), then open one or weigh in.
+* **Start an experimental extension**: [SEP-2133](/seps/2133-extensions) lets any WG or IG experiment in an `experimental-ext-` repository before a formal SEP.
+* **Contribute directly**: the [contributing guide](/community/contributing) covers the specification, SDKs, and tooling.
 
 
 # SEP-1865: MCP Apps - Interactive User Interfaces for MCP
@@ -39088,7 +39445,7 @@ MCP is transport-agnostic. While HTTP-based transports could theoretically use `
 
 ## Security Implications
 
-A misconfigured or malicious serer could set an excessively long TTL, causing clients to cache stale data for longer than desired. However, since the TTL is a hint and clients can choose to ignore it or re-fetch if they suspect changes, the security risk is minimal. Clients should be designed to handle unexpected TTL values gracefully.
+A misconfigured or malicious server could set an excessively long TTL, causing clients to cache stale data for longer than desired. However, since the TTL is a hint and clients can choose to ignore it or re-fetch if they suspect changes, the security risk is minimal. Clients should be designed to handle unexpected TTL values gracefully.
 
 
 # SEP-2567: Sessionless MCP via Explicit State Handles

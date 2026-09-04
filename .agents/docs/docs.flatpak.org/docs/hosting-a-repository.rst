@@ -206,7 +206,7 @@ The instructions will use Gitlab.com.
       - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
         when: on_success
 
-4. `Create <https://www.gnupg.org/gph/en/manual/c14.html>`_ a new GPG key
+4. `Create <https://www.gnupg.org/gph/en/manual.html#INTRO>`_ a new GPG key
    locally, to sign the repository.
 
 5. Go to ``https://gitlab.com/-/profile/personal_access_tokens`` and create
