@@ -74,7 +74,7 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
     execute: async function* (input, { abortSignal }): AsyncGenerator<GetUrlContentOutput> {
       abortSignal?.throwIfAborted();
 
-      const timeoutMs = (input.timeoutSeconds || 5) * 1000;
+      const timeoutMs = (input.timeoutSeconds || 5) * 1000 + 8000;
 
       logger.verbose("Executing getUrlContent tool with input:", input);
 

@@ -59,7 +59,7 @@ export const createWebSearchTool = (config: WebSearchToolConfig) =>
     execute: async (input, { abortSignal }) => {
       abortSignal?.throwIfAborted();
 
-      const timeoutMs = (input.timeoutSeconds || 5) * 1000;
+      const timeoutMs = (input.timeoutSeconds || 5) * 1000 + 8000;
 
       logger.verbose("Executing webSearch tool with input:", input);
 
