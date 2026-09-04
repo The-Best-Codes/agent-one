@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -14,7 +15,8 @@ use sqlx::SqlitePool;
 use tauri::Manager;
 use tokio::task;
 
-pub const SERVICE_NAME: &str = "com.agentone.app";
+pub const SERVICE_NAME: &str = "dev.agent-one";
+const LEGACY_SERVICE_NAME: &str = "com.agentone.app";
 const FALLBACK_MARKER_PREFIX: &str = "__agentone_secret_fallback_v1__:";
 
 pub fn initialize_keyring_store() -> Result<(), String> {
@@ -64,6 +66,55 @@ pub fn initialize_keyring_store() -> Result<(), String> {
     };
 
     keyring_core::set_default_store(store);
+    migrate_legacy_service_entries()?;
+    Ok(())
+}
+
+fn migrate_legacy_service_entries() -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    let legacy_pattern = format!(r"\.{}$", LEGACY_SERVICE_NAME.replace('.', r"\."));
+    #[cfg(target_os = "windows")]
+    let search = HashMap::from([("pattern", legacy_pattern.as_str())]);
+
+    #[cfg(not(target_os = "windows"))]
+    let search = HashMap::from([("service", LEGACY_SERVICE_NAME)]);
+
+    let legacy_entries = Entry::search(&search)
+        .map_err(|e| format!("Failed to find legacy keyring entries: {}", e))?;
+
+    for legacy_entry in legacy_entries {
+        #[cfg(target_os = "windows")]
+        let key = legacy_entry
+            .get_attributes()
+            .map_err(|e| format!("Failed to read legacy keyring attributes: {}", e))?
+            .remove("username")
+            .ok_or_else(|| "Legacy keyring entry has no username".to_string())?;
+
+        #[cfg(not(target_os = "windows"))]
+        let (_, key) = legacy_entry
+            .get_specifiers()
+            .ok_or_else(|| "Legacy keyring entry has no service or account".to_string())?;
+        let current_entry = Entry::new(SERVICE_NAME, &key)
+            .map_err(|e| format!("Failed to create migrated keyring entry: {}", e))?;
+
+        match current_entry.get_password() {
+            Ok(_) => {}
+            Err(KeyringError::NoEntry) => {
+                let value = legacy_entry
+                    .get_password()
+                    .map_err(|e| format!("Failed to read legacy keyring entry: {}", e))?;
+                current_entry
+                    .set_password(&value)
+                    .map_err(|e| format!("Failed to write migrated keyring entry: {}", e))?;
+            }
+            Err(e) => return Err(format!("Failed to read migrated keyring entry: {}", e)),
+        }
+
+        legacy_entry
+            .delete_credential()
+            .map_err(|e| format!("Failed to delete migrated legacy keyring entry: {}", e))?;
+    }
+
     Ok(())
 }
 
