@@ -122,7 +122,7 @@ pub async fn get_url_content(
         }
     }
 
-    let emulation = Emulation::Chrome137;
+    let emulation = Emulation::Chrome149;
 
     let client = Client::builder()
         .emulation(emulation)
@@ -145,7 +145,7 @@ pub async fn get_url_content(
         return Err(format!("HTTP error: {}", response.status()));
     }
 
-    let final_url = response.url().to_string();
+    let final_url = response.uri().to_string();
 
     let content_type = response
         .headers()

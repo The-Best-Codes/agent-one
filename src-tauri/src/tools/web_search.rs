@@ -144,7 +144,7 @@ pub async fn web_search(
         }
     }
 
-    let emulation = Emulation::Chrome137;
+    let emulation = Emulation::Chrome149;
 
     let client = Client::builder()
         .emulation(emulation)
