@@ -64,8 +64,11 @@ pub async fn web_search(
 
             if !first_page_result.success {
                 return Err(format!(
-                    "Webview reported failure for search URL: {}",
-                    first_page_result.url
+                    "Webview reported failure for search URL: {}. Details: {}",
+                    first_page_result.url,
+                    first_page_result
+                        .error
+                        .unwrap_or_else(|| "unknown error".to_string())
                 ));
             }
 

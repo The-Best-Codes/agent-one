@@ -49,8 +49,11 @@ pub async fn get_url_content(
 
             if !webview_result.success {
                 return Err(format!(
-                    "Webview reported failure for URL: {}",
-                    webview_result.url
+                    "Webview reported failure for URL: {}. Details: {}",
+                    webview_result.url,
+                    webview_result
+                        .error
+                        .unwrap_or_else(|| "unknown error".to_string())
                 ));
             }
 
