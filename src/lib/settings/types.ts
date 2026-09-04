@@ -459,7 +459,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   ROUNDNESS: "md",
   FONT: "default",
   TEXT_SCALE: "md",
-  NOTIFICATION_SETTING: "never",
+  NOTIFICATION_SETTING: "when-unfocused",
   ANALYTICS_IDENTITY: "user-id",
   ENABLED_TOOLS: {
     dateTime: true,
