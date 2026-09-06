@@ -59,7 +59,7 @@ base64 = "0.23.1"
 croner = { version = "4", features = ["chrono"] }
 chrono = "0.4"
 uuid = { version = "1", features = ["v4"] }
-native-cron = "0.1.1"
+native-cron = "0.1.2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
