@@ -57,6 +57,17 @@ export default function TestsRoute() {
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
+                  <h3 className="font-medium">{t("tests.launchCron")}</h3>
+                  <p className="text-muted-foreground text-sm">
+                    {t("tests.launchCronDescription")}
+                  </p>
+                </div>
+                <Button onClick={() => navigate("/tests/crons")} variant="outline">
+                  {t("tests.runTest")}
+                </Button>
+              </div>
+              <div className="flex items-center justify-between rounded-md border p-4">
+                <div>
                   <h3 className="font-medium">{t("tests.localDatabase")}</h3>
                   <p className="text-muted-foreground text-sm">
                     {t("tests.localDatabaseDescription")}

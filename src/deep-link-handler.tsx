@@ -4,8 +4,11 @@ import { useAtom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 import deepLinkSchema from "@/assets/deep-links/schema.json";
+import { getCronInvocation } from "@/lib/cron";
+import i18n from "@/lib/i18n";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -135,6 +138,26 @@ export function DeepLinkHandler() {
           }
 
           void navigate(`/settings?${params.toString()}`);
+        } else if (deepLinkId === "cron") {
+          const id = urlObj.searchParams.get("id");
+          if (!id) {
+            logger.warn("Cron deep link is missing the required id parameter");
+            return;
+          }
+
+          void getCronInvocation(id)
+            .then((invocation) => {
+              if (!invocation) return;
+              toast(i18n.t("tests.cronInvoked", { id: invocation.id }), {
+                description: i18n.t("tests.cronInvocationDescription", {
+                  message: invocation.message ?? i18n.t("tests.noCronMessage"),
+                  delay: invocation.delaySeconds,
+                }),
+              });
+            })
+            .catch((error) => {
+              logger.error("Failed to handle cron invocation:", error);
+            });
         }
       } catch (error) {
         logger.error("Failed to parse deep link URL:", error);

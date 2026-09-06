@@ -23,6 +23,8 @@ pub fn run() {
                     println!("Deep link detected: {}", deep_link);
                     if let Some(main_window) = app.get_webview_window("main") {
                         let _ = main_window.emit("tauri://deep-link", deep_link);
+                        let _ = main_window.unminimize();
+                        let _ = main_window.show();
                         let _ = main_window.set_focus();
                     }
                     return;
@@ -164,6 +166,12 @@ pub fn run() {
                     tools::get_url_content,
                     tools::web_search,
                     utils::is_update_managed_externally,
+                    utils::list_crons,
+                    utils::create_cron,
+                    utils::update_cron,
+                    utils::set_cron_enabled,
+                    utils::delete_cron,
+                    utils::get_cron_invocation,
                     utils::list_webviews,
                     utils::force_close_webview,
                     keyring::storage_get_item,
