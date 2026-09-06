@@ -235,6 +235,10 @@ fn opener_command(id: &str) -> Vec<String> {
     #[cfg(target_os = "linux")]
     {
         vec![
+            linux_systemd_run().unwrap_or_else(|| "systemd-run".to_string()),
+            "--user".to_string(),
+            "--scope".to_string(),
+            "--".to_string(),
             linux_opener().unwrap_or_else(|| "xdg-open".to_string()),
             url,
         ]
@@ -254,6 +258,16 @@ fn opener_command(id: &str) -> Vec<String> {
 #[cfg(target_os = "linux")]
 fn linux_opener() -> Option<String> {
     for candidate in ["/usr/bin/xdg-open", "/bin/xdg-open"] {
+        if std::fs::metadata(candidate).is_ok() {
+            return Some(candidate.to_string());
+        }
+    }
+    None
+}
+
+#[cfg(target_os = "linux")]
+fn linux_systemd_run() -> Option<String> {
+    for candidate in ["/usr/bin/systemd-run", "/bin/systemd-run"] {
         if std::fs::metadata(candidate).is_ok() {
             return Some(candidate.to_string());
         }
