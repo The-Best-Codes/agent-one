@@ -226,8 +226,39 @@ fn write_crons(app: &tauri::AppHandle, crons: &[Cron]) -> Result<(), String> {
         .map_err(|error| format!("Failed to save cron schedules: {error}"))
 }
 
-fn resolve_executable_path() -> Result<PathBuf, String> {
-    std::env::current_exe().map_err(|error| format!("Failed to resolve app executable: {error}"))
+fn opener_command(id: &str) -> Vec<String> {
+    let url = cron_url(id);
+    #[cfg(target_os = "macos")]
+    {
+        vec!["/usr/bin/open".to_string(), url]
+    }
+    #[cfg(target_os = "linux")]
+    {
+        vec![
+            linux_opener().unwrap_or_else(|| "xdg-open".to_string()),
+            url,
+        ]
+    }
+    #[cfg(target_os = "windows")]
+    {
+        vec![
+            "cmd".to_string(),
+            "/C".to_string(),
+            "start".to_string(),
+            String::new(),
+            url,
+        ]
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn linux_opener() -> Option<String> {
+    for candidate in ["/usr/bin/xdg-open", "/bin/xdg-open"] {
+        if std::fs::metadata(candidate).is_ok() {
+            return Some(candidate.to_string());
+        }
+    }
+    None
 }
 
 fn cron_url(id: &str) -> String {
@@ -253,14 +284,10 @@ fn gui_env() -> Vec<(String, String)> {
 }
 
 fn build_options(cron: &Cron) -> Result<native_cron::CronOptions, String> {
-    let executable = resolve_executable_path()?;
     let mut options = native_cron::CronOptions::new(
         cron.id.clone(),
         cron.schedule.clone(),
-        [
-            executable.to_string_lossy().into_owned(),
-            cron_url(&cron.id),
-        ],
+        opener_command(&cron.id),
     )
     .overwrite(true);
     for (key, value) in gui_env() {
