@@ -3453,10 +3453,11 @@ dependencies = [
 
 [[package]]
 name = "native-cron"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2d7ca4ddf8611e16f6b3f7952d4df9cd50839ae5f5569af631206edc242d6bf"
+checksum = "6753145df79fa7b66bc26dac18b5c74d70d5c41967ac096aed1819ce80bfe88d"
 dependencies = [
+ "libc",
  "plist",
  "quick-xml 0.42.0",
  "systemd-unit-edit",
@@ -3671,7 +3672,7 @@ version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51e219e79014df21a225b1860a479e2dcd7cbd9130f4defd4bd0e191ea31d67d"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.21.7",
  "chrono",
  "getrandom 0.2.17",
  "http",
