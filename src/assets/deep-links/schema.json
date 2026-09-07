@@ -8,6 +8,10 @@
       "id": "mcp/install",
       "version": 1,
       "dangerouslyAllowNoVersion": true
+    },
+    {
+      "id": "cron",
+      "version": 1
     }
   ]
 }

@@ -23,6 +23,7 @@ import OnboardingRoute from "@/routes/onboarding";
 import SettingsRoute from "@/routes/settings";
 
 const TestsRoute = lazy(() => import("@/routes/tests"));
+const CronsTestRoute = lazy(() => import("@/routes/tests/crons"));
 const ChatStressTestRoute = lazy(() => import("@/routes/tests/chat-stress"));
 const LocalDatabaseTestRoute = lazy(() => import("@/routes/tests/local-database"));
 const LogsTestRoute = lazy(() => import("@/routes/tests/logs"));
@@ -99,6 +100,7 @@ function App() {
             }
           >
             <Route path="/tests" element={<TestsRoute />} />
+            <Route path="/tests/crons" element={<CronsTestRoute />} />
             <Route path="/tests/chat-stress" element={<ChatStressTestRoute />} />
             <Route path="/tests/local-database" element={<LocalDatabaseTestRoute />} />
             <Route path="/tests/logs" element={<LogsTestRoute />} />
