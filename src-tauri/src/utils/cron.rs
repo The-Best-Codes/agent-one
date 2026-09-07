@@ -51,8 +51,8 @@ pub fn create_cron(
         enabled: true,
     };
 
-    install_cron(&cron)?;
     let mut crons = read_crons(&app)?;
+    install_cron(&cron)?;
     crons.push(cron.clone());
     if let Err(error) = write_crons(&app, &crons) {
         let _ = remove_cron(&cron.id);
