@@ -2,9 +2,11 @@ use chrono::Local;
 use croner::Cron as CronSchedule;
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 use tauri::Manager;
+use tempfile::NamedTempFile;
 use uuid::Uuid;
 
 // TODO: Later on, probably migrate this to the kv table that already exists in the AgentOne DB?
@@ -223,8 +225,23 @@ fn write_crons(app: &tauri::AppHandle, crons: &[Cron]) -> Result<(), String> {
         crons: crons.to_vec(),
     })
     .map_err(|error| format!("Failed to serialize cron schedules: {error}"))?;
-    fs::write(resolve_state_path(app)?, contents)
-        .map_err(|error| format!("Failed to save cron schedules: {error}"))
+    let path = resolve_state_path(app)?;
+    let directory = path
+        .parent()
+        .ok_or_else(|| "Failed to resolve cron schedules directory".to_string())?;
+    let mut temporary = NamedTempFile::new_in(directory)
+        .map_err(|error| format!("Failed to create temporary cron schedules file: {error}"))?;
+    temporary
+        .write_all(contents.as_bytes())
+        .map_err(|error| format!("Failed to write cron schedules: {error}"))?;
+    temporary
+        .as_file_mut()
+        .sync_all()
+        .map_err(|error| format!("Failed to sync cron schedules: {error}"))?;
+    temporary
+        .persist(&path)
+        .map_err(|error| format!("Failed to save cron schedules: {}", error.error))?;
+    Ok(())
 }
 
 fn opener_command(id: &str) -> Vec<String> {

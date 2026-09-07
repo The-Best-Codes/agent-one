@@ -69,6 +69,7 @@ dependencies = [
  "tauri-plugin-updater",
  "tauri-plugin-websocket",
  "tauri-plugin-window-state",
+ "tempfile",
  "tokio",
  "url",
  "urlencoding",
