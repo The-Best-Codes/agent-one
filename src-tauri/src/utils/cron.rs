@@ -7,6 +7,7 @@ use std::str::FromStr;
 use tauri::Manager;
 use uuid::Uuid;
 
+// TODO: Later on, probably migrate this to the kv table that already exists in the AgentOne DB?
 const CRON_STATE_FILE_NAME: &str = "crons.json";
 
 #[derive(Clone, Deserialize, Serialize)]
