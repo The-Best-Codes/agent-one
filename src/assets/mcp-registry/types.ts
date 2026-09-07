@@ -44,6 +44,7 @@ export type ServerMeta = {
             | number
             | string;
         }
+      | null
       | string;
   };
 };
@@ -140,6 +141,8 @@ export type FluffyIoModelcontextprotocolRegistryPublisherProvided = {
   install?: string;
   required?: boolean;
   config?: CodeixClass;
+  equivalentCommand?: string;
+  remoteCommands?: string[];
 };
 
 export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
@@ -185,6 +188,26 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   formula?: string;
   install?: string[];
   tap?: string;
+  codingAgentSetup?: string;
+  llmsTxt?: string;
+  "exchange:attempt"?: string;
+  "exchange:propose"?: string;
+  "exchange:read"?: string;
+  billing?: string;
+  limit?: number;
+  period?: string;
+  scope?: string;
+  api_key_env?: string;
+  api_key_header?: string;
+  requires_api_key?: boolean;
+  addressScoping?: boolean;
+  audience?: string;
+  issuance?: string;
+  scheme?: string;
+  discovery?: string;
+  dynamicClientRegistration?: boolean;
+  pkce?: string;
+  scopes?: Array<ScopeClass | string>;
   billingBasis?: string;
   deepUsdPerHandle?: string;
   internalActorFailoverHasNoExtraCharge?: boolean;
@@ -281,22 +304,12 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   x402_seller_rank?: string;
   x402_top_movers?: string;
   x402_trending_services?: string;
-  billing?: string;
-  limit?: number;
-  period?: string;
-  scope?: string;
-  api_key_env?: string;
-  api_key_header?: string;
-  requires_api_key?: boolean;
   channels?: Channels;
   endpoints?: string[] | EndpointsClass;
   errorCode?: number;
   keyFormat?: string;
   modes?: string[];
   noRecovery?: boolean;
-  "exchange:attempt"?: string;
-  "exchange:propose"?: string;
-  "exchange:read"?: string;
   grant_types?: string[];
   metadata_endpoint?: string;
   token_endpoint?: string;
@@ -309,20 +322,10 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   status?: string;
   authorizationUrl?: string;
   clientId?: string;
-  scopes?: Array<ScopeClass | string>;
   tokenUrl?: TokenURLClass | string;
-  addressScoping?: boolean;
-  audience?: string;
-  issuance?: string;
-  scheme?: string;
-  discovery?: string;
-  dynamicClientRegistration?: boolean;
-  pkce?: string;
   changelog?: string;
   health?: string;
   metadata?: string;
-  codingAgentSetup?: string;
-  llmsTxt?: string;
   wellKnownIssuer?: string;
   docsUrl?: string;
   oauthDiscoveryUrl?: string;
@@ -410,6 +413,8 @@ export type TentacledIoModelcontextprotocolRegistryPublisherProvided = {
   source?: string;
   tags?: string[];
   tier?: string;
+  hosted?: Hosted;
+  localDaemon?: LocalDaemon;
   deferred_chains?: string[];
   label?: string;
   live_chains?: string[];
@@ -430,9 +435,22 @@ export type EndpointsClass = {
   verify: string;
 };
 
+export type Hosted = {
+  reason: string;
+  status: string;
+};
+
 export type InvokeHumanTasks = {
   type: string;
   url: string;
+};
+
+export type LocalDaemon = {
+  authorization: string;
+  browser: string;
+  command: string;
+  status: string;
+  writes: string;
 };
 
 export type IoModelcontextprotocolRegistryPublisherProvidedMCPServers = {
@@ -557,6 +575,8 @@ export type EnvironmentVariableVariables = {
   storage_path?: ProjectRef;
   output_path?: ProjectRef;
   license_path?: ProjectRef;
+  metered_public_key?: ProjectRef;
+  metered_private_key?: SgpDirectoryAPIKey;
   ls_appkey?: ApifyAPIToken;
   ls_appsecretkey?: ApifyAPIToken;
   ls_market?: AllowSecrets;
@@ -624,14 +644,15 @@ export type PackageArgument = {
 export type PackageArgumentVariables = {
   region?: ApifyAPIToken;
   store_path?: ApifyAPIToken;
-  user_id?: APIKey;
-  config_path?: APIKey;
+  workspace?: AgentAtlasHost;
+  user_id?: AgentAtlasHost;
+  config_path?: AgentAtlasHost;
   workflow_dir?: ApifyAPIToken;
-  workingDirectory?: APIKey;
+  workingDirectory?: AgentAtlasHost;
   toolFilter?: ToolFilter;
 };
 
-export type APIKey = {
+export type AgentAtlasHost = {
   description: string;
   isRequired?: boolean;
   format?: string;
@@ -662,7 +683,7 @@ export type RuntimeArgument = {
 };
 
 export type RuntimeArgumentVariables = {
-  config_file?: APIKey;
+  config_file?: AgentAtlasHost;
   workspace?: Account;
   host_port?: AimarketHost;
   network?: AimarketHost;
@@ -671,53 +692,54 @@ export type RuntimeArgumentVariables = {
   PORT_CONTROL_PANEL?: AimarketHost;
   DASHBOARD_API_KEY?: SgpDirectoryAPIKey;
   SERVICE_HOST?: ProjectRef;
-  project?: APIKey;
+  project?: AgentAtlasHost;
   config_dir?: ApifyAPIToken;
   kubeconfig_path?: ApifyAPIToken;
-  workbook_dir?: APIKey;
+  workbook_dir?: AgentAtlasHost;
   api_key?: ApifyAPIToken;
   models_path?: ApifyAPIToken;
   encoder_file?: ApifyAPIToken;
   decoder_file?: ApifyAPIToken;
   tokens_file?: ApifyAPIToken;
   port?: ApifyAPIToken;
-  configDir?: APIKey;
-  contentDir?: APIKey;
-  dataDir?: APIKey;
+  configDir?: AgentAtlasHost;
+  contentDir?: AgentAtlasHost;
+  dataDir?: AgentAtlasHost;
   token?: ApifyAPIToken;
-  VAULT_PATH?: APIKey;
-  config_path?: APIKey;
-  data_path?: APIKey;
+  VAULT_PATH?: AgentAtlasHost;
+  config_path?: AgentAtlasHost;
+  data_path?: AgentAtlasHost;
   workspace_path?: ApifyAPIToken;
-  ssh_private_key_path?: APIKey;
-  ssh_known_hosts_path?: APIKey;
+  ssh_private_key_path?: AgentAtlasHost;
+  ssh_known_hosts_path?: AgentAtlasHost;
   gid?: ApifyAPIToken;
   uid?: ApifyAPIToken;
-  xdg_runtime_dir?: APIKey;
+  xdg_runtime_dir?: AgentAtlasHost;
   source_path?: ApifyAPIToken;
+  exports_dir?: ExportsDir;
   ssh_key?: Account;
   logs_dir?: ProjectRef;
   host?: ApifyAPIToken;
   address?: Address;
   enabled?: Address;
   kubeconfig_dir?: Account;
-  inventory_path?: APIKey;
+  inventory_path?: AgentAtlasHost;
   key_path?: ApifyAPIToken;
-  host_dir?: APIKey;
-  host_user?: APIKey;
-  repository?: APIKey;
-  audio_directory?: APIKey;
+  host_dir?: AgentAtlasHost;
+  host_user?: AgentAtlasHost;
+  repository?: AgentAtlasHost;
+  audio_directory?: AgentAtlasHost;
   data_volume?: ApifyAPIToken;
-  uid_gid?: APIKey;
-  documents_dir?: APIKey;
+  uid_gid?: AgentAtlasHost;
+  documents_dir?: AgentAtlasHost;
   password?: ApifyAPIToken;
-  rpc_url?: APIKey;
-  vault_path?: APIKey;
+  rpc_url?: AgentAtlasHost;
+  vault_path?: AgentAtlasHost;
   kube_config?: ApifyAPIToken;
-  sas_token_dir?: APIKey;
+  sas_token_dir?: AgentAtlasHost;
   knowledge_path?: ApifyAPIToken;
-  project_dir?: APIKey;
-  keepassxc_dir?: APIKey;
+  project_dir?: AgentAtlasHost;
+  keepassxc_dir?: AgentAtlasHost;
   client_id?: ApifyAPIToken;
   client_secret?: ApifyAPIToken;
   customer_id?: CustomerID;
@@ -731,6 +753,11 @@ export type Address = {
 
 export type CustomerID = {
   isRequired: boolean;
+  format: string;
+};
+
+export type ExportsDir = {
+  description: string;
   format: string;
 };
 
@@ -757,6 +784,7 @@ export type TransportHeader = {
 export type PurpleVariables = {
   token?: ApifyAPIToken;
   MCP_AUTH_TOKEN?: ApifyAPIToken;
+  OT_SECURITY__BEARER_TOKEN?: ApifyAPIToken;
 };
 
 export type TransportVariables = {
@@ -785,34 +813,34 @@ export type RemoteHeader = {
 };
 
 export type FluffyVariables = {
-  api_key?: APIKey;
+  api_key?: AgentAtlasHost;
   mcp_client_secret?: ApifyAPIToken;
   token?: ApifyAPIToken;
   postfleet_api_key?: ApifyAPIToken;
   PRIMATE_API_KEY?: ApifyAPIToken;
-  seaotter_api_key?: APIKey;
-  mcp_token?: APIKey;
+  seaotter_api_key?: AgentAtlasHost;
+  mcp_token?: AgentAtlasHost;
   TRILO_PAT?: ApifyAPIToken;
   CAMBER_API_KEY?: ApifyAPIToken;
-  chad_mcp_token?: APIKey;
+  chad_mcp_token?: AgentAtlasHost;
   agent_token?: ApifyAPIToken;
   INFOBIP_API_KEY?: ApifyAPIToken;
-  LADDRO_API_KEY?: APIKey;
+  LADDRO_API_KEY?: AgentAtlasHost;
   agentfarm_token?: ApifyAPIToken;
   NEURA_RELAY_MCP_TOKEN?: ApifyAPIToken;
-  partglyph_api_key?: APIKey;
+  partglyph_api_key?: AgentAtlasHost;
   rankcusp_api_key?: ApifyAPIToken;
   access_key?: ApifyAPIToken;
   scriptivox_api_key?: ApifyAPIToken;
   IFR_COWORKER_TOKEN?: ApifyAPIToken;
   access_token?: ProjectRef;
-  bot_token?: APIKey;
+  bot_token?: AgentAtlasHost;
   cernion_token?: ApifyAPIToken;
-  e2a_api_key?: APIKey;
+  e2a_api_key?: AgentAtlasHost;
   agent_key?: ApifyAPIToken;
   calmloop_mcp_token?: ApifyAPIToken;
   NINELAYER_API_KEY?: ApifyAPIToken;
-  adtao_api_key?: APIKey;
+  adtao_api_key?: AgentAtlasHost;
   project_token?: ApifyAPIToken;
   CATHEDRAL_API_KEY?: ApifyAPIToken;
   UPTOCODE_API_KEY?: ApifyAPIToken;
@@ -820,26 +848,27 @@ export type FluffyVariables = {
   LTD_API_TOKEN?: ApifyAPIToken;
   imagcon_api_key?: ApifyAPIToken;
   hosttracker_api_token?: ApifyAPIToken;
-  agent_push_kit_token?: APIKey;
+  agent_push_kit_token?: AgentAtlasHost;
   AUTH_TOKEN?: ApifyAPIToken;
   YUOR_MCP_TOKEN?: ApifyAPIToken;
   BRIGHTSEC_API_KEY?: ApifyAPIToken;
   normi_api_key?: ApifyAPIToken;
-  EVERALICE_API_KEY?: APIKey;
-  revinho_token?: APIKey;
+  EVERALICE_API_KEY?: AgentAtlasHost;
+  revinho_token?: AgentAtlasHost;
   FIRSTDATA_API_KEY?: ApifyAPIToken;
   YO_API_KEY?: ApifyAPIToken;
-  agent_name?: APIKey;
+  agent_name?: AgentAtlasHost;
   apiKey?: ApifyAPIToken;
   indicate_api_key?: ApifyAPIToken;
   NETDATA_CLOUD_API_TOKEN?: SgpDirectoryAPIKey;
   mcp_access_token?: SgpDirectoryAPIKey;
   pixelvault_api_key?: ApifyAPIToken;
   rendley_api_key?: ApifyAPIToken;
-  signaliz_api_key?: APIKey;
+  signaliz_api_key?: AgentAtlasHost;
   credentials?: ApifyAPIToken;
   patsol_api_key?: ApifyAPIToken;
   RUNLOG_API_KEY?: ApifyAPIToken;
+  hilos_token?: AgentAtlasHost;
 };
 
 export type RemoteVariables = {
@@ -850,19 +879,19 @@ export type RemoteVariables = {
   HAPI_PORT?: ApifyAPIToken;
   core?: AimarketHost;
   user?: AimarketHost;
-  hub?: APIKey;
+  hub?: AgentAtlasHost;
   workspaceSlug?: Account;
-  api_key?: APIKey;
-  roster_host?: APIKey;
+  api_key?: AgentAtlasHost;
+  roster_host?: AgentAtlasHost;
   ATLAS_MCP_URL?: ApifyAPIToken;
+  token?: APIHost;
   workspace?: APIHost;
   mcp_token?: ApifyAPIToken;
   tenant_domain?: Account;
   storefront?: AimarketHost;
   sysname?: ProjectRef;
-  token?: APIHost;
   shop_id?: AimarketHost;
-  API_KEY?: APIKey;
+  API_KEY?: AgentAtlasHost;
   connector_token?: ApifyAPIToken;
   channel_key?: ApifyAPIToken;
   instance?: ApifyAPIToken;
@@ -877,13 +906,14 @@ export type RemoteVariables = {
   baseUrl?: APIHost;
   "server-name"?: Account;
   tenantId?: ProjectRef;
+  business?: Account;
   property_slug?: Account;
   portal_host?: Account;
   env?: APIHost;
   apify_token?: ApifyAPIToken;
   agent_id?: Account;
   host?: APIHost;
-  apiKey?: APIKey;
+  apiKey?: AgentAtlasHost;
   x_playcaller_key?: ApifyAPIToken;
   instance_host?: Account;
   qovery_token?: ApifyAPIToken;
@@ -901,14 +931,14 @@ export type RemoteVariables = {
   owner?: Account;
   repo?: Account;
   api_id?: ApifyAPIToken;
-  shop?: APIKey;
+  shop?: AgentAtlasHost;
   allow_secrets?: AllowSecrets;
   read_only?: AllowSecrets;
   services_scope?: AllowSecrets;
   prior_api_key?: ApifyAPIToken;
   organizationId?: Account;
   tenant_slug?: Account;
-  mcp_gsc_worker_domain?: APIKey;
+  mcp_gsc_worker_domain?: AgentAtlasHost;
   game?: Account;
   studio?: Account;
   namespace?: Account;
@@ -918,22 +948,26 @@ export type RemoteVariables = {
   network?: APIHost;
   supabase_project_ref?: Account;
   project_id?: Account;
-  environment_id?: APIKey;
+  environment_id?: AgentAtlasHost;
   easy8_host?: Account;
   label?: AimarketHost;
   APIFY_API_TOKEN?: ApifyAPIToken;
-  installation_domain?: APIKey;
+  installation_domain?: AgentAtlasHost;
   hybridlog_host?: Account;
   server_host?: Account;
-  mailfathom_host?: APIKey;
-  HOSTNAME?: APIKey;
+  mailfathom_host?: AgentAtlasHost;
+  AGENT_ATLAS_HOST?: AgentAtlasHost;
+  AGENT_IRIS_HOST?: AgentAtlasHost;
+  SELLING_PARTNER_HOST?: AgentAtlasHost;
+  VENDOR_CENTRAL_HOST?: AgentAtlasHost;
+  HOSTNAME?: AgentAtlasHost;
   artel_host?: ApifyAPIToken;
   orgSlug?: Account;
   hitkeep_host?: Account;
   apifyToken?: ApifyAPIToken;
   slug?: Account;
   SKYVERN_API_KEY?: ApifyAPIToken;
-  env_id?: APIKey;
+  env_id?: AgentAtlasHost;
   session_id?: ApifyAPIToken;
   PROJECT_REF?: ProjectRef;
   ibkr_mcp_host?: Account;
@@ -944,10 +978,10 @@ export type RemoteVariables = {
   atisbo_mcp_key?: ApifyAPIToken;
   BILT_API_KEY?: ApifyAPIToken;
   site_key?: Account;
-  coder_hostname?: APIKey;
-  builder_id?: APIKey;
+  coder_hostname?: AgentAtlasHost;
+  builder_id?: AgentAtlasHost;
   oauth_client_id?: OauthClientID;
-  oauth_client_secret?: APIKey;
+  oauth_client_secret?: AgentAtlasHost;
   swarm_host?: Account;
   hostname?: Account;
   atlas_api_key?: ApifyAPIToken;
@@ -960,29 +994,32 @@ export type RemoteVariables = {
   account?: Account;
   helpdesk_host?: Account;
   organization?: Account;
+  fanout_host?: AgentAtlasHost;
   worker_host?: Account;
   marmot_host?: Account;
   metabase_host?: Account;
-  worker_domain?: APIKey;
+  worker_domain?: AgentAtlasHost;
   openmetadata_host?: Account;
   plexus_host?: ProjectRef;
+  notifyd_host?: Account;
   your_mcp_server_host?: Account;
-  SERPAPI_API_KEY?: APIKey;
+  SERPAPI_API_KEY?: AgentAtlasHost;
   sourcegraph_hostname?: Account;
   lobster_id?: Account;
   mcpPath?: MCPPath;
-  remoteHost?: APIKey;
+  remoteHost?: AgentAtlasHost;
   endpoint?: Account;
   key_id?: ApifyAPIToken;
   key_secret?: ApifyAPIToken;
   appId?: Account;
+  connect_token?: ApifyAPIToken;
   mcpHost?: APIHost;
   api_token?: ApifyAPIToken;
   endpoint_code?: Account;
   locale?: APIHost;
-  cashtag?: APIKey;
+  cashtag?: AgentAtlasHost;
   publish_token?: ApifyAPIToken;
-  site?: APIKey;
+  site?: AgentAtlasHost;
 };
 
 export type APIHost = {
