@@ -264,11 +264,10 @@ fn opener_command(id: &str) -> Vec<String> {
     #[cfg(target_os = "windows")]
     {
         vec![
-            "cmd".to_string(),
-            "/C".to_string(),
-            "start".to_string(),
-            String::new(),
-            url,
+            "powershell".to_string(),
+            "-NoProfile".to_string(),
+            "-Command".to_string(),
+            format!("Start-Process '{}'", url),
         ]
     }
 }
