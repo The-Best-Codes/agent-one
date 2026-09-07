@@ -2,6 +2,7 @@ import {
   isPermissionGranted,
   requestPermission,
   sendNotification,
+  Visibility,
 } from "@tauri-apps/plugin-notification";
 
 import { getLogger } from "@/lib/logger";
@@ -39,6 +40,8 @@ export async function sendNotificationIfAllowed(title: string, body: string): Pr
       sendNotification({
         title,
         body,
+        silent: false,
+        visibility: Visibility.Public,
       });
       return true;
     }
