@@ -325,6 +325,10 @@ fn build_options(cron: &Cron) -> Result<native_cron::CronOptions, String> {
     for (key, value) in gui_env() {
         options = options.env(key, value);
     }
+    #[cfg(target_os = "windows")]
+    {
+        options = options.windows(native_cron::WindowsOptions { visible: true });
+    }
     Ok(options)
 }
 
