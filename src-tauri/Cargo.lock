@@ -3453,9 +3453,9 @@ dependencies = [
 
 [[package]]
 name = "native-cron"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9c92f453e4c6ef1cb552ecbfa9986be77835910b69ef95e552948bef0b588c1"
+checksum = "d384b4e0d539846d2015bbb7e3d5e611341f757149993600daa58d3a8fdc7d43"
 dependencies = [
  "chrono",
  "libc",
@@ -3673,7 +3673,7 @@ version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51e219e79014df21a225b1860a479e2dcd7cbd9130f4defd4bd0e191ea31d67d"
 dependencies = [
- "base64 0.21.7",
+ "base64 0.22.1",
  "chrono",
  "getrandom 0.2.17",
  "http",
@@ -6795,7 +6795,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
