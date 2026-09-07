@@ -255,6 +255,7 @@ fn opener_command(id: &str) -> Vec<String> {
     }
 }
 
+// TODO: Remove this fallback later, as it doesn't even work. xdg-open gets killed by systemd later, closing the app, which is why we should stick with systemd-run.
 #[cfg(target_os = "linux")]
 fn linux_opener() -> Option<String> {
     for candidate in ["/usr/bin/xdg-open", "/bin/xdg-open"] {
