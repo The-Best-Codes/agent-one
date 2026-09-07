@@ -7,7 +7,14 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -147,15 +154,15 @@ export default function CronsTestRoute() {
         </Alert>
 
         <Card>
-          <CardHeader className="flex-row items-start justify-between">
-            <div className="flex flex-col gap-1.5">
-              <CardTitle>{t("tests.cronsCardTitle")}</CardTitle>
-              <CardDescription>{t("tests.cronsCardDescription")}</CardDescription>
-            </div>
-            <Button onClick={openCreateDialog} disabled={isLoading}>
-              <IconPlus data-icon="inline-start" />
-              {t("tests.addCron")}
-            </Button>
+          <CardHeader>
+            <CardTitle>{t("tests.cronsCardTitle")}</CardTitle>
+            <CardDescription>{t("tests.cronsCardDescription")}</CardDescription>
+            <CardAction>
+              <Button onClick={openCreateDialog} disabled={isLoading}>
+                <IconPlus data-icon="inline-start" />
+                {t("tests.addCron")}
+              </Button>
+            </CardAction>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {!isLoading && crons.length === 0 ? (
