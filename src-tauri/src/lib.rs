@@ -1,4 +1,4 @@
-use tauri::{Emitter, Listener, Manager};
+use tauri::{Listener, Manager};
 
 mod keyring;
 mod mcp_auth;
@@ -22,7 +22,6 @@ pub fn run() {
                 if deep_link.starts_with("agent-one://") {
                     println!("Deep link detected: {}", deep_link);
                     if let Some(main_window) = app.get_webview_window("main") {
-                        let _ = main_window.emit("tauri://deep-link", deep_link);
                         let _ = main_window.unminimize();
                         let _ = main_window.show();
                         let _ = main_window.set_focus();

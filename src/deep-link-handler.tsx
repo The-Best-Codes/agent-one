@@ -1,4 +1,3 @@
-import { listen } from "@tauri-apps/api/event";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { useAtom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
@@ -35,9 +34,14 @@ export function DeepLinkHandler() {
   const [handledDeepLink, setHandledDeepLink] = useAtom(handledDeepLinkAtom);
 
   useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+
     const setupDeepLink = async () => {
       try {
         const currentUrls = await getCurrent();
+        if (disposed) return;
+
         if (
           currentUrls &&
           currentUrls.length > 0 &&
@@ -49,15 +53,12 @@ export function DeepLinkHandler() {
           handleDeepLink(currentUrls[0]);
         }
 
-        await onOpenUrl((urls: string[]) => {
+        unlisten = await onOpenUrl((urls: string[]) => {
           if (urls.length > 0) {
             handleDeepLink(urls[0]);
           }
         });
-
-        await listen<string>("tauri://deep-link", (event) => {
-          handleDeepLink(event.payload);
-        });
+        if (disposed) unlisten();
       } catch (error) {
         logger.warn("Failed to setup deep link handler:", error);
       }
@@ -165,6 +166,11 @@ export function DeepLinkHandler() {
     };
 
     void setupDeepLink();
+
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
   }, [navigate, handledDeepLink, setHandledDeepLink]);
 
   return null;
