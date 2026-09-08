@@ -8,7 +8,12 @@
   "extensions": {
     "shareTarget": false,
     "fileAssociations": [],
-    "protocolHandlers": []
+    "protocolHandlers": [
+      {
+        "name": "agent-one",
+        "displayName": "AgentOne"
+      }
+    ]
   },
   "signing": {
     "pfx": null,
