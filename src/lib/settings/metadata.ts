@@ -25,6 +25,7 @@ import {
   remendEnabledAtom,
   roundnessAtom,
   showChatStatusIndicatorAtom,
+  sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showChatToBottomButtonAtom,
   showMessagePreviewRailAtom,
@@ -45,6 +46,7 @@ import * as types from "./types";
 const inspectableSettingAtoms = {
   ANALYTICS_IDENTITY: analyticsIdentityAtom,
   CHAT_SORT: chatSortAtom,
+  SIDEBAR_CHAT_TIME_GROUPING: sidebarChatTimeGroupingAtom,
   CHAT_VIRTUALIZATION_MODE: chatVirtualizationModeAtom,
   CHAT_VIRTUALIZATION_THRESHOLD: chatVirtualizationThresholdAtom,
   COLLAPSED_SIDEBAR_LAYOUT: collapsedSidebarLayoutAtom,

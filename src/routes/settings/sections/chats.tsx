@@ -27,6 +27,7 @@ import {
   regenerateOnSaveAtom,
   remendEnabledAtom,
   showChatStatusIndicatorAtom,
+  sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showChatToBottomButtonAtom,
   showMessagePreviewRailAtom,
@@ -73,6 +74,9 @@ export default function ChatsSection() {
   const [showChatToBottomButton, setShowChatToBottomButton] = useAtom(showChatToBottomButtonAtom);
   const [showMessagePreviewRail, setShowMessagePreviewRail] = useAtom(showMessagePreviewRailAtom);
   const [chatSort, setChatSort] = useAtom(chatSortAtom);
+  const [sidebarChatTimeGrouping, setSidebarChatTimeGrouping] = useAtom(
+    sidebarChatTimeGroupingAtom,
+  );
   const [titleGeneration, setTitleGeneration] = useAtom(titleGenerationAtom);
 
   const isMarkdownRenderingDefault = markdownRendering === DEFAULT_SETTINGS.MARKDOWN_RENDERING;
@@ -99,6 +103,8 @@ export default function ChatsSection() {
   const isShowMessagePreviewRailDefault =
     showMessagePreviewRail === DEFAULT_SETTINGS.SHOW_MESSAGE_PREVIEW_RAIL;
   const isChatSortDefault = chatSort === DEFAULT_SETTINGS.CHAT_SORT;
+  const isSidebarChatTimeGroupingDefault =
+    sidebarChatTimeGrouping === DEFAULT_SETTINGS.SIDEBAR_CHAT_TIME_GROUPING;
   const isTitleGenerationDefault =
     JSON.stringify(titleGeneration) === JSON.stringify(DEFAULT_SETTINGS.TITLE_GENERATION);
 
@@ -159,6 +165,43 @@ export default function ChatsSection() {
                     resetSetting("CHAT_SORT");
                   }}
                   disabled={isChatSortDefault}
+                  aria-label={t("common.resetToDefault")}
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-sidebar-chat-time-grouping">
+            <div className="flex flex-row items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">
+                  {t("chatsSettings.sidebarChatTimeGrouping")}
+                </Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  {t("chatsSettings.sidebarChatTimeGroupingDescription")}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={sidebarChatTimeGrouping}
+                  onCheckedChange={(checked) => {
+                    trackSettingsInteraction("chats", "sidebar_chat_time_grouping_toggled", {
+                      enabled: checked,
+                    });
+                    setSidebarChatTimeGrouping(checked);
+                  }}
+                  aria-label={t("chatsSettings.toggleSidebarChatTimeGrouping")}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_sidebar_chat_time_grouping");
+                    resetSetting("SIDEBAR_CHAT_TIME_GROUPING");
+                  }}
+                  disabled={isSidebarChatTimeGroupingDefault}
                   aria-label={t("common.resetToDefault")}
                 >
                   <IconRestore data-icon="inline-start" />

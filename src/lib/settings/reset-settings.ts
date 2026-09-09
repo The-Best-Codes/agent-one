@@ -38,6 +38,7 @@ import {
   roundnessAtom,
   showChatToBottomButtonAtom,
   showChatStatusIndicatorAtom,
+  sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showMessagePreviewRailAtom,
   smoothStreamEnabledAtom,
@@ -86,6 +87,7 @@ export function resetAllSettings(): void {
   store.set(showMessagePreviewRailAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
   store.set(chatSortAtom, RESET);
+  store.set(sidebarChatTimeGroupingAtom, RESET);
   store.set(chatBackgroundAtom, RESET);
   store.set(ttsSettingsAtom, RESET);
   store.set(themeAtom, RESET);
@@ -198,6 +200,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "CHAT_SORT":
       store.set(chatSortAtom, RESET);
+      break;
+    case "SIDEBAR_CHAT_TIME_GROUPING":
+      store.set(sidebarChatTimeGroupingAtom, RESET);
       break;
     case "CHAT_BACKGROUND":
       store.set(chatBackgroundAtom, RESET);

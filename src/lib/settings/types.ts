@@ -346,6 +346,7 @@ export interface DefaultSettings extends ApiKeySettings {
   SHOW_MESSAGE_PREVIEW_RAIL: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
   CHAT_SORT: ChatSortOption;
+  SIDEBAR_CHAT_TIME_GROUPING: boolean;
   CHAT_BACKGROUND: ChatBackgroundSettings;
   TTS: TtsSettings;
   TITLE_GENERATION: TitleGenerationSettings;
@@ -393,6 +394,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   SHOW_MESSAGE_PREVIEW_RAIL: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
   CHAT_SORT: "created-at",
+  SIDEBAR_CHAT_TIME_GROUPING: false,
   CHAT_BACKGROUND: {
     preset: "none",
     customUrl: "",

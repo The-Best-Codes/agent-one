@@ -227,6 +227,11 @@ export const chatSortAtom = createSettingAtom<ChatSortOption>(
   DEFAULT_SETTINGS.CHAT_SORT,
 );
 
+export const sidebarChatTimeGroupingAtom = createSettingAtom(
+  "SIDEBAR_CHAT_TIME_GROUPING",
+  DEFAULT_SETTINGS.SIDEBAR_CHAT_TIME_GROUPING,
+);
+
 export const chatBackgroundAtom = createSettingAtom<ChatBackgroundSettings>(
   "CHAT_BACKGROUND",
   DEFAULT_SETTINGS.CHAT_BACKGROUND,

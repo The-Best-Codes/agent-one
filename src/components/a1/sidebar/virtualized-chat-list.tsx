@@ -33,7 +33,7 @@ import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useOverflow } from "@/hooks/use-overflow";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
-import { chatSortAtom } from "@/lib/jotai/settings-atoms";
+import { chatSortAtom, sidebarChatTimeGroupingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 import type { ChatSearchResult } from "@/lib/storage/chat-storage";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,47 @@ interface ChatListItem {
   snippet?: string;
   createdAt?: number;
   updatedAt?: number;
+}
+
+type ChatListRow =
+  | { type: "header"; id: string; label: string }
+  | { type: "chat"; chat: ChatListItem };
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+function getChatTimeGroup(
+  chat: ChatListItem,
+  chatSort: "created-at" | "updated-at",
+  locale: string,
+  t: (key: string) => string,
+): { id: string; label: string } {
+  const timestamp =
+    chatSort === "updated-at"
+      ? (chat.updatedAt ?? chat.createdAt)
+      : (chat.createdAt ?? chat.updatedAt);
+
+  if (!timestamp || Number.isNaN(new Date(timestamp).getTime())) {
+    return { id: "older", label: t("sidebar.older") };
+  }
+
+  const age = Math.max(0, Date.now() - timestamp);
+  if (age < 7 * DAY_IN_MS) {
+    return { id: "recent", label: t("sidebar.recent") };
+  }
+  if (age < 14 * DAY_IN_MS) {
+    return { id: "last-week", label: t("sidebar.lastWeek") };
+  }
+  if (age < 31 * DAY_IN_MS) {
+    return { id: "last-month", label: t("sidebar.lastMonth") };
+  }
+
+  const date = new Date(timestamp);
+  const currentYear = new Date().getFullYear();
+  const label = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    ...(date.getFullYear() !== currentYear && { year: "numeric" }),
+  }).format(date);
+  return { id: `month-${date.getFullYear()}-${date.getMonth()}`, label };
 }
 
 interface VirtualizedChatListProps {
@@ -69,7 +110,7 @@ export const VirtualizedChatList = ({
   additionalOnChatClickCallback,
   scrollToActiveChat = true,
 }: VirtualizedChatListProps) => {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ChatSearchResult[] | null>(null);
@@ -86,6 +127,7 @@ export const VirtualizedChatList = ({
   const latestSearchQueryRef = useRef("");
   const [chatIds] = useAtom(chatIdsAtom);
   const [chatSort] = useAtom(chatSortAtom);
+  const [sidebarChatTimeGrouping] = useAtom(sidebarChatTimeGroupingAtom);
 
   useKeyboardShortcut("focusChatSearch", () => {
     searchInputRef.current?.focus();
@@ -241,34 +283,59 @@ export const VirtualizedChatList = ({
           title: r.title,
           branchOf: metadataMap.get(r.chatId)?.branchOf,
           snippet: r.snippet,
+          createdAt: metadataMap.get(r.chatId)?.createdAt,
+          updatedAt: metadataMap.get(r.chatId)?.updatedAt,
         }));
     }
     return chats.filter((chat) => chat.title.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [chats, searchQuery, searchResults, chatIds, searchContent]);
 
+  const listRows = useMemo<ChatListRow[]>(() => {
+    if (!sidebarChatTimeGrouping) {
+      return filteredChats.map((chat) => ({ type: "chat", chat }));
+    }
+
+    let previousGroupId: string | undefined;
+    return filteredChats.flatMap((chat) => {
+      const group = getChatTimeGroup(chat, chatSort, i18n.language, t);
+      const rows: ChatListRow[] = [];
+      if (group.id !== previousGroupId) {
+        rows.push({ type: "header", ...group });
+        previousGroupId = group.id;
+      }
+      rows.push({ type: "chat", chat });
+      return rows;
+    });
+  }, [chatSort, filteredChats, i18n.language, sidebarChatTimeGrouping, t]);
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
-    count: filteredChats.length,
+    count: listRows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => (filteredChats[index]?.snippet ? 48 : 34),
+    estimateSize: (index) => {
+      const row = listRows[index];
+      return row?.type === "header" ? 28 : row?.chat.snippet ? 48 : 34;
+    },
     measureElement: (el) => el.getBoundingClientRect().height,
     overscan: 5,
   });
 
   const isOverflowing = useOverflow(parentRef, {
-    watch: `${filteredChats.length}:${chats.length}:${isMetadataLoaded}:${searchQuery}`,
+    watch: `${listRows.length}:${chats.length}:${isMetadataLoaded}:${searchQuery}`,
   });
 
   useEffect(() => {
     if (scrollToActiveChat && activeChatId && virtualizer && !searchQuery) {
-      const activeIndex = filteredChats.findIndex((chat) => chat.id === activeChatId);
+      const activeIndex = listRows.findIndex(
+        (row) => row.type === "chat" && row.chat.id === activeChatId,
+      );
       if (activeIndex !== -1) {
         virtualizer.scrollToIndex(activeIndex, {
           align: "center",
         });
       }
     }
-  }, [activeChatId, filteredChats, virtualizer, scrollToActiveChat, searchQuery]);
+  }, [activeChatId, listRows, virtualizer, scrollToActiveChat, searchQuery]);
 
   const toggleSelection = useCallback((id: string) => {
     setSelectedChatIds((prev) => {
@@ -480,7 +547,7 @@ export const VirtualizedChatList = ({
             }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const chat = filteredChats[virtualItem.index];
+              const row = listRows[virtualItem.index];
               return (
                 <div
                   key={virtualItem.key}
@@ -494,19 +561,24 @@ export const VirtualizedChatList = ({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <ChatItem
-                    key={chat.id}
-                    activeChatId={activeChatId}
-                    id={chat.id}
-                    title={chat.title}
-                    branchOf={chat.branchOf}
-                    snippet={chat.snippet}
-                    additionalOnChatClickCallback={additionalOnChatClickCallback}
-                    selectionMode={selectionMode}
-                    isSelected={selectedChatIds.has(chat.id)}
-                    onSelectionToggle={toggleSelection}
-                    onEnterSelectionMode={enterSelectionMode}
-                  />
+                  {row.type === "header" ? (
+                    <div className="text-muted-foreground bg-sidebar px-2 pt-2 pb-1 text-xs font-medium">
+                      {row.label}
+                    </div>
+                  ) : (
+                    <ChatItem
+                      activeChatId={activeChatId}
+                      id={row.chat.id}
+                      title={row.chat.title}
+                      branchOf={row.chat.branchOf}
+                      snippet={row.chat.snippet}
+                      additionalOnChatClickCallback={additionalOnChatClickCallback}
+                      selectionMode={selectionMode}
+                      isSelected={selectedChatIds.has(row.chat.id)}
+                      onSelectionToggle={toggleSelection}
+                      onEnterSelectionMode={enterSelectionMode}
+                    />
+                  )}
                 </div>
               );
             })}
