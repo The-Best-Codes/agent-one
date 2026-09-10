@@ -976,7 +976,7 @@
     "newMessage": "New Message in \"{{chatName}}\"",
     "openToKeepWorking": "Open AgentOne to keep working.",
     "approvalRequired": "Approval Required in \"{{chatName}}\"",
-    "cannotContinueWithoutApproval": "AgentOne can't continue until you approve {{toolName}}.",
+    "cannotContinueWithoutApproval": "AgentOne can't continue until you provide approval.",
     "error": "Error in \"{{chatName}}\"",
     "stoppedBecauseOfError": "AgentOne stopped working because of an error."
   },

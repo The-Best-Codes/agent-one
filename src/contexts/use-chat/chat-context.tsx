@@ -12,7 +12,6 @@ import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
 import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
-import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import i18n from "@/lib/i18n";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
@@ -513,15 +512,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
         (notificationSetting === "when-unfocused" && !document.hasFocus()))
     ) {
       notifiedApprovalIdsRef.current.add(pendingApproval.approval.id);
-      const toolName = getToolDisplayName(
-        pendingApproval.type === "dynamic-tool"
-          ? pendingApproval.toolName
-          : pendingApproval.type.slice("tool-".length),
-        pendingApproval.title,
-      );
       void sendNotificationIfAllowed(
         i18n.t("notifications.approvalRequired", { chatName: metadataValue.title }),
-        i18n.t("notifications.cannotContinueWithoutApproval", { toolName }),
+        i18n.t("notifications.cannotContinueWithoutApproval"),
       );
     }
   }, [statusValue.status, messages, setMessages, notificationSetting, metadataValue.title]);
