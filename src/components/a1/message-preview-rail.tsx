@@ -3,25 +3,12 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getLastTextPart } from "@/lib/ai/message-preview";
 import i18n from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-const getMessagePreview = (message: UIMessage) => {
-  const text = message.parts
-    .flatMap((part) => {
-      if (part.type === "text" || part.type === "reasoning") return part.text;
-      if (part.type === "file")
-        return part.filename
-          ? i18n.t("chat.previewFile", { filename: part.filename })
-          : i18n.t("chat.previewFileAttachment");
-      return [];
-    })
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  return text || i18n.t("chat.messageWithTools");
-};
+const getMessagePreview = (message: UIMessage) =>
+  getLastTextPart(message) || i18n.t("chat.messageWithTools");
 
 export function MessagePreviewRail({
   messages,
