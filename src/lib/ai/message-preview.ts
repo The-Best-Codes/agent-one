@@ -17,5 +17,5 @@ export function truncateMessagePreview(
   maxLength = NOTIFICATION_PREVIEW_MAX_LENGTH,
 ): string {
   if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength - 1).trimEnd()}...`;
+  return `${text.slice(0, maxLength - 3).trimEnd()}...`;
 }
