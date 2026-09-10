@@ -3,12 +3,17 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLastTextPart } from "@/lib/ai/message-preview";
-import i18n from "@/lib/i18n";
+import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
 import { cn } from "@/lib/utils";
 
-const getMessagePreview = (message: UIMessage) =>
-  getLastTextPart(message) || i18n.t("chat.messageWithTools");
+type PreviewEntry = {
+  message: UIMessage;
+  index: number;
+  response?: UIMessage;
+};
+
+const getMessagePreview = (message: UIMessage, t: (key: string) => string) =>
+  getLastTextPart(message) || t("chat.messageWithTools");
 
 export function MessagePreviewRail({
   messages,
@@ -20,11 +25,21 @@ export function MessagePreviewRail({
   getScrollElement: () => HTMLElement | null;
 }) {
   const { t } = useTranslation();
+  const entries: PreviewEntry[] = [];
+  for (let index = 0; index < messages.length; index++) {
+    const message = messages[index];
+    if (message.role === "user" && messages[index + 1]?.role === "assistant") {
+      entries.push({ message, index, response: messages[index + 1] });
+      index++;
+    } else {
+      entries.push({ message, index });
+    }
+  }
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const [visibleIndexes, setVisibleIndexes] = useState<Set<number>>(new Set());
   const displayedIndex = hoveredIndex ?? focusedIndex;
-  const displayedMessage = displayedIndex == null ? undefined : messages[displayedIndex];
+  const displayedEntry = displayedIndex == null ? undefined : entries[displayedIndex];
 
   useEffect(() => {
     const root = getScrollElement();
@@ -90,11 +105,12 @@ export function MessagePreviewRail({
         }}
         className="pointer-events-auto relative grid w-12 shrink-0 content-stretch"
         style={{
-          height: `min(${messages.length * 20}px, calc(100svh - 2rem))`,
-          gridTemplateRows: `repeat(${messages.length}, minmax(0, 1fr))`,
+          height: `min(${entries.length * 10}px, calc(100svh - 2rem))`,
+          gridTemplateRows: `repeat(${entries.length}, minmax(0, 1fr))`,
         }}
       >
-        {messages.map((message, index) => {
+        {entries.map((entry, index) => {
+          const { message } = entry;
           const distance =
             displayedIndex == null ? Number.POSITIVE_INFINITY : Math.abs(index - displayedIndex);
           const scale = distance === 0 ? 1 : distance === 1 ? 0.68 : distance === 2 ? 0.44 : 0.25;
@@ -104,7 +120,7 @@ export function MessagePreviewRail({
               key={message.id}
               type="button"
               aria-label={
-                message.role === "user"
+                entry.message.role === "user"
                   ? t("chat.scrollToYourMessage", { index: index + 1 })
                   : t("chat.scrollToAssistantMessage", { index: index + 1 })
               }
@@ -115,14 +131,17 @@ export function MessagePreviewRail({
               onFocus={(event) => {
                 if (event.currentTarget.matches(":focus-visible")) setFocusedIndex(index);
               }}
-              onClick={() => onMessageSelect(index)}
+              onClick={() => onMessageSelect(entry.index)}
               className="text-muted-foreground focus-visible:ring-ring focus-visible:ring-offset-background relative flex min-h-1 w-12 cursor-pointer items-center justify-end focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <span
                 aria-hidden="true"
                 className={cn(
                   "block h-0.5 w-12 origin-right bg-current transition-transform duration-300 ease-out motion-reduce:transition-none",
-                  (visibleIndexes.has(index) || displayedIndex === index) && "text-foreground",
+                  (visibleIndexes.has(entry.index) ||
+                    (entry.response && visibleIndexes.has(entry.index + 1)) ||
+                    displayedIndex === index) &&
+                    "text-foreground",
                 )}
                 style={{ transform: `scaleX(${scale})` }}
               />
@@ -130,19 +149,25 @@ export function MessagePreviewRail({
           );
         })}
 
-        {displayedMessage && displayedIndex != null ? (
+        {displayedEntry && displayedIndex != null ? (
           <div
             aria-hidden="true"
             className="pointer-events-none absolute right-16 w-72 -translate-y-1/2"
-            style={{ top: `${((displayedIndex + 0.5) / messages.length) * 100}%` }}
+            style={{ top: `${((displayedIndex + 0.5) / entries.length) * 100}%` }}
           >
-            <Card key={displayedMessage.id}>
-              <CardHeader>
-                <CardTitle>
-                  {displayedMessage.role === "user" ? t("chat.roleYou") : t("chat.roleAssistant")}
+            <Card size="sm" key={displayedEntry.message.id}>
+              <CardHeader className="gap-1">
+                <CardTitle className="truncate whitespace-nowrap">
+                  {truncateMessagePreview(getMessagePreview(displayedEntry.message, t))}
                 </CardTitle>
-                <CardDescription className="line-clamp-4 leading-6">
-                  {getMessagePreview(displayedMessage)}
+                <CardDescription className="line-clamp-4 leading-5">
+                  {displayedEntry.response ? (
+                    getMessagePreview(displayedEntry.response, t)
+                  ) : displayedEntry.message.role === "user" ? (
+                    <em>{t("chat.noResponse")}</em>
+                  ) : (
+                    getMessagePreview(displayedEntry.message, t)
+                  )}
                 </CardDescription>
               </CardHeader>
             </Card>
