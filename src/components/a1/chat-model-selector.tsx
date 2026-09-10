@@ -520,14 +520,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
     (Boolean(user) && !customerState) ||
     shouldShowLoadingSkeleton
   ) {
-    return (
-      <Skeleton
-        className={cn(
-          "h-8 w-full bg-muted-foreground dark:bg-accent border border-border",
-          className,
-        )}
-      />
-    );
+    return <Skeleton className={cn("h-8 w-full border border-border", className)} />;
   }
 
   return (
