@@ -270,6 +270,7 @@ export const WebAuthProvider: React.FC<{ children: ReactNode }> = ({ children })
     setIsSigningOut(true);
     try {
       stopPolling();
+      settingsSyncManager.onSignedOut();
       setAuthToken(null);
       await keyringStorage.removeItem(TOKEN_KEY);
       void setAgentOneApiKey("");
