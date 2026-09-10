@@ -43,6 +43,7 @@ dependencies = [
  "htmd",
  "keyring-core",
  "native-cron",
+ "notify-rust",
  "once_cell",
  "rand 0.10.2",
  "regex",

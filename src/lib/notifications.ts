@@ -1,9 +1,11 @@
+import { invoke } from "@tauri-apps/api/core";
 import {
   isPermissionGranted,
   requestPermission,
   sendNotification,
   Visibility,
 } from "@tauri-apps/plugin-notification";
+import { platform } from "@tauri-apps/plugin-os";
 
 import { getLogger } from "@/lib/logger";
 
@@ -37,12 +39,16 @@ export async function sendNotificationIfAllowed(title: string, body: string): Pr
     }
 
     if (permissionGranted) {
-      sendNotification({
-        title,
-        body,
-        silent: false,
-        visibility: Visibility.Public,
-      });
+      if (platform() === "linux") {
+        await invoke("send_notification", { title, body });
+      } else {
+        sendNotification({
+          title,
+          body,
+          silent: false,
+          visibility: Visibility.Public,
+        });
+      }
       return true;
     }
 

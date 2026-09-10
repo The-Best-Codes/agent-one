@@ -1,15 +1,12 @@
 import { IconArrowLeft } from "@tabler/icons-react";
-import {
-  isPermissionGranted,
-  requestPermission,
-  sendNotification,
-} from "@tauri-apps/plugin-notification";
+import { isPermissionGranted, requestPermission } from "@tauri-apps/plugin-notification";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 export default function NotificationsTestRoute() {
   const { t } = useTranslation();
@@ -67,10 +64,7 @@ export default function NotificationsTestRoute() {
 
       if (permissionGranted) {
         addLog(t("tests.step3Sending"));
-        sendNotification({
-          title: t("tests.notificationTitle"),
-          body: t("tests.notificationBody"),
-        });
+        await sendNotificationIfAllowed(t("tests.notificationTitle"), t("tests.notificationBody"));
         addLog(t("tests.notificationSent"));
       } else {
         addLog(t("tests.permissionDenied"));
