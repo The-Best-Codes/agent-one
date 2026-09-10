@@ -1021,6 +1021,7 @@
     "maxTokensTooltip": "Maximum number of tokens (words/sub-words) in the model response. Leave empty to use the model's default limit.",
     "messageNav": "Chat message navigation",
     "messageWithTools": "Message with tools or attachments",
+    "emptyMessage": "Empty message",
     "noResponse": "No response",
     "modelAria": "Model: {{name}}",
     "modelConfig": "Model Config",

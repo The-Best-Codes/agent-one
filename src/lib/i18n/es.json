@@ -1021,6 +1021,7 @@
     "maxTokensTooltip": "Máximo de tokens en la respuesta. Deja en blanco para usar el límite por defecto del modelo.",
     "messageNav": "Navegación de mensajes del chat",
     "messageWithTools": "Mensaje con herramientas o adjuntos",
+    "emptyMessage": "Mensaje vacío",
     "noResponse": "Sin respuesta",
     "modelAria": "Modelo: {{name}}",
     "modelConfig": "Configuración del modelo",

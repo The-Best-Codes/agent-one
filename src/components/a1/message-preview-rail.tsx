@@ -12,9 +12,6 @@ type PreviewEntry = {
   response?: UIMessage;
 };
 
-const getMessagePreview = (message: UIMessage, t: (key: string) => string) =>
-  getLastTextPart(message) || t("chat.messageWithTools");
-
 export function MessagePreviewRail({
   messages,
   onMessageSelect,
@@ -158,15 +155,21 @@ export function MessagePreviewRail({
             <Card size="sm" key={displayedEntry.message.id}>
               <CardHeader className="gap-1">
                 <CardTitle className="truncate whitespace-nowrap">
-                  {truncateMessagePreview(getMessagePreview(displayedEntry.message, t))}
+                  {truncateMessagePreview(
+                    displayedEntry.message.role === "user"
+                      ? getLastTextPart(displayedEntry.message) || t("chat.emptyMessage")
+                      : t("chat.emptyMessage"),
+                  )}
                 </CardTitle>
                 <CardDescription className="line-clamp-4 leading-5">
                   {displayedEntry.response ? (
-                    getMessagePreview(displayedEntry.response, t)
+                    getLastTextPart(displayedEntry.response) || (
+                      <em>{t("chat.messageWithTools")}</em>
+                    )
                   ) : displayedEntry.message.role === "user" ? (
                     <em>{t("chat.noResponse")}</em>
                   ) : (
-                    getMessagePreview(displayedEntry.message, t)
+                    getLastTextPart(displayedEntry.message) || <em>{t("chat.messageWithTools")}</em>
                   )}
                 </CardDescription>
               </CardHeader>

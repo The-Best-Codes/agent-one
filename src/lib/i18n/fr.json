@@ -1021,6 +1021,7 @@
     "maxTokensTooltip": "Nombre max de tokens dans la réponse. Laisser vide pour la valeur par défaut du modèle.",
     "messageNav": "Navigation dans les messages",
     "messageWithTools": "Message avec outils ou pièces jointes",
+    "emptyMessage": "Message vide",
     "noResponse": "Aucune réponse",
     "modelAria": "Modèle : {{name}}",
     "modelConfig": "Config du modèle",
