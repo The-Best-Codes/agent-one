@@ -880,6 +880,42 @@
   }
 }
 
+@utility skeleton-shimmer {
+  --_skeleton-spread: var(--shimmer-spread, calc(3ch + 40px));
+  --_skeleton-base: var(--color-muted);
+  --_skeleton-highlight: color-mix(in oklch, var(--color-muted-foreground) 32%, var(--color-muted));
+  background-color: var(--color-muted);
+  background-image: linear-gradient(
+    calc(90deg + var(--shimmer-angle, 20deg)),
+    var(--_skeleton-base) calc(50% - var(--_skeleton-spread)),
+    color-mix(in oklch, var(--_skeleton-highlight), var(--_skeleton-base) 50%)
+      calc(50% - var(--_skeleton-spread) * 0.5),
+    var(--_skeleton-highlight) 50%,
+    color-mix(in oklch, var(--_skeleton-highlight), var(--_skeleton-base) 50%)
+      calc(50% + var(--_skeleton-spread) * 0.5),
+    var(--_skeleton-base) calc(50% + var(--_skeleton-spread))
+  );
+  background-repeat: no-repeat;
+  background-size: calc(200% + var(--_skeleton-spread) * 2) 100%;
+  background-position: 0 0;
+  animation: tw-shimmer var(--shimmer-duration, 1.35s) linear infinite;
+
+  @variant dark {
+    --_skeleton-highlight: color-mix(
+      in oklch,
+      var(--color-muted-foreground) 55%,
+      var(--color-muted)
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background-image: none;
+  }
+}
+
 @utility accordion-details-animated {
   @supports selector(details::details-content) {
     &::details-content {
