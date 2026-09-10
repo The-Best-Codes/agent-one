@@ -14,7 +14,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useChatMessages } from "@/contexts/use-chat/chat-hooks";
+import { useGetChatMessages } from "@/contexts/use-chat/chat-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useMessageEditing } from "@/hooks/use-message-editing";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
@@ -61,7 +61,7 @@ const MessagePartsInternal = ({
   const navigate = useNavigate();
   const { id: activeChatId } = useParams<{ id: string }>();
   const { branchChat } = usePersistence();
-  const allMessages = useChatMessages();
+  const getMessages = useGetChatMessages();
 
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
 
@@ -82,13 +82,13 @@ const MessagePartsInternal = ({
       const newChatId = branchChat({
         originalChatId: activeChatId,
         branchFromMessageId: message.id,
-        messages: allMessages,
+        messages: getMessages(),
       });
       void navigate(`/chat/${newChatId}`);
     } catch (error) {
       logger.error("Failed to branch chat:", error);
     }
-  }, [activeChatId, message.id, navigate, branchChat, allMessages]);
+  }, [activeChatId, message.id, navigate, branchChat, getMessages]);
 
   const getCopyContent = useCallback(() => {
     return message.parts

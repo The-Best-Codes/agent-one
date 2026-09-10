@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/native/accordion";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import type { ToolDisplayLabels } from "@/lib/ai/tools/describeNextTool";
 import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
@@ -64,7 +64,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
   const callId = part.toolCallId;
   const toolName = getToolDisplayName(part.toolName, part.title);
   const maxToolResultChars = useAtomValue(maxToolResultCharsAtom);
-  const { addToolApprovalResponse } = useChatFunctions();
+  const getChatFunctions = useGetChatFunctions();
 
   switch (part.state) {
     case "approval-requested": {
@@ -104,7 +104,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               size="sm"
               variant="outline"
               onClick={() =>
-                addToolApprovalResponse({
+                getChatFunctions().addToolApprovalResponse({
                   id: part.approval.id,
                   approved: false,
                 })
@@ -117,7 +117,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               size="sm"
               variant="outline"
               onClick={() =>
-                addToolApprovalResponse({
+                getChatFunctions().addToolApprovalResponse({
                   id: part.approval.id,
                   approved: true,
                 })

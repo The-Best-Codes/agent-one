@@ -6,6 +6,8 @@ import type { ChatMetadata } from "@/contexts/use-persistence/persistence-contex
 import {
   ChatApprovalHandlerContext,
   ChatFunctionsContext,
+  ChatGetFunctionsContext,
+  ChatGetMessagesContext,
   ChatLoadingContext,
   ChatMessagesContext,
   ChatMetadataContext,
@@ -35,6 +37,9 @@ export type ChatApprovalHandler = (args: {
   approved: boolean;
   reason?: string;
 }) => Promise<void>;
+
+export type ChatGetMessagesContextType = () => UIMessage[];
+export type ChatGetFunctionsContextType = () => ChatFunctionsContextType;
 
 export const useChatMessages = (): ChatMessagesContextType => {
   const context = useContext(ChatMessagesContext);
@@ -68,6 +73,22 @@ export const useChatFunctions = (): ChatFunctionsContextType => {
   const context = useContext(ChatFunctionsContext);
   if (context === undefined) {
     throw new Error("useChatFunctions must be used within a ChatProvider");
+  }
+  return context;
+};
+
+export const useGetChatMessages = (): ChatGetMessagesContextType => {
+  const context = useContext(ChatGetMessagesContext);
+  if (context === undefined) {
+    throw new Error("useGetChatMessages must be used within a ChatProvider");
+  }
+  return context;
+};
+
+export const useGetChatFunctions = (): ChatGetFunctionsContextType => {
+  const context = useContext(ChatGetFunctionsContext);
+  if (context === undefined) {
+    throw new Error("useGetChatFunctions must be used within a ChatProvider");
   }
   return context;
 };

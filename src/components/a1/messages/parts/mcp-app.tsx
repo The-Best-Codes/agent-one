@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 
 import packageJson from "@/../package.json";
 import { Button } from "@/components/ui/button";
-import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useChatStatus, useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { useTheme } from "@/hooks/use-theme";
 import {
@@ -105,7 +105,7 @@ function ConnectedMcpAppInternal({
   const { t } = useTranslation();
   const { mcpLoaded } = useTools();
   const { resolvedTheme } = useTheme();
-  const { sendMessage, updateMcpAppModelContext } = useChatFunctions();
+  const getChatFunctions = useGetChatFunctions();
   const { status } = useChatStatus();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialized, setInitialized] = useState(false);
@@ -218,11 +218,14 @@ function ConnectedMcpAppInternal({
           if (status !== "ready") {
             throw new Error("The chat is busy. Try sending the message again when it is ready.");
           }
-          await sendMessage({ text: getMessageText(params) });
+          await getChatFunctions().sendMessage({ text: getMessageText(params) });
           return {};
         },
         updateModelContext: (params) => {
-          updateMcpAppModelContext(part.toolCallId, validateModelContext(params));
+          getChatFunctions().updateMcpAppModelContext(
+            part.toolCallId,
+            validateModelContext(params),
+          );
           return {};
         },
         requestDisplayMode: ({ mode }) => {
@@ -250,12 +253,11 @@ function ConnectedMcpAppInternal({
     }
   }, [
     displayMode,
+    getChatFunctions,
     mcpLoaded,
     part.toolCallId,
-    sendMessage,
     serverId,
     status,
-    updateMcpAppModelContext,
     viewportSize.height,
   ]);
 

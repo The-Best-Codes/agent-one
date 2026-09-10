@@ -21,6 +21,8 @@ import { sendNotificationIfAllowed } from "@/lib/notifications";
 import {
   ChatApprovalHandlerContext,
   ChatFunctionsContext,
+  ChatGetFunctionsContext,
+  ChatGetMessagesContext,
   ChatLoadingContext,
   ChatMessagesContext,
   ChatMetadataContext,
@@ -522,12 +524,19 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ],
   );
 
-  const approvalHandlerValue = useMemo(
-    () =>
-      async ({ id, approved, reason }: { id: string; approved: boolean; reason?: string }) => {
-        await addToolApprovalResponse({ id, approved, reason });
-      },
-    [addToolApprovalResponse],
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const getMessages = useCallback(() => messagesRef.current, []);
+
+  const functionsRef = useRef(functionsValue);
+  functionsRef.current = functionsValue;
+  const getChatFunctions = useCallback(() => functionsRef.current, []);
+
+  const approvalHandlerValue = useCallback(
+    async ({ id, approved, reason }: { id: string; approved: boolean; reason?: string }) => {
+      await functionsRef.current.addToolApprovalResponse({ id, approved, reason });
+    },
+    [],
   );
 
   return (
@@ -551,19 +560,23 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           />
         );
       })}
-      <ChatMessagesContext.Provider value={messages}>
-        <ChatStatusContext.Provider value={statusValue}>
-          <ChatMetadataContext.Provider value={metadataValue}>
-            <ChatLoadingContext.Provider value={isChatLoading}>
-              <ChatFunctionsContext.Provider value={functionsValue}>
-                <ChatApprovalHandlerContext.Provider value={approvalHandlerValue}>
-                  {children}
-                </ChatApprovalHandlerContext.Provider>
-              </ChatFunctionsContext.Provider>
-            </ChatLoadingContext.Provider>
-          </ChatMetadataContext.Provider>
-        </ChatStatusContext.Provider>
-      </ChatMessagesContext.Provider>
+      <ChatGetMessagesContext.Provider value={getMessages}>
+        <ChatGetFunctionsContext.Provider value={getChatFunctions}>
+          <ChatMessagesContext.Provider value={messages}>
+            <ChatStatusContext.Provider value={statusValue}>
+              <ChatMetadataContext.Provider value={metadataValue}>
+                <ChatLoadingContext.Provider value={isChatLoading}>
+                  <ChatFunctionsContext.Provider value={functionsValue}>
+                    <ChatApprovalHandlerContext.Provider value={approvalHandlerValue}>
+                      {children}
+                    </ChatApprovalHandlerContext.Provider>
+                  </ChatFunctionsContext.Provider>
+                </ChatLoadingContext.Provider>
+              </ChatMetadataContext.Provider>
+            </ChatStatusContext.Provider>
+          </ChatMessagesContext.Provider>
+        </ChatGetFunctionsContext.Provider>
+      </ChatGetMessagesContext.Provider>
     </ModelContext.Provider>
   );
 };

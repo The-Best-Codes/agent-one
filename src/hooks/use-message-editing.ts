@@ -2,7 +2,7 @@ import type { TextUIPart, UIMessage } from "ai";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
+import { useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { setMessageEditingAtom } from "@/lib/jotai/chat-message-editing-atoms";
 import { getLogger } from "@/lib/logger";
@@ -33,7 +33,7 @@ export const useMessageEditing = ({
   message,
 }: UseMessageEditingOptions): UseMessageEditingReturn => {
   const [isEditing, setIsEditing] = useState(false);
-  const { setMessages, regenerate } = useChatFunctions();
+  const getChatFunctions = useGetChatFunctions();
   const setMessageEditing = useSetAtom(setMessageEditingAtom);
 
   const initialValues = useMemo(() => {
@@ -74,7 +74,7 @@ export const useMessageEditing = ({
   const handleSave = useCallback(
     (shouldRegenerate?: boolean) => {
       try {
-        setMessages((currentMessages) => {
+        getChatFunctions().setMessages((currentMessages) => {
           const messageIndex = currentMessages.findIndex((m) => m.id === message.id);
           if (messageIndex === -1) {
             logger.error("Could not find message to edit.");
@@ -113,14 +113,14 @@ export const useMessageEditing = ({
         setIsEditing(false);
 
         if (shouldRegenerate) {
-          void regenerate({ messageId: message.id });
+          void getChatFunctions().regenerate({ messageId: message.id });
         }
       } catch (e) {
         logger.error(e);
         handleCancel();
       }
     },
-    [setMessages, message.id, regenerate, handleCancel, setMessageEditing],
+    [getChatFunctions, message.id, handleCancel, setMessageEditing],
   );
 
   useEffect(() => {

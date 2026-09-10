@@ -3,7 +3,7 @@ import type { ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useChatStatus, useGetChatFunctions } from "@/contexts/use-chat/chat-hooks";
 
 type RetryButtonProps = {
   messageId: string;
@@ -15,14 +15,14 @@ type RetryButtonProps = {
 // TODO: Disable this button when no models are available (see ../../input/no-model-section.tsx for example)
 export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps) => {
   const { t } = useTranslation();
-  const { regenerate } = useChatFunctions();
+  const getChatFunctions = useGetChatFunctions();
   const { status } = useChatStatus();
 
   const isDisabled = status === "streaming" || status === "submitted";
 
   const handleRetry = () => {
     if (!isDisabled) {
-      void regenerate({ messageId });
+      void getChatFunctions().regenerate({ messageId });
     }
   };
 
