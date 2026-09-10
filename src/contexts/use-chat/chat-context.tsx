@@ -11,6 +11,8 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
+import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
+import { getToolDisplayName } from "@/lib/ai/tools/mcp";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import i18n from "@/lib/i18n";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
@@ -418,7 +420,21 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   } = instanceForFunctions ?? {};
 
   const wasBusyRef = useRef(false);
+  const notifiedApprovalIdsRef = useRef(new Set<string>());
   useEffect(() => {
+    const pendingApproval = messages
+      .filter((message) => message.role === "assistant")
+      .flatMap((message) => message.parts)
+      .find(
+        (part) =>
+          (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
+          "state" in part &&
+          part.state === "approval-requested" &&
+          "approval" in part &&
+          part.approval?.id &&
+          !notifiedApprovalIdsRef.current.has(part.approval.id),
+      );
+
     if (statusValue.status === "streaming" || statusValue.status === "submitted") {
       wasBusyRef.current = true;
     }
@@ -461,22 +477,54 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           }
         }
 
-        if (
+        const shouldNotify =
           notificationSetting === "always" ||
-          (notificationSetting === "when-unfocused" && !document.hasFocus())
-        ) {
+          (notificationSetting === "when-unfocused" && !document.hasFocus());
+        if (shouldNotify && !pendingApproval) {
           void sendNotificationIfAllowed(
-            i18n.t("notifications.finishedResponding"),
-            i18n.t("notifications.disableInSettings"),
+            i18n.t("notifications.newMessage", { chatName: metadataValue.title }),
+            truncateMessagePreview(
+              getLastTextPart(lastMessage) || i18n.t("notifications.openToKeepWorking"),
+            ),
           );
         }
       }
     }
 
     if (statusValue.status === "error") {
+      if (
+        wasBusyRef.current &&
+        (notificationSetting === "always" ||
+          (notificationSetting === "when-unfocused" && !document.hasFocus()))
+      ) {
+        void sendNotificationIfAllowed(
+          i18n.t("notifications.error", { chatName: metadataValue.title }),
+          i18n.t("notifications.stoppedBecauseOfError"),
+        );
+      }
       wasBusyRef.current = false;
     }
-  }, [statusValue.status, messages, setMessages, notificationSetting]);
+
+    if (
+      pendingApproval &&
+      "approval" in pendingApproval &&
+      pendingApproval.approval?.id &&
+      (notificationSetting === "always" ||
+        (notificationSetting === "when-unfocused" && !document.hasFocus()))
+    ) {
+      notifiedApprovalIdsRef.current.add(pendingApproval.approval.id);
+      const toolName = getToolDisplayName(
+        pendingApproval.type === "dynamic-tool"
+          ? pendingApproval.toolName
+          : pendingApproval.type.slice("tool-".length),
+        pendingApproval.title,
+      );
+      void sendNotificationIfAllowed(
+        i18n.t("notifications.approvalRequired", { chatName: metadataValue.title }),
+        i18n.t("notifications.cannotContinueWithoutApproval", { toolName }),
+      );
+    }
+  }, [statusValue.status, messages, setMessages, notificationSetting, metadataValue.title]);
 
   useEffect(() => {
     if (!isMetadataLoaded) return;

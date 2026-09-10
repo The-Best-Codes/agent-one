@@ -263,8 +263,8 @@
     "fixStreamingMarkdown": "Исправлять потоковый Markdown",
     "fixStreamingMarkdownDescription": "Автоматически закрывать незавершенные теги при потоковом выводе.",
     "toggleAutoCloseHtml": "Переключить автозакрытие HTML-тегов",
-    "completionNotification": "Уведомление о завершении",
-    "completionNotificationDescription": "Показывать уведомление, когда AgentOne закончит ответ.",
+    "completionNotification": "Уведомления AgentOne",
+    "completionNotificationDescription": "Показывать уведомление, когда AgentOne отвечает или нуждается в вашем внимании.",
     "selectCompletionNotification": "Выберите условие уведомления",
     "whenUnfocused": "Когда окно неактивно",
     "messageActionRow": "Панель действий сообщения",
@@ -973,8 +973,12 @@
     "message": "Сообщение"
   },
   "notifications": {
-    "finishedResponding": "AgentOne закончил ответ",
-    "disableInSettings": "Вы можете отключить это уведомление в настройках."
+    "newMessage": "Новое сообщение в \"{{chatName}}\"",
+    "openToKeepWorking": "Откройте AgentOne, чтобы продолжить работу.",
+    "approvalRequired": "Требуется подтверждение в \"{{chatName}}\"",
+    "cannotContinueWithoutApproval": "AgentOne не сможет продолжить, пока вы не подтвердите {{toolName}}.",
+    "error": "Ошибка в \"{{chatName}}\"",
+    "stoppedBecauseOfError": "AgentOne прекратил работу из-за ошибки."
   },
   "auth": {
     "checkingStatus": "Проверка статуса...",

@@ -263,8 +263,8 @@
     "fixStreamingMarkdown": "Corregir Markdown en streaming",
     "fixStreamingMarkdownDescription": "Corrige automáticamente el formato incompleto en respuestas en streaming.",
     "toggleAutoCloseHtml": "Alternar autocierre de etiquetas HTML",
-    "completionNotification": "Notificación al finalizar",
-    "completionNotificationDescription": "Muestra una notificación cuando AgentOne termine de responder.",
+    "completionNotification": "Notificaciones de AgentOne",
+    "completionNotificationDescription": "Muestra una notificación cuando AgentOne responda o necesite tu atención.",
     "selectCompletionNotification": "Seleccionar notificación de finalización",
     "whenUnfocused": "Cuando la ventana no esté activa",
     "messageActionRow": "Fila de acciones del mensaje",
@@ -973,8 +973,12 @@
     "message": "Mensaje"
   },
   "notifications": {
-    "finishedResponding": "AgentOne ha terminado de responder",
-    "disableInSettings": "Puedes desactivar esta notificación en los ajustes."
+    "newMessage": "Mensaje nuevo en \"{{chatName}}\"",
+    "openToKeepWorking": "Abre AgentOne para seguir trabajando.",
+    "approvalRequired": "Se requiere aprobación en \"{{chatName}}\"",
+    "cannotContinueWithoutApproval": "AgentOne no puede continuar hasta que apruebes {{toolName}}.",
+    "error": "Error en \"{{chatName}}\"",
+    "stoppedBecauseOfError": "AgentOne dejó de trabajar debido a un error."
   },
   "auth": {
     "checkingStatus": "Comprobando estado...",
