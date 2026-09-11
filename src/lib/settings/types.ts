@@ -384,7 +384,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MARKDOWN_HIGHLIGHTING: true,
   MARKDOWN_RENDERING: "both",
   SUBMIT_KEY: "enter",
-  INPUT_STYLE: "docked",
+  INPUT_STYLE: "floating",
   LANGUAGE: "en",
   MAX_CODEBLOCK_CHARS: 10000,
   MAX_MESSAGE_LENGTH: 50000,
