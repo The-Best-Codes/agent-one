@@ -452,6 +452,8 @@
     "title": "Atajos de teclado",
     "editShortcut": "Editar atajo",
     "pressKeys": "Pulsa las teclas",
+    "record": "Grabar",
+    "stopRecording": "Detener",
     "conflictTitle": "Conflicto de atajo",
     "conflictDescription": "Este atajo ya está siendo usado por {{label}}.",
     "activateInInputs": "Activar en campos de texto",

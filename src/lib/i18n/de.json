@@ -452,6 +452,8 @@
     "title": "Tastaturkürzel",
     "editShortcut": "Kürzel bearbeiten",
     "pressKeys": "Tasten drücken",
+    "record": "Aufnehmen",
+    "stopRecording": "Stopp",
     "conflictTitle": "Kürzel-Konflikt",
     "conflictDescription": "Dieses Kürzel wird bereits für „{{label}}“ verwendet.",
     "activateInInputs": "In Eingabefeldern aktivieren",

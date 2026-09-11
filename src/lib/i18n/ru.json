@@ -452,6 +452,8 @@
     "title": "Горячие клавиши",
     "editShortcut": "Изменить сочетание",
     "pressKeys": "Нажмите клавиши",
+    "record": "Записать",
+    "stopRecording": "Остановить",
     "conflictTitle": "Конфликт сочетаний",
     "conflictDescription": "Это сочетание уже назначено на: {{label}}.",
     "activateInInputs": "Срабатывать в полях ввода",

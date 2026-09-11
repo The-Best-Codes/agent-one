@@ -452,6 +452,8 @@
     "title": "Raccourcis clavier",
     "editShortcut": "Modifier le raccourci",
     "pressKeys": "Appuyez sur des touches",
+    "record": "Enregistrer",
+    "stopRecording": "Arrêter",
     "conflictTitle": "Conflit de raccourci",
     "conflictDescription": "Ce raccourci est déjà utilisé par {{label}}.",
     "activateInInputs": "Activer dans les champs de saisie",

@@ -452,6 +452,8 @@
     "title": "Scorciatoie da tastiera",
     "editShortcut": "Modifica scorciatoia",
     "pressKeys": "Premi i tasti",
+    "record": "Registra",
+    "stopRecording": "Interrompi",
     "conflictTitle": "Conflitto di scorciatoie",
     "conflictDescription": "Questa scorciatoia è già usata da {{label}}.",
     "activateInInputs": "Attiva nei campi di input",

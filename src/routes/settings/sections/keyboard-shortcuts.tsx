@@ -1,6 +1,7 @@
 import { IconBulb, IconPencil, IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRecordHotkeys } from "react-hotkeys-hook";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
@@ -28,30 +29,6 @@ import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 
 import SettingsTarget from "../settings-target";
 
-function formatKey(key: string) {
-  if (key === " ") return "space";
-  if (key === "Escape") return "esc";
-  if (key === ",") return "comma";
-  if (key === ".") return "period";
-  return key.toLowerCase();
-}
-
-function eventToShortcut(event: KeyboardEvent) {
-  const key = formatKey(event.key);
-  const modifiers = [
-    event.ctrlKey && "ctrl",
-    event.metaKey && "meta",
-    event.altKey && "alt",
-    event.shiftKey && "shift",
-  ].filter(Boolean);
-
-  if (["ctrl", "meta", "alt", "shift"].includes(key)) {
-    return modifiers.join("+");
-  }
-
-  return [...modifiers, key].join("+");
-}
-
 function ShortcutEditor({
   id,
   label,
@@ -68,25 +45,32 @@ function ShortcutEditor({
   const { t } = useTranslation();
   const [shortcuts, setShortcuts] = useAtom(keyboardShortcutsAtom);
   const current = shortcuts[id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[id];
-  const [shortcut, setShortcut] = useState(current.shortcut);
+  const [shortcut] = useState(current.shortcut);
   const [enabledInInputs, setEnabledInInputs] = useState<boolean | undefined>(
     current.enabledInInputs,
   );
   const [preventDefault, setPreventDefault] = useState(current.preventDefault);
+  const [keys, { start, stop, resetKeys, isRecording }] = useRecordHotkeys();
+
+  useEffect(() => () => stop(), [stop]);
+
+  const recordedShortcut = Array.from(keys).join("+");
+  const nextShortcut = recordedShortcut || shortcut;
 
   const conflict = useMemo(() => {
     return keyboardShortcutDefinitions.find((definition) => {
       if (definition.id === id) return false;
       const other = shortcuts[definition.id] ?? DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS[definition.id];
-      return other.shortcut === shortcut;
+      return other.shortcut === nextShortcut;
     });
-  }, [id, shortcut, shortcuts]);
+  }, [id, nextShortcut, shortcuts]);
 
   const handleSave = () => {
+    stop();
     setShortcuts((currentShortcuts) => ({
       ...currentShortcuts,
       [id]: {
-        shortcut,
+        shortcut: nextShortcut,
         enabledInInputs,
         preventDefault,
       },
@@ -95,28 +79,37 @@ function ShortcutEditor({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        onEscapeKeyDown={(event) => event.preventDefault()}
-        onKeyDown={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          setShortcut(eventToShortcut(event.nativeEvent));
-        }}
-      >
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) stop();
+        onOpenChange(nextOpen);
+      }}
+    >
+      <DialogContent showCloseButton={false} onEscapeKeyDown={(event) => event.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{t("shortcuts.editShortcut")}</DialogTitle>
           <DialogDescription>{label}</DialogDescription>
         </DialogHeader>
 
-        <button
-          type="button"
-          className="bg-muted/40 flex min-h-24 items-center justify-center rounded-lg border border-dashed p-4"
-          autoFocus
-        >
-          <Kbd className="h-auto px-3 py-1 text-sm">{shortcut || t("shortcuts.pressKeys")}</Kbd>
-        </button>
+        <div className="bg-muted/40 flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-4">
+          <Kbd className="h-auto px-3 py-1 text-sm wrap-anywhere">
+            {recordedShortcut || shortcut || t("shortcuts.pressKeys")}
+          </Kbd>
+          <Button
+            variant={isRecording ? "destructive" : "default"}
+            onClick={() => {
+              if (isRecording) {
+                stop();
+              } else {
+                resetKeys();
+                start();
+              }
+            }}
+          >
+            {isRecording ? t("shortcuts.stopRecording") : t("shortcuts.record")}
+          </Button>
+        </div>
 
         {conflict && (
           <Alert variant="destructive">

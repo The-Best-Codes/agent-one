@@ -452,6 +452,8 @@
     "title": "Keyboard Shortcuts",
     "editShortcut": "Edit shortcut",
     "pressKeys": "Press keys",
+    "record": "Record",
+    "stopRecording": "Stop",
     "conflictTitle": "Shortcut conflict",
     "conflictDescription": "This shortcut is also used by {{label}}.",
     "activateInInputs": "Activate in input fields",
