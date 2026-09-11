@@ -43,6 +43,7 @@
     "searchChats": "Rechercher des chats",
     "searchChatsPlaceholder": "Rechercher des chats...",
     "searchContent": "Rechercher dans le contenu",
+    "groupSearchResultsByTime": "Regrouper les résultats par date",
     "searchMode": "Mode de recherche",
     "searchOptions": "Options de recherche",
     "searchSelectConversation": "Sélectionnez une conversation pour continuer",

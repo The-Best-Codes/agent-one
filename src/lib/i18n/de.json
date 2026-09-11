@@ -43,6 +43,7 @@
     "searchChats": "Chats durchsuchen",
     "searchChatsPlaceholder": "Chats suchen...",
     "searchContent": "Inhalt suchen",
+    "groupSearchResultsByTime": "Suchergebnisse nach Zeit gruppieren",
     "searchMode": "Suchmodus",
     "searchOptions": "Suchoptionen",
     "searchSelectConversation": "Unterhaltung auswählen",

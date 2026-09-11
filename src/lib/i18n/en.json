@@ -43,6 +43,7 @@
     "searchChats": "Search chats",
     "searchChatsPlaceholder": "Search chats...",
     "searchContent": "Search content",
+    "groupSearchResultsByTime": "Group search results by time",
     "searchMode": "Search mode",
     "searchOptions": "Search options",
     "searchSelectConversation": "Select a conversation to continue",

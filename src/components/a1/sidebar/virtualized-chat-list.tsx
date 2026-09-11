@@ -117,6 +117,7 @@ export const VirtualizedChatList = ({
   // TODO: Use an atom to persist search content and raw operators settings?
   const [searchContent, setSearchContent] = useState(true);
   const [rawOperators, setRawOperators] = useState(false);
+  const [groupSearchResults, setGroupSearchResults] = useState(true);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedChatIds, setSelectedChatIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -292,13 +293,29 @@ export const VirtualizedChatList = ({
   const listRows = useMemo<ChatListRow[]>(() => {
     const shouldGroup =
       sidebarChatTimeGrouping === "always" ||
-      (sidebarChatTimeGrouping === "only-when-searching" && Boolean(searchQuery.trim()));
+      (sidebarChatTimeGrouping === "only-when-searching" &&
+        Boolean(searchQuery.trim()) &&
+        groupSearchResults);
     if (!shouldGroup) {
       return filteredChats.map((chat) => ({ type: "chat", chat }));
     }
 
+    const groupedChats = [...filteredChats].sort((a, b) => {
+      const recencyKey = (chat: ChatListItem) => {
+        const groupId = getChatTimeGroup(chat, chatSort, i18n.language, t).id;
+        if (groupId === "recent") return 0;
+        if (groupId === "last-week") return 1;
+        if (groupId === "last-month") return 2;
+        if (groupId.startsWith("month-")) {
+          const [, year, month] = groupId.split("-").map(Number);
+          return 3 + (new Date().getFullYear() - year) * 12 + new Date().getMonth() - month;
+        }
+        return Number.MAX_SAFE_INTEGER;
+      };
+      return recencyKey(a) - recencyKey(b);
+    });
     let previousGroupId: string | undefined;
-    return filteredChats.flatMap((chat) => {
+    return groupedChats.flatMap((chat) => {
       const group = getChatTimeGroup(chat, chatSort, i18n.language, t);
       const rows: ChatListRow[] = [];
       if (group.id !== previousGroupId) {
@@ -308,7 +325,15 @@ export const VirtualizedChatList = ({
       rows.push({ type: "chat", chat });
       return rows;
     });
-  }, [chatSort, filteredChats, i18n.language, searchQuery, sidebarChatTimeGrouping, t]);
+  }, [
+    chatSort,
+    filteredChats,
+    groupSearchResults,
+    i18n.language,
+    searchQuery,
+    sidebarChatTimeGrouping,
+    t,
+  ]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
@@ -488,6 +513,12 @@ export const VirtualizedChatList = ({
                     onCheckedChange={(checked) => setSearchContent(checked as boolean)}
                   >
                     {t("sidebar.searchContent")}
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={groupSearchResults}
+                    onCheckedChange={(checked) => setGroupSearchResults(checked as boolean)}
+                  >
+                    {t("sidebar.groupSearchResultsByTime")}
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuGroup>
                 {searchContent && (
