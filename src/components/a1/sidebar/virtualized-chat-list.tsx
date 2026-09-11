@@ -463,6 +463,9 @@ export const VirtualizedChatList = ({
                 className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
               />
             </div>
             <DropdownMenu>
@@ -565,7 +568,7 @@ export const VirtualizedChatList = ({
                   }}
                 >
                   {row.type === "header" ? (
-                    <div className="text-muted-foreground bg-sidebar px-2 pt-2 pb-1 text-xs font-medium">
+                    <div className="text-muted-foreground px-2 pt-2 pb-1 text-xs font-medium">
                       {row.label}
                     </div>
                   ) : (
