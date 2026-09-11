@@ -4,7 +4,6 @@ import {
   IconDownload,
   IconInbox,
   IconPlus,
-  IconSearch,
   IconSelectAll,
   IconTrash,
   IconX,
@@ -15,6 +14,7 @@ import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { SearchInput } from "@/components/a1/search-input";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,7 +25,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
@@ -451,23 +450,21 @@ export const VirtualizedChatList = ({
           </div>
         ) : (
           <div className="flex flex-row">
-            <div className="group/sidebar-search-input relative min-w-0 flex-1">
-              <IconSearch className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-100 duration-200 group-focus-within/sidebar-search-input:left-0 group-focus-within/sidebar-search-input:opacity-0" />
-              <Input
-                ref={searchInputRef}
-                placeholder={
-                  searchContent
-                    ? t("sidebar.searchChatsPlaceholder")
-                    : t("sidebar.searchTitlesPlaceholder")
-                }
-                className="bg-background rounded-r-none pl-9 transition-[padding] duration-200 group-focus-within/sidebar-search-input:pl-3"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-              />
-            </div>
+            <SearchInput
+              ref={searchInputRef}
+              containerClassName="min-w-0 flex-1"
+              className="rounded-r-none"
+              placeholder={
+                searchContent
+                  ? t("sidebar.searchChatsPlaceholder")
+                  : t("sidebar.searchTitlesPlaceholder")
+              }
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+            />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
