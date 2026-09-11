@@ -9,7 +9,7 @@ export const keyboardShortcutDefinitions = [
     id: "openSettings",
     labelKey: "shortcuts.openSettings.label",
     descriptionKey: "shortcuts.openSettings.description",
-    defaultShortcut: "mod+,",
+    defaultShortcut: "mod+comma",
   },
   {
     id: "newChat",
