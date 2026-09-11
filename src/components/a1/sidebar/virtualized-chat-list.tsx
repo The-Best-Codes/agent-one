@@ -291,7 +291,10 @@ export const VirtualizedChatList = ({
   }, [chats, searchQuery, searchResults, chatIds, searchContent]);
 
   const listRows = useMemo<ChatListRow[]>(() => {
-    if (!sidebarChatTimeGrouping) {
+    const shouldGroup =
+      sidebarChatTimeGrouping === "always" ||
+      (sidebarChatTimeGrouping === "only-when-searching" && Boolean(searchQuery.trim()));
+    if (!shouldGroup) {
       return filteredChats.map((chat) => ({ type: "chat", chat }));
     }
 
@@ -306,7 +309,7 @@ export const VirtualizedChatList = ({
       rows.push({ type: "chat", chat });
       return rows;
     });
-  }, [chatSort, filteredChats, i18n.language, sidebarChatTimeGrouping, t]);
+  }, [chatSort, filteredChats, i18n.language, searchQuery, sidebarChatTimeGrouping, t]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({

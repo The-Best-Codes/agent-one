@@ -18,6 +18,7 @@ import {
   type NotificationOption,
   type RoundnessOption,
   type StopButtonBehaviorOption,
+  type SidebarChatTimeGroupingOption,
   type SubmitKeyOption,
   type TtsSettings,
   type TextScaleOption,
@@ -227,7 +228,7 @@ export const chatSortAtom = createSettingAtom<ChatSortOption>(
   DEFAULT_SETTINGS.CHAT_SORT,
 );
 
-export const sidebarChatTimeGroupingAtom = createSettingAtom(
+export const sidebarChatTimeGroupingAtom = createSettingAtom<SidebarChatTimeGroupingOption>(
   "SIDEBAR_CHAT_TIME_GROUPING",
   DEFAULT_SETTINGS.SIDEBAR_CHAT_TIME_GROUPING,
 );

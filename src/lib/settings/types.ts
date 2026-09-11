@@ -97,6 +97,13 @@ export type ChatVirtualizationModeOption = (typeof CHAT_VIRTUALIZATION_MODE_OPTI
 export const CHAT_SORT_OPTIONS = ["created-at", "updated-at"] as const;
 export type ChatSortOption = (typeof CHAT_SORT_OPTIONS)[number];
 
+export const SIDEBAR_CHAT_TIME_GROUPING_OPTIONS = [
+  "only-when-searching",
+  "always",
+  "never",
+] as const;
+export type SidebarChatTimeGroupingOption = (typeof SIDEBAR_CHAT_TIME_GROUPING_OPTIONS)[number];
+
 export type ChatBackgroundPresetOption =
   | "none"
   | "custom"
@@ -346,7 +353,7 @@ export interface DefaultSettings extends ApiKeySettings {
   SHOW_MESSAGE_PREVIEW_RAIL: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
   CHAT_SORT: ChatSortOption;
-  SIDEBAR_CHAT_TIME_GROUPING: boolean;
+  SIDEBAR_CHAT_TIME_GROUPING: SidebarChatTimeGroupingOption;
   CHAT_BACKGROUND: ChatBackgroundSettings;
   TTS: TtsSettings;
   TITLE_GENERATION: TitleGenerationSettings;
@@ -394,7 +401,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   SHOW_MESSAGE_PREVIEW_RAIL: true,
   SHOW_MESSAGE_ACTION_ROW: "always",
   CHAT_SORT: "created-at",
-  SIDEBAR_CHAT_TIME_GROUPING: false,
+  SIDEBAR_CHAT_TIME_GROUPING: "only-when-searching",
   CHAT_BACKGROUND: {
     preset: "none",
     customUrl: "",

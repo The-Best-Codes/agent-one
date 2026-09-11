@@ -45,6 +45,7 @@ import {
   type NotificationOption,
   type SubmitKeyOption,
   type TitleGenerationMethodOption,
+  type SidebarChatTimeGroupingOption,
 } from "@/lib/settings/types";
 
 import SettingsTarget from "../settings-target";
@@ -184,16 +185,35 @@ export default function ChatsSection() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Switch
-                  checked={sidebarChatTimeGrouping}
-                  onCheckedChange={(checked) => {
+                <Select
+                  value={sidebarChatTimeGrouping}
+                  onValueChange={(value) => {
                     trackSettingsInteraction("chats", "sidebar_chat_time_grouping_toggled", {
-                      enabled: checked,
+                      value,
                     });
-                    setSidebarChatTimeGrouping(checked);
+                    setSidebarChatTimeGrouping(value as SidebarChatTimeGroupingOption);
                   }}
-                  aria-label={t("chatsSettings.toggleSidebarChatTimeGrouping")}
-                />
+                >
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label={t("chatsSettings.selectSidebarChatTimeGrouping")}
+                  >
+                    <SelectValue placeholder={t("common.selectOption")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="only-when-searching">
+                        {t("chatsSettings.sidebarChatTimeGroupingOnlyWhenSearching")}
+                      </SelectItem>
+                      <SelectItem value="always">
+                        {t("chatsSettings.sidebarChatTimeGroupingAlways")}
+                      </SelectItem>
+                      <SelectItem value="never">
+                        {t("chatsSettings.sidebarChatTimeGroupingNever")}
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 <Button
                   variant="ghost"
                   size="icon"
