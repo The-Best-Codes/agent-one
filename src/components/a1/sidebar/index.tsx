@@ -1,4 +1,10 @@
-import { IconLayoutSidebar, IconPlus, IconSearch, IconSettings } from "@tabler/icons-react";
+import {
+  IconLayoutSidebar,
+  IconPlus,
+  IconPuzzle,
+  IconSearch,
+  IconSettings,
+} from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -93,12 +99,18 @@ const SidebarContent = ({
 
       <div className="border-sidebar-border flex flex-col gap-2 pt-2">
         <Button variant="outline" className="w-full justify-start" asChild>
+          <Link to={`/settings?tab=extensions${activeChatId ? `&chatId=${activeChatId}` : ""}`}>
+            <IconPuzzle data-icon="inline-start" />
+            {t("sidebar.browseExtensions")}
+          </Link>
+        </Button>
+        <Button variant="outline" className="w-full justify-start" asChild>
           <Link
             to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
             data-icon="inline-start"
           >
             <IconSettings data-icon="inline-start" />
-            {t("common.settings")}
+            {t("sidebar.configureAgentOne")}
           </Link>
         </Button>
       </div>

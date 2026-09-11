@@ -32,6 +32,8 @@
     "generateTitle": "Titel mit KI generieren",
     "mobileSidebarDescription": "Mobiler Chat-Seitenleisteninhalt",
     "newChat": "Neuer Chat",
+    "browseExtensions": "Erweiterungen durchsuchen",
+    "configureAgentOne": "AgentOne konfigurieren",
     "noChatsYet": "Noch keine Chats",
     "noResults": "Keine Ergebnisse für „{{query}}“",
     "openSettings": "Einstellungen öffnen",

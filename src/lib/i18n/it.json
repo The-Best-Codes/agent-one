@@ -32,6 +32,8 @@
     "generateTitle": "Genera titolo con IA",
     "mobileSidebarDescription": "Contenuto barra laterale chat mobile",
     "newChat": "Nuova chat",
+    "browseExtensions": "Sfoglia estensioni",
+    "configureAgentOne": "Configura AgentOne",
     "noChatsYet": "Nessuna chat presente",
     "noResults": "Nessun risultato per \"{{query}}\"",
     "openSettings": "Apri impostazioni",

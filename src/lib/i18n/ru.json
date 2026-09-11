@@ -32,6 +32,8 @@
     "generateTitle": "Сгенерировать название с ИИ",
     "mobileSidebarDescription": "Мобильная панель чатов",
     "newChat": "Новый чат",
+    "browseExtensions": "Просмотреть расширения",
+    "configureAgentOne": "Настроить AgentOne",
     "noChatsYet": "Пока нет чатов",
     "noResults": "Нет результатов по запросу «{{query}}»",
     "openSettings": "Открыть настройки",
