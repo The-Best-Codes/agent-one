@@ -282,7 +282,7 @@
     "submitKeyDescription": "Elige qué combinación de teclas envía el mensaje.",
     "selectSubmitKey": "Seleccionar tecla de envío",
     "enter": "Enter",
-    "ctrlEnter": "Ctrl + Enter",
+    "ctrlEnter": "Ctrl/CMD + Enter",
     "regenerateOnSave": "Regenerar al guardar",
     "regenerateOnSaveDescription": "Regenera automáticamente la respuesta de la IA al guardar un mensaje editado.",
     "toggleRegenerateOnSave": "Alternar regenerar al guardar",

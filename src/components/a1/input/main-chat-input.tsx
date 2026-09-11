@@ -483,7 +483,7 @@ export const MainChatInput = ({
                 // eslint-disable-next-line react-hooks/refs
                 keymap.of([
                   {
-                    key: submitKey === "enter" ? "Enter" : "Ctrl-Enter",
+                    key: submitKey === "enter" ? "Enter" : "Mod-Enter",
                     run: (view) => {
                       if (view.composing) {
                         return false;

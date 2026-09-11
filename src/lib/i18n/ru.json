@@ -282,7 +282,7 @@
     "submitKeyDescription": "Выберите комбинацию клавиш для отправки сообщения.",
     "selectSubmitKey": "Выберите клавишу отправки",
     "enter": "Enter",
-    "ctrlEnter": "Ctrl + Enter",
+    "ctrlEnter": "Ctrl/CMD + Enter",
     "regenerateOnSave": "Перегенерировать при сохранении",
     "regenerateOnSaveDescription": "Автоматически пересоздавать ответ ИИ после редактирования сообщения.",
     "toggleRegenerateOnSave": "Переключить генерацию при сохранении",

@@ -282,7 +282,7 @@
     "submitKeyDescription": "Choisissez la touche ou combinaison qui envoie votre message.",
     "selectSubmitKey": "Sélectionner la touche d'envoi",
     "enter": "Entrée",
-    "ctrlEnter": "Ctrl + Entrée",
+    "ctrlEnter": "Ctrl/CMD + Entrée",
     "regenerateOnSave": "Régénérer à l'enregistrement",
     "regenerateOnSaveDescription": "Régénère la réponse IA quand vous enregistrez un message modifié.",
     "toggleRegenerateOnSave": "Basculer la régénération à l'enregistrement",

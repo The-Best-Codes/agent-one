@@ -282,7 +282,7 @@
     "submitKeyDescription": "Choose which key combination submits your message.",
     "selectSubmitKey": "Select submit key",
     "enter": "Enter",
-    "ctrlEnter": "Ctrl + Enter",
+    "ctrlEnter": "Ctrl/CMD + Enter",
     "regenerateOnSave": "Regenerate on Save",
     "regenerateOnSaveDescription": "Automatically regenerate the AI response when you save an edited message.",
     "toggleRegenerateOnSave": "Toggle regenerate on save",

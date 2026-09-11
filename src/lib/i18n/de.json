@@ -282,7 +282,7 @@
     "submitKeyDescription": "Tastenkombination zum Absenden von Nachrichten festlegen.",
     "selectSubmitKey": "Senden-Taste auswählen",
     "enter": "Enter",
-    "ctrlEnter": "Strg + Enter",
+    "ctrlEnter": "Ctrl/CMD + Enter",
     "regenerateOnSave": "Beim Speichern neu generieren",
     "regenerateOnSaveDescription": "KI-Antwort automatisch neu generieren, wenn eine Nachricht bearbeitet wird.",
     "toggleRegenerateOnSave": "Neu generieren beim Speichern umschalten",

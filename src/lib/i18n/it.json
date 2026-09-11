@@ -282,7 +282,7 @@
     "submitKeyDescription": "Scegli quale combinazione di tasti invia il messaggio.",
     "selectSubmitKey": "Seleziona tasto di invio",
     "enter": "Invio",
-    "ctrlEnter": "Ctrl + Invio",
+    "ctrlEnter": "Ctrl/CMD + Invio",
     "regenerateOnSave": "Rigenera al salvataggio",
     "regenerateOnSaveDescription": "Rigenera automaticamente la risposta IA quando salvi un messaggio modificato.",
     "toggleRegenerateOnSave": "Attiva/disattiva rigenerazione al salvataggio",
