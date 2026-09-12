@@ -92,7 +92,7 @@ function ShortcutEditor({
 
         <div className="bg-muted/40 flex min-h-24 flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-4">
           <Kbd className="h-auto px-3 py-1 text-sm wrap-anywhere">
-            {recordedShortcut || shortcut || "Press keys"}
+            {recordedShortcut || (!isRecording && shortcut) || "Press keys"}
           </Kbd>
           <Button
             variant={isRecording ? "destructive" : "default"}
@@ -193,7 +193,7 @@ export default function KeyboardShortcutsSection() {
           <div className="flex gap-1">
             <IconBulb className="size-5 shrink-0" />
             <span>
-              You can change the send key in (<Kbd>Enter</Kbd> / <Kbd>Ctrl+Enter</Kbd>){" "}
+              You can change the send key in (<Kbd>Enter</Kbd> / <Kbd>Ctrl/CMD+Enter</Kbd>){" "}
               <Link to="/settings?tab=chats#setting-submit-key" className="underline">
                 chat settings.
               </Link>
