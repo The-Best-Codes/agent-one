@@ -173,7 +173,7 @@ export const ChatItem = memo(
                     <span className="min-w-0 truncate">{title}</span>
                   </span>
                   {snippet && (
-                    <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs [&_mark]:bg-yellow-500/30">
+                    <span className="text-muted-foreground [&_mark]:text-foreground mt-0.5 truncate text-xs italic [&_mark]:bg-yellow-500/30">
                       {renderSnippet(snippet)}
                     </span>
                   )}
