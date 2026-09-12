@@ -490,7 +490,7 @@ export const VirtualizedChatList = ({
                   <IconChevronDown />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-auto min-w-max">
+              <DropdownMenuContent align="center" className="w-auto min-w-max">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Search mode</DropdownMenuLabel>
                   <DropdownMenuCheckboxItem
@@ -514,7 +514,7 @@ export const VirtualizedChatList = ({
                         checked={rawOperators}
                         onCheckedChange={(checked) => setRawOperators(checked as boolean)}
                       >
-                        Raw FTS5 syntax
+                        Allow search operators
                       </DropdownMenuCheckboxItem>
                     </DropdownMenuGroup>
                   </>
