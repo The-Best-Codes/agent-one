@@ -12,7 +12,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useAtom } from "jotai";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { SearchInput } from "@/components/a1/search-input";
 import { Button } from "@/components/ui/button";
@@ -60,8 +59,6 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 function getChatTimeGroup(
   chat: ChatListItem,
   chatSort: "created-at" | "updated-at",
-  locale: string,
-  t: (key: string) => string,
 ): { id: string; label: string } {
   const timestamp =
     chatSort === "updated-at"
@@ -69,23 +66,23 @@ function getChatTimeGroup(
       : (chat.createdAt ?? chat.updatedAt);
 
   if (!timestamp || Number.isNaN(new Date(timestamp).getTime())) {
-    return { id: "older", label: t("sidebar.older") };
+    return { id: "older", label: "Older" };
   }
 
   const age = Math.max(0, Date.now() - timestamp);
   if (age < 7 * DAY_IN_MS) {
-    return { id: "recent", label: t("sidebar.recent") };
+    return { id: "recent", label: "Recent" };
   }
   if (age < 14 * DAY_IN_MS) {
-    return { id: "last-week", label: t("sidebar.lastWeek") };
+    return { id: "last-week", label: "Last Week" };
   }
   if (age < 31 * DAY_IN_MS) {
-    return { id: "last-month", label: t("sidebar.lastMonth") };
+    return { id: "last-month", label: "Last Month" };
   }
 
   const date = new Date(timestamp);
   const currentYear = new Date().getFullYear();
-  const label = new Intl.DateTimeFormat(locale, {
+  const label = new Intl.DateTimeFormat("en", {
     month: "long",
     ...(date.getFullYear() !== currentYear && { year: "numeric" }),
   }).format(date);
@@ -109,7 +106,6 @@ export const VirtualizedChatList = ({
   additionalOnChatClickCallback,
   scrollToActiveChat = true,
 }: VirtualizedChatListProps) => {
-  const { i18n, t } = useTranslation();
   const [chats, setChats] = useState<ChatListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ChatSearchResult[] | null>(null);
@@ -302,7 +298,7 @@ export const VirtualizedChatList = ({
 
     const groupedChats = [...filteredChats].sort((a, b) => {
       const recencyKey = (chat: ChatListItem) => {
-        const groupId = getChatTimeGroup(chat, chatSort, i18n.language, t).id;
+        const groupId = getChatTimeGroup(chat, chatSort).id;
         if (groupId === "recent") return 0;
         if (groupId === "last-week") return 1;
         if (groupId === "last-month") return 2;
@@ -316,7 +312,7 @@ export const VirtualizedChatList = ({
     });
     let previousGroupId: string | undefined;
     return groupedChats.flatMap((chat) => {
-      const group = getChatTimeGroup(chat, chatSort, i18n.language, t);
+      const group = getChatTimeGroup(chat, chatSort);
       const rows: ChatListRow[] = [];
       if (group.id !== previousGroupId) {
         rows.push({ type: "header", ...group });
@@ -325,15 +321,7 @@ export const VirtualizedChatList = ({
       rows.push({ type: "chat", chat });
       return rows;
     });
-  }, [
-    chatSort,
-    filteredChats,
-    groupSearchResults,
-    i18n.language,
-    searchQuery,
-    sidebarChatTimeGrouping,
-    t,
-  ]);
+  }, [chatSort, filteredChats, groupSearchResults, searchQuery, sidebarChatTimeGrouping]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
@@ -414,7 +402,7 @@ export const VirtualizedChatList = ({
             analytics={{ event: "new_chat_clicked", params: { ui_location: "chat_list" } }}
           >
             <IconPlus data-icon="inline-start" />
-            {t("sidebar.newChat")}
+            {"New Chat"}
           </Button>
         )}
         {selectionMode ? (
@@ -424,7 +412,7 @@ export const VirtualizedChatList = ({
                 <IconX />
               </Button>
               <span className="text-muted-foreground text-sm">
-                {t("sidebar.selectedCount", { count: selectedChatIds.size })}
+                {`${selectedChatIds.size} selected`}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -443,7 +431,7 @@ export const VirtualizedChatList = ({
                 ) : (
                   <IconDeselect data-icon="inline-start" />
                 )}
-                {allSelected ? t("sidebar.deselectAll") : t("sidebar.selectAll")}
+                {allSelected ? "Deselect All" : "Select All"}
               </Button>
               <Button
                 variant="outline"
@@ -479,24 +467,21 @@ export const VirtualizedChatList = ({
               ref={searchInputRef}
               containerClassName="min-w-0 flex-1"
               className="rounded-r-none"
-              placeholder={
-                searchContent
-                  ? t("sidebar.searchChatsPlaceholder")
-                  : t("sidebar.searchTitlesPlaceholder")
-              }
+              placeholder={searchContent ? "Search chats..." : "Search titles..."}
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               autoCorrect="off"
               autoCapitalize="off"
               spellCheck="false"
             />
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon"
                   className="shrink-0 rounded-l-none border-l-0"
-                  aria-label={t("sidebar.searchOptions")}
+                  aria-label={"Search options"}
                   analytics={{
                     event: "chat_search_options_opened",
                     params: { ui_location: "sidebar" },
@@ -507,18 +492,18 @@ export const VirtualizedChatList = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>{t("sidebar.searchMode")}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{"Search mode"}</DropdownMenuLabel>
                   <DropdownMenuCheckboxItem
                     checked={searchContent}
                     onCheckedChange={(checked) => setSearchContent(checked as boolean)}
                   >
-                    {t("sidebar.searchContent")}
+                    {"Search content"}
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={groupSearchResults}
                     onCheckedChange={(checked) => setGroupSearchResults(checked as boolean)}
                   >
-                    {t("sidebar.groupSearchResultsByTime")}
+                    {"Group search results by time"}
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuGroup>
                 {searchContent && (
@@ -529,7 +514,7 @@ export const VirtualizedChatList = ({
                         checked={rawOperators}
                         onCheckedChange={(checked) => setRawOperators(checked as boolean)}
                       >
-                        {t("sidebar.rawFts")}
+                        {"Raw FTS5 syntax"}
                       </DropdownMenuCheckboxItem>
                     </DropdownMenuGroup>
                   </>
@@ -558,19 +543,17 @@ export const VirtualizedChatList = ({
         ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">{t("sidebar.noChatsYet")}</p>
+            <p className="max-w-full min-w-0 truncate">{"No chats yet"}</p>
           </div>
         ) : showSearchLoading ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <Spinner className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">{t("sidebar.searching")}</p>
+            <p className="max-w-full min-w-0 truncate">{"Searching..."}</p>
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
-            <span className="max-w-full min-w-0 truncate">
-              {t("sidebar.noResults", { query: searchQuery })}
-            </span>
+            <span className="max-w-full min-w-0 truncate">{`No results for "${searchQuery}"`}</span>
           </div>
         ) : (
           <div
@@ -626,6 +609,7 @@ export const VirtualizedChatList = ({
         chatIds={Array.from(selectedChatIds)}
         chatCount={selectedChatIds.size}
       />
+
       <BulkExportModal
         isOpen={showBulkExportModal}
         onClose={() => setShowBulkExportModal(false)}

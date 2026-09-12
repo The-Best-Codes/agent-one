@@ -1,6 +1,5 @@
 import { IconPlayerStopFilled, IconVolume, IconVolumeOff } from "@tabler/icons-react";
 import { useAtom, useAtomValue } from "jotai";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -22,7 +21,6 @@ export function TtsButton({
   text: string;
   className?: string;
 }) {
-  const { t } = useTranslation();
   const [ttsState, setTtsState] = useAtom(ttsPlaybackStateAtom);
   const [controller, setController] = useAtom(ttsPlaybackControllerAtom);
   const rawTtsSettings = useAtomValue(ttsSettingsAtom);
@@ -139,7 +137,7 @@ export function TtsButton({
       className={cn("size-8", className)}
       size="icon-sm"
       variant="secondary"
-      aria-label={icon === "playing" ? t("messages.stopReadingAloud") : t("messages.readAloud")}
+      aria-label={icon === "playing" ? "Stop reading aloud" : "Read aloud"}
     >
       {icon === "loading" ? (
         <Spinner />

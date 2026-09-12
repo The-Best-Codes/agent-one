@@ -1,7 +1,6 @@
 import { IconFilter, IconFlask, IconPlus, IconTool } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 
@@ -66,7 +65,6 @@ function isServerFromRegistry(server: McpServerConfig): boolean {
 }
 
 export default function ExtensionsSection() {
-  const { t } = useTranslation();
   const [mcpServers, setMcpServers] = useAtom(mcpServersAtom);
   const [mcpAuthStates] = useAtom(mcpAuthStatesAtom);
   const [mcpServerLoadStates] = useAtom(mcpServerLoadStatesAtom);
@@ -215,7 +213,7 @@ export default function ExtensionsSection() {
       transport_type: newServer.type,
       requires_approval: newServer.requiresApproval,
     });
-    toast.success(t("extensions.installedToast", { name: installed.name }));
+    toast.success(`${installed.name} installed`);
   };
 
   const handleUninstallClick = useCallback((serverId: string, name: string) => {
@@ -235,7 +233,7 @@ export default function ExtensionsSection() {
     }
 
     setMcpServers((prev) => prev.filter((server) => server.id !== serverToUninstall.id));
-    toast.success(t("extensions.removed", { name: serverToUninstall.name }));
+    toast.success(`${serverToUninstall.name} removed`);
     setServerToUninstall(null);
     setShowUninstallDialog(false);
   };
@@ -251,11 +249,11 @@ export default function ExtensionsSection() {
     // Built-in extensions card
     const toolCountLabel =
       enabledToolCount === 1
-        ? t("extensions.oneToolEnabled")
-        : t("extensions.toolsEnabledCount", { count: enabledToolCount, total: TOOL_IDS.length });
+        ? "1 tool enabled"
+        : `${enabledToolCount} of ${TOOL_IDS.length} tools enabled`;
     result.push({
       id: "built-in",
-      title: t("extensions.builtInExtensions"),
+      title: "Built-in extensions",
       description: toolCountLabel,
       searchText: `built-in extensions ${BUILT_IN_SEARCH_TEXT}`,
       transportType: "built-in",
@@ -272,14 +270,15 @@ export default function ExtensionsSection() {
       const isStdio = server.type === "stdio";
       result.push({
         id: `custom-${server.id}`,
-        title: server.name || t("extensions.customExtension"),
+        title: server.name || "Custom Extension",
         description: isStdio ? server.command : server.url,
         searchText: [
-          server.name || t("extensions.customExtension"),
+          server.name || "Custom Extension",
           server.id,
           server.type,
           isStdio ? server.command : server.url,
         ]
+
           .filter(Boolean)
           .join(" "),
         transportType: server.type,
@@ -291,8 +290,7 @@ export default function ExtensionsSection() {
         authState: mcpAuthStates[server.id],
         onEnabledChange: (enabled) => updateMcpServerById(server.id, { enabled }),
         onRestart: () => restartMcpServer(server.id),
-        onUninstall: () =>
-          handleUninstallClick(server.id, server.name || t("extensions.customExtension")),
+        onUninstall: () => handleUninstallClick(server.id, server.name || "Custom Extension"),
         advancedContent: (
           <ExtensionAdvancedDetails
             key={JSON.stringify(server)}
@@ -300,6 +298,7 @@ export default function ExtensionsSection() {
             onUpdate={(updates) => updateMcpServerById(server.id, updates)}
           />
         ),
+
         advancedContentKey: server,
       });
     }
@@ -367,7 +366,6 @@ export default function ExtensionsSection() {
     updateMcpServerById,
     handleUninstallClick,
     restartMcpServer,
-    t,
   ]);
 
   useEffect(() => {
@@ -393,14 +391,16 @@ export default function ExtensionsSection() {
   return (
     <Card className="flex min-h-0 flex-1 flex-col">
       <CardHeader className="shrink-0">
-        <h2 className="text-base leading-none font-semibold">{t("extensions.title")}</h2>
+        <h2 className="text-base leading-none font-semibold">{"Extensions"}</h2>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
         <SettingsTarget id="setting-extensions-beta-notice">
           <Alert>
             <IconFlask />
-            <AlertTitle>{t("extensions.betaTitle")}</AlertTitle>
-            <AlertDescription>{t("extensions.betaDescription")}</AlertDescription>
+            <AlertTitle>{"Extensions are in beta"}</AlertTitle>
+            <AlertDescription>
+              {"Some features may be incomplete or change without notice."}
+            </AlertDescription>
           </Alert>
         </SettingsTarget>
 
@@ -410,18 +410,19 @@ export default function ExtensionsSection() {
               <SearchInput
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder={t("extensions.search")}
-                aria-label={t("extensions.searchAria")}
+                placeholder={"Search extensions..."}
+                aria-label={"Search extensions"}
                 className="rounded-r-none"
                 containerClassName="flex-1"
               />
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     className="rounded-l-none border-l-0"
                     size="icon"
                     variant="outline"
-                    aria-label={t("extensions.filterAria")}
+                    aria-label={"Filter extensions"}
                     analytics={{ event: "extension_filters_opened" }}
                   >
                     <IconFilter data-icon="inline-start" />
@@ -429,35 +430,35 @@ export default function ExtensionsSection() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
                   <DropdownMenuGroup>
-                    <DropdownMenuLabel>{t("extensions.show")}</DropdownMenuLabel>
+                    <DropdownMenuLabel>{"Show"}</DropdownMenuLabel>
                     <DropdownMenuCheckboxItem
                       checked={onlyInstalled}
                       onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
                     >
-                      {t("extensions.onlyShowInstalled")}
+                      {"Only show installed"}
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuLabel>{t("extensions.connectionType")}</DropdownMenuLabel>
+                    <DropdownMenuLabel>{"Connection type"}</DropdownMenuLabel>
                     <DropdownMenuCheckboxItem
                       checked={showDeviceExtensions}
                       onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
                     >
-                      {t("extensions.runsOnThisDevice")}
+                      {"Runs on this device"}
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
                       checked={showOnlineExtensions}
                       onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
                     >
-                      {t("extensions.connectsOnline")}
+                      {"Connects online"}
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
                       <IconTool data-icon="inline-start" />
-                      {t("extensions.findDangling")}
+                      {"Find dangling extensions"}
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
@@ -468,7 +469,7 @@ export default function ExtensionsSection() {
               analytics={{ event: "custom_extension_dialog_opened" }}
             >
               <IconPlus data-icon="inline-start" />
-              {t("extensions.addCustomAction")}
+              {"Add Custom"}
             </Button>
           </div>
         </SettingsTarget>
@@ -529,9 +530,7 @@ export default function ExtensionsSection() {
               });
             }
             setMcpServers((prev) => prev.filter((s) => s.id !== serverId));
-            toast.success(
-              t("extensions.removed", { name: server?.name || t("extensions.extensionFallback") }),
-            );
+            toast.success(`${server?.name || "Extension"} removed`);
           }}
           onRemoveAll={(serverIds) => {
             trackGoogleAnalyticsEvent("extension_removed", {
@@ -540,7 +539,7 @@ export default function ExtensionsSection() {
             });
             const ids = new Set(serverIds);
             setMcpServers((prev) => prev.filter((s) => !ids.has(s.id)));
-            toast.success(t("extensions.removedDangling", { count: serverIds.length }));
+            toast.success(`Removed ${serverIds.length} dangling extensions`);
             setShowDanglingDialog(false);
           }}
         />

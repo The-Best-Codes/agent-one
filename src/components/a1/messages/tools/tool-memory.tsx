@@ -7,7 +7,6 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,70 +43,65 @@ interface MemoryToolPartProps {
   part: ToolUIPart;
 }
 
-function getActionLabel(t: (key: string) => string, input: MemoryToolInput) {
+function getActionLabel(input: MemoryToolInput) {
   switch (input.operation) {
     case "add":
-      return t("tools.updatingMemory");
+      return "Updating memory...";
     case "remove":
-      return t("tools.pruningMemory");
+      return "Pruning memory...";
     case "replace":
-      return t("tools.refreshingMemory");
+      return "Refreshing memory...";
   }
 }
 
-function formatOutput(
-  t: (key: string, opts?: Record<string, unknown>) => string,
-  output: MemoryToolOutput,
-) {
+function formatOutput(output: MemoryToolOutput) {
   const details: string[] = [];
 
   if (output.added?.length) {
-    details.push(
-      t("tools.memoryAdded", { entries: output.added.map((entry) => `- ${entry}`).join("\n") }),
-    );
+    details.push(`Added:
+${output.added.map((entry) => `- ${entry}`).join("\n")}`);
   }
 
   if (output.removed?.length) {
-    details.push(
-      t("tools.memoryRemoved", { entries: output.removed.map((entry) => `- ${entry}`).join("\n") }),
-    );
+    details.push(`Removed:
+${output.removed.map((entry) => `- ${entry}`).join("\n")}`);
   }
 
   if (output.action === "replace") {
-    details.push(
-      t("tools.memoryReplaced", { value: output.replaced ? t("tools.yes") : t("tools.no") }),
-    );
-    if (output.oldEntry) details.push(t("tools.memoryOld", { value: output.oldEntry }));
-    if (output.newEntry) details.push(t("tools.memoryNew", { value: output.newEntry }));
+    details.push(`Replaced: ${output.replaced ? "yes" : "no"}`);
+    if (output.oldEntry) details.push(`Old: ${output.oldEntry}`);
+    if (output.newEntry) details.push(`New: ${output.newEntry}`);
   }
 
   if (output.summary) {
     details.push(output.summary);
   }
 
-  return details.join("\n\n") || t("tools.memoryUpdatedPeriod");
+  return details.join("\n\n") || "Memory updated.";
 }
 
-function getCompletedLabel(
-  t: (key: string, opts?: Record<string, unknown>) => string,
-  output: MemoryToolOutput,
-) {
+function getCompletedLabel(output: MemoryToolOutput) {
   switch (output.action) {
     case "add":
       return output.added?.length
-        ? t("tools.savedMemoryEntries", { count: output.added.length })
-        : t("tools.memoryUnchanged");
+        ? output.added.length === 1
+          ? `Saved ${output.added.length} memory entry`
+          : `Saved ${output.added.length} memory entries`
+        : "Memory unchanged";
+
     case "remove":
       return output.removed?.length
-        ? t("tools.removedMemoryEntries", { count: output.removed.length })
-        : t("tools.memoryUnchanged");
+        ? output.removed.length === 1
+          ? `Removed ${output.removed.length} memory entry`
+          : `Removed ${output.removed.length} memory entries`
+        : "Memory unchanged";
+
     case "replace":
-      return output.replaced ? t("tools.updatedMemoryEntry") : t("tools.memoryUnchanged");
+      return output.replaced ? "Updated memory entry" : "Memory unchanged";
   }
 }
 
 export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as MemoryToolInput;
   const output = part.output as MemoryToolOutput;
@@ -125,7 +119,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconBrain className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsToUpdateMemory")}
+              {"AgentOne wants to update memory"}
             </span>
           </div>
           <pre className="text-muted-foreground overflow-x-auto rounded text-xs whitespace-pre-wrap">
@@ -138,7 +132,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -146,7 +140,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -156,7 +150,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{t("tools.memoryDenied")}</span>
+          <span className="text-muted-foreground text-sm font-bold">{"Memory update denied"}</span>
         </div>
       );
 
@@ -164,7 +158,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.preparingMemory")}</span>
+          <span className="text-foreground text-sm font-bold">{"Preparing memory update..."}</span>
         </div>
       );
 
@@ -175,7 +169,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.memoryDenied")}
+              {"Memory update denied"}
             </span>
           </div>
         );
@@ -186,7 +180,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">{getActionLabel(t, input)}</span>
+          <span className="max-w-2xl truncate">{getActionLabel(input)}</span>
         </div>
       );
     }
@@ -215,6 +209,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
+
                   <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/memory-tool-accordion:scale-100 group-hover/memory-tool-accordion:opacity-100",
@@ -227,11 +222,11 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
               shouldRotateIcon={true}
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
-              <span className="max-w-2xl truncate">{getCompletedLabel(t, output)}</span>
+              <span className="max-w-2xl truncate">{getCompletedLabel(output)}</span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="text-muted-foreground text-sm whitespace-pre-wrap">
-                {formatOutput(t, output)}
+                {formatOutput(output)}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -244,7 +239,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.memoryUpdateCancelled")}
+              {"Memory update cancelled"}
             </span>
           </div>
         );
@@ -256,7 +251,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.memoryError")}
+          title={"Memory update failed"}
         />
       );
 
@@ -264,7 +259,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconBrain className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.memoryUpdated")}</span>
+          <span className="text-foreground text-sm font-bold">{"Memory updated"}</span>
         </div>
       );
   }

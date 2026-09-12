@@ -1,7 +1,6 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,6 @@ import SettingsContent from "./settings-content";
 import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -127,7 +125,7 @@ export default function SettingsRoute() {
         fillHeight && "flex h-svh min-h-0 flex-col overflow-hidden",
       )}
     >
-      <h1 className="sr-only">{t("settings.title")}</h1>
+      <h1 className="sr-only">{"Settings"}</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
           <Button
@@ -137,14 +135,14 @@ export default function SettingsRoute() {
             analytics={{ event: "settings_back_clicked", params: { ui_location: "mobile_header" } }}
           >
             <IconArrowLeft data-icon="inline-start" />
-            {t("settings.back")}
+            {"Back"}
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                aria-label={t("settings.openMenu")}
+                aria-label={"Open settings menu"}
                 analytics={{
                   event: "settings_menu_opened",
                   params: { ui_location: "mobile_header" },
@@ -155,9 +153,9 @@ export default function SettingsRoute() {
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle className="mb-2">{t("settings.categories")}</DrawerTitle>
+                <DrawerTitle className="mb-2">{"Setting Categories"}</DrawerTitle>
                 <DrawerDescription className="sr-only">
-                  {t("settings.categoriesDescription")}
+                  {"List of setting sections"}
                 </DrawerDescription>
                 <SettingsSidebar
                   activeSection={displayedSection}
@@ -199,7 +197,7 @@ export default function SettingsRoute() {
                   }}
                 >
                   <IconArrowLeft data-icon="inline-start" />
-                  {t("settings.backToChat")}
+                  {"Back to Chat"}
                 </Button>
               </div>
               <SettingsSidebar

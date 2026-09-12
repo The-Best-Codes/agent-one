@@ -4,7 +4,6 @@ import { useAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
-import i18n from "@/lib/i18n";
 import { chatIdsAtom, chatUpdateTriggerAtom, lastVacuumTimestampAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -63,7 +62,7 @@ const NEW_CHAT_MODEL_CONFIG_KEY = "new-chat-model-config";
 
 function getDefaultMetadata(): ChatMetadata {
   return {
-    title: i18n.t("chatsSettings.newChatPlaceholder"),
+    title: "New chat",
     titleState: undefined,
     modelId: undefined,
     modelConfig: undefined,
@@ -215,7 +214,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
     (modelId: string, modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG) => {
       const id = generateId();
       const metadata = createTimestampedMetadata({
-        title: i18n.t("chatsSettings.newChatPlaceholder"),
+        title: "New chat",
         titleState: undefined,
         modelId,
         modelConfig,

@@ -1,6 +1,5 @@
 import { IconAlertTriangle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 
 import { EnvVarsEditor } from "@/components/a1/input/env-vars-editor";
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
@@ -62,41 +61,43 @@ export function McpServerConfigForm({
   showApprovalControls = false,
   showStdioWarning = false,
 }: McpServerConfigFormProps) {
-  const { t } = useTranslation();
   const isStdio = values.type === "stdio";
-  const resolvedNamePlaceholder = namePlaceholder ?? t("extensions.serverName");
-  const resolvedCommandPlaceholder = commandPlaceholder ?? t("extensions.commandPlaceholder");
-  const resolvedUrlPlaceholder = urlPlaceholder ?? t("extensions.urlPlaceholder");
+  const resolvedNamePlaceholder = namePlaceholder ?? "Server name";
+  const resolvedCommandPlaceholder =
+    commandPlaceholder ?? "e.g., npx -y @modelcontextprotocol/server-everything";
+  const resolvedUrlPlaceholder = urlPlaceholder ?? "https://mcp.example.com/api";
   const resolvedApprovalDescription =
-    approvalDescription ?? t("extensions.approvalDescriptionServer");
+    approvalDescription ?? "Ask for confirmation before running tools from this server";
 
   return (
     <div className={className}>
       {showTypeSelector ? (
         <div className="grid gap-2">
-          <Label htmlFor={`${idPrefix}-server-type`}>{t("extensions.serverType")}</Label>
+          <Label htmlFor={`${idPrefix}-server-type`}>{"Server Type"}</Label>
           <Select
             value={values.type}
             onValueChange={(value: McpServerType) => onChange({ type: value })}
           >
             <SelectTrigger id={`${idPrefix}-server-type`}>
-              <SelectValue placeholder={t("extensions.selectServerType")} />
+              <SelectValue placeholder={"Select server type"} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="stdio">{t("extensions.stdioLocal")}</SelectItem>
-                <SelectItem value="http">{t("extensions.httpRemote")}</SelectItem>
+                <SelectItem value="stdio">{"STDIO (Local)"}</SelectItem>
+                <SelectItem value="http">{"HTTP (Remote)"}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
           <p className="text-muted-foreground text-xs">
-            {isStdio ? t("extensions.stdioHelp") : t("extensions.httpHelp")}
+            {isStdio
+              ? "STDIO servers run locally via command line."
+              : "HTTP servers are remote endpoints that support the MCP protocol."}
           </p>
         </div>
       ) : null}
 
       <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-name`}>{t("common.name")}</Label>
+        <Label htmlFor={`${idPrefix}-name`}>{"Name"}</Label>
         <Input
           id={`${idPrefix}-name`}
           placeholder={resolvedNamePlaceholder}
@@ -110,12 +111,16 @@ export function McpServerConfigForm({
           {showStdioWarning ? (
             <Alert>
               <IconAlertTriangle />
-              <AlertTitle>{t("extensions.stdioSecurityTitle")}</AlertTitle>
-              <AlertDescription>{t("extensions.stdioSecurityDescription")}</AlertDescription>
+              <AlertTitle>{"This extension runs code on your device"}</AlertTitle>
+              <AlertDescription>
+                {
+                  "Only install it if you trust the developer. It may not work correctly on all devices."
+                }
+              </AlertDescription>
             </Alert>
           ) : null}
           <div className="grid gap-2">
-            <Label htmlFor={`${idPrefix}-command`}>{t("extensions.command")}</Label>
+            <Label htmlFor={`${idPrefix}-command`}>{"Command"}</Label>
             <Input
               id={`${idPrefix}-command`}
               placeholder={resolvedCommandPlaceholder}
@@ -136,7 +141,7 @@ export function McpServerConfigForm({
       ) : (
         <>
           <div className="grid gap-2">
-            <Label htmlFor={`${idPrefix}-url`}>{t("extensions.url")}</Label>
+            <Label htmlFor={`${idPrefix}-url`}>{"URL"}</Label>
             <Input
               id={`${idPrefix}-url`}
               placeholder={resolvedUrlPlaceholder}
@@ -157,7 +162,7 @@ export function McpServerConfigForm({
       )}
 
       <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-timeout`}>{t("extensions.timeoutSeconds")}</Label>
+        <Label htmlFor={`${idPrefix}-timeout`}>{"Timeout (seconds)"}</Label>
         <Input
           id={`${idPrefix}-timeout`}
           type="number"
@@ -176,7 +181,7 @@ export function McpServerConfigForm({
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
-              {t("extensions.requireApprovalByDefault")}
+              {"Require Approval By Default"}
             </Label>
             <span className="text-muted-foreground text-xs">{resolvedApprovalDescription}</span>
           </div>

@@ -6,7 +6,6 @@ import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-
 import CodeMirror from "@uiw/react-codemirror";
 import { useAtomValue } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -81,7 +80,6 @@ export const MainChatInput = ({
   initialValue?: string;
   disabled?: boolean;
 }) => {
-  const { t } = useTranslation();
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
   const { resolvedTheme } = useTheme();
@@ -264,7 +262,6 @@ export const MainChatInput = ({
       // setFiles(undefined);
     }
   };
-
   const handleRemoveFile = (index: number) => {
     if (!files) {
       logger.verbose("No files to remove");
@@ -428,7 +425,7 @@ export const MainChatInput = ({
               isFloating ? "rounded-md" : "rounded-md rounded-b-none",
             )}
           >
-            <p className="text-primary text-lg font-semibold">{t("chat.dropToAttach")}</p>
+            <p className="text-primary text-lg font-semibold">{"Drop files or chats to attach"}</p>
           </div>
         )}
         <input
@@ -439,6 +436,7 @@ export const MainChatInput = ({
           className="hidden"
           accept="image/*,text/*,video/*,application/pdf,.pdf,.doc,.docx,.txt,.md,.csv,.json,.xml,.html,.css,.js,.ts,.tsx,.jsx,.py,.java,.cpp,.c,.h,.rs,.go,.rb,.php,.swift,.kt"
         />
+
         {files && files.length > 0 && <Attachments files={files} onRemove={handleRemoveFile} />}
         <div className="grow overflow-hidden">
           <CodeMirror
@@ -449,7 +447,7 @@ export const MainChatInput = ({
             value={initialValue || ""}
             minHeight="40px"
             maxHeight="160px"
-            placeholder={t("chat.askAnything")}
+            placeholder={"Ask anything..."}
             className="bg-transparent text-sm"
             extensions={[
               ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
@@ -457,7 +455,7 @@ export const MainChatInput = ({
               EditorView.lineWrapping,
               EditorView.contentAttributes.of({
                 spellcheck: "true",
-                "aria-label": t("chat.inputAria"),
+                "aria-label": "Chat message input",
                 "data-testid": "chat-editor",
               }),
               // eslint-disable-next-line react-hooks/refs
@@ -547,7 +545,7 @@ export const MainChatInput = ({
                     params: { ui_location: "main_chat_input" },
                   }}
                   className="relative"
-                  aria-label={t("chat.attachFiles")}
+                  aria-label={"Attach files"}
                 >
                   {files && files?.length > 0 && (
                     <Badge variant="default" className="absolute -top-2 -right-2 z-10 shadow-md">
@@ -557,7 +555,7 @@ export const MainChatInput = ({
                   <IconPaperclip />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent>{t("chat.attachFilesTooltip")}</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent>{"Attach files to your message"}</AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </div>
           <div className="flex items-center gap-2">
@@ -567,6 +565,7 @@ export const MainChatInput = ({
                 className="w-40 min-w-0 flex-1 rounded-r-none sm:w-60"
                 popoverClassName="w-60"
               />
+
               <ChatModelConfig
                 disabled={isChatLoading}
                 triggerClassName="rounded-l-none border-l-0"
@@ -584,12 +583,12 @@ export const MainChatInput = ({
                       event: "response_stop_clicked",
                       params: { ui_location: "main_chat_input" },
                     }}
-                    aria-label={t("chat.stopResponse")}
+                    aria-label={"Stop response"}
                   >
                     <IconPlayerStopFilled />
                   </Button>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{t("chat.stopTooltip")}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{"Stop the current response"}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             ) : (
               <AdaptiveTooltip>
@@ -609,12 +608,12 @@ export const MainChatInput = ({
                       event: "send_button_clicked",
                       params: { ui_location: "main_chat_input" },
                     }}
-                    aria-label={t("chat.sendMessage")}
+                    aria-label={"Send message"}
                   >
                     {status === "submitted" ? <Spinner /> : <IconArrowUp />}
                   </Button>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{t("chat.sendTooltip")}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{"Send your message"}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
           </div>

@@ -10,7 +10,6 @@ import {
 import CodeMirror from "@uiw/react-codemirror";
 import type { ToolUIPart } from "ai";
 import { memo, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +69,6 @@ const ContentPreview = memo(({ content, filePath }: { content: string; filePath:
 ContentPreview.displayName = "ContentPreview";
 
 export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as CreateFileInput;
   const output = part.output as CreateFileOutput;
@@ -78,7 +76,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || t("tools.unknownFile");
+  const filePath = input?.filePath || "unknown file";
 
   switch (part.state) {
     case "approval-requested":
@@ -90,7 +88,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           <div className="flex items-center gap-1">
             <IconFilePlus className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {input?.overwrite ? t("tools.wantsToOverwrite") : t("tools.wantsToCreate")}{" "}
+              {input?.overwrite ? "AgentOne wants to overwrite" : "AgentOne wants to create"}{" "}
               <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
@@ -106,7 +104,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -114,7 +112,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -125,7 +123,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.fileCreationDenied", { path: filePath })}
+            {`File creation denied (${filePath})`}
           </span>
         </div>
       );
@@ -134,9 +132,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">
-            {t("tools.preparingCreateFile")}
-          </span>
+          <span className="text-foreground text-sm font-bold">{"Preparing to create file..."}</span>
         </div>
       );
 
@@ -147,7 +143,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.fileCreationDenied", { path: filePath })}
+              {`File creation denied (${filePath})`}
             </span>
           </div>
         );
@@ -158,7 +154,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">{t("tools.creatingFile", { path: filePath })}</span>
+          <span className="max-w-2xl truncate">{`Creating ${filePath}...`}</span>
         </div>
       );
     }
@@ -189,6 +185,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
+
                   <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/create-file-accordion:scale-100 group-hover/create-file-accordion:opacity-100",
@@ -202,7 +199,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                {output.overwritten ? t("tools.overwrote") : t("tools.created")}{" "}
+                {output.overwritten ? "Overwrote" : "Created"}{" "}
                 <span className="font-mono text-xs">{filePath}</span>
               </span>
             </AccordionTrigger>
@@ -212,7 +209,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
                   <ContentPreview content={content} filePath={filePath} />
                 </div>
               ) : (
-                <div className="text-muted-foreground text-xs">{t("tools.fileCreatedSuccess")}</div>
+                <div className="text-muted-foreground text-xs">{"File created successfully."}</div>
               )}
             </AccordionContent>
           </AccordionItem>
@@ -226,7 +223,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.fileCreationCancelled")}
+              {"File creation cancelled"}
             </span>
           </div>
         );
@@ -237,7 +234,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.createFileError")}
+          title={"Error creating file"}
         />
       );
 
@@ -245,7 +242,7 @@ export const MessagePartToolCreateFile = ({ part }: CreateFileToolPartProps) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconFilePlus className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.fileCreated")}</span>
+          <span className="text-foreground text-sm font-bold">{"File created"}</span>
         </div>
       );
   }

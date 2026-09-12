@@ -1,6 +1,5 @@
 import { IconAlarm, IconArrowLeft, IconEdit, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -47,7 +46,6 @@ import {
 const DEFAULT_SCHEDULE = "0 19 * * *";
 
 export default function CronsTestRoute() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [crons, setCrons] = useState<Cron[]>([]);
   const [editingCron, setEditingCron] = useState<Cron | null>(null);
@@ -65,7 +63,7 @@ export default function CronsTestRoute() {
         if (!cancelled) setCrons(loadedCrons);
       })
       .catch((error) => {
-        if (!cancelled) toast.error(t("tests.cronLoadFailed", { error: String(error) }));
+        if (!cancelled) toast.error(`Failed to load crons: ${String(error)}`);
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -73,7 +71,7 @@ export default function CronsTestRoute() {
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, []);
 
   const openCreateDialog = () => {
     setEditingCron(null);
@@ -102,9 +100,9 @@ export default function CronsTestRoute() {
         return current.map((cron) => (cron.id === saved.id ? saved : cron));
       });
       setDialogOpen(false);
-      toast.success(t(editingCron ? "tests.cronUpdated" : "tests.cronCreated"));
+      toast.success(editingCron ? "Cron updated." : "Cron created.");
     } catch (error) {
-      toast.error(t("tests.cronSaveFailed", { error: String(error) }));
+      toast.error(`Failed to save cron: ${String(error)}`);
     } finally {
       setIsSaving(false);
     }
@@ -115,9 +113,9 @@ export default function CronsTestRoute() {
     try {
       const updated = await setCronEnabled(cron.id, enabled);
       setCrons((current) => current.map((item) => (item.id === updated.id ? updated : item)));
-      toast.success(t(enabled ? "tests.cronEnabled" : "tests.cronDisabled"));
+      toast.success(enabled ? "Cron enabled." : "Cron disabled.");
     } catch (error) {
-      toast.error(t("tests.cronStateFailed", { error: String(error) }));
+      toast.error(`Failed to change cron state: ${String(error)}`);
     } finally {
       setBusyId(null);
     }
@@ -128,9 +126,9 @@ export default function CronsTestRoute() {
     try {
       await deleteCron(cron.id);
       setCrons((current) => current.filter((item) => item.id !== cron.id));
-      toast.success(t("tests.cronDeleted"));
+      toast.success("Cron deleted.");
     } catch (error) {
-      toast.error(t("tests.cronDeleteFailed", { error: String(error) }));
+      toast.error(`Failed to delete cron: ${String(error)}`);
     } finally {
       setBusyId(null);
     }
@@ -142,25 +140,31 @@ export default function CronsTestRoute() {
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")}>
             <IconArrowLeft data-icon="inline-start" />
-            {t("tests.backToTests")}
+            {"Back to Tests"}
           </Button>
-          <h1 className="text-2xl font-bold">{t("tests.cronsTest")}</h1>
+          <h1 className="text-2xl font-bold">{"Cron Test"}</h1>
         </div>
 
         <Alert>
           <IconAlarm />
-          <AlertTitle>{t("tests.cronsAlertTitle")}</AlertTitle>
-          <AlertDescription>{t("tests.cronsAlertDescription")}</AlertDescription>
+          <AlertTitle>{"Automatic launch test"}</AlertTitle>
+          <AlertDescription>
+            {
+              "Enabled crons use your operating system scheduler to open AgentOne. Cron schedules use your local time zone."
+            }
+          </AlertDescription>
         </Alert>
 
         <Card>
           <CardHeader>
-            <CardTitle>{t("tests.cronsCardTitle")}</CardTitle>
-            <CardDescription>{t("tests.cronsCardDescription")}</CardDescription>
+            <CardTitle>{"Scheduled crons"}</CardTitle>
+            <CardDescription>
+              {"Create multiple five-field cron schedules and manage them independently."}
+            </CardDescription>
             <CardAction>
               <Button onClick={openCreateDialog} disabled={isLoading}>
                 <IconPlus data-icon="inline-start" />
-                {t("tests.addCron")}
+                {"Add Cron"}
               </Button>
             </CardAction>
           </CardHeader>
@@ -171,13 +175,15 @@ export default function CronsTestRoute() {
                   <EmptyMedia variant="icon">
                     <IconAlarm />
                   </EmptyMedia>
-                  <EmptyTitle>{t("tests.noCrons")}</EmptyTitle>
-                  <EmptyDescription>{t("tests.noCronsDescription")}</EmptyDescription>
+                  <EmptyTitle>{"No crons yet"}</EmptyTitle>
+                  <EmptyDescription>
+                    {"Add a cron to automatically open AgentOne on a schedule."}
+                  </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <Button variant="outline" onClick={openCreateDialog}>
                     <IconPlus data-icon="inline-start" />
-                    {t("tests.addCron")}
+                    {"Add Cron"}
                   </Button>
                 </EmptyContent>
               </Empty>
@@ -191,11 +197,11 @@ export default function CronsTestRoute() {
                     <div className="flex flex-wrap items-center gap-2">
                       <code className="font-medium">{cron.schedule}</code>
                       <Badge variant={cron.enabled ? "default" : "secondary"}>
-                        {t(cron.enabled ? "tests.enabled" : "tests.disabled")}
+                        {cron.enabled ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
                     <p className="text-muted-foreground mt-1 truncate text-sm">
-                      {cron.message ?? t("tests.noCronMessage")}
+                      {cron.message ?? "No message"}
                     </p>
                     <p className="text-muted-foreground mt-1 truncate font-mono text-xs">
                       {cron.id}
@@ -206,14 +212,15 @@ export default function CronsTestRoute() {
                       checked={cron.enabled}
                       onCheckedChange={(enabled) => void changeEnabled(cron, enabled)}
                       disabled={busyId !== null}
-                      aria-label={t(cron.enabled ? "tests.disableCron" : "tests.enableCron")}
+                      aria-label={cron.enabled ? "Disable Cron" : "Enable Cron"}
                     />
+
                     <Button
                       size="icon-sm"
                       variant="outline"
                       onClick={() => openEditDialog(cron)}
                       disabled={busyId !== null}
-                      aria-label={t("tests.editCron")}
+                      aria-label={"Edit Cron"}
                     >
                       <IconEdit />
                     </Button>
@@ -222,7 +229,7 @@ export default function CronsTestRoute() {
                       variant="destructive"
                       onClick={() => void removeCron(cron)}
                       disabled={busyId !== null}
-                      aria-label={t("tests.deleteCron")}
+                      aria-label={"Delete Cron"}
                     >
                       <IconTrash />
                     </Button>
@@ -237,12 +244,14 @@ export default function CronsTestRoute() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t(editingCron ? "tests.editCron" : "tests.addCron")}</DialogTitle>
-            <DialogDescription>{t("tests.cronDialogDescription")}</DialogDescription>
+            <DialogTitle>{editingCron ? "Edit Cron" : "Add Cron"}</DialogTitle>
+            <DialogDescription>
+              {"Enter a standard five-field cron expression and an optional message."}
+            </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="cron-schedule">{t("tests.cronSchedule")}</FieldLabel>
+              <FieldLabel htmlFor="cron-schedule">{"Cron schedule"}</FieldLabel>
               <Input
                 id="cron-schedule"
                 value={schedule}
@@ -251,25 +260,28 @@ export default function CronsTestRoute() {
                 disabled={isSaving}
                 autoComplete="off"
               />
-              <FieldDescription>{t("tests.cronScheduleDescription")}</FieldDescription>
+
+              <FieldDescription>
+                {"Minute, hour, day of month, month, and day of week. Example: 0 19 * * *"}
+              </FieldDescription>
             </Field>
             <Field>
-              <FieldLabel htmlFor="cron-message">{t("tests.cronMessage")}</FieldLabel>
+              <FieldLabel htmlFor="cron-message">{"Message (optional)"}</FieldLabel>
               <Textarea
                 id="cron-message"
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
-                placeholder={t("tests.cronMessagePlaceholder")}
+                placeholder={"Hello, world!"}
                 disabled={isSaving}
               />
             </Field>
           </FieldGroup>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSaving}>
-              {t("common.cancel")}
+              {"Cancel"}
             </Button>
             <Button onClick={() => void saveCron()} disabled={isSaving || !schedule.trim()}>
-              {isSaving ? t("tests.savingCron") : t("common.save")}
+              {isSaving ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

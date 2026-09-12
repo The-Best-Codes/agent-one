@@ -1,7 +1,6 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { isPermissionGranted, requestPermission } from "@tauri-apps/plugin-notification";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 export default function NotificationsTestRoute() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [logs, setLogs] = useState<string[]>([]);
 
@@ -18,60 +16,52 @@ export default function NotificationsTestRoute() {
   };
 
   const checkPermission = async () => {
-    addLog(t("tests.checkingPermission"));
+    addLog("Checking notification permission...");
     try {
       const permissionGranted = await isPermissionGranted();
-      addLog(
-        t("tests.permissionResult", {
-          result: permissionGranted ? t("tests.granted") : t("tests.notGranted"),
-        }),
-      );
+      addLog(`Permission check result: ${permissionGranted ? "granted" : "not granted"}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      addLog(t("tests.permissionCheckFailed", { error: errorMessage }));
+      addLog(`Permission check failed: ${errorMessage}`);
     }
   };
 
   const requestNotificationPermission = async () => {
-    addLog(t("tests.requestingPermission"));
+    addLog("Requesting notification permission...");
     try {
       const permission = await requestPermission();
-      addLog(t("tests.permissionRequestResult", { result: permission }));
+      addLog(`Permission request result: ${permission}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      addLog(t("tests.permissionRequestFailed", { error: errorMessage }));
+      addLog(`Permission request failed: ${errorMessage}`);
     }
   };
 
   const sendTestNotification = async () => {
-    addLog(t("tests.startingNotificationTest"));
+    addLog("Starting notification flow test...");
     try {
-      addLog(t("tests.step1Checking"));
+      addLog("Step 1: Checking permission...");
       let permissionGranted = await isPermissionGranted();
-      addLog(
-        t("tests.permissionStatus", {
-          result: permissionGranted ? t("tests.granted") : t("tests.notGranted"),
-        }),
-      );
+      addLog(`Permission status: ${permissionGranted ? "granted" : "not granted"}`);
 
       if (!permissionGranted) {
-        addLog(t("tests.step2Requesting"));
+        addLog("Step 2: Requesting permission...");
         const permission = await requestPermission();
         permissionGranted = permission === "granted";
-        addLog(t("tests.permissionRequestResult", { result: permission }));
-        addLog(t("tests.permissionGranted", { granted: String(permissionGranted) }));
+        addLog(`Permission request result: ${permission}`);
+        addLog(`Permission granted: ${String(permissionGranted)}`);
       }
 
       if (permissionGranted) {
-        addLog(t("tests.step3Sending"));
-        await sendNotificationIfAllowed(t("tests.notificationTitle"), t("tests.notificationBody"));
-        addLog(t("tests.notificationSent"));
+        addLog("Step 3: Sending notification...");
+        await sendNotificationIfAllowed("AgentOne Test", "Tauri notifications are working!");
+        addLog("Notification sent successfully!");
       } else {
-        addLog(t("tests.permissionDenied"));
+        addLog("Permission not granted - cannot send notification");
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      addLog(t("tests.notificationTestFailed", { error: errorMessage }));
+      addLog(`Notification test failed: ${errorMessage}`);
     }
   };
 
@@ -81,25 +71,25 @@ export default function NotificationsTestRoute() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            {t("tests.backToTests")}
+            {"Back to Tests"}
           </Button>
-          <h1 className="text-2xl font-bold">{t("tests.notificationsTest")}</h1>
+          <h1 className="text-2xl font-bold">{"Notifications Test"}</h1>
         </div>
 
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t("tests.notificationTests")}</CardTitle>
+              <CardTitle>{"Notification Tests"}</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="flex gap-2">
                 <Button onClick={checkPermission} variant="outline">
-                  {t("tests.checkPermission")}
+                  {"Check Permission"}
                 </Button>
                 <Button onClick={requestNotificationPermission} variant="outline">
-                  {t("tests.requestPermission")}
+                  {"Request Permission"}
                 </Button>
-                <Button onClick={sendTestNotification}>{t("tests.sendTestNotification")}</Button>
+                <Button onClick={sendTestNotification}>{"Send Test Notification"}</Button>
               </div>
             </CardContent>
           </Card>
@@ -107,7 +97,7 @@ export default function NotificationsTestRoute() {
           {logs.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>{t("tests.logs")}</CardTitle>
+                <CardTitle>{"Logs"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/20 max-h-96 overflow-y-auto rounded-md border p-4">

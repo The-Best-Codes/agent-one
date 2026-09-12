@@ -20,7 +20,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
-import i18n from "@/lib/i18n";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -83,15 +82,17 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                 <div>
                   <CardTitle className="text-destructive flex items-center gap-2 text-xl">
                     <IconAlertTriangle />
-                    {i18n.t("errorBoundary.title")}
+                    {"Something went wrong"}
                   </CardTitle>
-                  <CardDescription>{i18n.t("errorBoundary.description")}</CardDescription>
+                  <CardDescription>
+                    {"An error occurred within the main application."}
+                  </CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <CopyButton
                     text={dedent`
-                Error: ${this.state.error?.toString() ?? i18n.t("errorBoundary.unknownError")}
-                Stack: ${this.state.errorInfo?.componentStack ?? i18n.t("errorBoundary.noStackTrace")}
+                Error: ${this.state.error?.toString() ?? "Unknown error"}
+                Stack: ${this.state.errorInfo?.componentStack ?? "No stack trace"}
                     `}
                   />
                 </div>
@@ -100,11 +101,9 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
             <CardContent>
               <Alert variant="destructive" className="mb-4">
-                <AlertTitle className="text-lg">{i18n.t("errorBoundary.errorMessage")}</AlertTitle>
+                <AlertTitle className="text-lg">{"Error Message"}</AlertTitle>
                 <AlertDescription>
-                  {this.state.error
-                    ? this.state.error.toString()
-                    : i18n.t("errorBoundary.unknownErrorOccurred")}
+                  {this.state.error ? this.state.error.toString() : "Unknown error occurred"}
                 </AlertDescription>
               </Alert>
 
@@ -119,7 +118,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                     shouldRotateIcon
                     className="flex justify-between p-2 px-1"
                   >
-                    <span>{i18n.t("errorBoundary.technicalDetails")}</span>
+                    <span>{"Technical Details"}</span>
                   </AccordionTrigger>
                   <AccordionContent className="pb-3">
                     <div className="bg-muted max-h-96 overflow-auto rounded-md p-3 font-mono text-sm">
@@ -132,11 +131,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             <CardFooter className="flex flex-wrap justify-end gap-2 pt-4">
               <div className="flex gap-2">
                 <Button variant="outline" onClick={this.handleReset}>
-                  {i18n.t("errorBoundary.tryAgain")}
+                  {"Try Again"}
                 </Button>
                 <Button onClick={this.handleRefresh}>
                   <IconRefresh data-icon="inline-start" />
-                  {i18n.t("errorBoundary.reloadApp")}
+                  {"Reload App"}
                 </Button>
               </div>
             </CardFooter>

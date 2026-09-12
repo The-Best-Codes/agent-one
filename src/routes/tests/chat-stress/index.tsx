@@ -1,7 +1,6 @@
 import { IconArrowLeft, IconMessage2Plus } from "@tabler/icons-react";
 import { generateId, type UIMessage } from "ai";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -99,7 +98,6 @@ function createStressMessages({
 }
 
 export default function ChatStressTestRoute() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     createChat,
@@ -110,7 +108,7 @@ export default function ChatStressTestRoute() {
     loadChatMessages,
   } = usePersistence();
 
-  const [title, setTitle] = useState(t("tests.stressChatDefaultTitle"));
+  const [title, setTitle] = useState("Virtualization Stress Chat");
   const [messagePairs, setMessagePairs] = useState(200);
   const [paragraphsPerUserMessage, setParagraphsPerUserMessage] = useState(1);
   const [paragraphsPerAssistantMessage, setParagraphsPerAssistantMessage] = useState(4);
@@ -127,8 +125,7 @@ export default function ChatStressTestRoute() {
     const normalizedPairs = clampPositiveInteger(messagePairs, 200);
     const normalizedUserParagraphs = clampPositiveInteger(paragraphsPerUserMessage, 1);
     const normalizedAssistantParagraphs = clampPositiveInteger(paragraphsPerAssistantMessage, 4);
-    const trimmedTitle =
-      title.trim() || t("tests.stressChatFallbackTitle", { count: normalizedPairs * 2 });
+    const trimmedTitle = title.trim() || `Stress Chat ${normalizedPairs * 2} messages`;
     const modelId = getNewChatModelId() || "openrouter/auto";
 
     setIsCreating(true);
@@ -155,14 +152,14 @@ export default function ChatStressTestRoute() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
       if (loadedMessages.length === 0) {
-        throw new Error(t("tests.loadMessagesFailed"));
+        throw new Error("Failed to load chat messages after 5 tries.");
       }
 
-      toast.success(t("tests.createdStressChat", { count: messages.length.toLocaleString() }));
+      toast.success(`Created stress chat with ${messages.length.toLocaleString()} messages.`);
       await navigate(`/chat/${chatId}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      toast.error(t("tests.failedStressChat", { message }));
+      toast.error(`Failed to create stress chat: ${message}`);
     } finally {
       setIsCreating(false);
     }
@@ -174,31 +171,35 @@ export default function ChatStressTestRoute() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            {t("tests.backToTests")}
+            {"Back to Tests"}
           </Button>
-          <h1 className="text-2xl font-bold">{t("tests.chatStressTest")}</h1>
+          <h1 className="text-2xl font-bold">{"Chat Stress Test"}</h1>
         </div>
 
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t("tests.generateStressChat")}</CardTitle>
-              <CardDescription>{t("tests.stressChatDescription")}</CardDescription>
+              <CardTitle>{"Generate a Stress Chat"}</CardTitle>
+              <CardDescription>
+                {
+                  "Create a realistic large chat and jump straight into it to test chat rendering, scrolling, and virtualization thresholds."
+                }
+              </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-2 md:col-span-2">
-                  <Label htmlFor="stress-chat-title">{t("tests.chatTitle")}</Label>
+                  <Label htmlFor="stress-chat-title">{"Chat Title"}</Label>
                   <Input
                     id="stress-chat-title"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
-                    placeholder={t("tests.stressChatDefaultTitle")}
+                    placeholder={"Virtualization Stress Chat"}
                   />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stress-chat-pairs">{t("tests.userAssistantPairs")}</Label>
+                  <Label htmlFor="stress-chat-pairs">{"User/Assistant Pairs"}</Label>
                   <Input
                     id="stress-chat-pairs"
                     type="number"
@@ -211,7 +212,7 @@ export default function ChatStressTestRoute() {
 
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="stress-chat-user-paragraphs">
-                    {t("tests.paragraphsPerUser")}
+                    {"Paragraphs Per User Message"}
                   </Label>
                   <Input
                     id="stress-chat-user-paragraphs"
@@ -227,7 +228,7 @@ export default function ChatStressTestRoute() {
 
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="stress-chat-assistant-paragraphs">
-                    {t("tests.paragraphsPerAssistant")}
+                    {"Paragraphs Per Assistant Message"}
                   </Label>
                   <Input
                     id="stress-chat-assistant-paragraphs"
@@ -242,7 +243,7 @@ export default function ChatStressTestRoute() {
                 </div>
 
                 <div className="flex flex-col justify-end gap-2">
-                  <Label htmlFor="stress-chat-reasoning">{t("tests.includeReasoning")}</Label>
+                  <Label htmlFor="stress-chat-reasoning">{"Include Reasoning Blocks"}</Label>
                   <Button
                     id="stress-chat-reasoning"
                     type="button"
@@ -250,24 +251,24 @@ export default function ChatStressTestRoute() {
                     className="justify-start"
                     onClick={() => setIncludeReasoning((current) => !current)}
                   >
-                    {includeReasoning ? t("common.enabled") : t("common.disabled")}
+                    {includeReasoning ? "Enabled" : "Disabled"}
                   </Button>
                 </div>
               </div>
 
               <div className="bg-muted/40 flex flex-col gap-1 rounded-md border p-4 text-sm">
-                <div>{t("tests.totalMessages", { count: totalMessages.toLocaleString() })}</div>
+                <div>{`Total messages: ${totalMessages.toLocaleString()}`}</div>
                 <div>
                   {includeReasoning
-                    ? t("tests.assistantBlocksReasoning")
-                    : t("tests.assistantBlocksTextOnly")}
+                    ? "Assistant message blocks: reasoning + text"
+                    : "Assistant message blocks: text only"}
                 </div>
               </div>
 
               <div className="flex justify-end">
                 <Button onClick={handleCreate} disabled={isCreating}>
                   <IconMessage2Plus data-icon="inline-start" />
-                  {isCreating ? t("tests.creating") : t("tests.makeTestChat")}
+                  {isCreating ? "Creating..." : "Make Test Chat"}
                 </Button>
               </div>
             </CardContent>

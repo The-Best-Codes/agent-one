@@ -1,7 +1,6 @@
 import { IconDownload } from "@tabler/icons-react";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +24,6 @@ interface BulkExportModalProps {
 }
 
 export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExportModalProps) => {
-  const { t } = useTranslation();
   const { bulkExportChats } = usePersistence();
 
   const handleExportJSON = async () => {
@@ -46,9 +44,13 @@ export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExp
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("sidebar.exportChatsTitle", { count: chatCount })}</DialogTitle>
+          <DialogTitle>
+            {chatCount === 1 ? `Export ${chatCount} chat` : `Export ${chatCount} chats`}
+          </DialogTitle>
           <DialogDescription>
-            {t("sidebar.exportChatsDescription", { count: chatCount })}
+            {chatCount === 1
+              ? `Export ${chatCount} selected chat as a single JSON file.`
+              : `Export ${chatCount} selected chats as a single JSON file.`}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2">
@@ -58,12 +60,12 @@ export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExp
             className="justify-start"
           >
             <IconDownload data-icon="inline-start" />
-            {t("sidebar.downloadJson")}
+            {"Download as JSON"}
           </Button>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {t("common.close")}
+            {"Close"}
           </Button>
         </DialogFooter>
       </DialogContent>

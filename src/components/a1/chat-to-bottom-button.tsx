@@ -1,7 +1,6 @@
 "use client";
 import { IconChevronDown } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +19,6 @@ interface ChatToBottomButtonProps {
 }
 
 export function ChatToBottomButton({ onClick, className }: ChatToBottomButtonProps) {
-  const { t } = useTranslation();
   const [showSetting, setShowSetting] = useAtom(showChatToBottomButtonAtom);
 
   if (!showSetting) return null;
@@ -35,17 +33,17 @@ export function ChatToBottomButton({ onClick, className }: ChatToBottomButtonPro
             onClick={onClick}
             className={className}
             variant="default"
-            aria-label={t("chat.scrollToBottom")}
+            aria-label={"Scroll to bottom"}
           >
             <IconChevronDown data-testid="scroll-to-bottom-icon" data-icon="inline-start" />
-            {t("chat.scrollToBottom")}
+            {"Scroll to bottom"}
           </Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuGroup>
-            <ContextMenuLabel>{t("common.options")}</ContextMenuLabel>
+            <ContextMenuLabel>{"Options"}</ContextMenuLabel>
             <ContextMenuItem variant="destructive" onSelect={() => setShowSetting(false)}>
-              {t("chat.neverShowScrollButton")}
+              {"Never show this button"}
             </ContextMenuItem>
           </ContextMenuGroup>
         </ContextMenuContent>

@@ -123,7 +123,6 @@ const vendorManualChunks = {
     "@tanstack/virtual-core",
     "@tanstack/react-virtual",
   ],
-  i18n: ["i18next", "react-i18next"],
 };
 
 export default defineConfig(() => ({
@@ -192,7 +191,6 @@ export default defineConfig(() => ({
           const mcpRegistryDir = path
             .resolve(import.meta.dirname, "src/assets/mcp-registry")
             .replace(/\\/g, "/");
-          const i18nDir = path.resolve(import.meta.dirname, "src/lib/i18n").replace(/\\/g, "/");
 
           if (normalizedId.includes(`${modelListsDir}/`)) {
             return "modelLists";
@@ -200,10 +198,6 @@ export default defineConfig(() => ({
 
           if (normalizedId.includes(`${mcpRegistryDir}/`)) {
             return "mcpRegistry";
-          }
-
-          if (normalizedId.includes(`${i18nDir}/`)) {
-            return "i18n";
           }
 
           if (normalizedId.includes("/node_modules/")) {

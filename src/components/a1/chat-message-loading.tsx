@@ -1,5 +1,4 @@
 import type { UIMessage } from "ai";
-import { useTranslation } from "react-i18next";
 
 import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useChatMessages, useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -12,10 +11,9 @@ const LoadingIndicator = ({
   isApiKeysLoading: boolean;
   isMcpLoading: boolean;
 }) => {
-  const { t } = useTranslation();
-  let text = t("messages.working");
-  if (isMcpLoading) text = t("messages.startingExtensions");
-  if (isApiKeysLoading) text = t("messages.bootingUp");
+  let text = "Working";
+  if (isMcpLoading) text = "Starting extensions";
+  if (isApiKeysLoading) text = "Booting up";
 
   return (
     <span className="shimmer dark:shimmer-color-accent text-foreground w-fit text-sm font-bold">

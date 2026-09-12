@@ -1,7 +1,6 @@
 import { IconSparkles } from "@tabler/icons-react";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -43,7 +42,6 @@ const ChangeTitleForm = ({
   chatId: string;
   onClose: () => void;
 }) => {
-  const { t } = useTranslation();
   const [title, setTitle] = useState(currentTitle);
   const [isGenerating, setIsGenerating] = useState(false);
   const { saveChatTitle, loadChatMetadata, loadChatMessages } = usePersistence();
@@ -94,10 +92,11 @@ const ChangeTitleForm = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={t("sidebar.enterTitle")}
+          placeholder={"Enter chat title..."}
           autoFocus
           className="flex-1"
         />
+
         <AdaptiveTooltip>
           <AdaptiveTooltipTrigger asChild>
             <Button onClick={handleGenerate} disabled={isGenerating} variant="outline" size="icon">
@@ -105,16 +104,16 @@ const ChangeTitleForm = ({
             </Button>
           </AdaptiveTooltipTrigger>
           <AdaptiveTooltipContent>
-            <p>{t("sidebar.generateTitle")}</p>
+            <p>{"Generate title using AI"}</p>
           </AdaptiveTooltipContent>
         </AdaptiveTooltip>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
-          {t("common.cancel")}
+          {"Cancel"}
         </Button>
         <Button onClick={handleSave} disabled={!title.trim()}>
-          {t("common.save")}
+          {"Save"}
         </Button>
       </DialogFooter>
     </>
@@ -127,13 +126,12 @@ export const ChangeTitleModal = ({
   chatId,
   currentTitle,
 }: ChangeTitleModalProps) => {
-  const { t } = useTranslation();
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("sidebar.changeTitleHeading")}</DialogTitle>
-          <DialogDescription>{t("sidebar.changeTitleDescription")}</DialogDescription>
+          <DialogTitle>{"Change Chat Title"}</DialogTitle>
+          <DialogDescription>{"Enter a new title for this chat conversation."}</DialogDescription>
         </DialogHeader>
         <ChangeTitleForm currentTitle={currentTitle} chatId={chatId} onClose={onClose} />
       </DialogContent>

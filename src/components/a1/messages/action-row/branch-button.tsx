@@ -1,6 +1,5 @@
 import { IconArrowsSplit } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -13,7 +12,6 @@ type BranchButtonProps = {
 >;
 
 export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProps) => {
-  const { t } = useTranslation();
   const { status } = useChatStatus();
   const isStreaming = status === "streaming" || status === "submitted";
 
@@ -24,7 +22,7 @@ export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProp
       className={className}
       size="icon-sm"
       variant="secondary"
-      aria-label={t("messages.branchFromMessage")}
+      aria-label={"Branch conversation from this message"}
       {...props}
     >
       <IconArrowsSplit data-icon="inline-start" />

@@ -9,7 +9,6 @@ import {
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -83,7 +82,6 @@ function normalizeOptionalNumber(value: string) {
 }
 
 function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddModelFormProps) {
-  const { t } = useTranslation();
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [supportsText, setSupportsText] = useState(true);
@@ -128,76 +126,79 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
     <div className="bg-muted/30 rounded-lg border p-4">
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="new-model-id">{t("providers.modelId")}</FieldLabel>
+          <FieldLabel htmlFor="new-model-id">{"Model ID"}</FieldLabel>
           <Input
             id="new-model-id"
             value={id}
             onChange={(event) => setId(event.target.value)}
-            placeholder={t("providers.modelIdPlaceholder")}
+            placeholder={"e.g. gpt-5"}
             aria-invalid={isDuplicate}
           />
+
           {isDuplicate ? (
             <FieldDescription className="text-destructive">
-              {t("providers.modelIdExists")}
+              {"Model ID already exists."}
             </FieldDescription>
           ) : overridesBuiltIn ? (
-            <FieldDescription>{t("providers.modelIdOverridesBuiltIn")}</FieldDescription>
+            <FieldDescription>
+              {"This matches a built-in model and will override its metadata."}
+            </FieldDescription>
           ) : (
-            <FieldDescription>{t("providers.modelIdHint")}</FieldDescription>
+            <FieldDescription>{"Use the provider's raw model identifier."}</FieldDescription>
           )}
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="new-model-name">{t("providers.displayName")}</FieldLabel>
+          <FieldLabel htmlFor="new-model-name">{"Display Name"}</FieldLabel>
           <Input
             id="new-model-name"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder={t("providers.optionalLabelPicker")}
+            placeholder={"Optional label shown in the model picker"}
           />
         </Field>
 
         <div className="grid gap-4 md:grid-cols-2">
           <Field data-invalid={parsedContextWindow === null || undefined}>
-            <FieldLabel htmlFor="new-model-context-window">
-              {t("providers.contextWindow")}
-            </FieldLabel>
+            <FieldLabel htmlFor="new-model-context-window">{"Context Window"}</FieldLabel>
             <Input
               id="new-model-context-window"
               value={contextWindow}
               onChange={(event) => setContextWindow(event.target.value)}
-              placeholder={t("providers.contextWindowPlaceholder")}
+              placeholder={"e.g. 200000"}
               inputMode="numeric"
               aria-invalid={parsedContextWindow === null}
             />
+
             <FieldDescription>
               {parsedContextWindow === null
-                ? t("providers.enterNonNegative")
-                : t("providers.optionalTokenLimit")}
+                ? "Enter a non-negative number."
+                : "Optional token limit used in the app UI."}
             </FieldDescription>
           </Field>
 
           <Field data-invalid={parsedMaxOutputTokens === null || undefined}>
-            <FieldLabel htmlFor="new-model-max-output">{t("providers.maxOutputTokens")}</FieldLabel>
+            <FieldLabel htmlFor="new-model-max-output">{"Max Output Tokens"}</FieldLabel>
             <Input
               id="new-model-max-output"
               value={maxOutputTokens}
               onChange={(event) => setMaxOutputTokens(event.target.value)}
-              placeholder={t("providers.maxOutputTokensPlaceholder")}
+              placeholder={"e.g. 8192"}
               inputMode="numeric"
               aria-invalid={parsedMaxOutputTokens === null}
             />
+
             <FieldDescription>
               {parsedMaxOutputTokens === null
-                ? t("providers.enterNonNegative")
-                : t("providers.optionalMaxOutput")}
+                ? "Enter a non-negative number."
+                : "Optional max output token metadata override."}
             </FieldDescription>
           </Field>
         </div>
 
         <div className="flex flex-col gap-4">
           <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-text">{t("providers.supportsText")}</FieldLabel>
+            <FieldLabel htmlFor="new-model-supports-text">{"Supports Text"}</FieldLabel>
             <Switch
               id="new-model-supports-text"
               checked={supportsText}
@@ -206,9 +207,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           </Field>
 
           <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-tools">
-              {t("providers.supportsTools")}
-            </FieldLabel>
+            <FieldLabel htmlFor="new-model-supports-tools">{"Supports Tools"}</FieldLabel>
             <Switch
               id="new-model-supports-tools"
               checked={supportsTools}
@@ -217,9 +216,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
           </Field>
 
           <Field orientation="horizontal">
-            <FieldLabel htmlFor="new-model-supports-images">
-              {t("providers.supportsImages")}
-            </FieldLabel>
+            <FieldLabel htmlFor="new-model-supports-images">{"Supports Images"}</FieldLabel>
             <Switch
               id="new-model-supports-images"
               checked={supportsImages}
@@ -229,7 +226,7 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 
           <Field orientation="horizontal">
             <FieldLabel htmlFor="new-model-supports-attachments">
-              {t("providers.supportsAttachments")}
+              {"Supports Attachments"}
             </FieldLabel>
             <Switch
               id="new-model-supports-attachments"
@@ -242,10 +239,10 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 
       <div className="mt-4 flex justify-end gap-2">
         <Button variant="outline" size="sm" onClick={onCancel}>
-          {t("common.cancel")}
+          {"Cancel"}
         </Button>
         <Button size="sm" onClick={handleAdd} disabled={!isValid}>
-          {t("providers.addModel")}
+          {"Add Model"}
         </Button>
       </div>
     </div>
@@ -253,7 +250,6 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
 }
 
 function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigDialogProps) {
-  const { t } = useTranslation();
   const [draft, setDraft] = useState(model);
   const [contextWindowValue, setContextWindowValue] = useState(
     model.contextWindow?.toString() ?? "",
@@ -284,7 +280,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={`model-name-${model.id}`}>{t("providers.displayName")}</FieldLabel>
+            <FieldLabel htmlFor={`model-name-${model.id}`}>{"Display Name"}</FieldLabel>
             <Input
               id={`model-name-${model.id}`}
               value={draft.name ?? ""}
@@ -294,14 +290,14 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
                   name: event.target.value.trim() || undefined,
                 })
               }
-              placeholder={t("providers.optionalLabelPicker")}
+              placeholder={"Optional label shown in the model picker"}
             />
           </Field>
 
           <div className="grid gap-4 md:grid-cols-2">
             <Field data-invalid={isContextWindowInvalid || undefined}>
               <FieldLabel htmlFor={`model-context-window-${model.id}`}>
-                {t("providers.contextWindow")}
+                {"Context Window"}
               </FieldLabel>
               <Input
                 id={`model-context-window-${model.id}`}
@@ -319,19 +315,18 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
                   }
                 }}
                 inputMode="numeric"
-                placeholder={t("common.optional")}
+                placeholder={"Optional"}
                 aria-invalid={isContextWindowInvalid}
               />
+
               <FieldDescription>
-                {isContextWindowInvalid
-                  ? t("providers.enterNonNegative")
-                  : t("providers.shownInUsage")}
+                {isContextWindowInvalid ? "Enter a non-negative number." : "Shown in usage status."}
               </FieldDescription>
             </Field>
 
             <Field data-invalid={isMaxOutputTokensInvalid || undefined}>
               <FieldLabel htmlFor={`model-max-output-${model.id}`}>
-                {t("providers.maxOutputTokens")}
+                {"Max Output Tokens"}
               </FieldLabel>
               <Input
                 id={`model-max-output-${model.id}`}
@@ -349,22 +344,21 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
                   }
                 }}
                 inputMode="numeric"
-                placeholder={t("common.optional")}
+                placeholder={"Optional"}
                 aria-invalid={isMaxOutputTokensInvalid}
               />
+
               <FieldDescription>
                 {isMaxOutputTokensInvalid
-                  ? t("providers.enterNonNegative")
-                  : t("providers.overrideOutputLimit")}
+                  ? "Enter a non-negative number."
+                  : "Used when you want to override the built-in output limit."}
               </FieldDescription>
             </Field>
           </div>
 
           <div className="flex flex-col gap-4">
             <Field orientation="horizontal">
-              <FieldLabel htmlFor={`model-supports-text-${model.id}`}>
-                {t("providers.supportsText")}
-              </FieldLabel>
+              <FieldLabel htmlFor={`model-supports-text-${model.id}`}>{"Supports Text"}</FieldLabel>
               <Switch
                 id={`model-supports-text-${model.id}`}
                 checked={draft.supportsText}
@@ -374,7 +368,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
             <Field orientation="horizontal">
               <FieldLabel htmlFor={`model-supports-tools-${model.id}`}>
-                {t("providers.supportsTools")}
+                {"Supports Tools"}
               </FieldLabel>
               <Switch
                 id={`model-supports-tools-${model.id}`}
@@ -385,7 +379,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
             <Field orientation="horizontal">
               <FieldLabel htmlFor={`model-supports-images-${model.id}`}>
-                {t("providers.supportsImages")}
+                {"Supports Images"}
               </FieldLabel>
               <Switch
                 id={`model-supports-images-${model.id}`}
@@ -396,7 +390,7 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 
             <Field orientation="horizontal">
               <FieldLabel htmlFor={`model-supports-attachments-${model.id}`}>
-                {t("providers.supportsAttachments")}
+                {"Supports Attachments"}
               </FieldLabel>
               <Switch
                 id={`model-supports-attachments-${model.id}`}
@@ -412,7 +406,6 @@ function ModelConfigDialog({ model, open, onOpenChange, onChange }: ModelConfigD
 }
 
 const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowProps) {
-  const { t } = useTranslation();
   const [configOpen, setConfigOpen] = useState(false);
 
   return (
@@ -435,7 +428,7 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
               trackSettingsInteraction("providers", "model_config_opened");
               setConfigOpen(true);
             }}
-            aria-label={t("providers.configureModel")}
+            aria-label={"Configure model"}
           >
             <IconSettings />
           </Button>
@@ -448,7 +441,7 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
               trackSettingsInteraction("providers", "model_deleted");
               onDelete(model.id);
             }}
-            aria-label={t("providers.deleteModel")}
+            aria-label={"Delete model"}
           >
             <IconTrash />
           </Button>
@@ -480,10 +473,10 @@ export function ModelList({
   emptyDescription,
   onChange,
 }: ModelListProps) {
-  const { t } = useTranslation();
-  const resolvedAddButtonLabel = addButtonLabel ?? t("providers.addModel");
-  const resolvedEmptyTitle = emptyTitle ?? t("providers.noModelsConfigured");
-  const resolvedEmptyDescription = emptyDescription ?? t("providers.addModelPicker");
+  const resolvedAddButtonLabel = addButtonLabel ?? "Add Model";
+  const resolvedEmptyTitle = emptyTitle ?? "No models configured";
+  const resolvedEmptyDescription =
+    emptyDescription ?? "Add a model to make it available in the model picker.";
   const [isAdding, setIsAdding] = useState(false);
   const [fetchState, setFetchState] = useState<"idle" | "fetching" | "success" | "error">("idle");
   const fetchResetTimeoutRef = useRef<number | null>(null);
@@ -604,7 +597,7 @@ export function ModelList({
   return (
     <div className="rounded-md border p-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="text-sm font-medium">{t("providers.models")}</div>
+        <div className="text-sm font-medium">{"Models"}</div>
 
         <div className="flex gap-2">
           {baseUrl ? (
@@ -620,7 +613,7 @@ export function ModelList({
               }}
             >
               {fetchIcon}
-              {t("providers.auto")}
+              {"Auto"}
             </Button>
           ) : null}
           <Button

@@ -1,7 +1,6 @@
 import { IconCheck, IconSearch } from "@tabler/icons-react";
 import { Command as CommandPrimitive } from "cmdk";
 import * as React from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   Dialog,
@@ -39,9 +38,8 @@ function CommandDialog({
   className?: string;
   showCloseButton?: boolean;
 }) {
-  const { t } = useTranslation();
-  const resolvedTitle = title ?? t("ui.commandPalette");
-  const resolvedDescription = description ?? t("ui.commandSearchPlaceholder");
+  const resolvedTitle = title ?? "Command Palette";
+  const resolvedDescription = description ?? "Search for a command to run...";
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
@@ -74,6 +72,7 @@ function CommandInput({
           )}
           {...props}
         />
+
         <InputGroupAddon>
           <IconSearch className="size-4 shrink-0 opacity-50" />
         </InputGroupAddon>
@@ -143,9 +142,7 @@ function CommandItem({
   children,
   showCheckmark = false,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Item> & {
-  showCheckmark?: boolean;
-}) {
+}: React.ComponentProps<typeof CommandPrimitive.Item> & { showCheckmark?: boolean }) {
   return (
     <CommandPrimitive.Item
       data-slot="command-item"

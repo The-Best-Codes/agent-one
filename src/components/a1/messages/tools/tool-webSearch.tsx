@@ -8,7 +8,6 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -50,14 +49,13 @@ interface WebSearchResult {
 }
 
 export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as WebSearchInput;
   const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const query = input?.query || t("tools.unknownQuery");
+  const query = input?.query || "Unknown query";
 
   switch (part.state) {
     case "approval-requested":
@@ -66,7 +64,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconSearch className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsToSearch", { query })}
+              {`AgentOne wants to search for "${query}"`}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -76,7 +74,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -84,7 +82,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -95,7 +93,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.webSearchDenied", { query })}
+            {`Web search for "${query}" denied`}
           </span>
         </div>
       );
@@ -104,7 +102,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />{" "}
-          <span className="text-foreground text-sm font-bold">{t("tools.preparingWebSearch")}</span>
+          <span className="text-foreground text-sm font-bold">{"Preparing web search..."}</span>
         </div>
       );
 
@@ -115,7 +113,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.webSearchDenied", { query })}
+              {`Web search for "${query}" denied`}
             </span>
           </div>
         );
@@ -124,7 +122,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
         <div key={callId} className="flex flex-row items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="max-w-2xl truncate text-sm font-bold">
-            {t("tools.searchingOnline", { query })}
+            {`Searching online for "${query}"...`}
           </span>
         </div>
       );
@@ -156,6 +154,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
+
                   <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/web-search-accordion:scale-100 group-hover/web-search-accordion:opacity-100",
@@ -169,7 +168,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                {t("tools.foundResults", { total: result.total_results, query: result.query })}
+                {`Found ${result.total_results} results for "${result.query}"`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
@@ -183,7 +182,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground text-xs"
                       >
-                        {t("tools.viewOnDuckDuckGo", { query: result.query })}
+                        {`View "${result.query}" on DuckDuckGo`}
                         <IconExternalLink className="ml-1 inline size-3" />
                       </a>
                     )}
@@ -224,9 +223,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />{" "}
             <span className="text-muted-foreground text-sm font-bold">
-              {query
-                ? t("tools.webSearchCancelled", { query })
-                : t("tools.webSearchCancelledShort")}
+              {query ? `Web search for "${query}" cancelled` : "Web search cancelled"}
             </span>
           </div>
         );
@@ -237,7 +234,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.webSearchError")}
+          title={"Web search error"}
         />
       );
     }
@@ -246,9 +243,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSearch className="text-muted-foreground size-4 shrink-0" />{" "}
-          <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.webSearchAccessed")}
-          </span>
+          <span className="text-muted-foreground text-sm font-bold">{"Web search accessed"}</span>
         </div>
       );
   }

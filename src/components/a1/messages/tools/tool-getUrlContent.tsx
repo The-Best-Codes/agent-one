@@ -8,7 +8,6 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { memo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -75,12 +74,11 @@ const formatUrl = (url: string) => {
 };
 
 const UrlPendingDisplay = memo(({ url }: { url: string }) => {
-  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1">
       <Spinner className="text-foreground size-4 shrink-0" />
       <span className="text-foreground max-w-2xl truncate text-sm font-bold">
-        {t("tools.browsing")}{" "}
+        {"Browsing"}{" "}
         <a
           href={url}
           target="_blank"
@@ -98,12 +96,11 @@ const UrlPendingDisplay = memo(({ url }: { url: string }) => {
 UrlPendingDisplay.displayName = "UrlPendingDisplay";
 
 const UrlCancelledDisplay = memo(({ url }: { url: string }) => {
-  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1">
       <IconCircleX className="text-muted-foreground size-4 shrink-0" />
       <span className="text-muted-foreground max-w-2xl truncate text-sm font-bold">
-        {t("tools.browsing")}{" "}
+        {"Browsing"}{" "}
         <a
           href={url}
           target="_blank"
@@ -112,7 +109,7 @@ const UrlCancelledDisplay = memo(({ url }: { url: string }) => {
         >
           {formatUrl(url)}
         </a>{" "}
-        {t("tools.cancelled")}
+        {"cancelled"}
       </span>
     </div>
   );
@@ -122,13 +119,12 @@ UrlCancelledDisplay.displayName = "UrlCancelledDisplay";
 
 const UrlResultDisplay = memo(
   ({ result, input }: { result: UrlResult; input: GetUrlContentInput }) => {
-    const { t } = useTranslation();
     if (result.error) {
       return (
         <div className="flex items-center gap-1">
           <IconCircleX className="text-destructive size-4 shrink-0" />
           <span className="text-destructive max-w-2xl truncate text-sm font-bold">
-            {t("tools.failedToBrowse")}{" "}
+            {"Failed to browse"}{" "}
             <a
               href={result.url}
               target="_blank"
@@ -148,7 +144,7 @@ const UrlResultDisplay = memo(
       <div className="flex items-center gap-1">
         <IconWorld className="text-foreground size-4 shrink-0" />
         <span className="text-foreground max-w-2xl truncate text-sm font-bold">
-          {t("tools.browsed")}{" "}
+          {"Browsed"}{" "}
           <a
             href={result.url}
             target="_blank"
@@ -165,7 +161,7 @@ const UrlResultDisplay = memo(
                 <AdaptiveTooltipTrigger asChild>
                   <IconFileText className="text-muted-foreground size-4 shrink-0" />
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{t("tools.fetchedRaw")}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{"Fetched raw content"}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
             <AdaptiveTooltip>
@@ -179,10 +175,10 @@ const UrlResultDisplay = memo(
               </AdaptiveTooltipTrigger>
               <AdaptiveTooltipContent>
                 {result.truncated
-                  ? t("tools.truncatedTo", { max: input.maxLength || t("common.unknown") })
+                  ? `Truncated to ${input.maxLength || "Unknown"} characters`
                   : result.length
-                    ? t("tools.charsProcessed", { count: result.length })
-                    : t("tools.allCharsProcessed")}
+                    ? `${result.length} characters processed`
+                    : "All characters processed"}
               </AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </>
@@ -195,7 +191,6 @@ const UrlResultDisplay = memo(
 UrlResultDisplay.displayName = "UrlResultDisplay";
 
 export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as GetUrlContentInput;
   const output = part.output as GetUrlContentOutput;
@@ -212,7 +207,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <div className="flex items-center gap-1">
             <IconWorld className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsToBrowse")}
+              {"AgentOne wants to browse"}
               {urlCount === 1 ? (
                 <>
                   {" "}
@@ -226,11 +221,11 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       {formatUrl(input.urls[0])}
                     </a>
                   ) : (
-                    t("tools.aWebsite")
+                    "a website"
                   )}
                 </>
               ) : (
-                ` ${t("tools.urlCount", { count: urlCount })}`
+                ` ${`${urlCount} URLs`}`
               )}
             </span>
           </div>
@@ -241,7 +236,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -249,7 +244,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -262,7 +257,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <span className="text-muted-foreground text-sm font-bold">
             {urlCount === 1 ? (
               <>
-                {t("tools.browsing")}{" "}
+                {"Browsing"}{" "}
                 {input?.urls?.[0] ? (
                   <a
                     href={input.urls[0]}
@@ -273,12 +268,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(input.urls[0])}
                   </a>
                 ) : (
-                  t("tools.aWebsite")
+                  "a website"
                 )}{" "}
-                {t("tools.deniedWord")}
+                {"denied"}
               </>
             ) : (
-              t("tools.browsingUrlsDenied", { count: urlCount })
+              `Browsing ${urlCount} URLs denied`
             )}
           </span>
         </div>
@@ -290,7 +285,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <div>
             <Spinner className="text-foreground size-4 shrink-0" />
           </div>
-          <span className="text-foreground text-sm font-bold">{t("tools.browsingUrls")}</span>
+          <span className="text-foreground text-sm font-bold">{"Browsing URLs..."}</span>
         </div>
       );
 
@@ -303,7 +298,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <span className="text-muted-foreground text-sm font-bold">
               {urlCount === 1 ? (
                 <>
-                  {t("tools.browsing")}{" "}
+                  {"Browsing"}{" "}
                   {input?.urls?.[0] ? (
                     <a
                       href={input.urls[0]}
@@ -314,12 +309,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                       {formatUrl(input.urls[0])}
                     </a>
                   ) : (
-                    t("tools.aWebsite")
+                    "a website"
                   )}{" "}
-                  {t("tools.deniedWord")}
+                  {"denied"}
                 </>
               ) : (
-                t("tools.browsingUrlsDenied", { count: urlCount })
+                `Browsing ${urlCount} URLs denied`
               )}
             </span>
           </div>
@@ -334,7 +329,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <span className="max-w-2xl truncate">
             {urlCount === 1 ? (
               <>
-                {t("tools.browsing")}{" "}
+                {"Browsing"}{" "}
                 {input?.urls?.[0] ? (
                   <a
                     href={input.urls[0]}
@@ -345,12 +340,12 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(input.urls[0])}
                   </a>
                 ) : (
-                  t("tools.aWebsite")
+                  "a website"
                 )}
                 ...
               </>
             ) : (
-              t("tools.browsingUrlsCount", { count: urlCount })
+              `Browsing ${urlCount} URLs...`
             )}
           </span>
         </div>
@@ -369,7 +364,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <div key={callId} className="flex items-center gap-1">
               <Spinner className="text-foreground size-4 shrink-0" />
               <span className="text-foreground text-sm font-bold">
-                {t("tools.browsing")}{" "}
+                {"Browsing"}{" "}
                 {results[0] ? (
                   <a
                     href={results[0].url}
@@ -380,7 +375,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                     {formatUrl(results[0].url)}
                   </a>
                 ) : (
-                  t("tools.aWebsite")
+                  "a website"
                 )}
                 ...
               </span>
@@ -441,9 +436,9 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             >
               <span className="max-w-2xl truncate tabular-nums">
                 {isStreaming
-                  ? t("tools.browsingUrlsCount", { count: results.length })
-                  : t("tools.browsedUrlsCount", { count: results.length })}
-                {failCount > 0 && ` ${t("tools.countFailed", { count: failCount })}`}
+                  ? `Browsing ${results.length} URLs...`
+                  : `Browsed ${results.length} URLs`}
+                {failCount > 0 && ` ${`(${failCount} failed)`}`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
@@ -471,7 +466,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
             <div key={callId} className="flex items-center gap-1">
               <IconCircleX className="text-muted-foreground size-4 shrink-0" />
               <span className="text-muted-foreground text-sm font-bold">
-                {t("tools.browsing")}{" "}
+                {"Browsing"}{" "}
                 <a
                   href={singleUrl}
                   target="_blank"
@@ -480,7 +475,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 >
                   {formatUrl(singleUrl)}
                 </a>{" "}
-                {t("tools.cancelled")}
+                {"cancelled"}
               </span>
             </div>
           );
@@ -511,6 +506,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                           isMainAccordionOpen && "scale-0 opacity-0",
                         )}
                       />
+
                       <IconChevronDown
                         className={cn(
                           "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/url-content-accordion:scale-100 group-hover/url-content-accordion:opacity-100",
@@ -524,7 +520,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                   className="justify-start gap-1 p-0 font-bold hover:no-underline"
                 >
                   <span className="text-muted-foreground max-w-2xl truncate tabular-nums">
-                    {t("tools.browsingUrlsCancelled", { count: urlCount })}
+                    {`Browsing ${urlCount} URLs cancelled`}
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="p-0 pt-2">
@@ -542,9 +538,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.browsingCancelled")}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">{"Browsing cancelled"}</span>
           </div>
         );
       }
@@ -554,7 +548,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.getUrlError")}
+          title={"Error fetching URL content"}
         />
       );
     }
@@ -563,9 +557,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconWorld className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">
-            {t("tools.webBrowsingAccessed")}
-          </span>
+          <span className="text-foreground text-sm font-bold">{"Web browsing accessed"}</span>
         </div>
       );
   }

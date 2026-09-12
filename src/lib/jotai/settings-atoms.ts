@@ -11,7 +11,6 @@ import {
   DEFAULT_SETTINGS,
   type FontOption,
   type InputStyleOption,
-  type LanguageOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type MessageActionRowOption,
@@ -81,11 +80,6 @@ export const submitKeyAtom = createSettingAtom<SubmitKeyOption>(
 export const inputStyleAtom = createSettingAtom<InputStyleOption>(
   "INPUT_STYLE",
   DEFAULT_SETTINGS.INPUT_STYLE,
-);
-
-export const languageAtom = createSettingAtom<LanguageOption>(
-  "LANGUAGE",
-  DEFAULT_SETTINGS.LANGUAGE,
 );
 
 export const maxCodeblockCharsAtom = createSettingAtom(

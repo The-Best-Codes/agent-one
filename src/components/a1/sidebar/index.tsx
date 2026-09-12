@@ -7,7 +7,6 @@ import {
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useCallback, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
@@ -49,7 +48,6 @@ const SidebarContent = ({
   handleNewChat: () => void;
   onChatClick?: (id: string) => void;
 }) => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
   const clickTimestamps = useRef<number[]>([]);
@@ -61,17 +59,17 @@ const SidebarContent = ({
     clickTimestamps.current = clickTimestamps.current.filter((ts) => now - ts < 1500);
     if (clickTimestamps.current.length >= 5) {
       clickTimestamps.current = [];
-      toast(t("sidebar.debugEnableQuestion"), {
+      toast("Enable debug mode?", {
         id: "enable-debug-mode",
-        description: t("sidebar.debugEnableQuestionDescription"),
+        description: "This will add a Debug section to Help & Updates in Settings.",
         action: {
-          label: t("common.enable"),
+          label: "Enable",
           onClick: () => {
             setDebugMode(true);
-            toast.success(t("sidebar.debugEnabled"), {
-              description: t("sidebar.debugEnabledDescription"),
+            toast.success("Debug mode enabled", {
+              description: "Check Settings > Help & Updates to access internal tests.",
               action: {
-                label: t("sidebar.openSettings"),
+                label: "Open Settings",
                 onClick: () => navigate("/settings?tab=about"),
               },
             });
@@ -80,7 +78,7 @@ const SidebarContent = ({
         duration: Infinity,
       });
     }
-  }, [navigate, debugMode, setDebugMode, t]);
+  }, [navigate, debugMode, setDebugMode]);
 
   return (
     <div className="flex h-full flex-col">
@@ -101,7 +99,7 @@ const SidebarContent = ({
         <Button variant="outline" className="w-full justify-start" asChild>
           <Link to={`/settings?tab=extensions${activeChatId ? `&chatId=${activeChatId}` : ""}`}>
             <IconPuzzle data-icon="inline-start" />
-            {t("sidebar.browseExtensions")}
+            {"Browse Extensions"}
           </Link>
         </Button>
         <Button variant="outline" className="w-full justify-start" asChild>
@@ -110,7 +108,7 @@ const SidebarContent = ({
             data-icon="inline-start"
           >
             <IconSettings data-icon="inline-start" />
-            {t("sidebar.configureAgentOne")}
+            {"Configure AgentOne"}
           </Link>
         </Button>
       </div>
@@ -119,7 +117,6 @@ const SidebarContent = ({
 };
 
 export const Sidebar = ({ className }: SidebarProps) => {
-  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useAtom(sidebarCollapsedAtom);
   const [collapsedLayout] = useAtom(collapsedSidebarLayoutAtom);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -131,8 +128,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const isSidebarSmall = isCollapsed || !isDesktop;
   const isColumnLayout = collapsedLayout === "column";
   const toggleTooltip = (isDesktop ? isCollapsed : !isDrawerOpen)
-    ? t("sidebar.openSidebar")
-    : t("sidebar.closeSidebar");
+    ? "Open sidebar"
+    : "Close sidebar";
+
   const tooltipSide = isColumnLayout && isSidebarSmall ? "right" : undefined;
 
   useKeyboardShortcut("focusChatSearchCollapsed", () => {
@@ -174,7 +172,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             event: "sidebar_toggled",
             params: { collapsed: !isCollapsed, ui_location: "desktop" },
           }}
-          aria-label={isCollapsed ? t("sidebar.openSidebar") : t("sidebar.closeSidebar")}
+          aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           className="size-6"
         >
           <IconLayoutSidebar data-icon="inline-start" />
@@ -198,10 +196,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="bg-background dark:bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
       >
-        <DrawerTitle className="sr-only">{t("sidebar.chatSidebar")}</DrawerTitle>
-        <DrawerDescription className="sr-only">
-          {t("sidebar.mobileSidebarDescription")}
-        </DrawerDescription>
+        <DrawerTitle className="sr-only">{"Chat Sidebar"}</DrawerTitle>
+        <DrawerDescription className="sr-only">{"Mobile chat sidebar content"}</DrawerDescription>
         <SidebarContent
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}
@@ -242,15 +238,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   size="icon-sm"
                   onClick={handleSearchClick}
                   analytics={{ event: "search_modal_opened", params: { ui_location: "sidebar" } }}
-                  aria-label={t("sidebar.searchChats")}
+                  aria-label={"Search chats"}
                   className="size-6"
                 >
                   <IconSearch data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>
-                {t("sidebar.searchChats")}
-              </AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>{"Search chats"}</AdaptiveTooltipContent>
             </AdaptiveTooltip>
             <AdaptiveTooltip>
               <AdaptiveTooltipTrigger asChild>
@@ -259,15 +253,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   size="icon-sm"
                   onClick={handleNewChat}
                   analytics={{ event: "new_chat_clicked", params: { ui_location: "sidebar" } }}
-                  aria-label={t("sidebar.newChat")}
+                  aria-label={"New Chat"}
                   className="size-6"
                 >
                   <IconPlus data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>
-                {t("sidebar.newChat")}
-              </AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>{"New Chat"}</AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </div>
         </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { IconBrightness, IconMoon, IconSun } from "@tabler/icons-react";
-import { useTranslation } from "react-i18next";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTheme } from "@/hooks/use-theme";
@@ -15,7 +14,6 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle = ({ className }: ThemeToggleProps) => {
-  const { t } = useTranslation();
   const { setTheme, theme, resolvedTheme } = useTheme();
 
   if (!resolvedTheme) {
@@ -37,24 +35,24 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
         }
       }}
       className={cn("w-full", className)}
-      aria-label={t("appearance.selectTheme")}
+      aria-label={"Select a theme"}
     >
-      <ToggleGroupItem value="system" aria-label={t("appearance.themeSystemAria")}>
+      <ToggleGroupItem value="system" aria-label={"System theme"}>
         <span className="flex items-center gap-1 text-sm">
           <IconBrightness data-icon="inline-start" />
-          {t("appearance.themeSystem")}
+          {"System"}
         </span>
       </ToggleGroupItem>
-      <ToggleGroupItem value="light" aria-label={t("appearance.themeLightAria")}>
+      <ToggleGroupItem value="light" aria-label={"Light theme"}>
         <span className="flex items-center gap-1 text-sm">
           <IconSun data-icon="inline-start" />
-          {t("appearance.themeLight")}
+          {"Light"}
         </span>
       </ToggleGroupItem>
-      <ToggleGroupItem value="dark" aria-label={t("appearance.themeDarkAria")}>
+      <ToggleGroupItem value="dark" aria-label={"Dark theme"}>
         <span className="flex items-center gap-1 text-sm">
           <IconMoon data-icon="inline-start" />
-          {t("appearance.themeDark")}
+          {"Dark"}
         </span>
       </ToggleGroupItem>
     </ToggleGroup>

@@ -1,5 +1,3 @@
-import { useTranslation } from "react-i18next";
-
 import { cn } from "@/lib/utils";
 
 const SPINNER_SEGMENTS = Array.from({ length: 12 }, (_, index) => ({
@@ -20,12 +18,10 @@ const SPINNER_KEYFRAMES = `
 `;
 
 function Spinner({ className, ...props }: React.ComponentProps<"div">) {
-  const { t } = useTranslation();
-
   return (
     <div
       role="status"
-      aria-label={t("common.loading")}
+      aria-label={"Loading"}
       data-geist-spinner=""
       data-version="v1"
       data-slot="spinner"

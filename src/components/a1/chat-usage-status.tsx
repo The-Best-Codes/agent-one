@@ -2,7 +2,6 @@ import NumberFlow from "@number-flow/react";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -46,6 +45,7 @@ const CircularProgress = ({
           strokeWidth="2"
           className="text-muted"
         />
+
         <circle
           cx="12"
           cy="12"
@@ -68,7 +68,6 @@ const CircularProgress = ({
 };
 
 export const ChatUsageStatus = () => {
-  const { t } = useTranslation();
   const messages = useChatMessages();
   const isChatLoading = useChatLoading();
   const { currentModel } = useModel();
@@ -158,11 +157,12 @@ export const ChatUsageStatus = () => {
                     </AdaptiveTooltipTrigger>
                     <AdaptiveTooltipContent className="max-w-xs">
                       {maxTokens !== undefined
-                        ? t("chat.tokensKnown", {
-                            total: totalTokens,
-                            max: maxTokens.toLocaleString(),
-                          })
-                        : t("chat.tokensUnknown", { total: totalTokens })}
+                        ? `This chat is currently ${
+                            totalTokens
+                          } tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
+                        : `This chat is currently ${
+                            totalTokens
+                          } tokens long. The model you're using supports an unknown number of tokens.`}
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
 
@@ -191,9 +191,9 @@ export const ChatUsageStatus = () => {
                     <AdaptiveTooltipContent className="max-w-xs">
                       {hasUnknownCost
                         ? totalCostUsd > 0
-                          ? t("chat.costLowerBound")
-                          : t("chat.costUnavailable")
-                        : t("chat.costEstimate")}
+                          ? "Estimated cost is a lower bound, as pricing data is missing for one or more messages in this chat. Edits and deleted messages are not included in these stats."
+                          : "Pricing data is unavailable for the model(s) used in this chat, so the cost cannot be estimated."
+                        : "Estimated cost of this chat in USD. Edits and deleted messages are not included in these stats."}
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
                 </>
@@ -203,7 +203,7 @@ export const ChatUsageStatus = () => {
         </div>
         <button
           onClick={() => setIsCollapsed((prev) => !prev)}
-          aria-label={isCollapsed ? t("chat.expandUsage") : t("chat.collapseUsage")}
+          aria-label={isCollapsed ? "Expand usage stats" : "Collapse usage stats"}
           data-is-collapsed={isCollapsed}
           className="hover:text-accent-foreground hover:bg-accent dark:hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-br-md px-0.5 transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none md:rounded-r-md md:data-[is-collapsed=true]:rounded-md"
         >

@@ -3,7 +3,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { getDefaultStore } from "jotai";
 import { toast } from "sonner";
 
-import i18n from "@/lib/i18n";
 import { dismissedOAuthPromptsAtom, mcpAuthStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { getLogger } from "@/lib/logger";
 import { type McpHttpServerConfig } from "@/lib/settings/types";
@@ -54,12 +53,12 @@ export async function mcpLogin(
 ): Promise<boolean> {
   dismissMcpLoginToasts(serverId);
 
-  const toastId = toast.loading(i18n.t("extensions.connectingTo", { name: serverName }), {
+  const toastId = toast.loading(`Connecting AgentOne to "${serverName}"...`, {
     action: {
-      label: i18n.t("common.cancel"),
+      label: "Cancel",
       onClick: async (event) => {
         event.preventDefault();
-        toast.loading(i18n.t("extensions.cancellingConnection", { name: serverName }), {
+        toast.loading(`Cancelling connection to "${serverName}"...`, {
           id: toastId,
           action: null,
           duration: Infinity,
@@ -78,7 +77,7 @@ export async function mcpLogin(
       serverId,
       serverUrl,
     });
-    toast.success(i18n.t("extensions.connectedTo", { name: serverName }), {
+    toast.success(`Connected to "${serverName}" successfully`, {
       id: toastId,
       action: null,
     });
@@ -93,13 +92,13 @@ export async function mcpLogin(
     return true;
   } catch (e) {
     if (typeof e === "string" && e.includes("Authorization cancelled")) {
-      toast.error(i18n.t("extensions.connectionCancelled", { name: serverName }), {
+      toast.error(`Connection to "${serverName}" cancelled`, {
         id: toastId,
         action: null,
         duration: 10_000,
       });
     } else {
-      toast.error(i18n.t("extensions.connectionFailed", { error: String(e) }), {
+      toast.error(`Connection failed: ${String(e)}`, {
         id: toastId,
         action: null,
         duration: 10_000,
@@ -112,7 +111,7 @@ export async function mcpLogin(
 export async function mcpLogout(serverId: string, serverName: string): Promise<boolean> {
   try {
     await clearMcpOAuthCredentials(serverId);
-    toast.success(i18n.t("extensions.disconnectedFrom", { name: serverName }));
+    toast.success(`Disconnected from "${serverName}" successfully`);
     store.set(mcpAuthStatesAtom, (prev) => {
       if (prev[serverId] === "logged-out") return prev;
       return {
@@ -123,7 +122,7 @@ export async function mcpLogout(serverId: string, serverName: string): Promise<b
     closeServerCache(serverId);
     return true;
   } catch (e) {
-    toast.error(i18n.t("extensions.disconnectFailed", { name: serverName, error: String(e) }));
+    toast.error(`Failed to disconnect from "${serverName}": ${String(e)}`);
     return false;
   }
 }
@@ -151,11 +150,11 @@ export async function mcpCheckAuth(
 }
 
 export function promptLoginToast(server: McpHttpServerConfig): void {
-  toast(i18n.t("extensions.connectToExtension", { name: server.name }), {
+  toast(`Connect to the "${server.name}" Extension`, {
     id: `mcp-prompt-login-${server.id}`,
-    description: i18n.t("extensions.authRequiredAccessTools"),
+    description: "Authentication required to access tools.",
     action: {
-      label: i18n.t("extensions.connect"),
+      label: "Connect",
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     duration: Infinity,
@@ -168,14 +167,14 @@ export function promptSoftLoginToast(server: McpHttpServerConfig): void {
     return;
   }
 
-  toast(i18n.t("extensions.connectToExtensionFullAccess", { name: server.name }), {
+  toast(`Connect to the "${server.name}" Extension for full access`, {
     id: `mcp-soft-login-${server.id}`,
     action: {
-      label: i18n.t("extensions.connect"),
+      label: "Connect",
       onClick: () => mcpLogin(server.id, server.url, server.name),
     },
     cancel: {
-      label: i18n.t("common.never"),
+      label: "Never",
       onClick: () => {
         store.set(dismissedOAuthPromptsAtom, (prev) => {
           if (prev.includes(server.id)) return prev;

@@ -1,6 +1,5 @@
 import { IconExternalLink, IconUser } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 
 import { CopyButton } from "@/components/a1/copy-button";
 import { UserProfileDisplay } from "@/components/a1/web-auth/user-profile-display";
@@ -15,7 +14,6 @@ interface AuthStatusDisplayProps {
 }
 
 export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDisplayProps) {
-  const { t } = useTranslation();
   const {
     user,
     isLoading,
@@ -32,8 +30,8 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
       <StatusRow
         className={className}
         icon={<Spinner className="text-muted-foreground" data-icon="inline-start" />}
-        title={t("auth.checkingStatus")}
-        description={t("auth.checkingStatusDescription")}
+        title={"Checking status..."}
+        description={"Please wait while we check your account"}
       />
     );
   }
@@ -43,11 +41,11 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
       <StatusRow
         className={className}
         icon={<Spinner className="text-primary" data-icon="inline-start" />}
-        title={t("auth.signingIn")}
-        description={t("auth.signingInDescription")}
+        title={"Signing in..."}
+        description={"Getting you signed in..."}
         action={
           <Button variant="secondary" size="sm" onClick={cancelSignIn}>
-            {t("common.cancel")}
+            {"Cancel"}
           </Button>
         }
       />
@@ -59,7 +57,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
       <StatusRow
         className={className}
         icon={<Spinner className="text-primary" data-icon="inline-start" />}
-        title={t("auth.linkAccount")}
+        title={"Link your account"}
         description={
           <a
             href={deviceFlow.verificationUriComplete || deviceFlow.verificationUri}
@@ -67,7 +65,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
             rel="noopener noreferrer"
             className="flex flex-row items-center justify-center gap-1 hover:underline"
           >
-            {t("auth.openLoginForm")}
+            {"Open Login Form Manually"}
             <IconExternalLink className="size-4" />
           </a>
         }
@@ -89,7 +87,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
               />
             </div>
             <Button variant="secondary" size="sm" onClick={cancelSignIn}>
-              {t("common.cancel")}
+              {"Cancel"}
             </Button>
           </>
         }
@@ -106,7 +104,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
           signedInAction ?? (
             <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
               {isSigningOut && <Spinner data-icon="inline-start" />}
-              {t("auth.signOut")}
+              {"Sign out"}
             </Button>
           )
         }
@@ -118,11 +116,11 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
     <StatusRow
       className={className}
       icon={<IconUser className="text-muted-foreground size-5" />}
-      title={t("auth.notSignedIn")}
-      description={t("auth.notSignedInDescription")}
+      title={"Not signed in"}
+      description={"Sign in to synchronize your data"}
       action={
         <Button onClick={startSignIn} size="sm">
-          {t("auth.signIn")}
+          {"Sign in"}
         </Button>
       }
     />

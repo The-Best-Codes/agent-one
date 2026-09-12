@@ -7,7 +7,6 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +57,6 @@ export function EnvVarsEditor({
   onChange: (env: Record<string, string>) => void;
   labelClassName?: string;
 }) {
-  const { t } = useTranslation();
   const [syncedEnv, setSyncedEnv] = useState(env);
   const [draft, setDraft] = useState<DraftEntry[]>(() => toDraft(env));
   const [visibleValues, setVisibleValues] = useState<Set<number>>(new Set());
@@ -130,7 +128,7 @@ export function EnvVarsEditor({
   return (
     <div className="rounded-md border p-3">
       <div className="mb-3 flex items-start justify-between gap-2">
-        <Label className={labelClassName || "text-xs"}>{t("input.envVars")}</Label>
+        <Label className={labelClassName || "text-xs"}>{"Environment Variables"}</Label>
         <div className="flex gap-1.5">
           {hasChanges && (
             <>
@@ -140,26 +138,26 @@ export function EnvVarsEditor({
                 size="sm"
                 onClick={handleSave}
                 disabled={!canSave}
-                title={t("common.saveChanges")}
+                title={"Save changes"}
               >
                 <IconDeviceFloppy data-icon="inline-start" />
-                {t("common.save")}
+                {"Save"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleRevert}
-                title={t("common.revertChanges")}
+                title={"Revert changes"}
               >
                 <IconRestore data-icon="inline-start" />
-                {t("common.revert")}
+                {"Revert"}
               </Button>
             </>
           )}
           <Button type="button" variant="outline" size="sm" onClick={addEntry}>
             <IconPlus data-icon="inline-start" />
-            {t("common.add")}
+            {"Add"}
           </Button>
         </div>
       </div>
@@ -174,26 +172,28 @@ export function EnvVarsEditor({
               <div key={`${id}-env-${idx}`}>
                 <div className="flex gap-2">
                   <Input
-                    placeholder={t("input.variableName")}
+                    placeholder={"Variable name"}
                     value={key}
                     onChange={(e) => updateKey(idx, e.target.value)}
                     aria-invalid={hasError}
                     className="flex-1"
                   />
+
                   <Input
-                    placeholder={t("common.value")}
+                    placeholder={"Value"}
                     type={isVisible ? "text" : "password"}
                     autoComplete="off"
                     value={value}
                     onChange={(e) => updateValue(idx, e.target.value)}
                     className="flex-1"
                   />
+
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
                     onClick={() => toggleVisibility(idx)}
-                    title={isVisible ? t("common.hideValue") : t("common.showValue")}
+                    title={isVisible ? "Hide value" : "Show value"}
                   >
                     {isVisible ? (
                       <IconEyeClosed data-icon="inline-start" />
@@ -212,12 +212,12 @@ export function EnvVarsEditor({
                 </div>
                 {isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    {t("input.duplicateVariable")}
+                    {"Duplicate variable name"}
                   </p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    {t("input.variableNameEmpty")}
+                    {"Variable name cannot be empty"}
                   </p>
                 )}
               </div>
@@ -226,7 +226,7 @@ export function EnvVarsEditor({
         </div>
       ) : (
         <p className="text-muted-foreground flex h-9 flex-col items-center justify-center rounded-md border border-dashed p-2 text-sm">
-          {t("input.noEnvVars")}
+          {"No environment variables configured."}
         </p>
       )}
     </div>

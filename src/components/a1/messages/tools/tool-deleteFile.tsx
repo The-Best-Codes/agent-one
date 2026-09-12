@@ -1,7 +1,6 @@
 import { IconCircleCheck, IconCircleX, IconTrash, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -19,13 +18,12 @@ interface DeleteFileToolPartProps {
 }
 
 export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as DeleteFileInput;
   const approvalHandler = useChatApprovalHandler();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || t("tools.unknownFile");
+  const filePath = input?.filePath || "unknown file";
 
   switch (part.state) {
     case "approval-requested":
@@ -34,7 +32,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           <div className="flex items-center gap-1">
             <IconTrash className="text-destructive size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsToDelete")} <span className="font-mono text-xs">{filePath}</span>
+              {"AgentOne wants to delete"} <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -44,7 +42,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -52,7 +50,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -63,7 +61,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.fileDeletionDenied", { path: filePath })}
+            {`File deletion denied (${filePath})`}
           </span>
         </div>
       );
@@ -72,9 +70,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">
-            {t("tools.preparingDeleteFile")}
-          </span>
+          <span className="text-foreground text-sm font-bold">{"Preparing to delete file..."}</span>
         </div>
       );
 
@@ -85,7 +81,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.fileDeletionDenied", { path: filePath })}
+              {`File deletion denied (${filePath})`}
             </span>
           </div>
         );
@@ -96,7 +92,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">{t("tools.deletingFile", { path: filePath })}</span>
+          <span className="max-w-2xl truncate">{`Deleting ${filePath}...`}</span>
         </div>
       );
     }
@@ -108,7 +104,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <IconTrash className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">{t("tools.deletedFile", { path: filePath })}</span>
+          <span className="max-w-2xl truncate">{`Deleted ${filePath}`}</span>
         </div>
       );
 
@@ -118,7 +114,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.fileDeletionCancelled")}
+              {"File deletion cancelled"}
             </span>
           </div>
         );
@@ -129,7 +125,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.deleteFileError")}
+          title={"Error deleting file"}
         />
       );
 
@@ -137,7 +133,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconTrash className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.fileDeleted")}</span>
+          <span className="text-foreground text-sm font-bold">{"File deleted"}</span>
         </div>
       );
   }

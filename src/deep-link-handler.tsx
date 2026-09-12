@@ -7,7 +7,6 @@ import { toast } from "sonner";
 
 import deepLinkSchema from "@/assets/deep-links/schema.json";
 import { getCronInvocation } from "@/lib/cron";
-import i18n from "@/lib/i18n";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
@@ -149,11 +148,10 @@ export function DeepLinkHandler() {
           void getCronInvocation(id)
             .then((invocation) => {
               if (!invocation) return;
-              toast(i18n.t("tests.cronInvoked", { id: invocation.id }), {
-                description: i18n.t("tests.cronInvocationDescription", {
-                  message: invocation.message ?? i18n.t("tests.noCronMessage"),
-                  delay: invocation.delaySeconds,
-                }),
+              toast(`Cron ${invocation.id} invoked`, {
+                description: `Message: ${invocation.message ?? "No message"}. Delay: ${
+                  invocation.delaySeconds
+                } seconds.`,
               });
             })
             .catch((error) => {

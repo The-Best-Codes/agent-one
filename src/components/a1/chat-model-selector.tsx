@@ -10,7 +10,6 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { ProviderLogo } from "@/components/a1/provider-logo";
 import {
@@ -60,25 +59,25 @@ type ModelCapability = "images" | "tools" | "attachments" | "reasoning";
 const MODEL_CAPABILITIES = [
   {
     id: "images",
-    labelKey: "chat.capabilityImages",
+    label: "Images",
     icon: IconPhoto,
     supports: (model: ModelData) => model.supportsImageInput,
   },
   {
     id: "tools",
-    labelKey: "chat.capabilityTools",
+    label: "Tools",
     icon: IconTool,
     supports: (model: ModelData) => model.supportsToolUse,
   },
   {
     id: "attachments",
-    labelKey: "chat.capabilityAttachments",
+    label: "Attachments",
     icon: IconPaperclip,
     supports: (model: ModelData) => model.supportsAttachments,
   },
   {
     id: "reasoning",
-    labelKey: "chat.capabilityReasoning",
+    label: "Reasoning",
     icon: IconBrain,
     supports: (model: ModelData) => model.supportsReasoning,
   },
@@ -110,7 +109,6 @@ const ModelList: FC<ModelListProps> = ({
   setSearchQuery,
   setCapabilityFilters,
 }) => {
-  const { t } = useTranslation();
   const [stickyState, setStickyState] = useState<{
     provider: string;
     providerId: string;
@@ -183,7 +181,7 @@ const ModelList: FC<ModelListProps> = ({
   return (
     <Command shouldFilter={false}>
       <CommandInput
-        placeholder={t("chat.searchModels")}
+        placeholder={"Search models..."}
         className="h-9"
         value={searchQuery}
         onValueChange={setSearchQuery}
@@ -195,8 +193,8 @@ const ModelList: FC<ModelListProps> = ({
                 size="icon-xs"
                 aria-label={
                   capabilityFilters.length > 0
-                    ? t("chat.filterModelsActive", { count: capabilityFilters.length })
-                    : t("chat.filterModels")
+                    ? `Filter models (${capabilityFilters.length} active)`
+                    : "Filter models"
                 }
               >
                 <IconFilter />
@@ -204,7 +202,7 @@ const ModelList: FC<ModelListProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-fit max-w-full">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>{t("chat.onlyShowModelsThatSupport")}</DropdownMenuLabel>
+                <DropdownMenuLabel>{"Only show models that support"}</DropdownMenuLabel>
                 {MODEL_CAPABILITIES.map((capability) => {
                   const CapabilityIcon = capability.icon;
                   const isChecked = capabilityFilters.includes(capability.id);
@@ -222,7 +220,7 @@ const ModelList: FC<ModelListProps> = ({
                       onSelect={(event) => event.preventDefault()}
                     >
                       <CapabilityIcon />
-                      {t(capability.labelKey)}
+                      {capability.label}
                     </DropdownMenuCheckboxItem>
                   );
                 })}
@@ -231,6 +229,7 @@ const ModelList: FC<ModelListProps> = ({
           </DropdownMenu>
         }
       />
+
       <div className="relative overflow-hidden">
         {stickyState && (
           <div
@@ -246,7 +245,7 @@ const ModelList: FC<ModelListProps> = ({
         )}
         <CommandList ref={parentRef}>
           {rows.length === 0 ? (
-            <CommandEmpty>{t("chat.noModelFound")}</CommandEmpty>
+            <CommandEmpty>{"No model found."}</CommandEmpty>
           ) : (
             <CommandGroup>
               <div
@@ -304,22 +303,19 @@ const ModelList: FC<ModelListProps> = ({
                           className="size-4!"
                           imageClassName="p-0"
                         />
+
                         <div className="scrollbar-size-xs w-full overflow-x-auto">
                           <span className="font-medium whitespace-nowrap">{model.name}</span>
                         </div>
                         {supportedCapabilities.length > 0 && (
                           <div
                             className="text-muted-foreground flex shrink-0 items-center gap-0"
-                            title={t("chat.supportsCapabilities", {
-                              list: supportedCapabilities
-                                .map((capability) => t(capability.labelKey).toLowerCase())
-                                .join(", "),
-                            })}
-                            aria-label={t("chat.supportsCapabilities", {
-                              list: supportedCapabilities
-                                .map((capability) => t(capability.labelKey).toLowerCase())
-                                .join(", "),
-                            })}
+                            title={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
+                            aria-label={`Supports ${supportedCapabilities
+                              .map((capability) => capability.label.toLowerCase())
+                              .join(", ")}`}
                           >
                             {supportedCapabilities.map((capability) => {
                               const CapabilityIcon = capability.icon;
@@ -354,7 +350,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   disabled = false,
   loading = false,
 }) => {
-  const { t } = useTranslation();
   const { currentModel, setModel } = useModel();
   const [open, setOpen] = useState(false);
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
@@ -504,15 +499,13 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   ) : (
     <>
       <div className="min-w-0 flex-1 text-left">
-        <span className="text-muted-foreground">{t("chat.noModelSelected")}</span>
+        <span className="text-muted-foreground">{"No model selected"}</span>
       </div>
       <IconSelector className="size-4 shrink-0 opacity-50" />
     </>
   );
 
-  const modelLabel = displayedModel
-    ? t("chat.modelAria", { name: displayedModel.name })
-    : t("chat.noModel");
+  const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
   if (
     isApiKeysLoading ||
@@ -538,7 +531,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         </Button>
       </AdaptivePopoverTrigger>
       <AdaptivePopoverContent
-        title={t("chat.selectModel")}
+        title={"Select a model"}
         className={cn("w-full p-0", popoverClassName)}
         mobileClassName="-mt-2 px-0"
       >

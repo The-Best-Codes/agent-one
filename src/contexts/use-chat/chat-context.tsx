@@ -13,7 +13,6 @@ import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
 import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
-import i18n from "@/lib/i18n";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
 import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -37,7 +36,7 @@ type ChatInstanceCollection = Map<string, ChatInstanceHelpers>;
 
 function getDefaultChatMetadata(): ChatMetadata {
   return {
-    title: i18n.t("chatsSettings.newChatPlaceholder"),
+    title: "New chat",
     titleState: undefined,
     modelId: undefined,
     modelConfig: undefined,
@@ -481,9 +480,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           (notificationSetting === "when-unfocused" && !document.hasFocus());
         if (shouldNotify && !pendingApproval) {
           void sendNotificationIfAllowed(
-            i18n.t("notifications.newMessage", { chatName: metadataValue.title }),
+            `New Message in "${metadataValue.title}"`,
             truncateMessagePreview(
-              getLastTextPart(lastMessage) || i18n.t("notifications.openToKeepWorking"),
+              getLastTextPart(lastMessage) || "Open AgentOne to keep working.",
             ),
           );
         }
@@ -497,8 +496,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           (notificationSetting === "when-unfocused" && !document.hasFocus()))
       ) {
         void sendNotificationIfAllowed(
-          i18n.t("notifications.error", { chatName: metadataValue.title }),
-          i18n.t("notifications.stoppedBecauseOfError"),
+          `Error in "${metadataValue.title}"`,
+          "AgentOne stopped working because of an error.",
         );
       }
       wasBusyRef.current = false;
@@ -513,8 +512,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     ) {
       notifiedApprovalIdsRef.current.add(pendingApproval.approval.id);
       void sendNotificationIfAllowed(
-        i18n.t("notifications.approvalRequired", { chatName: metadataValue.title }),
-        i18n.t("notifications.cannotContinueWithoutApproval"),
+        `Approval Required in "${metadataValue.title}"`,
+        "AgentOne can't continue until you provide approval.",
       );
     }
   }, [statusValue.status, messages, setMessages, notificationSetting, metadataValue.title]);

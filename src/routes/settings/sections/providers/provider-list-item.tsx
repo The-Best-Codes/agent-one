@@ -1,7 +1,6 @@
 import { IconAlertTriangle, IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { memo, useMemo, useRef, useState, type ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 
 import { HttpHeadersEditor } from "@/components/a1/input/http-headers-editor";
 import { SecretInput } from "@/components/a1/input/secret-input";
@@ -125,8 +124,6 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
   onOpenChange,
   onEnabledChange,
 }: SharedProviderEditorProps) {
-  const { t } = useTranslation();
-
   return (
     <AccordionItem value={id}>
       <AccordionTrigger className="px-1 py-2 hover:no-underline">
@@ -141,7 +138,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                     <IconAlertTriangle className="size-4" />
                   </span>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{t("providers.noApiKeySet")}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>{"No API key set"}</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
           </span>
@@ -157,7 +154,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                 }}
               >
                 <IconAlertTriangle data-icon="inline-start" />
-                {t("providers.setUpProvider")}
+                {"Set Up Provider"}
               </Button>
             )}
             <Switch
@@ -171,7 +168,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                 onEnabledChange(checked);
               }}
               onClick={(event) => event.stopPropagation()}
-              aria-label={t("providers.enableProvider", { title })}
+              aria-label={`Enable ${title}`}
             />
           </span>
         </div>
@@ -183,7 +180,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
           {showApiKey ? (
             <div className="flex flex-col gap-2">
               <Label htmlFor={`api-key-${id}`} className="text-xs">
-                {t("providers.apiKey")}
+                {"API Key"}
               </Label>
               {apiKeyHint ? <p className="text-muted-foreground text-sm">{apiKeyHint}</p> : null}
               <SecretInput
@@ -229,7 +226,6 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
   hasEnvKey,
   onOpenChange,
 }: BuiltInProviderListItemProps) {
-  const { t } = useTranslation();
   const storedConfig = useAtomValue(getProviderConfigAtom(providerId));
   const storedApiKey = useAtomValue(getApiKeyAtom(providerId));
   const modelDirectoryData = useAtomValue(modelDirectoryDataAtom);
@@ -269,11 +265,13 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
       models={storedConfig.models ?? []}
       onModelsChange={(models) => updateConfig({ models })}
       builtInModels={builtInModels}
-      apiKeyPlaceholder={t("providers.enterApiKeyFor", { label })}
-      apiKeyHint={hasEnvKey ? t("providers.usingEnvKey") : undefined}
-      addButtonLabel={t("providers.addModelOverride")}
-      emptyTitle={t("providers.noModelOverrides")}
-      emptyDescription={t("providers.noModelOverridesDescription")}
+      apiKeyPlaceholder={`Enter your ${label} API key`}
+      apiKeyHint={hasEnvKey ? "Using environment variable. Override below if needed." : undefined}
+      addButtonLabel={"Add Model Override"}
+      emptyTitle={"No model overrides"}
+      emptyDescription={
+        "Add a model to override built-in metadata or to register an extra model for this provider."
+      }
       onEnabledChange={(enabled) => updateConfig({ enabled })}
       showSetupButton={showSetupButton}
       showMissingKeyWarning={showMissingKeyWarning}
@@ -288,7 +286,6 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
   onDelete,
   onOpenChange,
 }: CustomProviderListItemProps) {
-  const { t } = useTranslation();
   const provider = useAtomValue(getCustomProviderAtom(providerId));
   const apiKey = useAtomValue(getCustomProviderApiKeyAtom(providerId));
   const updateProvider = useSetAtom(updateCustomProviderAtom);
@@ -328,31 +325,31 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
         onHeadersChange={(headers) => update({ headers })}
         models={provider.models}
         onModelsChange={(models) => update({ models })}
-        apiKeyPlaceholder={t("providers.enterApiKeyIfRequired")}
+        apiKeyPlaceholder={"Enter API key if required"}
         modelListBaseUrl={provider.baseUrl}
         modelListHeaders={provider.headers}
         modelListApiKey={apiKey}
-        emptyTitle={t("providers.noModelsConfigured")}
-        emptyDescription={t("providers.addModelPicker")}
+        emptyTitle={"No models configured"}
+        emptyDescription={"Add a model to make it available in the model picker."}
         details={
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={`name-${provider.id}`}>{t("common.name")}</FieldLabel>
+              <FieldLabel htmlFor={`name-${provider.id}`}>{"Name"}</FieldLabel>
               <Input
                 id={`name-${provider.id}`}
                 value={provider.name}
                 onChange={(event) => update({ name: event.target.value })}
-                placeholder={t("providers.providerName")}
+                placeholder={"Provider name"}
               />
             </Field>
 
             <Field>
-              <FieldLabel htmlFor={`base-url-${provider.id}`}>{t("providers.baseUrl")}</FieldLabel>
+              <FieldLabel htmlFor={`base-url-${provider.id}`}>{"Base URL"}</FieldLabel>
               <Input
                 id={`base-url-${provider.id}`}
                 value={provider.baseUrl}
                 onChange={(event) => update({ baseUrl: event.target.value })}
-                placeholder={t("providers.baseUrlPlaceholder")}
+                placeholder={"e.g., http://localhost:1234/v1"}
               />
             </Field>
           </FieldGroup>
@@ -370,7 +367,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
             className="w-fit"
           >
             <IconTrash data-icon="inline-start" />
-            {t("providers.deleteProvider")}
+            {"Delete Provider"}
           </Button>
         }
         onEnabledChange={(enabled) => update({ enabled })}
@@ -395,7 +392,6 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
   providerId,
   onOpenChange,
 }: LocalProviderListItemProps) {
-  const { t } = useTranslation();
   const provider = useAtomValue(getLocalProviderAtom(providerId));
   const updateProvider = useSetAtom(updateLocalProviderAtom);
   const setupDismissed = useAtomValue(providerSetupDismissedAtom);
@@ -426,21 +422,21 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
       models={provider.models}
       onModelsChange={(models) => updateProvider(provider.id, { models })}
       showApiKey={false}
-      apiKeyPlaceholder={t("providers.noApiKeyRequired")}
+      apiKeyPlaceholder={"No API key required"}
       modelListBaseUrl={provider.baseUrl}
       modelListHeaders={provider.headers}
       autoFetchOnMount
-      emptyTitle={t("providers.noModelsConfigured")}
-      emptyDescription={t("providers.fetchOrAddOllama")}
+      emptyTitle={"No models configured"}
+      emptyDescription={"Fetch models from Ollama or add one manually."}
       details={
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={`base-url-${provider.id}`}>{t("providers.baseUrl")}</FieldLabel>
+            <FieldLabel htmlFor={`base-url-${provider.id}`}>{"Base URL"}</FieldLabel>
             <Input
               id={`base-url-${provider.id}`}
               value={provider.baseUrl}
               onChange={(event) => updateProvider(provider.id, { baseUrl: event.target.value })}
-              placeholder={t("providers.baseUrlOllamaPlaceholder")}
+              placeholder={"e.g. http://127.0.0.1:11434/v1"}
             />
           </Field>
         </FieldGroup>

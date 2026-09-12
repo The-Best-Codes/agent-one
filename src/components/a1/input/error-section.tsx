@@ -1,5 +1,4 @@
 import { IconPlayerPlay, IconX } from "@tabler/icons-react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useChatFunctions, useChatStatus } from "@/contexts/use-chat/chat-hooks";
@@ -7,7 +6,6 @@ import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { getAiErrorMessageUx } from "@/lib/error/ai-error-messages";
 
 export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => {
-  const { t } = useTranslation();
   const { error } = useChatStatus();
   const { resumeStream, clearError } = useChatFunctions();
   const { hasAvailableModels } = useModelCatalog();
@@ -35,14 +33,9 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
           disabled={!hasAvailableModels}
         >
           <IconPlayerPlay data-icon="inline-start" />
-          {t("chat.resume")}
+          {"Resume"}
         </Button>
-        <Button
-          title={t("input.ignoreError")}
-          size="icon"
-          onClick={() => clearError()}
-          variant="outline"
-        >
+        <Button title={"Ignore error"} size="icon" onClick={() => clearError()} variant="outline">
           <IconX />
         </Button>
       </div>

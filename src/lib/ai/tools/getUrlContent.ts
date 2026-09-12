@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { raceWithAbort } from "@/lib/ai/tools/utils/abort";
 import { fixUrl } from "@/lib/fix-url";
-import i18n from "@/lib/i18n";
 import { getLogger } from "@/lib/logger";
 import type { GetUrlContentToolConfig } from "@/lib/settings/types";
 
@@ -145,7 +144,7 @@ export const createGetUrlContentTool = (config: GetUrlContentToolConfig) =>
               if (results[i].pending) {
                 results[i] = {
                   url: results[i].url,
-                  error: i18n.t("tools.urlFetchTimeout"),
+                  error: "Operation timed out before this URL could be fetched.",
                 };
               }
             }

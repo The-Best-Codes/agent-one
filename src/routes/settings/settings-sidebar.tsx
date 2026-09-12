@@ -1,5 +1,3 @@
-import { useTranslation } from "react-i18next";
-
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
@@ -16,8 +14,6 @@ export default function SettingsSidebar({
   onSectionChange,
   className,
 }: SettingsSidebarProps) {
-  const { t } = useTranslation();
-
   return (
     <ToggleGroup
       type="single"
@@ -41,7 +37,7 @@ export default function SettingsSidebar({
           aria-checked={undefined}
           className="data-[state=on]:bg-input w-full flex-none justify-start rounded-md border-0 px-4 text-left shadow-none transition-none"
         >
-          {t(section.labelKey)}
+          {section.label}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

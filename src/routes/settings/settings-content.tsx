@@ -1,5 +1,4 @@
 import { createElement } from "react";
-import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -11,11 +10,10 @@ interface SettingsContentProps {
 }
 
 export default function SettingsContent({ activeSection, fillHeight }: SettingsContentProps) {
-  const { t } = useTranslation();
   const SectionComponent = getSectionComponent(activeSection);
 
   if (!SectionComponent) {
-    return <div>{t("settings.selectSection")}</div>;
+    return <div>{"Select a section from the sidebar."}</div>;
   }
 
   return (

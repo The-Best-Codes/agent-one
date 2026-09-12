@@ -10,7 +10,6 @@ import {
 import type { ToolUIPart } from "ai";
 import { AnsiHtml } from "fancy-ansi/react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   AdaptiveTooltip,
@@ -117,7 +116,6 @@ const TerminalDisplay = ({
 };
 
 const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: boolean }) => {
-  const { t } = useTranslation();
   return (
     <TooltipProvider>
       <div className="flex items-center gap-0.5">
@@ -135,7 +133,7 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
               <IconPlayerStop />
             </Button>
           </AdaptiveTooltipTrigger>
-          <AdaptiveTooltipContent side="top">{t("tools.stopCommand")}</AdaptiveTooltipContent>
+          <AdaptiveTooltipContent side="top">{"Stop command"}</AdaptiveTooltipContent>
         </AdaptiveTooltip>
         {showSkip && (
           <AdaptiveTooltip>
@@ -152,7 +150,9 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
                 <IconPlayerSkipForward />
               </Button>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="top">{t("tools.skipCommand")}</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="top">
+              {"Skip command (leave it running in the background)"}
+            </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
       </div>
@@ -161,7 +161,6 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
 };
 
 export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as ExecuteCommandInput;
   const approvalHandler = useChatApprovalHandler();
@@ -203,7 +202,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
   const showLongRunningSkip =
     showLongRunningStop && liveState?.status === "running" && !liveState?.skipRequested;
 
-  const command = input?.command || t("tools.unknownCommand");
+  const command = input?.command || "unknown command";
   const truncatedCommand = command.length > 80 ? command.slice(0, 80) + "…" : command;
 
   switch (part.state) {
@@ -216,7 +215,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           <div className="flex items-center gap-1">
             <IconTerminal2 className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsToRunCommand")}
+              {"AgentOne wants to run a command"}
             </span>
           </div>
           <code className="bg-secondary text-foreground rounded px-2 py-1 text-xs break-all">
@@ -229,7 +228,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -237,7 +236,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -247,9 +246,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.commandDenied")}
-          </span>
+          <span className="text-muted-foreground text-sm font-bold">{"Command denied"}</span>
         </div>
       );
 
@@ -257,7 +254,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.preparingCommand")}</span>
+          <span className="text-foreground text-sm font-bold">{"Preparing command..."}</span>
         </div>
       );
 
@@ -267,9 +264,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.commandDenied")}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">{"Command denied"}</span>
           </div>
         );
       }
@@ -280,7 +275,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         >
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="truncate">
-            {t("tools.commandRunning")} <code className="text-xs">{truncatedCommand}</code>...
+            {"Running"} <code className="text-xs">{truncatedCommand}</code>...
           </span>
           {showLongRunningStop && (
             <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
@@ -354,23 +349,23 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
             >
               <span className="max-w-2xl truncate">
                 {liveState?.status === "skipped-running"
-                  ? t("tools.skippedCommand") + " "
+                  ? "Skipped" + " "
                   : isPreliminary
-                    ? t("tools.commandRunning") + " "
-                    : t("tools.ranCommand") + " "}
+                    ? "Running" + " "
+                    : "Ran" + " "}
                 <code className="text-xs">{truncatedCommand}</code>
                 {liveState?.status === "skipped-running"
-                  ? " " + t("tools.commandBackgrounded")
+                  ? " " + "(backgrounded)"
                   : isPreliminary
                     ? ""
                     : output.timedOut
-                      ? " " + t("tools.commandTimedOut")
+                      ? " " + "(timed out)"
                       : output.stopped
-                        ? " " + t("tools.commandStopped")
+                        ? " " + "(stopped)"
                         : output.skipped
-                          ? " " + t("tools.commandSkippedParen")
+                          ? " " + "(skipped)"
                           : output.exitCode && output.exitCode !== 0
-                            ? ` ${t("tools.exitCode", { code: output.exitCode })}`
+                            ? ` ${`(exit code ${output.exitCode})`}`
                             : ""}
               </span>
               {showLongRunningStop && (
@@ -417,6 +412,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                           isMainAccordionOpen && "scale-0 opacity-0",
                         )}
                       />
+
                       <IconChevronDown
                         className={cn(
                           "text-muted-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/exec-accordion:scale-100 group-hover/exec-accordion:opacity-100",
@@ -430,8 +426,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                   className="justify-start gap-1 p-0 font-bold hover:no-underline"
                 >
                   <span className="max-w-2xl truncate">
-                    {t("tools.cancelledCommand")}{" "}
-                    <code className="text-xs">{truncatedCommand}</code>
+                    {"Cancelled"} <code className="text-xs">{truncatedCommand}</code>
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="p-0 pt-2">
@@ -445,9 +440,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.commandCancelled")}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">{"Command cancelled"}</span>
           </div>
         );
       }
@@ -457,7 +450,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.executeCommandError")}
+          title={"Error running command"}
         />
       );
 
@@ -465,7 +458,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconTerminal2 className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.commandExecuted")}</span>
+          <span className="text-foreground text-sm font-bold">{"Command executed"}</span>
         </div>
       );
   }

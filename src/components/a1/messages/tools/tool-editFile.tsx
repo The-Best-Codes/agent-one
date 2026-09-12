@@ -11,7 +11,6 @@ import {
 import CodeMirror from "@uiw/react-codemirror";
 import type { ToolUIPart } from "ai";
 import { memo, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -88,7 +87,6 @@ const DiffView = memo(
 DiffView.displayName = "DiffView";
 
 export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as EditFileInput;
   const output = part.output as EditFileOutput;
@@ -96,7 +94,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const filePath = input?.filePath || t("tools.unknownFile");
+  const filePath = input?.filePath || "unknown file";
 
   switch (part.state) {
     case "approval-requested":
@@ -108,7 +106,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconPencil className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsToEdit")} <span className="font-mono text-xs">{filePath}</span>
+              {"AgentOne wants to edit"} <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           {input?.oldContent && input?.newContent && (
@@ -127,7 +125,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -135,7 +133,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -146,7 +144,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
           <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.editDenied", { path: filePath })}
+            {`Edit denied (${filePath})`}
           </span>
         </div>
       );
@@ -155,7 +153,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.preparingFileEdit")}</span>
+          <span className="text-foreground text-sm font-bold">{"Preparing file edit..."}</span>
         </div>
       );
 
@@ -166,7 +164,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.editDenied", { path: filePath })}
+              {`Edit denied (${filePath})`}
             </span>
           </div>
         );
@@ -177,7 +175,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           className="text-foreground flex flex-row items-center gap-1 text-sm font-bold"
         >
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate">{t("tools.editingFile", { path: filePath })}</span>
+          <span className="max-w-2xl truncate">{`Editing ${filePath}...`}</span>
         </div>
       );
     }
@@ -209,6 +207,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
+
                   <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/edit-file-accordion:scale-100 group-hover/edit-file-accordion:opacity-100",
@@ -222,10 +221,8 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                {t("tools.editedFile", { path: filePath })}
-                {output.linesChanged
-                  ? ` ${t("tools.linesChanged", { count: output.linesChanged })}`
-                  : ""}
+                {`Edited ${filePath}`}
+                {output.linesChanged ? ` ${`(${output.linesChanged} lines)`}` : ""}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
@@ -234,7 +231,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
                   <DiffView oldContent={oldContent} newContent={newContent} filePath={filePath} />
                 </div>
               ) : (
-                <div className="text-muted-foreground text-xs">{t("tools.fileEditedSuccess")}</div>
+                <div className="text-muted-foreground text-xs">{"File edited successfully."}</div>
               )}
             </AccordionContent>
           </AccordionItem>
@@ -247,9 +244,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.fileEditCancelled")}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">{"File edit cancelled"}</span>
           </div>
         );
       }
@@ -259,7 +254,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.editFileError")}
+          title={"Error editing file"}
         />
       );
 
@@ -267,7 +262,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconPencil className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{t("tools.fileEdited")}</span>
+          <span className="text-foreground text-sm font-bold">{"File edited"}</span>
         </div>
       );
   }

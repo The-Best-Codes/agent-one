@@ -1,6 +1,5 @@
 import type { UIMessage } from "ai";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
@@ -21,7 +20,6 @@ export function MessagePreviewRail({
   onMessageSelect: (index: number) => void;
   getScrollElement: () => HTMLElement | null;
 }) {
-  const { t } = useTranslation();
   const entries: PreviewEntry[] = [];
   for (let index = 0; index < messages.length; index++) {
     const message = messages[index];
@@ -95,7 +93,7 @@ export function MessagePreviewRail({
   return (
     <div className="pointer-events-none fixed top-1/2 right-0 z-20 hidden w-12 -translate-y-1/2 items-center md:flex">
       <nav
-        aria-label={t("chat.messageNav")}
+        aria-label={"Chat message navigation"}
         onPointerLeave={() => setHoveredIndex(null)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) setFocusedIndex(null);
@@ -118,8 +116,8 @@ export function MessagePreviewRail({
               type="button"
               aria-label={
                 entry.message.role === "user"
-                  ? t("chat.scrollToYourMessage", { index: index + 1 })
-                  : t("chat.scrollToAssistantMessage", { index: index + 1 })
+                  ? `Scroll to your message ${index + 1}`
+                  : `Scroll to assistant message ${index + 1}`
               }
               onPointerEnter={(event) => {
                 if (event.pointerType !== "touch") setHoveredIndex(index);
@@ -157,19 +155,21 @@ export function MessagePreviewRail({
                 <CardTitle className="truncate whitespace-nowrap">
                   {truncateMessagePreview(
                     displayedEntry.message.role === "user"
-                      ? getLastTextPart(displayedEntry.message) || t("chat.emptyMessage")
-                      : t("chat.emptyMessage"),
+                      ? getLastTextPart(displayedEntry.message) || "Empty message"
+                      : "Empty message",
                   )}
                 </CardTitle>
                 <CardDescription className="line-clamp-4 leading-5">
                   {displayedEntry.response ? (
                     getLastTextPart(displayedEntry.response) || (
-                      <em>{t("chat.messageWithTools")}</em>
+                      <em>{"Message with tools or attachments"}</em>
                     )
                   ) : displayedEntry.message.role === "user" ? (
-                    <em>{t("chat.noResponse")}</em>
+                    <em>{"No response"}</em>
                   ) : (
-                    getLastTextPart(displayedEntry.message) || <em>{t("chat.messageWithTools")}</em>
+                    getLastTextPart(displayedEntry.message) || (
+                      <em>{"Message with tools or attachments"}</em>
+                    )
                   )}
                 </CardDescription>
               </CardHeader>

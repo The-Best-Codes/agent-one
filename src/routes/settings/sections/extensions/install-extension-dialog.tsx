@@ -1,6 +1,5 @@
 import { IconAlertTriangle, IconEye, IconEyeClosed } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   createMcpServerFromRegistryInstall,
@@ -54,7 +53,6 @@ function InstallFieldInput({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const { t } = useTranslation();
   const [showSecret, setShowSecret] = useState(false);
 
   const label = (
@@ -100,6 +98,7 @@ function InstallFieldInput({
           placeholder={field.placeholder || undefined}
           type={field.secret && !showSecret ? "password" : "text"}
         />
+
         {field.secret ? (
           <Button
             type="button"
@@ -110,7 +109,7 @@ function InstallFieldInput({
               event: "settings_interaction",
               params: { section: "extensions", control: "toggle_install_secret_visibility" },
             }}
-            title={showSecret ? t("common.hideValue") : t("common.showValue")}
+            title={showSecret ? "Hide value" : "Show value"}
           >
             {showSecret ? (
               <IconEyeClosed data-icon="inline-start" />
@@ -136,7 +135,6 @@ function InstallExtensionDialogBody({
   onOpenChange: (open: boolean) => void;
   onInstall: (server: McpRegistryInstallResult) => void;
 }) {
-  const { t } = useTranslation();
   const installTemplates = extension.installTemplates;
   const [selectedTemplateId, setSelectedTemplateId] = useState(installTemplates[0]?.id ?? "");
 
@@ -227,7 +225,7 @@ function InstallExtensionDialogBody({
   const detectedConfigurationContent =
     install.fields.length > 0 ? (
       <div className="rounded-md border p-3">
-        <p className="mb-3 text-xs font-medium">{t("extensions.detectedConfig")}</p>
+        <p className="mb-3 text-xs font-medium">{"Detected configuration"}</p>
         <div className="flex flex-col gap-3">
           {install.fields.map((field) => (
             <InstallFieldInput
@@ -280,15 +278,17 @@ function InstallExtensionDialogBody({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{t("extensions.install", { name: extension.displayName })}</DialogTitle>
-        <DialogDescription>{t("extensions.installDescription")}</DialogDescription>
+        <DialogTitle>{`Install ${extension.displayName}`}</DialogTitle>
+        <DialogDescription>
+          {"Review detected settings and install this MCP extension."}
+        </DialogDescription>
       </DialogHeader>
 
       <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
         {installTemplates.length > 1 ? (
           <div className="grid gap-2 py-2">
             <Label htmlFor="install-method" className="text-sm">
-              {t("extensions.installMethod")}
+              {"Install method"}
             </Label>
             <Select value={install.id} onValueChange={selectMethod}>
               <SelectTrigger id="install-method" className="w-full">
@@ -314,7 +314,7 @@ function InstallExtensionDialogBody({
           showTransportEditors={false}
           commandPlaceholder="npx -y ..."
           urlPlaceholder="https://..."
-          approvalDescription={t("extensions.approvalDescription")}
+          approvalDescription={"Ask before running tools from this extension"}
           stdioSupplement={detectedConfigurationContent}
           httpSupplement={detectedConfigurationContent}
           showStdioWarning
@@ -327,11 +327,11 @@ function InstallExtensionDialogBody({
             <AdaptiveTooltipTrigger asChild>
               <Label className="text-destructive w-fit sm:w-full">
                 <IconAlertTriangle className="size-4" />
-                <span className="truncate">{t("extensions.missingRuntimeTitle")}</span>
+                <span className="truncate">{"Missing required tool"}</span>
               </Label>
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent className="max-w-xs">
-              {t("extensions.missingRuntimeDescription", { command: missingRuntimeCommand })}
+              {`The tool "${missingRuntimeCommand}" is not installed on your device. It's required to run this extension. You can still install it, but it may not work until the tool is available.`}
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         ) : (
@@ -339,14 +339,14 @@ function InstallExtensionDialogBody({
         )}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel")}
+            {"Cancel"}
           </Button>
           <Button
             onClick={handleInstall}
             disabled={!isFormValid}
             variant={missingRuntimeCommand ? "destructive" : "default"}
           >
-            {t("extensions.installAction")}
+            {"Install"}
           </Button>
         </div>
       </DialogFooter>

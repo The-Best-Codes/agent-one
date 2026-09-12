@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ interface NameStepProps {
 type Phase = "input" | "input-fading-out" | "greeting" | "greeting-fading-out";
 
 export function NameStep({ onSubmit }: NameStepProps) {
-  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [nameInput, setNameInput] = useState("");
   const [phase, setPhase] = useState<Phase>("input");
@@ -65,9 +63,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
             : "animate-out slide-out-to-top-5 fade-out-0 fill-mode-forwards duration-500",
         )}
       >
-        <h2 className="text-foreground text-4xl font-bold">
-          {t("onboarding.hiName", { name: nameInput.trim() })}
-        </h2>
+        <h2 className="text-foreground text-4xl font-bold">{`Hi, ${nameInput.trim()}!`}</h2>
       </div>
     );
   }
@@ -83,17 +79,17 @@ export function NameStep({ onSubmit }: NameStepProps) {
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-2xl font-bold">
-            {t("onboarding.whatShouldICallYou")}
-          </h2>
-          <p className="text-muted-foreground">{t("onboarding.enterNamePersonalize")}</p>
+          <h2 className="text-foreground text-2xl font-bold">{"What should I call you?"}</h2>
+          <p className="text-muted-foreground">
+            {"Enter your name to personalize your experience."}
+          </p>
         </div>
 
         <div className="flex flex-col gap-3">
           <Input
             ref={inputRef}
             type="text"
-            placeholder={t("onboarding.namePlaceholder")}
+            placeholder={"John"}
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onKeyDown={(e) => {
@@ -102,8 +98,9 @@ export function NameStep({ onSubmit }: NameStepProps) {
               }
             }}
           />
+
           <Button onClick={handleSubmit} disabled={!nameInput.trim()} className="w-full">
-            {t("common.continue")}
+            {"Continue"}
           </Button>
         </div>
       </div>

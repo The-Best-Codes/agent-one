@@ -9,7 +9,6 @@ import {
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
@@ -60,7 +59,6 @@ function formatNumber(value: number) {
 }
 
 export default function AccountSection() {
-  const { t } = useTranslation();
   const [userName, setUserName] = useAtom(userNameAtom);
   const [systemPromptAppendix, setSystemPromptAppendix] = useAtom(systemPromptAppendixAtom);
   const [memory, setMemory] = useAtom(memoryAtom);
@@ -89,7 +87,8 @@ export default function AccountSection() {
 
   const currentPlanName = activeSubscription
     ? getPlanNameForSubscription(activeSubscription)
-    : t("account.freePlan");
+    : "Free";
+
   const renewalDate = activeSubscription?.currentPeriodEnd
     ? new Date(activeSubscription.currentPeriodEnd).toLocaleDateString()
     : null;
@@ -139,7 +138,7 @@ export default function AccountSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t("account.title")}</CardTitle>
+          <CardTitle>{"Account, Sync & Access"}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           {isAuthLoading ? (
@@ -172,10 +171,8 @@ export default function AccountSection() {
                     >
                       <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
                         <IconExternalLink data-icon="inline-start" />
-                        <span>{t("account.dashboard")}</span>
-                        <span className="sr-only lg:not-sr-only">
-                          {t("account.dashboardSuffix")}
-                        </span>
+                        <span>{"Account"}</span>
+                        <span className="sr-only lg:not-sr-only">{" Dashboard"}</span>
                       </a>
                     </Button>
                     <Button
@@ -185,7 +182,7 @@ export default function AccountSection() {
                       disabled={isSigningOut}
                     >
                       <IconLogout data-icon="inline-start" />
-                      <span>{t("account.signOut")}</span>
+                      <span>{"Sign out"}</span>
                     </Button>
                   </div>
                 ) : undefined
@@ -218,15 +215,13 @@ export default function AccountSection() {
                 <>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex flex-col gap-1">
-                      <p className="font-medium">
-                        {t("account.onPlan", { plan: currentPlanName })}
-                      </p>
+                      <p className="font-medium">{`You're on the ${currentPlanName} Plan`}</p>
                       <p className="text-muted-foreground text-sm">
                         {activeSubscription
                           ? renewalDate
-                            ? t("account.renews", { date: renewalDate })
-                            : t("account.subscriptionActive")
-                          : t("account.upgradeHint")}
+                            ? `Renews ${renewalDate}.`
+                            : "Your subscription is active."
+                          : "Upgrade to Pro for higher limits and premium features."}
                       </p>
                     </div>
                     <Button
@@ -250,22 +245,24 @@ export default function AccountSection() {
                         ) : (
                           <IconRocket data-icon="inline-start" />
                         )}
-                        <span>
-                          {activeSubscription ? t("account.manageBilling") : t("account.upgrade")}
-                        </span>
+                        <span>{activeSubscription ? "Manage Billing" : "Upgrade"}</span>
                       </a>
                     </Button>
                   </div>
                   {isAccountProvisioning ? (
                     <Alert>
                       <IconInfoCircle />
-                      <AlertTitle>{t("account.setupInProgress")}</AlertTitle>
-                      <AlertDescription>{t("account.setupInProgressDescription")}</AlertDescription>
+                      <AlertTitle>{"Account setup in progress"}</AlertTitle>
+                      <AlertDescription>
+                        {
+                          "Your account will be ready in a few minutes. AgentOne billing is still finishing setup, so your credits have not appeared yet."
+                        }
+                      </AlertDescription>
                     </Alert>
                   ) : usageSummary ? (
                     <Field>
                       <FieldLabel htmlFor="credits-used">
-                        <span>{t("account.creditsUsed")}</span>
+                        <span>{"Credits used"}</span>
                         <span className="text-muted-foreground ml-auto">
                           {usageSummary.credited > 0
                             ? `${formatNumber((usageSummary.consumed / usageSummary.credited) * 100)}%`
@@ -280,14 +277,13 @@ export default function AccountSection() {
                             : 0
                         }
                       />
+
                       <FieldDescription>
-                        {t("account.creditsRemaining", {
-                          count: formatNumber(usageSummary.remaining),
-                        })}
+                        {`${formatNumber(usageSummary.remaining)} credits remaining this period.`}
                       </FieldDescription>
                     </Field>
                   ) : (
-                    <p className="text-muted-foreground text-sm">{t("account.noUsageMeters")}</p>
+                    <p className="text-muted-foreground text-sm">{"No active usage meters."}</p>
                   )}
                 </>
               )}
@@ -297,10 +293,10 @@ export default function AccountSection() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col gap-1">
                 <Label htmlFor="sync-enabled" className="text-sm font-medium">
-                  {t("account.synchronizeSettings")}
+                  {"Synchronize my settings"}
                 </Label>
                 <p className="text-muted-foreground text-sm">
-                  {t("account.synchronizeSettingsDescription")}
+                  {"Keep your settings in sync across devices using your AgentOne account."}
                 </p>
               </div>
               <AdaptiveTooltip>
@@ -320,7 +316,7 @@ export default function AccountSection() {
                   </span>
                 </AdaptiveTooltipTrigger>
                 {!user && (
-                  <AdaptiveTooltipContent>{t("account.signInToSync")}</AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>{"Sign in to enable sync"}</AdaptiveTooltipContent>
                 )}
               </AdaptiveTooltip>
             </div>
@@ -329,10 +325,10 @@ export default function AccountSection() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col gap-1">
                 <Label htmlFor="hide-agentone-models" className="text-sm font-medium">
-                  {t("account.hideAgentOneModels")}
+                  {"Hide AgentOne models"}
                 </Label>
                 <p className="text-muted-foreground text-sm">
-                  {t("account.hideAgentOneModelsDescription")}
+                  {"Remove AgentOne models from the model selector."}
                 </p>
               </div>
               <AdaptiveTooltip>
@@ -352,15 +348,17 @@ export default function AccountSection() {
                   </span>
                 </AdaptiveTooltipTrigger>
                 {!user && (
-                  <AdaptiveTooltipContent>{t("account.hideModelsTooltip")}</AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>
+                    {"You won't see AgentOne models unless signed-in"}
+                  </AdaptiveTooltipContent>
                 )}
               </AdaptiveTooltip>
             </div>
           </SettingsTarget>
           <p className="text-muted-foreground text-sm">
-            {t("account.analyticsMoved")}{" "}
+            {"Account analytics have moved to the"}{" "}
             <Link to="/settings?tab=about#setting-allow-usage-analytics" className="underline">
-              {t("account.helpAndUpdatesSection")}
+              {"Help & Updates section"}
             </Link>
             .
           </p>
@@ -368,15 +366,17 @@ export default function AccountSection() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{t("account.profileTitle")}</CardTitle>
+          <CardTitle>{"Profile & Instructions"}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-your-name">
             <div className="flex flex-col gap-2">
               <Label htmlFor="user-name" className="text-sm font-medium">
-                {t("account.yourName")}
+                {"Your Name"}
               </Label>
-              <p className="text-muted-foreground text-sm">{t("account.yourNameDescription")}</p>
+              <p className="text-muted-foreground text-sm">
+                {"AgentOne will use this name to address you."}
+              </p>
               <Input
                 id="user-name"
                 type="text"
@@ -387,17 +387,19 @@ export default function AccountSection() {
                   });
                   setUserName(e.target.value);
                 }}
-                placeholder={t("account.yourNamePlaceholder")}
+                placeholder={"Enter your name"}
               />
             </div>
           </SettingsTarget>
           <SettingsTarget id="setting-ai-instructions">
             <div className="flex flex-col gap-2">
               <Label htmlFor="system-prompt-appendix" className="text-sm font-medium">
-                {t("account.aiInstructions")}
+                {"AI Instructions"}
               </Label>
               <p className="text-muted-foreground text-sm">
-                {t("account.aiInstructionsDescription")}
+                {
+                  "Add custom instructions that will be appended to the system prompt. These will guide how AgentOne responds to you."
+                }
               </p>
               <div className="relative">
                 <Textarea
@@ -409,9 +411,10 @@ export default function AccountSection() {
                     });
                     handleAppendixChange(e.target.value);
                   }}
-                  placeholder={t("account.aiInstructionsPlaceholder")}
+                  placeholder={"e.g., Always use British English. Be concise and technical."}
                   className="field-sizing-fixed max-h-96 min-h-15 resize-y"
                 />
+
                 <span className="text-muted-foreground pointer-events-none absolute right-2 bottom-2 text-xs">
                   {systemPromptAppendix.length} / {MAX_APPENDIX_CHARS}
                 </span>
@@ -421,12 +424,18 @@ export default function AccountSection() {
           <SettingsTarget id="setting-memory">
             <div className="flex flex-col gap-2">
               <Label htmlFor="memory" className="text-sm font-medium">
-                {t("account.memory")}
+                {"Memory"}
               </Label>
-              <p className="text-muted-foreground text-sm">{t("account.memoryDescription")}</p>
+              <p className="text-muted-foreground text-sm">
+                {
+                  "Save the things you want AgentOne to remember about you across chats, like your preferences, goals, or ongoing projects."
+                }
+              </p>
               <div className="rounded-md border p-3">
                 <div className="mb-3 flex items-start justify-between gap-2">
-                  <p className="text-muted-foreground text-xs">{t("account.memoryHint")}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {"Keep each item short and specific so AgentOne can reuse it well."}
+                  </p>
                   <Button
                     type="button"
                     variant="outline"
@@ -438,7 +447,7 @@ export default function AccountSection() {
                     }
                   >
                     <IconPlus data-icon="inline-start" />
-                    {t("common.add")}
+                    {"Add"}
                   </Button>
                 </div>
                 {memory.length > 0 ? (
@@ -449,10 +458,11 @@ export default function AccountSection() {
                           id={index === 0 ? "memory" : undefined}
                           value={entry}
                           onChange={(e) => updateMemoryEntry(index, e.target.value)}
-                          placeholder={t("account.memoryPlaceholder")}
+                          placeholder={"e.g. I prefer concise technical answers"}
                           maxLength={MAX_MEMORY_ENTRY_CHARS}
                           className="flex-1"
                         />
+
                         {entry ? (
                           <Popover
                             open={removingIndex === index}
@@ -463,17 +473,15 @@ export default function AccountSection() {
                                 type="button"
                                 variant="destructive"
                                 size="icon"
-                                aria-label={t("account.removeMemory")}
+                                aria-label={"Remove memory entry"}
                               >
                                 <IconX />
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent align="end">
                               <PopoverHeader>
-                                <PopoverTitle>{t("account.deleteMemoryTitle")}</PopoverTitle>
-                                <PopoverDescription>
-                                  {t("account.deleteMemoryDescription")}
-                                </PopoverDescription>
+                                <PopoverTitle>{"Delete this memory?"}</PopoverTitle>
+                                <PopoverDescription>{"This cannot be undone."}</PopoverDescription>
                               </PopoverHeader>
                               <div className="flex justify-end gap-2">
                                 <Button
@@ -481,7 +489,7 @@ export default function AccountSection() {
                                   variant="outline"
                                   onClick={() => setRemovingIndex(null)}
                                 >
-                                  {t("common.cancel")}
+                                  {"Cancel"}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -491,7 +499,7 @@ export default function AccountSection() {
                                     setRemovingIndex(null);
                                   }}
                                 >
-                                  {t("common.delete")}
+                                  {"Delete"}
                                 </Button>
                               </div>
                             </PopoverContent>
@@ -502,7 +510,7 @@ export default function AccountSection() {
                             variant="destructive"
                             size="icon"
                             onClick={() => removeMemoryEntry(index)}
-                            aria-label={t("account.removeMemory")}
+                            aria-label={"Remove memory entry"}
                           >
                             <IconX />
                           </Button>
@@ -512,7 +520,7 @@ export default function AccountSection() {
                   </div>
                 ) : (
                   <p className="text-muted-foreground flex h-20 items-center justify-center rounded-md border border-dashed p-2 text-sm">
-                    {t("account.nothingSaved")}
+                    {"Nothing saved yet."}
                   </p>
                 )}
               </div>

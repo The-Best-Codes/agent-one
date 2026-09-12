@@ -10,7 +10,6 @@ import {
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,36 +61,32 @@ interface WikipediaArticleOutput {
 
 type WikipediaOutput = WikipediaSearchOutput | WikipediaArticleOutput;
 
-function getToolLabel(
-  t: (key: string, opts?: Record<string, unknown>) => string,
-  input: WikipediaInput | undefined,
-): string {
-  if (!input) return t("tools.wikipedia");
+function getToolLabel(input: WikipediaInput | undefined): string {
+  if (!input) return "Wikipedia";
   switch (input.action) {
     case "search":
-      return t("tools.wikiSearch", { query: input.query });
+      return `Search Wikipedia for "${input.query}"`;
     case "getSummary":
-      return t("tools.wikiSummary", { title: input.title });
+      return `Read "${input.title}" on Wikipedia`;
     case "getContent":
-      return t("tools.wikiContent", { title: input.title });
+      return `Read full content of "${input.title}" on Wikipedia`;
     case "getLinks":
-      return t("tools.wikiLinks", { title: input.title });
+      return `View links from "${input.title}" on Wikipedia`;
     case "getCategories":
-      return t("tools.wikiCategories", { title: input.title });
+      return `View categories of "${input.title}" on Wikipedia`;
     default:
-      return t("tools.wikipedia");
+      return "Wikipedia";
   }
 }
 
 export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
-  const { t } = useTranslation();
   const callId = part.toolCallId;
   const input = part.input as WikipediaInput;
   const approvalHandler = useChatApprovalHandler();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
 
-  const label = getToolLabel(t, input);
+  const label = getToolLabel(input);
 
   switch (part.state) {
     case "approval-requested":
@@ -100,7 +95,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconBrandWikipedia className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsTo", { label })}
+              {`AgentOne wants to ${label}`}
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -110,7 +105,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -118,7 +113,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -128,9 +123,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.labelDenied", { label })}
-          </span>
+          <span className="text-muted-foreground text-sm font-bold">{`${label} denied`}</span>
         </div>
       );
 
@@ -138,7 +131,9 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />{" "}
-          <span className="text-foreground text-sm font-bold">{t("tools.preparingWikipedia")}</span>
+          <span className="text-foreground text-sm font-bold">
+            {"Preparing Wikipedia request..."}
+          </span>
         </div>
       );
 
@@ -148,18 +143,14 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.labelDenied", { label })}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">{`${label} denied`}</span>
           </div>
         );
       }
       return (
         <div key={callId} className="flex flex-row items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="max-w-2xl truncate text-sm font-bold">
-            {t("tools.labelLoading", { label })}
-          </span>
+          <span className="max-w-2xl truncate text-sm font-bold">{`${label}...`}</span>
         </div>
       );
     }
@@ -200,6 +191,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                         isMainAccordionOpen && "scale-0 opacity-0",
                       )}
                     />
+
                     <IconChevronDown
                       className={cn(
                         "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/wikipedia-accordion:scale-100 group-hover/wikipedia-accordion:opacity-100",
@@ -213,13 +205,8 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                 className="justify-start gap-1 p-0 font-bold hover:no-underline"
               >
                 <span className="max-w-2xl truncate">
-                  {t("tools.wikiFoundResults", {
-                    count: result.results?.length ?? 0,
-                    query: result.query,
-                  })}
-                  {result.suggestion
-                    ? ` ${t("tools.wikiSuggested", { suggestion: result.suggestion })}`
-                    : ""}
+                  {`Found ${result.results?.length ?? 0} Wikipedia results for "${result.query}"`}
+                  {result.suggestion ? ` ${`(suggested: "${result.suggestion}")`}` : ""}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
@@ -275,6 +262,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                         isMainAccordionOpen && "scale-0 opacity-0",
                       )}
                     />
+
                     <IconChevronDown
                       className={cn(
                         "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/wikipedia-accordion:scale-100 group-hover/wikipedia-accordion:opacity-100",
@@ -288,7 +276,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                 className="justify-start gap-1 p-0 font-bold hover:no-underline"
               >
                 <span className="max-w-2xl truncate">
-                  {t("tools.wikiReadSummary", { title: result.title })}
+                  {`Read summary of "${result.title}" on Wikipedia`}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
@@ -304,7 +292,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground text-xs"
                       >
-                        {t("tools.viewOnWikipedia")}
+                        {"View on Wikipedia"}
                         <IconExternalLink className="ml-1 inline size-3" />
                       </a>
                     )}
@@ -347,6 +335,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                         isMainAccordionOpen && "scale-0 opacity-0",
                       )}
                     />
+
                     <IconChevronDown
                       className={cn(
                         "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/wikipedia-accordion:scale-100 group-hover/wikipedia-accordion:opacity-100",
@@ -360,7 +349,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                 className="justify-start gap-1 p-0 font-bold hover:no-underline"
               >
                 <span className="max-w-2xl truncate">
-                  {t("tools.wikiContent", { title: result.title })}
+                  {`Read full content of "${result.title}" on Wikipedia`}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
@@ -401,6 +390,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                         isMainAccordionOpen && "scale-0 opacity-0",
                       )}
                     />
+
                     <IconChevronDown
                       className={cn(
                         "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/wikipedia-accordion:scale-100 group-hover/wikipedia-accordion:opacity-100",
@@ -414,10 +404,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                 className="justify-start gap-1 p-0 font-bold hover:no-underline"
               >
                 <span className="max-w-2xl truncate">
-                  {t("tools.wikiFoundLinks", {
-                    count: result.links?.length ?? 0,
-                    title: result.title,
-                  })}
+                  {`Found ${result.links?.length ?? 0} links from "${result.title}" on Wikipedia`}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
@@ -467,6 +454,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                         isMainAccordionOpen && "scale-0 opacity-0",
                       )}
                     />
+
                     <IconChevronDown
                       className={cn(
                         "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/wikipedia-accordion:scale-100 group-hover/wikipedia-accordion:opacity-100",
@@ -480,10 +468,9 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                 className="justify-start gap-1 p-0 font-bold hover:no-underline"
               >
                 <span className="max-w-2xl truncate">
-                  {t("tools.wikiFoundCategories", {
-                    count: result.categories?.length ?? 0,
-                    title: result.title,
-                  })}
+                  {`Found ${result.categories?.length ?? 0} categories for "${
+                    result.title
+                  }" on Wikipedia`}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">
@@ -515,7 +502,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />{" "}
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.wikipediaCancelled")}
+              {"Wikipedia request cancelled"}
             </span>
           </div>
         );
@@ -526,7 +513,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={t("tools.wikipediaError")}
+          title={"Wikipedia error"}
         />
       );
     }
@@ -535,9 +522,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconBrandWikipedia className="text-muted-foreground size-4 shrink-0" />{" "}
-          <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.wikipediaAccessed")}
-          </span>
+          <span className="text-muted-foreground text-sm font-bold">{"Wikipedia accessed"}</span>
         </div>
       );
   }

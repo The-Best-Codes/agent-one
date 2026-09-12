@@ -8,7 +8,6 @@ import {
 import type { DynamicToolUIPart } from "ai";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 import { PerformantMarkdown } from "@/components/a1/markdown/performant-markdown";
 import {
@@ -58,7 +57,6 @@ export const MessagePartDynamicTool = (props: DynamicToolPartProps) => (
 );
 
 const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) => {
-  const { t } = useTranslation();
   const [isMainAccordionOpen, setIsMainAccordionOpen] = useState<boolean | undefined>();
   const [isErrorAccordionOpen, setIsErrorAccordionOpen] = useState<boolean | undefined>();
   const callId = part.toolCallId;
@@ -76,7 +74,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
           <div className="flex items-center gap-1">
             <IconTool className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {t("tools.wantsToRunTool", { name: toolName })}
+              {`AgentOne wants to run "${toolName}" tool`}
             </span>
           </div>
           {part?.input !== null && (
@@ -87,9 +85,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
             >
               <ParametersAccordionItem value="parameters" className="border-0">
                 <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
-                  <span className="text-muted-foreground font-medium">
-                    {t("common.parameters")}
-                  </span>
+                  <span className="text-muted-foreground font-medium">{"Parameters"}</span>
                 </ParametersAccordionTrigger>
                 <ParametersAccordionContent className="px-2 pb-2">
                   <pre className="text-muted-foreground overflow-x-auto text-xs">
@@ -111,7 +107,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               }
             >
               <IconX data-icon="inline-start" />
-              {t("common.deny")}
+              {"Deny"}
             </Button>
             <Button
               size="sm"
@@ -124,7 +120,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               }
             >
               <IconCircleCheck data-icon="inline-start" />
-              {t("common.approve")}
+              {"Approve"}
             </Button>
           </div>
         </div>
@@ -136,7 +132,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4" />
           <span className="text-muted-foreground text-sm font-bold">
-            {t("tools.quotedToolDenied", { name: toolName })}
+            {`"${toolName}" tool denied`}
           </span>
         </div>
       );
@@ -149,12 +145,12 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.quotedToolDenied", { name: toolName })}
+              {`"${toolName}" tool denied`}
             </span>
           </div>
         );
       }
-      const loadingText = labels?.loadingTitle ?? t("tools.runningTool", { name: toolName });
+      const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground" />
@@ -163,7 +159,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
       );
     }
     case "input-available": {
-      const loadingText = labels?.loadingTitle ?? t("tools.runningTool", { name: toolName });
+      const loadingText = labels?.loadingTitle ?? `Running "${toolName}" tool...`;
       return (
         <div
           key={callId}
@@ -178,7 +174,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
     case "output-available": {
       const output = part.output as DynamicToolOutput;
       const hasError = output?.isError;
-      const outputText = output ? JSON.stringify(output.content) : t("tools.noOutput");
+      const outputText = output ? JSON.stringify(output.content) : "No output";
       const isLongOutput = outputText.length > maxToolResultChars;
 
       if (hasError) {
@@ -205,6 +201,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                         isErrorAccordionOpen && "scale-0 opacity-0",
                       )}
                     />
+
                     <IconChevronDown
                       className={cn(
                         "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-error-accordion:scale-100 group-hover/dynamic-tool-error-accordion:opacity-100",
@@ -218,7 +215,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                 className="justify-start gap-1 p-0 font-bold hover:no-underline"
               >
                 <span className="text-destructive max-w-2xl truncate">
-                  {labels?.errorTitle ?? t("tools.quotedToolFailed", { name: toolName })}
+                  {labels?.errorTitle ?? `"${toolName}" tool failed`}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="p-0 pt-2">
@@ -258,6 +255,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                       isMainAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
+
                   <IconChevronDown
                     className={cn(
                       "text-foreground absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-accordion:scale-100 group-hover/dynamic-tool-accordion:opacity-100",
@@ -271,7 +269,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               className="items-center justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="max-w-2xl truncate">
-                {labels?.completedTitle ?? t("tools.quotedToolFinished", { name: toolName })}
+                {labels?.completedTitle ?? `"${toolName}" tool finished`}
               </span>
               {isLongOutput && (
                 <AdaptiveTooltip>
@@ -279,7 +277,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                     <div className="size-2 shrink-0 rounded-full bg-yellow-500" />
                   </AdaptiveTooltipTrigger>
                   <AdaptiveTooltipContent>
-                    {t("tools.resultOverChars", { max: maxToolResultChars })}
+                    {`Tool result is over ${maxToolResultChars} characters`}
                   </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               )}
@@ -290,14 +288,14 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                 <div className="flex flex-col gap-2">
                   {part?.input !== null && (
                     <div>
-                      <span className="font-medium">{t("common.parametersColon")}</span>
+                      <span className="font-medium">{"Parameters:"}</span>
                       <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
                         {JSON.stringify(part.input, null, 2)}
                       </pre>
                     </div>
                   )}
                   <div>
-                    <span className="font-medium">{t("common.result")}</span>
+                    <span className="font-medium">{"Result:"}</span>
                     <div className="mt-1 rounded bg-transparent p-2">
                       {isLongOutput ? (
                         <PerformantMarkdown maxHeight="200px" content={outputText} />
@@ -320,7 +318,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4" />
             <span className="text-muted-foreground text-sm font-bold">
-              {t("tools.quotedToolCancelled", { name: toolName })}
+              {`"${toolName}" tool cancelled`}
             </span>
           </div>
         );
@@ -348,6 +346,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                       isErrorAccordionOpen && "scale-0 opacity-0",
                     )}
                   />
+
                   <IconChevronDown
                     className={cn(
                       "text-destructive absolute inset-0 size-4 shrink-0 scale-0 opacity-0 transition-[opacity,scale] duration-200 group-hover/dynamic-tool-error-accordion:scale-100 group-hover/dynamic-tool-error-accordion:opacity-100",
@@ -361,12 +360,12 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               className="justify-start gap-1 p-0 font-bold hover:no-underline"
             >
               <span className="text-destructive max-w-2xl truncate">
-                {labels?.errorTitle ?? t("tools.quotedToolError", { name: toolName })}
+                {labels?.errorTitle ?? `"${toolName}" tool error`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
               <div className="text-destructive/80 text-sm font-normal">
-                {part?.errorText || t("messages.unknownError")}
+                {part?.errorText || "Unknown error"}
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -379,7 +378,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-destructive size-4" />
           <span className="text-destructive text-sm font-bold">
-            {t("tools.unknownToolState", { name: toolName })}
+            {`Unknown "${toolName}" tool state`}
           </span>
         </div>
       );
