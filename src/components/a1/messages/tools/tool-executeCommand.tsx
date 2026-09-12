@@ -349,23 +349,23 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
             >
               <span className="max-w-2xl truncate">
                 {liveState?.status === "skipped-running"
-                  ? "Skipped" + " "
+                  ? "Skipped "
                   : isPreliminary
-                    ? "Running" + " "
-                    : "Ran" + " "}
+                    ? "Running "
+                    : "Ran "}
                 <code className="text-xs">{truncatedCommand}</code>
                 {liveState?.status === "skipped-running"
-                  ? " " + "(backgrounded)"
+                  ? " (backgrounded)"
                   : isPreliminary
                     ? ""
                     : output.timedOut
-                      ? " " + "(timed out)"
+                      ? " (timed out)"
                       : output.stopped
-                        ? " " + "(stopped)"
+                        ? " (stopped)"
                         : output.skipped
-                          ? " " + "(skipped)"
+                          ? " (skipped)"
                           : output.exitCode && output.exitCode !== 0
-                            ? ` ${`(exit code ${output.exitCode})`}`
+                            ? ` (exit code ${output.exitCode})`
                             : ""}
               </span>
               {showLongRunningStop && (

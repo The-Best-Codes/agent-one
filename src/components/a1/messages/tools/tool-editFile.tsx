@@ -222,7 +222,7 @@ export const MessagePartToolEditFile = ({ part }: EditFileToolPartProps) => {
             >
               <span className="max-w-2xl truncate">
                 {`Edited ${filePath}`}
-                {output.linesChanged ? ` ${`(${output.linesChanged} lines)`}` : ""}
+                {output.linesChanged ? ` (${output.linesChanged} lines)` : ""}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">

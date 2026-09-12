@@ -279,7 +279,7 @@ export default function LocalDatabaseTestRoute() {
           const cleanupMessage = "The stored chat list changed during cleanup.";
           setSummary((current) =>
             current
-              ? `${current} ${`Cleanup issue: ${cleanupMessage}`}`
+              ? `${current} Cleanup issue: ${cleanupMessage}`
               : `Cleanup issue: ${cleanupMessage}`,
           );
           addLog(`Cleanup failed: ${cleanupMessage}`);
@@ -291,7 +291,7 @@ export default function LocalDatabaseTestRoute() {
           cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
         setSummary((current) =>
           current
-            ? `${current} ${`Cleanup issue: ${cleanupMessage}`}`
+            ? `${current} Cleanup issue: ${cleanupMessage}`
             : `Cleanup issue: ${cleanupMessage}`,
         );
         addLog(`Cleanup failed: ${cleanupMessage}`);

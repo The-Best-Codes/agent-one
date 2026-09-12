@@ -206,7 +206,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
               >
                 <span className="max-w-2xl truncate">
                   {`Found ${result.results?.length ?? 0} Wikipedia results for "${result.query}"`}
-                  {result.suggestion ? ` ${`(suggested: "${result.suggestion}")`}` : ""}
+                  {result.suggestion ? ` (suggested: "${result.suggestion}")` : ""}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground p-0 pt-2 text-xs">

@@ -157,9 +157,9 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
     case "output-available": {
       const lineInfo =
         output.truncated && output.startLine != null && output.endLine != null
-          ? ` ${`(${output.startLine}-${output.endLine} of ${output.totalLines} lines)`}`
+          ? ` (${output.startLine}-${output.endLine} of ${output.totalLines} lines)`
           : output.totalLines != null
-            ? ` ${`(${output.totalLines} lines)`}`
+            ? ` (${output.totalLines} lines)`
             : "";
 
       return (

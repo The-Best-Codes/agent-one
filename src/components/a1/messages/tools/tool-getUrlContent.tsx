@@ -225,7 +225,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                   )}
                 </>
               ) : (
-                ` ${`${urlCount} URLs`}`
+                ` ${urlCount} URLs`
               )}
             </span>
           </div>
@@ -438,7 +438,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 {isStreaming
                   ? `Browsing ${results.length} URLs...`
                   : `Browsed ${results.length} URLs`}
-                {failCount > 0 && ` ${`(${failCount} failed)`}`}
+                {failCount > 0 && ` (${failCount} failed)`}
               </span>
             </AccordionTrigger>
             <AccordionContent className="p-0 pt-2">
