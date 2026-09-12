@@ -913,20 +913,7 @@ export default function AppearanceSection() {
                     onClick={() =>
                       updateChatBackground({ preset: value as ChatBackgroundPresetOption })
                     }
-                    title={
-                      {
-                        abstract: "Abstract",
-                        mist: "Morning Mist",
-                        night: "Night Sky",
-                        island: "Island",
-                        aurora: "Aurora",
-                        valley: "Valley",
-                        forest: "Forest",
-                        ocean: "Ocean",
-                        mountain: "Mountain",
-                        sunset: "Sunset",
-                      }[value]
-                    }
+                    title={preset.label}
                   >
                     {chatBackground.preset === value && (
                       <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
@@ -934,20 +921,7 @@ export default function AppearanceSection() {
                       </span>
                     )}
                     <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
-                      {
-                        {
-                          abstract: "Abstract",
-                          mist: "Morning Mist",
-                          night: "Night Sky",
-                          island: "Island",
-                          aurora: "Aurora",
-                          valley: "Valley",
-                          forest: "Forest",
-                          ocean: "Ocean",
-                          mountain: "Mountain",
-                          sunset: "Sunset",
-                        }[value]
-                      }
+                      {preset.label}
                     </span>
                   </Button>
                 ))}
