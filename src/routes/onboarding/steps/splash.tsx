@@ -140,7 +140,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
           <div className="flex flex-col items-center gap-2 pb-4 text-center">
             <h1 className="text-foreground text-4xl font-bold">{`Welcome to ${CONFIG.appName}`}</h1>
             <p className="text-muted-foreground text-xl">
-              {"Let's get you set up with a few questions"}
+              Let's get you set up with a few questions
             </p>
           </div>
         </div>
@@ -159,7 +159,7 @@ export function SplashStep({ onGetStarted }: SplashStepProps) {
 
         {showButton ? (
           <Button variant="default" size="lg" onClick={handleGetStarted}>
-            {"Get Started"}
+            Get Started
           </Button>
         ) : (
           <div

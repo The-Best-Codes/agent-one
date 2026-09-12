@@ -31,7 +31,7 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
       )}
     >
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-foreground text-4xl font-bold">{"You're all set!"}</h1>
+        <h1 className="text-foreground text-4xl font-bold">You're all set!</h1>
         <p className="text-muted-foreground text-lg">{`Welcome aboard, ${name}. Ready to get started?`}</p>
       </div>
 
@@ -43,7 +43,7 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           disabled={isExiting}
         >
           <IconRocket data-icon="inline-start" />
-          {"Launch AgentOne"}
+          Launch AgentOne
         </Button>
         <Button
           variant="outline"
@@ -51,15 +51,15 @@ export function WelcomeStep({ name, onComplete }: WelcomeStepProps) {
           className="relative h-14 justify-start px-6 text-lg"
           disabled={true}
         >
-          <Badge className="absolute -top-2 -right-2">{"Coming Soon!"}</Badge>
+          <Badge className="absolute -top-2 -right-2">Coming Soon!</Badge>
           <IconSchool data-icon="inline-start" />
-          {"Take the Tutorial"}
+          Take the Tutorial
         </Button>
         <Button asChild variant="outline" size="lg" className="h-14 justify-between px-6 text-lg">
           <a href={AGENT_ONE_DOCS_URL} target="_blank" rel="noreferrer">
             <div className="flex items-center gap-2">
               <IconBook data-icon="inline-start" />
-              {"Browse Documentation"}
+              Browse Documentation
             </div>
             <IconExternalLink className="size-5" />
           </a>

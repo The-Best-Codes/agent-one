@@ -26,8 +26,8 @@ export const MainInputIncompleteSection = ({ onRetry }: { onRetry?: () => void }
   return (
     <div className="bg-muted/50 border-muted-foreground/20 text-foreground mb-0 flex w-full flex-row items-center justify-between gap-2 rounded-none border p-2 md:mb-2 md:rounded-md">
       <div className="flex max-h-24 w-full flex-col items-start overflow-auto">
-        <h3 className="text-lg font-bold">{"Incomplete Chat"}</h3>
-        <span className="text-base">{"The last message didn't receive a response."}</span>
+        <h3 className="text-lg font-bold">Incomplete Chat</h3>
+        <span className="text-base">The last message didn't receive a response.</span>
       </div>
       <div className="flex flex-row items-center gap-2">
         <Button
@@ -39,7 +39,7 @@ export const MainInputIncompleteSection = ({ onRetry }: { onRetry?: () => void }
           disabled={!hasAvailableModels}
         >
           <IconPlayerPlay data-icon="inline-start" />
-          {"Resume"}
+          Resume
         </Button>
       </div>
     </div>

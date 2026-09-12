@@ -56,13 +56,13 @@ export default function LogsTestRoute() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")}>
             <IconArrowLeft data-icon="inline-start" />
-            {"Back to Tests"}
+            Back to Tests
           </Button>
-          <h1 className="text-2xl font-bold">{"Log History"}</h1>
+          <h1 className="text-2xl font-bold">Log History</h1>
           <div className="ml-auto">
             <Button variant="destructive" size="sm" onClick={clearLogs}>
               <IconTrash data-icon="inline-start" />
-              {"Clear"}
+              Clear
             </Button>
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function LogsTestRoute() {
               <div className="relative">
                 <IconSearch className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
                 <Input
-                  placeholder={"Search"}
+                  placeholder="Search"
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -91,10 +91,10 @@ export default function LogsTestRoute() {
               ) : (
                 <>
                   <div className="text-muted-foreground grid grid-cols-[7rem_4rem_9rem_1fr] gap-0 border-b px-3 py-2 text-left text-xs font-medium uppercase">
-                    <div>{"Time"}</div>
-                    <div>{"Type"}</div>
-                    <div>{"Tag"}</div>
-                    <div>{"Message"}</div>
+                    <div>Time</div>
+                    <div>Type</div>
+                    <div>Tag</div>
+                    <div>Message</div>
                   </div>
                   <div
                     style={{

@@ -33,17 +33,17 @@ export function ChatToBottomButton({ onClick, className }: ChatToBottomButtonPro
             onClick={onClick}
             className={className}
             variant="default"
-            aria-label={"Scroll to bottom"}
+            aria-label="Scroll to bottom"
           >
             <IconChevronDown data-testid="scroll-to-bottom-icon" data-icon="inline-start" />
-            {"Scroll to bottom"}
+            Scroll to bottom
           </Button>
         </ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuGroup>
-            <ContextMenuLabel>{"Options"}</ContextMenuLabel>
+            <ContextMenuLabel>Options</ContextMenuLabel>
             <ContextMenuItem variant="destructive" onSelect={() => setShowSetting(false)}>
-              {"Never show this button"}
+              Never show this button
             </ContextMenuItem>
           </ContextMenuGroup>
         </ContextMenuContent>

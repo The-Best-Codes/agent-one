@@ -402,7 +402,7 @@ export const VirtualizedChatList = ({
             analytics={{ event: "new_chat_clicked", params: { ui_location: "chat_list" } }}
           >
             <IconPlus data-icon="inline-start" />
-            {"New Chat"}
+            New Chat
           </Button>
         )}
         {selectionMode ? (
@@ -481,7 +481,7 @@ export const VirtualizedChatList = ({
                   variant="outline"
                   size="icon"
                   className="shrink-0 rounded-l-none border-l-0"
-                  aria-label={"Search options"}
+                  aria-label="Search options"
                   analytics={{
                     event: "chat_search_options_opened",
                     params: { ui_location: "sidebar" },
@@ -492,18 +492,18 @@ export const VirtualizedChatList = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>{"Search mode"}</DropdownMenuLabel>
+                  <DropdownMenuLabel>Search mode</DropdownMenuLabel>
                   <DropdownMenuCheckboxItem
                     checked={searchContent}
                     onCheckedChange={(checked) => setSearchContent(checked as boolean)}
                   >
-                    {"Search content"}
+                    Search content
                   </DropdownMenuCheckboxItem>
                   <DropdownMenuCheckboxItem
                     checked={groupSearchResults}
                     onCheckedChange={(checked) => setGroupSearchResults(checked as boolean)}
                   >
-                    {"Group search results by time"}
+                    Group search results by time
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuGroup>
                 {searchContent && (
@@ -514,7 +514,7 @@ export const VirtualizedChatList = ({
                         checked={rawOperators}
                         onCheckedChange={(checked) => setRawOperators(checked as boolean)}
                       >
-                        {"Raw FTS5 syntax"}
+                        Raw FTS5 syntax
                       </DropdownMenuCheckboxItem>
                     </DropdownMenuGroup>
                   </>
@@ -543,12 +543,12 @@ export const VirtualizedChatList = ({
         ) : showNoChatsPlaceholder ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <IconInbox className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">{"No chats yet"}</p>
+            <p className="max-w-full min-w-0 truncate">No chats yet</p>
           </div>
         ) : showSearchLoading ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">
             <Spinner className="text-muted-foreground size-16" />
-            <p className="max-w-full min-w-0 truncate">{"Searching..."}</p>
+            <p className="max-w-full min-w-0 truncate">Searching...</p>
           </div>
         ) : showNoSearchResults ? (
           <div className="text-muted-foreground flex h-full flex-col items-center justify-center text-center text-sm">

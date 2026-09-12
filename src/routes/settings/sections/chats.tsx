@@ -120,17 +120,16 @@ export default function ChatsSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{"Chat Behavior"}</CardTitle>
+          <CardTitle>Chat Behavior</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-chat-sort-order">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Chat Sort Order"}</Label>
+                <Label className="text-sm font-medium">Chat Sort Order</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {
-                    "Choose whether the sidebar keeps newer chats first or brings recently updated chats to the top."
-                  }
+                  Choose whether the sidebar keeps newer chats first or brings recently updated
+                  chats to the top.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -143,14 +142,14 @@ export default function ChatsSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select chat sort order"}
+                    aria-label="Select chat sort order"
                   >
-                    <SelectValue placeholder={"Select option"} />
+                    <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="created-at">{"Newest chats first"}</SelectItem>
-                      <SelectItem value="updated-at">{"Recently updated first"}</SelectItem>
+                      <SelectItem value="created-at">Newest chats first</SelectItem>
+                      <SelectItem value="updated-at">Recently updated first</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -162,7 +161,7 @@ export default function ChatsSection() {
                     resetSetting("CHAT_SORT");
                   }}
                   disabled={isChatSortDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -173,11 +172,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-sidebar-chat-time-grouping">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Group sidebar chats by time"}</Label>
+                <Label className="text-sm font-medium">Group sidebar chats by time</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {
-                    "Organize chats into time sections such as Recent, Last Week, and monthly groups."
-                  }
+                  Organize chats into time sections such as Recent, Last Week, and monthly groups.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -192,15 +189,15 @@ export default function ChatsSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select when to group sidebar chats by time"}
+                    aria-label="Select when to group sidebar chats by time"
                   >
-                    <SelectValue placeholder={"Select option"} />
+                    <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="only-when-searching">{"Only when searching"}</SelectItem>
-                      <SelectItem value="always">{"Always"}</SelectItem>
-                      <SelectItem value="never">{"Never"}</SelectItem>
+                      <SelectItem value="only-when-searching">Only when searching</SelectItem>
+                      <SelectItem value="always">Always</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -212,7 +209,7 @@ export default function ChatsSection() {
                     resetSetting("SIDEBAR_CHAT_TIME_GROUPING");
                   }}
                   disabled={isSidebarChatTimeGroupingDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -223,9 +220,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-markdown-rendering">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Markdown Rendering"}</Label>
+                <Label className="text-sm font-medium">Markdown Rendering</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Choose which messages should render markdown formatting."}
+                  Choose which messages should render markdown formatting.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -238,16 +235,16 @@ export default function ChatsSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select markdown rendering"}
+                    aria-label="Select markdown rendering"
                   >
-                    <SelectValue placeholder={"Select option"} />
+                    <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="both">{"All messages"}</SelectItem>
-                      <SelectItem value="user">{"User messages only"}</SelectItem>
-                      <SelectItem value="assistant">{"Assistant messages only"}</SelectItem>
-                      <SelectItem value="neither">{"No messages"}</SelectItem>
+                      <SelectItem value="both">All messages</SelectItem>
+                      <SelectItem value="user">User messages only</SelectItem>
+                      <SelectItem value="assistant">Assistant messages only</SelectItem>
+                      <SelectItem value="neither">No messages</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -259,7 +256,7 @@ export default function ChatsSection() {
                     resetSetting("MARKDOWN_RENDERING");
                   }}
                   disabled={isMarkdownRenderingDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -270,9 +267,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-remend">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Fix Streaming Markdown"}</Label>
+                <Label className="text-sm font-medium">Fix Streaming Markdown</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Automatically fix incomplete formatting in streamed responses."}
+                  Automatically fix incomplete formatting in streamed responses.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -284,7 +281,7 @@ export default function ChatsSection() {
                     });
                     setRemendEnabled(checked);
                   }}
-                  aria-label={"Toggle auto-close HTML tags"}
+                  aria-label="Toggle auto-close HTML tags"
                 />
 
                 <Button
@@ -295,7 +292,7 @@ export default function ChatsSection() {
                     resetSetting("REMEND_ENABLED");
                   }}
                   disabled={isRemendEnabledDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -306,9 +303,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-completion-notification">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Agent Notifications"}</Label>
+                <Label className="text-sm font-medium">Agent Notifications</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Show a notification when AgentOne responds or needs your attention."}
+                  Show a notification when AgentOne responds or needs your attention.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -321,15 +318,15 @@ export default function ChatsSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select completion notification"}
+                    aria-label="Select completion notification"
                   >
-                    <SelectValue placeholder={"Select option"} />
+                    <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="always">{"Always"}</SelectItem>
-                      <SelectItem value="when-unfocused">{"When window unfocused"}</SelectItem>
-                      <SelectItem value="never">{"Never"}</SelectItem>
+                      <SelectItem value="always">Always</SelectItem>
+                      <SelectItem value="when-unfocused">When window unfocused</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -341,7 +338,7 @@ export default function ChatsSection() {
                     resetSetting("NOTIFICATION_SETTING");
                   }}
                   disabled={isNotificationSettingDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -352,9 +349,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-message-action-row">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Message Action Row"}</Label>
+                <Label className="text-sm font-medium">Message Action Row</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Control when message actions (copy, edit, etc.) are visible."}
+                  Control when message actions (copy, edit, etc.) are visible.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -367,15 +364,15 @@ export default function ChatsSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select message action row"}
+                    aria-label="Select message action row"
                   >
-                    <SelectValue placeholder={"Select option"} />
+                    <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="hover">{"Show on hover"}</SelectItem>
-                      <SelectItem value="always">{"Always show"}</SelectItem>
-                      <SelectItem value="never">{"Never show"}</SelectItem>
+                      <SelectItem value="hover">Show on hover</SelectItem>
+                      <SelectItem value="always">Always show</SelectItem>
+                      <SelectItem value="never">Never show</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -387,7 +384,7 @@ export default function ChatsSection() {
                     resetSetting("SHOW_MESSAGE_ACTION_ROW");
                   }}
                   disabled={isShowMessageActionRowDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -398,9 +395,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-submit-key">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Submit Key"}</Label>
+                <Label className="text-sm font-medium">Submit Key</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Choose which key combination submits your message."}
+                  Choose which key combination submits your message.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -413,14 +410,14 @@ export default function ChatsSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select submit key"}
+                    aria-label="Select submit key"
                   >
-                    <SelectValue placeholder={"Select option"} />
+                    <SelectValue placeholder="Select option" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="enter">{"Enter"}</SelectItem>
-                      <SelectItem value="ctrl-enter">{"Ctrl/CMD + Enter"}</SelectItem>
+                      <SelectItem value="enter">Enter</SelectItem>
+                      <SelectItem value="ctrl-enter">Ctrl/CMD + Enter</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -432,7 +429,7 @@ export default function ChatsSection() {
                     resetSetting("SUBMIT_KEY");
                   }}
                   disabled={isSubmitKeyDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -443,9 +440,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-regenerate-on-save">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Regenerate on Save"}</Label>
+                <Label className="text-sm font-medium">Regenerate on Save</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Automatically regenerate the AI response when you save an edited message."}
+                  Automatically regenerate the AI response when you save an edited message.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -457,7 +454,7 @@ export default function ChatsSection() {
                     });
                     setRegenerateOnSave(checked);
                   }}
-                  aria-label={"Toggle regenerate on save"}
+                  aria-label="Toggle regenerate on save"
                 />
 
                 <Button
@@ -468,7 +465,7 @@ export default function ChatsSection() {
                     resetSetting("REGENERATE_ON_SAVE");
                   }}
                   disabled={isRegenerateOnSaveDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -479,9 +476,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-always-show-stop-button">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Always Show Stop Button"}</Label>
+                <Label className="text-sm font-medium">Always Show Stop Button</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Show the stop button immediately after submitting a message."}
+                  Show the stop button immediately after submitting a message.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -493,7 +490,7 @@ export default function ChatsSection() {
                     });
                     setAlwaysShowStopButton(checked ? "immediate" : "at-stopping-point");
                   }}
-                  aria-label={"Toggle always show stop button"}
+                  aria-label="Toggle always show stop button"
                 />
 
                 <Button
@@ -504,7 +501,7 @@ export default function ChatsSection() {
                     resetSetting("STOP_BUTTON_BEHAVIOR");
                   }}
                   disabled={isAlwaysShowStopButtonDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -515,9 +512,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-show-scroll-to-bottom-button">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Chat Scroll to Bottom Button"}</Label>
+                <Label className="text-sm font-medium">Chat Scroll to Bottom Button</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Show a button to quickly scroll to the bottom of the chat."}
+                  Show a button to quickly scroll to the bottom of the chat.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -529,7 +526,7 @@ export default function ChatsSection() {
                     });
                     setShowChatToBottomButton(checked);
                   }}
-                  aria-label={"Toggle chat scroll to bottom button"}
+                  aria-label="Toggle chat scroll to bottom button"
                 />
 
                 <Button
@@ -540,7 +537,7 @@ export default function ChatsSection() {
                     resetSetting("SHOW_CHAT_TO_BOTTOM_BUTTON");
                   }}
                   disabled={isShowChatToBottomButtonDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -551,11 +548,10 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-show-message-preview-rail">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Message Navigation Rail"}</Label>
+                <Label className="text-sm font-medium">Message Navigation Rail</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {
-                    "Show message previews and navigation on the right side of chats. Hidden in the compact layout."
-                  }
+                  Show message previews and navigation on the right side of chats. Hidden in the
+                  compact layout.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -567,7 +563,7 @@ export default function ChatsSection() {
                     });
                     setShowMessagePreviewRail(checked);
                   }}
-                  aria-label={"Toggle message navigation rail"}
+                  aria-label="Toggle message navigation rail"
                 />
 
                 <Button
@@ -578,7 +574,7 @@ export default function ChatsSection() {
                     resetSetting("SHOW_MESSAGE_PREVIEW_RAIL");
                   }}
                   disabled={isShowMessagePreviewRailDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -589,9 +585,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-chat-status-indicators">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Chat Status Indicators"}</Label>
+                <Label className="text-sm font-medium">Chat Status Indicators</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Show status icons in the sidebar for loading, error, and unread chats."}
+                  Show status icons in the sidebar for loading, error, and unread chats.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -603,7 +599,7 @@ export default function ChatsSection() {
                     });
                     setShowChatStatusIndicator(checked);
                   }}
-                  aria-label={"Toggle chat status indicators"}
+                  aria-label="Toggle chat status indicators"
                 />
 
                 <Button
@@ -614,7 +610,7 @@ export default function ChatsSection() {
                     resetSetting("SHOW_CHAT_STATUS_INDICATOR");
                   }}
                   disabled={isShowChatStatusIndicatorDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -626,15 +622,15 @@ export default function ChatsSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{"Streaming Experience"}</CardTitle>
+          <CardTitle>Streaming Experience</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-smooth-stream">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Smooth Stream"}</Label>
+                <Label className="text-sm font-medium">Smooth Stream</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Enable smooth streaming for a more fluid typing experience."}
+                  Enable smooth streaming for a more fluid typing experience.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -646,7 +642,7 @@ export default function ChatsSection() {
                     });
                     setSmoothStreamEnabled(checked);
                   }}
-                  aria-label={"Toggle smooth stream"}
+                  aria-label="Toggle smooth stream"
                 />
 
                 <Button
@@ -657,7 +653,7 @@ export default function ChatsSection() {
                     resetSetting("SMOOTH_STREAM_ENABLED");
                   }}
                   disabled={isSmoothStreamDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -668,7 +664,7 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-extract-reasoning">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Extract Reasoning from Think Tags"}</Label>
+                <Label className="text-sm font-medium">Extract Reasoning from Think Tags</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
                   {
                     "Automatically extract <think> tag content from model responses and display it as a collapsible reasoning section. Does not apply to past messages or non-reasoning models."
@@ -684,7 +680,7 @@ export default function ChatsSection() {
                     });
                     setExtractReasoningEnabled(checked);
                   }}
-                  aria-label={"Toggle extract reasoning from think tags"}
+                  aria-label="Toggle extract reasoning from think tags"
                 />
 
                 <Button
@@ -695,7 +691,7 @@ export default function ChatsSection() {
                     resetSetting("EXTRACT_REASONING_ENABLED");
                   }}
                   disabled={isExtractReasoningDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -706,9 +702,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-experimental-throttle">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Experimental Throttle"}</Label>
+                <Label className="text-sm font-medium">Experimental Throttle</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Enable throttling to control streaming speed."}
+                  Enable throttling to control streaming speed.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -720,7 +716,7 @@ export default function ChatsSection() {
                     });
                     setExperimentalThrottleEnabled(checked);
                   }}
-                  aria-label={"Toggle experimental throttle"}
+                  aria-label="Toggle experimental throttle"
                 />
 
                 <Button
@@ -731,7 +727,7 @@ export default function ChatsSection() {
                     resetSetting("EXPERIMENTAL_THROTTLE_ENABLED");
                   }}
                   disabled={isExperimentalThrottleEnabledDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -747,7 +743,7 @@ export default function ChatsSection() {
                     {`Throttle Value: ${experimentalThrottleValue}ms`}
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {"Adjust the throttle delay from 0ms to 10,000ms."}
+                    Adjust the throttle delay from 0ms to 10,000ms.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -763,7 +759,7 @@ export default function ChatsSection() {
                     max={10000}
                     step={10}
                     className="flex-1"
-                    aria-label={"Throttle value"}
+                    aria-label="Throttle value"
                   />
 
                   <Button
@@ -774,7 +770,7 @@ export default function ChatsSection() {
                       resetSetting("EXPERIMENTAL_THROTTLE_VALUE");
                     }}
                     disabled={isExperimentalThrottleValueDefault}
-                    aria-label={"Reset to default"}
+                    aria-label="Reset to default"
                   >
                     <IconRestore data-icon="inline-start" />
                   </Button>
@@ -788,7 +784,7 @@ export default function ChatsSection() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>{"Chat Titles"}</CardTitle>
+            <CardTitle>Chat Titles</CardTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -797,7 +793,7 @@ export default function ChatsSection() {
                 resetSetting("TITLE_GENERATION");
               }}
               disabled={isTitleGenerationDefault}
-              aria-label={"Reset all title settings to default"}
+              aria-label="Reset all title settings to default"
             >
               <IconRestore data-icon="inline-start" />
             </Button>
@@ -807,9 +803,9 @@ export default function ChatsSection() {
           <SettingsTarget id="setting-generation-method">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Generation Method"}</Label>
+                <Label className="text-sm font-medium">Generation Method</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"How chat titles should be generated."}
+                  How chat titles should be generated.
                 </p>
               </div>
               <Select
@@ -823,18 +819,16 @@ export default function ChatsSection() {
               >
                 <SelectTrigger
                   className="w-full md:w-fit md:max-w-96"
-                  aria-label={"Select generation method"}
+                  aria-label="Select generation method"
                 >
-                  <SelectValue placeholder={"Select method"} />
+                  <SelectValue placeholder="Select method" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="ai">{"AI generated"}</SelectItem>
-                    <SelectItem value="first-user-message">{"First user message"}</SelectItem>
-                    <SelectItem value="first-assistant-message">
-                      {"First assistant message"}
-                    </SelectItem>
-                    <SelectItem value="custom">{"Custom phrase"}</SelectItem>
+                    <SelectItem value="ai">AI generated</SelectItem>
+                    <SelectItem value="first-user-message">First user message</SelectItem>
+                    <SelectItem value="first-assistant-message">First assistant message</SelectItem>
+                    <SelectItem value="custom">Custom phrase</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -847,10 +841,10 @@ export default function ChatsSection() {
               <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex flex-1 flex-col items-start">
                   <Label htmlFor="character-limit" className="text-sm font-medium">
-                    {"Character Limit"}
+                    Character Limit
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {"Maximum characters to use from the message."}
+                    Maximum characters to use from the message.
                   </p>
                 </div>
                 <Input
@@ -881,9 +875,9 @@ export default function ChatsSection() {
                     {`Max Output Tokens: ${titleMaxOutputTokenLabel}`}
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {
-                      "Maximum tokens available for AI title generation. Use no limit if title generation fails with thinking models. Manually generated titles don't respect this setting."
-                    }
+                    Maximum tokens available for AI title generation. Use no limit if title
+                    generation fails with thinking models. Manually generated titles don't respect
+                    this setting.
                   </p>
                 </div>
                 <Slider
@@ -899,7 +893,7 @@ export default function ChatsSection() {
                   max={64000}
                   step={64}
                   className="w-full"
-                  aria-label={"Title generation max output tokens"}
+                  aria-label="Title generation max output tokens"
                 />
               </div>
             </SettingsTarget>
@@ -910,10 +904,10 @@ export default function ChatsSection() {
               <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex flex-1 flex-col items-start">
                   <Label htmlFor="custom-phrase" className="text-sm font-medium">
-                    {"Custom Phrase"}
+                    Custom Phrase
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {"The phrase to use as the chat title."}
+                    The phrase to use as the chat title.
                   </p>
                 </div>
                 <Input
@@ -928,7 +922,7 @@ export default function ChatsSection() {
                       customPhrase: e.target.value,
                     });
                   }}
-                  placeholder={"New chat"}
+                  placeholder="New chat"
                   className="w-full md:w-64"
                 />
               </div>
@@ -940,10 +934,10 @@ export default function ChatsSection() {
               <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex flex-1 flex-col items-start">
                   <Label htmlFor="fallback-phrase" className="text-sm font-medium">
-                    {"Fallback Phrase"}
+                    Fallback Phrase
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {"Used when title generation fails or no content is available."}
+                    Used when title generation fails or no content is available.
                   </p>
                 </div>
                 <Input
@@ -958,7 +952,7 @@ export default function ChatsSection() {
                       fallbackPhrase: e.target.value,
                     });
                   }}
-                  placeholder={"New chat"}
+                  placeholder="New chat"
                   className="w-full md:w-64"
                 />
               </div>

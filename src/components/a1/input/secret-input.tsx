@@ -82,7 +82,7 @@ export function SecretInput({
             disabled={!hasChanges}
             variant="outline"
             size="icon"
-            title={"Save"}
+            title="Save"
           >
             <IconDeviceFloppy data-icon="inline-start" />
           </Button>
@@ -92,7 +92,7 @@ export function SecretInput({
             disabled={!hasChanges}
             variant="outline"
             size="icon"
-            title={"Cancel changes"}
+            title="Cancel changes"
           >
             <IconRestore data-icon="inline-start" />
           </Button>

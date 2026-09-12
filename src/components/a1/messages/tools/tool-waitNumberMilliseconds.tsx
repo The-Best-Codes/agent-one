@@ -70,7 +70,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -78,7 +78,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -100,7 +100,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           <div>
             <Spinner className="text-foreground size-4 shrink-0" />
           </div>
-          <span className="text-foreground text-sm font-bold">{"Waiting a bit..."}</span>
+          <span className="text-foreground text-sm font-bold">Waiting a bit...</span>
         </div>
       );
 
@@ -147,7 +147,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{"Wait cancelled"}</span>
+            <span className="text-muted-foreground text-sm font-bold">Wait cancelled</span>
           </div>
         );
       }
@@ -157,7 +157,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"An error occurred while waiting"}
+          title="An error occurred while waiting"
         />
       );
 
@@ -165,7 +165,7 @@ export const MessagePartToolWaitNumberMilliseconds = ({
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconClock className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Wait tool accessed"}</span>
+          <span className="text-foreground text-sm font-bold">Wait tool accessed</span>
         </div>
       );
   }

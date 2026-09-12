@@ -89,7 +89,7 @@ export const Attachments: React.FC<AttachmentsProps> = ({ files, onRemove }) => 
               variant="ghost"
               onClick={() => handleRemove(index)}
               className="size-6 shrink-0 opacity-60 transition-opacity hover:opacity-100"
-              title={"Remove file"}
+              title="Remove file"
             >
               <IconX data-icon="inline-start" />
             </Button>

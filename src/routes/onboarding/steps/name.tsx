@@ -79,17 +79,15 @@ export function NameStep({ onSubmit }: NameStepProps) {
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-2xl font-bold">{"What should I call you?"}</h2>
-          <p className="text-muted-foreground">
-            {"Enter your name to personalize your experience."}
-          </p>
+          <h2 className="text-foreground text-2xl font-bold">What should I call you?</h2>
+          <p className="text-muted-foreground">Enter your name to personalize your experience.</p>
         </div>
 
         <div className="flex flex-col gap-3">
           <Input
             ref={inputRef}
             type="text"
-            placeholder={"John"}
+            placeholder="John"
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
             onKeyDown={(e) => {
@@ -100,7 +98,7 @@ export function NameStep({ onSubmit }: NameStepProps) {
           />
 
           <Button onClick={handleSubmit} disabled={!nameInput.trim()} className="w-full">
-            {"Continue"}
+            Continue
           </Button>
         </div>
       </div>

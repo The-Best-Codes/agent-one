@@ -24,11 +24,10 @@ export const MainInputProvisioningSection = () => {
   return (
     <Alert className="mb-0 rounded-none md:mb-2 md:rounded-md">
       <IconInfoCircle />
-      <AlertTitle>{"Account setup in progress"}</AlertTitle>
+      <AlertTitle>Account setup in progress</AlertTitle>
       <AlertDescription>
-        {
-          "Your account will be ready in a few minutes. AgentOne chat will start working once your credits appear."
-        }
+        Your account will be ready in a few minutes. AgentOne chat will start working once your
+        credits appear.
       </AlertDescription>
     </Alert>
   );

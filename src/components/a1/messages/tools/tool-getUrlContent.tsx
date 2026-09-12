@@ -109,7 +109,7 @@ const UrlCancelledDisplay = memo(({ url }: { url: string }) => {
         >
           {formatUrl(url)}
         </a>{" "}
-        {"cancelled"}
+        cancelled
       </span>
     </div>
   );
@@ -161,7 +161,7 @@ const UrlResultDisplay = memo(
                 <AdaptiveTooltipTrigger asChild>
                   <IconFileText className="text-muted-foreground size-4 shrink-0" />
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{"Fetched raw content"}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>Fetched raw content</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
             <AdaptiveTooltip>
@@ -207,7 +207,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <div className="flex items-center gap-1">
             <IconWorld className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {"AgentOne wants to browse"}
+              AgentOne wants to browse
               {urlCount === 1 ? (
                 <>
                   {" "}
@@ -236,7 +236,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -244,7 +244,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -270,7 +270,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 ) : (
                   "a website"
                 )}{" "}
-                {"denied"}
+                denied
               </>
             ) : (
               `Browsing ${urlCount} URLs denied`
@@ -285,7 +285,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           <div>
             <Spinner className="text-foreground size-4 shrink-0" />
           </div>
-          <span className="text-foreground text-sm font-bold">{"Browsing URLs..."}</span>
+          <span className="text-foreground text-sm font-bold">Browsing URLs...</span>
         </div>
       );
 
@@ -311,7 +311,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                   ) : (
                     "a website"
                   )}{" "}
-                  {"denied"}
+                  denied
                 </>
               ) : (
                 `Browsing ${urlCount} URLs denied`
@@ -475,7 +475,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
                 >
                   {formatUrl(singleUrl)}
                 </a>{" "}
-                {"cancelled"}
+                cancelled
               </span>
             </div>
           );
@@ -538,7 +538,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{"Browsing cancelled"}</span>
+            <span className="text-muted-foreground text-sm font-bold">Browsing cancelled</span>
           </div>
         );
       }
@@ -548,7 +548,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Error fetching URL content"}
+          title="Error fetching URL content"
         />
       );
     }
@@ -557,7 +557,7 @@ export const MessagePartToolGetUrlContent = ({ part }: GetUrlContentToolPartProp
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconWorld className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Web browsing accessed"}</span>
+          <span className="text-foreground text-sm font-bold">Web browsing accessed</span>
         </div>
       );
   }

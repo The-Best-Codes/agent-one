@@ -125,7 +125,7 @@ export default function SettingsRoute() {
         fillHeight && "flex h-svh min-h-0 flex-col overflow-hidden",
       )}
     >
-      <h1 className="sr-only">{"Settings"}</h1>
+      <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
           <Button
@@ -135,14 +135,14 @@ export default function SettingsRoute() {
             analytics={{ event: "settings_back_clicked", params: { ui_location: "mobile_header" } }}
           >
             <IconArrowLeft data-icon="inline-start" />
-            {"Back"}
+            Back
           </Button>
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DrawerTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                aria-label={"Open settings menu"}
+                aria-label="Open settings menu"
                 analytics={{
                   event: "settings_menu_opened",
                   params: { ui_location: "mobile_header" },
@@ -153,10 +153,8 @@ export default function SettingsRoute() {
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle className="mb-2">{"Setting Categories"}</DrawerTitle>
-                <DrawerDescription className="sr-only">
-                  {"List of setting sections"}
-                </DrawerDescription>
+                <DrawerTitle className="mb-2">Setting Categories</DrawerTitle>
+                <DrawerDescription className="sr-only">List of setting sections</DrawerDescription>
                 <SettingsSidebar
                   activeSection={displayedSection}
                   onSectionChange={(section) => {
@@ -197,7 +195,7 @@ export default function SettingsRoute() {
                   }}
                 >
                   <IconArrowLeft data-icon="inline-start" />
-                  {"Back to Chat"}
+                  Back to Chat
                 </Button>
               </div>
               <SettingsSidebar

@@ -138,7 +138,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                     <IconAlertTriangle className="size-4" />
                   </span>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{"No API key set"}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>No API key set</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
           </span>
@@ -154,7 +154,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
                 }}
               >
                 <IconAlertTriangle data-icon="inline-start" />
-                {"Set Up Provider"}
+                Set Up Provider
               </Button>
             )}
             <Switch
@@ -180,7 +180,7 @@ const ProviderAccordionItem = memo(function ProviderAccordionItem({
           {showApiKey ? (
             <div className="flex flex-col gap-2">
               <Label htmlFor={`api-key-${id}`} className="text-xs">
-                {"API Key"}
+                API Key
               </Label>
               {apiKeyHint ? <p className="text-muted-foreground text-sm">{apiKeyHint}</p> : null}
               <SecretInput
@@ -267,11 +267,9 @@ export const BuiltInProviderListItem = memo(function BuiltInProviderListItem({
       builtInModels={builtInModels}
       apiKeyPlaceholder={`Enter your ${label} API key`}
       apiKeyHint={hasEnvKey ? "Using environment variable. Override below if needed." : undefined}
-      addButtonLabel={"Add Model Override"}
-      emptyTitle={"No model overrides"}
-      emptyDescription={
-        "Add a model to override built-in metadata or to register an extra model for this provider."
-      }
+      addButtonLabel="Add Model Override"
+      emptyTitle="No model overrides"
+      emptyDescription="Add a model to override built-in metadata or to register an extra model for this provider."
       onEnabledChange={(enabled) => updateConfig({ enabled })}
       showSetupButton={showSetupButton}
       showMissingKeyWarning={showMissingKeyWarning}
@@ -325,31 +323,31 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
         onHeadersChange={(headers) => update({ headers })}
         models={provider.models}
         onModelsChange={(models) => update({ models })}
-        apiKeyPlaceholder={"Enter API key if required"}
+        apiKeyPlaceholder="Enter API key if required"
         modelListBaseUrl={provider.baseUrl}
         modelListHeaders={provider.headers}
         modelListApiKey={apiKey}
-        emptyTitle={"No models configured"}
-        emptyDescription={"Add a model to make it available in the model picker."}
+        emptyTitle="No models configured"
+        emptyDescription="Add a model to make it available in the model picker."
         details={
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor={`name-${provider.id}`}>{"Name"}</FieldLabel>
+              <FieldLabel htmlFor={`name-${provider.id}`}>Name</FieldLabel>
               <Input
                 id={`name-${provider.id}`}
                 value={provider.name}
                 onChange={(event) => update({ name: event.target.value })}
-                placeholder={"Provider name"}
+                placeholder="Provider name"
               />
             </Field>
 
             <Field>
-              <FieldLabel htmlFor={`base-url-${provider.id}`}>{"Base URL"}</FieldLabel>
+              <FieldLabel htmlFor={`base-url-${provider.id}`}>Base URL</FieldLabel>
               <Input
                 id={`base-url-${provider.id}`}
                 value={provider.baseUrl}
                 onChange={(event) => update({ baseUrl: event.target.value })}
-                placeholder={"e.g., http://localhost:1234/v1"}
+                placeholder="e.g., http://localhost:1234/v1"
               />
             </Field>
           </FieldGroup>
@@ -367,7 +365,7 @@ export const CustomProviderListItem = memo(function CustomProviderListItem({
             className="w-fit"
           >
             <IconTrash data-icon="inline-start" />
-            {"Delete Provider"}
+            Delete Provider
           </Button>
         }
         onEnabledChange={(enabled) => update({ enabled })}
@@ -422,21 +420,21 @@ export const LocalProviderListItem = memo(function LocalProviderListItem({
       models={provider.models}
       onModelsChange={(models) => updateProvider(provider.id, { models })}
       showApiKey={false}
-      apiKeyPlaceholder={"No API key required"}
+      apiKeyPlaceholder="No API key required"
       modelListBaseUrl={provider.baseUrl}
       modelListHeaders={provider.headers}
       autoFetchOnMount
-      emptyTitle={"No models configured"}
-      emptyDescription={"Fetch models from Ollama or add one manually."}
+      emptyTitle="No models configured"
+      emptyDescription="Fetch models from Ollama or add one manually."
       details={
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor={`base-url-${provider.id}`}>{"Base URL"}</FieldLabel>
+            <FieldLabel htmlFor={`base-url-${provider.id}`}>Base URL</FieldLabel>
             <Input
               id={`base-url-${provider.id}`}
               value={provider.baseUrl}
               onChange={(event) => updateProvider(provider.id, { baseUrl: event.target.value })}
-              placeholder={"e.g. http://127.0.0.1:11434/v1"}
+              placeholder="e.g. http://127.0.0.1:11434/v1"
             />
           </Field>
         </FieldGroup>

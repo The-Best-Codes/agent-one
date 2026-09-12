@@ -171,35 +171,34 @@ export default function ChatStressTestRoute() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            {"Back to Tests"}
+            Back to Tests
           </Button>
-          <h1 className="text-2xl font-bold">{"Chat Stress Test"}</h1>
+          <h1 className="text-2xl font-bold">Chat Stress Test</h1>
         </div>
 
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{"Generate a Stress Chat"}</CardTitle>
+              <CardTitle>Generate a Stress Chat</CardTitle>
               <CardDescription>
-                {
-                  "Create a realistic large chat and jump straight into it to test chat rendering, scrolling, and virtualization thresholds."
-                }
+                Create a realistic large chat and jump straight into it to test chat rendering,
+                scrolling, and virtualization thresholds.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-2 md:col-span-2">
-                  <Label htmlFor="stress-chat-title">{"Chat Title"}</Label>
+                  <Label htmlFor="stress-chat-title">Chat Title</Label>
                   <Input
                     id="stress-chat-title"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
-                    placeholder={"Virtualization Stress Chat"}
+                    placeholder="Virtualization Stress Chat"
                   />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stress-chat-pairs">{"User/Assistant Pairs"}</Label>
+                  <Label htmlFor="stress-chat-pairs">User/Assistant Pairs</Label>
                   <Input
                     id="stress-chat-pairs"
                     type="number"
@@ -211,9 +210,7 @@ export default function ChatStressTestRoute() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="stress-chat-user-paragraphs">
-                    {"Paragraphs Per User Message"}
-                  </Label>
+                  <Label htmlFor="stress-chat-user-paragraphs">Paragraphs Per User Message</Label>
                   <Input
                     id="stress-chat-user-paragraphs"
                     type="number"
@@ -228,7 +225,7 @@ export default function ChatStressTestRoute() {
 
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="stress-chat-assistant-paragraphs">
-                    {"Paragraphs Per Assistant Message"}
+                    Paragraphs Per Assistant Message
                   </Label>
                   <Input
                     id="stress-chat-assistant-paragraphs"
@@ -243,7 +240,7 @@ export default function ChatStressTestRoute() {
                 </div>
 
                 <div className="flex flex-col justify-end gap-2">
-                  <Label htmlFor="stress-chat-reasoning">{"Include Reasoning Blocks"}</Label>
+                  <Label htmlFor="stress-chat-reasoning">Include Reasoning Blocks</Label>
                   <Button
                     id="stress-chat-reasoning"
                     type="button"

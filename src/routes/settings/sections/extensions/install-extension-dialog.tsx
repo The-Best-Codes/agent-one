@@ -225,7 +225,7 @@ function InstallExtensionDialogBody({
   const detectedConfigurationContent =
     install.fields.length > 0 ? (
       <div className="rounded-md border p-3">
-        <p className="mb-3 text-xs font-medium">{"Detected configuration"}</p>
+        <p className="mb-3 text-xs font-medium">Detected configuration</p>
         <div className="flex flex-col gap-3">
           {install.fields.map((field) => (
             <InstallFieldInput
@@ -280,7 +280,7 @@ function InstallExtensionDialogBody({
       <DialogHeader>
         <DialogTitle>{`Install ${extension.displayName}`}</DialogTitle>
         <DialogDescription>
-          {"Review detected settings and install this MCP extension."}
+          Review detected settings and install this MCP extension.
         </DialogDescription>
       </DialogHeader>
 
@@ -288,7 +288,7 @@ function InstallExtensionDialogBody({
         {installTemplates.length > 1 ? (
           <div className="grid gap-2 py-2">
             <Label htmlFor="install-method" className="text-sm">
-              {"Install method"}
+              Install method
             </Label>
             <Select value={install.id} onValueChange={selectMethod}>
               <SelectTrigger id="install-method" className="w-full">
@@ -314,7 +314,7 @@ function InstallExtensionDialogBody({
           showTransportEditors={false}
           commandPlaceholder="npx -y ..."
           urlPlaceholder="https://..."
-          approvalDescription={"Ask before running tools from this extension"}
+          approvalDescription="Ask before running tools from this extension"
           stdioSupplement={detectedConfigurationContent}
           httpSupplement={detectedConfigurationContent}
           showStdioWarning
@@ -327,7 +327,7 @@ function InstallExtensionDialogBody({
             <AdaptiveTooltipTrigger asChild>
               <Label className="text-destructive w-fit sm:w-full">
                 <IconAlertTriangle className="size-4" />
-                <span className="truncate">{"Missing required tool"}</span>
+                <span className="truncate">Missing required tool</span>
               </Label>
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent className="max-w-xs">
@@ -339,14 +339,14 @@ function InstallExtensionDialogBody({
         )}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {"Cancel"}
+            Cancel
           </Button>
           <Button
             onClick={handleInstall}
             disabled={!isFormValid}
             variant={missingRuntimeCommand ? "destructive" : "default"}
           >
-            {"Install"}
+            Install
           </Button>
         </div>
       </DialogFooter>

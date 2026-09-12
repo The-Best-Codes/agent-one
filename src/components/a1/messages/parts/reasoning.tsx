@@ -87,7 +87,7 @@ export const MessagePartReasoning = ({
           shouldRotateIcon={true}
           className="justify-start gap-1 p-0 font-bold hover:no-underline"
         >
-          <span className="max-w-2xl truncate">{"Reasoning"}</span>
+          <span className="max-w-2xl truncate">Reasoning</span>
         </AccordionTrigger>
         <AccordionContent
           className={cn(

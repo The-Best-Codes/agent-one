@@ -251,17 +251,17 @@ const MessagePartsInternal = ({
         <div className="mt-2 flex items-center justify-end gap-1.5">
           <Button size="xs" variant="outline" onClick={handleCancel}>
             <IconX data-icon="inline-start" />
-            {"Cancel"}
+            Cancel
           </Button>
           {message.role === "user" ? (
             <ButtonGroup>
               <Button size="xs" variant="default" onClick={() => handleSave(regenerateOnSave)}>
                 <IconCheck data-icon="inline-start" />
-                {"Save"}
+                Save
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="icon-xs" variant="default" aria-label={"More options"}>
+                  <Button size="icon-xs" variant="default" aria-label="More options">
                     <IconChevronDown />
                   </Button>
                 </DropdownMenuTrigger>
@@ -272,7 +272,7 @@ const MessagePartsInternal = ({
                       checked={regenerateOnSave}
                       onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
                     >
-                      {"Regenerate when Saved"}
+                      Regenerate when Saved
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
@@ -281,7 +281,7 @@ const MessagePartsInternal = ({
           ) : (
             <Button size="xs" variant="default" onClick={() => handleSave(false)}>
               <IconCheck data-icon="inline-start" />
-              {"Save"}
+              Save
             </Button>
           )}
         </div>

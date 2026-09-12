@@ -22,7 +22,7 @@ export const EditButton = ({ onEdit, className, ...props }: EditButtonProps) => 
       className={className}
       size="icon-sm"
       variant="secondary"
-      aria-label={"Edit message"}
+      aria-label="Edit message"
       {...props}
     >
       <IconEdit data-icon="inline-start" />

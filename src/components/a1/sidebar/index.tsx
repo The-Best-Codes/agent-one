@@ -99,7 +99,7 @@ const SidebarContent = ({
         <Button variant="outline" className="w-full justify-start" asChild>
           <Link to={`/settings?tab=extensions${activeChatId ? `&chatId=${activeChatId}` : ""}`}>
             <IconPuzzle data-icon="inline-start" />
-            {"Browse Extensions"}
+            Browse Extensions
           </Link>
         </Button>
         <Button variant="outline" className="w-full justify-start" asChild>
@@ -108,7 +108,7 @@ const SidebarContent = ({
             data-icon="inline-start"
           >
             <IconSettings data-icon="inline-start" />
-            {"Configure AgentOne"}
+            Configure AgentOne
           </Link>
         </Button>
       </div>
@@ -196,8 +196,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
         onCloseAutoFocus={(e) => e.preventDefault()}
         className="bg-background dark:bg-sidebar border-sidebar-border h-full max-w-64! border-r p-2"
       >
-        <DrawerTitle className="sr-only">{"Chat Sidebar"}</DrawerTitle>
-        <DrawerDescription className="sr-only">{"Mobile chat sidebar content"}</DrawerDescription>
+        <DrawerTitle className="sr-only">Chat Sidebar</DrawerTitle>
+        <DrawerDescription className="sr-only">Mobile chat sidebar content</DrawerDescription>
         <SidebarContent
           activeChatId={activeChatId}
           handleNewChat={handleNewChat}
@@ -238,13 +238,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   size="icon-sm"
                   onClick={handleSearchClick}
                   analytics={{ event: "search_modal_opened", params: { ui_location: "sidebar" } }}
-                  aria-label={"Search chats"}
+                  aria-label="Search chats"
                   className="size-6"
                 >
                   <IconSearch data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>{"Search chats"}</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>Search chats</AdaptiveTooltipContent>
             </AdaptiveTooltip>
             <AdaptiveTooltip>
               <AdaptiveTooltipTrigger asChild>
@@ -253,13 +253,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   size="icon-sm"
                   onClick={handleNewChat}
                   analytics={{ event: "new_chat_clicked", params: { ui_location: "sidebar" } }}
-                  aria-label={"New Chat"}
+                  aria-label="New Chat"
                   className="size-6"
                 >
                   <IconPlus data-icon="inline-start" />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent side={tooltipSide}>{"New Chat"}</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent side={tooltipSide}>New Chat</AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </div>
         </div>

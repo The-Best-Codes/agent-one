@@ -55,7 +55,7 @@ export function ReleaseNotesDialog() {
             <IconRocket className="text-primary size-5" />
             <DialogTitle>{`What's New in v${releaseNotesData.version}`}</DialogTitle>
           </div>
-          <DialogDescription>{"A quick look at what changed in this release."}</DialogDescription>
+          <DialogDescription>A quick look at what changed in this release.</DialogDescription>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto">
           <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless px-1">
@@ -68,7 +68,7 @@ export function ReleaseNotesDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleClose}>{"Close"}</Button>
+          <Button onClick={handleClose}>Close</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

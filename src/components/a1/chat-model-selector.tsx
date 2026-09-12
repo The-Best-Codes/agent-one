@@ -181,7 +181,7 @@ const ModelList: FC<ModelListProps> = ({
   return (
     <Command shouldFilter={false}>
       <CommandInput
-        placeholder={"Search models..."}
+        placeholder="Search models..."
         className="h-9"
         value={searchQuery}
         onValueChange={setSearchQuery}
@@ -202,7 +202,7 @@ const ModelList: FC<ModelListProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-fit max-w-full">
               <DropdownMenuGroup>
-                <DropdownMenuLabel>{"Only show models that support"}</DropdownMenuLabel>
+                <DropdownMenuLabel>Only show models that support</DropdownMenuLabel>
                 {MODEL_CAPABILITIES.map((capability) => {
                   const CapabilityIcon = capability.icon;
                   const isChecked = capabilityFilters.includes(capability.id);
@@ -245,7 +245,7 @@ const ModelList: FC<ModelListProps> = ({
         )}
         <CommandList ref={parentRef}>
           {rows.length === 0 ? (
-            <CommandEmpty>{"No model found."}</CommandEmpty>
+            <CommandEmpty>No model found.</CommandEmpty>
           ) : (
             <CommandGroup>
               <div
@@ -499,7 +499,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   ) : (
     <>
       <div className="min-w-0 flex-1 text-left">
-        <span className="text-muted-foreground">{"No model selected"}</span>
+        <span className="text-muted-foreground">No model selected</span>
       </div>
       <IconSelector className="size-4 shrink-0 opacity-50" />
     </>
@@ -531,7 +531,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         </Button>
       </AdaptivePopoverTrigger>
       <AdaptivePopoverContent
-        title={"Select a model"}
+        title="Select a model"
         className={cn("w-full p-0", popoverClassName)}
         mobileClassName="-mt-2 px-0"
       >

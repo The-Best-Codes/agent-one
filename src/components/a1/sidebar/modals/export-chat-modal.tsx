@@ -41,7 +41,7 @@ export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportCh
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Export Chat"}</DialogTitle>
+          <DialogTitle>Export Chat</DialogTitle>
           <DialogDescription>
             {`Choose how you'd like to export the "${chatTitle}" chat.`}
           </DialogDescription>
@@ -53,12 +53,12 @@ export const ExportChatModal = ({ isOpen, onClose, chatId, chatTitle }: ExportCh
             className="justify-start"
           >
             <IconDownload data-icon="inline-start" />
-            {"Download as JSON"}
+            Download as JSON
           </Button>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {"Close"}
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>

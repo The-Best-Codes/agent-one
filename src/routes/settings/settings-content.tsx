@@ -13,7 +13,7 @@ export default function SettingsContent({ activeSection, fillHeight }: SettingsC
   const SectionComponent = getSectionComponent(activeSection);
 
   if (!SectionComponent) {
-    return <div>{"Select a section from the sidebar."}</div>;
+    return <div>Select a section from the sidebar.</div>;
   }
 
   return (

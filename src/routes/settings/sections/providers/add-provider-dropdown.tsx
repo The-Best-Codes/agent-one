@@ -32,7 +32,7 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
               params: { section: "providers", control: "add_provider_menu_opened" },
             }}
           >
-            {"Add Provider"}
+            Add Provider
             <IconChevronDown data-icon="inline-end" />
           </Button>
         </DropdownMenuTrigger>
@@ -45,7 +45,7 @@ export function AddProviderDropdown({ onAddProvider }: AddProviderDropdownProps)
               }}
             >
               <IconPlus data-icon="inline-start" />
-              {"OpenAI Compatible"}
+              OpenAI Compatible
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

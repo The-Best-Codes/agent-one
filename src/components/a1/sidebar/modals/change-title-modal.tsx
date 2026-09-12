@@ -92,7 +92,7 @@ const ChangeTitleForm = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={"Enter chat title..."}
+          placeholder="Enter chat title..."
           autoFocus
           className="flex-1"
         />
@@ -104,16 +104,16 @@ const ChangeTitleForm = ({
             </Button>
           </AdaptiveTooltipTrigger>
           <AdaptiveTooltipContent>
-            <p>{"Generate title using AI"}</p>
+            <p>Generate title using AI</p>
           </AdaptiveTooltipContent>
         </AdaptiveTooltip>
       </div>
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
-          {"Cancel"}
+          Cancel
         </Button>
         <Button onClick={handleSave} disabled={!title.trim()}>
-          {"Save"}
+          Save
         </Button>
       </DialogFooter>
     </>
@@ -130,8 +130,8 @@ export const ChangeTitleModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Change Chat Title"}</DialogTitle>
-          <DialogDescription>{"Enter a new title for this chat conversation."}</DialogDescription>
+          <DialogTitle>Change Chat Title</DialogTitle>
+          <DialogDescription>Enter a new title for this chat conversation.</DialogDescription>
         </DialogHeader>
         <ChangeTitleForm currentTitle={currentTitle} chatId={chatId} onClose={onClose} />
       </DialogContent>

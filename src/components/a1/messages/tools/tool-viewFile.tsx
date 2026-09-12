@@ -89,7 +89,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconEye className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {"AgentOne wants to view"} <span className="font-mono text-xs">{filePath}</span>
+              AgentOne wants to view <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -99,7 +99,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -107,7 +107,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -127,7 +127,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Preparing to view file..."}</span>
+          <span className="text-foreground text-sm font-bold">Preparing to view file...</span>
         </div>
       );
 
@@ -216,7 +216,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
                   )}
                 </div>
               ) : (
-                <div className="text-muted-foreground text-xs">{"File viewed successfully."}</div>
+                <div className="text-muted-foreground text-xs">File viewed successfully.</div>
               )}
             </AccordionContent>
           </AccordionItem>
@@ -229,7 +229,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{"File view cancelled"}</span>
+            <span className="text-muted-foreground text-sm font-bold">File view cancelled</span>
           </div>
         );
       }
@@ -239,7 +239,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Error viewing file"}
+          title="Error viewing file"
         />
       );
 
@@ -247,7 +247,7 @@ export const MessagePartToolViewFile = ({ part }: ViewFileToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconEye className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"File viewed"}</span>
+          <span className="text-foreground text-sm font-bold">File viewed</span>
         </div>
       );
   }

@@ -178,7 +178,7 @@ function ExtensionListRowComponent({
               className="not-sm:size-7 sm:pl-1.5"
             >
               <IconTrash />
-              <span className="sr-only sm:not-sr-only">{"Uninstall"}</span>
+              <span className="sr-only sm:not-sr-only">Uninstall</span>
             </Button>
           ) : !installed ? (
             <Button size="sm" variant="default" onClick={onInstall} disabled={!installSupported}>
@@ -198,13 +198,13 @@ function ExtensionListRowComponent({
                       variant="ghost"
                       size="icon-xs"
                       className="size-3"
-                      aria-label={"Restart extension"}
+                      aria-label="Restart extension"
                       onClick={onRestart}
                     >
                       <IconRefresh />
                     </Button>
                   </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent>{"Restart"}</AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>Restart</AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               ) : null}
               <AdaptiveTooltip>
@@ -233,7 +233,7 @@ function ExtensionListRowComponent({
                 className="ml-1"
                 checked={enabled}
                 onCheckedChange={onEnabledChange}
-                aria-label={"Toggle extension"}
+                aria-label="Toggle extension"
               />
             </div>
           ) : null}
@@ -256,14 +256,14 @@ function ExtensionListRowComponent({
               variant="outline"
               className="h-auto w-full justify-between rounded-md border px-3 py-2 text-sm font-medium"
             >
-              {"Advanced"}
+              Advanced
               <IconChevronRight className="text-muted-foreground" data-icon="inline-end" />
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{`${title} advanced config`}</DialogTitle>
-              <DialogDescription>{"Edit advanced settings for this extension."}</DialogDescription>
+              <DialogDescription>Edit advanced settings for this extension.</DialogDescription>
             </DialogHeader>
             <div className="-mx-4 max-h-[60vh] overflow-y-auto px-4">
               <div className="flex flex-col gap-4 py-1">
@@ -271,7 +271,7 @@ function ExtensionListRowComponent({
                 {moreInfoJson !== undefined ? (
                   <Accordion type="single" collapsible className="rounded-md border px-3">
                     <AccordionItem value="more-info" className="border-b-0">
-                      <AccordionTrigger className="py-3">{"Debug info"}</AccordionTrigger>
+                      <AccordionTrigger className="py-3">Debug info</AccordionTrigger>
                       <AccordionContent>
                         <pre className="bg-muted overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap">
                           {JSON.stringify(moreInfoJson, null, 2)}

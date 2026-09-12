@@ -74,7 +74,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -82,7 +82,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -102,7 +102,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />{" "}
-          <span className="text-foreground text-sm font-bold">{"Preparing web search..."}</span>
+          <span className="text-foreground text-sm font-bold">Preparing web search...</span>
         </div>
       );
 
@@ -234,7 +234,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Web search error"}
+          title="Web search error"
         />
       );
     }
@@ -243,7 +243,7 @@ export const MessagePartToolWebSearch = ({ part }: WebSearchToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSearch className="text-muted-foreground size-4 shrink-0" />{" "}
-          <span className="text-muted-foreground text-sm font-bold">{"Web search accessed"}</span>
+          <span className="text-muted-foreground text-sm font-bold">Web search accessed</span>
         </div>
       );
   }

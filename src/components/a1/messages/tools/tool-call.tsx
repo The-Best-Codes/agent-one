@@ -43,7 +43,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -51,7 +51,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -101,7 +101,7 @@ export const MessagePartToolCall = ({ part }: ToolCallPartProps) => {
             <AccordionContent className="p-2 pt-0">
               {part.input && typeof part.input === "object" ? (
                 <div className="text-foreground/80 text-xs">
-                  <span className="font-medium">{"Parameters:"}</span>
+                  <span className="font-medium">Parameters:</span>
                   <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
                     {JSON.stringify(part.input, null, 2)}
                   </pre>

@@ -315,7 +315,7 @@ function ConnectedMcpAppInternal({
         >
           {displayMode === "pip" && (
             <Button variant="ghost" size="sm" onClick={() => setDisplayMode("inline")}>
-              {"Extension open in picture-in-picture"}
+              Extension open in picture-in-picture
             </Button>
           )}
         </div>
@@ -354,15 +354,15 @@ function ConnectedMcpAppInternal({
         {displayMode === "fullscreen" && (
           <div className="bg-background border-border flex h-16 items-center justify-between gap-3 border-b px-4">
             <div className="min-w-0">
-              <div className="truncate text-base font-medium">{"Expanded extension view"}</div>
+              <div className="truncate text-base font-medium">Expanded extension view</div>
               <div className="text-muted-foreground truncate text-sm">
-                {"Opened in expanded view. Press Escape or close it to return to the conversation."}
+                Opened in expanded view. Press Escape or close it to return to the conversation.
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon-sm" onClick={() => setDisplayMode("inline")}>
                 <IconX />
-                <span className="sr-only">{"Close expanded MCP app"}</span>
+                <span className="sr-only">Close expanded MCP app</span>
               </Button>
             </div>
           </div>

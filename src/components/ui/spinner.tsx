@@ -21,7 +21,7 @@ function Spinner({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       role="status"
-      aria-label={"Loading"}
+      aria-label="Loading"
       data-geist-spinner=""
       data-version="v1"
       data-slot="spinner"

@@ -391,15 +391,15 @@ export default function ExtensionsSection() {
   return (
     <Card className="flex min-h-0 flex-1 flex-col">
       <CardHeader className="shrink-0">
-        <h2 className="text-base leading-none font-semibold">{"Extensions"}</h2>
+        <h2 className="text-base leading-none font-semibold">Extensions</h2>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
         <SettingsTarget id="setting-extensions-beta-notice">
           <Alert>
             <IconFlask />
-            <AlertTitle>{"Extensions are in beta"}</AlertTitle>
+            <AlertTitle>Extensions are in beta</AlertTitle>
             <AlertDescription>
-              {"Some features may be incomplete or change without notice."}
+              Some features may be incomplete or change without notice.
             </AlertDescription>
           </Alert>
         </SettingsTarget>
@@ -410,8 +410,8 @@ export default function ExtensionsSection() {
               <SearchInput
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder={"Search extensions..."}
-                aria-label={"Search extensions"}
+                placeholder="Search extensions..."
+                aria-label="Search extensions"
                 className="rounded-r-none"
                 containerClassName="flex-1"
               />
@@ -422,7 +422,7 @@ export default function ExtensionsSection() {
                     className="rounded-l-none border-l-0"
                     size="icon"
                     variant="outline"
-                    aria-label={"Filter extensions"}
+                    aria-label="Filter extensions"
                     analytics={{ event: "extension_filters_opened" }}
                   >
                     <IconFilter data-icon="inline-start" />
@@ -430,35 +430,35 @@ export default function ExtensionsSection() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-auto min-w-max">
                   <DropdownMenuGroup>
-                    <DropdownMenuLabel>{"Show"}</DropdownMenuLabel>
+                    <DropdownMenuLabel>Show</DropdownMenuLabel>
                     <DropdownMenuCheckboxItem
                       checked={onlyInstalled}
                       onCheckedChange={(checked) => setOnlyInstalled(checked === true)}
                     >
-                      {"Only show installed"}
+                      Only show installed
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuLabel>{"Connection type"}</DropdownMenuLabel>
+                    <DropdownMenuLabel>Connection type</DropdownMenuLabel>
                     <DropdownMenuCheckboxItem
                       checked={showDeviceExtensions}
                       onCheckedChange={(checked) => setShowDeviceExtensions(checked === true)}
                     >
-                      {"Runs on this device"}
+                      Runs on this device
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
                       checked={showOnlineExtensions}
                       onCheckedChange={(checked) => setShowOnlineExtensions(checked === true)}
                     >
-                      {"Connects online"}
+                      Connects online
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem onSelect={() => setShowDanglingDialog(true)}>
                       <IconTool data-icon="inline-start" />
-                      {"Find dangling extensions"}
+                      Find dangling extensions
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
@@ -469,7 +469,7 @@ export default function ExtensionsSection() {
               analytics={{ event: "custom_extension_dialog_opened" }}
             >
               <IconPlus data-icon="inline-start" />
-              {"Add Custom"}
+              Add Custom
             </Button>
           </div>
         </SettingsTarget>

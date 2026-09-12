@@ -133,7 +133,7 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
               <IconPlayerStop />
             </Button>
           </AdaptiveTooltipTrigger>
-          <AdaptiveTooltipContent side="top">{"Stop command"}</AdaptiveTooltipContent>
+          <AdaptiveTooltipContent side="top">Stop command</AdaptiveTooltipContent>
         </AdaptiveTooltip>
         {showSkip && (
           <AdaptiveTooltip>
@@ -151,7 +151,7 @@ const LongRunningControls = ({ callId, showSkip }: { callId: string; showSkip: b
               </Button>
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="top">
-              {"Skip command (leave it running in the background)"}
+              Skip command (leave it running in the background)
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
@@ -215,7 +215,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           <div className="flex items-center gap-1">
             <IconTerminal2 className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {"AgentOne wants to run a command"}
+              AgentOne wants to run a command
             </span>
           </div>
           <code className="bg-secondary text-foreground rounded px-2 py-1 text-xs break-all">
@@ -228,7 +228,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -236,7 +236,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -246,7 +246,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{"Command denied"}</span>
+          <span className="text-muted-foreground text-sm font-bold">Command denied</span>
         </div>
       );
 
@@ -254,7 +254,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Preparing command..."}</span>
+          <span className="text-foreground text-sm font-bold">Preparing command...</span>
         </div>
       );
 
@@ -264,7 +264,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{"Command denied"}</span>
+            <span className="text-muted-foreground text-sm font-bold">Command denied</span>
           </div>
         );
       }
@@ -275,7 +275,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         >
           <Spinner className="text-foreground size-4 shrink-0" />
           <span className="truncate">
-            {"Running"} <code className="text-xs">{truncatedCommand}</code>...
+            Running <code className="text-xs">{truncatedCommand}</code>...
           </span>
           {showLongRunningStop && (
             <LongRunningControls callId={callId} showSkip={showLongRunningSkip} />
@@ -426,7 +426,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
                   className="justify-start gap-1 p-0 font-bold hover:no-underline"
                 >
                   <span className="max-w-2xl truncate">
-                    {"Cancelled"} <code className="text-xs">{truncatedCommand}</code>
+                    Cancelled <code className="text-xs">{truncatedCommand}</code>
                   </span>
                 </AccordionTrigger>
                 <AccordionContent className="p-0 pt-2">
@@ -440,7 +440,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{"Command cancelled"}</span>
+            <span className="text-muted-foreground text-sm font-bold">Command cancelled</span>
           </div>
         );
       }
@@ -450,7 +450,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Error running command"}
+          title="Error running command"
         />
       );
 
@@ -458,7 +458,7 @@ export const MessagePartToolExecuteCommand = ({ part }: ExecuteCommandToolPartPr
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconTerminal2 className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Command executed"}</span>
+          <span className="text-foreground text-sm font-bold">Command executed</span>
         </div>
       );
   }

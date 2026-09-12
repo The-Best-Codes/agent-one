@@ -93,7 +93,7 @@ export function MessagePreviewRail({
   return (
     <div className="pointer-events-none fixed top-1/2 right-0 z-20 hidden w-12 -translate-y-1/2 items-center md:flex">
       <nav
-        aria-label={"Chat message navigation"}
+        aria-label="Chat message navigation"
         onPointerLeave={() => setHoveredIndex(null)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) setFocusedIndex(null);
@@ -162,13 +162,13 @@ export function MessagePreviewRail({
                 <CardDescription className="line-clamp-4 leading-5">
                   {displayedEntry.response ? (
                     getLastTextPart(displayedEntry.response) || (
-                      <em>{"Message with tools or attachments"}</em>
+                      <em>Message with tools or attachments</em>
                     )
                   ) : displayedEntry.message.role === "user" ? (
-                    <em>{"No response"}</em>
+                    <em>No response</em>
                   ) : (
                     getLastTextPart(displayedEntry.message) || (
-                      <em>{"Message with tools or attachments"}</em>
+                      <em>Message with tools or attachments</em>
                     )
                   )}
                 </CardDescription>

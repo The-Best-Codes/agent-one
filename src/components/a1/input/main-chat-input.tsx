@@ -425,7 +425,7 @@ export const MainChatInput = ({
               isFloating ? "rounded-md" : "rounded-md rounded-b-none",
             )}
           >
-            <p className="text-primary text-lg font-semibold">{"Drop files or chats to attach"}</p>
+            <p className="text-primary text-lg font-semibold">Drop files or chats to attach</p>
           </div>
         )}
         <input
@@ -447,7 +447,7 @@ export const MainChatInput = ({
             value={initialValue || ""}
             minHeight="40px"
             maxHeight="160px"
-            placeholder={"Ask anything..."}
+            placeholder="Ask anything..."
             className="bg-transparent text-sm"
             extensions={[
               ...(markdownHighlighting ? [markdown({ base: markdownLanguage })] : []),
@@ -545,7 +545,7 @@ export const MainChatInput = ({
                     params: { ui_location: "main_chat_input" },
                   }}
                   className="relative"
-                  aria-label={"Attach files"}
+                  aria-label="Attach files"
                 >
                   {files && files?.length > 0 && (
                     <Badge variant="default" className="absolute -top-2 -right-2 z-10 shadow-md">
@@ -555,7 +555,7 @@ export const MainChatInput = ({
                   <IconPaperclip />
                 </Button>
               </AdaptiveTooltipTrigger>
-              <AdaptiveTooltipContent>{"Attach files to your message"}</AdaptiveTooltipContent>
+              <AdaptiveTooltipContent>Attach files to your message</AdaptiveTooltipContent>
             </AdaptiveTooltip>
           </div>
           <div className="flex items-center gap-2">
@@ -583,12 +583,12 @@ export const MainChatInput = ({
                       event: "response_stop_clicked",
                       params: { ui_location: "main_chat_input" },
                     }}
-                    aria-label={"Stop response"}
+                    aria-label="Stop response"
                   >
                     <IconPlayerStopFilled />
                   </Button>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{"Stop the current response"}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             ) : (
               <AdaptiveTooltip>
@@ -608,12 +608,12 @@ export const MainChatInput = ({
                       event: "send_button_clicked",
                       params: { ui_location: "main_chat_input" },
                     }}
-                    aria-label={"Send message"}
+                    aria-label="Send message"
                   >
                     {status === "submitted" ? <Spinner /> : <IconArrowUp />}
                   </Button>
                 </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>{"Send your message"}</AdaptiveTooltipContent>
+                <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>
               </AdaptiveTooltip>
             )}
           </div>

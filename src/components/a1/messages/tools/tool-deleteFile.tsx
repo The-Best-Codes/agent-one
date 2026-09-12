@@ -32,7 +32,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           <div className="flex items-center gap-1">
             <IconTrash className="text-destructive size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {"AgentOne wants to delete"} <span className="font-mono text-xs">{filePath}</span>
+              AgentOne wants to delete <span className="font-mono text-xs">{filePath}</span>
             </span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -42,7 +42,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -50,7 +50,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -70,7 +70,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Preparing to delete file..."}</span>
+          <span className="text-foreground text-sm font-bold">Preparing to delete file...</span>
         </div>
       );
 
@@ -113,9 +113,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {"File deletion cancelled"}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">File deletion cancelled</span>
           </div>
         );
       }
@@ -125,7 +123,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Error deleting file"}
+          title="Error deleting file"
         />
       );
 
@@ -133,7 +131,7 @@ export const MessagePartToolDeleteFile = ({ part }: DeleteFileToolPartProps) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconTrash className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"File deleted"}</span>
+          <span className="text-foreground text-sm font-bold">File deleted</span>
         </div>
       );
   }

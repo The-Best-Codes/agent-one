@@ -108,7 +108,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconHierarchy3 className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {"AgentOne wants to spawn a subagent"}
+              AgentOne wants to spawn a subagent
             </span>
           </div>
           <div className="bg-secondary rounded px-2 py-1 text-xs wrap-break-word">{task}</div>
@@ -119,7 +119,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -127,7 +127,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -137,7 +137,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       return (
         <div className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{"Subagent denied"}</span>
+          <span className="text-muted-foreground text-sm font-bold">Subagent denied</span>
         </div>
       );
 
@@ -145,7 +145,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       return (
         <div className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Preparing subagent..."}</span>
+          <span className="text-foreground text-sm font-bold">Preparing subagent...</span>
         </div>
       );
 
@@ -156,7 +156,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
         return (
           <div className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{"Subagent denied"}</span>
+            <span className="text-muted-foreground text-sm font-bold">Subagent denied</span>
           </div>
         );
       }
@@ -210,7 +210,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
               {hasPendingApprovals && !isExpanded && (
                 <span className="border-border text-muted-foreground ml-2 inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium">
                   <IconHourglassHigh className="size-3 shrink-0" />
-                  {"Approval needed"}
+                  Approval needed
                 </span>
               )}
             </AccordionTrigger>
@@ -234,7 +234,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
         return (
           <div className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">{"Subagent cancelled"}</span>
+            <span className="text-muted-foreground text-sm font-bold">Subagent cancelled</span>
           </div>
         );
       }
@@ -245,7 +245,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Subagent error"}
+          title="Subagent error"
         />
       );
 
@@ -253,7 +253,7 @@ export const MessagePartToolSubAgent = ({ part }: SubAgentToolPartProps) => {
       return (
         <div className="flex items-center gap-1">
           <IconHierarchy3 className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Subagent executed"}</span>
+          <span className="text-foreground text-sm font-bold">Subagent executed</span>
         </div>
       );
   }

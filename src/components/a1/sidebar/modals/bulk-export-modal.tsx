@@ -60,12 +60,12 @@ export const BulkExportModal = ({ isOpen, onClose, chatIds, chatCount }: BulkExp
             className="justify-start"
           >
             <IconDownload data-icon="inline-start" />
-            {"Download as JSON"}
+            Download as JSON
           </Button>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {"Close"}
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>

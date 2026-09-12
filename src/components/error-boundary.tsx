@@ -82,11 +82,9 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                 <div>
                   <CardTitle className="text-destructive flex items-center gap-2 text-xl">
                     <IconAlertTriangle />
-                    {"Something went wrong"}
+                    Something went wrong
                   </CardTitle>
-                  <CardDescription>
-                    {"An error occurred within the main application."}
-                  </CardDescription>
+                  <CardDescription>An error occurred within the main application.</CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <CopyButton
@@ -101,7 +99,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
             <CardContent>
               <Alert variant="destructive" className="mb-4">
-                <AlertTitle className="text-lg">{"Error Message"}</AlertTitle>
+                <AlertTitle className="text-lg">Error Message</AlertTitle>
                 <AlertDescription>
                   {this.state.error ? this.state.error.toString() : "Unknown error occurred"}
                 </AlertDescription>
@@ -118,7 +116,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                     shouldRotateIcon
                     className="flex justify-between p-2 px-1"
                   >
-                    <span>{"Technical Details"}</span>
+                    <span>Technical Details</span>
                   </AccordionTrigger>
                   <AccordionContent className="pb-3">
                     <div className="bg-muted max-h-96 overflow-auto rounded-md p-3 font-mono text-sm">
@@ -131,11 +129,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             <CardFooter className="flex flex-wrap justify-end gap-2 pt-4">
               <div className="flex gap-2">
                 <Button variant="outline" onClick={this.handleReset}>
-                  {"Try Again"}
+                  Try Again
                 </Button>
                 <Button onClick={this.handleRefresh}>
                   <IconRefresh data-icon="inline-start" />
-                  {"Reload App"}
+                  Reload App
                 </Button>
               </div>
             </CardFooter>

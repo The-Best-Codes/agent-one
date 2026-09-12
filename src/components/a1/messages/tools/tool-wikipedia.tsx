@@ -105,7 +105,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -113,7 +113,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -131,9 +131,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />{" "}
-          <span className="text-foreground text-sm font-bold">
-            {"Preparing Wikipedia request..."}
-          </span>
+          <span className="text-foreground text-sm font-bold">Preparing Wikipedia request...</span>
         </div>
       );
 
@@ -292,7 +290,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-foreground text-xs"
                       >
-                        {"View on Wikipedia"}
+                        View on Wikipedia
                         <IconExternalLink className="ml-1 inline size-3" />
                       </a>
                     )}
@@ -502,7 +500,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />{" "}
             <span className="text-muted-foreground text-sm font-bold">
-              {"Wikipedia request cancelled"}
+              Wikipedia request cancelled
             </span>
           </div>
         );
@@ -513,7 +511,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Wikipedia error"}
+          title="Wikipedia error"
         />
       );
     }
@@ -522,7 +520,7 @@ export const MessagePartToolWikipedia = ({ part }: WikipediaToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconBrandWikipedia className="text-muted-foreground size-4 shrink-0" />{" "}
-          <span className="text-muted-foreground text-sm font-bold">{"Wikipedia accessed"}</span>
+          <span className="text-muted-foreground text-sm font-bold">Wikipedia accessed</span>
         </div>
       );
   }

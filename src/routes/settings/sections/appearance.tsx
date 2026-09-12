@@ -478,13 +478,13 @@ export default function AppearanceSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{"General Look and Feel"}</CardTitle>
+          <CardTitle>General Look and Feel</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-theme">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">{"Theme"}</Label>
+                <Label className="text-sm font-medium">Theme</Label>
               </div>
               <ThemeToggle className="md:justify-end" />
             </div>
@@ -493,15 +493,14 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-primary-color">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">{"Primary Color"}</Label>
+                <Label className="text-sm font-medium">Primary Color</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {
-                    "Controls the accent color used for switches, badges, highlights, and primary actions."
-                  }
+                  Controls the accent color used for switches, badges, highlights, and primary
+                  actions.
                 </p>
               </div>
               <ColorPicker
-                label={"Primary color"}
+                label="Primary color"
                 value={colorTheme}
                 onValueChange={(value) => {
                   trackSettingsInteraction("appearance", "primary_color_changed", {
@@ -540,15 +539,14 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-tint">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">{"Tint"}</Label>
+                <Label className="text-sm font-medium">Tint</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {
-                    "Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted buttons."
-                  }
+                  Adds a subtle color wash to surfaces like backgrounds, panels, sidebars, and muted
+                  buttons.
                 </p>
               </div>
               <ColorPicker
-                label={"Tint"}
+                label="Tint"
                 value={uiTint}
                 onValueChange={(value) => {
                   trackSettingsInteraction("appearance", "tint_changed", { value });
@@ -590,7 +588,7 @@ export default function AppearanceSection() {
                     {`Tint Strength: ${uiTintStrength}/10`}
                   </Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {"Choose how light or strong the tint should feel."}
+                    Choose how light or strong the tint should feel.
                   </p>
                 </div>
                 <Button
@@ -601,7 +599,7 @@ export default function AppearanceSection() {
                     resetSetting("UI_TINT_STRENGTH");
                   }}
                   disabled={isUiTintStrengthDefault}
-                  aria-label={"Reset tint strength to default"}
+                  aria-label="Reset tint strength to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -618,7 +616,7 @@ export default function AppearanceSection() {
                 max={10}
                 step={1}
                 className="w-full"
-                aria-label={"Tint strength"}
+                aria-label="Tint strength"
                 disabled={uiTint === "default"}
               />
             </div>
@@ -627,9 +625,9 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-font">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">{"Font"}</Label>
+                <Label className="text-sm font-medium">Font</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Choose the font for the application."}
+                  Choose the font for the application.
                 </p>
               </div>
               <ToggleGroup
@@ -642,7 +640,7 @@ export default function AppearanceSection() {
                     setFont(value as typeof font);
                   }
                 }}
-                aria-label={"Select font"}
+                aria-label="Select font"
                 className="w-full min-w-64 md:w-fit"
               >
                 {fontOptions.map((option) => (
@@ -670,9 +668,9 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-roundness">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">{"Roundness"}</Label>
+                <Label className="text-sm font-medium">Roundness</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Adjust the corner radius of UI elements."}
+                  Adjust the corner radius of UI elements.
                 </p>
               </div>
               <ToggleGroup
@@ -685,7 +683,7 @@ export default function AppearanceSection() {
                     setRoundness(value as typeof roundness);
                   }
                 }}
-                aria-label={"Select roundness"}
+                aria-label="Select roundness"
                 className="w-full md:w-fit"
                 size="lg"
               >
@@ -716,9 +714,9 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-text-scale">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">{"Text Scale"}</Label>
+                <Label className="text-sm font-medium">Text Scale</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Adjust the text size throughout the application."}
+                  Adjust the text size throughout the application.
                 </p>
               </div>
               <div className="w-full md:max-w-64">
@@ -731,7 +729,7 @@ export default function AppearanceSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select text scale"}
+                    aria-label="Select text scale"
                   >
                     <SelectValue />
                   </SelectTrigger>
@@ -762,16 +760,16 @@ export default function AppearanceSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{"Chat Background"}</CardTitle>
+          <CardTitle>Chat Background</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-chat-background">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
                 <div className="flex flex-1 flex-col items-start">
-                  <Label className="text-sm font-medium">{"Background Image"}</Label>
+                  <Label className="text-sm font-medium">Background Image</Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {"Pick a preset or add your own image behind the main chat area."}
+                    Pick a preset or add your own image behind the main chat area.
                   </p>
                 </div>
                 <Button
@@ -791,7 +789,7 @@ export default function AppearanceSection() {
                     }));
                   }}
                   disabled={isChatBackgroundDefault}
-                  aria-label={"Reset chat background"}
+                  aria-label="Reset chat background"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -805,7 +803,7 @@ export default function AppearanceSection() {
                   onClick={() => void handleAddCustomBackground()}
                 >
                   <IconPhotoPlus data-icon="inline-start" />
-                  {"Add Custom"}
+                  Add Custom
                 </Button>
 
                 <Button
@@ -815,7 +813,7 @@ export default function AppearanceSection() {
                   onClick={() => updateChatBackground({ preset: "none" })}
                 >
                   <IconPhotoOff data-icon="inline-start" />
-                  {"None"}
+                  None
                   {chatBackground.preset === "none" && (
                     <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-white">
                       <IconCheck className="size-8" data-icon="inline-start" />
@@ -837,7 +835,7 @@ export default function AppearanceSection() {
                       ),
                     }}
                     onClick={() => updateChatBackground({ preset: "custom", customUrl: url })}
-                    title={"Custom background"}
+                    title="Custom background"
                   >
                     <Popover
                       open={removingCustomUrl === url}
@@ -848,7 +846,7 @@ export default function AppearanceSection() {
                           variant="ghost"
                           size="icon-sm"
                           className="bg-background/80 hover:bg-background absolute top-1 right-1"
-                          aria-label={"Remove custom background"}
+                          aria-label="Remove custom background"
                           onMouseDown={(event) => event.stopPropagation()}
                           onClick={(event) => event.stopPropagation()}
                         >
@@ -857,9 +855,9 @@ export default function AppearanceSection() {
                       </PopoverTrigger>
                       <PopoverContent align="end">
                         <PopoverHeader>
-                          <PopoverTitle>{"Delete this background?"}</PopoverTitle>
+                          <PopoverTitle>Delete this background?</PopoverTitle>
                           <PopoverDescription>
-                            {"This removes it from your custom list."}
+                            This removes it from your custom list.
                           </PopoverDescription>
                         </PopoverHeader>
                         <div className="flex justify-end gap-2">
@@ -871,7 +869,7 @@ export default function AppearanceSection() {
                               setRemovingCustomUrl(null);
                             }}
                           >
-                            {"Cancel"}
+                            Cancel
                           </Button>
                           <Button
                             size="sm"
@@ -882,7 +880,7 @@ export default function AppearanceSection() {
                               setRemovingCustomUrl(null);
                             }}
                           >
-                            {"Delete"}
+                            Delete
                           </Button>
                         </div>
                       </PopoverContent>
@@ -898,7 +896,7 @@ export default function AppearanceSection() {
                       </span>
                     )}
                     <span className="absolute right-2 bottom-2 text-xs font-medium text-white drop-shadow">
-                      {"Custom"}
+                      Custom
                     </span>
                   </Button>
                 ))}
@@ -932,7 +930,7 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-chat-background-effects">
             <div className="grid gap-4 md:grid-cols-3">
               <ChatBackgroundSlider
-                label={"Opacity"}
+                label="Opacity"
                 value={chatBackground.tint}
                 defaultValue={chatBackgroundDefaults.tint}
                 suffix="%"
@@ -940,13 +938,13 @@ export default function AppearanceSection() {
                 min={0}
                 max={70}
                 step={5}
-                aria-label={"Chat background tint"}
+                aria-label="Chat background tint"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />
 
               <ChatBackgroundSlider
-                label={"Blur"}
+                label="Blur"
                 value={chatBackground.blur}
                 defaultValue={chatBackgroundDefaults.blur}
                 suffix="px"
@@ -954,13 +952,13 @@ export default function AppearanceSection() {
                 min={0}
                 max={20}
                 step={1}
-                aria-label={"Chat background blur"}
+                aria-label="Chat background blur"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />
 
               <ChatBackgroundSlider
-                label={"Dim"}
+                label="Dim"
                 value={chatBackground.dim}
                 defaultValue={chatBackgroundDefaults.dim}
                 suffix="%"
@@ -968,13 +966,13 @@ export default function AppearanceSection() {
                 min={0}
                 max={70}
                 step={5}
-                aria-label={"Chat background dim"}
+                aria-label="Chat background dim"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />
 
               <ChatBackgroundSlider
-                label={"X"}
+                label="X"
                 value={chatBackground.x}
                 defaultValue={chatBackgroundDefaults.x}
                 suffix="%"
@@ -982,13 +980,13 @@ export default function AppearanceSection() {
                 min={0}
                 max={100}
                 step={1}
-                aria-label={"Chat background horizontal position"}
+                aria-label="Chat background horizontal position"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />
 
               <ChatBackgroundSlider
-                label={"Y"}
+                label="Y"
                 value={chatBackground.y}
                 defaultValue={chatBackgroundDefaults.y}
                 suffix="%"
@@ -996,13 +994,13 @@ export default function AppearanceSection() {
                 min={0}
                 max={100}
                 step={1}
-                aria-label={"Chat background vertical position"}
+                aria-label="Chat background vertical position"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />
 
               <ChatBackgroundSlider
-                label={"Zoom"}
+                label="Zoom"
                 value={chatBackground.zoom}
                 defaultValue={chatBackgroundDefaults.zoom}
                 suffix="%"
@@ -1010,7 +1008,7 @@ export default function AppearanceSection() {
                 min={100}
                 max={200}
                 step={5}
-                aria-label={"Chat background zoom"}
+                aria-label="Chat background zoom"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />
@@ -1023,16 +1021,15 @@ export default function AppearanceSection() {
             <div className="flex flex-col gap-4">
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="flex flex-1 flex-col items-start">
-                  <Label className="text-sm font-medium">{"Chat Background Shade"}</Label>
+                  <Label className="text-sm font-medium">Chat Background Shade</Label>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {
-                      "Places a shade over the background image on chat pages to improve text readability when a chat is open."
-                    }
+                    Places a shade over the background image on chat pages to improve text
+                    readability when a chat is open.
                   </p>
                 </div>
               </div>
               <ChatBackgroundSlider
-                label={"Shade Opacity"}
+                label="Shade Opacity"
                 value={chatBackground.backgroundShade}
                 defaultValue={chatBackgroundDefaults.backgroundShade}
                 suffix="%"
@@ -1040,7 +1037,7 @@ export default function AppearanceSection() {
                 min={0}
                 max={100}
                 step={5}
-                aria-label={"Chat background shade opacity"}
+                aria-label="Chat background shade opacity"
                 disabled={chatBackground.preset === "none"}
                 orientation="horizontal"
               />
@@ -1051,15 +1048,15 @@ export default function AppearanceSection() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{"Chat Appearance"}</CardTitle>
+          <CardTitle>Chat Appearance</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-markdown-highlighting">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Markdown Highlighting"}</Label>
+                <Label className="text-sm font-medium">Markdown Highlighting</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Show markdown formatting styles while typing in the chat input."}
+                  Show markdown formatting styles while typing in the chat input.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -1071,7 +1068,7 @@ export default function AppearanceSection() {
                     });
                     setMarkdownHighlighting(checked);
                   }}
-                  aria-label={"Toggle markdown highlighting"}
+                  aria-label="Toggle markdown highlighting"
                 />
 
                 <Button
@@ -1079,7 +1076,7 @@ export default function AppearanceSection() {
                   size="icon"
                   onClick={handleResetMarkdownHighlighting}
                   disabled={isMarkdownHighlightingDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -1090,9 +1087,9 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-input-style">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Input Style"}</Label>
+                <Label className="text-sm font-medium">Input Style</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Choose how the chat input box is displayed."}
+                  Choose how the chat input box is displayed.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -1105,14 +1102,14 @@ export default function AppearanceSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select input style"}
+                    aria-label="Select input style"
                   >
-                    <SelectValue placeholder={"Select style"} />
+                    <SelectValue placeholder="Select style" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="docked">{"Docked"}</SelectItem>
-                      <SelectItem value="floating">{"Floating"}</SelectItem>
+                      <SelectItem value="docked">Docked</SelectItem>
+                      <SelectItem value="floating">Floating</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -1121,7 +1118,7 @@ export default function AppearanceSection() {
                   size="icon"
                   onClick={handleResetInputStyle}
                   disabled={isInputStyleDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>
@@ -1132,9 +1129,9 @@ export default function AppearanceSection() {
           <SettingsTarget id="setting-collapsed-sidebar-layout">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">{"Collapsed Sidebar Layout"}</Label>
+                <Label className="text-sm font-medium">Collapsed Sidebar Layout</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {"Choose whether collapsed sidebar buttons are laid out in a row or column."}
+                  Choose whether collapsed sidebar buttons are laid out in a row or column.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -1149,14 +1146,14 @@ export default function AppearanceSection() {
                 >
                   <SelectTrigger
                     className="w-full md:w-fit md:max-w-96"
-                    aria-label={"Select collapsed sidebar layout"}
+                    aria-label="Select collapsed sidebar layout"
                   >
-                    <SelectValue placeholder={"Select layout"} />
+                    <SelectValue placeholder="Select layout" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="row">{"Row"}</SelectItem>
-                      <SelectItem value="column">{"Column"}</SelectItem>
+                      <SelectItem value="row">Row</SelectItem>
+                      <SelectItem value="column">Column</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -1165,7 +1162,7 @@ export default function AppearanceSection() {
                   size="icon"
                   onClick={handleResetCollapsedSidebarLayout}
                   disabled={isCollapsedSidebarLayoutDefault}
-                  aria-label={"Reset to default"}
+                  aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
                 </Button>

@@ -31,7 +31,7 @@ export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps
       className={className}
       size="icon-sm"
       variant="secondary"
-      aria-label={"Regenerate response"}
+      aria-label="Regenerate response"
       {...props}
     >
       <IconRefresh data-icon="inline-start" />

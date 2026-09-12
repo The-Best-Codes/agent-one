@@ -85,7 +85,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
             >
               <ParametersAccordionItem value="parameters" className="border-0">
                 <ParametersAccordionTrigger className="px-2 py-1.5 text-xs hover:no-underline">
-                  <span className="text-muted-foreground font-medium">{"Parameters"}</span>
+                  <span className="text-muted-foreground font-medium">Parameters</span>
                 </ParametersAccordionTrigger>
                 <ParametersAccordionContent className="px-2 pb-2">
                   <pre className="text-muted-foreground overflow-x-auto text-xs">
@@ -107,7 +107,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               }
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -120,7 +120,7 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
               }
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -288,14 +288,14 @@ const MessagePartDynamicToolFallback = ({ part, labels }: DynamicToolPartProps) 
                 <div className="flex flex-col gap-2">
                   {part?.input !== null && (
                     <div>
-                      <span className="font-medium">{"Parameters:"}</span>
+                      <span className="font-medium">Parameters:</span>
                       <pre className="mt-1 overflow-x-auto rounded bg-transparent p-2 text-xs">
                         {JSON.stringify(part.input, null, 2)}
                       </pre>
                     </div>
                   )}
                   <div>
-                    <span className="font-medium">{"Result:"}</span>
+                    <span className="font-medium">Result:</span>
                     <div className="mt-1 rounded bg-transparent p-2">
                       {isLongOutput ? (
                         <PerformantMarkdown maxHeight="200px" content={outputText} />

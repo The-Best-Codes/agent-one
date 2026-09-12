@@ -35,24 +35,24 @@ const ThemeToggle = ({ className }: ThemeToggleProps) => {
         }
       }}
       className={cn("w-full", className)}
-      aria-label={"Select a theme"}
+      aria-label="Select a theme"
     >
-      <ToggleGroupItem value="system" aria-label={"System theme"}>
+      <ToggleGroupItem value="system" aria-label="System theme">
         <span className="flex items-center gap-1 text-sm">
           <IconBrightness data-icon="inline-start" />
-          {"System"}
+          System
         </span>
       </ToggleGroupItem>
-      <ToggleGroupItem value="light" aria-label={"Light theme"}>
+      <ToggleGroupItem value="light" aria-label="Light theme">
         <span className="flex items-center gap-1 text-sm">
           <IconSun data-icon="inline-start" />
-          {"Light"}
+          Light
         </span>
       </ToggleGroupItem>
-      <ToggleGroupItem value="dark" aria-label={"Dark theme"}>
+      <ToggleGroupItem value="dark" aria-label="Dark theme">
         <span className="flex items-center gap-1 text-sm">
           <IconMoon data-icon="inline-start" />
-          {"Dark"}
+          Dark
         </span>
       </ToggleGroupItem>
     </ToggleGroup>

@@ -48,17 +48,17 @@ export function DanglingExtensionsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Dangling extensions"}</DialogTitle>
+          <DialogTitle>Dangling extensions</DialogTitle>
           <DialogDescription>
-            {
-              "These extensions were installed previously but no longer match anything in the registry, usually because the extension was updated to a newer version. They may still be running in the background."
-            }
+            These extensions were installed previously but no longer match anything in the registry,
+            usually because the extension was updated to a newer version. They may still be running
+            in the background.
           </DialogDescription>
         </DialogHeader>
 
         {danglingServers.length === 0 ? (
           <div className="text-muted-foreground rounded-md border p-6 text-center text-sm">
-            {"No dangling extensions found."}
+            No dangling extensions found.
           </div>
         ) : (
           <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto">
@@ -93,7 +93,7 @@ export function DanglingExtensionsDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {"Close"}
+            Close
           </Button>
           {danglingServers.length > 0 && (
             <Button
@@ -105,7 +105,7 @@ export function DanglingExtensionsDialog({
                 onRemoveAll(danglingServers.map((s) => s.id));
               }}
             >
-              {"Remove all"}
+              Remove all
             </Button>
           )}
         </DialogFooter>

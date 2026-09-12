@@ -65,7 +65,7 @@ export const MessageActionRow = ({
               />
             </div>
           </AdaptiveTooltipTrigger>
-          <AdaptiveTooltipContent side="bottom">{"Copy message"}</AdaptiveTooltipContent>
+          <AdaptiveTooltipContent side="bottom">Copy message</AdaptiveTooltipContent>
         </AdaptiveTooltip>
 
         {messageRole === "assistant" && contentToSpeak.trim() ? (
@@ -79,7 +79,7 @@ export const MessageActionRow = ({
                 <BranchButton onBranch={onBranch} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">{"Branch conversation"}</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">Branch conversation</AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
         {messageRole === "assistant" && (
@@ -89,7 +89,7 @@ export const MessageActionRow = ({
                 <RetryButton messageId={messageId} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">{"Regenerate response"}</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">Regenerate response</AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
         {onEdit && (
@@ -99,7 +99,7 @@ export const MessageActionRow = ({
                 <EditButton onEdit={onEdit} className="size-6" />
               </div>
             </AdaptiveTooltipTrigger>
-            <AdaptiveTooltipContent side="bottom">{"Edit message"}</AdaptiveTooltipContent>
+            <AdaptiveTooltipContent side="bottom">Edit message</AdaptiveTooltipContent>
           </AdaptiveTooltip>
         )}
       </>
@@ -129,7 +129,7 @@ function TtsAction({ messageId, text }: { messageId: string; text: string }) {
           <TtsButton messageId={messageId} text={text} className="size-6" />
         </div>
       </AdaptiveTooltipTrigger>
-      <AdaptiveTooltipContent side="bottom">{"Read aloud"}</AdaptiveTooltipContent>
+      <AdaptiveTooltipContent side="bottom">Read aloud</AdaptiveTooltipContent>
     </AdaptiveTooltip>
   );
 }

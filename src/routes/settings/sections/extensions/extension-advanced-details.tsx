@@ -56,7 +56,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <IconInfoCircle className="text-foreground size-5" />
-          <span className="text-foreground text-sm">{"Enable server to see auth status"}</span>
+          <span className="text-foreground text-sm">Enable server to see auth status</span>
         </div>
       </div>
     );
@@ -67,7 +67,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <IconShieldOff className="text-foreground size-5" />
-          <span className="text-foreground text-sm">{"No authorization required"}</span>
+          <span className="text-foreground text-sm">No authorization required</span>
         </div>
       </div>
     );
@@ -78,7 +78,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
       <div className="flex items-center justify-between rounded-md border p-3">
         <div className="flex items-center gap-2">
           <Spinner className="text-foreground" data-icon="inline-start" />
-          <span className="text-foreground text-sm">{"Checking auth status..."}</span>
+          <span className="text-foreground text-sm">Checking auth status...</span>
         </div>
       </div>
     );
@@ -93,7 +93,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
         {authState === "logged-in" ? (
           <>
             <IconCircleCheck className="text-foreground size-5" />
-            <span className="text-sm">{"Connected"}</span>
+            <span className="text-sm">Connected</span>
           </>
         ) : authState === "supports-oauth" ? (
           <>
@@ -115,7 +115,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
           disabled={loading}
         >
           {loading ? <Spinner data-icon="inline-start" /> : <IconLogout />}
-          {"Disconnect"}
+          Disconnect
         </Button>
       ) : (
         <Button
@@ -124,7 +124,7 @@ function McpAuthStatus({ server, disabled }: { server: McpHttpServerConfig; disa
           disabled={loading}
         >
           {loading ? <Spinner data-icon="inline-start" /> : <IconLogin />}
-          {"Connect"}
+          Connect
         </Button>
       )}
     </div>
@@ -155,10 +155,10 @@ function McpServerApprovalSettings({
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
-            {"Require Approval By Default"}
+            Require Approval By Default
           </Label>
           <span className="text-muted-foreground text-xs">
-            {"Ask for confirmation before running tools"}
+            Ask for confirmation before running tools
           </span>
         </div>
         <Switch
@@ -170,29 +170,28 @@ function McpServerApprovalSettings({
 
       <Accordion type="single" collapsible className="rounded-md border px-3">
         <AccordionItem value="tool-approval" className="border-b-0">
-          <AccordionTrigger className="py-3 text-sm">{"Per-tool approvals"}</AccordionTrigger>
+          <AccordionTrigger className="py-3 text-sm">Per-tool approvals</AccordionTrigger>
           <AccordionContent className="pb-3">
             <div className="flex flex-col gap-3">
               {!enabled ? (
                 <span className="text-muted-foreground text-sm">
-                  {"Enable this server to configure per-tool approvals."}
+                  Enable this server to configure per-tool approvals.
                 </span>
               ) : loadState?.status === "starting" ||
                 loadState?.status === "connecting" ||
                 loadState?.status === "unknown" ? (
                 <div className="text-muted-foreground flex items-center gap-2 text-sm">
                   <Spinner className="size-4" />
-                  {"Tool list will appear after the server finishes loading."}
+                  Tool list will appear after the server finishes loading.
                 </div>
               ) : loadState?.status === "error" ? (
                 <span className="text-muted-foreground text-sm">
-                  {
-                    "Tools could not be loaded yet. Resolve the server error to configure per-tool approvals."
-                  }
+                  Tools could not be loaded yet. Resolve the server error to configure per-tool
+                  approvals.
                 </span>
               ) : availableTools.length === 0 ? (
                 <span className="text-muted-foreground text-sm">
-                  {"This server does not currently expose any tools."}
+                  This server does not currently expose any tools.
                 </span>
               ) : (
                 availableTools.map((tool) => {
@@ -278,12 +277,12 @@ export function ExtensionAdvancedDetails({
       <>
         <DialogClose asChild>
           <Button type="button" variant="outline">
-            {"Cancel"}
+            Cancel
           </Button>
         </DialogClose>
         <DialogClose asChild>
           <Button type="button" onClick={() => onUpdate(draft)}>
-            {"Save changes"}
+            Save changes
           </Button>
         </DialogClose>
       </>,

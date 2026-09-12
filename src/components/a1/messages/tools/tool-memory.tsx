@@ -119,7 +119,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           <div className="flex items-center gap-1">
             <IconBrain className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
-              {"AgentOne wants to update memory"}
+              AgentOne wants to update memory
             </span>
           </div>
           <pre className="text-muted-foreground overflow-x-auto rounded text-xs whitespace-pre-wrap">
@@ -132,7 +132,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -140,7 +140,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -150,7 +150,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-          <span className="text-muted-foreground text-sm font-bold">{"Memory update denied"}</span>
+          <span className="text-muted-foreground text-sm font-bold">Memory update denied</span>
         </div>
       );
 
@@ -158,7 +158,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <Spinner className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Preparing memory update..."}</span>
+          <span className="text-foreground text-sm font-bold">Preparing memory update...</span>
         </div>
       );
 
@@ -168,9 +168,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {"Memory update denied"}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">Memory update denied</span>
           </div>
         );
       }
@@ -238,9 +236,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
         return (
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
-            <span className="text-muted-foreground text-sm font-bold">
-              {"Memory update cancelled"}
-            </span>
+            <span className="text-muted-foreground text-sm font-bold">Memory update cancelled</span>
           </div>
         );
       }
@@ -251,7 +247,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Memory update failed"}
+          title="Memory update failed"
         />
       );
 
@@ -259,7 +255,7 @@ export const MessagePartToolMemory = ({ part }: MemoryToolPartProps) => {
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconBrain className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Memory updated"}</span>
+          <span className="text-foreground text-sm font-bold">Memory updated</span>
         </div>
       );
   }

@@ -115,18 +115,18 @@ export function AddServerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Add Custom Extension"}</DialogTitle>
+          <DialogTitle>Add Custom Extension</DialogTitle>
           <DialogDescription>
-            {"Configure a custom extension by defining an MCP server."}
+            Configure a custom extension by defining an MCP server.
           </DialogDescription>
         </DialogHeader>
 
         {isFromDeepLink ? (
           <Alert variant="destructive">
             <IconAlertTriangle />
-            <AlertTitle>{"Extension details were auto-filled"}</AlertTitle>
+            <AlertTitle>Extension details were auto-filled</AlertTitle>
             <AlertDescription>
-              {"Review the details below before installing. Only install extensions you trust."}
+              Review the details below before installing. Only install extensions you trust.
             </AlertDescription>
           </Alert>
         ) : null}
@@ -138,17 +138,17 @@ export function AddServerDialog({
             showTypeSelector
             values={formValues}
             onChange={(updates) => setFormValues((current) => ({ ...current, ...updates }))}
-            namePlaceholder={"e.g., Everything Server"}
+            namePlaceholder="e.g., Everything Server"
             showStdioWarning
           />
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancelAdd}>
-            {"Cancel"}
+            Cancel
           </Button>
           <Button onClick={handleAddServer} disabled={!isAddFormValid}>
-            {"Add Custom"}
+            Add Custom
           </Button>
         </DialogFooter>
       </DialogContent>

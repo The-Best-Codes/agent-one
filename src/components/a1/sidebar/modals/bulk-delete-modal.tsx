@@ -46,10 +46,10 @@ export const BulkDeleteModal = ({ isOpen, onClose, chatIds, chatCount }: BulkDel
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {"Cancel"}
+            Cancel
           </Button>
           <Button variant="destructive" onClick={handleDelete}>
-            {"Delete"}
+            Delete
           </Button>
         </DialogFooter>
       </DialogContent>

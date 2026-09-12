@@ -33,9 +33,9 @@ export const MainInputErrorSection = ({ onRetry }: { onRetry?: () => void }) => 
           disabled={!hasAvailableModels}
         >
           <IconPlayerPlay data-icon="inline-start" />
-          {"Resume"}
+          Resume
         </Button>
-        <Button title={"Ignore error"} size="icon" onClick={() => clearError()} variant="outline">
+        <Button title="Ignore error" size="icon" onClick={() => clearError()} variant="outline">
           <IconX />
         </Button>
       </div>

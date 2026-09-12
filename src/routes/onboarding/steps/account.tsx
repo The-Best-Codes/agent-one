@@ -50,11 +50,10 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
       >
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-foreground text-2xl font-bold">{"Configure providers"}</h2>
+            <h2 className="text-foreground text-2xl font-bold">Configure providers</h2>
             <p className="text-muted-foreground text-sm">
-              {
-                "Your API keys are stored securely on your device. Enable providers and configure their API keys to get started."
-              }
+              Your API keys are stored securely on your device. Enable providers and configure their
+              API keys to get started.
             </p>
           </div>
 
@@ -68,11 +67,11 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
               disabled={!hasEnabledProvider || isSubmitting}
               className="w-full"
             >
-              {"Finish Setup"}
+              Finish Setup
             </Button>
             <Button variant="outline" onClick={() => handleViewChange("account")}>
               <IconArrowLeft data-icon="inline-start" />
-              {"Back to account options"}
+              Back to account options
             </Button>
           </div>
         </div>
@@ -92,13 +91,10 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
     >
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
-          <h2 className="text-foreground text-center text-4xl font-bold">
-            {"Set up your account"}
-          </h2>
+          <h2 className="text-foreground text-center text-4xl font-bold">Set up your account</h2>
           <p className="text-muted-foreground text-center text-base">
-            {
-              "An AgentOne account synchronizes your data across devices and allows you to access AgentOne models."
-            }
+            An AgentOne account synchronizes your data across devices and allows you to access
+            AgentOne models.
           </p>
         </div>
 
@@ -109,7 +105,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
 
           {user && (
             <Button size="lg" onClick={handleSubmit} disabled={isSubmitting}>
-              {"Continue"}
+              Continue
               <IconArrowRight data-icon="inline-end" />
             </Button>
           )}
@@ -119,7 +115,7 @@ export function AccountStep({ onSubmit }: AccountStepProps) {
             className="text-muted-foreground hover:text-foreground mt-2 cursor-pointer text-sm underline"
             onClick={() => handleViewChange("byok")}
           >
-            {"Or continue without an account"}
+            Or continue without an account
           </button>
         </div>
       </div>

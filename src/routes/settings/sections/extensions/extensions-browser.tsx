@@ -114,11 +114,11 @@ export function ExtensionsBrowser({
     <div
       ref={parentRef}
       className="max-h-none min-h-0 flex-1 scroll-py-1 overflow-x-hidden overflow-y-auto"
-      aria-label={"Extensions"}
+      aria-label="Extensions"
     >
       {filteredItems.length === 0 ? (
         <div className="text-muted-foreground rounded-md p-8 text-center text-sm">
-          {"No extensions match your search."}
+          No extensions match your search.
         </div>
       ) : (
         <div className={cn(isOverflowing && "pr-2")}>

@@ -99,9 +99,9 @@ export function AddOpenAICompatibleDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Add OpenAI Compatible Provider"}</DialogTitle>
+          <DialogTitle>Add OpenAI Compatible Provider</DialogTitle>
           <DialogDescription>
-            {"Add a custom provider that uses the OpenAI API format."}
+            Add a custom provider that uses the OpenAI API format.
           </DialogDescription>
         </DialogHeader>
 
@@ -109,10 +109,10 @@ export function AddOpenAICompatibleDialog({
           <div className="py-4">
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="provider-name">{"Name"}</FieldLabel>
+                <FieldLabel htmlFor="provider-name">Name</FieldLabel>
                 <Input
                   id="provider-name"
-                  placeholder={"e.g., My Local LLM"}
+                  placeholder="e.g., My Local LLM"
                   value={draft.name}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -124,10 +124,10 @@ export function AddOpenAICompatibleDialog({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="provider-base-url">{"Base URL"}</FieldLabel>
+                <FieldLabel htmlFor="provider-base-url">Base URL</FieldLabel>
                 <Input
                   id="provider-base-url"
-                  placeholder={"e.g., http://localhost:1234/v1"}
+                  placeholder="e.g., http://localhost:1234/v1"
                   value={draft.baseUrl}
                   onChange={(event) =>
                     setDraft((current) => ({
@@ -139,7 +139,7 @@ export function AddOpenAICompatibleDialog({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="provider-api-key">{"API Key"}</FieldLabel>
+                <FieldLabel htmlFor="provider-api-key">API Key</FieldLabel>
                 <SecretInput
                   id="provider-api-key"
                   value={draft.apiKey}
@@ -149,7 +149,7 @@ export function AddOpenAICompatibleDialog({
                       apiKey,
                     }))
                   }
-                  placeholder={"Enter API key if required"}
+                  placeholder="Enter API key if required"
                 />
               </Field>
 
@@ -169,10 +169,8 @@ export function AddOpenAICompatibleDialog({
                 baseUrl={draft.baseUrl.trim()}
                 apiKey={draft.apiKey.trim()}
                 headers={draft.headers}
-                emptyTitle={"No custom models yet"}
-                emptyDescription={
-                  "Add a model or fetch the provider’s model list, then edit the metadata you want AgentOne to use."
-                }
+                emptyTitle="No custom models yet"
+                emptyDescription="Add a model or fetch the provider’s model list, then edit the metadata you want AgentOne to use."
                 onChange={(models) =>
                   setDraft((current) => ({
                     ...current,
@@ -186,10 +184,10 @@ export function AddOpenAICompatibleDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            {"Cancel"}
+            Cancel
           </Button>
           <Button onClick={handleAdd} disabled={!isValid}>
-            {"Add Provider"}
+            Add Provider
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -208,7 +206,7 @@ export function DeleteProviderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{"Delete Provider"}</DialogTitle>
+          <DialogTitle>Delete Provider</DialogTitle>
           <DialogDescription>
             {`Are you sure you want to delete "${providerName}"? This action cannot be undone.`}
           </DialogDescription>
@@ -216,10 +214,10 @@ export function DeleteProviderDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={onCancel}>
-            {"Cancel"}
+            Cancel
           </Button>
           <Button variant="destructive" onClick={onConfirm}>
-            {"Delete"}
+            Delete
           </Button>
         </DialogFooter>
       </DialogContent>

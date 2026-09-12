@@ -73,18 +73,18 @@ export function McpServerConfigForm({
     <div className={className}>
       {showTypeSelector ? (
         <div className="grid gap-2">
-          <Label htmlFor={`${idPrefix}-server-type`}>{"Server Type"}</Label>
+          <Label htmlFor={`${idPrefix}-server-type`}>Server Type</Label>
           <Select
             value={values.type}
             onValueChange={(value: McpServerType) => onChange({ type: value })}
           >
             <SelectTrigger id={`${idPrefix}-server-type`}>
-              <SelectValue placeholder={"Select server type"} />
+              <SelectValue placeholder="Select server type" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="stdio">{"STDIO (Local)"}</SelectItem>
-                <SelectItem value="http">{"HTTP (Remote)"}</SelectItem>
+                <SelectItem value="stdio">STDIO (Local)</SelectItem>
+                <SelectItem value="http">HTTP (Remote)</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -97,7 +97,7 @@ export function McpServerConfigForm({
       ) : null}
 
       <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-name`}>{"Name"}</Label>
+        <Label htmlFor={`${idPrefix}-name`}>Name</Label>
         <Input
           id={`${idPrefix}-name`}
           placeholder={resolvedNamePlaceholder}
@@ -111,16 +111,15 @@ export function McpServerConfigForm({
           {showStdioWarning ? (
             <Alert>
               <IconAlertTriangle />
-              <AlertTitle>{"This extension runs code on your device"}</AlertTitle>
+              <AlertTitle>This extension runs code on your device</AlertTitle>
               <AlertDescription>
-                {
-                  "Only install it if you trust the developer. It may not work correctly on all devices."
-                }
+                Only install it if you trust the developer. It may not work correctly on all
+                devices.
               </AlertDescription>
             </Alert>
           ) : null}
           <div className="grid gap-2">
-            <Label htmlFor={`${idPrefix}-command`}>{"Command"}</Label>
+            <Label htmlFor={`${idPrefix}-command`}>Command</Label>
             <Input
               id={`${idPrefix}-command`}
               placeholder={resolvedCommandPlaceholder}
@@ -141,7 +140,7 @@ export function McpServerConfigForm({
       ) : (
         <>
           <div className="grid gap-2">
-            <Label htmlFor={`${idPrefix}-url`}>{"URL"}</Label>
+            <Label htmlFor={`${idPrefix}-url`}>URL</Label>
             <Input
               id={`${idPrefix}-url`}
               placeholder={resolvedUrlPlaceholder}
@@ -162,7 +161,7 @@ export function McpServerConfigForm({
       )}
 
       <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-timeout`}>{"Timeout (seconds)"}</Label>
+        <Label htmlFor={`${idPrefix}-timeout`}>Timeout (seconds)</Label>
         <Input
           id={`${idPrefix}-timeout`}
           type="number"
@@ -181,7 +180,7 @@ export function McpServerConfigForm({
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <Label htmlFor={`${idPrefix}-requires-approval`} className="text-sm">
-              {"Require Approval By Default"}
+              Require Approval By Default
             </Label>
             <span className="text-muted-foreground text-xs">{resolvedApprovalDescription}</span>
           </div>

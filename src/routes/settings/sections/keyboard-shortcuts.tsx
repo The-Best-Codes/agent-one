@@ -86,7 +86,7 @@ function ShortcutEditor({
     >
       <DialogContent showCloseButton={false} onEscapeKeyDown={(event) => event.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>{"Edit shortcut"}</DialogTitle>
+          <DialogTitle>Edit shortcut</DialogTitle>
           <DialogDescription>{label}</DialogDescription>
         </DialogHeader>
 
@@ -111,7 +111,7 @@ function ShortcutEditor({
 
         {conflict && (
           <Alert variant="destructive">
-            <AlertTitle>{"Shortcut conflict"}</AlertTitle>
+            <AlertTitle>Shortcut conflict</AlertTitle>
             <AlertDescription>
               {`This shortcut is also used by ${conflict.label}.`}
             </AlertDescription>
@@ -120,24 +120,24 @@ function ShortcutEditor({
 
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-4">
-            <Label>{"Activate in input fields"}</Label>
+            <Label>Activate in input fields</Label>
             <Switch
               checked={enabledInInputs ?? enabledInInputsDefault}
               onCheckedChange={setEnabledInInputs}
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <Label>{"Prevent default browser behavior"}</Label>
+            <Label>Prevent default browser behavior</Label>
             <Switch checked={preventDefault} onCheckedChange={setPreventDefault} />
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {"Cancel"}
+            Cancel
           </Button>
           <Button variant={conflict ? "destructive" : "default"} onClick={handleSave}>
-            {"Save"}
+            Save
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -156,26 +156,23 @@ export default function KeyboardShortcutsSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{"Keyboard Shortcuts"}</CardTitle>
+          <CardTitle>Keyboard Shortcuts</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <SettingsTarget id="setting-activate-shortcuts-in-input-fields">
             <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
               <div className="flex flex-col items-start">
-                <Label className="text-sm font-medium">
-                  {"Activate shortcuts in input fields"}
-                </Label>
+                <Label className="text-sm font-medium">Activate shortcuts in input fields</Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  {
-                    "This is the default behavior. You can change it for individual shortcuts in the shortcut editor."
-                  }
+                  This is the default behavior. You can change it for individual shortcuts in the
+                  shortcut editor.
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
                   checked={enabledInInputsDefault}
                   onCheckedChange={setEnabledInInputsDefault}
-                  aria-label={"Activate shortcuts in input fields"}
+                  aria-label="Activate shortcuts in input fields"
                 />
 
                 <Button
@@ -185,7 +182,7 @@ export default function KeyboardShortcutsSection() {
                     enabledInInputsDefault === DEFAULT_SETTINGS.KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS
                   }
                   onClick={() => resetSetting("KEYBOARD_SHORTCUTS_ENABLED_IN_INPUTS")}
-                  aria-label={"Reset input field shortcut behavior"}
+                  aria-label="Reset input field shortcut behavior"
                 >
                   <IconRestore />
                 </Button>
@@ -196,9 +193,9 @@ export default function KeyboardShortcutsSection() {
           <div className="flex gap-1">
             <IconBulb className="size-5 shrink-0" />
             <span>
-              {"You can change the send key in"} (<Kbd>Enter</Kbd> / <Kbd>Ctrl+Enter</Kbd>){" "}
+              You can change the send key in (<Kbd>Enter</Kbd> / <Kbd>Ctrl+Enter</Kbd>){" "}
               <Link to="/settings?tab=chats#setting-submit-key" className="underline">
-                {"chat settings."}
+                chat settings.
               </Link>
             </span>
           </div>

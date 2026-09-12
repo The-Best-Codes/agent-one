@@ -98,7 +98,7 @@ export function HttpHeadersEditor({
   return (
     <div className="rounded-md border p-3">
       <div className="mb-3 flex items-start justify-between gap-2">
-        <Label className={labelClassName || "text-xs"}>{"HTTP Headers"}</Label>
+        <Label className={labelClassName || "text-xs"}>HTTP Headers</Label>
         <div className="flex gap-1.5">
           {hasChanges && (
             <>
@@ -108,26 +108,26 @@ export function HttpHeadersEditor({
                 size="sm"
                 onClick={handleSave}
                 disabled={!canSave}
-                title={"Save changes"}
+                title="Save changes"
               >
                 <IconDeviceFloppy data-icon="inline-start" />
-                {"Save"}
+                Save
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleRevert}
-                title={"Revert changes"}
+                title="Revert changes"
               >
                 <IconRestore data-icon="inline-start" />
-                {"Revert"}
+                Revert
               </Button>
             </>
           )}
           <Button type="button" variant="outline" size="sm" onClick={addEntry}>
             <IconPlus data-icon="inline-start" />
-            {"Add"}
+            Add
           </Button>
         </div>
       </div>
@@ -141,7 +141,7 @@ export function HttpHeadersEditor({
               <div key={`${id}-header-${idx}`}>
                 <div className="flex gap-2">
                   <Input
-                    placeholder={"Header name"}
+                    placeholder="Header name"
                     value={key}
                     onChange={(e) => updateKey(idx, e.target.value)}
                     aria-invalid={hasError}
@@ -149,7 +149,7 @@ export function HttpHeadersEditor({
                   />
 
                   <Input
-                    placeholder={"Value"}
+                    placeholder="Value"
                     value={value}
                     onChange={(e) => updateValue(idx, e.target.value)}
                     className="flex-1"
@@ -165,11 +165,11 @@ export function HttpHeadersEditor({
                   </Button>
                 </div>
                 {isDupe && (
-                  <p className="text-destructive mt-1 ml-0.5 text-xs">{"Duplicate header name"}</p>
+                  <p className="text-destructive mt-1 ml-0.5 text-xs">Duplicate header name</p>
                 )}
                 {isEmpty && !isDupe && (
                   <p className="text-destructive mt-1 ml-0.5 text-xs">
-                    {"Header name cannot be empty"}
+                    Header name cannot be empty
                   </p>
                 )}
               </div>
@@ -178,7 +178,7 @@ export function HttpHeadersEditor({
         </div>
       ) : (
         <p className="text-muted-foreground flex h-9 flex-col items-center justify-center rounded-md border border-dashed p-2 text-sm">
-          {"No headers configured."}
+          No headers configured.
         </p>
       )}
     </div>

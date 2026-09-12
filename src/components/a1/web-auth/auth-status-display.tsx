@@ -30,8 +30,8 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
       <StatusRow
         className={className}
         icon={<Spinner className="text-muted-foreground" data-icon="inline-start" />}
-        title={"Checking status..."}
-        description={"Please wait while we check your account"}
+        title="Checking status..."
+        description="Please wait while we check your account"
       />
     );
   }
@@ -41,11 +41,11 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
       <StatusRow
         className={className}
         icon={<Spinner className="text-primary" data-icon="inline-start" />}
-        title={"Signing in..."}
-        description={"Getting you signed in..."}
+        title="Signing in..."
+        description="Getting you signed in..."
         action={
           <Button variant="secondary" size="sm" onClick={cancelSignIn}>
-            {"Cancel"}
+            Cancel
           </Button>
         }
       />
@@ -57,7 +57,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
       <StatusRow
         className={className}
         icon={<Spinner className="text-primary" data-icon="inline-start" />}
-        title={"Link your account"}
+        title="Link your account"
         description={
           <a
             href={deviceFlow.verificationUriComplete || deviceFlow.verificationUri}
@@ -65,7 +65,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
             rel="noopener noreferrer"
             className="flex flex-row items-center justify-center gap-1 hover:underline"
           >
-            {"Open Login Form Manually"}
+            Open Login Form Manually
             <IconExternalLink className="size-4" />
           </a>
         }
@@ -87,7 +87,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
               />
             </div>
             <Button variant="secondary" size="sm" onClick={cancelSignIn}>
-              {"Cancel"}
+              Cancel
             </Button>
           </>
         }
@@ -104,7 +104,7 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
           signedInAction ?? (
             <Button variant="secondary" size="sm" onClick={signOut} disabled={isSigningOut}>
               {isSigningOut && <Spinner data-icon="inline-start" />}
-              {"Sign out"}
+              Sign out
             </Button>
           )
         }
@@ -116,11 +116,11 @@ export function AuthStatusDisplay({ className, signedInAction }: AuthStatusDispl
     <StatusRow
       className={className}
       icon={<IconUser className="text-muted-foreground size-5" />}
-      title={"Not signed in"}
-      description={"Sign in to synchronize your data"}
+      title="Not signed in"
+      description="Sign in to synchronize your data"
       action={
         <Button onClick={startSignIn} size="sm">
-          {"Sign in"}
+          Sign in
         </Button>
       }
     />

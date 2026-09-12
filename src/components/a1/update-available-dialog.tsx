@@ -34,7 +34,7 @@ export function UpdateAvailableDialog() {
         <DialogHeader>
           <div className="flex items-center gap-2">
             <IconRocket className="text-primary size-5" />
-            <DialogTitle>{"Update Available"}</DialogTitle>
+            <DialogTitle>Update Available</DialogTitle>
           </div>
           <DialogDescription>
             {`AgentOne v${updateVersion} is available. Update now to get the latest features and bug fixes.`}
@@ -44,7 +44,7 @@ export function UpdateAvailableDialog() {
           <ButtonGroup>
             <Button variant="outline" size="sm" onClick={() => handleRemind(1)}>
               <IconClock data-icon="inline-start" />
-              {"Remind me in 1 day"}
+              Remind me in 1 day
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -55,13 +55,13 @@ export function UpdateAvailableDialog() {
               <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => handleRemind(3)}>
-                    {"Remind me in 3 days"}
+                    Remind me in 3 days
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleRemind(7)}>
-                    {"Remind me in 1 week"}
+                    Remind me in 1 week
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleRemind(14)}>
-                    {"Remind me in 2 weeks"}
+                    Remind me in 2 weeks
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -75,7 +75,7 @@ export function UpdateAvailableDialog() {
             }}
           >
             <IconDownload data-icon="inline-start" />
-            {"Update"}
+            Update
           </Button>
         </DialogFooter>
       </DialogContent>

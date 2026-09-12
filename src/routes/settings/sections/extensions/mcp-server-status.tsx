@@ -99,7 +99,7 @@ export function McpServerStatus({
       return (
         <div className="flex items-center gap-1.5">
           <Spinner className="text-muted-foreground size-3" />
-          <span className="text-muted-foreground text-xs">{"Loading..."}</span>
+          <span className="text-muted-foreground text-xs">Loading...</span>
         </div>
       );
     }
@@ -139,7 +139,7 @@ export function McpServerStatus({
           id={switchId}
           checked={!disabled}
           onCheckedChange={onEnabledChange}
-          aria-label={"Toggle extension"}
+          aria-label="Toggle extension"
         />
       ) : null}
     </div>

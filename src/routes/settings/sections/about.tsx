@@ -145,7 +145,7 @@ export default function AboutSection() {
             size="sm"
           >
             <IconRefresh data-icon="inline-start" />
-            {"Check Now"}
+            Check Now
           </Button>
         );
 
@@ -153,7 +153,7 @@ export default function AboutSection() {
         return (
           <Button variant="outline" size="sm" disabled>
             <Spinner data-icon="inline-start" />
-            {"Checking..."}
+            Checking...
           </Button>
         );
 
@@ -169,7 +169,7 @@ export default function AboutSection() {
             size="sm"
           >
             <IconDownload data-icon="inline-start" />
-            {"Download & Install"}
+            Download & Install
           </Button>
         );
 
@@ -184,7 +184,7 @@ export default function AboutSection() {
             size="sm"
           >
             <IconRefresh data-icon="inline-start" />
-            {"Try Again"}
+            Try Again
           </Button>
         );
 
@@ -223,11 +223,11 @@ export default function AboutSection() {
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>{"App Updates"}</CardTitle>
+          <CardTitle>App Updates</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div>
-            <p className="text-muted-foreground text-sm">{"Current Version"}</p>
+            <p className="text-muted-foreground text-sm">Current Version</p>
             <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
           </div>
 
@@ -255,7 +255,7 @@ export default function AboutSection() {
           {selectedReleaseNotes && (
             <Accordion type="single" collapsible className="border-t pt-3">
               <AccordionItem value="release-notes" className="border-b-0">
-                <AccordionTrigger className="py-1.5">{"Release notes"}</AccordionTrigger>
+                <AccordionTrigger className="py-1.5">Release notes</AccordionTrigger>
                 <AccordionContent className="h-auto overflow-visible pb-0">
                   <Select
                     value={selectedReleaseNotesVersion}
@@ -264,7 +264,7 @@ export default function AboutSection() {
                     <SelectTrigger
                       className="mb-3"
                       size="sm"
-                      aria-label={"Select release notes version"}
+                      aria-label="Select release notes version"
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -295,15 +295,15 @@ export default function AboutSection() {
       <SettingsTarget id="setting-model-directory">
         <Card>
           <CardHeader>
-            <CardTitle>{"Model List Updates"}</CardTitle>
+            <CardTitle>Model List Updates</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <p className="text-muted-foreground text-sm">
               {"Download the latest"}{" "}
               <Link className="underline" to="/settings?tab=providers#setting-built-in-providers">
-                {"built-in providers'"}
+                built-in providers'
               </Link>{" "}
-              {"model metadata. This will update the model list available in the UI."}
+              model metadata. This will update the model list available in the UI.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-1">
@@ -330,7 +330,7 @@ export default function AboutSection() {
                   ) : (
                     <IconRefresh data-icon="inline-start" />
                   )}
-                  {"Update now"}
+                  Update now
                 </Button>
                 <Button
                   onClick={handleResetModelDirectory}
@@ -339,7 +339,7 @@ export default function AboutSection() {
                   size="sm"
                 >
                   <IconRestore data-icon="inline-start" />
-                  {"Reset"}
+                  Reset
                 </Button>
               </div>
             </div>
@@ -348,7 +348,7 @@ export default function AboutSection() {
       </SettingsTarget>
       <Card>
         <CardHeader>
-          <CardTitle>{"Help"}</CardTitle>
+          <CardTitle>Help</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-1">
@@ -357,7 +357,7 @@ export default function AboutSection() {
               href="https://github.com/AgentOne-Dev/agent-one-public/issues/new"
               className="flex w-fit items-center gap-1 underline"
             >
-              {"Report a bug"}
+              Report a bug
               <IconExternalLink className="size-4" />
             </a>
             <a
@@ -365,7 +365,7 @@ export default function AboutSection() {
               href="https://www.agent-one.dev/discord"
               className="flex w-fit items-center gap-1 underline"
             >
-              {"Get help on Discord"}
+              Get help on Discord
               <IconExternalLink className="size-4" />
             </a>
             <a
@@ -373,7 +373,7 @@ export default function AboutSection() {
               href="https://docs.agent-one.dev/docs"
               className="flex w-fit items-center gap-1 underline"
             >
-              {"Read the docs"}
+              Read the docs
               <IconExternalLink className="size-4" />
             </a>
           </div>
@@ -381,17 +381,16 @@ export default function AboutSection() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{"Usage Analytics"}</CardTitle>
+          <CardTitle>Usage Analytics</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <SettingsTarget id="setting-allow-usage-analytics">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-1 flex-col gap-1">
-                <p className="text-sm font-medium">{"Allow usage analytics"}</p>
+                <p className="text-sm font-medium">Allow usage analytics</p>
                 <p className="text-muted-foreground text-sm">
-                  {
-                    "When disabled, AgentOne stops sending Google Analytics events from the desktop app."
-                  }
+                  When disabled, AgentOne stops sending Google Analytics events from the desktop
+                  app.
                 </p>
               </div>
               <Switch
@@ -403,20 +402,18 @@ export default function AboutSection() {
                   });
                   setAnalyticsIdentity(nextValue);
                 }}
-                aria-label={"Allow usage analytics"}
+                aria-label="Allow usage analytics"
               />
             </div>
           </SettingsTarget>
           <SettingsTarget id="setting-associate-analytics-with-my-signed-in-account">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-1 flex-col gap-1">
-                <p className="text-sm font-medium">
-                  {"Associate analytics with my signed-in account"}
-                </p>
+                <p className="text-sm font-medium">Associate analytics with my signed-in account</p>
                 <p className="text-muted-foreground text-sm">
-                  {
-                    "When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you can measure signed-in usage across sessions. We do not send your name or email address to Google Analytics."
-                  }
+                  When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you
+                  can measure signed-in usage across sessions. We do not send your name or email
+                  address to Google Analytics.
                 </p>
                 <a
                   href="https://www.agent-one.dev/privacy?utm_source=desktop-app"
@@ -424,7 +421,7 @@ export default function AboutSection() {
                   rel="noopener noreferrer"
                   className="flex w-fit underline"
                 >
-                  {"Learn more"}
+                  Learn more
                 </a>
               </div>
 
@@ -441,13 +438,13 @@ export default function AboutSection() {
                         });
                         setAnalyticsIdentity(checked ? "user-id" : "anonymous");
                       }}
-                      aria-label={"Associate analytics with my signed-in account"}
+                      aria-label="Associate analytics with my signed-in account"
                     />
                   </span>
                 </AdaptiveTooltipTrigger>
                 {!user && (
                   <AdaptiveTooltipContent>
-                    {"You're not signed in, so analytics aren't associated with your account."}
+                    You're not signed in, so analytics aren't associated with your account.
                   </AdaptiveTooltipContent>
                 )}
               </AdaptiveTooltip>
@@ -458,7 +455,7 @@ export default function AboutSection() {
       {debugMode && (
         <Card>
           <CardHeader>
-            <CardTitle>{"Debug"}</CardTitle>
+            <CardTitle>Debug</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
@@ -467,14 +464,14 @@ export default function AboutSection() {
                   <IconBug className="text-muted-foreground size-5" />
                 </div>
                 <div>
-                  <p className="leading-none font-medium">{"Internal Tests"}</p>
+                  <p className="leading-none font-medium">Internal Tests</p>
                   <p className="text-muted-foreground text-sm">
-                    {"Access internal testing tools and utilities."}
+                    Access internal testing tools and utilities.
                   </p>
                 </div>
               </div>
               <Button onClick={() => navigate("/tests")} size="sm">
-                {"Open Tests"}
+                Open Tests
               </Button>
             </div>
           </CardContent>

@@ -71,25 +71,25 @@ export default function NotificationsTestRoute() {
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")} className="gap-2">
             <IconArrowLeft data-icon="inline-start" />
-            {"Back to Tests"}
+            Back to Tests
           </Button>
-          <h1 className="text-2xl font-bold">{"Notifications Test"}</h1>
+          <h1 className="text-2xl font-bold">Notifications Test</h1>
         </div>
 
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{"Notification Tests"}</CardTitle>
+              <CardTitle>Notification Tests</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="flex gap-2">
                 <Button onClick={checkPermission} variant="outline">
-                  {"Check Permission"}
+                  Check Permission
                 </Button>
                 <Button onClick={requestNotificationPermission} variant="outline">
-                  {"Request Permission"}
+                  Request Permission
                 </Button>
-                <Button onClick={sendTestNotification}>{"Send Test Notification"}</Button>
+                <Button onClick={sendTestNotification}>Send Test Notification</Button>
               </div>
             </CardContent>
           </Card>
@@ -97,7 +97,7 @@ export default function NotificationsTestRoute() {
           {logs.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>{"Logs"}</CardTitle>
+                <CardTitle>Logs</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="bg-muted/20 max-h-96 overflow-y-auto rounded-md border p-4">

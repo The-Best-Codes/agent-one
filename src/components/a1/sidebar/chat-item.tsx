@@ -212,7 +212,7 @@ export const ChatItem = memo(
                           }}
                         >
                           <IconEdit />
-                          {"Change Title"}
+                          Change Title
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
@@ -226,7 +226,7 @@ export const ChatItem = memo(
                           }}
                         >
                           <IconDownload />
-                          {"Export Chat"}
+                          Export Chat
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
@@ -241,7 +241,7 @@ export const ChatItem = memo(
                           variant="destructive"
                         >
                           <IconTrash />
-                          {"Delete Chat"}
+                          Delete Chat
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                       <DropdownMenuSeparator />
@@ -254,7 +254,7 @@ export const ChatItem = memo(
                           }}
                         >
                           <IconCheckbox />
-                          {"Select Chat"}
+                          Select Chat
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -275,7 +275,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconEdit />
-                {"Change Title"}
+                Change Title
               </ContextMenuItem>
               <ContextMenuItem
                 onClick={() => {
@@ -287,7 +287,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconDownload />
-                {"Export Chat"}
+                Export Chat
               </ContextMenuItem>
               <ContextMenuItem
                 variant="destructive"
@@ -300,7 +300,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconTrash />
-                {"Delete Chat"}
+                Delete Chat
               </ContextMenuItem>
             </ContextMenuGroup>
             <ContextMenuSeparator />
@@ -311,7 +311,7 @@ export const ChatItem = memo(
                 }}
               >
                 <IconCheckbox />
-                {"Select Chat"}
+                Select Chat
               </ContextMenuItem>
             </ContextMenuGroup>
           </ContextMenuContent>

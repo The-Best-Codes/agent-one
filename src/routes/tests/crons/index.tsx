@@ -140,31 +140,30 @@ export default function CronsTestRoute() {
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate("/tests")}>
             <IconArrowLeft data-icon="inline-start" />
-            {"Back to Tests"}
+            Back to Tests
           </Button>
-          <h1 className="text-2xl font-bold">{"Cron Test"}</h1>
+          <h1 className="text-2xl font-bold">Cron Test</h1>
         </div>
 
         <Alert>
           <IconAlarm />
-          <AlertTitle>{"Automatic launch test"}</AlertTitle>
+          <AlertTitle>Automatic launch test</AlertTitle>
           <AlertDescription>
-            {
-              "Enabled crons use your operating system scheduler to open AgentOne. Cron schedules use your local time zone."
-            }
+            Enabled crons use your operating system scheduler to open AgentOne. Cron schedules use
+            your local time zone.
           </AlertDescription>
         </Alert>
 
         <Card>
           <CardHeader>
-            <CardTitle>{"Scheduled crons"}</CardTitle>
+            <CardTitle>Scheduled crons</CardTitle>
             <CardDescription>
-              {"Create multiple five-field cron schedules and manage them independently."}
+              Create multiple five-field cron schedules and manage them independently.
             </CardDescription>
             <CardAction>
               <Button onClick={openCreateDialog} disabled={isLoading}>
                 <IconPlus data-icon="inline-start" />
-                {"Add Cron"}
+                Add Cron
               </Button>
             </CardAction>
           </CardHeader>
@@ -175,15 +174,15 @@ export default function CronsTestRoute() {
                   <EmptyMedia variant="icon">
                     <IconAlarm />
                   </EmptyMedia>
-                  <EmptyTitle>{"No crons yet"}</EmptyTitle>
+                  <EmptyTitle>No crons yet</EmptyTitle>
                   <EmptyDescription>
-                    {"Add a cron to automatically open AgentOne on a schedule."}
+                    Add a cron to automatically open AgentOne on a schedule.
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <Button variant="outline" onClick={openCreateDialog}>
                     <IconPlus data-icon="inline-start" />
-                    {"Add Cron"}
+                    Add Cron
                   </Button>
                 </EmptyContent>
               </Empty>
@@ -220,7 +219,7 @@ export default function CronsTestRoute() {
                       variant="outline"
                       onClick={() => openEditDialog(cron)}
                       disabled={busyId !== null}
-                      aria-label={"Edit Cron"}
+                      aria-label="Edit Cron"
                     >
                       <IconEdit />
                     </Button>
@@ -229,7 +228,7 @@ export default function CronsTestRoute() {
                       variant="destructive"
                       onClick={() => void removeCron(cron)}
                       disabled={busyId !== null}
-                      aria-label={"Delete Cron"}
+                      aria-label="Delete Cron"
                     >
                       <IconTrash />
                     </Button>
@@ -246,12 +245,12 @@ export default function CronsTestRoute() {
           <DialogHeader>
             <DialogTitle>{editingCron ? "Edit Cron" : "Add Cron"}</DialogTitle>
             <DialogDescription>
-              {"Enter a standard five-field cron expression and an optional message."}
+              Enter a standard five-field cron expression and an optional message.
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="cron-schedule">{"Cron schedule"}</FieldLabel>
+              <FieldLabel htmlFor="cron-schedule">Cron schedule</FieldLabel>
               <Input
                 id="cron-schedule"
                 value={schedule}
@@ -262,23 +261,23 @@ export default function CronsTestRoute() {
               />
 
               <FieldDescription>
-                {"Minute, hour, day of month, month, and day of week. Example: 0 19 * * *"}
+                Minute, hour, day of month, month, and day of week. Example: 0 19 * * *
               </FieldDescription>
             </Field>
             <Field>
-              <FieldLabel htmlFor="cron-message">{"Message (optional)"}</FieldLabel>
+              <FieldLabel htmlFor="cron-message">Message (optional)</FieldLabel>
               <Textarea
                 id="cron-message"
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
-                placeholder={"Hello, world!"}
+                placeholder="Hello, world!"
                 disabled={isSaving}
               />
             </Field>
           </FieldGroup>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSaving}>
-              {"Cancel"}
+              Cancel
             </Button>
             <Button onClick={() => void saveCron()} disabled={isSaving || !schedule.trim()}>
               {isSaving ? "Saving..." : "Save"}

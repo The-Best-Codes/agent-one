@@ -52,7 +52,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
             >
               <IconX data-icon="inline-start" />
-              {"Deny"}
+              Deny
             </Button>
             <Button
               size="sm"
@@ -60,7 +60,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
               onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
             >
               <IconCircleCheck data-icon="inline-start" />
-              {"Approve"}
+              Approve
             </Button>
           </div>
         </div>
@@ -122,7 +122,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           <div key={callId} className="flex items-center gap-1">
             <IconCircleX className="text-muted-foreground size-4 shrink-0" />
             <span className="text-muted-foreground text-sm font-bold">
-              {"Updating setting was cancelled"}
+              Updating setting was cancelled
             </span>
           </div>
         );
@@ -134,7 +134,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
           errorText={part.errorText}
           isOpen={isErrorAccordionOpen}
           onOpenChange={setIsErrorAccordionOpen}
-          title={"Error updating setting"}
+          title="Error updating setting"
         />
       );
     }
@@ -143,7 +143,7 @@ export const MessagePartToolUpdateSetting = ({ part }: { part: ToolUIPart }) => 
       return (
         <div key={callId} className="flex items-center gap-1">
           <IconSettings className="text-foreground size-4 shrink-0" />
-          <span className="text-foreground text-sm font-bold">{"Update setting accessed"}</span>
+          <span className="text-foreground text-sm font-bold">Update setting accessed</span>
         </div>
       );
   }

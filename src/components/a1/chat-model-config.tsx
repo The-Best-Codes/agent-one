@@ -138,7 +138,7 @@ const SliderConfig = ({
           className="h-6 w-fit px-2 text-xs"
           onClick={handleSetCustomValue}
         >
-          {"Set custom value"}
+          Set custom value
         </Button>
       ) : (
         <Slider
@@ -262,7 +262,7 @@ export const ChatModelConfig = ({
   const content = (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">{"Model Config"}</h3>
+        <h3 className="text-lg font-semibold">Model Config</h3>
         <Button
           variant="ghost"
           size="icon"
@@ -271,19 +271,19 @@ export const ChatModelConfig = ({
           disabled={isAtDefaults}
         >
           <IconRestore data-icon="inline-start" />
-          <span className="sr-only">{"Reset all"}</span>
+          <span className="sr-only">Reset all</span>
         </Button>
       </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label>{"Tool Behavior"}</Label>
+          <Label>Tool Behavior</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              {"Choose whether tools are available and when they need your approval."}
+              Choose whether tools are available and when they need your approval.
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
@@ -323,10 +323,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="temperature"
-        label={"Temperature"}
-        tooltip={
-          "Controls randomness in responses. Higher values (1.0-2.0) make output more creative and random, while lower values (0.0-1.0) make it more focused and deterministic."
-        }
+        label="Temperature"
+        tooltip="Controls randomness in responses. Higher values (1.0-2.0) make output more creative and random, while lower values (0.0-1.0) make it more focused and deterministic."
         value={currentModelConfig.temperature}
         min={0}
         max={2}
@@ -336,10 +334,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="topP"
-        label={"Top P"}
-        tooltip={
-          "Nucleus sampling. Controls diversity by limiting token selection to a cumulative probability. Lower values (e.g., 0.1) make output more focused, higher values (e.g., 0.9) allow more variety. It's recommended to set either temperature or topP, but not both."
-        }
+        label="Top P"
+        tooltip="Nucleus sampling. Controls diversity by limiting token selection to a cumulative probability. Lower values (e.g., 0.1) make output more focused, higher values (e.g., 0.9) allow more variety. It's recommended to set either temperature or topP, but not both."
         value={currentModelConfig.topP}
         min={0}
         max={1}
@@ -349,22 +345,22 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="topK">{"Top K"}</Label>
+          <Label htmlFor="topK">Top K</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              {
-                'Only sample from the top K options for each subsequent token. Used to remove "long tail" low probability responses. Recommended for advanced use cases only. Leave empty to use model default.'
-              }
+              Only sample from the top K options for each subsequent token. Used to remove "long
+              tail" low probability responses. Recommended for advanced use cases only. Leave empty
+              to use model default.
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="topK"
           type="number"
-          placeholder={"Default"}
+          placeholder="Default"
           min={1}
           value={localInputs.topK ?? ""}
           onChange={handleTopKChange}
@@ -373,10 +369,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="frequencyPenalty"
-        label={"Frequency Penalty"}
-        tooltip={
-          "Reduces the likelihood of the model repeatedly using the same words or phrases. Higher values (up to 2.0) discourage repetition more strongly."
-        }
+        label="Frequency Penalty"
+        tooltip="Reduces the likelihood of the model repeatedly using the same words or phrases. Higher values (up to 2.0) discourage repetition more strongly."
         value={currentModelConfig.frequencyPenalty}
         min={0}
         max={2}
@@ -386,10 +380,8 @@ export const ChatModelConfig = ({
 
       <SliderConfig
         id="presencePenalty"
-        label={"Presence Penalty"}
-        tooltip={
-          "Reduces the likelihood of the model repeating information already in the prompt. Higher values (up to 2.0) encourage the model to introduce new topics."
-        }
+        label="Presence Penalty"
+        tooltip="Reduces the likelihood of the model repeating information already in the prompt. Higher values (up to 2.0) encourage the model to introduce new topics."
         value={currentModelConfig.presencePenalty}
         min={0}
         max={2}
@@ -399,22 +391,20 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="maxSteps">{"Max Steps"}</Label>
+          <Label htmlFor="maxSteps">Max Steps</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              {
-                "Maximum number of reasoning/tool steps in one response. Leave empty for no step limit."
-              }
+              Maximum number of reasoning/tool steps in one response. Leave empty for no step limit.
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="maxSteps"
           type="number"
-          placeholder={"Default"}
+          placeholder="Default"
           min={0}
           max={1000}
           value={localInputs.maxSteps ?? ""}
@@ -425,22 +415,21 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="maxTokens">{"Max Tokens"}</Label>
+          <Label htmlFor="maxTokens">Max Tokens</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              {
-                "Maximum number of tokens (words/sub-words) in the model response. Leave empty to use the model's default limit."
-              }
+              Maximum number of tokens (words/sub-words) in the model response. Leave empty to use
+              the model's default limit.
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="maxTokens"
           type="number"
-          placeholder={"Default"}
+          placeholder="Default"
           value={localInputs.maxTokens ?? ""}
           onChange={handleMaxTokensChange}
         />
@@ -448,22 +437,21 @@ export const ChatModelConfig = ({
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="seed">{"Seed"}</Label>
+          <Label htmlFor="seed">Seed</Label>
           <AdaptiveTooltip>
             <AdaptiveTooltipTrigger asChild>
               <IconInfoCircle className="text-muted-foreground size-3 cursor-help" />
             </AdaptiveTooltipTrigger>
             <AdaptiveTooltipContent side="right" className="max-w-xs">
-              {
-                "Integer seed for random sampling. If set and supported by the model, calls will generate deterministic results. Leave empty for random behavior."
-              }
+              Integer seed for random sampling. If set and supported by the model, calls will
+              generate deterministic results. Leave empty for random behavior.
             </AdaptiveTooltipContent>
           </AdaptiveTooltip>
         </div>
         <Input
           id="seed"
           type="number"
-          placeholder={"Default"}
+          placeholder="Default"
           value={localInputs.seed ?? ""}
           onChange={handleSeedChange}
         />
@@ -475,14 +463,14 @@ export const ChatModelConfig = ({
     <Button
       variant="outline"
       size="icon"
-      aria-label={"Model configuration"}
+      aria-label="Model configuration"
       className={cn("relative", triggerClassName)}
       disabled={disabled}
     >
       <IconAdjustments data-icon="inline-start" />
       {!isAtDefaults && (
         <span
-          title={"Model config has been modified"}
+          title="Model config has been modified"
           className="bg-primary absolute -top-0.5 -right-0.5 flex size-2 rounded-full"
         ></span>
       )}
@@ -493,7 +481,7 @@ export const ChatModelConfig = ({
     <AdaptivePopover open={effectiveOpen} onOpenChange={setOpen}>
       <AdaptivePopoverTrigger asChild>{trigger}</AdaptivePopoverTrigger>
       <AdaptivePopoverContent
-        title={"Model Configuration"}
+        title="Model Configuration"
         className="max-h-80 w-64 overflow-auto p-4"
       >
         {content}

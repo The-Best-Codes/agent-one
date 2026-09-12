@@ -22,7 +22,7 @@ export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProp
       className={className}
       size="icon-sm"
       variant="secondary"
-      aria-label={"Branch conversation from this message"}
+      aria-label="Branch conversation from this message"
       {...props}
     >
       <IconArrowsSplit data-icon="inline-start" />
