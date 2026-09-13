@@ -4714,7 +4714,7 @@ fn login(app: AppHandle, user: String, password: String) {
 }
 ```
 
-It is also possible to trigger an event to a list of webviews by calling [Emitter#emit\_filter](https://docs.rs/tauri/2.0.0/tauri/trait.Emitter.html#tymethod.emit_filter). In the following example we emit a open-file event to the main and file-viewer webviews:
+It is also possible to trigger an event to a list of webviews by calling [Emitter#emit\_filter](https://docs.rs/tauri/2.0.0/tauri/trait.Emitter.html#tymethod.emit_filter). In the following example we emit an open-file event to the main and file-viewer webviews:
 
 src-tauri/src/lib.rs
 
@@ -14083,9 +14083,9 @@ This guide only applies to OV code signing certificates acquired before June 1st
 
 Note
 
-If you sign the app with an EV Certificate, it’ll receive an immediate reputation with Microsoft SmartScreen and won’t show any warnings to users.
+Since 2024, an EV Certificate no longer gives your app an immediate reputation with Microsoft SmartScreen. Microsoft removed the special treatment of EV code signing certificates from its Trusted Root Program in 2024, so EV and OV certificates now build SmartScreen reputation the same way, and a newly signed release can show a warning with either. See Microsoft’s [SmartScreen reputation for Windows app developers](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation) and [Current status of Windows app distribution features](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/distribution-feature-status#smartscreen-reputation-ev-certificates-no-longer-grant-instant-bypass).
 
-If you opt for an OV Certificate, which is generally cheaper and available to individuals, Microsoft SmartScreen will still show a warning to users when they download the app. It might take some time until your certificate builds enough reputation. You may opt for [submitting your app](https://www.microsoft.com/en-us/wdsi/filesubmission/) to Microsoft for manual review. Although not guaranteed, if the app does not contain any malicious code, Microsoft may grant additional reputation and potentially remove the warning for that specific uploaded file.
+An OV Certificate is generally cheaper and available to individuals. With either kind of certificate, Microsoft SmartScreen may show a warning to users when they download the app until the file and the certificate build enough reputation. Signing every release with the same certificate lets that reputation carry across releases. You may opt for [submitting your app](https://www.microsoft.com/en-us/wdsi/filesubmission/) to Microsoft for manual review. Although not guaranteed, if the app does not contain any malicious code, Microsoft may grant additional reputation and potentially remove the warning for that specific uploaded file.
 
 See the [comparison](https://www.digicert.com/difference-between-dv-ov-and-ev-ssl-certificates) to learn more about OV vs EV certificates.
 
@@ -31379,7 +31379,7 @@ For CLI commands related to developing plugins visit the [Develop a Tauri Plugin
 Initialize a Tauri project in an existing directory
 
 
-Usage: tauri init [OPTIONS]
+Usage: pnpm-native run build init [OPTIONS]
 
 
 Options:
@@ -31455,7 +31455,7 @@ Options:
 Run your app in development mode with hot-reloading for the Rust code. It makes use of the `build.devUrl` property from your `tauri.conf.json` file. It also runs your `build.beforeDevCommand` which usually starts your frontend devServer.
 
 
-Usage: tauri dev [OPTIONS] [ARGS]...
+Usage: pnpm-native run build dev [OPTIONS] [ARGS]...
 
 
 Arguments:
@@ -31574,7 +31574,7 @@ Options:
 Build your app in release mode and generate bundles and installers. It makes use of the `build.frontendDist` property from your `tauri.conf.json` file. It also runs your `build.beforeBuildCommand` which usually builds your frontend into `build.frontendDist`. This will also run `build.beforeBundleCommand` before generating the bundles and installers of your app.
 
 
-Usage: tauri build [OPTIONS] [ARGS]...
+Usage: pnpm-native run build build [OPTIONS] [ARGS]...
 
 
 Arguments:
@@ -31708,7 +31708,7 @@ Options:
 Generate bundles and installers for your app (already built by `tauri build`). This run `build.beforeBundleCommand` before generating the bundles and installers of your app.
 
 
-Usage: tauri bundle [OPTIONS]
+Usage: pnpm-native run build bundle [OPTIONS]
 
 
 Options:
@@ -31825,7 +31825,7 @@ Options:
 Android commands
 
 
-Usage: tauri android [OPTIONS] <COMMAND>
+Usage: pnpm-native run build android [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -31884,7 +31884,7 @@ Options:
 Initialize Android target in the project
 
 
-Usage: tauri android init [OPTIONS]
+Usage: pnpm-native run build android init [OPTIONS]
 
 
 Options:
@@ -31963,7 +31963,7 @@ Options:
 Run your app in development mode on Android with hot-reloading for the Rust code. It makes use of the `build.devUrl` property from your `tauri.conf.json` file. It also runs your `build.beforeDevCommand` which usually starts your frontend devServer.
 
 
-Usage: tauri android dev [OPTIONS] [DEVICE] [-- <ARGS>...]
+Usage: pnpm-native run build android dev [OPTIONS] [DEVICE] [-- <ARGS>...]
 
 
 Arguments:
@@ -32112,7 +32112,7 @@ Options:
 Build your app in release mode for Android and generate APKs and AABs. It makes use of the `build.frontendDist` property from your `tauri.conf.json` file. It also runs your `build.beforeBuildCommand` which usually builds your frontend into `build.frontendDist`.
 
 
-Usage: tauri android build [OPTIONS] [-- <ARGS>...]
+Usage: pnpm-native run build android build [OPTIONS] [-- <ARGS>...]
 
 
 Arguments:
@@ -32230,7 +32230,7 @@ Options:
 Run your app in production mode on Android. It makes use of the `build.frontendDist` property from your `tauri.conf.json` file. It also runs your `build.beforeBuildCommand` which usually builds your frontend into `build.frontendDist`.
 
 
-Usage: tauri android run [OPTIONS] [DEVICE] [-- <ARGS>...]
+Usage: pnpm-native run build android run [OPTIONS] [DEVICE] [-- <ARGS>...]
 
 
 Arguments:
@@ -32865,7 +32865,7 @@ Options:
 Migrate from v1 to v2
 
 
-Usage: tauri migrate [OPTIONS]
+Usage: pnpm-native run build migrate [OPTIONS]
 
 
 Options:
@@ -32916,7 +32916,7 @@ Options:
 Show a concise list of information about the environment, Rust, Node.js and their versions as well as a few relevant project configurations
 
 
-Usage: tauri info [OPTIONS]
+Usage: pnpm-native run build info [OPTIONS]
 
 
 Options:
@@ -32968,7 +32968,7 @@ Options:
 Add a tauri plugin to the project
 
 
-Usage: tauri add [OPTIONS] <PLUGIN>
+Usage: pnpm-native run build add [OPTIONS] <PLUGIN>
 
 
 Arguments:
@@ -33027,7 +33027,7 @@ Options:
 Remove a tauri plugin from the project
 
 
-Usage: tauri remove [OPTIONS] <PLUGIN>
+Usage: pnpm-native run build remove [OPTIONS] <PLUGIN>
 
 
 Arguments:
@@ -33082,7 +33082,7 @@ Options:
 Manage or create Tauri plugins
 
 
-Usage: tauri plugin [OPTIONS] <COMMAND>
+Usage: pnpm-native run build plugin [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -33141,7 +33141,7 @@ Options:
 Initializes a new Tauri plugin project
 
 
-Usage: tauri plugin new [OPTIONS] <PLUGIN_NAME>
+Usage: pnpm-native run build plugin new [OPTIONS] <PLUGIN_NAME>
 
 
 Arguments:
@@ -33252,7 +33252,7 @@ Options:
 Initialize a Tauri plugin project on an existing directory
 
 
-Usage: tauri plugin init [OPTIONS] [PLUGIN_NAME]
+Usage: pnpm-native run build plugin init [OPTIONS] [PLUGIN_NAME]
 
 
 Arguments:
@@ -33366,7 +33366,7 @@ Options:
 Manage the Android project for a Tauri plugin
 
 
-Usage: tauri plugin android [OPTIONS] <COMMAND>
+Usage: pnpm-native run build plugin android [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -33422,7 +33422,7 @@ Options:
 Initializes the Android project for an existing Tauri plugin
 
 
-Usage: tauri plugin android init [OPTIONS] [PLUGIN_NAME]
+Usage: pnpm-native run build plugin android init [OPTIONS] [PLUGIN_NAME]
 
 
 Arguments:
@@ -33478,7 +33478,7 @@ Options:
 Manage the iOS project for a Tauri plugin
 
 
-Usage: tauri plugin ios [OPTIONS] <COMMAND>
+Usage: pnpm-native run build plugin ios [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -33534,7 +33534,7 @@ Options:
 Initializes the iOS project for an existing Tauri plugin
 
 
-Usage: tauri plugin ios init [OPTIONS] [PLUGIN_NAME]
+Usage: pnpm-native run build plugin ios init [OPTIONS] [PLUGIN_NAME]
 
 
 Arguments:
@@ -33616,7 +33616,7 @@ Options:
 Generate various icons for all major platforms
 
 
-Usage: tauri icon [OPTIONS] [INPUT]
+Usage: pnpm-native run build icon [OPTIONS] [INPUT]
 
 
 Arguments:
@@ -33709,7 +33709,7 @@ Options:
 Generate signing keys for Tauri updater or sign files
 
 
-Usage: tauri signer [OPTIONS] <COMMAND>
+Usage: pnpm-native run build signer [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -33766,7 +33766,7 @@ Options:
 Sign a file
 
 
-Usage: tauri signer sign [OPTIONS] <FILE>
+Usage: pnpm-native run build signer sign [OPTIONS] <FILE>
 
 
 Arguments:
@@ -33830,7 +33830,7 @@ Options:
 Generate a new signing key to sign files
 
 
-Usage: tauri signer generate [OPTIONS]
+Usage: pnpm-native run build signer generate [OPTIONS]
 
 
 Options:
@@ -33885,7 +33885,7 @@ Options:
 Generate Tauri CLI shell completions for Bash, Zsh, PowerShell or Fish
 
 
-Usage: tauri completions [OPTIONS] --shell <SHELL>
+Usage: pnpm-native run build completions [OPTIONS] --shell <SHELL>
 
 
 Options:
@@ -33938,7 +33938,7 @@ Options:
 Manage or create permissions for your app or plugin
 
 
-Usage: tauri permission [OPTIONS] <COMMAND>
+Usage: pnpm-native run build permission [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -33997,7 +33997,7 @@ Options:
 Create a new permission file
 
 
-Usage: tauri permission new [OPTIONS] [IDENTIFIER]
+Usage: pnpm-native run build permission new [OPTIONS] [IDENTIFIER]
 
 
 Arguments:
@@ -34057,7 +34057,7 @@ Options:
 Add a permission to capabilities
 
 
-Usage: tauri permission add [OPTIONS] <IDENTIFIER> [CAPABILITY]
+Usage: pnpm-native run build permission add [OPTIONS] <IDENTIFIER> [CAPABILITY]
 
 
 Arguments:
@@ -34113,7 +34113,7 @@ Options:
 Remove a permission file, and its reference from any capability
 
 
-Usage: tauri permission rm [OPTIONS] <IDENTIFIER>
+Usage: pnpm-native run build permission rm [OPTIONS] <IDENTIFIER>
 
 
 Arguments:
@@ -34179,7 +34179,7 @@ Options:
 List permissions available to your application
 
 
-Usage: tauri permission ls [OPTIONS] [PLUGIN]
+Usage: pnpm-native run build permission ls [OPTIONS] [PLUGIN]
 
 
 Arguments:
@@ -34235,7 +34235,7 @@ Options:
 Manage or create capabilities for your app
 
 
-Usage: tauri capability [OPTIONS] <COMMAND>
+Usage: pnpm-native run build capability [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -34291,7 +34291,7 @@ Options:
 Create a new permission file
 
 
-Usage: tauri capability new [OPTIONS] [IDENTIFIER]
+Usage: pnpm-native run build capability new [OPTIONS] [IDENTIFIER]
 
 
 Arguments:
@@ -34351,7 +34351,7 @@ Options:
 Inspect values used by Tauri
 
 
-Usage: tauri inspect [OPTIONS] <COMMAND>
+Usage: pnpm-native run build inspect [OPTIONS] <COMMAND>
 
 
 Commands:
@@ -34407,7 +34407,7 @@ Options:
 Print the default Upgrade Code used by MSI installer derived from productName
 
 
-Usage: tauri inspect wix-upgrade-code [OPTIONS]
+Usage: pnpm-native run build inspect wix-upgrade-code [OPTIONS]
 
 
 Options:
@@ -64948,19 +64948,19 @@ The table below maps an OS version to the corresponding WebKit Safari versions s
 
 | OS Name     | OS Version                       | WebKit Version                                                                                                                                 | Safari Version | Notes                                                                                                                                                                                       |
 | ----------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sonoma      | 14.0 (Beta)                      | 616.1.14.11.11                                                                                                                                 | 17.0           | Verified on a 2023 M2 14“ MacBook Pro                                                                                                                                                       |
-| Ventura     | 13.4.1                           | 615.2.9.11.7                                                                                                                                   | 16.5.1         | Verified on a 2023 M2 14“ MacBook Pro                                                                                                                                                       |
-|             | 13.3.1                           | 615.1.26.11.23                                                                                                                                 |                | Verified on a 2023 M2 14“ MacBook Pro                                                                                                                                                       |
-|             | 13.3                             | 615.1.26.11.22                                                                                                                                 | 16.4           | Verified on a 2023 M2 14“ MacBook Pro                                                                                                                                                       |
+| Sonoma      | 14.0 (Beta)                      | 616.1.14.11.11                                                                                                                                 | 17.0           | Verified on a 2023 M2 14” MacBook Pro                                                                                                                                                       |
+| Ventura     | 13.4.1                           | 615.2.9.11.7                                                                                                                                   | 16.5.1         | Verified on a 2023 M2 14” MacBook Pro                                                                                                                                                       |
+|             | 13.3.1                           | 615.1.26.11.23                                                                                                                                 |                | Verified on a 2023 M2 14” MacBook Pro                                                                                                                                                       |
+|             | 13.3                             | 615.1.26.11.22                                                                                                                                 | 16.4           | Verified on a 2023 M2 14” MacBook Pro                                                                                                                                                       |
 |             | 13.2.1                           | 614.4.6.1.6                                                                                                                                    |                |                                                                                                                                                                                             |
 |             | 13.2                             | ?                                                                                                                                              | 16.3           |                                                                                                                                                                                             |
-|             | 13.1                             | 614.3.7.1.5                                                                                                                                    | 16.2           | Verified on a 2020 M1 13“ MacBook Pro                                                                                                                                                       |
-|             | 13.0.1                           |                                                                                                                                                |                | Verified on a 2020 M1 13“ MacBook Pro                                                                                                                                                       |
-|             | 13.0                             | 614.2.9.1.12                                                                                                                                   | 16.1           | Verified on a 2020 M1 13“ MacBook Pro                                                                                                                                                       |
-| Monterey    | 12.6                             |                                                                                                                                                |                | Verified on a 2020 M1 13“ MacBook Pro                                                                                                                                                       |
-|             | 12.5.1                           | 613.3.9.1.16                                                                                                                                   | 15.6.1         | Verified on a 2020 M1 13“ MacBook Pro                                                                                                                                                       |
-|             | 12.5                             | [613.3.9.1.5](https://github.com/WebKit/WebKit/blob/7f88b99524540e94abcdef4d45c1c0324d63fb56/Source/WebKit/Configurations/Version.xcconfig)    | 15.6           | Verified on a 2020 M1 13“ MacBook Pro                                                                                                                                                       |
-|             | 12.4                             | [613.2.7.1.8](https://github.com/WebKit/WebKit/blob/b85867ab0dadcd371dd9859feff9033885748d47/Source/WebKit/Configurations/Version.xcconfig)    | 15.5           | Verified on a 2020 M1 13“ MacBook Pro                                                                                                                                                       |
+|             | 13.1                             | 614.3.7.1.5                                                                                                                                    | 16.2           | Verified on a 2020 M1 13” MacBook Pro                                                                                                                                                       |
+|             | 13.0.1                           |                                                                                                                                                |                | Verified on a 2020 M1 13” MacBook Pro                                                                                                                                                       |
+|             | 13.0                             | 614.2.9.1.12                                                                                                                                   | 16.1           | Verified on a 2020 M1 13” MacBook Pro                                                                                                                                                       |
+| Monterey    | 12.6                             |                                                                                                                                                |                | Verified on a 2020 M1 13” MacBook Pro                                                                                                                                                       |
+|             | 12.5.1                           | 613.3.9.1.16                                                                                                                                   | 15.6.1         | Verified on a 2020 M1 13” MacBook Pro                                                                                                                                                       |
+|             | 12.5                             | [613.3.9.1.5](https://github.com/WebKit/WebKit/blob/7f88b99524540e94abcdef4d45c1c0324d63fb56/Source/WebKit/Configurations/Version.xcconfig)    | 15.6           | Verified on a 2020 M1 13” MacBook Pro                                                                                                                                                       |
+|             | 12.4                             | [613.2.7.1.8](https://github.com/WebKit/WebKit/blob/b85867ab0dadcd371dd9859feff9033885748d47/Source/WebKit/Configurations/Version.xcconfig)    | 15.5           | Verified on a 2020 M1 13” MacBook Pro                                                                                                                                                       |
 |             | 12.3.1                           | [613.1.17.1.13](https://github.com/WebKit/WebKit/blob/8b92a7625ab76aed000ee5a3a1f6b68b20404449/Source/WebKit/Configurations/Version.xcconfig)  |                |                                                                                                                                                                                             |
 |             | 12.3                             | [613.1.17.1.6](https://github.com/WebKit/WebKit/blob/151e184ecb1d669996ac6139f28640b1c71184e1/Source/WebKit/Configurations/Version.xcconfig)   | 15.4           |                                                                                                                                                                                             |
 |             | 12.2.1                           | [612.4.9.1.8](https://github.com/WebKit/WebKit/blob/cf0263b49d5753432d651e14537ed44e6185dc16/Source/WebKit/Configurations/Version.xcconfig)    |                |                                                                                                                                                                                             |
@@ -64980,7 +64980,7 @@ The table below maps an OS version to the corresponding WebKit Safari versions s
 |             | 11.5                             | [611.3.10.1.3](https://github.com/WebKit/WebKit/blob/7253374f3302a64a15482d5303925d0cfa5eb610/Source/WebKit/Configurations/Version.xcconfig)   | 14.1.2         |                                                                                                                                                                                             |
 |             | 11.4                             | [611.2.7.1.4](https://github.com/WebKit/WebKit/blob/200180885a516f378d0253ffc7b950f98b3f9810/Source/WebKit/Configurations/Version.xcconfig)    | 14.1.1         |                                                                                                                                                                                             |
 |             | 11.3.1                           |                                                                                                                                                |                |                                                                                                                                                                                             |
-|             | 11.3                             | [611.1.21.161.3](https://github.com/WebKit/WebKit/blob/7aaa117b91a6822c40761d6f4da2e3d27627602f/Source/WebKit/Configurations/Version.xcconfig) | 14.1           | 24“ M1 iMac received a special WebKit version [611.1.21.1.12](https://github.com/WebKit/WebKit/blob/5aebddad42f6572ffb20d1cd1be8d22be9cf0101/Source/WebKit/Configurations/Version.xcconfig) |
+|             | 11.3                             | [611.1.21.161.3](https://github.com/WebKit/WebKit/blob/7aaa117b91a6822c40761d6f4da2e3d27627602f/Source/WebKit/Configurations/Version.xcconfig) | 14.1           | 24” M1 iMac received a special WebKit version [611.1.21.1.12](https://github.com/WebKit/WebKit/blob/5aebddad42f6572ffb20d1cd1be8d22be9cf0101/Source/WebKit/Configurations/Version.xcconfig) |
 |             | 11.2.3                           | [610.4.3.1.7](https://github.com/WebKit/WebKit/blob/248c3283ebdec8bd8ae05d4d1d56390b0da28f27/Sour.3ce/WebKit/Configurations/Version.xcconfig)  |                |                                                                                                                                                                                             |
 |             | 11.2.2                           |                                                                                                                                                |                |                                                                                                                                                                                             |
 |             | 11.2.1                           |                                                                                                                                                |                |                                                                                                                                                                                             |
@@ -64995,7 +64995,7 @@ The table below maps an OS version to the corresponding WebKit Safari versions s
 |             | 10.15.4                          | [609.1.20.111.8](https://github.com/WebKit/WebKit/blob/5c90480a38a86464b6b421c2fd28c744b43a4faa/Source/WebKit/Configurations/Version.xcconfig) | 13.1           |                                                                                                                                                                                             |
 |             | 10.15.3                          | [608.5.11](https://github.com/WebKit/WebKit/blob/e0e5c8297429016745b55545b1454f02e40d83e1/Source/WebKit/Configurations/Version.xcconfig)       | 13.0.5         |                                                                                                                                                                                             |
 |             | 10.15.2                          | [608.4.9.1.3](https://github.com/WebKit/WebKit/blob/37f92d461f8ff74ea5cbe8f0baac0b8c8f1f6e19/Source/WebKit/Configurations/Version.xcconfig)    | 13.0.4         |                                                                                                                                                                                             |
-|             | 10.15.1                          | [608.3.10.1.4](https://github.com/WebKit/WebKit/blob/ba26f5d986fca25516e6e72bc35c89905b1ed39a/Source/WebKit/Configurations/Version.xcconfig)   | 13.0.3         | Verified on a 2014 15“ MacBook Pro                                                                                                                                                          |
+|             | 10.15.1                          | [608.3.10.1.4](https://github.com/WebKit/WebKit/blob/ba26f5d986fca25516e6e72bc35c89905b1ed39a/Source/WebKit/Configurations/Version.xcconfig)   | 13.0.3         | Verified on a 2014 15” MacBook Pro                                                                                                                                                          |
 |             | 10.15                            | [608.2.30.1.1](https://github.com/WebKit/WebKit/blob/7b6a3e211037e2580cec885316f027a4b5b11b2d/Source/WebKit/Configurations/Version.xcconfig)   | 13.0.2         |                                                                                                                                                                                             |
 | Mojave      | 10.14.6                          | [608.1.49](https://trac.webkit.org/browser/webkit/releases/Apple/Safari%2013.0/WebKit/Configurations/Version.xcconfig)                         | 13.0           |                                                                                                                                                                                             |
 |             | 10.14.4                          | [607.1.40.1.5](https://trac.webkit.org/browser/webkit/releases/Apple/Safari%2012.1/WebKit/Configurations/Version.xcconfig)                     | 12.1           |                                                                                                                                                                                             |
@@ -65008,8 +65008,8 @@ The table below maps an OS version to the corresponding WebKit Safari versions s
 |             | 10.13.4 Security Update 2018-001 | [605.1.33.1.4](https://github.com/WebKit/WebKit/blob/69c0509d70d600dedaf55f448db8d887908b218c/Source/WebKit/Configurations/Version.xcconfig)   | 11.1           |                                                                                                                                                                                             |
 |             | 10.13.4                          | [605.1.33.1.2](https://github.com/WebKit/WebKit/blob/25c0a6e3ca8e4a2dd41d4dcf52d70f27a912fef4/Source/WebKit/Configurations/Version.xcconfig)   | 11.1           |                                                                                                                                                                                             |
 |             | 10.13.3                          | [604.5.6](https://github.com/WebKit/WebKit/blob/3f76b1214e0deb75a2f813be9bd96b56d9da84df/Source/WebKit/Configurations/Version.xcconfig)        | 11.0.3         |                                                                                                                                                                                             |
-|             | 10.13.2 Supplemental Update      | [604.4.7.1.6](https://github.com/WebKit/WebKit/blob/68ee2c6176b6d03fbee855cd727c9cf9b09314b1/Source/WebKit/Configurations/Version.xcconfig)    | 11.0.2         | 27“ iMac Pro received a special WebKit version [604.4.7.10.6](https://github.com/WebKit/WebKit/blob/00051d7d17eb097dd60908d93a94a072080dec08/Source/WebKit/Configurations/Version.xcconfig) |
-|             | 10.13.2                          | [604.4.7.1.3](https://github.com/WebKit/WebKit/blob/abe6ee6ad0f8fe44bd9ba476c818e4905c921ad3/Source/WebKit/Configurations/Version.xcconfig)    | 11.0.2         | 27“ iMac Pro received a special WebKit version [604.4.7.10.4](https://github.com/WebKit/WebKit/blob/1122bda2378b8a88d24b01a585f17e4286f14752/Source/WebKit/Configurations/Version.xcconfig) |
+|             | 10.13.2 Supplemental Update      | [604.4.7.1.6](https://github.com/WebKit/WebKit/blob/68ee2c6176b6d03fbee855cd727c9cf9b09314b1/Source/WebKit/Configurations/Version.xcconfig)    | 11.0.2         | 27” iMac Pro received a special WebKit version [604.4.7.10.6](https://github.com/WebKit/WebKit/blob/00051d7d17eb097dd60908d93a94a072080dec08/Source/WebKit/Configurations/Version.xcconfig) |
+|             | 10.13.2                          | [604.4.7.1.3](https://github.com/WebKit/WebKit/blob/abe6ee6ad0f8fe44bd9ba476c818e4905c921ad3/Source/WebKit/Configurations/Version.xcconfig)    | 11.0.2         | 27” iMac Pro received a special WebKit version [604.4.7.10.4](https://github.com/WebKit/WebKit/blob/1122bda2378b8a88d24b01a585f17e4286f14752/Source/WebKit/Configurations/Version.xcconfig) |
 |             | 10.13.1                          | [604.3.5](https://trac.webkit.org/browser/webkit/releases/Apple/Safari%2011.0.1/WebKit/Configurations/Version.xcconfig)                        | 11.0.1         |                                                                                                                                                                                             |
 |             | 10.13                            | [604.1.38.1.6](https://github.com/WebKit/WebKit/blob/62f5206fadd2fd99c6e3060df4f57a7b7ddbbd1e/Source/WebKit/Configurations/Version.xcconfig)   | 11.0           |                                                                                                                                                                                             |
 
@@ -65567,7 +65567,7 @@ We are planning to further support and implement related features in the future.
 
 ### WebView Hardening
 
-In Tauri’s current threat model and boundaries we are not able to add more security constraints to the WebView itself and since it is the biggest part of our stack which is written in an memory unsafe language, we are planning to research and consider ways to further sandbox and isolate the webview processes.
+In Tauri’s current threat model and boundaries we are not able to add more security constraints to the WebView itself and since it is the biggest part of our stack which is written in a memory unsafe language, we are planning to research and consider ways to further sandbox and isolate the webview processes.
 
 Inbuilt and external sandboxing methods will be evaluated to reduce attack impact and to enforce the IPC bridge for system access. We believe that this part of our stack is the weak link but current generation WebViews are improving in their hardening and exploit resilience.
 
@@ -66210,7 +66210,7 @@ folders by default on windows.
 permissions = ["scope-applocaldata-recursive", "deny-default"]
 ```
 
-These scopes can be either used for all commands, by extending the global scope of the plugin, or for only selected commands when they are used in combination with a enabled command inside a permission.
+These scopes can be either used for all commands, by extending the global scope of the plugin, or for only selected commands when they are used in combination with an enabled command inside a permission.
 
 Reasonable read only file access to files in the `APPLOCALDATA` could look like this:
 
