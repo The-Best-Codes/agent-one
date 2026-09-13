@@ -31,6 +31,54 @@ interface ContextMenuContextValue {
 
 const ContextMenuContext = React.createContext<ContextMenuContextValue | null>(null);
 
+const textInputTypes = new Set(["email", "number", "password", "search", "tel", "text", "url"]);
+
+function hasEditableContext(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+
+  const input = target.closest("input");
+  if (input instanceof HTMLInputElement && textInputTypes.has(input.type)) return true;
+  if (target.closest("textarea")) return true;
+
+  const editable = target.closest("[contenteditable]");
+  return editable instanceof HTMLElement && editable.isContentEditable;
+}
+
+function hasSelectedText(target: EventTarget | null): boolean {
+  if (!(target instanceof Node)) return false;
+
+  const selection = window.getSelection();
+  if (!selection || selection.isCollapsed || selection.toString().trim().length === 0) return false;
+
+  for (let index = 0; index < selection.rangeCount; index += 1) {
+    if (selection.getRangeAt(index).intersectsNode(target)) return true;
+  }
+
+  return false;
+}
+
+/**
+ * Disables the system's native context menu except for these cases:
+ * - Inputs (if the type is `email`, `number`, `password`, `search`, `tel`, `text`, or `url`)
+ * - Textareas
+ * - Contenteditable elements
+ * - Selected text
+ */
+function DefaultContextMenu() {
+  React.useEffect(() => {
+    const handleContextMenu = (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+      if (hasEditableContext(event.target) || hasSelectedText(event.target)) return;
+      event.preventDefault();
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => document.removeEventListener("contextmenu", handleContextMenu);
+  }, []);
+
+  return null;
+}
+
 function getText(children: React.ReactNode): string {
   return React.Children.toArray(children)
     .map((child) => {
@@ -309,4 +357,5 @@ export {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
+  DefaultContextMenu,
 };

@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 
 import ErrorBoundary from "@/components/error-boundary";
 import { ThemeRegistry } from "@/components/theme/theme-registry";
+import { DefaultContextMenu } from "@/components/ui/native/context-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ApiKeysProvider } from "@/contexts/use-api-keys/api-keys-context";
 import { ModelProvider } from "@/contexts/use-model/model-context";
@@ -18,6 +19,7 @@ import App from "./App";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ErrorBoundary>
+      <DefaultContextMenu />
       <ThemeRegistry />
       <WebAuthProvider>
         <PersistenceProvider>
