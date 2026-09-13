@@ -28,7 +28,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
               <ModelProvider>
                 <UpdateProvider>
                   <Suspense fallback={<SuspenseFallback />}>
-                    <TooltipProvider>
+                    <TooltipProvider delayDuration={700}>
                       <App />
                     </TooltipProvider>
                   </Suspense>
