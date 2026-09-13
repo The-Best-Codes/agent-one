@@ -10,7 +10,7 @@ import {
   ContextMenuItem,
   ContextMenuLabel,
   ContextMenuTrigger,
-} from "@/components/ui/native/context-menu";
+} from "@/components/ui/context-menu";
 import { showChatToBottomButtonAtom } from "@/lib/jotai/settings-atoms";
 
 interface ChatToBottomButtonProps {
