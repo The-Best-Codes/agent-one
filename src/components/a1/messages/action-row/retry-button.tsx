@@ -30,7 +30,7 @@ export const RetryButton = ({ messageId, className, ...props }: RetryButtonProps
       disabled={isDisabled}
       className={className}
       size="icon-sm"
-      variant="secondary"
+      variant="outline"
       aria-label="Regenerate response"
       {...props}
     >

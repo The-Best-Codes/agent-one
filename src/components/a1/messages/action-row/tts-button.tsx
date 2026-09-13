@@ -136,7 +136,7 @@ export function TtsButton({
       disabled={isDisabled}
       className={cn("size-8", className)}
       size="icon-sm"
-      variant="secondary"
+      variant="outline"
       aria-label={icon === "playing" ? "Stop reading aloud" : "Read aloud"}
     >
       {icon === "loading" ? (

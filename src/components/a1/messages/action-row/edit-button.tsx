@@ -21,7 +21,7 @@ export const EditButton = ({ onEdit, className, ...props }: EditButtonProps) => 
       disabled={isStreaming}
       className={className}
       size="icon-sm"
-      variant="secondary"
+      variant="outline"
       aria-label="Edit message"
       {...props}
     >

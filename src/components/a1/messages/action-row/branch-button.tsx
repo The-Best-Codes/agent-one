@@ -21,7 +21,7 @@ export const BranchButton = ({ onBranch, className, ...props }: BranchButtonProp
       disabled={isStreaming}
       className={className}
       size="icon-sm"
-      variant="secondary"
+      variant="outline"
       aria-label="Branch conversation from this message"
       {...props}
     >

@@ -55,10 +55,10 @@ export const MessageActionRow = ({
               <CopyButton
                 className="size-6"
                 variants={{
-                  idle: "secondary",
-                  copying: "secondary",
-                  success: "secondary",
-                  error: "secondary",
+                  idle: "outline",
+                  copying: "outline",
+                  success: "outline",
+                  error: "outline",
                 }}
                 text={contentToCopy}
                 size="icon-sm"
