@@ -90,6 +90,8 @@ export function MessagePreviewRail({
     };
   }, [getScrollElement]);
 
+  if (entries.length <= 1) return null;
+
   return (
     <div className="pointer-events-none fixed top-1/2 right-0 z-20 hidden w-12 -translate-y-1/2 items-center md:flex">
       <nav
