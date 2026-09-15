@@ -47,8 +47,8 @@ import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
 
-import { selectSettingsCard } from "../select-settings-card";
-import SettingsTarget from "../settings-target";
+import { selectSettingsCard } from "../../select-settings-card";
+import SettingsTarget from "../../settings-target";
 
 const MAX_APPENDIX_CHARS = 2000;
 const DASHBOARD_URL = "https://www.agent-one.dev/dashboard";

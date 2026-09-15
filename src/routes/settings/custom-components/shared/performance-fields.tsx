@@ -18,8 +18,8 @@ import {
 import { resetSetting } from "@/lib/settings/reset-settings";
 import { DEFAULT_SETTINGS } from "@/lib/settings/types";
 
-import { selectSettingsCard } from "../select-settings-card";
-import SettingsTarget from "../settings-target";
+import { selectSettingsCard } from "../../select-settings-card";
+import SettingsTarget from "../../settings-target";
 
 export default function PerformanceSection({ cardIndex }: { cardIndex?: number } = {}) {
   const [maxMessageLength, setMaxMessageLength] = useAtom(maxMessageLengthAtom);

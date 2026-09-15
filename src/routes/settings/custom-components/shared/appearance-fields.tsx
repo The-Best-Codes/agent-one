@@ -58,8 +58,8 @@ import {
 } from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
-import { selectSettingsCard } from "../select-settings-card";
-import SettingsTarget from "../settings-target";
+import { selectSettingsCard } from "../../select-settings-card";
+import SettingsTarget from "../../settings-target";
 
 const roundnessOptions = [
   { value: "none", label: "Not Round", radius: "rounded-[0px]" },

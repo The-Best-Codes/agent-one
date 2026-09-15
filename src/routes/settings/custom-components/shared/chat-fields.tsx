@@ -47,8 +47,8 @@ import {
   type SidebarChatTimeGroupingOption,
 } from "@/lib/settings/types";
 
-import { selectSettingsCard } from "../select-settings-card";
-import SettingsTarget from "../settings-target";
+import { selectSettingsCard } from "../../select-settings-card";
+import SettingsTarget from "../../settings-target";
 
 export default function ChatsSection({ cardIndex }: { cardIndex?: number } = {}) {
   const [markdownRendering, setMarkdownRendering] = useAtom(markdownRenderingAtom);

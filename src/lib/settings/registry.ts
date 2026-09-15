@@ -64,35 +64,27 @@ import {
   UI_TINT_OPTIONS,
 } from "./types";
 
-export const settingsSections = [
-  { id: "account", label: "Account & Sync", renderer: "account", cardIndex: 0 },
-  { id: "profile", label: "Profile & Instructions", renderer: "account", cardIndex: 1 },
-  { id: "appearance", label: "Appearance", renderer: "appearance", cardIndex: 0 },
-  { id: "chat-background", label: "Chat Background", renderer: "appearance", cardIndex: 1 },
-  { id: "chat-appearance", label: "Chat Appearance", renderer: "appearance", cardIndex: 2 },
-  { id: "chats", label: "Chat Behavior", renderer: "chats", cardIndex: 0 },
-  { id: "streaming", label: "Streaming", renderer: "chats", cardIndex: 1 },
-  { id: "chat-titles", label: "Chat Titles", renderer: "chats", cardIndex: 2 },
-  { id: "rendering-limits", label: "Rendering Limits", renderer: "performance", cardIndex: 0 },
-  {
-    id: "chat-virtualization",
-    label: "Chat Virtualization",
-    renderer: "performance",
-    cardIndex: 1,
-  },
-  { id: "extension-runtime", label: "Extension Runtime", renderer: "performance", cardIndex: 2 },
-  { id: "extensions", label: "Extensions", renderer: "extensions", fillHeight: true },
-  { id: "keyboard-shortcuts", label: "Keyboard Shortcuts", renderer: "keyboard-shortcuts" },
-  { id: "providers", label: "Model Providers", renderer: "providers", cardIndex: 0 },
-  { id: "text-to-speech", label: "Text-to-Speech", renderer: "providers", cardIndex: 1 },
-  { id: "app-updates", label: "App Updates", renderer: "about", cardIndex: 0 },
-  { id: "model-updates", label: "Model List Updates", renderer: "about", cardIndex: 1 },
-  { id: "help", label: "Help", renderer: "about", cardIndex: 2 },
-  { id: "analytics", label: "Usage Analytics", renderer: "about", cardIndex: 3 },
-  { id: "debug", label: "Debug", renderer: "about", cardIndex: 4, requiresDebugMode: true },
-] as const;
-
-export type SettingsSectionId = (typeof settingsSections)[number]["id"];
+export type SettingsSectionId =
+  | "account"
+  | "profile"
+  | "appearance"
+  | "chat-background"
+  | "chat-appearance"
+  | "chats"
+  | "streaming"
+  | "chat-titles"
+  | "rendering-limits"
+  | "chat-virtualization"
+  | "extension-runtime"
+  | "extensions"
+  | "keyboard-shortcuts"
+  | "providers"
+  | "text-to-speech"
+  | "app-updates"
+  | "model-updates"
+  | "help"
+  | "analytics"
+  | "debug";
 
 type SelectOption = { value: string | number; label: string };
 

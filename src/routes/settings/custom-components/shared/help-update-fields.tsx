@@ -53,8 +53,8 @@ import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
-import { selectSettingsCard } from "../select-settings-card";
-import SettingsTarget from "../settings-target";
+import { selectSettingsCard } from "../../select-settings-card";
+import SettingsTarget from "../../settings-target";
 
 function formatModelDirectoryTimestamp(value: number, neverLabel: string): string {
   return value ? new Date(value).toLocaleString() : neverLabel;
