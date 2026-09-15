@@ -47,6 +47,7 @@ import {
 } from "@/lib/jotai/local-provider-atoms";
 import { ttsSettingsAtom } from "@/lib/jotai/settings-atoms";
 
+import { selectSettingsCard } from "../../select-settings-card";
 import SettingsTarget from "../../settings-target";
 import { AddProviderDropdown } from "./add-provider-dropdown";
 import {
@@ -55,7 +56,7 @@ import {
   LocalProviderListItem,
 } from "./provider-list-item";
 
-export function ProvidersList() {
+export function ProvidersList({ cardIndex }: { cardIndex?: number } = {}) {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [customSearchQuery, setCustomSearchQuery] = useState("");
@@ -158,7 +159,7 @@ export function ProvidersList() {
     void deleteCustomProviderApiKey(providerId);
   };
 
-  return (
+  return selectSettingsCard(
     <div className="flex flex-col gap-4">
       <Card size="sm">
         <CardHeader>
@@ -860,6 +861,7 @@ export function ProvidersList() {
           </CardContent>
         </Card>
       </SettingsTarget>
-    </div>
+    </div>,
+    cardIndex,
   );
 }

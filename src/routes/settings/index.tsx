@@ -18,7 +18,7 @@ import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 
 import SettingsContent from "./settings-content";
-import { isValidSection, sections } from "./settings-registry";
+import { isValidSection, resolveSettingsSection, sections } from "./settings-registry";
 import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
@@ -33,10 +33,10 @@ export default function SettingsRoute() {
   const displayedSection = useMemo(() => {
     try {
       if (tabParam && isValidSection(tabParam)) {
-        return tabParam;
+        return resolveSettingsSection(tabParam)!;
       }
       if (isValidSection(activeSection)) {
-        return activeSection;
+        return resolveSettingsSection(activeSection)!;
       }
       return sections[0].id;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -65,14 +65,31 @@ import {
 } from "./types";
 
 export const settingsSections = [
-  { id: "account", label: "Account" },
-  { id: "appearance", label: "Appearance" },
-  { id: "chats", label: "Chats" },
-  { id: "extensions", label: "Extensions", fillHeight: true },
-  { id: "keyboard-shortcuts", label: "Keyboard Shortcuts" },
-  { id: "performance", label: "Performance" },
-  { id: "providers", label: "Providers" },
-  { id: "about", label: "Help & Updates" },
+  { id: "account", label: "Account & Sync", renderer: "account", cardIndex: 0 },
+  { id: "profile", label: "Profile & Instructions", renderer: "account", cardIndex: 1 },
+  { id: "appearance", label: "Appearance", renderer: "appearance", cardIndex: 0 },
+  { id: "chat-background", label: "Chat Background", renderer: "appearance", cardIndex: 1 },
+  { id: "chat-appearance", label: "Chat Appearance", renderer: "appearance", cardIndex: 2 },
+  { id: "chats", label: "Chat Behavior", renderer: "chats", cardIndex: 0 },
+  { id: "streaming", label: "Streaming", renderer: "chats", cardIndex: 1 },
+  { id: "chat-titles", label: "Chat Titles", renderer: "chats", cardIndex: 2 },
+  { id: "rendering-limits", label: "Rendering Limits", renderer: "performance", cardIndex: 0 },
+  {
+    id: "chat-virtualization",
+    label: "Chat Virtualization",
+    renderer: "performance",
+    cardIndex: 1,
+  },
+  { id: "extension-runtime", label: "Extension Runtime", renderer: "performance", cardIndex: 2 },
+  { id: "extensions", label: "Extensions", renderer: "extensions", fillHeight: true },
+  { id: "keyboard-shortcuts", label: "Keyboard Shortcuts", renderer: "keyboard-shortcuts" },
+  { id: "providers", label: "Model Providers", renderer: "providers", cardIndex: 0 },
+  { id: "text-to-speech", label: "Text-to-Speech", renderer: "providers", cardIndex: 1 },
+  { id: "app-updates", label: "App Updates", renderer: "about", cardIndex: 0 },
+  { id: "model-updates", label: "Model List Updates", renderer: "about", cardIndex: 1 },
+  { id: "help", label: "Help", renderer: "about", cardIndex: 2 },
+  { id: "analytics", label: "Usage Analytics", renderer: "about", cardIndex: 3 },
+  { id: "debug", label: "Debug", renderer: "about", cardIndex: 4, requiresDebugMode: true },
 ] as const;
 
 export type SettingsSectionId = (typeof settingsSections)[number]["id"];
@@ -94,7 +111,7 @@ export interface SettingDefinition {
   description?: string;
   docs?: string;
   keywords?: readonly string[];
-  section: SettingsSectionId;
+  section: string;
   card: string;
   atom?: WritableAtom<unknown, [unknown], unknown>;
   defaultValue?: unknown;
@@ -116,6 +133,29 @@ const labels = <T extends string | number>(
         .join(" "),
   }));
 
+const cardSectionIds: Record<string, SettingsSectionId> = {
+  "Account, Sync & Access": "account",
+  "Profile & Instructions": "profile",
+  "General Look and Feel": "appearance",
+  "Chat Background": "chat-background",
+  "Chat Appearance": "chat-appearance",
+  "Chat Behavior": "chats",
+  "Streaming Experience": "streaming",
+  "Chat Titles": "chat-titles",
+  "Rendering Limits": "rendering-limits",
+  "Chat Virtualization": "chat-virtualization",
+  "Extension Runtime": "extension-runtime",
+  Extensions: "extensions",
+  "Keyboard Shortcuts": "keyboard-shortcuts",
+  Providers: "providers",
+  "Text-to-Speech Providers": "text-to-speech",
+  "App Updates": "app-updates",
+  "Model List Updates": "model-updates",
+  Help: "help",
+  "Usage Analytics": "analytics",
+  Debug: "debug",
+};
+
 const setting = <T>(
   definition: Omit<SettingDefinition, "atom" | "defaultValue"> & {
     key: keyof typeof DEFAULT_SETTINGS;
@@ -123,6 +163,7 @@ const setting = <T>(
   },
 ): SettingDefinition => ({
   ...definition,
+  section: cardSectionIds[definition.card],
   atom: definition.atom as WritableAtom<unknown, [unknown], unknown>,
   defaultValue: DEFAULT_SETTINGS[definition.key],
   aiAccessible: definition.aiAccessible ?? true,
@@ -617,7 +658,7 @@ export const settingsRegistry = [
     id: "tts-providers",
     title: "Text-to-Speech Providers",
     section: "providers",
-    card: "Providers",
+    card: "Text-to-Speech Providers",
     controls: { type: "component", component: "TtsProviders" },
   },
   {
