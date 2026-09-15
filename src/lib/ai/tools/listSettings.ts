@@ -1,17 +1,24 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getInspectableKeys } from "@/lib/settings/metadata";
+import { getAiSettings } from "@/lib/settings/registry";
 import type { ListSettingsToolConfig } from "@/lib/settings/types";
 
 export const createListSettingsTool = (config: ListSettingsToolConfig) =>
   tool({
-    description: "List the keys of all AI-accessible settings in the desktop application.",
+    description: "List all AI-accessible settings in the desktop application.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({}),
     execute: async () => {
       return {
-        keys: getInspectableKeys(),
+        settings: getAiSettings().map(({ id, key, title, description, section, controls }) => ({
+          id,
+          key,
+          title,
+          description,
+          section,
+          type: controls.type,
+        })),
       };
     },
   });

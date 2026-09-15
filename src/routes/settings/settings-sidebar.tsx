@@ -1,7 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
-import { sections } from "./sections-config";
+import { sections } from "./settings-registry";
 
 interface SettingsSidebarProps {
   activeSection: string;

@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { getDefaultStore, type Atom } from "jotai";
 import { z } from "zod";
 
-import { getSettingAtom, getSettingMetadata, isInspectableKey } from "@/lib/settings/metadata";
+import { getSettingDefinition } from "@/lib/settings/registry";
 import type { GetSettingToolConfig } from "@/lib/settings/types";
 
 export const createGetSettingTool = (config: GetSettingToolConfig) =>
@@ -17,17 +17,27 @@ export const createGetSettingTool = (config: GetSettingToolConfig) =>
     }),
     execute: async (input) => {
       const { key } = input;
-      if (!isInspectableKey(key)) {
+      const definition = getSettingDefinition(key);
+      if (!definition?.aiAccessible || !definition.atom) {
         throw new Error(`Setting key "${key}" is not valid or inspectable.`);
       }
-
-      const metadata = getSettingMetadata(key);
       const store = getDefaultStore();
-      const atom = getSettingAtom(key);
-      const value = store.get(atom as Atom<unknown>);
+      const value = store.get(definition.atom as Atom<unknown>);
 
       return {
-        ...metadata,
+        id: definition.id,
+        key: definition.key,
+        title: definition.title,
+        description: definition.description,
+        docs: definition.docs,
+        type: definition.controls.type,
+        options:
+          definition.controls.type === "select"
+            ? definition.controls.options
+            : definition.controls.type === "switch"
+              ? [true, false]
+              : null,
+        defaultValue: definition.defaultValue,
         value,
       };
     },

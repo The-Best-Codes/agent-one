@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { getDefaultStore, type WritableAtom } from "jotai";
 import { z } from "zod";
 
-import { getSettingAtom, isInspectableKey, validateSettingValue } from "@/lib/settings/metadata";
+import { getSettingDefinition, validateSettingValue } from "@/lib/settings/registry";
 import type { UpdateSettingToolConfig } from "@/lib/settings/types";
 
 export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
@@ -27,22 +27,24 @@ export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
     }),
     execute: async (input) => {
       const { key, value, convertToNumber } = input;
-      if (!isInspectableKey(key)) {
+      const definition = getSettingDefinition(key);
+      if (!definition?.aiAccessible || !definition.atom) {
         throw new Error(`Setting key "${key}" is not valid or inspectable.`);
       }
 
       const normalizedValue = convertToNumber && typeof value === "string" ? Number(value) : value;
-      const validation = validateSettingValue(key, normalizedValue);
-      if (!validation.success) {
-        throw new Error(validation.error);
+      const validationError = validateSettingValue(definition, normalizedValue);
+      if (validationError) {
+        throw new Error(validationError);
       }
 
       const store = getDefaultStore();
-      const atom = getSettingAtom(key) as WritableAtom<unknown, [unknown], void>;
+      const atom = definition.atom as WritableAtom<unknown, [unknown], void>;
       store.set(atom, normalizedValue);
 
       return {
-        key,
+        id: definition.id,
+        key: definition.key,
         value: normalizedValue,
         success: true,
       };

@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { useLocation } from "react-router";
 
+import { getSettingDefinition } from "@/lib/settings/registry";
 import { cn } from "@/lib/utils";
 
 const HIGHLIGHT_ACTIVE_MS = 4000;
@@ -13,6 +14,7 @@ interface SettingsTargetProps {
 }
 
 export default function SettingsTarget({ id, children, className }: SettingsTargetProps) {
+  const definition = getSettingDefinition(id);
   const location = useLocation();
   const [phase, setPhase] = useState<"idle" | "active" | "fading">("idle");
 
@@ -35,6 +37,9 @@ export default function SettingsTarget({ id, children, className }: SettingsTarg
   return (
     <div
       id={id}
+      data-setting-id={definition?.id}
+      data-setting-title={definition?.title}
+      data-setting-keywords={definition?.keywords?.join(" ")}
       className={cn(
         "scroll-mt-4 rounded-[calc(var(--radius-xl)+4px)] bg-transparent transition-[colors,padding] duration-300",
         phase === "active" && "settings-target-pulse bg-primary/10 p-2",

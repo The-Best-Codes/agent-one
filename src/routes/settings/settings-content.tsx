@@ -2,7 +2,7 @@ import { createElement } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { getSectionComponent } from "./sections-config";
+import { getSectionComponent } from "./settings-registry";
 
 interface SettingsContentProps {
   activeSection: string;

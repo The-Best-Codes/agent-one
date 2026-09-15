@@ -160,16 +160,22 @@ export function ProvidersList() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SettingsTarget id="setting-built-in-providers">
-        <Card size="sm">
-          <CardHeader>
-            <CardTitle>Built-in Providers</CardTitle>
-            <CardDescription>
-              Enable built-in providers, set keys and headers, and override model metadata when
-              needed.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>Model Providers</CardTitle>
+          <CardDescription>
+            Configure built-in, local, and custom providers in one place.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-8">
+          <SettingsTarget id="setting-built-in-providers" className="flex flex-col gap-4">
+            <div>
+              <h3 className="text-sm font-semibold">Built-in Providers</h3>
+              <p className="text-muted-foreground text-sm">
+                Enable built-in providers, set keys and headers, and override model metadata when
+                needed.
+              </p>
+            </div>
             <SearchInput
               placeholder="Search built-in providers..."
               value={builtInSearchQuery}
@@ -204,19 +210,16 @@ export function ProvidersList() {
                 No built-in providers found.
               </p>
             )}
-          </CardContent>
-        </Card>
-      </SettingsTarget>
+          </SettingsTarget>
 
-      <SettingsTarget id="setting-local-providers">
-        <Card size="sm">
-          <CardHeader>
-            <CardTitle>Local Providers</CardTitle>
-            <CardDescription>
-              Configure built-in local providers that can automatically discover models on startup.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <SettingsTarget id="setting-local-providers" className="flex flex-col gap-4">
+            <div>
+              <h3 className="text-sm font-semibold">Local Providers</h3>
+              <p className="text-muted-foreground text-sm">
+                Configure built-in local providers that can automatically discover models on
+                startup.
+              </p>
+            </div>
             <SearchInput
               placeholder="Search local providers..."
               value={localSearchQuery}
@@ -249,19 +252,15 @@ export function ProvidersList() {
                 No local providers found.
               </p>
             )}
-          </CardContent>
-        </Card>
-      </SettingsTarget>
+          </SettingsTarget>
 
-      <SettingsTarget id="setting-custom-providers">
-        <Card size="sm">
-          <CardHeader>
-            <CardTitle>Custom Providers</CardTitle>
-            <CardDescription>
-              Add OpenAI-compatible providers and configure exactly which models they expose.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <SettingsTarget id="setting-custom-providers" className="flex flex-col gap-4">
+            <div>
+              <h3 className="text-sm font-semibold">Custom Providers</h3>
+              <p className="text-muted-foreground text-sm">
+                Add OpenAI-compatible providers and configure exactly which models they expose.
+              </p>
+            </div>
             <div className="flex gap-2">
               <SearchInput
                 placeholder="Search custom providers..."
@@ -315,9 +314,9 @@ export function ProvidersList() {
                 No custom providers found.
               </p>
             )}
-          </CardContent>
-        </Card>
-      </SettingsTarget>
+          </SettingsTarget>
+        </CardContent>
+      </Card>
 
       <SettingsTarget id="setting-tts-providers">
         <Card size="sm">

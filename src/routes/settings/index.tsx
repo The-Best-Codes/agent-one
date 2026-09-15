@@ -17,8 +17,8 @@ import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { cn } from "@/lib/utils";
 
-import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
+import { isValidSection, sections } from "./settings-registry";
 import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
