@@ -142,16 +142,6 @@ export default defineConfig(() => ({
       : undefined,
   ],
 
-  test: {
-    globals: true,
-    environment: "jsdom",
-    include: [
-      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-      "tests/unit-tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-    ],
-    exclude: ["tests/e2e/**"],
-  },
-
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
@@ -171,7 +161,7 @@ export default defineConfig(() => ({
         }
       : undefined,
     watch: {
-      ignored: ["**/src-tauri/**", "**/tests/**"],
+      ignored: ["**/src-tauri/**"],
     },
   },
 

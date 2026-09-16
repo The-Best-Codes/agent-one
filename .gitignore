@@ -30,11 +30,6 @@ dist-ssr
 # ESLint cache
 .eslintcache
 
-# Playwright
-playwright/.auth/
-test-results/
-playwright-report/
-
 # Tauri
 /src-tauri/target/
 /src-tauri/gen/schemas

@@ -103,7 +103,6 @@ src/ # React frontend (routes, components, lib, workers)
 src-tauri/ # Rust backend (Tauri commands, migrations, capabilities)
 src-tauri/migrations # SQLite database migrations
 scripts/ # Maintenance and update scripts
-tests/ # Test helpers
 ```
 
 ## Contributing
