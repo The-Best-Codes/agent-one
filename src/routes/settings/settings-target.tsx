@@ -1,8 +1,9 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { useLocation } from "react-router";
 
-import { getSettingDefinition } from "@/lib/settings/registry";
 import { cn } from "@/lib/utils";
+
+import { getSettingDefinition } from "./settings-registry";
 
 const HIGHLIGHT_ACTIVE_MS = 4000;
 const HIGHLIGHT_FADE_MS = 1000;

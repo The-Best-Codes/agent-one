@@ -1,8 +1,8 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getAiSettings } from "@/lib/settings/registry";
 import type { ListSettingsToolConfig } from "@/lib/settings/types";
+import { getAiSettings } from "@/routes/settings/settings-registry";
 
 export const createListSettingsTool = (config: ListSettingsToolConfig) =>
   tool({

@@ -2,8 +2,8 @@ import { tool } from "ai";
 import { getDefaultStore, type WritableAtom } from "jotai";
 import { z } from "zod";
 
-import { getSettingDefinition, validateSettingValue } from "@/lib/settings/registry";
 import type { UpdateSettingToolConfig } from "@/lib/settings/types";
+import { getSettingDefinition, validateSettingValue } from "@/routes/settings/settings-registry";
 
 export const createUpdateSettingTool = (config: UpdateSettingToolConfig) =>
   tool({

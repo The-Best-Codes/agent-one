@@ -45,10 +45,10 @@ export default function SettingsRoute() {
     }
   }, [tabParam, activeSection]);
 
-  const fillHeight = useMemo(
-    () => sections.find((section) => section.id === displayedSection)?.fillHeight === true,
-    [displayedSection],
-  );
+  const fillHeight = useMemo(() => {
+    const section = sections.find((candidate) => candidate.id === displayedSection);
+    return section !== undefined && "fillHeight" in section && section.fillHeight === true;
+  }, [displayedSection]);
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");

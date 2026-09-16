@@ -301,7 +301,10 @@ export default function AboutSection({ cardIndex }: { cardIndex?: number } = {})
           <CardContent className="flex flex-col gap-4">
             <p className="text-muted-foreground text-sm">
               {"Download the latest"}{" "}
-              <Link className="underline" to="/settings?tab=providers#setting-built-in-providers">
+              <Link
+                className="underline"
+                to="/settings?tab=built-in-providers#setting-built-in-providers"
+              >
                 built-in providers'
               </Link>{" "}
               model metadata. This will update the model list available in the UI.

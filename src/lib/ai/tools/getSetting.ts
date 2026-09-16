@@ -2,8 +2,8 @@ import { tool } from "ai";
 import { getDefaultStore, type Atom } from "jotai";
 import { z } from "zod";
 
-import { getSettingDefinition } from "@/lib/settings/registry";
 import type { GetSettingToolConfig } from "@/lib/settings/types";
+import { getSettingDefinition } from "@/routes/settings/settings-registry";
 
 export const createGetSettingTool = (config: GetSettingToolConfig) =>
   tool({
