@@ -1,8 +1,9 @@
-import { IconPlugConnected } from "@tabler/icons-react";
+import { IconPlugConnected, IconTrash } from "@tabler/icons-react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 
 import { SearchInput } from "@/components/a1/search-input";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Empty,
@@ -12,10 +13,13 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Accordion } from "@/components/ui/native/accordion";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   deleteCustomProviderApiKeyAtom,
+  getCustomProviderApiKeyAtom,
   setCustomProviderApiKeyAtom,
 } from "@/lib/jotai/custom-provider-api-key-atoms";
 import {
@@ -23,12 +27,129 @@ import {
   customProviderIdsAtom,
   customProviderSearchItemsAtom,
   deleteCustomProviderAtom,
+  getCustomProviderAtom,
+  type CustomProvider,
   type NewCustomProviderData,
+  updateCustomProviderAtom,
 } from "@/lib/jotai/custom-provider-atoms";
+import { providerSetupDismissedAtom } from "@/lib/jotai/provider-atoms";
 
 import SettingsTarget from "../settings-target";
 import { AddProviderDropdown } from "./providers/add-provider-dropdown";
-import { CustomProviderListItem } from "./providers/provider-list-item";
+import { ProviderAccordionItem } from "./providers/provider-accordion-item";
+import { DeleteProviderDialog } from "./providers/provider-dialogs";
+
+interface CustomProviderListItemProps {
+  providerId: string;
+  onDelete: () => void;
+  onOpenChange?: (id: string) => void;
+}
+
+const CustomProviderListItem = memo(function CustomProviderListItem({
+  providerId,
+  onDelete,
+  onOpenChange,
+}: CustomProviderListItemProps) {
+  const provider = useAtomValue(getCustomProviderAtom(providerId));
+  const apiKey = useAtomValue(getCustomProviderApiKeyAtom(providerId));
+  const updateProvider = useSetAtom(updateCustomProviderAtom);
+  const setApiKey = useSetAtom(setCustomProviderApiKeyAtom);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const setupDismissed = useAtomValue(providerSetupDismissedAtom);
+  const dismissSetup = useSetAtom(providerSetupDismissedAtom);
+  const [wasInitiallyEnabled] = useState(provider?.enabled ?? false);
+
+  if (!provider) {
+    return null;
+  }
+
+  const update = (updates: Partial<Omit<CustomProvider, "id">>) => {
+    updateProvider(provider.id, updates);
+  };
+
+  const showSetupButton = provider.enabled && !wasInitiallyEnabled && !setupDismissed[provider.id];
+  const showMissingKeyWarning = provider.enabled && !apiKey;
+  const handleSetupDismiss = () => {
+    dismissSetup((prev) => ({ ...prev, [provider.id]: true }));
+  };
+
+  return (
+    <>
+      <ProviderAccordionItem
+        id={provider.id}
+        title={provider.name}
+        enabled={provider.enabled}
+        showSetupButton={showSetupButton}
+        showMissingKeyWarning={showMissingKeyWarning}
+        onSetupDismiss={handleSetupDismiss}
+        apiKey={apiKey}
+        onApiKeyChange={(nextApiKey) => void setApiKey(provider.id, nextApiKey)}
+        headers={provider.headers}
+        onHeadersChange={(headers) => update({ headers })}
+        models={provider.models}
+        onModelsChange={(models) => update({ models })}
+        apiKeyPlaceholder="Enter API key if required"
+        modelListBaseUrl={provider.baseUrl}
+        modelListHeaders={provider.headers}
+        modelListApiKey={apiKey}
+        emptyTitle="No models configured"
+        emptyDescription="Add a model to make it available in the model picker."
+        details={
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor={`name-${provider.id}`}>Name</FieldLabel>
+              <Input
+                id={`name-${provider.id}`}
+                value={provider.name}
+                onChange={(event) => update({ name: event.target.value })}
+                placeholder="Provider name"
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor={`base-url-${provider.id}`}>Base URL</FieldLabel>
+              <Input
+                id={`base-url-${provider.id}`}
+                value={provider.baseUrl}
+                onChange={(event) => update({ baseUrl: event.target.value })}
+                placeholder="e.g., http://localhost:1234/v1"
+              />
+            </Field>
+          </FieldGroup>
+        }
+        footer={
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              trackSettingsInteraction("providers", "delete_provider_dialog_opened", {
+                provider_id: provider.id,
+              });
+              setDeleteDialogOpen(true);
+            }}
+            className="w-fit"
+          >
+            <IconTrash data-icon="inline-start" />
+            Delete Provider
+          </Button>
+        }
+        onEnabledChange={(enabled) => update({ enabled })}
+        onOpenChange={onOpenChange}
+      />
+
+      <DeleteProviderDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        providerName={provider.name}
+        onConfirm={() => {
+          setDeleteDialogOpen(false);
+          onDelete();
+        }}
+        onCancel={() => setDeleteDialogOpen(false)}
+      />
+    </>
+  );
+});
 
 export default function CustomProvidersSettings() {
   const [searchQuery, setSearchQuery] = useState("");
