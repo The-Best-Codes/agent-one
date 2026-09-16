@@ -3,8 +3,6 @@ import { useLocation } from "react-router";
 
 import { cn } from "@/lib/utils";
 
-import { getSettingDefinition } from "./settings-registry";
-
 const HIGHLIGHT_ACTIVE_MS = 4000;
 const HIGHLIGHT_FADE_MS = 1000;
 
@@ -15,7 +13,6 @@ interface SettingsTargetProps {
 }
 
 export default function SettingsTarget({ id, children, className }: SettingsTargetProps) {
-  const definition = getSettingDefinition(id);
   const location = useLocation();
   const [phase, setPhase] = useState<"idle" | "active" | "fading">("idle");
 
@@ -38,9 +35,6 @@ export default function SettingsTarget({ id, children, className }: SettingsTarg
   return (
     <div
       id={id}
-      data-setting-id={definition?.id}
-      data-setting-title={definition?.title}
-      data-setting-keywords={definition?.keywords?.join(" ")}
       className={cn(
         "scroll-mt-4 rounded-[calc(var(--radius-xl)+4px)] bg-transparent transition-[colors,padding] duration-300",
         phase === "active" && "settings-target-pulse bg-primary/10 p-2",

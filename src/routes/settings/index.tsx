@@ -1,5 +1,5 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
@@ -14,41 +14,51 @@ import {
 } from "@/components/ui/drawer";
 import { useOverflow } from "@/hooks/use-overflow";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
-import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
+import { activeSettingsSectionAtom, debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
+import {
+  getSection,
+  isSectionVisible,
+  resolveSectionForTarget,
+  resolveSectionId,
+  sections,
+} from "@/lib/settings/registry";
 import { cn } from "@/lib/utils";
 
 import SettingsContent from "./settings-content";
-import { isValidSection, resolveSettingsSection, sections } from "./settings-registry";
 import SettingsSidebar from "./settings-sidebar";
 
 export default function SettingsRoute() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
+  const debugModeEnabled = useAtomValue(debugModeEnabledAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
 
   const tabParam = searchParams.get("tab");
-  const displayedSection = useMemo(() => {
-    try {
-      if (tabParam && isValidSection(tabParam)) {
-        return resolveSettingsSection(tabParam)!;
-      }
-      if (isValidSection(activeSection)) {
-        return resolveSettingsSection(activeSection)!;
-      }
-      return sections[0].id;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_error) {
-      return sections[0].id;
-    }
-  }, [tabParam, activeSection]);
+  const hashTarget = location.hash.startsWith("#setting-") ? location.hash.slice(1) : undefined;
 
-  const fillHeight = useMemo(() => {
-    const section = sections.find((candidate) => candidate.id === displayedSection);
-    return section !== undefined && "fillHeight" in section && section.fillHeight === true;
-  }, [displayedSection]);
+  const displayedSection = useMemo(() => {
+    const candidates = [
+      hashTarget ? resolveSectionForTarget(hashTarget) : undefined,
+      tabParam ? resolveSectionId(tabParam) : undefined,
+      resolveSectionId(activeSection),
+    ];
+
+    for (const candidate of candidates) {
+      if (candidate && isSectionVisible(candidate, debugModeEnabled)) {
+        return candidate;
+      }
+    }
+
+    return (
+      sections.find((section) => isSectionVisible(section.id, debugModeEnabled))?.id ??
+      sections[0].id
+    );
+  }, [hashTarget, tabParam, activeSection, debugModeEnabled]);
+
+  const fillHeight = getSection(displayedSection)?.fillHeight === true;
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
@@ -108,11 +118,15 @@ export default function SettingsRoute() {
   const handleSectionChange = (section: string) => {
     trackSettingsInteraction("navigation", "section_changed", { value: section });
     setActiveSection(section);
-    if (tabParam) {
-      setSearchParams((prev) => {
-        prev.delete("tab");
-        return prev;
-      });
+
+    if (tabParam || location.hash) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("tab");
+      const query = nextParams.toString();
+      void navigate(
+        { pathname: location.pathname, search: query ? `?${query}` : "", hash: "" },
+        { replace: true },
+      );
     }
   };
 

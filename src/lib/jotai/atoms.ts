@@ -6,6 +6,8 @@ import { sanitizeMemoryEntries } from "@/lib/memory";
 
 import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "./settings-atoms";
 
+export { hideAgentOneModelsAtom, syncEnabledAtom } from "./app-preference-atoms";
+
 export type ChatStatusIndicator = "loading" | "error" | "unread" | null;
 
 export const chatStatusIndicatorsAtom = atom<Record<string, ChatStatusIndicator>>({});
@@ -16,17 +18,6 @@ export const chatUpdateTriggerAtom = atom(0);
 
 export const onboardingCompletedAtom = atomWithStorage(
   "agent-one-onboarding-completed",
-  false,
-  undefined,
-  { getOnInit: true },
-);
-
-export const syncEnabledAtom = atomWithStorage("agent-one-sync-enabled", true, undefined, {
-  getOnInit: true,
-});
-
-export const hideAgentOneModelsAtom = atomWithStorage(
-  "agent-one-hide-agentone-models",
   false,
   undefined,
   { getOnInit: true },
