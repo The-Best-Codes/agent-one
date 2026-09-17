@@ -17,6 +17,7 @@ import {
 } from "@/lib/google-analytics";
 import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import ChatRoute from "@/routes/chat";
+import ExtensionsRoute from "@/routes/extensions";
 import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
@@ -85,6 +86,7 @@ function App() {
           <Route path="/chat" element={<ChatRoute />} />
           <Route path="/chat/:id" element={<ChatRoute />} />
           <Route path="/onboarding" element={<OnboardingRoute />} />
+          <Route path="/extensions" element={<ExtensionsRoute />} />
           <Route path="/settings" element={<SettingsRoute />} />
           <Route
             element={

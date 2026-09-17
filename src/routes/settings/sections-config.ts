@@ -5,17 +5,16 @@ import AboutSection from "./sections/about";
 import AccountSection from "./sections/account";
 import AppearanceSection from "./sections/appearance";
 import ChatsSection from "./sections/chats";
-import ExtensionsSection from "./sections/extensions";
 import KeyboardShortcutsSection from "./sections/keyboard-shortcuts";
 import PerformanceSection from "./sections/performance";
 import ProvidersSection from "./sections/providers";
+import ToolsSection from "./sections/tools";
 
 interface SettingsSection {
   id: string;
   label: string;
   icon?: string;
   component: ComponentType;
-  fillHeight?: boolean;
 }
 
 const componentMap: Record<SectionId, ComponentType> = {
@@ -24,7 +23,7 @@ const componentMap: Record<SectionId, ComponentType> = {
   chats: ChatsSection,
   performance: PerformanceSection,
   appearance: AppearanceSection,
-  extensions: ExtensionsSection,
+  tools: ToolsSection,
   "keyboard-shortcuts": KeyboardShortcutsSection,
   about: AboutSection,
 };

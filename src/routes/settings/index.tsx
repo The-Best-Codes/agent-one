@@ -12,10 +12,8 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useOverflow } from "@/hooks/use-overflow";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
-import { cn } from "@/lib/utils";
 
 import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
@@ -45,11 +43,6 @@ export default function SettingsRoute() {
     }
   }, [tabParam, activeSection]);
 
-  const fillHeight = useMemo(
-    () => sections.find((section) => section.id === displayedSection)?.fillHeight === true,
-    [displayedSection],
-  );
-
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
     if (chatId) {
@@ -59,8 +52,6 @@ export default function SettingsRoute() {
     }
   };
 
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const isSidebarOverflowing = useOverflow(sidebarRef);
   const previousSectionRef = useRef(displayedSection);
 
   useEffect(() => {
@@ -117,14 +108,7 @@ export default function SettingsRoute() {
   };
 
   return (
-    <main
-      ref={rootRef}
-      role="main"
-      className={cn(
-        "bg-background min-h-svh pl-[calc(100vw-100%)]",
-        fillHeight && "flex h-svh min-h-0 flex-col overflow-hidden",
-      )}
-    >
+    <main ref={rootRef} role="main" className="bg-background min-h-svh pl-[calc(100vw-100%)]">
       <h1 className="sr-only">Settings</h1>
       <div className="bg-background sticky top-0 z-10 border-b p-4 md:hidden">
         <div className="flex items-center justify-between">
@@ -168,21 +152,9 @@ export default function SettingsRoute() {
         </div>
       </div>
 
-      <div
-        className={cn(
-          "mx-auto w-full max-w-5xl p-4 md:flex md:flex-col md:p-6",
-          fillHeight && "flex min-h-0 flex-1 flex-col md:h-full md:min-h-0",
-        )}
-      >
-        <div className={cn("flex flex-col gap-6 md:flex-row", fillHeight && "min-h-0 flex-1")}>
-          <div
-            ref={sidebarRef}
-            className={cn(
-              "hidden w-48 shrink-0 md:flex md:flex-col lg:w-64",
-              fillHeight ? "overflow-auto" : "md:sticky md:top-6 md:self-start",
-              fillHeight && isSidebarOverflowing && "pr-2",
-            )}
-          >
+      <div className="mx-auto w-full max-w-5xl p-4 md:flex md:flex-col md:p-6">
+        <div className="flex flex-col gap-6 md:flex-row">
+          <div className="hidden w-48 shrink-0 md:sticky md:top-6 md:flex md:flex-col md:self-start lg:w-64">
             <div className="flex flex-col gap-2 pl-0.5">
               <div className="mb-2">
                 <Button
@@ -205,30 +177,15 @@ export default function SettingsRoute() {
             </div>
           </div>
 
-          {fillHeight ? (
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <div
-                role="tabpanel"
-                tabIndex={0}
-                className={cn(
-                  "focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1",
-                  "flex min-h-0 min-w-0 flex-1 flex-col",
-                )}
-              >
-                <SettingsContent activeSection={displayedSection} fillHeight />
-              </div>
+          <div className="min-w-0 flex-1">
+            <div
+              role="tabpanel"
+              tabIndex={0}
+              className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
+            >
+              <SettingsContent activeSection={displayedSection} />
             </div>
-          ) : (
-            <div className="min-w-0 flex-1">
-              <div
-                role="tabpanel"
-                tabIndex={0}
-                className="focus-visible:border-ring/50 focus-visible:border-[3px] focus-visible:outline-1"
-              >
-                <SettingsContent activeSection={displayedSection} />
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </main>

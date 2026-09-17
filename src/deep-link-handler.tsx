@@ -126,7 +126,6 @@ export function DeepLinkHandler() {
 
           const serverType = config.type === "http" ? "http" : "stdio";
           const params = new URLSearchParams({
-            tab: "extensions",
             mcpName: name,
             mcpType: serverType,
           });
@@ -137,7 +136,7 @@ export function DeepLinkHandler() {
             params.set("mcpUrl", config.url);
           }
 
-          void navigate(`/settings?${params.toString()}`);
+          void navigate(`/extensions?${params.toString()}`);
         } else if (deepLinkId === "cron") {
           const id = urlObj.searchParams.get("id");
           if (!id) {
