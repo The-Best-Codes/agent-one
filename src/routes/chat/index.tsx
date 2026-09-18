@@ -207,6 +207,7 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
           )}
           <MainChatInput
             key={chatId || "new-chat"}
+            draftKey={chatId || "new-chat"}
             initialValue={initialInputValue}
             disabled={isChatLoading}
             onScrollNeededAction={() => {

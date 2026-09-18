@@ -22,6 +22,7 @@ import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import useMobileDetection from "@/hooks/use-mobile-detection";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
+import { loadChatInputDraft, saveChatInputDraft } from "@/lib/chat-input-drafts";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
@@ -74,10 +75,12 @@ const editorTheme = EditorView.theme({
 export const MainChatInput = ({
   onScrollNeededAction,
   initialValue,
+  draftKey,
   disabled = false,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
+  draftKey: string;
   disabled?: boolean;
 }) => {
   const { status } = useChatStatus();
@@ -99,6 +102,7 @@ export const MainChatInput = ({
   });
 
   const [isEmpty, setIsEmpty] = useState(true);
+  const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
   const [files, setFiles] = useState<FileList | undefined>(undefined);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -134,6 +138,7 @@ export const MainChatInput = ({
   });
 
   const handleEditorChange = (newValue: string) => {
+    saveChatInputDraft(draftKey, newValue);
     const newIsEmpty = !newValue.trim();
     if (newIsEmpty !== isEmpty) {
       setIsEmpty(newIsEmpty);
@@ -162,6 +167,7 @@ export const MainChatInput = ({
         text: currentText || "",
         files: files,
       });
+      saveChatInputDraft(draftKey, "");
       trackGoogleAnalyticsEvent("message_sent", {
         ui_location: "main_chat_input",
         text_length: currentText.length,
@@ -444,7 +450,7 @@ export const MainChatInput = ({
             editable={!disabled}
             theme={resolvedTheme === "dark" ? "dark" : "light"}
             // Note: Explicitly setting the value like this might prevent edits or input. It seems to be working fine, but if there are issues in the future, inspect this.
-            value={initialValue || ""}
+            value={editorInitialValue}
             minHeight="40px"
             maxHeight="160px"
             placeholder="Ask anything..."
@@ -499,7 +505,7 @@ export const MainChatInput = ({
             onChange={handleEditorChange}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
-              if (initialValue) {
+              if (editorInitialValue) {
                 view.dispatch({
                   selection: { anchor: view.state.doc.length },
                 });
