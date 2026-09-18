@@ -21,8 +21,7 @@ import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
-export type ChatInstanceHelpers = UseChatHelpers<UIMessage> &
-  Pick<ReturnType<typeof useChat>, "updateMcpAppModelContext">;
+export type ChatInstanceHelpers = ReturnType<typeof useChat>;
 
 export const ChatInstance = memo(
   ({
