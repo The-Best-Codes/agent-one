@@ -18,8 +18,6 @@ import { Switch } from "@/components/ui/switch";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   chatSortAtom,
-  experimentalThrottleEnabledAtom,
-  experimentalThrottleValueAtom,
   extractReasoningEnabledAtom,
   markdownRenderingAtom,
   notificationSettingAtom,
@@ -30,9 +28,9 @@ import {
   showMessageActionRowAtom,
   showChatToBottomButtonAtom,
   showMessagePreviewRailAtom,
-  smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
+  throttleValueAtom,
   titleGenerationAtom,
 } from "@/lib/jotai/settings-atoms";
 import { resetSetting } from "@/lib/settings/reset-settings";
@@ -56,16 +54,10 @@ export default function ChatsSection() {
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
   const [remendEnabled, setRemendEnabled] = useAtom(remendEnabledAtom);
-  const [smoothStreamEnabled, setSmoothStreamEnabled] = useAtom(smoothStreamEnabledAtom);
   const [extractReasoningEnabled, setExtractReasoningEnabled] = useAtom(
     extractReasoningEnabledAtom,
   );
-  const [experimentalThrottleEnabled, setExperimentalThrottleEnabled] = useAtom(
-    experimentalThrottleEnabledAtom,
-  );
-  const [experimentalThrottleValue, setExperimentalThrottleValue] = useAtom(
-    experimentalThrottleValueAtom,
-  );
+  const [throttleValue, setThrottleValue] = useAtom(throttleValueAtom);
   const [alwaysShowStopButton, setAlwaysShowStopButton] = useAtom(stopButtonBehaviorAtom);
   const [showChatStatusIndicator, setShowChatStatusIndicator] = useAtom(
     showChatStatusIndicatorAtom,
@@ -86,13 +78,9 @@ export default function ChatsSection() {
   const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
   const isRegenerateOnSaveDefault = regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
   const isRemendEnabledDefault = remendEnabled === DEFAULT_SETTINGS.REMEND_ENABLED;
-  const isSmoothStreamDefault = smoothStreamEnabled === DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED;
   const isExtractReasoningDefault =
     extractReasoningEnabled === DEFAULT_SETTINGS.EXTRACT_REASONING_ENABLED;
-  const isExperimentalThrottleEnabledDefault =
-    experimentalThrottleEnabled === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED;
-  const isExperimentalThrottleValueDefault =
-    experimentalThrottleValue === DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE;
+  const isThrottleValueDefault = throttleValue === DEFAULT_SETTINGS.THROTTLE_VALUE;
   const isAlwaysShowStopButtonDefault =
     alwaysShowStopButton === DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR;
   const isShowChatStatusIndicatorDefault =
@@ -625,42 +613,6 @@ export default function ChatsSection() {
           <CardTitle>Streaming Experience</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
-          <SettingsTarget id="setting-smooth-stream">
-            <div className="flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">Smooth Stream</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Enable smooth streaming for a more fluid typing experience.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={smoothStreamEnabled}
-                  onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "smooth_stream_toggled", {
-                      enabled: checked,
-                    });
-                    setSmoothStreamEnabled(checked);
-                  }}
-                  aria-label="Toggle smooth stream"
-                />
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    trackSettingsInteraction("chats", "reset_smooth_stream");
-                    resetSetting("SMOOTH_STREAM_ENABLED");
-                  }}
-                  disabled={isSmoothStreamDefault}
-                  aria-label="Reset to default"
-                >
-                  <IconRestore data-icon="inline-start" />
-                </Button>
-              </div>
-            </div>
-          </SettingsTarget>
-
           <SettingsTarget id="setting-extract-reasoning">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-1 flex-col items-start">
@@ -699,34 +651,40 @@ export default function ChatsSection() {
             </div>
           </SettingsTarget>
 
-          <SettingsTarget id="setting-experimental-throttle">
-            <div className="flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">Experimental Throttle</Label>
+          <SettingsTarget id="setting-throttle-value">
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col items-start">
+                <Label className="text-sm font-medium tabular-nums">
+                  {`Throttle: ${throttleValue}ms`}
+                </Label>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Enable throttling to control streaming speed.
+                  Control how often streaming messages update the interface.
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Switch
-                  checked={experimentalThrottleEnabled}
-                  onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "experimental_throttle_toggled", {
-                      enabled: checked,
+                <Slider
+                  value={[throttleValue]}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "throttle_value_changed", {
+                      value: value[0],
                     });
-                    setExperimentalThrottleEnabled(checked);
+                    setThrottleValue(value[0]);
                   }}
-                  aria-label="Toggle experimental throttle"
+                  min={50}
+                  max={1000}
+                  step={10}
+                  className="flex-1"
+                  aria-label="Throttle value"
                 />
 
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_experimental_throttle");
-                    resetSetting("EXPERIMENTAL_THROTTLE_ENABLED");
+                    trackSettingsInteraction("chats", "reset_throttle_value");
+                    resetSetting("THROTTLE_VALUE");
                   }}
-                  disabled={isExperimentalThrottleEnabledDefault}
+                  disabled={isThrottleValueDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />
@@ -734,50 +692,6 @@ export default function ChatsSection() {
               </div>
             </div>
           </SettingsTarget>
-
-          {experimentalThrottleEnabled && (
-            <SettingsTarget id="setting-throttle-value">
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col items-start">
-                  <Label className="text-sm font-medium tabular-nums">
-                    {`Throttle Value: ${experimentalThrottleValue}ms`}
-                  </Label>
-                  <p className="text-muted-foreground mt-1 text-sm">
-                    Adjust the throttle delay from 0ms to 10,000ms.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Slider
-                    value={[experimentalThrottleValue]}
-                    onValueChange={(value) => {
-                      trackSettingsInteraction("chats", "experimental_throttle_value_changed", {
-                        value: value[0],
-                      });
-                      setExperimentalThrottleValue(value[0]);
-                    }}
-                    min={0}
-                    max={10000}
-                    step={10}
-                    className="flex-1"
-                    aria-label="Throttle value"
-                  />
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      trackSettingsInteraction("chats", "reset_experimental_throttle_value");
-                      resetSetting("EXPERIMENTAL_THROTTLE_VALUE");
-                    }}
-                    disabled={isExperimentalThrottleValueDefault}
-                    aria-label="Reset to default"
-                  >
-                    <IconRestore data-icon="inline-start" />
-                  </Button>
-                </div>
-              </div>
-            </SettingsTarget>
-          )}
         </CardContent>
       </Card>
 

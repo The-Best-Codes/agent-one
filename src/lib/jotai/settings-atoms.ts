@@ -107,19 +107,9 @@ export const chatVirtualizationThresholdAtom = createSettingAtom(
   DEFAULT_SETTINGS.CHAT_VIRTUALIZATION_THRESHOLD,
 );
 
-export const experimentalThrottleEnabledAtom = createSettingAtom(
-  "EXPERIMENTAL_THROTTLE_ENABLED",
-  DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_ENABLED,
-);
-
-export const experimentalThrottleValueAtom = createSettingAtom(
-  "EXPERIMENTAL_THROTTLE_VALUE",
-  DEFAULT_SETTINGS.EXPERIMENTAL_THROTTLE_VALUE,
-);
-
-export const smoothStreamEnabledAtom = createSettingAtom(
-  "SMOOTH_STREAM_ENABLED",
-  DEFAULT_SETTINGS.SMOOTH_STREAM_ENABLED,
+export const throttleValueAtom = createSettingAtom(
+  "THROTTLE_VALUE",
+  DEFAULT_SETTINGS.THROTTLE_VALUE,
 );
 
 export const extractReasoningEnabledAtom = createSettingAtom(

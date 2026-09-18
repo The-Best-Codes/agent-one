@@ -8,13 +8,13 @@ import { useTools } from "@/contexts/use-tools/tools-hooks";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
 import { CustomChatTransport } from "@/lib/ai/custom-chat-transport";
 import { systemPromptAtom } from "@/lib/jotai/atoms";
-import { extractReasoningEnabledAtom, smoothStreamEnabledAtom } from "@/lib/jotai/settings-atoms";
+import { extractReasoningEnabledAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
 
 type CustomChatOptions = Omit<ChatInit<UIMessage>, "transport"> &
-  Pick<UseChatOptions<UIMessage>, "experimental_throttle" | "resume">;
+  Pick<UseChatOptions<UIMessage>, "resume" | "throttle">;
 
 function canResumeFromMessages(messages: UIMessage[]) {
   const lastMessage = messages.at(-1);
@@ -32,7 +32,6 @@ export function useChat(
   modelConfig: ModelConfig,
   options?: CustomChatOptions,
 ) {
-  const smoothStreamEnabled = useAtomValue(smoothStreamEnabledAtom);
   const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
   const systemPrompt = useAtomValue(systemPromptAtom);
   const { getApiKeysLoadedPromise } = useApiKeys();
@@ -44,7 +43,6 @@ export function useChat(
         model,
         modelId,
         modelConfig,
-        smoothStreamEnabled,
         extractReasoningEnabled,
         getTools,
         getSystemPrompt,
@@ -69,11 +67,6 @@ export function useChat(
     transport.updateModelConfig(modelConfig);
     logger.verbose("Updated chat transport with new config");
   }, [modelConfig, transport]);
-
-  useEffect(() => {
-    transport.updateSmoothStreamEnabled(smoothStreamEnabled);
-    logger.verbose("Updated chat transport with new settings");
-  }, [smoothStreamEnabled, transport]);
 
   useEffect(() => {
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
@@ -102,9 +95,8 @@ export function useChat(
     transport.updateModel(model);
     transport.updateModelId(modelId);
     transport.updateModelConfig(modelConfig);
-    transport.updateSmoothStreamEnabled(smoothStreamEnabled);
     transport.updateExtractReasoningEnabled(extractReasoningEnabled);
-  }, [model, modelId, modelConfig, smoothStreamEnabled, extractReasoningEnabled, transport]);
+  }, [model, modelId, modelConfig, extractReasoningEnabled, transport]);
 
   const sendMessage = useCallback<typeof chatResult.sendMessage>(
     async (message, sendOptions) => {

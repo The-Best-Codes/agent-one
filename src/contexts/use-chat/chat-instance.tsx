@@ -14,8 +14,7 @@ import { generateChatTitle, hasMessageTextContent } from "@/lib/ai/title-generat
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   extractReasoningEnabledAtom,
-  experimentalThrottleEnabledAtom,
-  experimentalThrottleValueAtom,
+  throttleValueAtom,
   titleGenerationAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -47,8 +46,7 @@ export const ChatInstance = memo(
       hasError?: boolean,
     ) => void;
   }) => {
-    const experimentalThrottleEnabled = useAtomValue(experimentalThrottleEnabledAtom);
-    const experimentalThrottleValue = useAtomValue(experimentalThrottleValueAtom);
+    const throttleValue = useAtomValue(throttleValueAtom);
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
     const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
     const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
@@ -67,7 +65,7 @@ export const ChatInstance = memo(
     }, []);
 
     const chat = useChat(model, modelId, modelConfig, {
-      experimental_throttle: experimentalThrottleEnabled ? experimentalThrottleValue : undefined,
+      throttle: throttleValue,
       sendAutomaticallyWhen,
       onFinish: ({ isAbort }) => {
         if (isAbort) {

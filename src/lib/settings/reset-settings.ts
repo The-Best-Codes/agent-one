@@ -16,8 +16,6 @@ import {
   collapsedSidebarLayoutAtom,
   colorThemeAtom,
   enabledToolsAtom,
-  experimentalThrottleEnabledAtom,
-  experimentalThrottleValueAtom,
   extractReasoningEnabledAtom,
   fontAtom,
   inputStyleAtom,
@@ -40,12 +38,12 @@ import {
   sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showMessagePreviewRailAtom,
-  smoothStreamEnabledAtom,
   stopButtonBehaviorAtom,
   submitKeyAtom,
   systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
+  throttleValueAtom,
   ttsSettingsAtom,
   titleGenerationAtom,
   uiTintAtom,
@@ -75,9 +73,7 @@ export function resetAllSettings(): void {
   store.set(maxToolResultCharsAtom, RESET);
   store.set(chatVirtualizationModeAtom, RESET);
   store.set(chatVirtualizationThresholdAtom, RESET);
-  store.set(experimentalThrottleEnabledAtom, RESET);
-  store.set(experimentalThrottleValueAtom, RESET);
-  store.set(smoothStreamEnabledAtom, RESET);
+  store.set(throttleValueAtom, RESET);
   store.set(extractReasoningEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
   store.set(remendEnabledAtom, RESET);
@@ -163,14 +159,8 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "CHAT_VIRTUALIZATION_THRESHOLD":
       store.set(chatVirtualizationThresholdAtom, RESET);
       break;
-    case "EXPERIMENTAL_THROTTLE_ENABLED":
-      store.set(experimentalThrottleEnabledAtom, RESET);
-      break;
-    case "EXPERIMENTAL_THROTTLE_VALUE":
-      store.set(experimentalThrottleValueAtom, RESET);
-      break;
-    case "SMOOTH_STREAM_ENABLED":
-      store.set(smoothStreamEnabledAtom, RESET);
+    case "THROTTLE_VALUE":
+      store.set(throttleValueAtom, RESET);
       break;
     case "EXTRACT_REASONING_ENABLED":
       store.set(extractReasoningEnabledAtom, RESET);
