@@ -1,3 +1,7 @@
+import { IconRestore } from "@tabler/icons-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,22 +18,57 @@ import { TOOL_INFO } from "./tools-metadata";
 
 const defaults = DEFAULT_SETTINGS.TOOL_CONFIGS;
 
+interface FieldResetButtonProps {
+  label: string;
+  disabled: boolean;
+  onReset: () => void;
+}
+
+function FieldResetButton({ label, disabled, onReset }: FieldResetButtonProps) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onReset}
+      disabled={disabled}
+      aria-label={`Reset ${label} to default`}
+    >
+      <IconRestore />
+    </Button>
+  );
+}
+
 interface ToolSwitchFieldProps {
   id: string;
   label: string;
   description: string;
   checked: boolean;
+  defaultValue: boolean;
   onChange: (checked: boolean) => void;
 }
 
-function ToolSwitchField({ id, label, description, checked, onChange }: ToolSwitchFieldProps) {
+function ToolSwitchField({
+  id,
+  label,
+  description,
+  checked,
+  defaultValue,
+  onChange,
+}: ToolSwitchFieldProps) {
   return (
     <Field orientation="horizontal">
       <div className="flex flex-1 flex-col gap-0.5 leading-snug">
         <FieldLabel htmlFor={id}>{label}</FieldLabel>
         <FieldDescription>{description}</FieldDescription>
       </div>
-      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+      <div className="flex items-center gap-2">
+        <Switch id={id} checked={checked} onCheckedChange={onChange} />
+        <FieldResetButton
+          label={label}
+          disabled={checked === defaultValue}
+          onReset={() => onChange(defaultValue)}
+        />
+      </div>
     </Field>
   );
 }
@@ -41,7 +80,7 @@ interface ToolNumberFieldProps {
   value: number;
   min: number;
   max: number;
-  fallback: number;
+  defaultValue: number;
   onChange: (value: number) => void;
 }
 
@@ -52,23 +91,44 @@ function ToolNumberField({
   value,
   min,
   max,
-  fallback,
+  defaultValue,
   onChange,
 }: ToolNumberFieldProps) {
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const commitDraft = () => {
+    if (draft === null) {
+      return;
+    }
+
+    const parsed = Number.parseInt(draft, 10);
+    const nextValue = Math.max(min, Math.min(Number.isNaN(parsed) ? defaultValue : parsed, max));
+    setDraft(null);
+
+    if (nextValue !== value) {
+      onChange(nextValue);
+    }
+  };
+
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <Input
-        id={id}
-        type="number"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(event) => {
-          const parsed = parseInt(event.target.value) || fallback;
-          onChange(Math.max(min, Math.min(parsed, max)));
-        }}
-      />
+      <div className="flex items-center gap-2">
+        <Input
+          id={id}
+          type="number"
+          min={min}
+          max={max}
+          value={draft ?? String(value)}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={commitDraft}
+        />
+        <FieldResetButton
+          label={label}
+          disabled={value === defaultValue && draft === null}
+          onReset={() => onChange(defaultValue)}
+        />
+      </div>
       <FieldDescription>{description}</FieldDescription>
     </Field>
   );
@@ -105,6 +165,7 @@ export function ToolSettingsDialog({
             label="Require Approval"
             description="Ask for confirmation before running this tool"
             checked={configs[toolId].requiresApproval}
+            defaultValue={defaults[toolId].requiresApproval}
             onChange={(requiresApproval) => onConfigChange(toolId, { requiresApproval })}
           />
 
@@ -114,6 +175,7 @@ export function ToolSettingsDialog({
               label="Use UTC"
               description="Return the time in UTC instead of your local timezone"
               checked={configs.dateTime.useUtc}
+              defaultValue={defaults.dateTime.useUtc}
               onChange={(useUtc) => onConfigChange("dateTime", { useUtc })}
             />
           ) : null}
@@ -127,7 +189,7 @@ export function ToolSettingsDialog({
                 value={configs.waitNumberMilliseconds.minMs}
                 min={0}
                 max={configs.waitNumberMilliseconds.maxMs}
-                fallback={defaults.waitNumberMilliseconds.minMs}
+                defaultValue={defaults.waitNumberMilliseconds.minMs}
                 onChange={(minMs) => onConfigChange("waitNumberMilliseconds", { minMs })}
               />
               <ToolNumberField
@@ -137,7 +199,7 @@ export function ToolSettingsDialog({
                 value={configs.waitNumberMilliseconds.maxMs}
                 min={configs.waitNumberMilliseconds.minMs}
                 max={600000}
-                fallback={defaults.waitNumberMilliseconds.maxMs}
+                defaultValue={defaults.waitNumberMilliseconds.maxMs}
                 onChange={(maxMs) => onConfigChange("waitNumberMilliseconds", { maxMs })}
               />
             </div>
@@ -153,7 +215,7 @@ export function ToolSettingsDialog({
                   value={configs.getUrlContent.minUrls}
                   min={1}
                   max={configs.getUrlContent.maxUrls}
-                  fallback={defaults.getUrlContent.minUrls}
+                  defaultValue={defaults.getUrlContent.minUrls}
                   onChange={(minUrls) => onConfigChange("getUrlContent", { minUrls })}
                 />
                 <ToolNumberField
@@ -163,7 +225,7 @@ export function ToolSettingsDialog({
                   value={configs.getUrlContent.maxUrls}
                   min={configs.getUrlContent.minUrls}
                   max={200}
-                  fallback={defaults.getUrlContent.maxUrls}
+                  defaultValue={defaults.getUrlContent.maxUrls}
                   onChange={(maxUrls) => onConfigChange("getUrlContent", { maxUrls })}
                 />
               </div>
@@ -174,7 +236,7 @@ export function ToolSettingsDialog({
                 value={configs.getUrlContent.defaultMaxLength}
                 min={100}
                 max={50000}
-                fallback={defaults.getUrlContent.defaultMaxLength}
+                defaultValue={defaults.getUrlContent.defaultMaxLength}
                 onChange={(defaultMaxLength) =>
                   onConfigChange("getUrlContent", { defaultMaxLength })
                 }
@@ -191,7 +253,7 @@ export function ToolSettingsDialog({
                 value={configs.webSearch.maxConcurrent}
                 min={1}
                 max={50}
-                fallback={defaults.webSearch.maxConcurrent}
+                defaultValue={defaults.webSearch.maxConcurrent}
                 onChange={(maxConcurrent) => onConfigChange("webSearch", { maxConcurrent })}
               />
               <div className="grid gap-4 md:grid-cols-2">
@@ -202,7 +264,7 @@ export function ToolSettingsDialog({
                   value={configs.webSearch.defaultMaxResults}
                   min={1}
                   max={200}
-                  fallback={defaults.webSearch.defaultMaxResults}
+                  defaultValue={defaults.webSearch.defaultMaxResults}
                   onChange={(defaultMaxResults) =>
                     onConfigChange("webSearch", { defaultMaxResults })
                   }
@@ -214,7 +276,7 @@ export function ToolSettingsDialog({
                   value={configs.webSearch.defaultMaxPages}
                   min={1}
                   max={20}
-                  fallback={defaults.webSearch.defaultMaxPages}
+                  defaultValue={defaults.webSearch.defaultMaxPages}
                   onChange={(defaultMaxPages) => onConfigChange("webSearch", { defaultMaxPages })}
                 />
               </div>
@@ -229,7 +291,7 @@ export function ToolSettingsDialog({
               value={configs.wikipedia.defaultMaxResults}
               min={1}
               max={50}
-              fallback={defaults.wikipedia.defaultMaxResults}
+              defaultValue={defaults.wikipedia.defaultMaxResults}
               onChange={(defaultMaxResults) => onConfigChange("wikipedia", { defaultMaxResults })}
             />
           ) : null}
@@ -242,7 +304,7 @@ export function ToolSettingsDialog({
               value={configs.viewFile.defaultMaxChars}
               min={100}
               max={100000}
-              fallback={defaults.viewFile.defaultMaxChars}
+              defaultValue={defaults.viewFile.defaultMaxChars}
               onChange={(defaultMaxChars) => onConfigChange("viewFile", { defaultMaxChars })}
             />
           ) : null}
@@ -256,7 +318,7 @@ export function ToolSettingsDialog({
                 value={configs.executeCommand.defaultTimeoutMs}
                 min={1000}
                 max={600000}
-                fallback={defaults.executeCommand.defaultTimeoutMs}
+                defaultValue={defaults.executeCommand.defaultTimeoutMs}
                 onChange={(defaultTimeoutMs) =>
                   onConfigChange("executeCommand", { defaultTimeoutMs })
                 }
@@ -268,7 +330,7 @@ export function ToolSettingsDialog({
                 value={configs.executeCommand.maxScrollbackChars}
                 min={1000}
                 max={500000}
-                fallback={defaults.executeCommand.maxScrollbackChars}
+                defaultValue={defaults.executeCommand.maxScrollbackChars}
                 onChange={(maxScrollbackChars) =>
                   onConfigChange("executeCommand", { maxScrollbackChars })
                 }
