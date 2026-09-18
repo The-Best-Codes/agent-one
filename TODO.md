@@ -1,2 +1,2 @@
 - Document `watch characterData?` commit as fixing a scroll to bottom bug that was very important!
-- Fix streaming chats without experimental throttle enabled lagging the UI so much you can't click over to another chat (too many rerenders). Read AI SDK docs for smoothStream? Is it related to a different recent commit e.g. characterData watching? Test
+- Fix streaming chats without experimental throttle enabled lagging the UI so much you can't click over to another chat (too many rerenders?). Read AI SDK docs for smoothStream? Confirmed: it's NOT an issue with auto scroll container.
