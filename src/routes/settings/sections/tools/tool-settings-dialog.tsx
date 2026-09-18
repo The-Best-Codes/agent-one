@@ -95,6 +95,7 @@ function ToolNumberField({
   onChange,
 }: ToolNumberFieldProps) {
   const [draft, setDraft] = useState<string | null>(null);
+  const resetValue = Math.max(min, Math.min(defaultValue, max));
 
   const commitDraft = () => {
     if (draft === null) {
@@ -125,8 +126,13 @@ function ToolNumberField({
         />
         <FieldResetButton
           label={label}
-          disabled={value === defaultValue && draft === null}
-          onReset={() => onChange(defaultValue)}
+          disabled={value === resetValue && draft === null}
+          onReset={() => {
+            setDraft(null);
+            if (resetValue !== value) {
+              onChange(resetValue);
+            }
+          }}
         />
       </div>
       <FieldDescription>{description}</FieldDescription>
