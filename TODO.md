@@ -1,3 +1,2 @@
 - Document `watch characterData?` commit as fixing a scroll to bottom bug that was very important!
-- Fix streaming chats without experimental throttle enabled lagging the UI so much you can't click over to another chat (too many rerenders?). Read AI SDK docs for smoothStream? Confirmed: it's NOT an issue with auto scroll container.
 - When you get a new notification, it claims to come from the selected chat, not the one it actually came from
