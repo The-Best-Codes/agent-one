@@ -97,7 +97,7 @@ const SidebarContent = ({
 
       <div className="border-sidebar-border flex flex-col gap-2 pt-2">
         <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to={`/settings?tab=extensions${activeChatId ? `&chatId=${activeChatId}` : ""}`}>
+          <Link to={`/extensions${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
             <IconPuzzle data-icon="inline-start" />
             Browse Extensions
           </Link>

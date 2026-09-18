@@ -31,7 +31,7 @@
 
 Most AI tools are either too simple (a chatbot) or too specialized (they only work for one task). **AgentOne unifies all of your tools and does the work**, from first step to finished result.
 
-AgentOne is special because it has one place to browser and connect with over **20,000+ extensions** (apps, services, websites, etc.). Under the hood, this uses **MCP servers**. Right now, `Settings > Extensions` is a UI browser for the official MCP registry, making it easy to discover and connect to anything. I'm building a proprietary registry to provide a richer experience (similar to the Chrome Web Store), which is currently in [private beta](https://www.agent-one.dev/discord). Support for MCP Apps is also in beta.
+AgentOne is special because it has one place to browser and connect with over **20,000+ extensions** (apps, services, websites, etc.). Under the hood, this uses **MCP servers**. Right now, the **Extensions** browser (reachable from "Browse Extensions" in the app sidebar) is a UI browser for the official MCP registry, making it easy to discover and connect to anything. I'm building a proprietary registry to provide a richer experience (similar to the Chrome Web Store), which is currently in [private beta](https://www.agent-one.dev/discord). Support for MCP Apps is also in beta.
 
 AgentOne also supports over **10,000+ AI models** from 70+ built-in providers, powered by the [AI Model Directory](https://models.agent-one.dev). Because the AI Model Directory is automatically updated every 24 hours, you don't have to wait for AgentOne to support a new model - it's designed to work out of the box, as soon as it becomes available, without any updates made on our end. Additionally, you can add as many OpenAI-compatible providers as you like.
 
