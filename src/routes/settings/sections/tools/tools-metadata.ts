@@ -1,125 +1,123 @@
-import {
-  IconBrandWikipedia,
-  IconBrain,
-  IconCalendar,
-  IconClock,
-  IconEye,
-  IconFilePlus,
-  IconHierarchy3,
-  IconList,
-  IconPencil,
-  IconSearch,
-  IconSettings,
-  IconSettingsCheck,
-  IconTerminal2,
-  IconTrash,
-  IconWorld,
-  type Icon,
-} from "@tabler/icons-react";
-
 import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
 
-export interface BuiltInToolInfo {
+export interface ToolInfo {
   name: string;
   description: string;
-  icon: Icon;
-  searchTerms: string;
+  anchor: string;
 }
 
-export const BUILT_IN_TOOLS: Record<ToolId, BuiltInToolInfo> = {
+export const TOOL_INFO: Record<ToolId, ToolInfo> = {
   dateTime: {
     name: "Current date and time",
     description: "Check the current date and time",
-    icon: IconCalendar,
-    searchTerms: "date time clock timezone",
+    anchor: "date-time",
   },
   waitNumberMilliseconds: {
     name: "Pause",
     description: "Wait for a short amount of time",
-    icon: IconClock,
-    searchTerms: "wait delay pause timer milliseconds",
+    anchor: "pause",
   },
   getUrlContent: {
     name: "Browse",
     description: "Read content from web pages",
-    icon: IconWorld,
-    searchTerms: "url website fetch read page",
+    anchor: "browse",
   },
   webSearch: {
     name: "Search the web",
     description: "Find information online",
-    icon: IconSearch,
-    searchTerms: "search web internet results",
+    anchor: "search-the-web",
   },
   wikipedia: {
     name: "Wikipedia",
     description: "Search Wikipedia and read article summaries, content, links, and categories",
-    icon: IconBrandWikipedia,
-    searchTerms: "wikipedia encyclopedia knowledge article reference",
+    anchor: "wikipedia",
   },
   memory: {
     name: "Memory",
     description: "Maintain concise long-term user memory",
-    icon: IconBrain,
-    searchTerms: "memory remember preferences profile facts notes",
+    anchor: "memory",
   },
   editFile: {
     name: "Edit file",
     description: "Edit files by replacing text content",
-    icon: IconPencil,
-    searchTerms: "edit file modify change replace text",
+    anchor: "edit-file",
   },
   createFile: {
     name: "Create file",
     description: "Create new files with content",
-    icon: IconFilePlus,
-    searchTerms: "create file new write",
+    anchor: "create-file",
   },
   deleteFile: {
     name: "Delete file",
     description: "Delete files from the filesystem",
-    icon: IconTrash,
-    searchTerms: "delete file remove",
+    anchor: "delete-file",
   },
   viewFile: {
     name: "View file",
     description: "Read and view file contents with smart truncation",
-    icon: IconEye,
-    searchTerms: "view file read open content",
+    anchor: "view-file",
   },
   executeCommand: {
     name: "Run command",
     description: "Execute terminal commands on your system",
-    icon: IconTerminal2,
-    searchTerms: "execute command terminal shell bash run script",
+    anchor: "run-command",
   },
   subAgent: {
     name: "Spawn subagent",
-    description: "Delegate focused work to a streamed subagent",
-    icon: IconHierarchy3,
-    searchTerms: "subagent delegate nested agent parallel work",
+    description:
+      "Delegate focused work to a streamed subagent. Subagents inherit your current model and enabled tools, but cannot spawn other subagents.",
+    anchor: "spawn-subagent",
   },
   listSettings: {
     name: "List settings",
     description: "List all available configuration setting keys",
-    icon: IconList,
-    searchTerms: "settings list keys config configuration options",
+    anchor: "list-settings",
   },
   getSetting: {
     name: "Get setting",
     description: "Get the current value and possible options of a specific setting",
-    icon: IconSettings,
-    searchTerms: "settings get value options inspect configuration",
+    anchor: "get-setting",
   },
   updateSetting: {
     name: "Update setting",
     description: "Update a setting key's value",
-    icon: IconSettingsCheck,
-    searchTerms: "settings update change set write value configuration",
+    anchor: "update-setting",
   },
 };
 
-export const TOOL_IDS = Object.keys(BUILT_IN_TOOLS) as ToolId[];
+export interface ToolGroup {
+  title: string;
+  description: string;
+  toolIds: ToolId[];
+}
+
+export const TOOL_GROUPS: ToolGroup[] = [
+  {
+    title: "Web",
+    description: "Let AgentOne look things up online and read the pages it finds.",
+    toolIds: ["webSearch", "getUrlContent", "wikipedia"],
+  },
+  {
+    title: "Files",
+    description: "Read and change files on your computer.",
+    toolIds: ["viewFile", "editFile", "createFile", "deleteFile"],
+  },
+  {
+    title: "Utilities",
+    description: "Everyday helpers like the clock, timers, and long-term memory.",
+    toolIds: ["dateTime", "waitNumberMilliseconds", "memory"],
+  },
+  {
+    title: "System",
+    description: "Reach outside AgentOne by running commands or delegating to a subagent.",
+    toolIds: ["executeCommand", "subAgent"],
+  },
+  {
+    title: "AgentOne Settings",
+    description: "Let AgentOne inspect and update your AgentOne settings.",
+    toolIds: ["listSettings", "getSetting", "updateSetting"],
+  },
+];
 
 export function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
   return {
