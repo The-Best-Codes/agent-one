@@ -5,6 +5,7 @@ import {
   type Key,
   type ReactNode,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useRef,
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { ChatToBottomButton } from "./chat-to-bottom-button";
 
 const AT_BOTTOM_THRESHOLD = 10;
+const SHOW_BUTTON_DELAY_MS = 150;
 
 export interface AutoScrollContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
@@ -63,6 +65,7 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
     const isOverflowing = useOverflow(parentRef);
     const [showButton, setShowButton] = useState(false);
     const atBottomRef = useRef(true);
+    const showButtonTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const isVirtualized = items != null && items.length > 0;
 
     const virtualizer = useVirtualizer({
@@ -117,8 +120,30 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       const atBottom = distanceFromBottom <= AT_BOTTOM_THRESHOLD;
 
       atBottomRef.current = atBottom;
-      setShowButton(isOverflowing && !atBottom);
-    }, [isOverflowing]);
+      if (!isOverflowing || atBottom) {
+        if (showButtonTimeoutRef.current !== null) {
+          clearTimeout(showButtonTimeoutRef.current);
+          showButtonTimeoutRef.current = null;
+        }
+        setShowButton(false);
+        return;
+      }
+
+      if (showButton || showButtonTimeoutRef.current !== null) return;
+
+      showButtonTimeoutRef.current = setTimeout(() => {
+        showButtonTimeoutRef.current = null;
+        if (!atBottomRef.current) setShowButton(true);
+      }, SHOW_BUTTON_DELAY_MS);
+    }, [isOverflowing, showButton]);
+
+    useEffect(() => {
+      return () => {
+        if (showButtonTimeoutRef.current !== null) {
+          clearTimeout(showButtonTimeoutRef.current);
+        }
+      };
+    }, []);
 
     useLayoutEffect(() => {
       const container = parentRef.current;
