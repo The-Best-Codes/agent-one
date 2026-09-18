@@ -1,2 +1,3 @@
 - Fix annoying scroll to bottom button flickering during fast smooth streaming
 - Save what you're currently typing in the main chat input per-chat and in the new chat area. Save at what time, to determine what entries to prune when running out of space (of course, for perf reasons dont save the input if its too long, and overall dont save more than 500kb in session storage or something)
+- Fix STDIO servers failing on macOS due to stuff missing in PATH. Maybe make the PATH on all OSes default to what the user's PATH would be if they were just running a command in their terminal would fix a lottt of problems?
