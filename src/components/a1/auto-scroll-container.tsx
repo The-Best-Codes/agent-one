@@ -169,7 +169,11 @@ export const AutoScrollContainer = forwardRef<AutoScrollHandle, AutoScrollContai
       };
 
       const mutationObserver = new MutationObserver(observerCallback);
-      mutationObserver.observe(container, { childList: true, subtree: true });
+      mutationObserver.observe(container, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
 
       return () => {
         mutationObserver.disconnect();
