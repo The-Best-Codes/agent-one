@@ -26,7 +26,7 @@ import {
 } from "@/lib/jotai/settings-atoms";
 import { cn } from "@/lib/utils";
 
-const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
+const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const messages = useChatMessages();
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
@@ -106,119 +106,119 @@ const ChatInterface = ({ chatId }: { chatId: string | undefined }) => {
   const getChatScrollElement = useCallback(() => scrollRef.current?.getScrollElement() ?? null, []);
 
   return (
-    <main className="flex h-svh" role="main" data-testid="main">
-      <Sidebar />
-      {chatId && <ChatUsageStatus />}
-
-      <div
-        className="relative flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden"
-        data-testid="chat-main"
-      >
-        {chatBackgroundUrl && (
-          <div
-            className="absolute inset-0 bg-cover"
-            style={{
-              backgroundImage: cssImageUrl(chatBackgroundUrl),
-              backgroundPosition: `${chatBackgroundX}% ${chatBackgroundY}%`,
-              backgroundRepeat: "no-repeat",
-              backgroundSize: "cover",
-              filter: `blur(${chatBackgroundBlur}px) brightness(${100 - chatBackgroundDim}%) opacity(${100 - chatBackgroundTint}%)`,
-              transform: `scale(${chatBackgroundZoom / 100})`,
-            }}
-          />
+    <div
+      className="relative flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden"
+      data-testid="chat-main"
+    >
+      {chatBackgroundUrl && (
+        <div
+          className="absolute inset-0 bg-cover"
+          style={{
+            backgroundImage: cssImageUrl(chatBackgroundUrl),
+            backgroundPosition: `${chatBackgroundX}% ${chatBackgroundY}%`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            filter: `blur(${chatBackgroundBlur}px) brightness(${100 - chatBackgroundDim}%) opacity(${100 - chatBackgroundTint}%)`,
+            transform: `scale(${chatBackgroundZoom / 100})`,
+          }}
+        />
+      )}
+      {chatBackgroundUrl && chatId && chatBackgroundShade > 0 && (
+        <div
+          className="bg-background absolute inset-0"
+          style={{ opacity: chatBackgroundShade / 100 }}
+        />
+      )}
+      <div className="relative flex h-full w-full max-w-3xl flex-1 flex-col">
+        {isChatLoading && showSpinner ? (
+          <div className="flex flex-1 items-center justify-center">
+            <Spinner className="text-muted-foreground size-8" />
+          </div>
+        ) : (
+          <div className="relative min-h-0 flex-1">
+            <AutoScrollContainer
+              ref={scrollRef}
+              className="max-h-full min-h-0 pt-2 pr-0 pb-2"
+              items={shouldVirtualizeMessages ? messages : undefined}
+              renderItem={
+                shouldVirtualizeMessages
+                  ? (item, index) => {
+                      const msg = item as (typeof messages)[number];
+                      return (
+                        <div
+                          data-message-index={index}
+                          className={cn(
+                            "flex",
+                            msg.role === "user"
+                              ? "justify-end"
+                              : index === messages.length - 1
+                                ? "justify-start"
+                                : "mb-1 justify-start",
+                          )}
+                        >
+                          <MessageParts message={msg} isLastMessage={msg.id === lastMessageId} />
+                        </div>
+                      );
+                    }
+                  : undefined
+              }
+              getItemKey={shouldVirtualizeMessages ? (index) => messages[index]!.id : undefined}
+              keepMountedIndexes={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
+              overflowingClassName="md:pr-2"
+              scrollableClassName={cn("h-full pr-2")}
+              behavior="instant"
+              buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
+            >
+              {!isChatLoading && messages.length === 0 && !chatId && <NoMessagesGreeting />}
+              {!shouldVirtualizeMessages &&
+                messages.map((message, index) => (
+                  <div
+                    key={message.id}
+                    data-message-index={index}
+                    className={cn(
+                      "flex",
+                      message.role === "user"
+                        ? "justify-end"
+                        : index === messages.length - 1
+                          ? "justify-start"
+                          : "mb-1 justify-start",
+                    )}
+                  >
+                    <MessageParts message={message} isLastMessage={message.id === lastMessageId} />
+                  </div>
+                ))}
+              {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
+            </AutoScrollContainer>
+            {showMessagePreviewRail && chatId && messages.length > 0 && !isChatLoading ? (
+              <MessagePreviewRail
+                messages={messages}
+                onMessageSelect={(index) => scrollRef.current?.scrollToIndex(index)}
+                getScrollElement={getChatScrollElement}
+              />
+            ) : null}
+          </div>
         )}
-        {chatBackgroundUrl && chatId && chatBackgroundShade > 0 && (
-          <div
-            className="bg-background absolute inset-0"
-            style={{ opacity: chatBackgroundShade / 100 }}
-          />
-        )}
-        <div className="relative flex h-full w-full max-w-3xl flex-1 flex-col">
-          {isChatLoading && showSpinner ? (
-            <div className="flex flex-1 items-center justify-center">
-              <Spinner className="text-muted-foreground size-8" />
-            </div>
-          ) : (
-            <div className="relative min-h-0 flex-1">
-              <AutoScrollContainer
-                ref={scrollRef}
-                className="max-h-full min-h-0 pt-2 pr-0 pb-2"
-                items={shouldVirtualizeMessages ? messages : undefined}
-                renderItem={
-                  shouldVirtualizeMessages
-                    ? (item, index) => {
-                        const msg = item as (typeof messages)[number];
-                        return (
-                          <div
-                            data-message-index={index}
-                            className={cn(
-                              "flex",
-                              msg.role === "user"
-                                ? "justify-end"
-                                : index === messages.length - 1
-                                  ? "justify-start"
-                                  : "mb-1 justify-start",
-                            )}
-                          >
-                            <MessageParts message={msg} isLastMessage={msg.id === lastMessageId} />
-                          </div>
-                        );
-                      }
-                    : undefined
-                }
-                getItemKey={shouldVirtualizeMessages ? (index) => messages[index]!.id : undefined}
-                keepMountedIndexes={shouldVirtualizeMessages ? keepMountedIndexes : undefined}
-                overflowingClassName="md:pr-2"
-                scrollableClassName={cn("h-full pr-2")}
-                behavior="instant"
-                buttonScrollBehavior={status === "streaming" ? "instant" : "smooth"}
-              >
-                {!isChatLoading && messages.length === 0 && !chatId && <NoMessagesGreeting />}
-                {!shouldVirtualizeMessages &&
-                  messages.map((message, index) => (
-                    <div
-                      key={message.id}
-                      data-message-index={index}
-                      className={cn(
-                        "flex",
-                        message.role === "user"
-                          ? "justify-end"
-                          : index === messages.length - 1
-                            ? "justify-start"
-                            : "mb-1 justify-start",
-                      )}
-                    >
-                      <MessageParts
-                        message={message}
-                        isLastMessage={message.id === lastMessageId}
-                      />
-                    </div>
-                  ))}
-                {messages.length > 0 && <ChatMessageLoading mode="inLayout" />}
-              </AutoScrollContainer>
-              {showMessagePreviewRail && chatId && messages.length > 0 && !isChatLoading ? (
-                <MessagePreviewRail
-                  messages={messages}
-                  onMessageSelect={(index) => scrollRef.current?.scrollToIndex(index)}
-                  getScrollElement={getChatScrollElement}
-                />
-              ) : null}
-            </div>
-          )}
-          <MainChatInput
-            key={chatId || "new-chat"}
-            draftKey={chatId || "new-chat"}
-            initialValue={initialInputValue}
-            disabled={isChatLoading}
-            onScrollNeededAction={() => {
-              scrollRef.current?.scrollToBottom();
-            }}
-          />
-        </div>
+        <MainChatInput
+          key={chatId || "new-chat"}
+          draftKey={chatId || "new-chat"}
+          initialValue={initialInputValue}
+          disabled={isChatLoading}
+          onScrollNeededAction={() => {
+            scrollRef.current?.scrollToBottom();
+          }}
+        />
       </div>
-    </main>
+    </div>
   );
 };
+
+const ChatInterface = ({ chatId }: { chatId: string | undefined }) => (
+  <main className="flex h-svh" role="main" data-testid="main">
+    <Sidebar />
+    {chatId && <ChatUsageStatus />}
+    <ChatContent chatId={chatId} />
+  </main>
+);
 
 function ChatRoute() {
   const { id } = useParams<{ id: string }>();
