@@ -1,1 +1,0 @@
-- Document `watch characterData?` commit as fixing a scroll to bottom bug that was very important!
