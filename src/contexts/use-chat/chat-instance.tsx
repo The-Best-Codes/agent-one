@@ -10,14 +10,17 @@ import { memo, useCallback, useEffect, useRef } from "react";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { type ModelConfig } from "@/hooks/ai/use-model-catalog";
+import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
 import { generateChatTitle, hasMessageTextContent } from "@/lib/ai/title-generator";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   extractReasoningEnabledAtom,
+  notificationSettingAtom,
   throttleValueAtom,
   titleGenerationAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 const logger = getLogger(import.meta.url);
 
@@ -48,9 +51,12 @@ export const ChatInstance = memo(
     const throttleValue = useAtomValue(throttleValueAtom);
     const titleGenerationSettings = useAtomValue(titleGenerationAtom);
     const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
+    const notificationSetting = useAtomValue(notificationSettingAtom);
     const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
     const chatIds = useAtomValue(chatIdsAtom);
     const suppressAutoSubmitAfterAbortRef = useRef(false);
+    const wasBusyRef = useRef(false);
+    const notifiedApprovalIdsRef = useRef(new Set<string>());
 
     const sendAutomaticallyWhen = useCallback(({ messages }: { messages: UIMessage[] }) => {
       if (suppressAutoSubmitAfterAbortRef.current) {
@@ -74,6 +80,68 @@ export const ChatInstance = memo(
       id: chatId,
       messages: initialMessages,
     });
+
+    useEffect(() => {
+      const pendingApproval = chat.messages
+        .filter((message) => message.role === "assistant")
+        .flatMap((message) => message.parts)
+        .find(
+          (part) =>
+            (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
+            "state" in part &&
+            part.state === "approval-requested" &&
+            "approval" in part &&
+            part.approval?.id &&
+            !notifiedApprovalIdsRef.current.has(part.approval.id),
+        );
+      const shouldNotify =
+        notificationSetting === "always" ||
+        (notificationSetting === "when-unfocused" && !document.hasFocus());
+
+      if (chat.status === "streaming" || chat.status === "submitted") {
+        wasBusyRef.current = true;
+      }
+
+      if (wasBusyRef.current && chat.status === "ready") {
+        wasBusyRef.current = false;
+        const lastMessage = chat.messages[chat.messages.length - 1];
+
+        if (shouldNotify && lastMessage?.role === "assistant" && !pendingApproval) {
+          const title = loadChatMetadata(chatId).title;
+          void sendNotificationIfAllowed(
+            `New Message in "${title}"`,
+            truncateMessagePreview(
+              getLastTextPart(lastMessage) || "Open AgentOne to keep working.",
+            ),
+          );
+        }
+      }
+
+      if (chat.status === "error") {
+        if (wasBusyRef.current && shouldNotify) {
+          const title = loadChatMetadata(chatId).title;
+          void sendNotificationIfAllowed(
+            `Error in "${title}"`,
+            "AgentOne stopped working because of an error.",
+          );
+        }
+        wasBusyRef.current = false;
+      }
+
+      if (
+        pendingApproval &&
+        "approval" in pendingApproval &&
+        pendingApproval.approval?.id &&
+        shouldNotify
+      ) {
+        notifiedApprovalIdsRef.current.add(pendingApproval.approval.id);
+        const title = loadChatMetadata(chatId).title;
+        void sendNotificationIfAllowed(
+          `Approval Required in "${title}"`,
+          "AgentOne can't continue until you provide approval.",
+        );
+      }
+    }, [chat.status, chat.messages, chatId, loadChatMetadata, notificationSetting]);
 
     useEffect(() => {
       if (chat.messages.length > 0) {

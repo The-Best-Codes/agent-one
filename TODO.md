@@ -1,2 +1,1 @@
 - Document `watch characterData?` commit as fixing a scroll to bottom bug that was very important!
-- When you get a new notification, it claims to come from the selected chat, not the one it actually came from

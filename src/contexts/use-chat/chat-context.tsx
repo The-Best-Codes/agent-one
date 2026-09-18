@@ -11,12 +11,9 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useChat } from "@/hooks/ai/use-chat";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { type ModelConfig, type ModelData } from "@/hooks/ai/use-model-catalog";
-import { getLastTextPart, truncateMessagePreview } from "@/lib/ai/message-preview";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { chatIdsAtom, chatStatusIndicatorsAtom } from "@/lib/jotai/atoms";
-import { notificationSettingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
-import { sendNotificationIfAllowed } from "@/lib/notifications";
 
 import {
   ChatApprovalHandlerContext,
@@ -65,7 +62,6 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const [chatIds] = useAtom(chatIdsAtom);
-  const [notificationSetting] = useAtom(notificationSettingAtom);
   const setChatStatusIndicators = useSetAtom(chatStatusIndicatorsAtom);
   const { getModelById } = useModelCatalog();
 
@@ -418,21 +414,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   } = instanceForFunctions ?? {};
 
   const wasBusyRef = useRef(false);
-  const notifiedApprovalIdsRef = useRef(new Set<string>());
   useEffect(() => {
-    const pendingApproval = messages
-      .filter((message) => message.role === "assistant")
-      .flatMap((message) => message.parts)
-      .find(
-        (part) =>
-          (part.type.startsWith("tool-") || part.type === "dynamic-tool") &&
-          "state" in part &&
-          part.state === "approval-requested" &&
-          "approval" in part &&
-          part.approval?.id &&
-          !notifiedApprovalIdsRef.current.has(part.approval.id),
-      );
-
     if (statusValue.status === "streaming" || statusValue.status === "submitted") {
       wasBusyRef.current = true;
     }
@@ -474,49 +456,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
             setMessages(newMessages);
           }
         }
-
-        const shouldNotify =
-          notificationSetting === "always" ||
-          (notificationSetting === "when-unfocused" && !document.hasFocus());
-        if (shouldNotify && !pendingApproval) {
-          void sendNotificationIfAllowed(
-            `New Message in "${metadataValue.title}"`,
-            truncateMessagePreview(
-              getLastTextPart(lastMessage) || "Open AgentOne to keep working.",
-            ),
-          );
-        }
       }
     }
 
     if (statusValue.status === "error") {
-      if (
-        wasBusyRef.current &&
-        (notificationSetting === "always" ||
-          (notificationSetting === "when-unfocused" && !document.hasFocus()))
-      ) {
-        void sendNotificationIfAllowed(
-          `Error in "${metadataValue.title}"`,
-          "AgentOne stopped working because of an error.",
-        );
-      }
       wasBusyRef.current = false;
     }
-
-    if (
-      pendingApproval &&
-      "approval" in pendingApproval &&
-      pendingApproval.approval?.id &&
-      (notificationSetting === "always" ||
-        (notificationSetting === "when-unfocused" && !document.hasFocus()))
-    ) {
-      notifiedApprovalIdsRef.current.add(pendingApproval.approval.id);
-      void sendNotificationIfAllowed(
-        `Approval Required in "${metadataValue.title}"`,
-        "AgentOne can't continue until you provide approval.",
-      );
-    }
-  }, [statusValue.status, messages, setMessages, notificationSetting, metadataValue.title]);
+  }, [statusValue.status, messages, setMessages]);
 
   useEffect(() => {
     if (!isMetadataLoaded) return;
