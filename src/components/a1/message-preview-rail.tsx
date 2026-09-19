@@ -152,7 +152,11 @@ export function MessagePreviewRail({
             className="pointer-events-none absolute right-16 w-72 -translate-y-1/2"
             style={{ top: `${((displayedIndex + 0.5) / entries.length) * 100}%` }}
           >
-            <Card size="sm" key={displayedEntry.message.id}>
+            <Card
+              className="border-foreground/10 border ring-0"
+              size="sm"
+              key={displayedEntry.message.id}
+            >
               <CardHeader className="gap-1">
                 <CardTitle className="truncate whitespace-nowrap">
                   {truncateMessagePreview(
