@@ -9,6 +9,11 @@ import {
 import { memo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 
+import {
+  AdaptiveTooltip,
+  AdaptiveTooltipContent,
+  AdaptiveTooltipTrigger,
+} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -71,12 +76,54 @@ function renderSnippet(snippet: string): ReactNode[] {
   return parts;
 }
 
+function BranchIcon({
+  branchOf,
+  branchParentTitle,
+}: {
+  branchOf: string;
+  branchParentTitle?: string;
+}) {
+  return (
+    <AdaptiveTooltip>
+      <AdaptiveTooltipTrigger asChild>
+        <span
+          className="inline-flex shrink-0"
+          data-icon="inline-start"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+        </span>
+      </AdaptiveTooltipTrigger>
+      <AdaptiveTooltipContent side="top" onClick={(e) => e.stopPropagation()}>
+        <span className="text-background">
+          Branched from{" "}
+          {branchParentTitle ? (
+            <Link
+              to={`/chat/${branchOf}`}
+              className="font-medium underline underline-offset-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {branchParentTitle}
+            </Link>
+          ) : (
+            "another chat"
+          )}
+        </span>
+      </AdaptiveTooltipContent>
+    </AdaptiveTooltip>
+  );
+}
+
 interface ChatItemProps {
   activeChatId?: string;
   additionalOnChatClickCallback?: (id: string) => void;
   id: string;
   title: string;
   branchOf?: string;
+  branchParentTitle?: string;
   snippet?: string;
   selectionMode?: boolean;
   isSelected?: boolean;
@@ -91,6 +138,7 @@ export const ChatItem = memo(
     id,
     title,
     branchOf,
+    branchParentTitle,
     snippet,
     selectionMode,
     isSelected,
@@ -116,7 +164,7 @@ export const ChatItem = memo(
         >
           <Checkbox checked={isSelected} className="pointer-events-none" />
           <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
-            {branchOf && <IconArrowsSplit className="text-foreground" data-icon="inline-start" />}
+            {branchOf && <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />}
             <span className="min-w-0 truncate">{title}</span>
           </span>
         </Button>
@@ -168,7 +216,7 @@ export const ChatItem = memo(
                   <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
                     <ChatStatusIndicator chatId={id} />
                     {branchOf && (
-                      <IconArrowsSplit className="text-foreground" data-icon="inline-start" />
+                      <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />
                     )}
                     <span className="min-w-0 truncate">{title}</span>
                   </span>

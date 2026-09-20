@@ -588,6 +588,11 @@ export const VirtualizedChatList = ({
                       id={row.chat.id}
                       title={row.chat.title}
                       branchOf={row.chat.branchOf}
+                      branchParentTitle={
+                        row.chat.branchOf
+                          ? chats.find((c) => c.id === row.chat.branchOf)?.title
+                          : undefined
+                      }
                       snippet={row.chat.snippet}
                       additionalOnChatClickCallback={additionalOnChatClickCallback}
                       selectionMode={selectionMode}
