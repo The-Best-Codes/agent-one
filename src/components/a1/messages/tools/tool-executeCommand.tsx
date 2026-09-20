@@ -24,6 +24,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
+// TODO: Remove this? main.tsx sets up the global provider already
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import {
