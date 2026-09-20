@@ -4,6 +4,7 @@ import {
   IconDotsVertical,
   IconDownload,
   IconEdit,
+  IconClockPlay,
   IconTrash,
 } from "@tabler/icons-react";
 import { memo, useState, type ReactNode } from "react";
@@ -117,6 +118,25 @@ function BranchIcon({
   );
 }
 
+function ScheduledAgentIcon({ title }: { title: string }) {
+  return (
+    <AdaptiveTooltip>
+      <AdaptiveTooltipTrigger asChild>
+        <span
+          className="inline-flex shrink-0"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+        >
+          <IconClockPlay className="text-foreground" />
+        </span>
+      </AdaptiveTooltipTrigger>
+      <AdaptiveTooltipContent side="top">Scheduled via “{title}”</AdaptiveTooltipContent>
+    </AdaptiveTooltip>
+  );
+}
+
 interface ChatItemProps {
   activeChatId?: string;
   additionalOnChatClickCallback?: (id: string) => void;
@@ -124,6 +144,7 @@ interface ChatItemProps {
   title: string;
   branchOf?: string;
   branchParentTitle?: string;
+  scheduledAgentTitle?: string;
   snippet?: string;
   selectionMode?: boolean;
   isSelected?: boolean;
@@ -139,6 +160,7 @@ export const ChatItem = memo(
     title,
     branchOf,
     branchParentTitle,
+    scheduledAgentTitle,
     snippet,
     selectionMode,
     isSelected,
@@ -165,6 +187,7 @@ export const ChatItem = memo(
           <Checkbox checked={isSelected} className="pointer-events-none" />
           <span className="flex min-w-0 items-center gap-1.5 text-sm font-normal">
             {branchOf && <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />}
+            {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
             <span className="min-w-0 truncate">{title}</span>
           </span>
         </Button>
@@ -218,6 +241,7 @@ export const ChatItem = memo(
                     {branchOf && (
                       <BranchIcon branchOf={branchOf} branchParentTitle={branchParentTitle} />
                     )}
+                    {scheduledAgentTitle && <ScheduledAgentIcon title={scheduledAgentTitle} />}
                     <span className="min-w-0 truncate">{title}</span>
                   </span>
                   {snippet && (

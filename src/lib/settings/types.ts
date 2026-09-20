@@ -234,7 +234,11 @@ export type ToolId =
   | "subAgent"
   | "listSettings"
   | "getSetting"
-  | "updateSetting";
+  | "updateSetting"
+  | "listScheduledAgents"
+  | "createScheduledAgent"
+  | "updateScheduledAgent"
+  | "deleteScheduledAgent";
 
 export interface DateTimeToolConfig {
   requiresApproval: boolean;
@@ -309,6 +313,10 @@ export interface UpdateSettingToolConfig {
   requiresApproval: boolean;
 }
 
+export interface ScheduledAgentToolConfig {
+  requiresApproval: boolean;
+}
+
 export interface ToolConfigs {
   dateTime: DateTimeToolConfig;
   waitNumberMilliseconds: WaitToolConfig;
@@ -325,6 +333,10 @@ export interface ToolConfigs {
   listSettings: ListSettingsToolConfig;
   getSetting: GetSettingToolConfig;
   updateSetting: UpdateSettingToolConfig;
+  listScheduledAgents: ScheduledAgentToolConfig;
+  createScheduledAgent: ScheduledAgentToolConfig;
+  updateScheduledAgent: ScheduledAgentToolConfig;
+  deleteScheduledAgent: ScheduledAgentToolConfig;
 }
 
 type ApiKeySettings = Record<ProviderStorageKey, string>;
@@ -477,6 +489,10 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     listSettings: true,
     getSetting: true,
     updateSetting: true,
+    listScheduledAgents: true,
+    createScheduledAgent: true,
+    updateScheduledAgent: true,
+    deleteScheduledAgent: true,
   },
   TOOL_CONFIGS: {
     dateTime: {
@@ -537,6 +553,10 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
     updateSetting: {
       requiresApproval: true,
     },
+    listScheduledAgents: { requiresApproval: false },
+    createScheduledAgent: { requiresApproval: true },
+    updateScheduledAgent: { requiresApproval: true },
+    deleteScheduledAgent: { requiresApproval: true },
   },
   MCP_SERVERS: [],
   MCP_PARALLEL_LOAD_LIMIT: 8,

@@ -17,8 +17,28 @@ const CRON_STATE_FILE_NAME: &str = "crons.json";
 pub struct Cron {
     pub id: String,
     pub schedule: String,
-    pub message: Option<String>,
     pub enabled: bool,
+    #[serde(flatten)]
+    pub kind: CronKind,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(
+    tag = "type",
+    rename_all = "kebab-case",
+    rename_all_fields = "camelCase"
+)]
+pub enum CronKind {
+    CronTest {
+        message: Option<String>,
+    },
+    ScheduledAgent {
+        title: String,
+        prompt: String,
+        model_id: Option<String>,
+        model_config: Option<serde_json::Value>,
+        delay_cutoff_seconds: Option<i64>,
+    },
 }
 
 #[derive(Deserialize, Serialize)]
@@ -30,13 +50,17 @@ struct CronState {
 #[serde(rename_all = "camelCase")]
 pub struct CronInvocation {
     pub id: String,
-    pub message: Option<String>,
     pub delay_seconds: i64,
+    #[serde(flatten)]
+    pub kind: CronKind,
 }
 
 #[tauri::command]
 pub fn list_crons(app: tauri::AppHandle) -> Result<Vec<Cron>, String> {
-    read_crons(&app)
+    Ok(read_crons(&app)?
+        .into_iter()
+        .filter(|cron| matches!(cron.kind, CronKind::CronTest { .. }))
+        .collect())
 }
 
 #[tauri::command]
@@ -49,8 +73,10 @@ pub fn create_cron(
     let cron = Cron {
         id: Uuid::new_v4().to_string(),
         schedule,
-        message: normalize_message(message),
         enabled: true,
+        kind: CronKind::CronTest {
+            message: normalize_message(message),
+        },
     };
 
     let mut crons = read_crons(&app)?;
@@ -78,8 +104,10 @@ pub fn update_cron(
     let updated = Cron {
         id,
         schedule,
-        message: normalize_message(message),
         enabled: previous.enabled,
+        kind: CronKind::CronTest {
+            message: normalize_message(message),
+        },
     };
 
     if updated.enabled {
@@ -164,11 +192,140 @@ pub fn get_cron_invocation(
         .find_previous_occurrence(&now, true)
         .map_err(|error| format!("Failed to calculate the cron occurrence: {error}"))?;
 
+    let delay_seconds = (now - scheduled_at).num_seconds().max(0);
+    if let CronKind::ScheduledAgent {
+        delay_cutoff_seconds: Some(cutoff),
+        ..
+    } = &cron.kind
+    {
+        if delay_seconds > *cutoff {
+            return Ok(None);
+        }
+    }
+
     Ok(Some(CronInvocation {
         id: cron.id.clone(),
-        message: cron.message.clone(),
-        delay_seconds: (now - scheduled_at).num_seconds().max(0),
+        delay_seconds,
+        kind: cron.kind.clone(),
     }))
+}
+
+#[tauri::command]
+pub fn list_scheduled_agents(app: tauri::AppHandle) -> Result<Vec<Cron>, String> {
+    Ok(read_crons(&app)?
+        .into_iter()
+        .filter(|cron| matches!(cron.kind, CronKind::ScheduledAgent { .. }))
+        .collect())
+}
+
+#[tauri::command]
+pub fn create_scheduled_agent(
+    app: tauri::AppHandle,
+    title: String,
+    schedule: String,
+    prompt: String,
+) -> Result<Cron, String> {
+    let cron = Cron {
+        id: Uuid::new_v4().to_string(),
+        schedule: normalize_schedule(&schedule)?,
+        enabled: true,
+        kind: CronKind::ScheduledAgent {
+            title: normalize_required("Title", title)?,
+            prompt: normalize_required("Prompt", prompt)?,
+            model_id: None,
+            model_config: None,
+            delay_cutoff_seconds: None,
+        },
+    };
+    let mut crons = read_crons(&app)?;
+    install_cron(&cron)?;
+    crons.push(cron.clone());
+    if let Err(error) = write_crons(&app, &crons) {
+        let _ = remove_cron(&cron.id);
+        return Err(error);
+    }
+    Ok(cron)
+}
+
+#[tauri::command]
+pub fn update_scheduled_agent(
+    app: tauri::AppHandle,
+    id: String,
+    title: String,
+    schedule: String,
+    prompt: String,
+) -> Result<Cron, String> {
+    let schedule = normalize_schedule(&schedule)?;
+    let mut crons = read_crons(&app)?;
+    let index = find_cron_index(&crons, &id)?;
+    let previous = crons[index].clone();
+    let CronKind::ScheduledAgent {
+        model_id,
+        model_config,
+        delay_cutoff_seconds,
+        ..
+    } = &previous.kind
+    else {
+        return Err(format!("Cron \"{id}\" is not a scheduled agent"));
+    };
+    let updated = Cron {
+        id,
+        schedule,
+        enabled: previous.enabled,
+        kind: CronKind::ScheduledAgent {
+            title: normalize_required("Title", title)?,
+            prompt: normalize_required("Prompt", prompt)?,
+            model_id: model_id.clone(),
+            model_config: model_config.clone(),
+            delay_cutoff_seconds: *delay_cutoff_seconds,
+        },
+    };
+    if updated.enabled {
+        install_cron(&updated)?;
+    }
+    crons[index] = updated.clone();
+    if let Err(error) = write_crons(&app, &crons) {
+        if updated.enabled {
+            let _ = install_cron(&previous);
+        }
+        return Err(error);
+    }
+    Ok(updated)
+}
+
+#[tauri::command]
+pub fn set_scheduled_agent_enabled(
+    app: tauri::AppHandle,
+    id: String,
+    enabled: bool,
+) -> Result<Cron, String> {
+    ensure_scheduled_agent(&app, &id)?;
+    set_cron_enabled(app, id, enabled)
+}
+
+#[tauri::command]
+pub fn delete_scheduled_agent(app: tauri::AppHandle, id: String) -> Result<(), String> {
+    ensure_scheduled_agent(&app, &id)?;
+    delete_cron(app, id)
+}
+
+fn ensure_scheduled_agent(app: &tauri::AppHandle, id: &str) -> Result<(), String> {
+    let crons = read_crons(app)?;
+    let index = find_cron_index(&crons, id)?;
+    if matches!(crons[index].kind, CronKind::ScheduledAgent { .. }) {
+        Ok(())
+    } else {
+        Err(format!("Cron \"{id}\" is not a scheduled agent"))
+    }
+}
+
+fn normalize_required(label: &str, value: String) -> Result<String, String> {
+    let value = value.trim().to_string();
+    if value.is_empty() {
+        Err(format!("{label} is required"))
+    } else {
+        Ok(value)
+    }
 }
 
 fn normalize_schedule(value: &str) -> Result<String, String> {

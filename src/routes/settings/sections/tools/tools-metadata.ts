@@ -83,6 +83,26 @@ export const TOOL_INFO: Record<ToolId, ToolInfo> = {
     description: "Update a setting key's value",
     anchor: "update-setting",
   },
+  listScheduledAgents: {
+    name: "List scheduled agents",
+    description: "View scheduled agents and their configuration",
+    anchor: "list-scheduled-agents",
+  },
+  createScheduledAgent: {
+    name: "Create scheduled agent",
+    description: "Create an agent that runs on a schedule",
+    anchor: "create-scheduled-agent",
+  },
+  updateScheduledAgent: {
+    name: "Update scheduled agent",
+    description: "Change an existing scheduled agent",
+    anchor: "update-scheduled-agent",
+  },
+  deleteScheduledAgent: {
+    name: "Delete scheduled agent",
+    description: "Permanently delete a scheduled agent",
+    anchor: "delete-scheduled-agent",
+  },
 };
 
 export interface ToolGroup {
@@ -116,6 +136,16 @@ export const TOOL_GROUPS: ToolGroup[] = [
     title: "AgentOne Settings",
     description: "Let AgentOne inspect and update your AgentOne settings.",
     toolIds: ["listSettings", "getSetting", "updateSetting"],
+  },
+  {
+    title: "Scheduled Agents",
+    description: "Let AgentOne view and manage scheduled agents.",
+    toolIds: [
+      "listScheduledAgents",
+      "createScheduledAgent",
+      "updateScheduledAgent",
+      "deleteScheduledAgent",
+    ],
   },
 ];
 
@@ -153,6 +183,22 @@ export function getMergedToolConfigs(toolConfigs: ToolConfigs): ToolConfigs {
     updateSetting: {
       ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateSetting,
       ...toolConfigs.updateSetting,
+    },
+    listScheduledAgents: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.listScheduledAgents,
+      ...toolConfigs.listScheduledAgents,
+    },
+    createScheduledAgent: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.createScheduledAgent,
+      ...toolConfigs.createScheduledAgent,
+    },
+    updateScheduledAgent: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.updateScheduledAgent,
+      ...toolConfigs.updateScheduledAgent,
+    },
+    deleteScheduledAgent: {
+      ...DEFAULT_SETTINGS.TOOL_CONFIGS.deleteScheduledAgent,
+      ...toolConfigs.deleteScheduledAgent,
     },
   };
 }

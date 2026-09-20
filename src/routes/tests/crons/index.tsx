@@ -36,7 +36,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createCron,
-  type Cron,
+  type CronTest,
   deleteCron,
   listCrons,
   setCronEnabled,
@@ -47,8 +47,8 @@ const DEFAULT_SCHEDULE = "0 19 * * *";
 
 export default function CronsTestRoute() {
   const navigate = useNavigate();
-  const [crons, setCrons] = useState<Cron[]>([]);
-  const [editingCron, setEditingCron] = useState<Cron | null>(null);
+  const [crons, setCrons] = useState<CronTest[]>([]);
+  const [editingCron, setEditingCron] = useState<CronTest | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
   const [message, setMessage] = useState("");
@@ -80,7 +80,7 @@ export default function CronsTestRoute() {
     setDialogOpen(true);
   };
 
-  const openEditDialog = (cron: Cron) => {
+  const openEditDialog = (cron: CronTest) => {
     setEditingCron(cron);
     setSchedule(cron.schedule);
     setMessage(cron.message ?? "");
@@ -108,7 +108,7 @@ export default function CronsTestRoute() {
     }
   };
 
-  const changeEnabled = async (cron: Cron, enabled: boolean) => {
+  const changeEnabled = async (cron: CronTest, enabled: boolean) => {
     setBusyId(cron.id);
     try {
       const updated = await setCronEnabled(cron.id, enabled);
@@ -121,7 +121,7 @@ export default function CronsTestRoute() {
     }
   };
 
-  const removeCron = async (cron: Cron) => {
+  const removeCron = async (cron: CronTest) => {
     setBusyId(cron.id);
     try {
       await deleteCron(cron.id);

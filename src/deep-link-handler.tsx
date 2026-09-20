@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import deepLinkSchema from "@/assets/deep-links/schema.json";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { getCronInvocation } from "@/lib/cron";
 import { getLogger } from "@/lib/logger";
 
@@ -29,6 +30,7 @@ function getDeepLinkMeta(id: string): { version: number; allowNoVersion: boolean
 
 export function DeepLinkHandler() {
   const navigate = useNavigate();
+  const { programmaticNewChat } = useChatFunctions();
   const initialDeepLinkHandledRef = useRef(false);
   const [handledDeepLink, setHandledDeepLink] = useAtom(handledDeepLinkAtom);
 
@@ -147,10 +149,17 @@ export function DeepLinkHandler() {
           void getCronInvocation(id)
             .then((invocation) => {
               if (!invocation) return;
-              toast(`Cron ${invocation.id} invoked`, {
-                description: `Message: ${invocation.message ?? "No message"}. Delay: ${
-                  invocation.delaySeconds
-                } seconds.`,
+              if (invocation.type === "cron-test") {
+                toast(`Cron ${invocation.id} invoked`, {
+                  description: `Message: ${invocation.message ?? "No message"}. Delay: ${invocation.delaySeconds} seconds.`,
+                });
+                return;
+              }
+              void programmaticNewChat({
+                message: invocation.prompt,
+                modelId: invocation.modelId,
+                modelConfig: invocation.modelConfig,
+                scheduledAgent: { id: invocation.id, title: invocation.title },
               });
             })
             .catch((error) => {
@@ -168,7 +177,7 @@ export function DeepLinkHandler() {
       disposed = true;
       unlisten?.();
     };
-  }, [navigate, handledDeepLink, setHandledDeepLink]);
+  }, [navigate, handledDeepLink, setHandledDeepLink, programmaticNewChat]);
 
   return null;
 }

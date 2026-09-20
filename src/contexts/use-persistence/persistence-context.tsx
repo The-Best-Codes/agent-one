@@ -19,6 +19,8 @@ export interface ChatMetadata {
   modelId?: string;
   modelConfig?: ModelConfig;
   branchOf?: string;
+  scheduledAgentId?: string;
+  scheduledAgentTitle?: string;
   createdAt?: number;
   updatedAt?: number;
 }
@@ -33,7 +35,11 @@ export interface PersistenceContextType {
   saveNewChatModelId: (modelId: string) => void;
   getNewChatModelConfig: () => ModelConfig;
   saveNewChatModelConfig: (config: ModelConfig) => void;
-  createChat: (modelId: string, modelConfig?: ModelConfig) => string;
+  createChat: (
+    modelId: string,
+    modelConfig?: ModelConfig,
+    provenance?: { scheduledAgentId: string; scheduledAgentTitle: string },
+  ) => string;
   loadChatMessages: (id: string) => Promise<UIMessage[]>;
   loadChatMetadata: (id: string) => ChatMetadata;
   loadFullChatData: (id: string) => Promise<ChatData>;
@@ -67,6 +73,8 @@ function getDefaultMetadata(): ChatMetadata {
     modelId: undefined,
     modelConfig: undefined,
     branchOf: undefined,
+    scheduledAgentId: undefined,
+    scheduledAgentTitle: undefined,
     createdAt: undefined,
     updatedAt: undefined,
   };
@@ -211,7 +219,11 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, []);
 
   const createChat = useCallback(
-    (modelId: string, modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG) => {
+    (
+      modelId: string,
+      modelConfig: ModelConfig = DEFAULT_MODEL_CONFIG,
+      provenance?: { scheduledAgentId: string; scheduledAgentTitle: string },
+    ) => {
       const id = generateId();
       const metadata = createTimestampedMetadata({
         title: "New chat",
@@ -219,6 +231,7 @@ export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ childre
         modelId,
         modelConfig,
         branchOf: undefined,
+        ...provenance,
       });
       setMetadata(id, metadata);
       persistMetadata(id, metadata);

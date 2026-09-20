@@ -110,6 +110,14 @@ pub fn run() {
                             sql: include_str!("../migrations/0006_add_chat_timestamps.sql"),
                             kind: tauri_plugin_sql::MigrationKind::Up,
                         },
+                        tauri_plugin_sql::Migration {
+                            version: 7,
+                            description: "add_scheduled_agent_chat_metadata",
+                            sql: include_str!(
+                                "../migrations/0007_add_scheduled_agent_chat_metadata.sql"
+                            ),
+                            kind: tauri_plugin_sql::MigrationKind::Up,
+                        },
                     ],
                 )
                 .build(),
@@ -179,6 +187,11 @@ pub fn run() {
                     utils::set_cron_enabled,
                     utils::delete_cron,
                     utils::get_cron_invocation,
+                    utils::list_scheduled_agents,
+                    utils::create_scheduled_agent,
+                    utils::update_scheduled_agent,
+                    utils::set_scheduled_agent_enabled,
+                    utils::delete_scheduled_agent,
                     utils::list_webviews,
                     utils::force_close_webview,
                     keyring::storage_get_item,

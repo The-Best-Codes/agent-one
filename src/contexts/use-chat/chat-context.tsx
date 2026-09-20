@@ -31,6 +31,27 @@ const logger = getLogger(import.meta.url);
 
 type ChatInstanceCollection = Map<string, ChatInstanceHelpers>;
 
+function isValidModelConfig(value: ModelConfig | null | undefined): value is ModelConfig {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const numericKeys: (keyof ModelConfig)[] = [
+    "temperature",
+    "maxTokens",
+    "maxSteps",
+    "topP",
+    "topK",
+    "frequencyPenalty",
+    "presencePenalty",
+    "seed",
+  ];
+  if (numericKeys.some((key) => value[key] !== undefined && typeof value[key] !== "number")) {
+    return false;
+  }
+  return (
+    value.toolBehavior === undefined ||
+    ["default", "ask", "yolo", "disable"].includes(value.toolBehavior)
+  );
+}
+
 function getDefaultChatMetadata(): ChatMetadata {
   return {
     title: "New chat",
@@ -38,6 +59,8 @@ function getDefaultChatMetadata(): ChatMetadata {
     modelId: undefined,
     modelConfig: undefined,
     branchOf: undefined,
+    scheduledAgentId: undefined,
+    scheduledAgentTitle: undefined,
   };
 }
 
@@ -346,6 +369,44 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [navigate, defaultChat.sendMessage, focusedModel?.id, focusedModelConfig],
   );
 
+  const programmaticNewChat = useCallback(
+    async ({
+      message,
+      modelId,
+      modelConfig,
+      scheduledAgent,
+    }: {
+      message: string;
+      modelId?: string | null;
+      modelConfig?: ModelConfig | null;
+      scheduledAgent?: { id: string; title: string };
+    }) => {
+      const trimmedMessage = message.trim();
+      if (!trimmedMessage) return null;
+      const requestedModel = modelId ? getModelById(modelId) : undefined;
+      const model = requestedModel ?? defaultModelForNewChats;
+      if (!model) return null;
+      const config = isValidModelConfig(modelConfig) ? modelConfig : defaultModelConfigForNewChats;
+      const newChatId = createChat(
+        model.id,
+        config,
+        scheduledAgent
+          ? {
+              scheduledAgentId: scheduledAgent.id,
+              scheduledAgentTitle: scheduledAgent.title,
+            }
+          : undefined,
+      );
+      loadedMessagesRef.current.set(newChatId, []);
+      setChatMessagesLoaded((prev) => new Set(prev).add(newChatId));
+      void navigate(`/chat/${newChatId}`, {
+        state: { pendingMessage: { message: { text: trimmedMessage } } },
+      });
+      return newChatId;
+    },
+    [createChat, defaultModelConfigForNewChats, defaultModelForNewChats, getModelById, navigate],
+  );
+
   const isNewChat = !currentChatId;
   const focusedChatInstance = currentChatId
     ? chatInstancesRef.current.get(currentChatId)
@@ -494,6 +555,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       stop,
       setMessages,
       updateMcpAppModelContext,
+      programmaticNewChat,
     }),
     [
       isNewChat,
@@ -507,6 +569,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       stop,
       setMessages,
       updateMcpAppModelContext,
+      programmaticNewChat,
     ],
   );
 

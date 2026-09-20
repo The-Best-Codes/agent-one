@@ -14,3 +14,9 @@ export { createWikipediaTool } from "./wikipedia";
 export { createListSettingsTool } from "./listSettings";
 export { createGetSettingTool } from "./getSetting";
 export { createUpdateSettingTool } from "./updateSetting";
+export {
+  createCreateScheduledAgentTool,
+  createDeleteScheduledAgentTool,
+  createListScheduledAgentsTool,
+  createUpdateScheduledAgentTool,
+} from "./scheduledAgents";

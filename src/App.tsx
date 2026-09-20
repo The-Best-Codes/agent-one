@@ -21,6 +21,7 @@ import ExtensionsRoute from "@/routes/extensions";
 import IndexRoute from "@/routes/index";
 import NotFoundRoute from "@/routes/not-found";
 import OnboardingRoute from "@/routes/onboarding";
+import ScheduledAgentsRoute from "@/routes/scheduled-agents";
 import SettingsRoute from "@/routes/settings";
 
 const TestsRoute = lazy(() => import("@/routes/tests"));
@@ -38,6 +39,7 @@ import { KbdRegistry } from "./kbd-shortcuts";
 function AppLayout() {
   return (
     <MultiChatProvider>
+      <DeepLinkHandler />
       {/* This essentially lets MultiChatProvider wrap all the <Route> components while being a child of <Routes> */}
       <Outlet />
     </MultiChatProvider>
@@ -75,7 +77,6 @@ function App() {
       <ModelDirectoryStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
-      <DeepLinkHandler />
       <ReleaseNotesDialog />
       <UpdateAvailableDialog />
       <ReactScan />
@@ -88,6 +89,7 @@ function App() {
           <Route path="/onboarding" element={<OnboardingRoute />} />
           <Route path="/extensions" element={<ExtensionsRoute />} />
           <Route path="/settings" element={<SettingsRoute />} />
+          <Route path="/scheduled-agents" element={<ScheduledAgentsRoute />} />
           <Route
             element={
               <Suspense
