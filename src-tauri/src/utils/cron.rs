@@ -64,7 +64,15 @@ pub fn list_crons(app: tauri::AppHandle) -> Result<Vec<Cron>, String> {
 }
 
 #[tauri::command]
-pub fn create_cron(
+pub async fn create_cron(
+    app: tauri::AppHandle,
+    schedule: String,
+    message: Option<String>,
+) -> Result<Cron, String> {
+    run_blocking(move || create_cron_blocking(app, schedule, message)).await
+}
+
+fn create_cron_blocking(
     app: tauri::AppHandle,
     schedule: String,
     message: Option<String>,
@@ -91,7 +99,16 @@ pub fn create_cron(
 }
 
 #[tauri::command]
-pub fn update_cron(
+pub async fn update_cron(
+    app: tauri::AppHandle,
+    id: String,
+    schedule: String,
+    message: Option<String>,
+) -> Result<Cron, String> {
+    run_blocking(move || update_cron_blocking(app, id, schedule, message)).await
+}
+
+fn update_cron_blocking(
     app: tauri::AppHandle,
     id: String,
     schedule: String,
@@ -126,7 +143,19 @@ pub fn update_cron(
 }
 
 #[tauri::command]
-pub fn set_cron_enabled(app: tauri::AppHandle, id: String, enabled: bool) -> Result<Cron, String> {
+pub async fn set_cron_enabled(
+    app: tauri::AppHandle,
+    id: String,
+    enabled: bool,
+) -> Result<Cron, String> {
+    run_blocking(move || set_cron_enabled_blocking(app, id, enabled)).await
+}
+
+fn set_cron_enabled_blocking(
+    app: tauri::AppHandle,
+    id: String,
+    enabled: bool,
+) -> Result<Cron, String> {
     let mut crons = read_crons(&app)?;
     let index = find_cron_index(&crons, &id)?;
     let previous = crons[index].clone();
@@ -155,7 +184,11 @@ pub fn set_cron_enabled(app: tauri::AppHandle, id: String, enabled: bool) -> Res
 }
 
 #[tauri::command]
-pub fn delete_cron(app: tauri::AppHandle, id: String) -> Result<(), String> {
+pub async fn delete_cron(app: tauri::AppHandle, id: String) -> Result<(), String> {
+    run_blocking(move || delete_cron_blocking(app, id)).await
+}
+
+fn delete_cron_blocking(app: tauri::AppHandle, id: String) -> Result<(), String> {
     let mut crons = read_crons(&app)?;
     let index = find_cron_index(&crons, &id)?;
     let cron = crons[index].clone();
@@ -219,7 +252,16 @@ pub fn list_scheduled_agents(app: tauri::AppHandle) -> Result<Vec<Cron>, String>
 }
 
 #[tauri::command]
-pub fn create_scheduled_agent(
+pub async fn create_scheduled_agent(
+    app: tauri::AppHandle,
+    title: String,
+    schedule: String,
+    prompt: String,
+) -> Result<Cron, String> {
+    run_blocking(move || create_scheduled_agent_blocking(app, title, schedule, prompt)).await
+}
+
+fn create_scheduled_agent_blocking(
     app: tauri::AppHandle,
     title: String,
     schedule: String,
@@ -248,7 +290,17 @@ pub fn create_scheduled_agent(
 }
 
 #[tauri::command]
-pub fn update_scheduled_agent(
+pub async fn update_scheduled_agent(
+    app: tauri::AppHandle,
+    id: String,
+    title: String,
+    schedule: String,
+    prompt: String,
+) -> Result<Cron, String> {
+    run_blocking(move || update_scheduled_agent_blocking(app, id, title, schedule, prompt)).await
+}
+
+fn update_scheduled_agent_blocking(
     app: tauri::AppHandle,
     id: String,
     title: String,
@@ -294,19 +346,35 @@ pub fn update_scheduled_agent(
 }
 
 #[tauri::command]
-pub fn set_scheduled_agent_enabled(
+pub async fn set_scheduled_agent_enabled(
     app: tauri::AppHandle,
     id: String,
     enabled: bool,
 ) -> Result<Cron, String> {
-    ensure_scheduled_agent(&app, &id)?;
-    set_cron_enabled(app, id, enabled)
+    run_blocking(move || {
+        ensure_scheduled_agent(&app, &id)?;
+        set_cron_enabled_blocking(app, id, enabled)
+    })
+    .await
 }
 
 #[tauri::command]
-pub fn delete_scheduled_agent(app: tauri::AppHandle, id: String) -> Result<(), String> {
-    ensure_scheduled_agent(&app, &id)?;
-    delete_cron(app, id)
+pub async fn delete_scheduled_agent(app: tauri::AppHandle, id: String) -> Result<(), String> {
+    run_blocking(move || {
+        ensure_scheduled_agent(&app, &id)?;
+        delete_cron_blocking(app, id)
+    })
+    .await
+}
+
+async fn run_blocking<T, F>(operation: F) -> Result<T, String>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+{
+    tokio::task::spawn_blocking(operation)
+        .await
+        .map_err(|error| format!("Cron operation task failed: {error}"))?
 }
 
 fn ensure_scheduled_agent(app: &tauri::AppHandle, id: &str) -> Result<(), String> {
