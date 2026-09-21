@@ -1,7 +1,7 @@
 import {
   IconLayoutSidebar,
   IconPlus,
-  IconRobot,
+  IconClock,
   IconPuzzle,
   IconSearch,
   IconSettings,
@@ -98,15 +98,15 @@ const SidebarContent = ({
 
       <div className="border-sidebar-border flex flex-col gap-2 pt-2">
         <Button variant="outline" className="w-full justify-start" asChild>
-          <Link to="/scheduled-agents">
-            <IconRobot data-icon="inline-start" />
-            Scheduled Agents
-          </Link>
-        </Button>
-        <Button variant="outline" className="w-full justify-start" asChild>
           <Link to={`/extensions${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
             <IconPuzzle data-icon="inline-start" />
             Browse Extensions
+          </Link>
+        </Button>
+        <Button variant="outline" className="w-full justify-start" asChild>
+          <Link to={`/scheduled-agents${activeChatId ? `?chatId=${activeChatId}` : ""}`}>
+            <IconClock data-icon="inline-start" />
+            Scheduled Agents
           </Link>
         </Button>
         <Button variant="outline" className="w-full justify-start" asChild>

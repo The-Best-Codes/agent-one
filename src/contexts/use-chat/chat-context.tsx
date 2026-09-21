@@ -31,27 +31,6 @@ const logger = getLogger(import.meta.url);
 
 type ChatInstanceCollection = Map<string, ChatInstanceHelpers>;
 
-function isValidModelConfig(value: ModelConfig | null | undefined): value is ModelConfig {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-  const numericKeys: (keyof ModelConfig)[] = [
-    "temperature",
-    "maxTokens",
-    "maxSteps",
-    "topP",
-    "topK",
-    "frequencyPenalty",
-    "presencePenalty",
-    "seed",
-  ];
-  if (numericKeys.some((key) => value[key] !== undefined && typeof value[key] !== "number")) {
-    return false;
-  }
-  return (
-    value.toolBehavior === undefined ||
-    ["default", "ask", "yolo", "disable"].includes(value.toolBehavior)
-  );
-}
-
 function getDefaultChatMetadata(): ChatMetadata {
   return {
     title: "New chat",
@@ -345,6 +324,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     defaultModelForNewChats?.id ?? null,
     defaultModelConfigForNewChats,
   );
+  const pendingProgrammaticMessagesRef = useRef(
+    new Map<string, { message: Parameters<typeof defaultChat.sendMessage>[0] }>(),
+  );
 
   const handleNewChatSubmit = useCallback(
     (
@@ -386,7 +368,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       const requestedModel = modelId ? getModelById(modelId) : undefined;
       const model = requestedModel ?? defaultModelForNewChats;
       if (!model) return null;
-      const config = isValidModelConfig(modelConfig) ? modelConfig : defaultModelConfigForNewChats;
+      const config = modelConfig ?? defaultModelConfigForNewChats;
       const newChatId = createChat(
         model.id,
         config,
@@ -398,10 +380,11 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
           : undefined,
       );
       loadedMessagesRef.current.set(newChatId, []);
-      setChatMessagesLoaded((prev) => new Set(prev).add(newChatId));
-      void navigate(`/chat/${newChatId}`, {
-        state: { pendingMessage: { message: { text: trimmedMessage } } },
+      pendingProgrammaticMessagesRef.current.set(newChatId, {
+        message: { text: trimmedMessage },
       });
+      setChatMessagesLoaded((prev) => new Set(prev).add(newChatId));
+      void navigate(`/chat/${newChatId}`);
       return newChatId;
     },
     [createChat, defaultModelConfigForNewChats, defaultModelForNewChats, getModelById, navigate],
@@ -432,6 +415,14 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [location.state, location.pathname, navigate, focusedChatInstance?.status, currentChatId]);
+
+  useEffect(() => {
+    if (!currentChatId || focusedChatInstance?.status !== "ready") return;
+    const pending = pendingProgrammaticMessagesRef.current.get(currentChatId);
+    if (!pending) return;
+    pendingProgrammaticMessagesRef.current.delete(currentChatId);
+    void focusedChatInstance.sendMessage(pending.message);
+  }, [currentChatId, focusedChatInstance]);
 
   const currentMessages = currentChatId
     ? (stableFocusedChatInstance?.messages ?? [])

@@ -1,8 +1,16 @@
-import { IconClock, IconPlus, IconRobot, IconTrash } from "@tabler/icons-react";
+import {
+  IconAlertCircle,
+  IconArrowLeft,
+  IconClock,
+  IconPlus,
+  IconRobot,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useNavigate, useSearchParams } from "react-router";
 
 import { SearchInput } from "@/components/a1/search-input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,6 +35,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -46,19 +55,22 @@ function AgentEditor({
   onSaved,
   onDelete,
   onToggle,
+  onError,
 }: {
   agent: ScheduledAgent;
   busy: boolean;
   onSaved: (agent: ScheduledAgent) => void;
   onDelete: () => void;
   onToggle: (enabled: boolean) => void;
+  onError: (message: string) => void;
 }) {
   const [title, setTitle] = useState(agent.title);
   const [schedule, setSchedule] = useState(agent.schedule);
   const [prompt, setPrompt] = useState(agent.prompt);
   const [saving, setSaving] = useState(false);
+  const disabled = busy || saving;
   const dirty = title !== agent.title || schedule !== agent.schedule || prompt !== agent.prompt;
-  const valid = title.trim() && schedule.trim() && prompt.trim();
+  const valid = Boolean(title.trim() && schedule.trim() && prompt.trim());
 
   const reset = () => {
     setTitle(agent.title);
@@ -67,7 +79,7 @@ function AgentEditor({
   };
 
   const save = async () => {
-    if (!valid || saving) return;
+    if (!valid || disabled) return;
     setSaving(true);
     try {
       const updated = await updateScheduledAgent(agent.id, title, schedule, prompt);
@@ -75,28 +87,34 @@ function AgentEditor({
       setTitle(updated.title);
       setSchedule(updated.schedule);
       setPrompt(updated.prompt);
-      toast.success("Scheduled agent updated.");
     } catch (error) {
-      toast.error(`Failed to update scheduled agent: ${String(error)}`);
+      onError(`Failed to update scheduled agent: ${String(error)}`);
     } finally {
       setSaving(false);
     }
   };
 
-  const disabled = busy || saving;
-
   return (
-    <AccordionItem value={agent.id} className="rounded-lg border px-4">
-      <AccordionTrigger aria-disabled={busy} className="no-underline hover:no-underline">
-        <div className="flex min-w-0 flex-col items-start gap-1">
-          <span className="truncate">{agent.title}</span>
-          <span className="text-muted-foreground flex items-center gap-1 font-mono text-xs font-normal">
-            <IconClock className="size-3.5" />
-            {agent.schedule}
+    <AccordionItem value={agent.id}>
+      <AccordionTrigger className="px-1 py-2 hover:no-underline">
+        <div className="flex flex-1 items-center justify-between gap-2 pr-2">
+          <span className="flex min-w-0 flex-col items-start gap-1">
+            <span className="truncate">{agent.title}</span>
+            <span className="text-muted-foreground flex items-center gap-1 font-mono text-xs font-normal">
+              <IconClock className="size-3.5" />
+              {agent.schedule}
+            </span>
           </span>
+          <Switch
+            checked={agent.enabled}
+            onCheckedChange={onToggle}
+            onClick={(event) => event.stopPropagation()}
+            disabled={disabled}
+            aria-label={agent.enabled ? `Disable ${agent.title}` : `Enable ${agent.title}`}
+          />
         </div>
       </AccordionTrigger>
-      <AccordionContent>
+      <AccordionContent className="overflow-auto px-1 pb-3">
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor={`title-${agent.id}`}>Title</FieldLabel>
@@ -104,6 +122,7 @@ function AgentEditor({
               id={`title-${agent.id}`}
               value={title}
               onChange={(event) => setTitle(event.target.value)}
+              placeholder="e.g., Daily email summary"
               disabled={disabled}
             />
           </Field>
@@ -113,6 +132,7 @@ function AgentEditor({
               id={`schedule-${agent.id}`}
               value={schedule}
               onChange={(event) => setSchedule(event.target.value)}
+              placeholder="e.g., 0 7 * * *"
               disabled={disabled}
               autoComplete="off"
             />
@@ -123,34 +143,23 @@ function AgentEditor({
               id={`prompt-${agent.id}`}
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
+              placeholder="e.g., Summarize the unread emails in my inbox."
               disabled={disabled}
               rows={5}
             />
           </Field>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={agent.enabled}
-                onCheckedChange={onToggle}
-                disabled={disabled}
-                aria-label={agent.enabled ? `Disable ${agent.title}` : `Enable ${agent.title}`}
-              />
-              <span className="text-muted-foreground text-sm">
-                {agent.enabled ? "Enabled" : "Disabled"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="destructive" size="sm" onClick={onDelete} disabled={disabled}>
-                <IconTrash data-icon="inline-start" />
-                Delete
-              </Button>
-              <Button variant="outline" size="sm" onClick={reset} disabled={disabled || !dirty}>
-                Cancel
-              </Button>
-              <Button size="sm" onClick={() => void save()} disabled={disabled || !dirty || !valid}>
-                Save
-              </Button>
-            </div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button variant="destructive" size="sm" onClick={onDelete} disabled={disabled}>
+              <IconTrash data-icon="inline-start" />
+              Delete
+            </Button>
+            <Button variant="outline" size="sm" onClick={reset} disabled={disabled || !dirty}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={() => void save()} disabled={disabled || !dirty || !valid}>
+              {saving ? <Spinner data-icon="inline-start" /> : null}
+              {saving ? "Saving" : "Save"}
+            </Button>
           </div>
         </FieldGroup>
       </AccordionContent>
@@ -159,6 +168,8 @@ function AgentEditor({
 }
 
 export default function ScheduledAgentsRoute() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [agents, setAgents] = useState<ScheduledAgent[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -169,17 +180,22 @@ export default function ScheduledAgentsRoute() {
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
   const [prompt, setPrompt] = useState("");
   const [creating, setCreating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     void listScheduledAgents()
       .then(setAgents)
-      .catch((error) => toast.error(`Failed to load scheduled agents: ${String(error)}`))
+      .catch((error) => setErrorMessage(`Failed to load scheduled agents: ${String(error)}`))
       .finally(() => setLoading(false));
   }, []);
 
   const filtered = agents.filter((agent) =>
     `${agent.title} ${agent.schedule} ${agent.prompt}`.toLowerCase().includes(query.toLowerCase()),
   );
+  const handleNavigateBack = () => {
+    const chatId = searchParams.get("chatId");
+    void navigate(chatId ? `/chat/${chatId}` : "/chat");
+  };
 
   const create = async () => {
     if (!title.trim() || !schedule.trim() || !prompt.trim() || creating) return;
@@ -191,9 +207,8 @@ export default function ScheduledAgentsRoute() {
       setTitle("");
       setSchedule(DEFAULT_SCHEDULE);
       setPrompt("");
-      toast.success("Scheduled agent created.");
     } catch (error) {
-      toast.error(`Failed to create scheduled agent: ${String(error)}`);
+      setErrorMessage(`Failed to create scheduled agent: ${String(error)}`);
     } finally {
       setCreating(false);
     }
@@ -205,7 +220,7 @@ export default function ScheduledAgentsRoute() {
       const updated = await setScheduledAgentEnabled(agent.id, enabled);
       setAgents((current) => current.map((item) => (item.id === agent.id ? updated : item)));
     } catch (error) {
-      toast.error(`Failed to change scheduled agent state: ${String(error)}`);
+      setErrorMessage(`Failed to change scheduled agent state: ${String(error)}`);
     } finally {
       setBusyId(null);
     }
@@ -218,66 +233,76 @@ export default function ScheduledAgentsRoute() {
       await deleteScheduledAgent(deleteTarget.id);
       setAgents((current) => current.filter((agent) => agent.id !== deleteTarget.id));
       setDeleteTarget(null);
-      toast.success("Scheduled agent deleted.");
     } catch (error) {
-      toast.error(`Failed to delete scheduled agent: ${String(error)}`);
+      setErrorMessage(`Failed to delete scheduled agent: ${String(error)}`);
     } finally {
       setBusyId(null);
     }
   };
 
   return (
-    <main className="container mx-auto flex max-w-4xl flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-2xl font-bold">Scheduled Agents</h1>
-        <p className="text-muted-foreground mt-1">
-          Run AgentOne automatically on a recurring schedule.
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        <SearchInput
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search scheduled agents"
-          containerClassName="flex-1"
-        />
-        <Button onClick={() => setCreateOpen(true)} disabled={loading}>
-          <IconPlus data-icon="inline-start" />
-          New
+    <main className="flex h-svh min-h-0 flex-col" role="main">
+      <header className="bg-background sticky top-0 z-10 flex items-center gap-3 border-b p-4">
+        <Button variant="outline" size="sm" onClick={handleNavigateBack}>
+          <IconArrowLeft data-icon="inline-start" />
+          Back
         </Button>
+        <h1 className="text-base font-semibold">Scheduled Agents</h1>
+      </header>
+      <div className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-4 overflow-auto p-4 md:p-6">
+        {errorMessage ? (
+          <Alert variant="destructive">
+            <IconAlertCircle />
+            <AlertTitle>Something went wrong</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        ) : null}
+        <div className="flex items-center gap-2">
+          <SearchInput
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search scheduled agents"
+            containerClassName="flex-1"
+          />
+          <Button onClick={() => setCreateOpen(true)} disabled={loading}>
+            <IconPlus data-icon="inline-start" />
+            New
+          </Button>
+        </div>
+        {!loading && filtered.length === 0 ? (
+          <Empty className="border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <IconRobot />
+              </EmptyMedia>
+              <EmptyTitle>
+                {query ? "No matching scheduled agents" : "No scheduled agents yet"}
+              </EmptyTitle>
+              <EmptyDescription>
+                {query ? "Try a different search." : "Create one to run an agent automatically."}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <Accordion type="single" collapsible>
+            {filtered.map((agent) => (
+              <AgentEditor
+                key={agent.id}
+                agent={agent}
+                busy={busyId === agent.id}
+                onToggle={(enabled) => void toggle(agent, enabled)}
+                onDelete={() => setDeleteTarget(agent)}
+                onSaved={(updated) =>
+                  setAgents((current) =>
+                    current.map((item) => (item.id === updated.id ? updated : item)),
+                  )
+                }
+                onError={setErrorMessage}
+              />
+            ))}
+          </Accordion>
+        )}
       </div>
-      {!loading && filtered.length === 0 ? (
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <IconRobot />
-            </EmptyMedia>
-            <EmptyTitle>
-              {query ? "No matching scheduled agents" : "No scheduled agents yet"}
-            </EmptyTitle>
-            <EmptyDescription>
-              {query ? "Try a different search." : "Create one to run an agent automatically."}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <Accordion type="single" collapsible className="flex flex-col gap-3">
-          {filtered.map((agent) => (
-            <AgentEditor
-              key={agent.id}
-              agent={agent}
-              busy={busyId === agent.id}
-              onToggle={(enabled) => void toggle(agent, enabled)}
-              onDelete={() => setDeleteTarget(agent)}
-              onSaved={(updated) =>
-                setAgents((current) =>
-                  current.map((item) => (item.id === updated.id ? updated : item)),
-                )
-              }
-            />
-          ))}
-        </Accordion>
-      )}
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
@@ -292,6 +317,7 @@ export default function ScheduledAgentsRoute() {
                 id="new-agent-title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
+                placeholder="e.g., Daily email summary"
                 disabled={creating}
               />
             </Field>
@@ -301,6 +327,7 @@ export default function ScheduledAgentsRoute() {
                 id="new-agent-schedule"
                 value={schedule}
                 onChange={(event) => setSchedule(event.target.value)}
+                placeholder="e.g., 0 7 * * *"
                 disabled={creating}
                 autoComplete="off"
               />
@@ -311,6 +338,7 @@ export default function ScheduledAgentsRoute() {
                 id="new-agent-prompt"
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
+                placeholder="e.g., Summarize the unread emails in my inbox."
                 disabled={creating}
                 rows={5}
               />
@@ -324,7 +352,8 @@ export default function ScheduledAgentsRoute() {
               onClick={() => void create()}
               disabled={creating || !title.trim() || !schedule.trim() || !prompt.trim()}
             >
-              Create
+              {creating ? <Spinner data-icon="inline-start" /> : null}
+              {creating ? "Creating" : "Create"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -348,7 +377,8 @@ export default function ScheduledAgentsRoute() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={() => void remove()} disabled={busyId !== null}>
-              Delete
+              {busyId !== null ? <Spinner data-icon="inline-start" /> : null}
+              {busyId !== null ? "Deleting" : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
