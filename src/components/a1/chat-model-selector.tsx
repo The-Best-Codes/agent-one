@@ -36,9 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { InputGroupButton } from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
-import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import { type ModelData, useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { CHAT_LOADING_DELAY_MS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -357,9 +355,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [capabilityFilters, setCapabilityFilters] = useState<ModelCapability[]>([]);
   const parentRef = useRef<HTMLDivElement>(null);
-  const { AVAILABLE_ENABLED_CHAT_MODELS } = useModelCatalog();
-  const { isApiKeysLoading } = useApiKeys();
-  const { user, isLoading: isAuthLoading, customerState } = useWebAuth();
+  const { AVAILABLE_ENABLED_CHAT_MODELS, isModelCatalogLoading } = useModelCatalog();
 
   if (!loading && staleModel !== currentModel) {
     setStaleModel(currentModel);
@@ -507,12 +503,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
 
   const modelLabel = displayedModel ? `Model: ${displayedModel.name}` : "No model";
 
-  if (
-    isApiKeysLoading ||
-    isAuthLoading ||
-    (Boolean(user) && !customerState) ||
-    shouldShowLoadingSkeleton
-  ) {
+  if (isModelCatalogLoading || shouldShowLoadingSkeleton) {
     return <Skeleton className={cn("h-8 w-full border border-border", className)} />;
   }
 

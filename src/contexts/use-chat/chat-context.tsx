@@ -65,7 +65,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
   const [chatIds] = useAtom(chatIdsAtom);
   const setChatStatusIndicators = useSetAtom(chatStatusIndicatorsAtom);
-  const { getModelById } = useModelCatalog();
+  const { getModelById, getChatModelById, isModelCatalogLoading } = useModelCatalog();
 
   // TODO: Should this use useParams from react router instead?
   const currentChatId = useMemo(() => {
@@ -327,6 +327,17 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const pendingProgrammaticMessagesRef = useRef(
     new Map<string, { message: Parameters<typeof defaultChat.sendMessage>[0] }>(),
   );
+  const queuedProgrammaticChatsRef = useRef<
+    Array<{
+      params: {
+        message: string;
+        modelId?: string | null;
+        modelConfig?: ModelConfig | null;
+        scheduledAgent?: { id: string; title: string };
+      };
+      resolve: (chatId: string | null) => void;
+    }>
+  >([]);
 
   const handleNewChatSubmit = useCallback(
     (
@@ -351,8 +362,8 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     [navigate, defaultChat.sendMessage, focusedModel?.id, focusedModelConfig],
   );
 
-  const programmaticNewChat = useCallback(
-    async ({
+  const createProgrammaticChat = useCallback(
+    ({
       message,
       modelId,
       modelConfig,
@@ -365,7 +376,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     }) => {
       const trimmedMessage = message.trim();
       if (!trimmedMessage) return null;
-      const requestedModel = modelId ? getModelById(modelId) : undefined;
+      const requestedModel = modelId ? getChatModelById(modelId) : undefined;
       const model = requestedModel ?? defaultModelForNewChats;
       if (!model) return null;
       const config = modelConfig ?? defaultModelConfigForNewChats;
@@ -387,8 +398,43 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       void navigate(`/chat/${newChatId}`);
       return newChatId;
     },
-    [createChat, defaultModelConfigForNewChats, defaultModelForNewChats, getModelById, navigate],
+    [
+      createChat,
+      defaultModelConfigForNewChats,
+      defaultModelForNewChats,
+      getChatModelById,
+      navigate,
+    ],
   );
+
+  const isProgrammaticChatReady = isMetadataLoaded && !isModelCatalogLoading;
+
+  const programmaticNewChat = useCallback(
+    (params: {
+      message: string;
+      modelId?: string | null;
+      modelConfig?: ModelConfig | null;
+      scheduledAgent?: { id: string; title: string };
+    }) => {
+      if (isProgrammaticChatReady) {
+        return Promise.resolve(createProgrammaticChat(params));
+      }
+
+      return new Promise<string | null>((resolve) => {
+        queuedProgrammaticChatsRef.current.push({ params, resolve });
+      });
+    },
+    [createProgrammaticChat, isProgrammaticChatReady],
+  );
+
+  useEffect(() => {
+    if (!isProgrammaticChatReady || queuedProgrammaticChatsRef.current.length === 0) return;
+
+    const queuedChats = queuedProgrammaticChatsRef.current.splice(0);
+    for (const { params, resolve } of queuedChats) {
+      resolve(createProgrammaticChat(params));
+    }
+  }, [createProgrammaticChat, isProgrammaticChatReady]);
 
   const isNewChat = !currentChatId;
   const focusedChatInstance = currentChatId
