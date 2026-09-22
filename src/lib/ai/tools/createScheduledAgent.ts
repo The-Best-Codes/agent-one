@@ -6,8 +6,7 @@ import type { ScheduledAgentToolConfig } from "@/lib/settings/types";
 
 export const createCreateScheduledAgentTool = (config: ScheduledAgentToolConfig) =>
   tool({
-    description:
-      "Create and enable a scheduled agent using a standard five-field cron expression in the user's local timezone.",
+    description: "Create and enable a scheduled agent using a standard five-field cron expression.",
     needsApproval: config.requiresApproval,
     inputSchema: z.object({
       title: z.string().min(1).describe("A concise, descriptive title."),
