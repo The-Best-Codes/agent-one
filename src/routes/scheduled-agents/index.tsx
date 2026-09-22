@@ -4,6 +4,7 @@ import {
   IconClock,
   IconPlus,
   IconRobot,
+  IconSparkles,
   IconTrash,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -175,6 +176,7 @@ export default function ScheduledAgentsRoute() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [manualCreate, setManualCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ScheduledAgent | null>(null);
   const [title, setTitle] = useState("");
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE);
@@ -195,6 +197,17 @@ export default function ScheduledAgentsRoute() {
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
     void navigate(chatId ? `/chat/${chatId}` : "/chat");
+  };
+
+  const openCreateDialog = () => {
+    setManualCreate(false);
+    setCreateOpen(true);
+  };
+
+  const askAgentOneToCreate = () => {
+    const initialMessage =
+      "Create a scheduled agent for me. Ask me questions to understand what I need, then create it.";
+    void navigate(`/chat?initialMessage=${encodeURIComponent(initialMessage)}`);
   };
 
   const create = async () => {
@@ -264,7 +277,7 @@ export default function ScheduledAgentsRoute() {
             placeholder="Search scheduled agents"
             containerClassName="flex-1"
           />
-          <Button onClick={() => setCreateOpen(true)} disabled={loading}>
+          <Button onClick={openCreateDialog} disabled={loading}>
             <IconPlus data-icon="inline-start" />
             New
           </Button>
@@ -308,54 +321,72 @@ export default function ScheduledAgentsRoute() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>New scheduled agent</DialogTitle>
-            <DialogDescription>Choose when it runs and what the agent should do.</DialogDescription>
+            <DialogDescription>
+              {manualCreate
+                ? "Choose when it runs and what the agent should do."
+                : "Tell AgentOne what you want to automate and it will help set it up."}
+            </DialogDescription>
           </DialogHeader>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="new-agent-title">Title</FieldLabel>
-              <Input
-                id="new-agent-title"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="e.g., Daily email summary"
-                disabled={creating}
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="new-agent-schedule">Cron schedule</FieldLabel>
-              <Input
-                id="new-agent-schedule"
-                value={schedule}
-                onChange={(event) => setSchedule(event.target.value)}
-                placeholder="e.g., 0 7 * * *"
-                disabled={creating}
-                autoComplete="off"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="new-agent-prompt">Prompt</FieldLabel>
-              <Textarea
-                id="new-agent-prompt"
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                placeholder="e.g., Summarize the unread emails in my inbox."
-                disabled={creating}
-                rows={5}
-              />
-            </Field>
-          </FieldGroup>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => void create()}
-              disabled={creating || !title.trim() || !schedule.trim() || !prompt.trim()}
-            >
-              {creating ? <Spinner data-icon="inline-start" /> : null}
-              {creating ? "Creating" : "Create"}
-            </Button>
-          </DialogFooter>
+          {manualCreate ? (
+            <>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="new-agent-title">Title</FieldLabel>
+                  <Input
+                    id="new-agent-title"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder="e.g., Daily email summary"
+                    disabled={creating}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-agent-schedule">Cron schedule</FieldLabel>
+                  <Input
+                    id="new-agent-schedule"
+                    value={schedule}
+                    onChange={(event) => setSchedule(event.target.value)}
+                    placeholder="e.g., 0 7 * * *"
+                    disabled={creating}
+                    autoComplete="off"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-agent-prompt">Prompt</FieldLabel>
+                  <Textarea
+                    id="new-agent-prompt"
+                    value={prompt}
+                    onChange={(event) => setPrompt(event.target.value)}
+                    placeholder="e.g., Summarize the unread emails in my inbox."
+                    disabled={creating}
+                    rows={5}
+                  />
+                </Field>
+              </FieldGroup>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={creating}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => void create()}
+                  disabled={creating || !title.trim() || !schedule.trim() || !prompt.trim()}
+                >
+                  {creating ? <Spinner data-icon="inline-start" /> : null}
+                  {creating ? "Creating" : "Create"}
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <Button onClick={askAgentOneToCreate} size="lg">
+                <IconSparkles data-icon="inline-start" />
+                Ask AgentOne to create it
+              </Button>
+              <Button variant="link" onClick={() => setManualCreate(true)}>
+                or enter manually
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
