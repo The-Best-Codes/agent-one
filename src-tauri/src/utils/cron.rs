@@ -5,12 +5,14 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::{Arc, OnceLock};
 use tauri::Manager;
 use tempfile::NamedTempFile;
 use uuid::Uuid;
 
 // TODO: Later on, probably migrate this to the kv table that already exists in the AgentOne DB?
 const CRON_STATE_FILE_NAME: &str = "crons.json";
+static CRON_MUTATION_LOCK: OnceLock<Arc<tokio::sync::Mutex<()>>> = OnceLock::new();
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -372,9 +374,14 @@ where
     T: Send + 'static,
     F: FnOnce() -> Result<T, String> + Send + 'static,
 {
-    tokio::task::spawn_blocking(operation)
-        .await
-        .map_err(|error| format!("Cron operation task failed: {error}"))?
+    let lock = CRON_MUTATION_LOCK.get_or_init(|| Arc::new(tokio::sync::Mutex::new(())));
+    let guard = lock.clone().lock_owned().await;
+    tokio::task::spawn_blocking(move || {
+        let _guard = guard;
+        operation()
+    })
+    .await
+    .map_err(|error| format!("Cron operation task failed: {error}"))?
 }
 
 fn ensure_scheduled_agent(app: &tauri::AppHandle, id: &str) -> Result<(), String> {
