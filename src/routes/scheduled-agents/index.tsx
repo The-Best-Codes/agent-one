@@ -284,7 +284,7 @@ export default function ScheduledAgentsRoute() {
             </EmptyHeader>
           </Empty>
         ) : (
-          <Accordion type="single" collapsible>
+          <Accordion className="rounded-md border px-2" type="single" collapsible>
             {filtered.map((agent) => (
               <AgentEditor
                 key={agent.id}
