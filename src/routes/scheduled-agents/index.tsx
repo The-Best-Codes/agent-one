@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
+import { ScheduledAgentSchedule } from "@/components/a1/scheduled-agent-schedule";
 import { SearchInput } from "@/components/a1/search-input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -103,7 +104,7 @@ function AgentEditor({
             <span className="truncate">{agent.title}</span>
             <span className="text-muted-foreground flex items-center gap-1 font-mono text-xs font-normal">
               <IconClock className="size-3.5" />
-              {agent.schedule}
+              <ScheduledAgentSchedule cron={agent.schedule} />
             </span>
           </span>
           <Switch

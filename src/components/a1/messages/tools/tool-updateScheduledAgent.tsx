@@ -8,6 +8,7 @@ import {
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
+import { ScheduledAgentSchedule } from "@/components/a1/scheduled-agent-schedule";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -35,9 +36,7 @@ const Detail = ({ input }: { input: UpdateScheduledAgentInput }) => (
     {input.schedule && (
       <div className="flex flex-col gap-0.5">
         <span className="text-muted-foreground text-sm">Schedule</span>
-        <code className="bg-secondary text-foreground rounded px-2 py-1 font-mono text-xs break-all">
-          {input.schedule}
-        </code>
+        <ScheduledAgentSchedule cron={input.schedule} className="text-foreground w-fit text-sm" />
       </div>
     )}
     {typeof input.enabled === "boolean" && (

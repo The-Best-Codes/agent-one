@@ -2,6 +2,7 @@ import { IconCalendar, IconChevronDown, IconCircleX, IconList } from "@tabler/ic
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
+import { ScheduledAgentSchedule } from "@/components/a1/scheduled-agent-schedule";
 import {
   Accordion,
   AccordionContent,
@@ -136,10 +137,10 @@ export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart 
                       <span className="text-foreground truncate text-sm font-bold">
                         {agent.title ?? agent.id ?? `Agent ${index + 1}`}
                       </span>
-                      <span className="text-muted-foreground font-mono text-xs break-all">
-                        {[agent.schedule, agent.enabled === false ? "disabled" : null]
-                          .filter(Boolean)
-                          .join(" · ")}
+                      <span className="text-muted-foreground flex flex-wrap items-center gap-1 text-xs">
+                        {agent.schedule && (
+                          <ScheduledAgentSchedule cron={agent.schedule} className="w-fit" />
+                        )}
                       </span>
                     </div>
                   </div>
