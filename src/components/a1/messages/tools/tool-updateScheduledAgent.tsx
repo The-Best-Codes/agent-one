@@ -32,29 +32,9 @@ interface UpdateScheduledAgentInput {
 
 const Detail = ({ input }: { input: UpdateScheduledAgentInput }) => (
   <div className="flex w-full flex-col gap-2">
-    {input.id && (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          ID
-        </span>
-        <code className="bg-secondary text-foreground rounded px-2 py-1 font-mono text-xs break-all">
-          {input.id}
-        </code>
-      </div>
-    )}
-    {input.title && (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          Title
-        </span>
-        <span className="text-foreground text-sm wrap-break-word">{input.title}</span>
-      </div>
-    )}
     {input.schedule && (
       <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          Schedule (cron)
-        </span>
+        <span className="text-muted-foreground text-sm">Schedule</span>
         <code className="bg-secondary text-foreground rounded px-2 py-1 font-mono text-xs break-all">
           {input.schedule}
         </code>
@@ -62,17 +42,13 @@ const Detail = ({ input }: { input: UpdateScheduledAgentInput }) => (
     )}
     {typeof input.enabled === "boolean" && (
       <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          Enabled
-        </span>
+        <span className="text-muted-foreground text-sm">Enabled</span>
         <span className="text-foreground text-sm">{input.enabled ? "true" : "false"}</span>
       </div>
     )}
     {input.prompt && (
       <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          Prompt
-        </span>
+        <span className="text-muted-foreground text-sm">Prompt</span>
         <span className="text-foreground text-sm wrap-break-word whitespace-pre-wrap">
           {input.prompt}
         </span>
@@ -91,7 +67,7 @@ export const MessagePartToolUpdateScheduledAgent = ({ part }: { part: ToolUIPart
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
   const shortLabel = input.title ? ` “${input.title}”` : input.id ? ` “${input.id}”` : "";
-  const merged: UpdateScheduledAgentInput = { ...input, ...(output ?? {}) };
+  const merged: UpdateScheduledAgentInput = output ? { ...input, ...output } : { ...input };
   const doneLabel = output?.title ? ` “${output.title}”` : shortLabel;
 
   switch (part.state) {

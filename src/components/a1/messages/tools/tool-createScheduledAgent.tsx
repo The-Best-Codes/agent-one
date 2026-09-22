@@ -30,19 +30,9 @@ interface CreateScheduledAgentInput {
 
 const Detail = ({ input }: { input: CreateScheduledAgentInput }) => (
   <div className="flex w-full flex-col gap-2">
-    {input.title && (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          Title
-        </span>
-        <span className="text-foreground text-sm wrap-break-word">{input.title}</span>
-      </div>
-    )}
     {input.schedule && (
       <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          Schedule (cron)
-        </span>
+        <span className="text-muted-foreground text-sm">Schedule</span>
         <code className="bg-secondary text-foreground rounded px-2 py-1 font-mono text-xs break-all">
           {input.schedule}
         </code>
@@ -50,9 +40,7 @@ const Detail = ({ input }: { input: CreateScheduledAgentInput }) => (
     )}
     {input.prompt && (
       <div className="flex flex-col gap-0.5">
-        <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-          Prompt
-        </span>
+        <span className="text-muted-foreground text-sm">Prompt</span>
         <span className="text-foreground text-sm wrap-break-word whitespace-pre-wrap">
           {input.prompt}
         </span>
@@ -71,7 +59,7 @@ export const MessagePartToolCreateScheduledAgent = ({ part }: { part: ToolUIPart
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
   const shortTitle = input.title ? ` “${input.title}”` : "";
-  const merged: CreateScheduledAgentInput = { ...input, ...(output ?? {}) };
+  const merged: CreateScheduledAgentInput = output ? { ...input, ...output } : { ...input };
   const doneTitle = output?.title ? ` “${output.title}”` : shortTitle;
 
   switch (part.state) {
