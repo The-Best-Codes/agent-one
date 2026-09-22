@@ -132,7 +132,7 @@ function ScheduledAgentIcon({ title }: { title: string }) {
           <IconClockPlay className="text-foreground" />
         </span>
       </AdaptiveTooltipTrigger>
-      <AdaptiveTooltipContent side="top">Scheduled via “{title}”</AdaptiveTooltipContent>
+      <AdaptiveTooltipContent side="top">Scheduled via "{title}"</AdaptiveTooltipContent>
     </AdaptiveTooltip>
   );
 }

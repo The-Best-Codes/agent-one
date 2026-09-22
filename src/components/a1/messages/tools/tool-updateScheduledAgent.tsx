@@ -66,9 +66,9 @@ export const MessagePartToolUpdateScheduledAgent = ({ part }: { part: ToolUIPart
   const [isApproveOpen, setIsApproveOpen] = useState<boolean | undefined>();
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
-  const shortLabel = input.title ? ` “${input.title}”` : input.id ? ` “${input.id}”` : "";
+  const shortLabel = input.title ? ` "${input.title}"` : input.id ? ` "${input.id}"` : "";
   const merged: UpdateScheduledAgentInput = output ? { ...input, ...output } : { ...input };
-  const doneLabel = output?.title ? ` “${output.title}”` : shortLabel;
+  const doneLabel = output?.title ? ` "${output.title}"` : shortLabel;
 
   switch (part.state) {
     case "approval-requested":

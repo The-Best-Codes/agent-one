@@ -364,7 +364,7 @@ export default function ScheduledAgentsRoute() {
           <DialogHeader>
             <DialogTitle>Delete scheduled agent?</DialogTitle>
             <DialogDescription>
-              This permanently deletes “{deleteTarget?.title}”. Chats it already created will remain
+              This permanently deletes "{deleteTarget?.title}". Chats it already created will remain
               available.
             </DialogDescription>
           </DialogHeader>

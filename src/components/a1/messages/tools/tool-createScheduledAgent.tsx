@@ -58,9 +58,9 @@ export const MessagePartToolCreateScheduledAgent = ({ part }: { part: ToolUIPart
   const [isApproveOpen, setIsApproveOpen] = useState<boolean | undefined>();
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
-  const shortTitle = input.title ? ` “${input.title}”` : "";
+  const shortTitle = input.title ? ` "${input.title}"` : "";
   const merged: CreateScheduledAgentInput = output ? { ...input, ...output } : { ...input };
-  const doneTitle = output?.title ? ` “${output.title}”` : shortTitle;
+  const doneTitle = output?.title ? ` "${output.title}"` : shortTitle;
 
   switch (part.state) {
     case "approval-requested":

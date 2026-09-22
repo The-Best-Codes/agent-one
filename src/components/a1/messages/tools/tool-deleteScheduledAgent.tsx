@@ -11,6 +11,7 @@ import { ToolErrorAccordion } from "./tool-error-accordion";
 
 interface DeleteScheduledAgentInput {
   id?: string;
+  title?: string;
 }
 
 export const MessagePartToolDeleteScheduledAgent = ({ part }: { part: ToolUIPart }) => {
@@ -19,7 +20,7 @@ export const MessagePartToolDeleteScheduledAgent = ({ part }: { part: ToolUIPart
   const approvalHandler = useChatApprovalHandler();
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
-  const shortLabel = input.id ? ` “${input.id}”` : "";
+  const shortLabel = input.title ? ` "${input.title}"` : input.id ? ` "${input.id}"` : "";
 
   switch (part.state) {
     case "approval-requested":
@@ -34,11 +35,6 @@ export const MessagePartToolDeleteScheduledAgent = ({ part }: { part: ToolUIPart
               {`AgentOne wants to delete scheduled agent${shortLabel}`}
             </span>
           </div>
-          {input.id && (
-            <code className="bg-secondary text-foreground rounded px-2 py-1 font-mono text-xs break-all">
-              {input.id}
-            </code>
-          )}
           <div className="flex items-center justify-end gap-2">
             <Button
               size="sm"
