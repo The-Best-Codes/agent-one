@@ -11,7 +11,6 @@ import { getCronInvocation } from "@/lib/cron";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
-const recentDeepLinks = new Map<string, number>();
 
 const handledDeepLinkAtom = atomWithStorage<string | null>(
   "agent-one-handled-deeplink",
@@ -68,10 +67,6 @@ export function DeepLinkHandler() {
 
     const handleDeepLink = (url: string) => {
       try {
-        const now = Date.now();
-        const lastHandledAt = recentDeepLinks.get(url);
-        if (lastHandledAt !== undefined && now - lastHandledAt < 2_000) return;
-        recentDeepLinks.set(url, now);
         const urlObj = new URL(url);
         const deepLinkId = [urlObj.hostname, urlObj.pathname.replace(/^\/+/, "")]
           .filter(Boolean)
