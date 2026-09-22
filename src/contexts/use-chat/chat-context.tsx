@@ -210,7 +210,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
       } else {
         chatInstancesRef.current.delete(id);
       }
-      if (id === currentChatId) {
+      if (id === currentChatId || pendingProgrammaticMessagesRef.current.has(id)) {
         forceUpdate();
       }
     },
@@ -293,6 +293,9 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
     const newActiveIds = new Set<string>();
     if (currentChatId) {
       newActiveIds.add(currentChatId);
+    }
+    for (const id of pendingProgrammaticMessagesRef.current.keys()) {
+      newActiveIds.add(id);
     }
 
     chatInstancesRef.current.forEach((instance, id) => {
@@ -463,12 +466,13 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [location.state, location.pathname, navigate, focusedChatInstance?.status, currentChatId]);
 
   useEffect(() => {
-    if (!currentChatId || focusedChatInstance?.status !== "ready") return;
-    const pending = pendingProgrammaticMessagesRef.current.get(currentChatId);
-    if (!pending) return;
-    pendingProgrammaticMessagesRef.current.delete(currentChatId);
-    void focusedChatInstance.sendMessage(pending.message);
-  }, [currentChatId, focusedChatInstance]);
+    for (const [id, pending] of pendingProgrammaticMessagesRef.current) {
+      const instance = chatInstancesRef.current.get(id);
+      if (instance?.status !== "ready") continue;
+      pendingProgrammaticMessagesRef.current.delete(id);
+      void instance.sendMessage(pending.message);
+    }
+  }, [activeChatIds, updateKey]);
 
   const currentMessages = currentChatId
     ? (stableFocusedChatInstance?.messages ?? [])
