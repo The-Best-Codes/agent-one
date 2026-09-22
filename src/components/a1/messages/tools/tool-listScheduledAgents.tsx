@@ -1,8 +1,16 @@
-import { IconCalendar, IconChevronDown, IconCircleX, IconList } from "@tabler/icons-react";
+import {
+  IconCalendar,
+  IconChevronDown,
+  IconCircleCheck,
+  IconCircleX,
+  IconList,
+  IconX,
+} from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
 import { ScheduledAgentSchedule } from "@/components/a1/scheduled-agent-schedule";
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -10,6 +18,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/native/accordion";
 import { Spinner } from "@/components/ui/spinner";
+import { useChatApprovalHandler } from "@/contexts/use-chat/chat-hooks";
 import { TOOL_CANCELLED_BY_USER_SYMBOL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -37,15 +46,36 @@ const parseOutput = (output: unknown): ScheduledAgentSummary[] => {
 export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart }) => {
   const callId = part.toolCallId;
   const output = part.output as unknown;
+  const approvalHandler = useChatApprovalHandler();
   const [isMainOpen, setIsMainOpen] = useState<boolean | undefined>();
   const [isErrorOpen, setIsErrorOpen] = useState<boolean | undefined>();
 
   switch (part.state) {
     case "approval-requested":
       return (
-        <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <IconList className="text-foreground size-4 shrink-0" />
-          <span>AgentOne wants to list scheduled agents</span>
+        <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
+          <div className="flex items-center gap-1 text-sm font-bold">
+            <IconList className="text-foreground size-4 shrink-0" />
+            <span>AgentOne wants to list scheduled agents</span>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: false })}
+            >
+              <IconX data-icon="inline-start" />
+              Deny
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => approvalHandler?.({ id: part.approval.id, approved: true })}
+            >
+              <IconCircleCheck data-icon="inline-start" />
+              Approve
+            </Button>
+          </div>
         </div>
       );
     case "output-denied":
