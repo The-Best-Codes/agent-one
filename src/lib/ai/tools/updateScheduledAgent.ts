@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { listScheduledAgents, setScheduledAgentEnabled, updateScheduledAgent } from "@/lib/cron";
+import { describeSchedule } from "@/lib/cron-schedule";
 import type { ScheduledAgentToolConfig } from "@/lib/settings/types";
 
 export const createUpdateScheduledAgentTool = (config: ScheduledAgentToolConfig) =>
@@ -31,6 +32,6 @@ export const createUpdateScheduledAgentTool = (config: ScheduledAgentToolConfig)
       if (enabled !== undefined && enabled !== updated.enabled) {
         updated = await setScheduledAgentEnabled(id, enabled);
       }
-      return updated;
+      return { ...updated, scheduleInfo: describeSchedule(updated.schedule) };
     },
   });

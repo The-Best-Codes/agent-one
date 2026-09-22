@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { createScheduledAgent } from "@/lib/cron";
+import { describeSchedule } from "@/lib/cron-schedule";
 import type { ScheduledAgentToolConfig } from "@/lib/settings/types";
 
 export const createCreateScheduledAgentTool = (config: ScheduledAgentToolConfig) =>
@@ -13,5 +14,8 @@ export const createCreateScheduledAgentTool = (config: ScheduledAgentToolConfig)
       schedule: z.string().min(1).describe("A standard five-field cron expression."),
       prompt: z.string().min(1).describe("The complete prompt sent to the agent on each run."),
     }),
-    execute: ({ title, schedule, prompt }) => createScheduledAgent(title, schedule, prompt),
+    execute: async ({ title, schedule, prompt }) => {
+      const agent = await createScheduledAgent(title, schedule, prompt);
+      return { ...agent, scheduleInfo: describeSchedule(agent.schedule) };
+    },
   });
