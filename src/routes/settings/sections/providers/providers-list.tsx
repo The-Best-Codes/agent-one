@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/empty";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Accordion } from "@/components/ui/native/accordion";
 import {
   Select,
   SelectContent,
@@ -54,6 +53,7 @@ import {
   CustomProviderListItem,
   LocalProviderListItem,
 } from "./provider-list-item";
+import { VirtualizedProviderList } from "./virtualized-provider-list";
 
 export function ProvidersList() {
   const [builtInSearchQuery, setBuiltInSearchQuery] = useState("");
@@ -182,23 +182,22 @@ export function ProvidersList() {
             />
 
             {filteredBuiltInProviders.length > 0 ? (
-              <Accordion
-                type="single"
-                collapsible
-                className="w-full"
+              <VirtualizedProviderList
+                items={filteredBuiltInProviders}
+                getKey={(provider) => provider.id}
+                label="Built-in providers"
+                searchQuery={normalizedBuiltInQuery}
                 value={openBuiltInItem}
                 onValueChange={handleBuiltInOpenChange}
-              >
-                {filteredBuiltInProviders.map((provider) => (
+                renderItem={(provider) => (
                   <BuiltInProviderListItem
-                    key={provider.id}
                     providerId={provider.id}
                     label={provider.label}
                     hasEnvKey={hasEnvKey(provider.id)}
                     onOpenChange={setOpenBuiltInItem}
                   />
-                ))}
-              </Accordion>
+                )}
+              />
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
                 No built-in providers found.
@@ -229,21 +228,17 @@ export function ProvidersList() {
             />
 
             {filteredLocalProviderIds.length > 0 ? (
-              <Accordion
-                type="single"
-                collapsible
-                className="w-full"
+              <VirtualizedProviderList
+                items={filteredLocalProviderIds}
+                getKey={(providerId) => providerId}
+                label="Local providers"
+                searchQuery={normalizedLocalQuery}
                 value={openLocalItem}
                 onValueChange={handleLocalOpenChange}
-              >
-                {filteredLocalProviderIds.map((providerId) => (
-                  <LocalProviderListItem
-                    key={providerId}
-                    providerId={providerId}
-                    onOpenChange={setOpenLocalItem}
-                  />
-                ))}
-              </Accordion>
+                renderItem={(providerId) => (
+                  <LocalProviderListItem providerId={providerId} onOpenChange={setOpenLocalItem} />
+                )}
+              />
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
                 No local providers found.
@@ -294,22 +289,21 @@ export function ProvidersList() {
                 </EmptyContent>
               </Empty>
             ) : filteredCustomProviderIds.length > 0 ? (
-              <Accordion
-                type="single"
-                collapsible
-                className="w-full"
+              <VirtualizedProviderList
+                items={filteredCustomProviderIds}
+                getKey={(providerId) => providerId}
+                label="Custom providers"
+                searchQuery={normalizedCustomQuery}
                 value={openCustomItem}
                 onValueChange={handleCustomOpenChange}
-              >
-                {filteredCustomProviderIds.map((providerId) => (
+                renderItem={(providerId) => (
                   <CustomProviderListItem
-                    key={providerId}
                     providerId={providerId}
                     onDelete={() => handleDeleteProvider(providerId)}
                     onOpenChange={setOpenCustomItem}
                   />
-                ))}
-              </Accordion>
+                )}
+              />
             ) : (
               <p className="text-muted-foreground py-4 text-center text-sm">
                 No custom providers found.
