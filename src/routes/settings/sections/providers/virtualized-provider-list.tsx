@@ -37,8 +37,7 @@ export function VirtualizedProviderList<T>({
 
   useEffect(() => {
     parentRef.current?.scrollTo({ top: 0 });
-    virtualizer.measure();
-  }, [searchQuery, virtualizer]);
+  }, [searchQuery]);
 
   return (
     <div
