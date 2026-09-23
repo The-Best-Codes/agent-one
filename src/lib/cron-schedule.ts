@@ -22,7 +22,7 @@ export function formatScheduleDateTime(value?: string | Date | null): string {
 
 export function describeSchedule(schedule: string, now = new Date()): CronScheduleInfo {
   try {
-    const description = cronstrue.toString(schedule);
+    const description = cronstrue.toString(schedule, { verbose: true });
     const cron = new Cron(schedule);
     const nextRun = cron.nextRun(now);
     const lastRun = cron.previousRuns(1, now)[0] ?? null;

@@ -1,7 +1,6 @@
 import {
   IconAlertCircle,
   IconArrowLeft,
-  IconClock,
   IconPlus,
   IconRobot,
   IconSparkles,
@@ -103,7 +102,6 @@ function AgentEditor({
           <span className="flex min-w-0 flex-col items-start gap-1">
             <span className="truncate">{agent.title}</span>
             <span className="text-muted-foreground flex items-center gap-1 font-mono text-xs font-normal">
-              <IconClock className="size-3.5" />
               <ScheduledAgentSchedule cron={agent.schedule} />
             </span>
           </span>
