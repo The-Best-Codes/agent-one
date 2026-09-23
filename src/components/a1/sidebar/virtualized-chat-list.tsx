@@ -509,7 +509,7 @@ export const VirtualizedChatList = ({
                   <IconChevronDown />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="center" className="w-auto min-w-max">
+              <DropdownMenuContent align="end" className="w-auto min-w-max">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Search mode</DropdownMenuLabel>
                   <DropdownMenuCheckboxItem
