@@ -274,8 +274,9 @@ export const ChatItem = memo(
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             logger.verbose("Opening change title modal", {
                               chatId: id,
                               title,
@@ -288,8 +289,9 @@ export const ChatItem = memo(
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             logger.verbose("Opening export chat modal", {
                               chatId: id,
                               title,
@@ -302,8 +304,9 @@ export const ChatItem = memo(
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             logger.verbose("Opening delete chat modal", {
                               chatId: id,
                               title,
@@ -320,8 +323,9 @@ export const ChatItem = memo(
                       <DropdownMenuGroup>
                         <DropdownMenuItem
                           onClick={(e) => {
-                            e.preventDefault();
                             e.stopPropagation();
+                          }}
+                          onSelect={() => {
                             onEnterSelectionMode?.([id]);
                           }}
                         >
