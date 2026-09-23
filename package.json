@@ -81,6 +81,8 @@
     "cmdk": "^1.1.1",
     "cn": "^0.2.6",
     "consola": "^3.4.2",
+    "croner": "^10.0.1",
+    "cronstrue": "^3.27.0",
     "dedent": "^1.7.2",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",

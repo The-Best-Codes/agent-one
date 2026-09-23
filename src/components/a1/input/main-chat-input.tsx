@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
+import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useModelCatalog } from "@/hooks/ai/use-model-catalog";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
@@ -87,7 +88,8 @@ export const MainChatInput = ({
   const isChatLoading = useChatLoading();
   const { resolvedTheme } = useTheme();
   const { sendMessage, stop } = useChatFunctions();
-  const { hasAvailableModels } = useModelCatalog();
+  const { currentModel } = useModel();
+  const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
   const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
@@ -150,7 +152,7 @@ export const MainChatInput = ({
     if (disabled) {
       return;
     }
-    if (!hasAvailableModels) {
+    if (isModelCatalogLoading || !hasAvailableModels || !currentModel) {
       logger.verbose("No models available, message submission aborted");
       return;
     }
@@ -534,7 +536,12 @@ export const MainChatInput = ({
                   data-testid="attach-button"
                   type="button"
                   disabled={
-                    disabled || status !== "ready" || !hasAvailableModels || hasPendingApproval
+                    disabled ||
+                    status !== "ready" ||
+                    isModelCatalogLoading ||
+                    !hasAvailableModels ||
+                    !currentModel ||
+                    hasPendingApproval
                   }
                   size="icon"
                   variant="outline"
@@ -602,7 +609,9 @@ export const MainChatInput = ({
                       disabled ||
                       status !== "ready" ||
                       (isEmpty && !files) ||
+                      isModelCatalogLoading ||
                       !hasAvailableModels ||
+                      !currentModel ||
                       hasPendingApproval
                     }
                     analytics={{

@@ -29,6 +29,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useOverflow } from "@/hooks/use-overflow";
+import { listScheduledAgents, SCHEDULED_AGENTS_CHANGED_EVENT } from "@/lib/cron";
 import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom, sidebarChatTimeGroupingAtom } from "@/lib/jotai/settings-atoms";
@@ -45,6 +46,8 @@ interface ChatListItem {
   id: string;
   title: string;
   branchOf?: string;
+  scheduledAgentId?: string;
+  scheduledAgentTitle?: string;
   snippet?: string;
   createdAt?: number;
   updatedAt?: number;
@@ -130,6 +133,22 @@ export const VirtualizedChatList = ({
   });
   const [chatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
   const { loadChatMetadata, isMetadataLoaded, searchChats } = usePersistence();
+  const [scheduledAgentTitles, setScheduledAgentTitles] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const refresh = () => {
+      void listScheduledAgents()
+        .then((agents) =>
+          setScheduledAgentTitles(
+            Object.fromEntries(agents.map((agent) => [agent.id, agent.title])),
+          ),
+        )
+        .catch(() => {});
+    };
+    refresh();
+    window.addEventListener(SCHEDULED_AGENTS_CHANGED_EVENT, refresh);
+    return () => window.removeEventListener(SCHEDULED_AGENTS_CHANGED_EVENT, refresh);
+  }, []);
 
   const loadChats = useCallback(() => {
     if (!isMetadataLoaded) return;
@@ -142,6 +161,8 @@ export const VirtualizedChatList = ({
             id,
             title: chatMetadata?.title || `Chat ${id.slice(0, 8)}`,
             branchOf: chatMetadata?.branchOf,
+            scheduledAgentId: chatMetadata?.scheduledAgentId,
+            scheduledAgentTitle: chatMetadata?.scheduledAgentTitle,
             createdAt: chatMetadata?.createdAt,
             updatedAt: chatMetadata?.updatedAt,
           };
@@ -151,6 +172,8 @@ export const VirtualizedChatList = ({
             id,
             title: `Chat ${id.slice(0, 8)}`,
             branchOf: undefined,
+            scheduledAgentId: undefined,
+            scheduledAgentTitle: undefined,
             createdAt: undefined,
             updatedAt: undefined,
           };
@@ -591,6 +614,12 @@ export const VirtualizedChatList = ({
                       branchParentTitle={
                         row.chat.branchOf
                           ? chats.find((c) => c.id === row.chat.branchOf)?.title
+                          : undefined
+                      }
+                      scheduledAgentTitle={
+                        row.chat.scheduledAgentId
+                          ? (scheduledAgentTitles[row.chat.scheduledAgentId] ??
+                            row.chat.scheduledAgentTitle)
                           : undefined
                       }
                       snippet={row.chat.snippet}

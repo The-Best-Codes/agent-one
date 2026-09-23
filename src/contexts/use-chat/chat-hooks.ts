@@ -2,6 +2,7 @@ import type { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import { useContext } from "react";
 
 import type { ChatMetadata } from "@/contexts/use-persistence/persistence-context";
+import type { ModelConfig } from "@/hooks/ai/use-model-catalog";
 
 import {
   ChatApprovalHandlerContext,
@@ -30,6 +31,12 @@ export type ChatFunctionsContextType = Pick<
   | "setMessages"
 > & {
   updateMcpAppModelContext: (viewId: string, context: unknown) => void;
+  programmaticNewChat: (params: {
+    message: string;
+    modelId?: string | null;
+    modelConfig?: ModelConfig | null;
+    scheduledAgent?: { id: string; title: string };
+  }) => Promise<string | null>;
 };
 
 export type ChatApprovalHandler = (args: {

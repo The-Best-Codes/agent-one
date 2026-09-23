@@ -3,6 +3,7 @@ import { useAtomValue } from "jotai";
 import { atom } from "jotai";
 import { useMemo } from "react";
 
+import { useApiKeys } from "@/contexts/use-api-keys/api-keys-hooks";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
   modelDirectoryDataAtom,
@@ -403,9 +404,11 @@ export function useModelCatalog() {
   const AVAILABLE_IMAGE_MODELS = useAtomValue(availableImageModelsAtom);
   const providerHasApiKey = useAtomValue(providerHasApiKeyAtom);
   const providerIsAvailable = useAtomValue(providerIsAvailableAtom);
-  const { user, isLoading } = useWebAuth();
+  const { isApiKeysLoading } = useApiKeys();
+  const { user, isLoading, customerState } = useWebAuth();
 
   const shouldHideUnavailableAgentOneModels = isLoading || !user;
+  const isModelCatalogLoading = isApiKeysLoading || isLoading || (Boolean(user) && !customerState);
 
   const AVAILABLE_ENABLED_CHAT_MODELS = useMemo(
     () =>
@@ -468,6 +471,7 @@ export function useModelCatalog() {
     getChatModelById,
     getSmartDefaultChatModel,
     hasAvailableModels,
+    isModelCatalogLoading,
     providerHasApiKey,
     DEFAULT_MODEL_CONFIG,
     DEFAULT_CHAT_MODEL_ID,

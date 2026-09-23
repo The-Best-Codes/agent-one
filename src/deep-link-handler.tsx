@@ -1,22 +1,14 @@
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
-import { useAtom } from "jotai";
-import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import deepLinkSchema from "@/assets/deep-links/schema.json";
+import { useChatFunctions } from "@/contexts/use-chat/chat-hooks";
 import { getCronInvocation } from "@/lib/cron";
 import { getLogger } from "@/lib/logger";
 
 const logger = getLogger(import.meta.url);
-
-const handledDeepLinkAtom = atomWithStorage<string | null>(
-  "agent-one-handled-deeplink",
-  null,
-  createJSONStorage(() => sessionStorage),
-  { getOnInit: true },
-);
 
 function getDeepLinkMeta(id: string): { version: number; allowNoVersion: boolean } | null {
   const deepLink = deepLinkSchema.deepLinks.find((dl) => dl.id === id);
@@ -29,8 +21,12 @@ function getDeepLinkMeta(id: string): { version: number; allowNoVersion: boolean
 
 export function DeepLinkHandler() {
   const navigate = useNavigate();
-  const initialDeepLinkHandledRef = useRef(false);
-  const [handledDeepLink, setHandledDeepLink] = useAtom(handledDeepLinkAtom);
+  const { programmaticNewChat } = useChatFunctions();
+  const actionsRef = useRef({ navigate, programmaticNewChat });
+
+  useEffect(() => {
+    actionsRef.current = { navigate, programmaticNewChat };
+  }, [navigate, programmaticNewChat]);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -38,26 +34,25 @@ export function DeepLinkHandler() {
 
     const setupDeepLink = async () => {
       try {
-        const currentUrls = await getCurrent();
-        if (disposed) return;
-
-        if (
-          currentUrls &&
-          currentUrls.length > 0 &&
-          !initialDeepLinkHandledRef.current &&
-          currentUrls[0] !== handledDeepLink
-        ) {
-          initialDeepLinkHandledRef.current = true;
-          setHandledDeepLink(currentUrls[0]);
-          handleDeepLink(currentUrls[0]);
-        }
-
+        const urlsSeenDuringSetup = new Set<string>();
+        let loadingCurrentUrl = true;
         unlisten = await onOpenUrl((urls: string[]) => {
-          if (urls.length > 0) {
+          if (!disposed && urls.length > 0) {
+            if (loadingCurrentUrl) urlsSeenDuringSetup.add(urls[0]);
             handleDeepLink(urls[0]);
           }
         });
-        if (disposed) unlisten();
+        if (disposed) {
+          unlisten();
+          return;
+        }
+
+        const currentUrls = await getCurrent();
+        if (!disposed && currentUrls?.[0] && !urlsSeenDuringSetup.has(currentUrls[0])) {
+          handleDeepLink(currentUrls[0]);
+        }
+        loadingCurrentUrl = false;
+        urlsSeenDuringSetup.clear();
       } catch (error) {
         logger.warn("Failed to setup deep link handler:", error);
       }
@@ -107,7 +102,9 @@ export function DeepLinkHandler() {
           if (message) {
             params.set("initialMessage", message);
           }
-          void navigate(`/chat${params.size > 0 ? `?${params.toString()}` : ""}`);
+          void actionsRef.current.navigate(
+            `/chat${params.size > 0 ? `?${params.toString()}` : ""}`,
+          );
         } else if (deepLinkId === "mcp/install") {
           const name = urlObj.searchParams.get("name");
           const configParam = urlObj.searchParams.get("config");
@@ -136,7 +133,7 @@ export function DeepLinkHandler() {
             params.set("mcpUrl", config.url);
           }
 
-          void navigate(`/extensions?${params.toString()}`);
+          void actionsRef.current.navigate(`/extensions?${params.toString()}`);
         } else if (deepLinkId === "cron") {
           const id = urlObj.searchParams.get("id");
           if (!id) {
@@ -147,10 +144,17 @@ export function DeepLinkHandler() {
           void getCronInvocation(id)
             .then((invocation) => {
               if (!invocation) return;
-              toast(`Cron ${invocation.id} invoked`, {
-                description: `Message: ${invocation.message ?? "No message"}. Delay: ${
-                  invocation.delaySeconds
-                } seconds.`,
+              if (invocation.type === "cron-test") {
+                toast(`Cron ${invocation.id} invoked`, {
+                  description: `Message: ${invocation.message ?? "No message"}. Delay: ${invocation.delaySeconds} seconds.`,
+                });
+                return;
+              }
+              void actionsRef.current.programmaticNewChat({
+                message: invocation.prompt,
+                modelId: invocation.modelId,
+                modelConfig: invocation.modelConfig,
+                scheduledAgent: { id: invocation.id, title: invocation.title },
               });
             })
             .catch((error) => {
@@ -168,7 +172,7 @@ export function DeepLinkHandler() {
       disposed = true;
       unlisten?.();
     };
-  }, [navigate, handledDeepLink, setHandledDeepLink]);
+  }, []);
 
   return null;
 }
