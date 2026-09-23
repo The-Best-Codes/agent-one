@@ -116,7 +116,6 @@ export const VirtualizedChatList = ({
   // TODO: Use an atom to persist search content and raw operators settings?
   const [searchContent, setSearchContent] = useState(true);
   const [rawOperators, setRawOperators] = useState(false);
-  const [groupSearchResults, setGroupSearchResults] = useState(true);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedChatIds, setSelectedChatIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -310,11 +309,7 @@ export const VirtualizedChatList = ({
   }, [chats, searchQuery, searchResults, chatIds, searchContent]);
 
   const listRows = useMemo<ChatListRow[]>(() => {
-    const shouldGroup =
-      sidebarChatTimeGrouping === "always" ||
-      (sidebarChatTimeGrouping === "only-when-searching" &&
-        Boolean(searchQuery.trim()) &&
-        groupSearchResults);
+    const shouldGroup = sidebarChatTimeGrouping && !searchQuery.trim();
     if (!shouldGroup) {
       return filteredChats.map((chat) => ({ type: "chat", chat }));
     }
@@ -344,7 +339,7 @@ export const VirtualizedChatList = ({
       rows.push({ type: "chat", chat });
       return rows;
     });
-  }, [chatSort, filteredChats, groupSearchResults, searchQuery, sidebarChatTimeGrouping]);
+  }, [chatSort, filteredChats, searchQuery, sidebarChatTimeGrouping]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
@@ -521,12 +516,6 @@ export const VirtualizedChatList = ({
                     onCheckedChange={(checked) => setSearchContent(checked as boolean)}
                   >
                     Search content
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={groupSearchResults}
-                    onCheckedChange={(checked) => setGroupSearchResults(checked as boolean)}
-                  >
-                    Group search results by time
                   </DropdownMenuCheckboxItem>
                 </DropdownMenuGroup>
                 {searchContent && (

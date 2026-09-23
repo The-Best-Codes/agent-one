@@ -42,7 +42,6 @@ import {
   type NotificationOption,
   type SubmitKeyOption,
   type TitleGenerationMethodOption,
-  type SidebarChatTimeGroupingOption,
 } from "@/lib/settings/types";
 
 import SettingsTarget from "../settings-target";
@@ -166,29 +165,16 @@ export default function ChatsSection() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Select
-                  value={sidebarChatTimeGrouping}
-                  onValueChange={(value) => {
+                <Switch
+                  checked={sidebarChatTimeGrouping}
+                  onCheckedChange={(checked) => {
                     trackSettingsInteraction("chats", "sidebar_chat_time_grouping_toggled", {
-                      value,
+                      value: checked,
                     });
-                    setSidebarChatTimeGrouping(value as SidebarChatTimeGroupingOption);
+                    setSidebarChatTimeGrouping(checked);
                   }}
-                >
-                  <SelectTrigger
-                    className="w-full md:w-fit md:max-w-96"
-                    aria-label="Select when to group sidebar chats by time"
-                  >
-                    <SelectValue placeholder="Select option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="only-when-searching">Only when searching</SelectItem>
-                      <SelectItem value="always">Always</SelectItem>
-                      <SelectItem value="never">Never</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                  aria-label="Group sidebar chats by time"
+                />
                 <Button
                   variant="ghost"
                   size="icon"
