@@ -542,8 +542,8 @@ export const VirtualizedChatList = ({
         ref={parentRef}
         className={cn(
           "flex-1",
-          showList ? "overflow-y-auto scroll-fade" : "overflow-hidden",
-          isOverflowing && showList && "pr-2",
+          showList ? "overflow-y-auto" : "overflow-hidden",
+          isOverflowing && showList && "scroll-fade pr-2",
         )}
       >
         {!isMetadataLoaded ? (
