@@ -466,12 +466,19 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   }, [location.state, location.pathname, navigate, focusedChatInstance?.status, currentChatId]);
 
   useEffect(() => {
-    for (const [id, pending] of pendingProgrammaticMessagesRef.current) {
-      const instance = chatInstancesRef.current.get(id);
-      if (instance?.status !== "ready") continue;
-      pendingProgrammaticMessagesRef.current.delete(id);
-      void instance.sendMessage(pending.message);
-    }
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      for (const [id, pending] of pendingProgrammaticMessagesRef.current) {
+        const instance = chatInstancesRef.current.get(id);
+        if (instance?.status !== "ready") continue;
+        pendingProgrammaticMessagesRef.current.delete(id);
+        void instance.sendMessage(pending.message);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [activeChatIds, updateKey]);
 
   const currentMessages = currentChatId
