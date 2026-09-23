@@ -17,21 +17,22 @@ interface SearchModalProps {
 export const SearchModal = ({ isOpen, onClose, activeChatId }: SearchModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent showCloseButton={false} className="flex h-fit max-w-2xl flex-col p-2">
+      <DialogContent
+        showCloseButton={false}
+        className="flex max-h-[80svh] max-w-2xl flex-col gap-0 p-2"
+      >
         <DialogHeader>
           <DialogTitle className="sr-only flex items-center gap-2">Chat search dialog</DialogTitle>
           <DialogDescription className="sr-only">
             Select a conversation to continue
           </DialogDescription>
-          <div className="max-h-[80svh] min-h-0 flex-1">
-            <VirtualizedChatList
-              activeChatId={activeChatId}
-              showNewChatButton={false}
-              className="h-full"
-              additionalOnChatClickCallback={onClose}
-            />
-          </div>
         </DialogHeader>
+        <VirtualizedChatList
+          activeChatId={activeChatId}
+          showNewChatButton={false}
+          className="h-auto min-h-0"
+          additionalOnChatClickCallback={onClose}
+        />
       </DialogContent>
     </Dialog>
   );
