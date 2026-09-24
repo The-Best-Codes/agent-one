@@ -16,6 +16,8 @@ import { type McpServerType } from "@/lib/settings/types";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";
 
+// TODO: Warn you when it looks like you're installing a custom MCP server that you already have installed
+
 interface AddServerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
