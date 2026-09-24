@@ -460,29 +460,31 @@ export default function AboutSection() {
         </CardContent>
       </Card>
       {debugMode && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Debug</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
-                  <IconBug className="text-muted-foreground size-5" />
+        <SettingsTarget id="setting-debug">
+          <Card>
+            <CardHeader>
+              <CardTitle>Debug</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
+                    <IconBug className="text-muted-foreground size-5" />
+                  </div>
+                  <div>
+                    <p className="leading-none font-medium">Internal Tests</p>
+                    <p className="text-muted-foreground text-sm">
+                      Access internal testing tools and utilities.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="leading-none font-medium">Internal Tests</p>
-                  <p className="text-muted-foreground text-sm">
-                    Access internal testing tools and utilities.
-                  </p>
-                </div>
+                <Button onClick={() => navigate("/tests")} size="sm">
+                  Open Tests
+                </Button>
               </div>
-              <Button onClick={() => navigate("/tests")} size="sm">
-                Open Tests
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </SettingsTarget>
       )}
     </div>
   );

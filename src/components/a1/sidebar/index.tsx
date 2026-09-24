@@ -71,7 +71,7 @@ const SidebarContent = ({
               description: "Check Settings > Help & Updates to access internal tests.",
               action: {
                 label: "Open Settings",
-                onClick: () => navigate("/settings?tab=about"),
+                onClick: () => navigate("/settings?tab=about#setting-debug"),
               },
             });
           },
