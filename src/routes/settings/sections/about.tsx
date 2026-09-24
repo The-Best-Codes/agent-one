@@ -251,7 +251,10 @@ export default function AboutSection() {
               </div>
 
               {(updateStatus === "downloading" || updateStatus === "installing") && (
-                <Progress value={updateProgress} />
+                <Progress
+                  value={updateProgress}
+                  indeterminate={!(updateProgress >= 1 && updateProgress <= 99)}
+                />
               )}
             </div>
 
