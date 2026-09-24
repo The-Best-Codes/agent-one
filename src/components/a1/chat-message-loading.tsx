@@ -16,7 +16,7 @@ const LoadingIndicator = ({
   if (isApiKeysLoading) text = "Booting up";
 
   return (
-    <span className="shimmer dark:text-muted-foreground text-foreground w-fit text-sm font-bold">
+    <span className="shimmer shimmer-with-pause shimmer-spread-2 shimmer-duration-1000 dark:text-muted-foreground text-foreground w-fit text-sm font-bold [--shimmer-pause:1000ms]">
       {text}
     </span>
   );

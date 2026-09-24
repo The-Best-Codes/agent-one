@@ -880,6 +880,19 @@
   }
 }
 
+.shimmer.shimmer-with-pause {
+  animation-duration: calc(var(--shimmer-duration, 2s) + var(--shimmer-pause, 1s));
+  animation-timing-function: linear(
+    0,
+    1
+      calc(
+        100% * var(--shimmer-duration, 2s) /
+          (var(--shimmer-duration, 2s) + var(--shimmer-pause, 1s))
+      ),
+    1
+  );
+}
+
 @keyframes skeleton-shimmer-animation {
   from {
     background-position: 100%;
