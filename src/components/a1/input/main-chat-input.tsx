@@ -135,6 +135,12 @@ export const MainChatInput = ({
     initialValueKeyRef.current = initialValueKey;
   }, [initialValue, initialValueKey]);
 
+  useEffect(() => {
+    if (!disabled) {
+      editorViewRef.current?.focus();
+    }
+  }, [disabled]);
+
   // TODO: Is a function acceptable to use here, e.g. a switch-case? Will be cleaner when we add more options
   const showStopButton =
     stopButtonBehavior === "immediate"
