@@ -71,7 +71,7 @@ export function UpdateAvailableDialog() {
             size="sm"
             onClick={() => {
               dismissDialog();
-              void navigate("/settings?tab=about");
+              void navigate("/settings?tab=about#setting-download-and-install-update");
             }}
           >
             <IconDownload data-icon="inline-start" />

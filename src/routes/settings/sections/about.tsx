@@ -161,16 +161,18 @@ export default function AboutSection() {
         return null;
       case "available":
         return (
-          <Button
-            onClick={() => {
-              trackSettingsInteraction("about", "download_and_install_update");
-              void downloadAndInstallUpdate();
-            }}
-            size="sm"
-          >
-            <IconDownload data-icon="inline-start" />
-            Download & Install
-          </Button>
+          <SettingsTarget id="setting-download-and-install-update">
+            <Button
+              onClick={() => {
+                trackSettingsInteraction("about", "download_and_install_update");
+                void downloadAndInstallUpdate();
+              }}
+              size="sm"
+            >
+              <IconDownload data-icon="inline-start" />
+              Download & Install
+            </Button>
+          </SettingsTarget>
         );
 
       case "error":
@@ -221,77 +223,79 @@ export default function AboutSection() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>App Updates</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          <div>
-            <p className="text-muted-foreground text-sm">Current Version</p>
-            <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
-          </div>
-
-          <Separator />
-
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
-                  {stateDisplay.icon}
-                </div>
-                <div>
-                  <p className="leading-none font-medium">{stateDisplay.title}</p>
-                  <p className="text-muted-foreground text-sm">{stateDisplay.description}</p>
-                </div>
-              </div>
-              {getActionButton()}
+      <SettingsTarget id="setting-app-updates">
+        <Card>
+          <CardHeader>
+            <CardTitle>App Updates</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            <div>
+              <p className="text-muted-foreground text-sm">Current Version</p>
+              <p className="text-3xl font-bold tracking-tight">{currentVersion}</p>
             </div>
 
-            {(updateStatus === "downloading" || updateStatus === "installing") && (
-              <Progress value={updateProgress} />
-            )}
-          </div>
+            <Separator />
 
-          {selectedReleaseNotes && (
-            <Accordion type="single" collapsible className="border-t pt-3">
-              <AccordionItem value="release-notes" className="border-b-0">
-                <AccordionTrigger className="py-1.5">Release notes</AccordionTrigger>
-                <AccordionContent className="h-auto overflow-visible pb-0">
-                  <Select
-                    value={selectedReleaseNotesVersion}
-                    onValueChange={setSelectedReleaseNotesVersion}
-                  >
-                    <SelectTrigger
-                      className="mb-3"
-                      size="sm"
-                      aria-label="Select release notes version"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {releaseNoteVersions.map((version) => (
-                          <SelectItem key={version} value={version}>
-                            v{version}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless max-w-none">
-                    <MemoizedMarkdown
-                      allowInternalLinks
-                      content={selectedReleaseNotes}
-                      id={`release-notes-${selectedReleaseNotesVersion}`}
-                      messageRole="assistant"
-                    />
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
+                    {stateDisplay.icon}
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
-        </CardContent>
-      </Card>
+                  <div>
+                    <p className="leading-none font-medium">{stateDisplay.title}</p>
+                    <p className="text-muted-foreground text-sm">{stateDisplay.description}</p>
+                  </div>
+                </div>
+                {getActionButton()}
+              </div>
+
+              {(updateStatus === "downloading" || updateStatus === "installing") && (
+                <Progress value={updateProgress} />
+              )}
+            </div>
+
+            {selectedReleaseNotes && (
+              <Accordion type="single" collapsible className="border-t pt-3">
+                <AccordionItem value="release-notes" className="border-b-0">
+                  <AccordionTrigger className="py-1.5">Release notes</AccordionTrigger>
+                  <AccordionContent className="h-auto overflow-visible pb-0">
+                    <Select
+                      value={selectedReleaseNotesVersion}
+                      onValueChange={setSelectedReleaseNotesVersion}
+                    >
+                      <SelectTrigger
+                        className="mb-3"
+                        size="sm"
+                        aria-label="Select release notes version"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {releaseNoteVersions.map((version) => (
+                            <SelectItem key={version} value={version}>
+                              v{version}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <div className="prose prose-sm prose-neutral dark:prose-invert prose-quoteless max-w-none">
+                      <MemoizedMarkdown
+                        allowInternalLinks
+                        content={selectedReleaseNotes}
+                        id={`release-notes-${selectedReleaseNotesVersion}`}
+                        messageRole="assistant"
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
+          </CardContent>
+        </Card>
+      </SettingsTarget>
       <SettingsTarget id="setting-model-directory">
         <Card>
           <CardHeader>
