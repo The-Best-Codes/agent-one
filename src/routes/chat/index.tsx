@@ -200,9 +200,10 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
           </div>
         )}
         <MainChatInput
-          key={chatId || location.key}
+          key={chatId || "new-chat"}
           draftKey={chatId || "new-chat"}
           initialValue={initialInputValue}
+          initialValueKey={chatId ? undefined : location.key}
           disabled={isChatLoading}
           onScrollNeededAction={() => {
             scrollRef.current?.scrollToBottom();

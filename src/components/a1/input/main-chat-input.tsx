@@ -76,11 +76,13 @@ const editorTheme = EditorView.theme({
 export const MainChatInput = ({
   onScrollNeededAction,
   initialValue,
+  initialValueKey,
   draftKey,
   disabled = false,
 }: {
   onScrollNeededAction?: () => void;
   initialValue?: string;
+  initialValueKey?: string;
   draftKey: string;
   disabled?: boolean;
 }) => {
@@ -109,19 +111,29 @@ export const MainChatInput = ({
   const [isDragging, setIsDragging] = useState(false);
 
   const editorViewRef = useRef<EditorView | null>(null);
+  const initialValueKeyRef = useRef(initialValueKey);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounter = useRef(0);
 
   useEffect(() => {
     if (initialValue) {
-      editorViewRef.current?.dispatch({
-        selection: { anchor: editorViewRef.current?.state.doc.length },
-      });
+      const view = editorViewRef.current;
+      if (view) {
+        if (initialValueKeyRef.current !== initialValueKey) {
+          view.dispatch({
+            changes: { from: 0, to: view.state.doc.length, insert: initialValue },
+            selection: { anchor: initialValue.length },
+          });
+        } else {
+          view.dispatch({ selection: { anchor: view.state.doc.length } });
+        }
+      }
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsEmpty(initialValue.trim().length === 0);
-      editorViewRef.current?.focus();
+      view?.focus();
     }
-  }, [initialValue]);
+    initialValueKeyRef.current = initialValueKey;
+  }, [initialValue, initialValueKey]);
 
   // TODO: Is a function acceptable to use here, e.g. a switch-case? Will be cleaner when we add more options
   const showStopButton =
