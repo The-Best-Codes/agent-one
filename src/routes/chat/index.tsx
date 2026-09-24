@@ -1,6 +1,6 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "react-router";
+import { useLocation, useParams, useSearchParams } from "react-router";
 
 import { AutoScrollContainer, type AutoScrollHandle } from "@/components/a1/auto-scroll-container";
 import { ChatMessageLoading } from "@/components/a1/chat-message-loading";
@@ -31,6 +31,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
   const { status } = useChatStatus();
   const isChatLoading = useChatLoading();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const scrollRef = useRef<AutoScrollHandle | null>(null);
   const [delayPassed, setDelayPassed] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -199,7 +200,7 @@ const ChatContent = ({ chatId }: { chatId: string | undefined }) => {
           </div>
         )}
         <MainChatInput
-          key={chatId || "new-chat"}
+          key={chatId || location.key}
           draftKey={chatId || "new-chat"}
           initialValue={initialInputValue}
           disabled={isChatLoading}
