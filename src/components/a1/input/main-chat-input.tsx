@@ -701,7 +701,10 @@ export const MainChatInput = ({
                       data-testid={showInterruptButton ? "interrupt-button" : "send-button"}
                       type="submit"
                       size="icon"
-                      className="bg-clip-border"
+                      className={cn(
+                        "bg-clip-border",
+                        showInterruptButton && "border-l! border-l-secondary!",
+                      )}
                       variant={showStopButton ? "destructive" : "default"}
                       aria-hidden={showStopButton && !showInterruptButton}
                       inert={showStopButton && !showInterruptButton}
