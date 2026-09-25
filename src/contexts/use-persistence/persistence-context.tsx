@@ -1,6 +1,6 @@
 import type { UIMessage } from "ai";
 import { generateId } from "ai";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { DEFAULT_MODEL_CONFIG, type ModelConfig } from "@/hooks/ai/use-model-catalog";
@@ -99,7 +99,7 @@ function touchMetadata(metadata: ChatMetadata): ChatMetadata {
 }
 
 export const PersistenceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [, setChatIds] = useAtom(chatIdsAtom);
+  const setChatIds = useSetAtom(chatIdsAtom);
   const [chatUpdateTrigger, setChatUpdateTrigger] = useAtom(chatUpdateTriggerAtom);
   const [lastVacuumTimestamp, setLastVacuumTimestamp] = useAtom(lastVacuumTimestampAtom);
   const [chatSort] = useAtom(chatSortAtom);

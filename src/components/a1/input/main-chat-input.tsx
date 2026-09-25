@@ -4,7 +4,7 @@ import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { IconArrowUp, IconPaperclip, IconPlayerStopFilled } from "@tabler/icons-react";
 import CodeMirror from "@uiw/react-codemirror";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useAtomValueRawSync } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -98,7 +98,7 @@ export const MainChatInput = ({
   const submitKey = useAtomValue(submitKeyAtom);
   const inputStyle = useAtomValue(inputStyleAtom);
   const { loadChatMessages } = usePersistence();
-  const chatIds = useAtomValue(chatIdsAtom);
+  const chatIds = useAtomValueRawSync(chatIdsAtom);
   const isMobile = useMobileDetection({
     anyHover: true,
     pointerCoarse: true,

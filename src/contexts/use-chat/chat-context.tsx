@@ -1,6 +1,6 @@
 import { type UseChatHelpers } from "@ai-sdk/react";
 import { type UIMessage, type UITool, type UIToolInvocation } from "ai";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtomValueRawSync, useSetAtom } from "jotai";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 
@@ -63,7 +63,7 @@ export const MultiChatProvider = ({ children }: { children: ReactNode }) => {
   const params = useParams<{ id: string }>();
   const [updateKey, setUpdateKey] = useState(0);
   const forceUpdate = useCallback(() => setUpdateKey((k) => k + 1), []);
-  const [chatIds] = useAtom(chatIdsAtom);
+  const chatIds = useAtomValueRawSync(chatIdsAtom);
   const setChatStatusIndicators = useSetAtom(chatStatusIndicatorsAtom);
   const { getModelById, getChatModelById, isModelCatalogLoading } = useModelCatalog();
 

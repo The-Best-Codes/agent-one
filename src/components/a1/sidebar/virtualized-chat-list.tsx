@@ -9,7 +9,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValueRawSync } from "jotai";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -123,7 +123,7 @@ export const VirtualizedChatList = ({
   const parentRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const latestSearchQueryRef = useRef("");
-  const [chatIds] = useAtom(chatIdsAtom);
+  const chatIds = useAtomValueRawSync(chatIdsAtom);
   const [chatSort] = useAtom(chatSortAtom);
   const [sidebarChatTimeGrouping] = useAtom(sidebarChatTimeGroupingAtom);
 

@@ -4,7 +4,7 @@ import {
   lastAssistantMessageIsCompleteWithApprovalResponses,
   type UIMessage,
 } from "ai";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useAtomValueRawSync } from "jotai";
 import { memo, useCallback, useEffect, useRef } from "react";
 
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
@@ -53,7 +53,7 @@ export const ChatInstance = memo(
     const extractReasoningEnabled = useAtomValue(extractReasoningEnabledAtom);
     const notificationSetting = useAtomValue(notificationSettingAtom);
     const { loadChatMetadata, saveChat, saveChatTitleState, saveChatTitle } = usePersistence();
-    const chatIds = useAtomValue(chatIdsAtom);
+    const chatIds = useAtomValueRawSync(chatIdsAtom);
     const suppressAutoSubmitAfterAbortRef = useRef(false);
     const wasBusyRef = useRef(false);
     const notifiedApprovalIdsRef = useRef(new Set<string>());
