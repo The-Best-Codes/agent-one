@@ -1,7 +1,7 @@
+// Some settings are intentionally omitted from the inspectable setting atoms list. You should still consider adding new settings here.
 import type { Atom } from "jotai";
 
 import {
-  analyticsIdentityAtom,
   chatSortAtom,
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
@@ -27,27 +27,22 @@ import {
   showChatToBottomButtonAtom,
   showMessagePreviewRailAtom,
   submitKeyAtom,
-  systemPromptAppendixAtom,
   textScaleAtom,
   themeAtom,
-  throttleValueAtom,
   uiTintAtom,
   uiTintStrengthAtom,
-  userNameAtom,
 } from "@/lib/jotai/settings-atoms";
 
 import { DEFAULT_SETTINGS } from "./types";
 import * as types from "./types";
 
 const inspectableSettingAtoms = {
-  ANALYTICS_IDENTITY: analyticsIdentityAtom,
   CHAT_SORT: chatSortAtom,
   SIDEBAR_CHAT_TIME_GROUPING: sidebarChatTimeGroupingAtom,
   CHAT_VIRTUALIZATION_MODE: chatVirtualizationModeAtom,
   CHAT_VIRTUALIZATION_THRESHOLD: chatVirtualizationThresholdAtom,
   COLLAPSED_SIDEBAR_LAYOUT: collapsedSidebarLayoutAtom,
   COLOR_THEME: colorThemeAtom,
-  THROTTLE_VALUE: throttleValueAtom,
   EXTRACT_REASONING_ENABLED: extractReasoningEnabledAtom,
   FONT: fontAtom,
   INPUT_STYLE: inputStyleAtom,
@@ -67,12 +62,10 @@ const inspectableSettingAtoms = {
   SHOW_CHAT_TO_BOTTOM_BUTTON: showChatToBottomButtonAtom,
   SHOW_MESSAGE_PREVIEW_RAIL: showMessagePreviewRailAtom,
   SUBMIT_KEY: submitKeyAtom,
-  SYSTEM_PROMPT_APPENDIX: systemPromptAppendixAtom,
   TEXT_SCALE: textScaleAtom,
   THEME: themeAtom,
   UI_TINT: uiTintAtom,
   UI_TINT_STRENGTH: uiTintStrengthAtom,
-  USER_NAME: userNameAtom,
 } satisfies Record<string, Atom<unknown>>;
 
 type InspectableSettingKey = keyof typeof inspectableSettingAtoms;
