@@ -19,6 +19,7 @@ import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   chatSortAtom,
   extractReasoningEnabledAtom,
+  interruptKeyAtom,
   markdownRenderingAtom,
   notificationSettingAtom,
   regenerateOnSaveAtom,
@@ -36,6 +37,7 @@ import { resetSetting } from "@/lib/settings/reset-settings";
 import {
   type ChatSortOption,
   DEFAULT_SETTINGS,
+  type InterruptKeyOption,
   type MarkdownRenderingOption,
   type MessageActionRowOption,
   type NotificationOption,
@@ -50,6 +52,7 @@ export default function ChatsSection() {
   const [notificationSetting, setNotificationSetting] = useAtom(notificationSettingAtom);
   const [showMessageActionRow, setShowMessageActionRow] = useAtom(showMessageActionRowAtom);
   const [submitKey, setSubmitKey] = useAtom(submitKeyAtom);
+  const [interruptKey, setInterruptKey] = useAtom(interruptKeyAtom);
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
   const [remendEnabled, setRemendEnabled] = useAtom(remendEnabledAtom);
   const [extractReasoningEnabled, setExtractReasoningEnabled] = useAtom(
@@ -73,6 +76,7 @@ export default function ChatsSection() {
   const isShowMessageActionRowDefault =
     showMessageActionRow === DEFAULT_SETTINGS.SHOW_MESSAGE_ACTION_ROW;
   const isSubmitKeyDefault = submitKey === DEFAULT_SETTINGS.SUBMIT_KEY;
+  const isInterruptKeyDefault = interruptKey === DEFAULT_SETTINGS.INTERRUPT_KEY;
   const isRegenerateOnSaveDefault = regenerateOnSave === DEFAULT_SETTINGS.REGENERATE_ON_SAVE;
   const isRemendEnabledDefault = remendEnabled === DEFAULT_SETTINGS.REMEND_ENABLED;
   const isExtractReasoningDefault =
@@ -399,6 +403,52 @@ export default function ChatsSection() {
                     resetSetting("SUBMIT_KEY");
                   }}
                   disabled={isSubmitKeyDefault}
+                  aria-label="Reset to default"
+                >
+                  <IconRestore data-icon="inline-start" />
+                </Button>
+              </div>
+            </div>
+          </SettingsTarget>
+
+          <SettingsTarget id="setting-interrupt-key">
+            <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
+              <div className="flex flex-1 flex-col items-start">
+                <Label className="text-sm font-medium">Interrupt Key</Label>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Choose which key combination stops the response and sends your message.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={interruptKey}
+                  onValueChange={(value) => {
+                    trackSettingsInteraction("chats", "interrupt_key_changed", { value });
+                    setInterruptKey(value as InterruptKeyOption);
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full md:w-fit md:max-w-96"
+                    aria-label="Select interrupt key"
+                  >
+                    <SelectValue placeholder="Select option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="enter">Enter</SelectItem>
+                      <SelectItem value="ctrl-enter">Ctrl/CMD + Enter</SelectItem>
+                      <SelectItem value="ctrl-shift-enter">Ctrl/CMD + Shift + Enter</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    trackSettingsInteraction("chats", "reset_interrupt_key");
+                    resetSetting("INTERRUPT_KEY");
+                  }}
+                  disabled={isInterruptKeyDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />

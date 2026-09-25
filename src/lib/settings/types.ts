@@ -10,6 +10,8 @@ export type MarkdownRenderingOption = (typeof MARKDOWN_RENDERING_OPTIONS)[number
 
 export const SUBMIT_KEY_OPTIONS = ["enter", "ctrl-enter"] as const;
 export type SubmitKeyOption = (typeof SUBMIT_KEY_OPTIONS)[number];
+export const INTERRUPT_KEY_OPTIONS = ["enter", "ctrl-enter", "ctrl-shift-enter"] as const;
+export type InterruptKeyOption = (typeof INTERRUPT_KEY_OPTIONS)[number];
 
 export const THEME_OPTIONS = ["light", "dark", "system"] as const;
 export type ThemeOption = (typeof THEME_OPTIONS)[number];
@@ -337,6 +339,7 @@ export interface DefaultSettings extends ApiKeySettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
   SUBMIT_KEY: SubmitKeyOption;
+  INTERRUPT_KEY: InterruptKeyOption;
   INPUT_STYLE: InputStyleOption;
   MAX_CODEBLOCK_CHARS: number;
   MAX_MESSAGE_LENGTH: number;
@@ -381,6 +384,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MARKDOWN_HIGHLIGHTING: true,
   MARKDOWN_RENDERING: "both",
   SUBMIT_KEY: "enter",
+  INTERRUPT_KEY: "ctrl-enter",
   INPUT_STYLE: "floating",
   MAX_CODEBLOCK_CHARS: 10000,
   MAX_MESSAGE_LENGTH: 50000,

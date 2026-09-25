@@ -11,6 +11,7 @@ import {
   DEFAULT_SETTINGS,
   type FontOption,
   type InputStyleOption,
+  type InterruptKeyOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type MessageActionRowOption,
@@ -74,6 +75,11 @@ export const markdownRenderingAtom = createSettingAtom<MarkdownRenderingOption>(
 export const submitKeyAtom = createSettingAtom<SubmitKeyOption>(
   "SUBMIT_KEY",
   DEFAULT_SETTINGS.SUBMIT_KEY,
+);
+
+export const interruptKeyAtom = createSettingAtom<InterruptKeyOption>(
+  "INTERRUPT_KEY",
+  DEFAULT_SETTINGS.INTERRUPT_KEY,
 );
 
 export const inputStyleAtom = createSettingAtom<InputStyleOption>(

@@ -19,6 +19,7 @@ import {
   extractReasoningEnabledAtom,
   fontAtom,
   inputStyleAtom,
+  interruptKeyAtom,
   keyboardShortcutsAtom,
   keyboardShortcutsEnabledInInputsAtom,
   markdownHighlightingAtom,
@@ -66,6 +67,7 @@ export function resetAllSettings(): void {
   store.set(markdownHighlightingAtom, RESET);
   store.set(markdownRenderingAtom, RESET);
   store.set(submitKeyAtom, RESET);
+  store.set(interruptKeyAtom, RESET);
   store.set(inputStyleAtom, RESET);
   store.set(maxCodeblockCharsAtom, RESET);
   store.set(maxMessageLengthAtom, RESET);
@@ -138,6 +140,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SUBMIT_KEY":
       store.set(submitKeyAtom, RESET);
+      break;
+    case "INTERRUPT_KEY":
+      store.set(interruptKeyAtom, RESET);
       break;
     case "INPUT_STYLE":
       store.set(inputStyleAtom, RESET);
