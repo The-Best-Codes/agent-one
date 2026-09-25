@@ -660,16 +660,55 @@ export const MainChatInput = ({
                   <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               )}
-              {(!showStopButton || showInterruptButton) && (
+              <div
+                data-slot={showInterruptButton ? "interrupt-action" : undefined}
+                aria-hidden={!showInterruptButton}
+                inert={!showInterruptButton}
+                className={cn(
+                  "flex origin-left overflow-hidden transition-[width] duration-200 ease-in-out motion-reduce:transition-none",
+                  showInterruptButton ? "w-8 justify-start" : "w-0 justify-end",
+                )}
+              >
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
+                    <Button
+                      data-testid="interrupt-button"
+                      type="submit"
+                      size="icon"
+                      className="rounded-l-none border-l-0"
+                      disabled={
+                        disabled ||
+                        !showInterruptButton ||
+                        isModelCatalogLoading ||
+                        !hasAvailableModels ||
+                        !currentModel ||
+                        hasPendingApproval
+                      }
+                      analytics={{
+                        event: "interrupt_button_clicked",
+                        params: { ui_location: "main_chat_input" },
+                      }}
+                      aria-label="Interrupt and send message"
+                    >
+                      <IconArrowUp />
+                    </Button>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent>
+                    Stop the response and send your message
+                  </AdaptiveTooltipContent>
+                </AdaptiveTooltip>
+              </div>
+              {!showStopButton && (
                 <AdaptiveTooltip>
                   <AdaptiveTooltipTrigger asChild>
                     <Button
                       data-testid="send-button"
                       type="submit"
                       size="icon"
+                      className="rounded-l-lg! border-l!"
                       disabled={
                         disabled ||
-                        (status !== "ready" && !showInterruptButton) ||
+                        status !== "ready" ||
                         (isEmpty && !files) ||
                         isModelCatalogLoading ||
                         !hasAvailableModels ||
@@ -677,23 +716,15 @@ export const MainChatInput = ({
                         hasPendingApproval
                       }
                       analytics={{
-                        event: showInterruptButton
-                          ? "interrupt_button_clicked"
-                          : "send_button_clicked",
+                        event: "send_button_clicked",
                         params: { ui_location: "main_chat_input" },
                       }}
-                      aria-label={
-                        showInterruptButton ? "Interrupt and send message" : "Send message"
-                      }
+                      aria-label="Send message"
                     >
                       <IconArrowUp />
                     </Button>
                   </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent>
-                    {showInterruptButton
-                      ? "Stop the response and send your message"
-                      : "Send your message"}
-                  </AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>
                 </AdaptiveTooltip>
               )}
             </ButtonGroup>
