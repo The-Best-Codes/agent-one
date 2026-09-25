@@ -118,6 +118,7 @@ export const MainChatInput = ({
   });
 
   const [isEmpty, setIsEmpty] = useState(true);
+  const [isInterruptSubmitting, setIsInterruptSubmitting] = useState(false);
   const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
   const [files, setFiles] = useState<FileList | undefined>(undefined);
   const [isDragging, setIsDragging] = useState(false);
@@ -127,6 +128,7 @@ export const MainChatInput = ({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounter = useRef(0);
   const isSubmittingRef = useRef(false);
+  const hasSentInterruptRef = useRef(false);
   const statusRef = useRef(status);
   const readyResolverRef = useRef<(() => void) | null>(null);
 
@@ -137,6 +139,17 @@ export const MainChatInput = ({
       readyResolverRef.current = null;
     }
   }, [status]);
+
+  useEffect(() => {
+    if (
+      isInterruptSubmitting &&
+      hasSentInterruptRef.current &&
+      isEmpty &&
+      (status === "submitted" || status === "streaming")
+    ) {
+      setIsInterruptSubmitting(false);
+    }
+  }, [isInterruptSubmitting, isEmpty, status]);
 
   useEffect(() => {
     if (initialValue) {
@@ -164,10 +177,11 @@ export const MainChatInput = ({
     }
   }, [disabled]);
 
-  const showStopButton = status === "streaming" || status === "submitted";
+  const showStopButton = status === "streaming" || status === "submitted" || isInterruptSubmitting;
   // TODO: Consider this approach in the future
   // const showInterruptButton = (status === "streaming" || status === "submitted") && (!isEmpty || !!files);
-  const showInterruptButton = status === "streaming" && (!isEmpty || !!files);
+  const showInterruptButton =
+    status === "streaming" && (!isEmpty || !!files) && !isInterruptSubmitting;
 
   useKeyboardShortcut("focusMainChatInput", () => {
     editorViewRef.current?.focus();
@@ -212,6 +226,8 @@ export const MainChatInput = ({
       });
       try {
         if (showInterruptButton) {
+          hasSentInterruptRef.current = false;
+          setIsInterruptSubmitting(true);
           await stop();
           if (statusRef.current !== "ready") {
             await new Promise<void>((resolve) => {
@@ -219,8 +235,13 @@ export const MainChatInput = ({
             });
           }
         }
+        if (showInterruptButton) {
+          hasSentInterruptRef.current = true;
+        }
         void sendMessage({ text: currentText, files });
       } catch (error) {
+        hasSentInterruptRef.current = false;
+        setIsInterruptSubmitting(false);
         logger.error("Message submission failed", error);
         return;
       } finally {
@@ -639,14 +660,28 @@ export const MainChatInput = ({
                 triggerClassName="rounded-l-none border-l-0"
               />
             </div>
-            <ButtonGroup aria-label="Response actions">
-              {showStopButton && (
+            <div
+              className={cn(
+                "flex-none overflow-hidden rounded-lg transition-[width] duration-200 ease-in-out motion-reduce:transition-none",
+                showInterruptButton ? "w-16" : "w-8",
+              )}
+            >
+              <ButtonGroup
+                aria-label="Response actions"
+                className={cn(
+                  "w-16 transition-transform duration-200 ease-in-out motion-reduce:transition-none",
+                  !showStopButton && "-translate-x-8",
+                )}
+              >
                 <AdaptiveTooltip>
                   <AdaptiveTooltipTrigger asChild>
                     <Button
                       variant="destructive"
                       type="button"
                       size="icon"
+                      disabled={!showStopButton}
+                      aria-hidden={!showStopButton}
+                      inert={!showStopButton}
                       onClick={() => stop()}
                       analytics={{
                         event: "response_stop_clicked",
@@ -659,57 +694,18 @@ export const MainChatInput = ({
                   </AdaptiveTooltipTrigger>
                   <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
                 </AdaptiveTooltip>
-              )}
-              <div
-                data-slot={showInterruptButton ? "interrupt-action" : undefined}
-                aria-hidden={!showInterruptButton}
-                inert={!showInterruptButton}
-                className={cn(
-                  "flex origin-left overflow-hidden transition-[width] duration-200 ease-in-out motion-reduce:transition-none",
-                  showInterruptButton ? "w-8 justify-start" : "w-0 justify-end",
-                )}
-              >
                 <AdaptiveTooltip>
                   <AdaptiveTooltipTrigger asChild>
                     <Button
-                      data-testid="interrupt-button"
+                      data-testid={showInterruptButton ? "interrupt-button" : "send-button"}
                       type="submit"
                       size="icon"
-                      variant="destructive"
-                      className="rounded-l-none"
+                      variant={showStopButton ? "destructive" : "default"}
+                      aria-hidden={showStopButton && !showInterruptButton}
+                      inert={showStopButton && !showInterruptButton}
                       disabled={
                         disabled ||
-                        !showInterruptButton ||
-                        isModelCatalogLoading ||
-                        !hasAvailableModels ||
-                        !currentModel ||
-                        hasPendingApproval
-                      }
-                      analytics={{
-                        event: "interrupt_button_clicked",
-                        params: { ui_location: "main_chat_input" },
-                      }}
-                      aria-label="Interrupt and send message"
-                    >
-                      <IconArrowUp />
-                    </Button>
-                  </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent>
-                    Stop the response and send your message
-                  </AdaptiveTooltipContent>
-                </AdaptiveTooltip>
-              </div>
-              {!showStopButton && (
-                <AdaptiveTooltip>
-                  <AdaptiveTooltipTrigger asChild>
-                    <Button
-                      data-testid="send-button"
-                      type="submit"
-                      size="icon"
-                      className="rounded-l-lg!"
-                      disabled={
-                        disabled ||
-                        status !== "ready" ||
+                        (status !== "ready" && !showInterruptButton) ||
                         (isEmpty && !files) ||
                         isModelCatalogLoading ||
                         !hasAvailableModels ||
@@ -717,18 +713,26 @@ export const MainChatInput = ({
                         hasPendingApproval
                       }
                       analytics={{
-                        event: "send_button_clicked",
+                        event: showInterruptButton
+                          ? "interrupt_button_clicked"
+                          : "send_button_clicked",
                         params: { ui_location: "main_chat_input" },
                       }}
-                      aria-label="Send message"
+                      aria-label={
+                        showInterruptButton ? "Interrupt and send message" : "Send message"
+                      }
                     >
                       <IconArrowUp />
                     </Button>
                   </AdaptiveTooltipTrigger>
-                  <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>
+                  <AdaptiveTooltipContent>
+                    {showInterruptButton
+                      ? "Stop the response and send your message"
+                      : "Send your message"}
+                  </AdaptiveTooltipContent>
                 </AdaptiveTooltip>
-              )}
-            </ButtonGroup>
+              </ButtonGroup>
+            </div>
           </div>
         </div>
       </form>
