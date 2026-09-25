@@ -28,7 +28,6 @@ import {
   showMessageActionRowAtom,
   showChatToBottomButtonAtom,
   showMessagePreviewRailAtom,
-  stopButtonBehaviorAtom,
   submitKeyAtom,
   throttleValueAtom,
   titleGenerationAtom,
@@ -57,7 +56,6 @@ export default function ChatsSection() {
     extractReasoningEnabledAtom,
   );
   const [throttleValue, setThrottleValue] = useAtom(throttleValueAtom);
-  const [alwaysShowStopButton, setAlwaysShowStopButton] = useAtom(stopButtonBehaviorAtom);
   const [showChatStatusIndicator, setShowChatStatusIndicator] = useAtom(
     showChatStatusIndicatorAtom,
   );
@@ -80,8 +78,6 @@ export default function ChatsSection() {
   const isExtractReasoningDefault =
     extractReasoningEnabled === DEFAULT_SETTINGS.EXTRACT_REASONING_ENABLED;
   const isThrottleValueDefault = throttleValue === DEFAULT_SETTINGS.THROTTLE_VALUE;
-  const isAlwaysShowStopButtonDefault =
-    alwaysShowStopButton === DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR;
   const isShowChatStatusIndicatorDefault =
     showChatStatusIndicator === DEFAULT_SETTINGS.SHOW_CHAT_STATUS_INDICATOR;
   const isShowChatToBottomButtonDefault =
@@ -439,42 +435,6 @@ export default function ChatsSection() {
                     resetSetting("REGENERATE_ON_SAVE");
                   }}
                   disabled={isRegenerateOnSaveDefault}
-                  aria-label="Reset to default"
-                >
-                  <IconRestore data-icon="inline-start" />
-                </Button>
-              </div>
-            </div>
-          </SettingsTarget>
-
-          <SettingsTarget id="setting-always-show-stop-button">
-            <div className="flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-1 flex-col items-start">
-                <Label className="text-sm font-medium">Always Show Stop Button</Label>
-                <p className="text-muted-foreground mt-1 text-sm">
-                  Show the stop button immediately after submitting a message.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={alwaysShowStopButton === "immediate"}
-                  onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "stop_button_behavior_toggled", {
-                      enabled: checked,
-                    });
-                    setAlwaysShowStopButton(checked ? "immediate" : "at-stopping-point");
-                  }}
-                  aria-label="Toggle always show stop button"
-                />
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    trackSettingsInteraction("chats", "reset_stop_button_behavior");
-                    resetSetting("STOP_BUTTON_BEHAVIOR");
-                  }}
-                  disabled={isAlwaysShowStopButtonDefault}
                   aria-label="Reset to default"
                 >
                   <IconRestore data-icon="inline-start" />

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/adaptive-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
@@ -29,7 +28,6 @@ import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   inputStyleAtom,
   markdownHighlightingAtom,
-  stopButtonBehaviorAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -94,7 +92,6 @@ export const MainChatInput = ({
   const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
-  const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
   const inputStyle = useAtomValue(inputStyleAtom);
   const { loadChatMessages } = usePersistence();
@@ -141,11 +138,7 @@ export const MainChatInput = ({
     }
   }, [disabled]);
 
-  // TODO: Is a function acceptable to use here, e.g. a switch-case? Will be cleaner when we add more options
-  const showStopButton =
-    stopButtonBehavior === "immediate"
-      ? status === "streaming" || status === "submitted"
-      : status === "streaming";
+  const showStopButton = status === "streaming" || status === "submitted";
 
   useKeyboardShortcut("focusMainChatInput", () => {
     editorViewRef.current?.focus();
@@ -638,7 +631,7 @@ export const MainChatInput = ({
                     }}
                     aria-label="Send message"
                   >
-                    {status === "submitted" ? <Spinner /> : <IconArrowUp />}
+                    <IconArrowUp />
                   </Button>
                 </AdaptiveTooltipTrigger>
                 <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>

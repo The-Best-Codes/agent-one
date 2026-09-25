@@ -16,7 +16,6 @@ import {
   type MessageActionRowOption,
   type NotificationOption,
   type RoundnessOption,
-  type StopButtonBehaviorOption,
   type SidebarChatTimeGroupingOption,
   type SubmitKeyOption,
   type TtsSettings,
@@ -120,11 +119,6 @@ export const extractReasoningEnabledAtom = createSettingAtom(
 export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
-);
-
-export const stopButtonBehaviorAtom = createSettingAtom<StopButtonBehaviorOption>(
-  "STOP_BUTTON_BEHAVIOR",
-  DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR,
 );
 
 export const showChatStatusIndicatorAtom = createSettingAtom(

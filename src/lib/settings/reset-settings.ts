@@ -38,7 +38,6 @@ import {
   sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showMessagePreviewRailAtom,
-  stopButtonBehaviorAtom,
   submitKeyAtom,
   systemPromptAppendixAtom,
   textScaleAtom,
@@ -77,7 +76,6 @@ export function resetAllSettings(): void {
   store.set(extractReasoningEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
   store.set(remendEnabledAtom, RESET);
-  store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessagePreviewRailAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
@@ -173,9 +171,6 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SHOW_CHAT_TO_BOTTOM_BUTTON":
       store.set(showChatToBottomButtonAtom, RESET);
-      break;
-    case "STOP_BUTTON_BEHAVIOR":
-      store.set(stopButtonBehaviorAtom, RESET);
       break;
     case "SHOW_CHAT_STATUS_INDICATOR":
       store.set(showChatStatusIndicatorAtom, RESET);
