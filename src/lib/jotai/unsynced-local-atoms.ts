@@ -13,13 +13,6 @@ export const sidebarCollapsedAtom = atomWithStorage(
   { getOnInit: true },
 );
 
-export const activeSettingsSectionAtom = atomWithStorage(
-  "agent-one-active-settings-section",
-  "account",
-  createNoSyncStorage<string>(),
-  { getOnInit: true },
-);
-
 export const debugModeEnabledAtom = atomWithStorage<boolean>(
   "agent-one-debug-mode",
   false,

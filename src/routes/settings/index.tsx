@@ -1,5 +1,4 @@
 import { IconArrowLeft, IconList } from "@tabler/icons-react";
-import { useAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
@@ -13,7 +12,6 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { trackSettingsInteraction } from "@/lib/google-analytics";
-import { activeSettingsSectionAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import { isValidSection, sections } from "./sections-config";
 import SettingsContent from "./settings-content";
@@ -23,7 +21,6 @@ export default function SettingsRoute() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeSection, setActiveSection] = useAtom(activeSettingsSectionAtom);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
 
@@ -33,15 +30,12 @@ export default function SettingsRoute() {
       if (tabParam && isValidSection(tabParam)) {
         return tabParam;
       }
-      if (isValidSection(activeSection)) {
-        return activeSection;
-      }
       return sections[0].id;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_error) {
       return sections[0].id;
     }
-  }, [tabParam, activeSection]);
+  }, [tabParam]);
 
   const handleNavigateBack = () => {
     const chatId = searchParams.get("chatId");
@@ -98,13 +92,11 @@ export default function SettingsRoute() {
 
   const handleSectionChange = (section: string) => {
     trackSettingsInteraction("navigation", "section_changed", { value: section });
-    setActiveSection(section);
-    if (tabParam) {
-      setSearchParams((prev) => {
-        prev.delete("tab");
-        return prev;
-      });
-    }
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", section);
+      return next;
+    });
   };
 
   return (
