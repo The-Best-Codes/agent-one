@@ -19,6 +19,7 @@ import {
   extractReasoningEnabledAtom,
   fontAtom,
   inputStyleAtom,
+  interruptKeyAtom,
   keyboardShortcutsAtom,
   keyboardShortcutsEnabledInInputsAtom,
   markdownHighlightingAtom,
@@ -38,7 +39,6 @@ import {
   sidebarChatTimeGroupingAtom,
   showMessageActionRowAtom,
   showMessagePreviewRailAtom,
-  stopButtonBehaviorAtom,
   submitKeyAtom,
   systemPromptAppendixAtom,
   textScaleAtom,
@@ -67,6 +67,7 @@ export function resetAllSettings(): void {
   store.set(markdownHighlightingAtom, RESET);
   store.set(markdownRenderingAtom, RESET);
   store.set(submitKeyAtom, RESET);
+  store.set(interruptKeyAtom, RESET);
   store.set(inputStyleAtom, RESET);
   store.set(maxCodeblockCharsAtom, RESET);
   store.set(maxMessageLengthAtom, RESET);
@@ -77,7 +78,6 @@ export function resetAllSettings(): void {
   store.set(extractReasoningEnabledAtom, RESET);
   store.set(regenerateOnSaveAtom, RESET);
   store.set(remendEnabledAtom, RESET);
-  store.set(stopButtonBehaviorAtom, RESET);
   store.set(showChatStatusIndicatorAtom, RESET);
   store.set(showMessagePreviewRailAtom, RESET);
   store.set(showMessageActionRowAtom, RESET);
@@ -141,6 +141,9 @@ export function resetSetting(key: keyof DefaultSettings): void {
     case "SUBMIT_KEY":
       store.set(submitKeyAtom, RESET);
       break;
+    case "INTERRUPT_KEY":
+      store.set(interruptKeyAtom, RESET);
+      break;
     case "INPUT_STYLE":
       store.set(inputStyleAtom, RESET);
       break;
@@ -173,9 +176,6 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "SHOW_CHAT_TO_BOTTOM_BUTTON":
       store.set(showChatToBottomButtonAtom, RESET);
-      break;
-    case "STOP_BUTTON_BEHAVIOR":
-      store.set(stopButtonBehaviorAtom, RESET);
       break;
     case "SHOW_CHAT_STATUS_INDICATOR":
       store.set(showChatStatusIndicatorAtom, RESET);

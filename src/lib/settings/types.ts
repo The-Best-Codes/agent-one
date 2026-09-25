@@ -10,6 +10,8 @@ export type MarkdownRenderingOption = (typeof MARKDOWN_RENDERING_OPTIONS)[number
 
 export const SUBMIT_KEY_OPTIONS = ["enter", "ctrl-enter"] as const;
 export type SubmitKeyOption = (typeof SUBMIT_KEY_OPTIONS)[number];
+export const INTERRUPT_KEY_OPTIONS = ["enter", "ctrl-enter", "ctrl-shift-enter"] as const;
+export type InterruptKeyOption = (typeof INTERRUPT_KEY_OPTIONS)[number];
 
 export const THEME_OPTIONS = ["light", "dark", "system"] as const;
 export type ThemeOption = (typeof THEME_OPTIONS)[number];
@@ -75,9 +77,6 @@ export type NotificationOption = (typeof NOTIFICATION_SETTING_OPTIONS)[number];
 
 export const ANALYTICS_IDENTITY_OPTIONS = ["off", "anonymous", "user-id"] as const;
 export type AnalyticsIdentityOption = (typeof ANALYTICS_IDENTITY_OPTIONS)[number];
-
-export const STOP_BUTTON_BEHAVIOR_OPTIONS = ["at-stopping-point", "immediate"] as const;
-export type StopButtonBehaviorOption = (typeof STOP_BUTTON_BEHAVIOR_OPTIONS)[number];
 
 export const SHOW_MESSAGE_ACTION_ROW_OPTIONS = ["hover", "always", "never"] as const;
 export type MessageActionRowOption = (typeof SHOW_MESSAGE_ACTION_ROW_OPTIONS)[number];
@@ -340,6 +339,7 @@ export interface DefaultSettings extends ApiKeySettings {
   MARKDOWN_HIGHLIGHTING: boolean;
   MARKDOWN_RENDERING: MarkdownRenderingOption;
   SUBMIT_KEY: SubmitKeyOption;
+  INTERRUPT_KEY: InterruptKeyOption;
   INPUT_STYLE: InputStyleOption;
   MAX_CODEBLOCK_CHARS: number;
   MAX_MESSAGE_LENGTH: number;
@@ -349,7 +349,6 @@ export interface DefaultSettings extends ApiKeySettings {
   THROTTLE_VALUE: number;
   EXTRACT_REASONING_ENABLED: boolean;
   REGENERATE_ON_SAVE: boolean;
-  STOP_BUTTON_BEHAVIOR: StopButtonBehaviorOption;
   SHOW_CHAT_STATUS_INDICATOR: boolean;
   SHOW_MESSAGE_PREVIEW_RAIL: boolean;
   SHOW_MESSAGE_ACTION_ROW: MessageActionRowOption;
@@ -385,6 +384,7 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   MARKDOWN_HIGHLIGHTING: true,
   MARKDOWN_RENDERING: "both",
   SUBMIT_KEY: "enter",
+  INTERRUPT_KEY: "ctrl-enter",
   INPUT_STYLE: "floating",
   MAX_CODEBLOCK_CHARS: 10000,
   MAX_MESSAGE_LENGTH: 50000,
@@ -394,7 +394,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   THROTTLE_VALUE: 100,
   EXTRACT_REASONING_ENABLED: false,
   REGENERATE_ON_SAVE: true,
-  STOP_BUTTON_BEHAVIOR: "immediate",
   SHOW_CHAT_STATUS_INDICATOR: true,
   SHOW_MESSAGE_PREVIEW_RAIL: true,
   SHOW_MESSAGE_ACTION_ROW: "always",

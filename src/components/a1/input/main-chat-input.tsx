@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/adaptive-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { useChatFunctions, useChatLoading, useChatStatus } from "@/contexts/use-chat/chat-hooks";
 import { useModel } from "@/contexts/use-model/model-hooks";
 import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
@@ -28,11 +28,12 @@ import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   inputStyleAtom,
+  interruptKeyAtom,
   markdownHighlightingAtom,
-  stopButtonBehaviorAtom,
   submitKeyAtom,
 } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
+import type { InterruptKeyOption, SubmitKeyOption } from "@/lib/settings/types";
 import { cn } from "@/lib/utils";
 
 import { ChatModelConfig } from "../chat-model-config";
@@ -44,6 +45,17 @@ import { MainInputNoModelSection } from "./no-model-section";
 import { MainInputProvisioningSection } from "./provisioning-section";
 
 const logger = getLogger(import.meta.url);
+
+function getChatShortcut(key: SubmitKeyOption | InterruptKeyOption) {
+  switch (key) {
+    case "enter":
+      return "Enter";
+    case "ctrl-shift-enter":
+      return "Mod-Shift-Enter";
+    default:
+      return "Mod-Enter";
+  }
+}
 
 const editorTheme = EditorView.theme({
   "&": {
@@ -94,8 +106,8 @@ export const MainChatInput = ({
   const { hasAvailableModels, isModelCatalogLoading } = useModelCatalog();
   const hasPendingApproval = usePendingToolApproval();
   const markdownHighlighting = useAtomValue(markdownHighlightingAtom);
-  const stopButtonBehavior = useAtomValue(stopButtonBehaviorAtom);
   const submitKey = useAtomValue(submitKeyAtom);
+  const interruptKey = useAtomValue(interruptKeyAtom);
   const inputStyle = useAtomValue(inputStyleAtom);
   const { loadChatMessages } = usePersistence();
   const chatIds = useAtomValueRawSync(chatIdsAtom);
@@ -106,6 +118,7 @@ export const MainChatInput = ({
   });
 
   const [isEmpty, setIsEmpty] = useState(true);
+  const [isInterruptSubmitting, setIsInterruptSubmitting] = useState(false);
   const [editorInitialValue] = useState(() => initialValue ?? loadChatInputDraft(draftKey));
   const [files, setFiles] = useState<FileList | undefined>(undefined);
   const [isDragging, setIsDragging] = useState(false);
@@ -114,6 +127,28 @@ export const MainChatInput = ({
   const initialValueKeyRef = useRef(initialValueKey);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragCounter = useRef(0);
+  const isSubmittingRef = useRef(false);
+  const hasSentInterruptRef = useRef(false);
+  const statusRef = useRef(status);
+  const readyResolverRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    statusRef.current = status;
+    if (status === "ready") {
+      readyResolverRef.current?.();
+      readyResolverRef.current = null;
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (
+      isInterruptSubmitting &&
+      hasSentInterruptRef.current &&
+      (status === "error" || (isEmpty && (status === "submitted" || status === "streaming")))
+    ) {
+      setIsInterruptSubmitting(false);
+    }
+  }, [isInterruptSubmitting, isEmpty, status]);
 
   useEffect(() => {
     if (initialValue) {
@@ -141,11 +176,11 @@ export const MainChatInput = ({
     }
   }, [disabled]);
 
-  // TODO: Is a function acceptable to use here, e.g. a switch-case? Will be cleaner when we add more options
-  const showStopButton =
-    stopButtonBehavior === "immediate"
-      ? status === "streaming" || status === "submitted"
-      : status === "streaming";
+  const showStopButton = status === "streaming" || status === "submitted" || isInterruptSubmitting;
+  // TODO: Consider this approach in the future
+  // const showInterruptButton = (status === "streaming" || status === "submitted") && (!isEmpty || !!files);
+  const showInterruptButton =
+    status === "streaming" && (!isEmpty || !!files) && !isInterruptSubmitting;
 
   useKeyboardShortcut("focusMainChatInput", () => {
     editorViewRef.current?.focus();
@@ -166,8 +201,8 @@ export const MainChatInput = ({
     }
   };
 
-  const submitMessage = () => {
-    if (disabled) {
+  const submitMessage = async () => {
+    if (disabled || isSubmittingRef.current) {
       return;
     }
     if (isModelCatalogLoading || !hasAvailableModels || !currentModel) {
@@ -177,16 +212,44 @@ export const MainChatInput = ({
 
     const currentText = editorViewRef.current?.state.doc.toString() || "";
 
-    if ((currentText.trim() || files) && status === "ready" && !hasPendingApproval) {
+    if (
+      (currentText.trim() || files) &&
+      (status === "ready" || showInterruptButton) &&
+      !hasPendingApproval
+    ) {
+      isSubmittingRef.current = true;
       logger.verbose("Submitting message", {
         textLength: currentText.length,
         hasFiles: !!files,
         fileCount: files?.length || 0,
       });
-      void sendMessage({
-        text: currentText || "",
-        files: files,
-      });
+      try {
+        if (showInterruptButton) {
+          hasSentInterruptRef.current = false;
+          setIsInterruptSubmitting(true);
+          await stop();
+          if (statusRef.current !== "ready") {
+            await new Promise<void>((resolve) => {
+              readyResolverRef.current = resolve;
+            });
+          }
+        }
+        if (showInterruptButton) {
+          hasSentInterruptRef.current = true;
+        }
+        void sendMessage({ text: currentText, files }).catch((error: unknown) => {
+          hasSentInterruptRef.current = false;
+          setIsInterruptSubmitting(false);
+          logger.error("Message submission failed", error);
+        });
+      } catch (error) {
+        hasSentInterruptRef.current = false;
+        setIsInterruptSubmitting(false);
+        logger.error("Message submission failed", error);
+        return;
+      } finally {
+        isSubmittingRef.current = false;
+      }
       saveChatInputDraft(draftKey, "");
       trackGoogleAnalyticsEvent("message_sent", {
         ui_location: "main_chat_input",
@@ -221,7 +284,7 @@ export const MainChatInput = ({
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    submitMessage();
+    void submitMessage();
   };
 
   const addFiles = useCallback(
@@ -507,15 +570,18 @@ export const MainChatInput = ({
                 // eslint-disable-next-line react-hooks/refs
                 keymap.of([
                   {
-                    key: submitKey === "enter" ? "Enter" : "Mod-Enter",
+                    key: getChatShortcut(showInterruptButton ? interruptKey : submitKey),
                     run: (view) => {
                       if (view.composing) {
                         return false;
                       }
-                      if (isMobile && submitKey === "enter") {
+                      if (
+                        isMobile &&
+                        (showInterruptButton ? interruptKey : submitKey) === "enter"
+                      ) {
                         return false;
                       }
-                      submitMessage();
+                      void submitMessage();
                       return true;
                     },
                   },
@@ -597,53 +663,84 @@ export const MainChatInput = ({
                 triggerClassName="rounded-l-none border-l-0"
               />
             </div>
-            {showStopButton ? (
-              <AdaptiveTooltip>
-                <AdaptiveTooltipTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    size="icon"
-                    onClick={() => stop()}
-                    analytics={{
-                      event: "response_stop_clicked",
-                      params: { ui_location: "main_chat_input" },
-                    }}
-                    aria-label="Stop response"
-                  >
-                    <IconPlayerStopFilled />
-                  </Button>
-                </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
-              </AdaptiveTooltip>
-            ) : (
-              <AdaptiveTooltip>
-                <AdaptiveTooltipTrigger asChild>
-                  <Button
-                    data-testid="send-button"
-                    type="submit"
-                    size="icon"
-                    disabled={
-                      disabled ||
-                      status !== "ready" ||
-                      (isEmpty && !files) ||
-                      isModelCatalogLoading ||
-                      !hasAvailableModels ||
-                      !currentModel ||
-                      hasPendingApproval
-                    }
-                    analytics={{
-                      event: "send_button_clicked",
-                      params: { ui_location: "main_chat_input" },
-                    }}
-                    aria-label="Send message"
-                  >
-                    {status === "submitted" ? <Spinner /> : <IconArrowUp />}
-                  </Button>
-                </AdaptiveTooltipTrigger>
-                <AdaptiveTooltipContent>Send your message</AdaptiveTooltipContent>
-              </AdaptiveTooltip>
-            )}
+            <div
+              className={cn(
+                "flex-none overflow-hidden rounded-lg transition-[width] duration-200 ease-in-out motion-reduce:transition-none",
+                showInterruptButton ? "w-16" : "w-8",
+              )}
+            >
+              <ButtonGroup
+                aria-label="Response actions"
+                className={cn(
+                  "w-16 transition-transform duration-200 ease-in-out motion-reduce:transition-none",
+                  !showStopButton && "-translate-x-8",
+                )}
+              >
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      type="button"
+                      size="icon"
+                      className="bg-clip-border"
+                      disabled={!showStopButton}
+                      aria-hidden={!showStopButton}
+                      inert={!showStopButton}
+                      onClick={() => stop()}
+                      analytics={{
+                        event: "response_stop_clicked",
+                        params: { ui_location: "main_chat_input" },
+                      }}
+                      aria-label="Stop response"
+                    >
+                      <IconPlayerStopFilled />
+                    </Button>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent>Stop the current response</AdaptiveTooltipContent>
+                </AdaptiveTooltip>
+                <AdaptiveTooltip>
+                  <AdaptiveTooltipTrigger asChild>
+                    <Button
+                      data-testid={showInterruptButton ? "interrupt-button" : "send-button"}
+                      type="submit"
+                      size="icon"
+                      className={cn(
+                        "bg-clip-border",
+                        showInterruptButton && "border-l! border-l-secondary!",
+                      )}
+                      variant={showStopButton ? "destructive" : "default"}
+                      aria-hidden={showStopButton && !showInterruptButton}
+                      inert={showStopButton && !showInterruptButton}
+                      disabled={
+                        disabled ||
+                        (status !== "ready" && !showInterruptButton) ||
+                        (isEmpty && !files) ||
+                        isModelCatalogLoading ||
+                        !hasAvailableModels ||
+                        !currentModel ||
+                        hasPendingApproval
+                      }
+                      analytics={{
+                        event: showInterruptButton
+                          ? "interrupt_button_clicked"
+                          : "send_button_clicked",
+                        params: { ui_location: "main_chat_input" },
+                      }}
+                      aria-label={
+                        showInterruptButton ? "Interrupt and send message" : "Send message"
+                      }
+                    >
+                      <IconArrowUp />
+                    </Button>
+                  </AdaptiveTooltipTrigger>
+                  <AdaptiveTooltipContent>
+                    {showInterruptButton
+                      ? "Stop the response and send your message"
+                      : "Send your message"}
+                  </AdaptiveTooltipContent>
+                </AdaptiveTooltip>
+              </ButtonGroup>
+            </div>
           </div>
         </div>
       </form>

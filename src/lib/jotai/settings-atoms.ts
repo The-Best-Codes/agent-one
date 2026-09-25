@@ -11,12 +11,12 @@ import {
   DEFAULT_SETTINGS,
   type FontOption,
   type InputStyleOption,
+  type InterruptKeyOption,
   type MarkdownRenderingOption,
   type McpServerConfig,
   type MessageActionRowOption,
   type NotificationOption,
   type RoundnessOption,
-  type StopButtonBehaviorOption,
   type SidebarChatTimeGroupingOption,
   type SubmitKeyOption,
   type TtsSettings,
@@ -77,6 +77,11 @@ export const submitKeyAtom = createSettingAtom<SubmitKeyOption>(
   DEFAULT_SETTINGS.SUBMIT_KEY,
 );
 
+export const interruptKeyAtom = createSettingAtom<InterruptKeyOption>(
+  "INTERRUPT_KEY",
+  DEFAULT_SETTINGS.INTERRUPT_KEY,
+);
+
 export const inputStyleAtom = createSettingAtom<InputStyleOption>(
   "INPUT_STYLE",
   DEFAULT_SETTINGS.INPUT_STYLE,
@@ -120,11 +125,6 @@ export const extractReasoningEnabledAtom = createSettingAtom(
 export const regenerateOnSaveAtom = createSettingAtom(
   "REGENERATE_ON_SAVE",
   DEFAULT_SETTINGS.REGENERATE_ON_SAVE,
-);
-
-export const stopButtonBehaviorAtom = createSettingAtom<StopButtonBehaviorOption>(
-  "STOP_BUTTON_BEHAVIOR",
-  DEFAULT_SETTINGS.STOP_BUTTON_BEHAVIOR,
 );
 
 export const showChatStatusIndicatorAtom = createSettingAtom(
