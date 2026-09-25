@@ -675,7 +675,8 @@ export const MainChatInput = ({
                       data-testid="interrupt-button"
                       type="submit"
                       size="icon"
-                      className="rounded-l-none border-l-0"
+                      variant="destructive"
+                      className="rounded-l-none"
                       disabled={
                         disabled ||
                         !showInterruptButton ||
@@ -705,7 +706,7 @@ export const MainChatInput = ({
                       data-testid="send-button"
                       type="submit"
                       size="icon"
-                      className="rounded-l-lg! border-l!"
+                      className="rounded-l-lg!"
                       disabled={
                         disabled ||
                         status !== "ready" ||
