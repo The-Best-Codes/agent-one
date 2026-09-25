@@ -1,10 +1,10 @@
 import {
-  IconCalendar,
+  IconClockSearch,
   IconChevronDown,
   IconCircleCheck,
   IconCircleX,
-  IconList,
   IconX,
+  IconClock,
 } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
@@ -55,7 +55,7 @@ export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart 
       return (
         <div key={callId} className="border-border flex w-fit flex-col gap-2 rounded-md border p-2">
           <div className="flex items-center gap-1 text-sm font-bold">
-            <IconList className="text-foreground size-4 shrink-0" />
+            <IconClockSearch className="text-foreground size-4 shrink-0" />
             <span>AgentOne wants to list scheduled agents</span>
           </div>
           <div className="flex items-center justify-end gap-2">
@@ -113,7 +113,7 @@ export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart 
       if (agents.length === 0)
         return (
           <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-            <IconList className="size-4 shrink-0" />
+            <IconClockSearch className="size-4 shrink-0" />
             <span>No scheduled agents</span>
           </div>
         );
@@ -136,7 +136,7 @@ export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart 
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <IconList
+                  <IconClockSearch
                     className={cn(
                       "absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/sched-list:scale-0 group-hover/sched-list:opacity-0",
                       isMainOpen && "scale-0 opacity-0",
@@ -162,7 +162,6 @@ export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart 
               <div className="flex flex-col gap-2">
                 {agents.map((agent, index) => (
                   <div key={agent.id ?? index} className="flex items-start gap-1.5">
-                    <IconCalendar className="text-muted-foreground mt-0.5 size-4 shrink-0" />
                     <div className="flex min-w-0 flex-col">
                       <span className="text-foreground truncate text-sm font-bold">
                         {agent.title ?? agent.id ?? `Agent ${index + 1}`}
@@ -204,7 +203,7 @@ export const MessagePartToolListScheduledAgents = ({ part }: { part: ToolUIPart 
     default:
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <IconList className="size-4 shrink-0" />
+          <IconClock className="size-4 shrink-0" />
           Scheduled agent tool accessed
         </div>
       );

@@ -1,5 +1,5 @@
 import {
-  IconCalendarCog,
+  IconClockEdit,
   IconChevronDown,
   IconCircleCheck,
   IconCircleX,
@@ -77,7 +77,7 @@ export const MessagePartToolUpdateScheduledAgent = ({ part }: { part: ToolUIPart
           className="border-border flex w-full max-w-2xl flex-col gap-2 rounded-md border p-2"
         >
           <div className="flex items-center gap-1">
-            <IconCalendarCog className="text-foreground size-4 shrink-0" />
+            <IconClockEdit className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               {`AgentOne wants to update scheduled agent${shortLabel}`}
             </span>
@@ -171,7 +171,7 @@ export const MessagePartToolUpdateScheduledAgent = ({ part }: { part: ToolUIPart
             <AccordionTrigger
               icon={
                 <div className="relative">
-                  <IconCalendarCog
+                  <IconClockEdit
                     className={cn(
                       "absolute inset-0 size-4 shrink-0 transition-[opacity,scale] duration-200 group-hover/sched-update:scale-0 group-hover/sched-update:opacity-0",
                       isMainOpen && "scale-0 opacity-0",
@@ -220,7 +220,7 @@ export const MessagePartToolUpdateScheduledAgent = ({ part }: { part: ToolUIPart
     default:
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <IconCalendarCog className="size-4 shrink-0" />
+          <IconClockEdit className="size-4 shrink-0" />
           Scheduled agent tool accessed
         </div>
       );

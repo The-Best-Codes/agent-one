@@ -1,4 +1,4 @@
-import { IconCalendarX, IconCircleCheck, IconCircleX, IconX } from "@tabler/icons-react";
+import { IconClockX, IconCircleCheck, IconCircleX, IconX } from "@tabler/icons-react";
 import type { ToolUIPart } from "ai";
 import { useState } from "react";
 
@@ -30,7 +30,7 @@ export const MessagePartToolDeleteScheduledAgent = ({ part }: { part: ToolUIPart
           className="border-border flex w-full max-w-2xl flex-col gap-2 rounded-md border p-2"
         >
           <div className="flex items-center gap-1">
-            <IconCalendarX className="text-foreground size-4 shrink-0" />
+            <IconClockX className="text-foreground size-4 shrink-0" />
             <span className="text-foreground text-sm font-bold">
               {`AgentOne wants to delete scheduled agent${shortLabel}`}
             </span>
@@ -88,7 +88,7 @@ export const MessagePartToolDeleteScheduledAgent = ({ part }: { part: ToolUIPart
     case "output-available":
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <IconCalendarX className="size-4 shrink-0" />
+          <IconClockX className="size-4 shrink-0" />
           <span>{`Deleted scheduled agent${shortLabel}`}</span>
         </div>
       );
@@ -115,7 +115,7 @@ export const MessagePartToolDeleteScheduledAgent = ({ part }: { part: ToolUIPart
     default:
       return (
         <div key={callId} className="flex items-center gap-1 text-sm font-bold">
-          <IconCalendarX className="size-4 shrink-0" />
+          <IconClockX className="size-4 shrink-0" />
           Scheduled agent tool accessed
         </div>
       );
