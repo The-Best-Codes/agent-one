@@ -144,8 +144,7 @@ export const MainChatInput = ({
     if (
       isInterruptSubmitting &&
       hasSentInterruptRef.current &&
-      isEmpty &&
-      (status === "submitted" || status === "streaming")
+      (status === "error" || (isEmpty && (status === "submitted" || status === "streaming")))
     ) {
       setIsInterruptSubmitting(false);
     }
@@ -238,7 +237,11 @@ export const MainChatInput = ({
         if (showInterruptButton) {
           hasSentInterruptRef.current = true;
         }
-        void sendMessage({ text: currentText, files });
+        void sendMessage({ text: currentText, files }).catch((error: unknown) => {
+          hasSentInterruptRef.current = false;
+          setIsInterruptSubmitting(false);
+          logger.error("Message submission failed", error);
+        });
       } catch (error) {
         hasSentInterruptRef.current = false;
         setIsInterruptSubmitting(false);
