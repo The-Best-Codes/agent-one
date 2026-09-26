@@ -1,6 +1,6 @@
 import { IconArrowLeft, IconFilter, IconFlask, IconPlus, IconTool } from "@tabler/icons-react";
 import { useAtom } from "jotai";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
@@ -321,19 +321,6 @@ export default function ExtensionsRoute() {
     handleUninstallClick,
     restartMcpServer,
   ]);
-
-  useEffect(() => {
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {}, 300);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [onlyInstalled, query, showDeviceExtensions, showOnlineExtensions]);
 
   return (
     <main className="flex h-svh min-h-0 flex-col" role="main">
