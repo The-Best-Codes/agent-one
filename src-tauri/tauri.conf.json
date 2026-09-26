@@ -45,6 +45,9 @@
     }
   },
   "plugins": {
+    "opener": {
+      "requireLiteralLeadingDot": false
+    },
     "deep-link": {
       "desktop": {
         "schemes": ["agent-one"]
