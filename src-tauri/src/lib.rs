@@ -1,7 +1,7 @@
 use tauri::{Listener, Manager};
 use tauri_plugin_log::{FileOpenStrategy, RotationStrategy, Target, TargetKind};
 
-const LOG_FILE_NAME: &str = "agent-one";
+const LOG_FILE_NAME: &str = "agent-one-logs";
 
 mod keyring;
 mod mcp_auth;
