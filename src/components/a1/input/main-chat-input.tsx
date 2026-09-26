@@ -333,7 +333,7 @@ export const MainChatInput = ({
         fileCount: newFiles.length,
         fileNames: Array.from(newFiles).map((f) => f.name),
       });
-      setFiles(newFiles.length > 0 ? newFiles : undefined);
+      addFiles(newFiles);
     } else {
       // Undesired behavior, so disabled for now
       // logger.verbose("File input cleared");
