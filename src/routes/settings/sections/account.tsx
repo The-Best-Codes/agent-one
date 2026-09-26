@@ -9,7 +9,6 @@ import {
 } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
 
 import { AuthStatusDisplay } from "@/components/a1/web-auth/auth-status-display";
 import {
@@ -42,7 +41,6 @@ import {
   isAgentOneAccountProvisioning,
 } from "@/contexts/use-web-auth/web-auth-contexts";
 import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { hideAgentOneModelsAtom, syncEnabledAtom } from "@/lib/jotai/atoms";
 import { memoryAtom, systemPromptAppendixAtom, userNameAtom } from "@/lib/jotai/settings-atoms";
 import { MAX_MEMORY_ENTRIES, MAX_MEMORY_ENTRY_CHARS } from "@/lib/memory";
@@ -111,26 +109,14 @@ export default function AccountSection() {
     if (memory.length >= MAX_MEMORY_ENTRIES) return;
     if (memory.length > 0 && memory[memory.length - 1] === "") return;
 
-    trackSettingsInteraction("account", "memory_entry_added", {
-      entry_count: memory.length + 1,
-    });
     setMemory((prev) => [...prev, ""]);
   };
 
   const updateMemoryEntry = (index: number, value: string) => {
-    trackSettingsInteraction("account", "memory_changed", {
-      value_length: value.length,
-      entry_index: index,
-    });
-
     setMemory((prev) => prev.map((entry, entryIndex) => (entryIndex === index ? value : entry)));
   };
 
   const removeMemoryEntry = (index: number) => {
-    trackSettingsInteraction("account", "memory_entry_removed", {
-      entry_index: index,
-    });
-
     setMemory((prev) => prev.filter((_, entryIndex) => entryIndex !== index));
   };
 
@@ -160,15 +146,7 @@ export default function AccountSection() {
               signedInAction={
                 user ? (
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      analytics={{
-                        event: "settings_external_link_clicked",
-                        params: { section: "account", control: "account_dashboard" },
-                      }}
-                    >
+                    <Button variant="outline" size="sm" asChild>
                       <a href={DASHBOARD_URL} target="_blank" rel="noopener noreferrer">
                         <IconExternalLink data-icon="inline-start" />
                         <span>Account</span>
@@ -224,17 +202,7 @@ export default function AccountSection() {
                           : "Upgrade to Pro for higher limits and premium features."}
                       </p>
                     </div>
-                    <Button
-                      size="sm"
-                      asChild
-                      analytics={{
-                        event: "settings_external_link_clicked",
-                        params: {
-                          section: "account",
-                          control: activeSubscription ? "manage_billing" : "upgrade_plan",
-                        },
-                      }}
-                    >
+                    <Button size="sm" asChild>
                       <a
                         href={activeSubscription ? BILLING_URL : UPGRADE_URL}
                         target="_blank"
@@ -305,9 +273,6 @@ export default function AccountSection() {
                       id="sync-enabled"
                       checked={syncEnabled}
                       onCheckedChange={(checked) => {
-                        trackSettingsInteraction("account", "sync_enabled_toggled", {
-                          enabled: checked,
-                        });
                         setSyncEnabled(checked);
                       }}
                       disabled={!user}
@@ -335,9 +300,6 @@ export default function AccountSection() {
                       id="hide-agentone-models"
                       checked={hideAgentOneModels}
                       onCheckedChange={(checked) => {
-                        trackSettingsInteraction("account", "hide_agentone_models_toggled", {
-                          enabled: checked,
-                        });
                         setHideAgentOneModels(checked);
                       }}
                       disabled={!user}
@@ -352,13 +314,6 @@ export default function AccountSection() {
               </AdaptiveTooltip>
             </div>
           </SettingsTarget>
-          <p className="text-muted-foreground text-sm">
-            {"Account analytics have moved to the"}{" "}
-            <Link to="/settings?tab=about#setting-allow-usage-analytics" className="underline">
-              Help & Updates section
-            </Link>
-            .
-          </p>
         </CardContent>
       </Card>
       <Card>
@@ -379,9 +334,6 @@ export default function AccountSection() {
                 type="text"
                 value={userName}
                 onChange={(e) => {
-                  trackSettingsInteraction("account", "user_name_changed", {
-                    value_length: e.target.value.length,
-                  });
                   setUserName(e.target.value);
                 }}
                 placeholder="Enter your name"
@@ -402,9 +354,6 @@ export default function AccountSection() {
                   id="system-prompt-appendix"
                   value={systemPromptAppendix}
                   onChange={(e) => {
-                    trackSettingsInteraction("account", "ai_instructions_changed", {
-                      value_length: e.target.value.length,
-                    });
                     handleAppendixChange(e.target.value);
                   }}
                   placeholder="e.g., Always use British English. Be concise and technical."

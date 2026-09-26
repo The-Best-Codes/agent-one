@@ -30,7 +30,6 @@ import { usePersistence } from "@/contexts/use-persistence/persistence-hooks";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useOverflow } from "@/hooks/use-overflow";
 import { listScheduledAgents, SCHEDULED_AGENTS_CHANGED_EVENT } from "@/lib/cron";
-import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom, chatUpdateTriggerAtom } from "@/lib/jotai/atoms";
 import { chatSortAtom, sidebarChatTimeGroupingAtom } from "@/lib/jotai/settings-atoms";
 import { getLogger } from "@/lib/logger";
@@ -213,12 +212,7 @@ export const VirtualizedChatList = ({
           return;
         }
         setIsSearching(true);
-        trackGoogleAnalyticsEvent("chat_search_used", {
-          ui_location: "sidebar",
-          query_length: query.trim().length,
-          search_content: searchContent,
-          raw_operators: useRawOperators,
-        });
+
         try {
           const results = await searchChats(query, useRawOperators);
           if (latestSearchQueryRef.current !== query) {
@@ -237,7 +231,7 @@ export const VirtualizedChatList = ({
           }
         }
       }, 300),
-    [searchChats, searchContent],
+    [searchChats],
   );
 
   useEffect(() => {
@@ -418,7 +412,6 @@ export const VirtualizedChatList = ({
             onClick={() => handleNewChat && handleNewChat()}
             className="w-full justify-start"
             variant="outline"
-            analytics={{ event: "new_chat_clicked", params: { ui_location: "chat_list" } }}
           >
             <IconPlus data-icon="inline-start" />
             New Chat
@@ -440,10 +433,6 @@ export const VirtualizedChatList = ({
                 size="sm"
                 className="h-7 flex-1 justify-start"
                 onClick={toggleSelectAll}
-                analytics={{
-                  event: "chat_selection_toggled",
-                  params: { ui_location: "chat_list" },
-                }}
               >
                 {!allSelected ? (
                   <IconSelectAll data-icon="inline-start" />
@@ -458,10 +447,6 @@ export const VirtualizedChatList = ({
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkExportModal(true)}
-                analytics={{
-                  event: "bulk_chat_export_opened",
-                  params: { ui_location: "chat_list" },
-                }}
               >
                 <IconDownload data-icon="inline-start" />
               </Button>
@@ -471,10 +456,6 @@ export const VirtualizedChatList = ({
                 className="size-7"
                 disabled={selectedChatIds.size === 0}
                 onClick={() => setShowBulkDeleteModal(true)}
-                analytics={{
-                  event: "bulk_chat_delete_opened",
-                  params: { ui_location: "chat_list" },
-                }}
               >
                 <IconTrash data-icon="inline-start" />
               </Button>
@@ -501,10 +482,6 @@ export const VirtualizedChatList = ({
                   size="icon"
                   className="shrink-0 rounded-l-none border-l-0"
                   aria-label="Search options"
-                  analytics={{
-                    event: "chat_search_options_opened",
-                    params: { ui_location: "sidebar" },
-                  }}
                 >
                   <IconChevronDown />
                 </Button>

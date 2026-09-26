@@ -5,7 +5,6 @@ import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { enabledToolsAtom, toolConfigsAtom } from "@/lib/jotai/settings-atoms";
 import { DEFAULT_SETTINGS, type ToolConfigs, type ToolId } from "@/lib/settings/types";
 
@@ -27,17 +26,10 @@ export const ToolRow = memo(function ToolRow({ toolId }: ToolRowProps) {
   const mergedToolConfigs = getMergedToolConfigs(toolConfigs);
 
   const updateToolEnabled = (nextEnabled: boolean) => {
-    trackSettingsInteraction("tools", "tool_toggled", {
-      tool_id: toolId,
-      enabled: nextEnabled,
-    });
     setEnabledTools((prev) => ({ ...prev, [toolId]: nextEnabled }));
   };
 
   const updateToolConfig = <T extends ToolId>(id: T, updates: Partial<ToolConfigs[T]>) => {
-    trackSettingsInteraction("tools", "tool_config_changed", {
-      tool_id: id,
-    });
     setToolConfigs((prev) => ({
       ...prev,
       [id]: { ...DEFAULT_SETTINGS.TOOL_CONFIGS[id], ...prev[id], ...updates },
@@ -45,9 +37,6 @@ export const ToolRow = memo(function ToolRow({ toolId }: ToolRowProps) {
   };
 
   const resetTool = () => {
-    trackSettingsInteraction("tools", "tool_reset", {
-      tool_id: toolId,
-    });
     setEnabledTools((prev) => ({ ...prev, [toolId]: DEFAULT_SETTINGS.ENABLED_TOOLS[toolId] }));
     setToolConfigs((prev) => ({ ...prev, [toolId]: { ...DEFAULT_SETTINGS.TOOL_CONFIGS[toolId] } }));
   };
@@ -80,9 +69,6 @@ export const ToolRow = memo(function ToolRow({ toolId }: ToolRowProps) {
               variant="outline"
               size="icon-sm"
               onClick={() => {
-                trackSettingsInteraction("tools", "tool_settings_opened", {
-                  tool_id: toolId,
-                });
                 setIsSettingsOpen(true);
               }}
               aria-label={`Configure ${tool.name}`}

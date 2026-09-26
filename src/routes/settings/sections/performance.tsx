@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   chatVirtualizationModeAtom,
   chatVirtualizationThresholdAtom,
@@ -65,9 +64,6 @@ export default function PerformanceSection() {
                   max="1000000"
                   value={maxMessageLength}
                   onChange={(e) => {
-                    trackSettingsInteraction("performance", "max_message_length_changed", {
-                      value: parseInt(e.target.value) || 50000,
-                    });
                     setMaxMessageLength(parseInt(e.target.value) || 50000);
                   }}
                   className="w-full md:w-32"
@@ -77,7 +73,6 @@ export default function PerformanceSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("performance", "reset_max_message_length");
                     resetSetting("MAX_MESSAGE_LENGTH");
                   }}
                   disabled={isMaxMessageLengthDefault}
@@ -107,9 +102,6 @@ export default function PerformanceSection() {
                   max="1000000"
                   value={maxCodeblockChars}
                   onChange={(e) => {
-                    trackSettingsInteraction("performance", "max_codeblock_chars_changed", {
-                      value: parseInt(e.target.value) || 10000,
-                    });
                     setMaxCodeblockChars(parseInt(e.target.value) || 10000);
                   }}
                   className="w-full md:w-32"
@@ -119,7 +111,6 @@ export default function PerformanceSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("performance", "reset_max_codeblock_chars");
                     resetSetting("MAX_CODEBLOCK_CHARS");
                   }}
                   disabled={isMaxCodeblockCharsDefault}
@@ -149,9 +140,6 @@ export default function PerformanceSection() {
                   max="1000000"
                   value={maxToolResultChars}
                   onChange={(e) => {
-                    trackSettingsInteraction("performance", "max_tool_result_chars_changed", {
-                      value: parseInt(e.target.value) || 15000,
-                    });
                     setMaxToolResultChars(parseInt(e.target.value) || 15000);
                   }}
                   className="w-full md:w-32"
@@ -161,7 +149,6 @@ export default function PerformanceSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("performance", "reset_max_tool_result_chars");
                     resetSetting("MAX_TOOL_RESULT_CHARS");
                   }}
                   disabled={isMaxToolResultCharsDefault}
@@ -195,9 +182,6 @@ export default function PerformanceSection() {
                   id="chat-virtualization-enabled"
                   checked={chatVirtualizationMode !== "off"}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("performance", "chat_virtualization_toggled", {
-                      enabled: checked,
-                    });
                     setChatVirtualizationMode(checked ? "threshold" : "off");
                   }}
                 />
@@ -206,7 +190,6 @@ export default function PerformanceSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("performance", "reset_chat_virtualization_mode");
                     resetSetting("CHAT_VIRTUALIZATION_MODE");
                   }}
                   disabled={isChatVirtualizationModeDefault}
@@ -239,11 +222,7 @@ export default function PerformanceSection() {
                     value={chatVirtualizationThreshold}
                     onChange={(e) => {
                       const value = Math.max(1, parseInt(e.target.value) || 1);
-                      trackSettingsInteraction(
-                        "performance",
-                        "chat_virtualization_threshold_changed",
-                        { value },
-                      );
+
                       setChatVirtualizationThreshold(value);
                     }}
                     className="w-full md:w-32"
@@ -253,10 +232,6 @@ export default function PerformanceSection() {
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      trackSettingsInteraction(
-                        "performance",
-                        "reset_chat_virtualization_threshold",
-                      );
                       resetSetting("CHAT_VIRTUALIZATION_THRESHOLD");
                     }}
                     disabled={isChatVirtualizationThresholdDefault}
@@ -295,9 +270,7 @@ export default function PerformanceSection() {
                   value={mcpParallelLoadLimit}
                   onChange={(e) => {
                     const value = Math.max(1, parseInt(e.target.value) || 8);
-                    trackSettingsInteraction("performance", "mcp_parallel_load_limit_changed", {
-                      value,
-                    });
+
                     setMcpParallelLoadLimit(value);
                   }}
                   className="w-full md:w-32"
@@ -307,7 +280,6 @@ export default function PerformanceSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("performance", "reset_mcp_parallel_load_limit");
                     resetSetting("MCP_PARALLEL_LOAD_LIMIT");
                   }}
                   disabled={isMcpParallelLoadLimitDefault}

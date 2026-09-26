@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { type McpServerType } from "@/lib/settings/types";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";
@@ -97,11 +96,6 @@ export function AddServerDialog({
       headers: formValues.type === "http" ? formValues.headers : undefined,
       timeoutSec: formValues.timeoutSec,
       requiresApproval: formValues.requiresApproval,
-    });
-
-    trackSettingsInteraction("extensions", "submit_add_custom_extension", {
-      type: formValues.type,
-      requires_approval: formValues.requiresApproval,
     });
 
     resetAddForm();

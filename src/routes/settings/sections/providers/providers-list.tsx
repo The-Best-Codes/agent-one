@@ -27,7 +27,6 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { hasEnvKey, PROVIDER_REGISTRY } from "@/lib/ai/providers/registry";
 import { TTS_PROVIDER_OPTIONS, getSelectedTtsModel, normalizeTtsSettings } from "@/lib/ai/tts";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { apiKeyAtomFamily } from "@/lib/jotai/api-key-atoms";
 import {
   deleteCustomProviderApiKeyAtom,
@@ -141,10 +140,6 @@ export function ProvidersList() {
   }, [localProviderIds, localProviderSearchItems, normalizedLocalQuery]);
 
   const handleAddProvider = (data: NewCustomProviderData, apiKey: string) => {
-    trackSettingsInteraction("providers", "custom_provider_added", {
-      has_api_key: Boolean(apiKey.trim()),
-      model_count: data.models.length,
-    });
     const providerId = addCustomProvider(data);
 
     if (apiKey) {
@@ -153,7 +148,6 @@ export function ProvidersList() {
   };
 
   const handleDeleteProvider = (providerId: string) => {
-    trackSettingsInteraction("providers", "custom_provider_deleted");
     deleteCustomProvider(providerId);
     void deleteCustomProviderApiKey(providerId);
   };
@@ -174,9 +168,6 @@ export function ProvidersList() {
               placeholder="Search built-in providers..."
               value={builtInSearchQuery}
               onChange={(event) => {
-                trackSettingsInteraction("providers", "built_in_search_changed", {
-                  value_length: event.target.value.length,
-                });
                 setBuiltInSearchQuery(event.target.value);
               }}
             />
@@ -220,9 +211,6 @@ export function ProvidersList() {
               placeholder="Search local providers..."
               value={localSearchQuery}
               onChange={(event) => {
-                trackSettingsInteraction("providers", "local_search_changed", {
-                  value_length: event.target.value.length,
-                });
                 setLocalSearchQuery(event.target.value);
               }}
             />
@@ -262,9 +250,6 @@ export function ProvidersList() {
                 placeholder="Search custom providers..."
                 value={customSearchQuery}
                 onChange={(event) => {
-                  trackSettingsInteraction("providers", "custom_search_changed", {
-                    value_length: event.target.value.length,
-                  });
                   setCustomSearchQuery(event.target.value);
                 }}
                 containerClassName="flex-1"
@@ -329,7 +314,7 @@ export function ProvidersList() {
                   value={ttsSettings.provider}
                   onValueChange={(value) => {
                     const provider = value as (typeof TTS_PROVIDER_OPTIONS)[number]["id"];
-                    trackSettingsInteraction("providers", "tts_provider_changed", { provider });
+
                     updateTtsSettings({
                       provider,
                     });
@@ -358,8 +343,6 @@ export function ProvidersList() {
                 <Select
                   value={selectedTtsModel}
                   onValueChange={(model) => {
-                    trackSettingsInteraction("providers", "tts_model_changed", { model });
-
                     if (ttsSettings.provider === "openai") {
                       updateTtsSettings({
                         openai: { ...ttsSettings.openai, model },

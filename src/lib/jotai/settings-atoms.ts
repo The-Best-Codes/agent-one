@@ -4,7 +4,6 @@ import { atomWithStorage, RESET } from "jotai/utils";
 import type { KeyboardShortcutSettings } from "@/lib/kbd-registry";
 import type { DefaultSettings } from "@/lib/settings/types";
 import {
-  type AnalyticsIdentityOption,
   type ChatBackgroundSettings,
   type ChatSortOption,
   type ColorThemeOption,
@@ -166,11 +165,6 @@ export const textScaleAtom = createSettingAtom<TextScaleOption>(
 export const notificationSettingAtom = createSettingAtom<NotificationOption>(
   "NOTIFICATION_SETTING",
   DEFAULT_SETTINGS.NOTIFICATION_SETTING,
-);
-
-export const analyticsIdentityAtom = createSettingAtom<AnalyticsIdentityOption>(
-  "ANALYTICS_IDENTITY",
-  DEFAULT_SETTINGS.ANALYTICS_IDENTITY,
 );
 
 export const enabledToolsAtom = createSettingAtom<Record<ToolId, boolean>>(

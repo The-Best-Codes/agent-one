@@ -175,10 +175,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="outline"
           size="icon-sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          analytics={{
-            event: "sidebar_toggled",
-            params: { collapsed: !isCollapsed, ui_location: "desktop" },
-          }}
           aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           className="size-6"
         >
@@ -244,7 +240,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   variant="outline"
                   size="icon-sm"
                   onClick={handleSearchClick}
-                  analytics={{ event: "search_modal_opened", params: { ui_location: "sidebar" } }}
                   aria-label="Search chats"
                   className="size-6"
                 >
@@ -259,7 +254,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   variant="outline"
                   size="icon-sm"
                   onClick={handleNewChat}
-                  analytics={{ event: "new_chat_clicked", params: { ui_location: "sidebar" } }}
                   aria-label="New Chat"
                   className="size-6"
                 >

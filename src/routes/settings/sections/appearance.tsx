@@ -36,7 +36,6 @@ import {
   cssImageUrl,
   resolveChatBackgroundAssetUrl,
 } from "@/lib/chat-backgrounds";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   chatBackgroundAtom,
   collapsedSidebarLayoutAtom,
@@ -343,17 +342,14 @@ export default function AppearanceSection() {
     collapsedSidebarLayout === DEFAULT_SETTINGS.COLLAPSED_SIDEBAR_LAYOUT;
 
   const handleResetMarkdownHighlighting = () => {
-    trackSettingsInteraction("appearance", "reset_markdown_highlighting");
     resetSetting("MARKDOWN_HIGHLIGHTING");
   };
 
   const handleResetInputStyle = () => {
-    trackSettingsInteraction("appearance", "reset_input_style");
     resetSetting("INPUT_STYLE");
   };
 
   const handleResetCollapsedSidebarLayout = () => {
-    trackSettingsInteraction("appearance", "reset_collapsed_sidebar_layout");
     resetSetting("COLLAPSED_SIDEBAR_LAYOUT");
   };
 
@@ -371,7 +367,6 @@ export default function AppearanceSection() {
   };
 
   const removeCustomBackground = (url: string) => {
-    trackSettingsInteraction("appearance", "custom_chat_background_removed");
     void removeManagedBackgroundFile(url);
     setChatBackground((prev) => {
       const customUrls = (prev.customUrls ?? []).filter((customUrl) => customUrl !== url);
@@ -427,7 +422,7 @@ export default function AppearanceSection() {
       const imageUrl = resolveChatBackgroundAssetUrl(imageAbsolutePath);
 
       setPendingCustomBackgrounds((prev) => [{ url: imageAbsolutePath }, ...prev]);
-      trackSettingsInteraction("appearance", "custom_chat_background_added");
+
       setChatBackground((prev) => {
         const currentUrls = prev.customUrls ?? [];
         const customUrls = currentUrls.includes(imageAbsolutePath)
@@ -503,9 +498,6 @@ export default function AppearanceSection() {
                 label="Primary color"
                 value={colorTheme}
                 onValueChange={(value) => {
-                  trackSettingsInteraction("appearance", "primary_color_changed", {
-                    value,
-                  });
                   setColorTheme(value as typeof colorTheme);
                 }}
                 options={colorThemeOptions.map((option) => ({
@@ -549,7 +541,6 @@ export default function AppearanceSection() {
                 label="Tint"
                 value={uiTint}
                 onValueChange={(value) => {
-                  trackSettingsInteraction("appearance", "tint_changed", { value });
                   setUiTint(value as typeof uiTint);
                 }}
                 options={colorThemeOptions.map((option) => ({
@@ -595,7 +586,6 @@ export default function AppearanceSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("appearance", "reset_tint_strength");
                     resetSetting("UI_TINT_STRENGTH");
                   }}
                   disabled={isUiTintStrengthDefault}
@@ -607,9 +597,6 @@ export default function AppearanceSection() {
               <Slider
                 value={[uiTintStrength]}
                 onValueChange={(value) => {
-                  trackSettingsInteraction("appearance", "tint_strength_changed", {
-                    value: value[0],
-                  });
                   setUiTintStrength(value[0] as typeof uiTintStrength);
                 }}
                 min={1}
@@ -636,7 +623,6 @@ export default function AppearanceSection() {
                 value={font}
                 onValueChange={(value) => {
                   if (value) {
-                    trackSettingsInteraction("appearance", "font_changed", { value });
                     setFont(value as typeof font);
                   }
                 }}
@@ -679,7 +665,6 @@ export default function AppearanceSection() {
                 value={roundness}
                 onValueChange={(value) => {
                   if (value) {
-                    trackSettingsInteraction("appearance", "roundness_changed", { value });
                     setRoundness(value as typeof roundness);
                   }
                 }}
@@ -723,7 +708,6 @@ export default function AppearanceSection() {
                 <Select
                   value={textScale}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("appearance", "text_scale_changed", { value });
                     setTextScale(value as typeof textScale);
                   }}
                 >
@@ -776,7 +760,6 @@ export default function AppearanceSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("appearance", "reset_chat_background");
                     setChatBackground((prev) => ({
                       ...prev,
                       tint: chatBackgroundDefaults.tint,
@@ -1063,9 +1046,6 @@ export default function AppearanceSection() {
                 <Switch
                   checked={markdownHighlighting}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("appearance", "markdown_highlighting_toggled", {
-                      enabled: checked,
-                    });
                     setMarkdownHighlighting(checked);
                   }}
                   aria-label="Toggle markdown highlighting"
@@ -1096,7 +1076,6 @@ export default function AppearanceSection() {
                 <Select
                   value={inputStyle}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("appearance", "input_style_changed", { value });
                     setInputStyle(value as InputStyleOption);
                   }}
                 >
@@ -1138,9 +1117,6 @@ export default function AppearanceSection() {
                 <Select
                   value={collapsedSidebarLayout}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("appearance", "collapsed_sidebar_layout_changed", {
-                      value,
-                    });
                     setCollapsedSidebarLayout(value as CollapsedSidebarLayoutOption);
                   }}
                 >

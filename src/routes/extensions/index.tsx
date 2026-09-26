@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTools } from "@/contexts/use-tools/tools-hooks";
-import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { mcpAuthStatesAtom, mcpServerLoadStatesAtom } from "@/lib/jotai/mcp-atoms";
 import { mcpServersAtom } from "@/lib/jotai/settings-atoms";
 import { type McpServerConfig } from "@/lib/settings/types";
@@ -119,17 +118,6 @@ export default function ExtensionsRoute() {
         mcpServerLoadStates[serverId]?.status === "error" &&
         updates.timeoutMs !== undefined &&
         updates.timeoutMs !== currentServer.timeoutMs;
-      if (
-        currentServer &&
-        typeof updates.enabled === "boolean" &&
-        updates.enabled !== currentServer.enabled
-      ) {
-        trackGoogleAnalyticsEvent("extension_enabled_changed", {
-          extension_source: isServerFromRegistry(currentServer) ? "registry" : "custom",
-          transport_type: currentServer.type,
-          enabled: updates.enabled,
-        });
-      }
 
       setMcpServers((prev) =>
         prev.map((server) =>
@@ -180,11 +168,6 @@ export default function ExtensionsRoute() {
           };
 
     setMcpServers((prev) => [newServer, ...prev]);
-    trackGoogleAnalyticsEvent("extension_added", {
-      extension_source: "custom",
-      transport_type: newServer.type,
-      requires_approval: newServer.requiresApproval,
-    });
   };
 
   const handleInstallExtension = (installed: McpRegistryInstallResult) => {
@@ -214,11 +197,7 @@ export default function ExtensionsRoute() {
           };
 
     setMcpServers((prev) => [newServer, ...prev]);
-    trackGoogleAnalyticsEvent("extension_added", {
-      extension_source: "registry",
-      transport_type: newServer.type,
-      requires_approval: newServer.requiresApproval,
-    });
+
     toast.success(`${installed.name} installed`);
   };
 
@@ -229,14 +208,6 @@ export default function ExtensionsRoute() {
 
   const handleConfirmUninstall = () => {
     if (!serverToUninstall) return;
-
-    const server = mcpServers.find((item) => item.id === serverToUninstall.id);
-    if (server) {
-      trackGoogleAnalyticsEvent("extension_removed", {
-        extension_source: isServerFromRegistry(server) ? "registry" : "custom",
-        transport_type: server.type,
-      });
-    }
 
     setMcpServers((prev) => prev.filter((server) => server.id !== serverToUninstall.id));
     toast.success(`${serverToUninstall.name} removed`);
@@ -357,14 +328,7 @@ export default function ExtensionsRoute() {
       return;
     }
 
-    const timeout = window.setTimeout(() => {
-      trackGoogleAnalyticsEvent("extension_search_used", {
-        query_length: trimmedQuery.length,
-        only_installed: onlyInstalled,
-        show_device_extensions: showDeviceExtensions,
-        show_online_extensions: showOnlineExtensions,
-      });
-    }, 300);
+    const timeout = window.setTimeout(() => {}, 300);
 
     return () => {
       window.clearTimeout(timeout);
@@ -374,12 +338,7 @@ export default function ExtensionsRoute() {
   return (
     <main className="flex h-svh min-h-0 flex-col" role="main">
       <header className="bg-background sticky top-0 z-10 flex items-center gap-3 border-b p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleNavigateBack}
-          analytics={{ event: "extensions_back_clicked", params: { ui_location: "header" } }}
-        >
+        <Button variant="outline" size="sm" onClick={handleNavigateBack}>
           <IconArrowLeft data-icon="inline-start" />
           Back
         </Button>
@@ -413,7 +372,6 @@ export default function ExtensionsRoute() {
                   size="icon"
                   variant="outline"
                   aria-label="Filter extensions"
-                  analytics={{ event: "extension_filters_opened" }}
                 >
                   <IconFilter data-icon="inline-start" />
                 </Button>
@@ -454,10 +412,7 @@ export default function ExtensionsRoute() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Button
-            onClick={() => setShowAddDialog(true)}
-            analytics={{ event: "custom_extension_dialog_opened" }}
-          >
+          <Button onClick={() => setShowAddDialog(true)}>
             <IconPlus data-icon="inline-start" />
             Add Custom
           </Button>
@@ -513,20 +468,10 @@ export default function ExtensionsRoute() {
         knownRegistryNames={knownRegistryNames}
         onRemove={(serverId) => {
           const server = mcpServers.find((s) => s.id === serverId);
-          if (server) {
-            trackGoogleAnalyticsEvent("extension_removed", {
-              extension_source: "dangling",
-              transport_type: server.type,
-            });
-          }
           setMcpServers((prev) => prev.filter((s) => s.id !== serverId));
           toast.success(`${server?.name || "Extension"} removed`);
         }}
         onRemoveAll={(serverIds) => {
-          trackGoogleAnalyticsEvent("extension_removed", {
-            extension_source: "dangling_bulk",
-            removed_count: serverIds.length,
-          });
           const ids = new Set(serverIds);
           setMcpServers((prev) => prev.filter((s) => !ids.has(s.id)));
           toast.success(`Removed ${serverIds.length} dangling extensions`);

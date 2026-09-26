@@ -32,7 +32,6 @@ import {
   getProviderModelName,
   type ProviderModelMetadata,
 } from "@/lib/ai/providers/provider-models";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 
 interface ModelListProps {
   models: ProviderModelMetadata[];
@@ -114,11 +113,6 @@ function AddModelForm({ existingIds, builtInModelIds, onAdd, onCancel }: AddMode
       supportsAttachments,
       contextWindow: parsedContextWindow ?? undefined,
       maxOutputTokens: parsedMaxOutputTokens ?? undefined,
-    });
-
-    trackSettingsInteraction("providers", "model_added", {
-      model_id_length: trimmedId.length,
-      overrides_built_in: overridesBuiltIn,
     });
   };
 
@@ -415,7 +409,6 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
             size="icon"
             className="size-8"
             onClick={() => {
-              trackSettingsInteraction("providers", "model_config_opened");
               setConfigOpen(true);
             }}
             aria-label="Configure model"
@@ -428,7 +421,6 @@ const ModelRow = memo(function ModelRow({ model, onChange, onDelete }: ModelRowP
             size="icon"
             className="text-destructive hover:text-destructive size-8"
             onClick={() => {
-              trackSettingsInteraction("providers", "model_deleted");
               onDelete(model.id);
             }}
             aria-label="Delete model"
@@ -553,10 +545,6 @@ export function ModelList({
         onChange([...fetchedModels, ...models]);
       }
 
-      trackSettingsInteraction("providers", "models_auto_fetched", {
-        fetched_count: fetchedModels.length,
-      });
-
       setFetchStateWithReset("success");
     } catch {
       setFetchStateWithReset("error");
@@ -597,10 +585,6 @@ export function ModelList({
               size="sm"
               onClick={handleFetchModels}
               disabled={fetchState !== "idle"}
-              analytics={{
-                event: "settings_interaction",
-                params: { section: "providers", control: "auto_fetch_models_clicked" },
-              }}
             >
               {fetchIcon}
               Auto
@@ -611,7 +595,6 @@ export function ModelList({
             variant="outline"
             size="sm"
             onClick={() => {
-              trackSettingsInteraction("providers", "add_model_form_opened");
               setIsAdding(true);
             }}
           >
@@ -677,7 +660,6 @@ export function ModelList({
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  trackSettingsInteraction("providers", "add_model_form_opened");
                   setIsAdding(true);
                 }}
               >
