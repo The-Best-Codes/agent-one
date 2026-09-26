@@ -24,7 +24,6 @@ import useMobileDetection from "@/hooks/use-mobile-detection";
 import { usePendingToolApproval } from "@/hooks/use-pending-tool-approval";
 import { useTheme } from "@/hooks/use-theme";
 import { loadChatInputDraft, saveChatInputDraft } from "@/lib/chat-input-drafts";
-import { trackGoogleAnalyticsEvent } from "@/lib/google-analytics";
 import { chatIdsAtom } from "@/lib/jotai/atoms";
 import {
   inputStyleAtom,
@@ -251,12 +250,7 @@ export const MainChatInput = ({
         isSubmittingRef.current = false;
       }
       saveChatInputDraft(draftKey, "");
-      trackGoogleAnalyticsEvent("message_sent", {
-        ui_location: "main_chat_input",
-        text_length: currentText.length,
-        has_files: Boolean(files),
-        file_count: files?.length ?? 0,
-      });
+
       if (editorViewRef.current) {
         editorViewRef.current.dispatch({
           changes: {
@@ -325,11 +319,6 @@ export const MainChatInput = ({
         fileInputRef.current.files = updatedFileList;
       }
 
-      trackGoogleAnalyticsEvent("files_attached", {
-        ui_location: "main_chat_input",
-        file_count: updatedFileList.length,
-      });
-
       logger.verbose("Files added successfully", {
         totalFileCount: updatedFileList.length,
       });
@@ -365,11 +354,6 @@ export const MainChatInput = ({
 
     const newFileList = dt.files;
     setFiles(newFileList.length > 0 ? newFileList : undefined);
-
-    trackGoogleAnalyticsEvent("attached_file_removed", {
-      ui_location: "main_chat_input",
-      remaining_file_count: newFileList.length,
-    });
 
     if (fileInputRef.current) {
       fileInputRef.current.files = newFileList;
@@ -632,10 +616,6 @@ export const MainChatInput = ({
                   onClick={() => {
                     fileInputRef.current?.click();
                   }}
-                  analytics={{
-                    event: "attachment_picker_opened",
-                    params: { ui_location: "main_chat_input" },
-                  }}
                   className="relative"
                   aria-label="Attach files"
                 >
@@ -687,10 +667,6 @@ export const MainChatInput = ({
                       aria-hidden={!showStopButton}
                       inert={!showStopButton}
                       onClick={() => stop()}
-                      analytics={{
-                        event: "response_stop_clicked",
-                        params: { ui_location: "main_chat_input" },
-                      }}
                       aria-label="Stop response"
                     >
                       <IconPlayerStopFilled />
@@ -720,12 +696,6 @@ export const MainChatInput = ({
                         !currentModel ||
                         hasPendingApproval
                       }
-                      analytics={{
-                        event: showInterruptButton
-                          ? "interrupt_button_clicked"
-                          : "send_button_clicked",
-                        params: { ui_location: "main_chat_input" },
-                      }}
                       aria-label={
                         showInterruptButton ? "Interrupt and send message" : "Send message"
                       }

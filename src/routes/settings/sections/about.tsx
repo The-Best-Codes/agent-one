@@ -23,11 +23,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  AdaptiveTooltip,
-  AdaptiveTooltipContent,
-  AdaptiveTooltipTrigger,
-} from "@/components/ui/adaptive-tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -41,16 +36,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { Switch } from "@/components/ui/switch";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
-import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
 import {
   modelDirectoryStatusAtom,
   resetModelDirectory,
   updateModelDirectory,
 } from "@/lib/ai/models/model-directory";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
-import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom } from "@/lib/jotai/unsynced-local-atoms";
 
 import SettingsTarget from "../settings-target";
@@ -63,8 +54,6 @@ export default function AboutSection() {
   const navigate = useNavigate();
   const { updateStatus, updateProgress, updateVersion, checkForUpdates, downloadAndInstallUpdate } =
     useUpdate();
-  const { user } = useWebAuth();
-  const [analyticsIdentity, setAnalyticsIdentity] = useAtom(analyticsIdentityAtom);
   const [debugMode] = useAtom(debugModeEnabledAtom);
   const modelDirectoryStatus = useAtomValue(modelDirectoryStatusAtom);
   const [isUpdatingModelDirectory, setIsUpdatingModelDirectory] = useState(false);
@@ -138,7 +127,6 @@ export default function AboutSection() {
         return (
           <Button
             onClick={() => {
-              trackSettingsInteraction("about", "check_for_updates");
               void checkForUpdates();
             }}
             variant="outline"
@@ -164,7 +152,6 @@ export default function AboutSection() {
           <SettingsTarget id="setting-download-and-install-update">
             <Button
               onClick={() => {
-                trackSettingsInteraction("about", "download_and_install_update");
                 void downloadAndInstallUpdate();
               }}
               size="sm"
@@ -179,7 +166,6 @@ export default function AboutSection() {
         return (
           <Button
             onClick={() => {
-              trackSettingsInteraction("about", "retry_update_check");
               void checkForUpdates();
             }}
             variant="outline"
@@ -199,7 +185,7 @@ export default function AboutSection() {
 
   const handleUpdateModelDirectory = async () => {
     setIsUpdatingModelDirectory(true);
-    trackSettingsInteraction("about", "model_directory_update");
+
     const result = await updateModelDirectory();
     setIsUpdatingModelDirectory(false);
 
@@ -216,7 +202,6 @@ export default function AboutSection() {
   };
 
   const handleResetModelDirectory = async () => {
-    trackSettingsInteraction("about", "model_directory_reset");
     await resetModelDirectory();
     toast.success("Model list reset to bundled version");
   };
@@ -384,79 +369,6 @@ export default function AboutSection() {
               <IconExternalLink className="size-4" />
             </a>
           </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Usage Analytics</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <SettingsTarget id="setting-allow-usage-analytics">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-1 flex-col gap-1">
-                <p className="text-sm font-medium">Allow usage analytics</p>
-                <p className="text-muted-foreground text-sm">
-                  When disabled, AgentOne stops sending Google Analytics events from the desktop
-                  app.
-                </p>
-              </div>
-              <Switch
-                checked={analyticsIdentity !== "off"}
-                onCheckedChange={(checked) => {
-                  const nextValue = checked ? "user-id" : "off";
-                  trackSettingsInteraction("about", "analytics_enabled_toggled", {
-                    value: nextValue,
-                  });
-                  setAnalyticsIdentity(nextValue);
-                }}
-                aria-label="Allow usage analytics"
-              />
-            </div>
-          </SettingsTarget>
-          <SettingsTarget id="setting-associate-analytics-with-my-signed-in-account">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex flex-1 flex-col gap-1">
-                <p className="text-sm font-medium">Associate analytics with my signed-in account</p>
-                <p className="text-muted-foreground text-sm">
-                  When enabled, AgentOne sends your internal account ID to GA4 as a User-ID so you
-                  can measure signed-in usage across sessions. We do not send your name or email
-                  address to Google Analytics.
-                </p>
-                <a
-                  href="https://www.agent-one.dev/privacy?utm_source=desktop-app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex w-fit underline"
-                >
-                  Learn more
-                </a>
-              </div>
-
-              <AdaptiveTooltip>
-                <AdaptiveTooltipTrigger asChild>
-                  <span>
-                    <Switch
-                      checked={analyticsIdentity === "user-id"}
-                      disabled={analyticsIdentity === "off" || !user}
-                      onCheckedChange={(checked) => {
-                        trackSettingsInteraction("about", "analytics_identity_toggled", {
-                          value: checked ? "user-id" : "anonymous",
-                          signed_in: Boolean(user),
-                        });
-                        setAnalyticsIdentity(checked ? "user-id" : "anonymous");
-                      }}
-                      aria-label="Associate analytics with my signed-in account"
-                    />
-                  </span>
-                </AdaptiveTooltipTrigger>
-                {!user && (
-                  <AdaptiveTooltipContent>
-                    You're not signed in, so analytics aren't associated with your account.
-                  </AdaptiveTooltipContent>
-                )}
-              </AdaptiveTooltip>
-            </div>
-          </SettingsTarget>
         </CardContent>
       </Card>
       {debugMode && (

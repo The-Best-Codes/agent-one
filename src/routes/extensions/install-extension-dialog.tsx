@@ -32,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import { isCommandAvailable } from "@/lib/run-command";
 
 import { McpServerConfigForm, type McpServerConfigFormValues } from "./mcp-server-config-form";
@@ -105,10 +104,6 @@ function InstallFieldInput({
             variant="outline"
             size="icon"
             onClick={() => setShowSecret((prev) => !prev)}
-            analytics={{
-              event: "settings_interaction",
-              params: { section: "extensions", control: "toggle_install_secret_visibility" },
-            }}
             title={showSecret ? "Hide value" : "Show value"}
           >
             {showSecret ? (
@@ -263,13 +258,6 @@ function InstallExtensionDialogBody({
     if (!result) {
       return;
     }
-
-    trackSettingsInteraction("extensions", "submit_install_extension", {
-      type: install.type,
-      method: install.label,
-      requires_approval: formValues.requiresApproval,
-      field_count: install.fields.length,
-    });
 
     onInstall(result);
     onOpenChange(false);

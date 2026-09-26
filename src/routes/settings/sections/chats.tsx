@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { trackSettingsInteraction } from "@/lib/google-analytics";
 import {
   chatSortAtom,
   extractReasoningEnabledAtom,
@@ -123,7 +122,6 @@ export default function ChatsSection() {
                 <Select
                   value={chatSort}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "chat_sort_changed", { value });
                     setChatSort(value as ChatSortOption);
                   }}
                 >
@@ -144,7 +142,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_chat_sort");
                     resetSetting("CHAT_SORT");
                   }}
                   disabled={isChatSortDefault}
@@ -168,9 +165,6 @@ export default function ChatsSection() {
                 <Switch
                   checked={sidebarChatTimeGrouping}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "sidebar_chat_time_grouping_toggled", {
-                      value: checked,
-                    });
                     setSidebarChatTimeGrouping(checked);
                   }}
                   aria-label="Group sidebar chats by time"
@@ -179,7 +173,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_sidebar_chat_time_grouping");
                     resetSetting("SIDEBAR_CHAT_TIME_GROUPING");
                   }}
                   disabled={isSidebarChatTimeGroupingDefault}
@@ -203,7 +196,6 @@ export default function ChatsSection() {
                 <Select
                   value={markdownRendering}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "markdown_rendering_changed", { value });
                     setMarkdownRendering(value as MarkdownRenderingOption);
                   }}
                 >
@@ -226,7 +218,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_markdown_rendering");
                     resetSetting("MARKDOWN_RENDERING");
                   }}
                   disabled={isMarkdownRenderingDefault}
@@ -250,9 +241,6 @@ export default function ChatsSection() {
                 <Switch
                   checked={remendEnabled}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "remend_toggled", {
-                      enabled: checked,
-                    });
                     setRemendEnabled(checked);
                   }}
                   aria-label="Toggle auto-close HTML tags"
@@ -262,7 +250,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_remend");
                     resetSetting("REMEND_ENABLED");
                   }}
                   disabled={isRemendEnabledDefault}
@@ -286,7 +273,6 @@ export default function ChatsSection() {
                 <Select
                   value={notificationSetting}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "notification_setting_changed", { value });
                     setNotificationSetting(value as NotificationOption);
                   }}
                 >
@@ -308,7 +294,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_notification_setting");
                     resetSetting("NOTIFICATION_SETTING");
                   }}
                   disabled={isNotificationSettingDefault}
@@ -332,7 +317,6 @@ export default function ChatsSection() {
                 <Select
                   value={showMessageActionRow}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "message_action_row_changed", { value });
                     setShowMessageActionRow(value as MessageActionRowOption);
                   }}
                 >
@@ -354,7 +338,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_message_action_row");
                     resetSetting("SHOW_MESSAGE_ACTION_ROW");
                   }}
                   disabled={isShowMessageActionRowDefault}
@@ -378,7 +361,6 @@ export default function ChatsSection() {
                 <Select
                   value={submitKey}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "submit_key_changed", { value });
                     setSubmitKey(value as SubmitKeyOption);
                   }}
                 >
@@ -399,7 +381,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_submit_key");
                     resetSetting("SUBMIT_KEY");
                   }}
                   disabled={isSubmitKeyDefault}
@@ -423,7 +404,6 @@ export default function ChatsSection() {
                 <Select
                   value={interruptKey}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "interrupt_key_changed", { value });
                     setInterruptKey(value as InterruptKeyOption);
                   }}
                 >
@@ -445,7 +425,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_interrupt_key");
                     resetSetting("INTERRUPT_KEY");
                   }}
                   disabled={isInterruptKeyDefault}
@@ -469,9 +448,6 @@ export default function ChatsSection() {
                 <Switch
                   checked={regenerateOnSave}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "regenerate_on_save_toggled", {
-                      enabled: checked,
-                    });
                     setRegenerateOnSave(checked);
                   }}
                   aria-label="Toggle regenerate on save"
@@ -481,7 +457,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_regenerate_on_save");
                     resetSetting("REGENERATE_ON_SAVE");
                   }}
                   disabled={isRegenerateOnSaveDefault}
@@ -505,9 +480,6 @@ export default function ChatsSection() {
                 <Switch
                   checked={showChatToBottomButton}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "chat_scroll_to_bottom_button_toggled", {
-                      enabled: checked,
-                    });
                     setShowChatToBottomButton(checked);
                   }}
                   aria-label="Toggle chat scroll to bottom button"
@@ -517,7 +489,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_chat_scroll_to_bottom_button");
                     resetSetting("SHOW_CHAT_TO_BOTTOM_BUTTON");
                   }}
                   disabled={isShowChatToBottomButtonDefault}
@@ -542,9 +513,6 @@ export default function ChatsSection() {
                 <Switch
                   checked={showMessagePreviewRail}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "message_preview_rail_toggled", {
-                      enabled: checked,
-                    });
                     setShowMessagePreviewRail(checked);
                   }}
                   aria-label="Toggle message navigation rail"
@@ -554,7 +522,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_message_preview_rail");
                     resetSetting("SHOW_MESSAGE_PREVIEW_RAIL");
                   }}
                   disabled={isShowMessagePreviewRailDefault}
@@ -578,9 +545,6 @@ export default function ChatsSection() {
                 <Switch
                   checked={showChatStatusIndicator}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "chat_status_indicators_toggled", {
-                      enabled: checked,
-                    });
                     setShowChatStatusIndicator(checked);
                   }}
                   aria-label="Toggle chat status indicators"
@@ -590,7 +554,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_chat_status_indicators");
                     resetSetting("SHOW_CHAT_STATUS_INDICATOR");
                   }}
                   disabled={isShowChatStatusIndicatorDefault}
@@ -623,9 +586,6 @@ export default function ChatsSection() {
                 <Switch
                   checked={extractReasoningEnabled}
                   onCheckedChange={(checked) => {
-                    trackSettingsInteraction("chats", "extract_reasoning_toggled", {
-                      enabled: checked,
-                    });
                     setExtractReasoningEnabled(checked);
                   }}
                   aria-label="Toggle extract reasoning from think tags"
@@ -635,7 +595,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_extract_reasoning");
                     resetSetting("EXTRACT_REASONING_ENABLED");
                   }}
                   disabled={isExtractReasoningDefault}
@@ -661,9 +620,6 @@ export default function ChatsSection() {
                 <Slider
                   value={[throttleValue]}
                   onValueChange={(value) => {
-                    trackSettingsInteraction("chats", "throttle_value_changed", {
-                      value: value[0],
-                    });
                     setThrottleValue(value[0]);
                   }}
                   min={50}
@@ -677,7 +633,6 @@ export default function ChatsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    trackSettingsInteraction("chats", "reset_throttle_value");
                     resetSetting("THROTTLE_VALUE");
                   }}
                   disabled={isThrottleValueDefault}
@@ -699,7 +654,6 @@ export default function ChatsSection() {
               variant="ghost"
               size="icon"
               onClick={() => {
-                trackSettingsInteraction("chats", "reset_title_generation");
                 resetSetting("TITLE_GENERATION");
               }}
               disabled={isTitleGenerationDefault}
@@ -721,7 +675,6 @@ export default function ChatsSection() {
               <Select
                 value={titleGeneration.method}
                 onValueChange={(value) => {
-                  trackSettingsInteraction("chats", "title_generation_method_changed", { value });
                   updateTitleGeneration({
                     method: value as TitleGenerationMethodOption,
                   });
@@ -764,9 +717,6 @@ export default function ChatsSection() {
                   max="200"
                   value={titleGeneration.characterLimit}
                   onChange={(e) => {
-                    trackSettingsInteraction("chats", "title_character_limit_changed", {
-                      value: parseInt(e.target.value) || 50,
-                    });
                     updateTitleGeneration({
                       characterLimit: parseInt(e.target.value) || 50,
                     });
@@ -794,9 +744,7 @@ export default function ChatsSection() {
                   value={[titleMaxOutputTokenValue]}
                   onValueChange={(value) => {
                     const maxOutputTokens = value[0] === 0 ? "none" : value[0];
-                    trackSettingsInteraction("chats", "title_max_output_tokens_changed", {
-                      value: maxOutputTokens,
-                    });
+
                     updateTitleGeneration({ maxOutputTokens });
                   }}
                   min={0}
@@ -825,9 +773,6 @@ export default function ChatsSection() {
                   type="text"
                   value={titleGeneration.customPhrase}
                   onChange={(e) => {
-                    trackSettingsInteraction("chats", "title_custom_phrase_changed", {
-                      value_length: e.target.value.length,
-                    });
                     updateTitleGeneration({
                       customPhrase: e.target.value,
                     });
@@ -855,9 +800,6 @@ export default function ChatsSection() {
                   type="text"
                   value={titleGeneration.fallbackPhrase}
                   onChange={(e) => {
-                    trackSettingsInteraction("chats", "title_fallback_phrase_changed", {
-                      value_length: e.target.value.length,
-                    });
                     updateTitleGeneration({
                       fallbackPhrase: e.target.value,
                     });

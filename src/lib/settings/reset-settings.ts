@@ -8,7 +8,6 @@ import type { TtsProviderId } from "@/lib/settings/types";
 import { getApiKeyBaseAtom } from "../jotai/api-key-atoms";
 import { providerConfigAtoms } from "../jotai/provider-atoms";
 import {
-  analyticsIdentityAtom,
   chatBackgroundAtom,
   chatSortAtom,
   chatVirtualizationModeAtom,
@@ -92,7 +91,6 @@ export function resetAllSettings(): void {
   store.set(roundnessAtom, RESET);
   store.set(fontAtom, RESET);
   store.set(notificationSettingAtom, RESET);
-  store.set(analyticsIdentityAtom, RESET);
   store.set(userNameAtom, RESET);
   store.set(systemPromptAppendixAtom, RESET);
   store.set(memoryAtom, RESET);
@@ -221,9 +219,6 @@ export function resetSetting(key: keyof DefaultSettings): void {
       break;
     case "NOTIFICATION_SETTING":
       store.set(notificationSettingAtom, RESET);
-      break;
-    case "ANALYTICS_IDENTITY":
-      store.set(analyticsIdentityAtom, RESET);
       break;
     case "ENABLED_TOOLS":
       store.set(enabledToolsAtom, RESET);

@@ -75,9 +75,6 @@ export type TextScaleOption = (typeof TEXT_SCALE_OPTIONS)[number];
 export const NOTIFICATION_SETTING_OPTIONS = ["always", "when-unfocused", "never"] as const;
 export type NotificationOption = (typeof NOTIFICATION_SETTING_OPTIONS)[number];
 
-export const ANALYTICS_IDENTITY_OPTIONS = ["off", "anonymous", "user-id"] as const;
-export type AnalyticsIdentityOption = (typeof ANALYTICS_IDENTITY_OPTIONS)[number];
-
 export const SHOW_MESSAGE_ACTION_ROW_OPTIONS = ["hover", "always", "never"] as const;
 export type MessageActionRowOption = (typeof SHOW_MESSAGE_ACTION_ROW_OPTIONS)[number];
 
@@ -365,7 +362,6 @@ export interface DefaultSettings extends ApiKeySettings {
   FONT: FontOption;
   TEXT_SCALE: TextScaleOption;
   NOTIFICATION_SETTING: NotificationOption;
-  ANALYTICS_IDENTITY: AnalyticsIdentityOption;
   ENABLED_TOOLS: Record<ToolId, boolean>;
   TOOL_CONFIGS: ToolConfigs;
   MCP_SERVERS: McpServerConfig[];
@@ -466,7 +462,6 @@ export const DEFAULT_SETTINGS: DefaultSettings = {
   FONT: "default",
   TEXT_SCALE: "md",
   NOTIFICATION_SETTING: "when-unfocused",
-  ANALYTICS_IDENTITY: "user-id",
   ENABLED_TOOLS: {
     dateTime: true,
     waitNumberMilliseconds: true,

@@ -1,6 +1,5 @@
-import { useAtomValue } from "jotai";
-import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter, Outlet, Route, Routes, useLocation } from "react-router";
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 
 import { LocalProviderStartupSync } from "@/components/a1/local-provider-startup-sync";
@@ -8,14 +7,6 @@ import { ModelDirectoryStartupSync } from "@/components/a1/model-directory-start
 import { ReactScan } from "@/components/a1/react-scan";
 import { Spinner } from "@/components/ui/spinner";
 import { MultiChatProvider } from "@/contexts/use-chat/chat-context";
-import { useWebAuth } from "@/contexts/use-web-auth/web-auth-hooks";
-import {
-  initializeGoogleAnalytics,
-  setGoogleAnalyticsEnabled,
-  setGoogleAnalyticsUserId,
-  trackGoogleAnalyticsPageView,
-} from "@/lib/google-analytics";
-import { analyticsIdentityAtom } from "@/lib/jotai/settings-atoms";
 import ChatRoute from "@/routes/chat";
 import ExtensionsRoute from "@/routes/extensions";
 import IndexRoute from "@/routes/index";
@@ -46,34 +37,9 @@ function AppLayout() {
   );
 }
 
-function GoogleAnalyticsTracker() {
-  const location = useLocation();
-  const analyticsIdentity = useAtomValue(analyticsIdentityAtom);
-  const { user } = useWebAuth();
-
-  useEffect(() => {
-    setGoogleAnalyticsEnabled(analyticsIdentity !== "off");
-
-    if (analyticsIdentity !== "off") {
-      initializeGoogleAnalytics();
-    }
-  }, [analyticsIdentity]);
-
-  useEffect(() => {
-    setGoogleAnalyticsUserId(analyticsIdentity === "user-id" ? (user?.id ?? null) : null);
-  }, [analyticsIdentity, user?.id]);
-
-  useEffect(() => {
-    trackGoogleAnalyticsPageView(`${location.pathname}${location.search}`);
-  }, [location.pathname, location.search]);
-
-  return null;
-}
-
 function App() {
   return (
     <BrowserRouter>
-      <GoogleAnalyticsTracker />
       <ModelDirectoryStartupSync />
       <LocalProviderStartupSync />
       <KbdRegistry />
