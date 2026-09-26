@@ -1,4 +1,7 @@
 use tauri::{Listener, Manager};
+use tauri_plugin_log::{FileOpenStrategy, RotationStrategy, Target, TargetKind};
+
+const LOG_FILE_NAME: &str = "agent-one";
 
 mod keyring;
 mod mcp_auth;
@@ -123,7 +126,17 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        // .plugin(tauri_plugin_log::Builder::new().build()) // Disabled for now
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .clear_targets()
+                .target(Target::new(TargetKind::LogDir {
+                    file_name: Some(LOG_FILE_NAME.to_string()),
+                }))
+                .max_file_size(1024 * 1024)
+                .rotation_strategy(RotationStrategy::KeepSome(100))
+                .file_open_strategy(FileOpenStrategy::Rotate)
+                .build(),
+        )
         .setup(|app| {
             use tauri_plugin_deep_link::DeepLinkExt;
 

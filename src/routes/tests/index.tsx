@@ -1,6 +1,9 @@
 import { IconAlertTriangle, IconArrowLeft } from "@tabler/icons-react";
+import { appLogDir } from "@tauri-apps/api/path";
+import { openPath } from "@tauri-apps/plugin-opener";
 import { useAtom, useSetAtom } from "jotai";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,6 +16,14 @@ export default function TestsRoute() {
   const navigate = useNavigate();
   const setOnboardingCompleted = useSetAtom(onboardingCompletedAtom);
   const [reactScanEnabled, setReactScanEnabled] = useAtom(reactScanEnabledAtom);
+
+  async function openLogs() {
+    try {
+      await openPath(await appLogDir());
+    } catch (error) {
+      toast.error(`Could not open the logs folder: ${String(error)}`);
+    }
+  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -108,12 +119,12 @@ export default function TestsRoute() {
               </div>
               <div className="flex items-center justify-between rounded-md border p-4">
                 <div>
-                  <h3 className="font-medium">Log History</h3>
+                  <h3 className="font-medium">Application Logs</h3>
                   <p className="text-muted-foreground text-sm">
-                    View persisted application logs from the current session
+                    Open the folder containing recent application logs
                   </p>
                 </div>
-                <Button onClick={() => navigate("/tests/logs")} variant="outline">
+                <Button onClick={() => void openLogs()} variant="outline">
                   View Logs
                 </Button>
               </div>
