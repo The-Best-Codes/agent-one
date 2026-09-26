@@ -396,7 +396,10 @@ export const VirtualizedChatList = ({
 
   const showNoChatsPlaceholder = isMetadataLoaded && chats.length === 0;
   const showSearchLoading =
-    isSearching && searchContent && searchResults === null && searchQuery.trim();
+    isSearching &&
+    searchContent &&
+    (searchResults === null || filteredChats.length === 0) &&
+    searchQuery.trim();
   const showNoSearchResults =
     !isSearching && chats.length > 0 && filteredChats.length === 0 && searchQuery.trim();
   const allSelected =
