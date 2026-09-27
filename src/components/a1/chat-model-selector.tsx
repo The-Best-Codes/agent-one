@@ -11,9 +11,9 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router";
 
 import { ProviderLogo } from "@/components/a1/provider-logo";
+import { SettingsLink } from "@/components/a1/settings-link";
 import {
   AdaptivePopover,
   AdaptivePopoverContent,
@@ -86,7 +86,6 @@ const MODEL_CAPABILITIES = [
 interface ModelListProps {
   rows: VirtualRow[];
   currentModel: ModelData | undefined;
-  settingsPath: string;
   parentRef: React.RefObject<HTMLDivElement | null>;
   virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
@@ -102,7 +101,6 @@ const ITEM_HEIGHT = 32;
 const ModelList: FC<ModelListProps> = ({
   rows,
   currentModel,
-  settingsPath,
   parentRef,
   virtualizer,
   searchQuery,
@@ -344,10 +342,10 @@ const ModelList: FC<ModelListProps> = ({
           )}
           <div className="p-1">
             <Button asChild variant="outline" size="sm" className="w-full justify-start">
-              <Link to={settingsPath}>
+              <SettingsLink tab="providers">
                 <IconPlus data-icon="inline-start" />
                 Add more models
-              </Link>
+              </SettingsLink>
             </Button>
           </div>
         </CommandList>
@@ -363,7 +361,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   loading = false,
 }) => {
   const { currentModel, setModel } = useModel();
-  const { id: chatId } = useParams<{ id: string }>();
   const [open, setOpen] = useState(false);
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
   const [staleModel, setStaleModel] = useState(currentModel);
@@ -546,7 +543,6 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         <ModelList
           rows={rows}
           currentModel={currentModel}
-          settingsPath={`/settings?tab=providers${chatId ? `&chatId=${chatId}` : ""}`}
           parentRef={parentRef}
           virtualizer={virtualizer}
           searchQuery={searchQuery}

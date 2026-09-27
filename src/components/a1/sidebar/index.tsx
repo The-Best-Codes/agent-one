@@ -26,11 +26,13 @@ import {
 } from "@/components/ui/drawer";
 import { useKeyboardShortcut } from "@/hooks/use-keyboard-shortcut";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useSettingsPath } from "@/hooks/use-settings-path";
 import { collapsedSidebarLayoutAtom } from "@/lib/jotai/settings-atoms";
 import { debugModeEnabledAtom, sidebarCollapsedAtom } from "@/lib/jotai/unsynced-local-atoms";
 import { getLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 
+import { SettingsLink } from "../settings-link";
 import { ChatList } from "./chat-list";
 import { SearchModal } from "./search-modal";
 
@@ -50,6 +52,7 @@ const SidebarContent = ({
   onChatClick?: (id: string) => void;
 }) => {
   const navigate = useNavigate();
+  const debugSettingsPath = useSettingsPath({ tab: "about", id: "setting-debug" });
   const [debugMode, setDebugMode] = useAtom(debugModeEnabledAtom);
   const clickTimestamps = useRef<number[]>([]);
 
@@ -71,7 +74,7 @@ const SidebarContent = ({
               description: "Check Settings > Help & Updates to access internal tests.",
               action: {
                 label: "Open Settings",
-                onClick: () => navigate("/settings?tab=about#setting-debug"),
+                onClick: () => navigate(debugSettingsPath),
               },
             });
           },
@@ -79,7 +82,7 @@ const SidebarContent = ({
         duration: Infinity,
       });
     }
-  }, [navigate, debugMode, setDebugMode]);
+  }, [navigate, debugMode, setDebugMode, debugSettingsPath]);
 
   return (
     <div className="flex h-full flex-col">
@@ -110,13 +113,10 @@ const SidebarContent = ({
           </Link>
         </Button>
         <Button variant="outline" className="w-full justify-start" asChild>
-          <Link
-            to={`/settings${activeChatId ? `?chatId=${activeChatId}` : ""}`}
-            data-icon="inline-start"
-          >
+          <SettingsLink data-icon="inline-start">
             <IconSettings data-icon="inline-start" />
             Configure AgentOne
-          </Link>
+          </SettingsLink>
         </Button>
       </div>
     </div>

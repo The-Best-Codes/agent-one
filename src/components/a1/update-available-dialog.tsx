@@ -19,10 +19,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUpdate } from "@/contexts/use-update/update-hooks";
+import { useSettingsPath } from "@/hooks/use-settings-path";
 
 export function UpdateAvailableDialog() {
   const { dialogOpen, updateVersion, handleRemind, dismissDialog } = useUpdate();
   const navigate = useNavigate();
+  const updateSettingsPath = useSettingsPath({
+    tab: "about",
+    id: "setting-download-and-install-update",
+  });
 
   return (
     <Dialog open={dialogOpen}>
@@ -71,7 +76,7 @@ export function UpdateAvailableDialog() {
             size="sm"
             onClick={() => {
               dismissDialog();
-              void navigate("/settings?tab=about#setting-download-and-install-update");
+              void navigate(updateSettingsPath);
             }}
           >
             <IconDownload data-icon="inline-start" />

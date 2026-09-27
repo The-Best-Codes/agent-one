@@ -2,8 +2,8 @@ import { IconBulb, IconPencil, IconRestore } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
 import { useRecordHotkeys } from "react-hotkeys-hook";
-import { Link } from "react-router";
 
+import { SettingsLink } from "@/components/a1/settings-link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -194,9 +194,9 @@ export default function KeyboardShortcutsSection() {
             <IconBulb className="size-5 shrink-0" />
             <span>
               You can change the send key in (<Kbd>Enter</Kbd> / <Kbd>Ctrl/CMD+Enter</Kbd>){" "}
-              <Link to="/settings?tab=chats#setting-submit-key" className="underline">
+              <SettingsLink tab="chats" id="setting-submit-key" className="underline">
                 chat settings.
-              </Link>
+              </SettingsLink>
             </span>
           </div>
 

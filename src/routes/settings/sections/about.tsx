@@ -11,12 +11,13 @@ import {
 } from "@tabler/icons-react";
 import { useAtom, useAtomValue } from "jotai";
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import packageJson from "@/../package.json";
 import { getReleaseNotes, getReleaseNotesVersions } from "@/assets/release-notes";
 import { MemoizedMarkdown } from "@/components/a1/markdown/memoized-markdown";
+import { SettingsLink } from "@/components/a1/settings-link";
 import {
   Accordion,
   AccordionContent,
@@ -292,9 +293,9 @@ export default function AboutSection() {
           <CardContent className="flex flex-col gap-4">
             <p className="text-muted-foreground text-sm">
               {"Download the latest"}{" "}
-              <Link className="underline" to="/settings?tab=providers#setting-built-in-providers">
+              <SettingsLink className="underline" tab="providers" id="setting-built-in-providers">
                 built-in providers'
-              </Link>{" "}
+              </SettingsLink>{" "}
               model metadata. This will update the model list available in the UI.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

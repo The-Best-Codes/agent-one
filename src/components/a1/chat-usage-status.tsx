@@ -2,8 +2,8 @@ import NumberFlow from "@number-flow/react";
 import { IconChevronLeft, IconCoins } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router";
 
+import { SettingsLink } from "@/components/a1/settings-link";
 import {
   AdaptiveTooltip,
   AdaptiveTooltipContent,
@@ -80,10 +80,8 @@ export const ChatUsageStatus = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
   const isColumnLayout = collapsedLayout === "column";
-  const { id: chatId } = useParams<{ id: string }>();
 
   const isAgentOneModel = currentModel?.provider === "AgentOne";
-  const creditSettingsPath = `/settings?tab=account${chatId ? `&chatId=${chatId}` : ""}#setting-credits-used`;
 
   useEffect(() => {
     if (!isChatLoading) {
@@ -173,19 +171,24 @@ export const ChatUsageStatus = () => {
                         tabIndex={isCollapsed ? -1 : 0}
                         asChild
                       >
-                        <Link
-                          to={creditSettingsPath}
+                        <SettingsLink
+                          tab="account"
+                          id="setting-credits-used"
                           aria-label="View AgentOne credit usage in Settings"
                         >
                           <IconCoins className="text--muted-foreground size-5" />
-                        </Link>
+                        </SettingsLink>
                       </AdaptiveTooltipTrigger>
                       <AdaptiveTooltipContent className="max-w-xs whitespace-normal">
                         <span>
                           AgentOne usage consumes credits.{" "}
-                          <Link to={creditSettingsPath} className="underline underline-offset-2">
+                          <SettingsLink
+                            tab="account"
+                            id="setting-credits-used"
+                            className="underline underline-offset-2"
+                          >
                             View credit usage in Settings
-                          </Link>
+                          </SettingsLink>
                           .
                         </span>
                       </AdaptiveTooltipContent>
