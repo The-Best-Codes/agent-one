@@ -4,12 +4,14 @@ import {
   IconFilter,
   IconPaperclip,
   IconPhoto,
+  IconPlus,
   IconSelector,
   IconTool,
 } from "@tabler/icons-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import fuzzysort from "fuzzysort";
 import { type FC, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import { Link, useParams } from "react-router";
 
 import { ProviderLogo } from "@/components/a1/provider-logo";
 import {
@@ -84,6 +86,7 @@ const MODEL_CAPABILITIES = [
 interface ModelListProps {
   rows: VirtualRow[];
   currentModel: ModelData | undefined;
+  settingsPath: string;
   parentRef: React.RefObject<HTMLDivElement | null>;
   virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
   searchQuery: string;
@@ -99,6 +102,7 @@ const ITEM_HEIGHT = 32;
 const ModelList: FC<ModelListProps> = ({
   rows,
   currentModel,
+  settingsPath,
   parentRef,
   virtualizer,
   searchQuery,
@@ -295,12 +299,14 @@ const ModelList: FC<ModelListProps> = ({
                     >
                       <div className="flex w-full min-w-0 flex-1 items-center justify-center gap-1">
                         {isSelected && <IconCheck />}
-                        <ProviderLogo
-                          id={model.providerId}
-                          title={model.provider}
-                          className="size-4!"
-                          imageClassName="p-0"
-                        />
+                        {model.providerId !== "agent-one" && (
+                          <ProviderLogo
+                            id={model.providerId}
+                            title={model.provider}
+                            className="size-4!"
+                            imageClassName="p-0"
+                          />
+                        )}
 
                         <div className="scrollbar-size-xs w-full overflow-x-auto">
                           <span className="font-medium whitespace-nowrap">{model.name}</span>
@@ -336,6 +342,14 @@ const ModelList: FC<ModelListProps> = ({
               </div>
             </CommandGroup>
           )}
+          <div className="p-1">
+            <Button asChild variant="outline" size="sm" className="w-full justify-start">
+              <Link to={settingsPath}>
+                <IconPlus data-icon="inline-start" />
+                Add more models
+              </Link>
+            </Button>
+          </div>
         </CommandList>
       </div>
     </Command>
@@ -349,6 +363,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   loading = false,
 }) => {
   const { currentModel, setModel } = useModel();
+  const { id: chatId } = useParams<{ id: string }>();
   const [open, setOpen] = useState(false);
   const [loadingDelayPassed, setLoadingDelayPassed] = useState(false);
   const [staleModel, setStaleModel] = useState(currentModel);
@@ -485,7 +500,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
       <div className="min-w-0 flex-1">
         <div className="scrollbar-size-xs scroll-fade-x w-full overflow-x-auto" tabIndex={0}>
           <div className="w-full text-left whitespace-nowrap">
-            <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
+            {displayedModel.providerId !== "agent-one" && (
+              <span className="text-muted-foreground text-xs">{displayedModel.provider}/</span>
+            )}
             <span className="font-medium">{displayedModel.name}</span>
           </div>
         </div>
@@ -529,6 +546,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
         <ModelList
           rows={rows}
           currentModel={currentModel}
+          settingsPath={`/settings?tab=providers${chatId ? `&chatId=${chatId}` : ""}`}
           parentRef={parentRef}
           virtualizer={virtualizer}
           searchQuery={searchQuery}
