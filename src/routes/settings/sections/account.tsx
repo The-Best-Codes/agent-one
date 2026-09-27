@@ -168,7 +168,7 @@ export default function AccountSection() {
             />
           )}
           {(user || isAuthLoading) && (
-            <div className="flex flex-col gap-4">
+            <SettingsTarget id="setting-credits-used" className="flex flex-col gap-4">
               {isAuthLoading || billingLoading || (user && !customerState) ? (
                 <div className="flex flex-col gap-4">
                   <div className="flex items-start justify-between gap-4">
@@ -254,7 +254,7 @@ export default function AccountSection() {
                   )}
                 </>
               )}
-            </div>
+            </SettingsTarget>
           )}
           <SettingsTarget id="setting-synchronize-my-settings">
             <div className="flex items-center justify-between gap-4">

@@ -1,7 +1,8 @@
 import NumberFlow from "@number-flow/react";
-import { IconChevronLeft } from "@tabler/icons-react";
+import { IconChevronLeft, IconCoins } from "@tabler/icons-react";
 import { useAtom } from "jotai";
 import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router";
 
 import {
   AdaptiveTooltip,
@@ -79,8 +80,10 @@ export const ChatUsageStatus = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isSidebarSmall = isSidebarCollapsed || !isDesktop;
   const isColumnLayout = collapsedLayout === "column";
+  const { id: chatId } = useParams<{ id: string }>();
 
   const isAgentOneModel = currentModel?.provider === "AgentOne";
+  const creditSettingsPath = `/settings?tab=account${chatId ? `&chatId=${chatId}` : ""}#setting-credits-used`;
 
   useEffect(() => {
     if (!isChatLoading) {
@@ -97,10 +100,6 @@ export const ChatUsageStatus = () => {
     };
   }, [isChatLoading]);
 
-  if (isAgentOneModel) {
-    return null;
-  }
-
   const showSkeleton = isChatLoading && delayPassed;
   const lastUsage = getLastAssistantUsage(messages);
 
@@ -111,6 +110,7 @@ export const ChatUsageStatus = () => {
   const totalTokens = contextInputTokens + contextOutputTokens;
   const maxTokens = currentModel?.contextWindow;
   const isExceeded = maxTokens !== undefined && totalTokens > maxTokens;
+  const contextUsagePercent = maxTokens ? Math.round((totalTokens / maxTokens) * 100) : null;
 
   return (
     <div
@@ -131,7 +131,7 @@ export const ChatUsageStatus = () => {
               {showSkeleton ? (
                 <>
                   <Skeleton className="size-5 rounded-full" />
-                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className={isAgentOneModel ? "size-5 rounded-full" : "h-5 w-12"} />
                 </>
               ) : (
                 <>
@@ -156,46 +156,72 @@ export const ChatUsageStatus = () => {
                       </div>
                     </AdaptiveTooltipTrigger>
                     <AdaptiveTooltipContent className="max-w-xs">
-                      {maxTokens !== undefined
-                        ? `This chat is currently ${
-                            totalTokens
-                          } tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
-                        : `This chat is currently ${
-                            totalTokens
-                          } tokens long. The model you're using supports an unknown number of tokens.`}
+                      {isAgentOneModel
+                        ? contextUsagePercent === null
+                          ? "The maximum conversation length for this model is unavailable."
+                          : `This chat is using ${contextUsagePercent}% of the model's conversation capacity.`
+                        : maxTokens !== undefined
+                          ? `This chat is currently ${totalTokens} tokens long. The model you're using supports up to ${maxTokens.toLocaleString()} tokens.`
+                          : `This chat is currently ${totalTokens} tokens long. The model you're using supports an unknown number of tokens.`}
                     </AdaptiveTooltipContent>
                   </AdaptiveTooltip>
 
-                  <AdaptiveTooltip>
-                    <AdaptiveTooltipTrigger
-                      className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
-                      tabIndex={isCollapsed ? -1 : 0}
-                      asChild
-                    >
-                      <span>
-                        {hasUnknownCost && totalCostUsd <= 0 ? (
-                          <span className="text-foreground tabular-nums">$?</span>
-                        ) : (
-                          <NumberFlow
-                            value={totalCostUsd}
-                            format={{
-                              style: "currency",
-                              currency: "USD",
-                            }}
-                            prefix={hasUnknownCost ? "≥ " : undefined}
-                            className="text-foreground tabular-nums"
-                          />
-                        )}
-                      </span>
-                    </AdaptiveTooltipTrigger>
-                    <AdaptiveTooltipContent className="max-w-xs">
-                      {hasUnknownCost
-                        ? totalCostUsd > 0
-                          ? "Estimated cost is a lower bound, as pricing data is missing for one or more messages in this chat. Edits and deleted messages are not included in these stats."
-                          : "Pricing data is unavailable for the model(s) used in this chat, so the cost cannot be estimated."
-                        : "Estimated cost of this chat in USD. Edits and deleted messages are not included in these stats."}
-                    </AdaptiveTooltipContent>
-                  </AdaptiveTooltip>
+                  {isAgentOneModel ? (
+                    <AdaptiveTooltip>
+                      <AdaptiveTooltipTrigger
+                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                        tabIndex={isCollapsed ? -1 : 0}
+                        asChild
+                      >
+                        <Link
+                          to={creditSettingsPath}
+                          aria-label="View AgentOne credit usage in Settings"
+                        >
+                          <IconCoins className="text--muted-foreground size-5" />
+                        </Link>
+                      </AdaptiveTooltipTrigger>
+                      <AdaptiveTooltipContent className="max-w-xs whitespace-normal">
+                        <span>
+                          AgentOne usage consumes credits.{" "}
+                          <Link to={creditSettingsPath} className="underline underline-offset-2">
+                            View credit usage in Settings
+                          </Link>
+                          .
+                        </span>
+                      </AdaptiveTooltipContent>
+                    </AdaptiveTooltip>
+                  ) : (
+                    <AdaptiveTooltip>
+                      <AdaptiveTooltipTrigger
+                        className="focus-visible:border-ring focus-visible:ring-ring/50 cursor-help rounded outline-none focus-visible:ring-[3px]"
+                        tabIndex={isCollapsed ? -1 : 0}
+                        asChild
+                      >
+                        <span>
+                          {hasUnknownCost && totalCostUsd <= 0 ? (
+                            <span className="text-foreground tabular-nums">$?</span>
+                          ) : (
+                            <NumberFlow
+                              value={totalCostUsd}
+                              format={{
+                                style: "currency",
+                                currency: "USD",
+                              }}
+                              prefix={hasUnknownCost ? "≥ " : undefined}
+                              className="text-foreground tabular-nums"
+                            />
+                          )}
+                        </span>
+                      </AdaptiveTooltipTrigger>
+                      <AdaptiveTooltipContent className="max-w-xs">
+                        {hasUnknownCost
+                          ? totalCostUsd > 0
+                            ? "Estimated cost is a lower bound, as pricing data is missing for one or more messages in this chat. Edits and deleted messages are not included in these stats."
+                            : "Pricing data is unavailable for the model(s) used in this chat, so the cost cannot be estimated."
+                          : "Estimated cost of this chat in USD. Edits and deleted messages are not included in these stats."}
+                      </AdaptiveTooltipContent>
+                    </AdaptiveTooltip>
+                  )}
                 </>
               )}
             </div>
