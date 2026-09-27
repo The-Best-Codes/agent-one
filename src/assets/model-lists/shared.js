@@ -19,21 +19,10 @@ export function createAgentOneProvider() {
     models: {
       auto: {
         id: "agent-one-auto",
-        name: "Auto",
-        features: { tool_call: true },
-        modalities: { output: ["text"] },
-      },
-      lite: {
-        id: "agent-one-lite",
-        name: "Lite",
-        features: { tool_call: true },
-        modalities: { output: ["text"] },
-      },
-      smart: {
-        id: "agent-one-smart",
-        name: "Smart",
-        features: { tool_call: true },
-        modalities: { output: ["text"] },
+        name: "Default",
+        features: { tool_call: true, attachment: true, reasoning: true },
+        modalities: { input: ["text", "image", "file"], output: ["text"] },
+        limit: { context: 256000, output: 32000 },
       },
     },
   };

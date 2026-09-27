@@ -168,11 +168,15 @@ function mapDirectoryModels(
   }
 
   const models = Array.from(modelMap.values());
-  const filteredModels = filter ? models.filter((model) => filter(toModelRecord(model))) : models;
+  const filteredModels = models.filter(
+    (model) =>
+      (providerId !== "agent-one" || model.id === "agent-one-auto") &&
+      (!filter || filter(toModelRecord(model))),
+  );
 
   return filteredModels.map((model) => ({
     id: `${providerId}-${model.id}`,
-    name: model.name ?? model.id,
+    name: providerId === "agent-one" ? "Default" : (model.name ?? model.id),
     provider: providerName,
     providerId,
     model: createModel(model.id),
