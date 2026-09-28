@@ -64,12 +64,8 @@ const MessagePartsInternal = ({
   const [regenerateOnSave, setRegenerateOnSave] = useAtom(regenerateOnSaveAtom);
 
   const handleEnterKey = useCallback(() => {
-    if (message.role === "user") {
-      handleSave(regenerateOnSave);
-    } else {
-      handleSave(false);
-    }
-  }, [handleSave, message.role, regenerateOnSave]);
+    handleSave(regenerateOnSave);
+  }, [handleSave, regenerateOnSave]);
 
   const handleBranch = useCallback(() => {
     if (!activeChatId) {
@@ -240,12 +236,7 @@ const MessagePartsInternal = ({
 
   if (isEditing) {
     return (
-      <div
-        className={cn(
-          "border-input focus-within:border-ring focus-within:ring-ring/50 bg-background ml-2 flex w-full flex-col rounded-md border p-2 focus-within:ring-[3px]",
-          message.role === "assistant" ? "my-2" : "mt-2 max-w-3/4 self-end",
-        )}
-      >
+      <div className="border-input focus-within:border-ring focus-within:ring-ring/50 bg-background mt-2 ml-2 flex w-full max-w-3/4 flex-col self-end rounded-md border p-2 focus-within:ring-[3px]">
         <div className="flex flex-col">{renderedParts}</div>
 
         <div className="mt-2 flex items-center justify-end gap-1.5">
@@ -253,37 +244,30 @@ const MessagePartsInternal = ({
             <IconX data-icon="inline-start" />
             Cancel
           </Button>
-          {message.role === "user" ? (
-            <ButtonGroup>
-              <Button size="xs" variant="default" onClick={() => handleSave(regenerateOnSave)}>
-                <IconCheck data-icon="inline-start" />
-                Save
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon-xs" variant="default" aria-label="More options">
-                    <IconChevronDown />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-auto min-w-max">
-                  <DropdownMenuGroup>
-                    <DropdownMenuCheckboxItem
-                      id="regenerate-on-save"
-                      checked={regenerateOnSave}
-                      onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
-                    >
-                      Regenerate when Saved
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </ButtonGroup>
-          ) : (
-            <Button size="xs" variant="default" onClick={() => handleSave(false)}>
+          <ButtonGroup>
+            <Button size="xs" variant="default" onClick={() => handleSave(regenerateOnSave)}>
               <IconCheck data-icon="inline-start" />
               Save
             </Button>
-          )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon-xs" variant="default" aria-label="More options">
+                  <IconChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-auto min-w-max">
+                <DropdownMenuGroup>
+                  <DropdownMenuCheckboxItem
+                    id="regenerate-on-save"
+                    checked={regenerateOnSave}
+                    onCheckedChange={(checked) => setRegenerateOnSave(checked as boolean)}
+                  >
+                    Regenerate when Saved
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
         </div>
       </div>
     );

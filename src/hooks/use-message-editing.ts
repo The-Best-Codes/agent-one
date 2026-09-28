@@ -23,7 +23,7 @@ export interface UseMessageEditingReturn {
 
   handleEdit: () => void;
   handleCancel: () => void;
-  handleSave: (shouldRegenerate?: boolean) => void;
+  handleSave: (shouldRegenerate: boolean) => void;
   handleTextChange: (textIndex: number, next: string) => void;
 
   initialValues: string[];
@@ -49,7 +49,7 @@ export const useMessageEditing = ({
     match: "all",
   });
 
-  const canEdit = useMemo(() => message.parts.some((p) => p.type === "text"), [message.parts]);
+  const canEdit = message.role === "user" && initialValues.length > 0;
 
   useEffect(() => {
     textValuesRef.current = [...initialValues];
@@ -57,9 +57,10 @@ export const useMessageEditing = ({
   }, [initialValues]);
 
   const handleEdit = useCallback(() => {
+    if (!canEdit) return;
     setMessageEditing({ isEditing: true, messageId: message.id });
     setIsEditing(true);
-  }, [message.id, setMessageEditing]);
+  }, [canEdit, message.id, setMessageEditing]);
 
   const handleCancel = useCallback(() => {
     setMessageEditing({ isEditing: false, messageId: message.id });
@@ -72,7 +73,7 @@ export const useMessageEditing = ({
   }, []);
 
   const handleSave = useCallback(
-    (shouldRegenerate?: boolean) => {
+    (shouldRegenerate: boolean) => {
       try {
         getChatFunctions().setMessages((currentMessages) => {
           const messageIndex = currentMessages.findIndex((m) => m.id === message.id);
